@@ -137,6 +137,13 @@ function evaluateItemReadiness(item, user, options = {}) {
                     warnings.push('INSTRUMENT_CALIBRATION_DUE_SOON');
                     reasons.push(`Instrument ${asset.name} calibration is due soon`);
                 }
+                if (asset.readiness === 'BLOCKED' || asset.readiness === 'NOT_CONFIGURED') {
+                    if (!blockers.some(code => code.startsWith('INSTRUMENT_'))) {
+                        blockers.push('INSTRUMENT_NOT_READY');
+                        reasons.push(`Instrument ${asset.name} is not ready`);
+                    }
+                }
+                for (const warning of asset.readinessWarnings || []) if (!warnings.includes(warning)) warnings.push(warning);
             }
         }
     }
@@ -149,6 +156,35 @@ function evaluateItemReadiness(item, user, options = {}) {
     };
 }
 
+async function resolveEquipmentRequirement(db, item, labId) {
+    const methodId = item.methodologyId || null;
+    const policy = await require('./policyService').resolve(labId, 'equipment.requireEquipment',
+        { db, analysisCode: item.analysis, methodologyId: methodId });
+    let mapping = methodId ? await db.equipmentMethodEligibility.findFirst({ where: { labId, analysisCode: item.analysis, methodId } }) : null;
+    if (!mapping) mapping = await db.equipmentMethodEligibility.findFirst({ where: { labId, analysisCode: item.analysis, methodId: null } });
+    const eligibleIds = mapping?.eligibleEquipmentIds == null ? [] : require('./cataloguePolicy').parseJson(mapping.eligibleEquipmentIds, null);
+    if (!Array.isArray(eligibleIds)) throw Object.assign(new Error('Equipment eligibility must be a list.'),
+        { statusCode: 409, code: 'INSTRUMENT_CONFIGURATION_INVALID' });
+    return { isRequired: policy.value === 'REQUIRED' || policy.value === 'AUTO' && Boolean(mapping?.isRequired),
+        eligibleIds: eligibleIds || [], requirement: policy.value,
+        requirementSource: policy.value === 'AUTO' ? { policy: policy.source, eligibilityId: mapping?.id || null,
+            methodId: mapping?.methodId || null } : { policy: policy.source, scope: policy.scope }, mappingId: mapping?.id || null };
+}
+
+async function eligibleEquipmentForItem(db, item, labId, options = {}) {
+    const requirement = await resolveEquipmentRequirement(db, item, labId);
+    const assets = requirement.eligibleIds.length ? await db.equipmentAsset.findMany({
+        where: { id: { in: requirement.eligibleIds }, labId, status: 'IN_SERVICE' }, include: { qualification: true }
+    }) : [];
+    const views = await Promise.all(assets.map(asset => require('./equipmentQualificationService').equipmentView(asset, { db, ...options })));
+    return { requirement, eligibleEquipment: views.map(asset => ({ id: asset.id, labId: asset.labId, name: asset.name,
+        assetType: asset.assetType, status: asset.status, criticality: asset.criticality,
+        calibrationStatus: asset.qualification?.calibrationStatus || 'NOT_CONFIGURED',
+        nextCalibrationDue: asset.qualification?.nextCalibrationDueDate || null,
+        nextCalibrationDueDate: asset.qualification?.nextCalibrationDueDate || null,
+        readiness: asset.readiness, readinessState: asset.readinessState, readinessWarnings: asset.readinessWarnings })) };
+}
+
 /** Application callers load evidence and catalogue before the pure evaluation. */
 async function evaluateExecutionReadiness(db, item, user, options = {}) {
     const engine = require('../utils/workflowEngine');
@@ -159,13 +195,13 @@ async function evaluateExecutionReadiness(db, item, user, options = {}) {
     const selectedEquipmentId = options.selectedEquipmentId || item.equipmentId;
     // A transaction caller must read qualification dates afresh, rather than
     // trusting the queue's cached calibration label.
-    const equipReq = options.equipReq === undefined ? await db.equipmentMethodEligibility.findFirst({
-        where: { labId, analysisCode: item.analysis, OR: [{ methodId: null }, { methodId: item.methodologyId || null }] }
-    }) : options.equipReq;
-    const asset = options.asset === undefined && selectedEquipmentId ? await db.equipmentAsset.findUnique({
+    const equipReq = await resolveEquipmentRequirement(db, item, labId);
+    const selectedAsset = selectedEquipmentId ? await db.equipmentAsset.findUnique({
         where: { id: selectedEquipmentId }, include: { qualification: true }
-    }) : options.asset;
-    if (asset && asset.labId !== labId) return { isReady: false, blockers: ['INSTRUMENT_LAB_MISMATCH'], warnings: [], reasons: ['Instrument belongs to a different laboratory'] };
+    }) : null;
+    if (selectedAsset && selectedAsset.labId !== labId) return { isReady: false, equipmentBlocked: true, blockers: ['INSTRUMENT_LAB_MISMATCH'], warnings: [], reasons: ['Instrument belongs to a different laboratory'] };
+    const now = options.now || new Date();
+    const asset = selectedAsset ? await require('./equipmentQualificationService').equipmentView(selectedAsset, { db, now }) : null;
     const workItems = await db.workItem.findMany({ where: { sampleId: item.sample.id } });
     const required = workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) ? [] : item.analysis === 'DRYING' ? []
         : item.analysis === 'PREPARATION' ? ['DRYING'] : ['DRYING', 'PREPARATION'];
@@ -174,12 +210,19 @@ async function evaluateExecutionReadiness(db, item, user, options = {}) {
         category: workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) ? 'Post-Analytical'
             : ['DRYING', 'PREPARATION'].includes(item.analysis) ? 'Operational Gates' : item.category || engine.getAnalysisConfig(item.analysis).category
     }));
-    return evaluateItemReadiness({ ...item, category }, user, { ...options, selectedEquipmentId, asset,
-        equipReq: equipReq && { ...equipReq, eligibleIds: equipReq.eligibleIds || require('./cataloguePolicy').parseJson(equipReq.eligibleEquipmentIds, []) }, prerequisite,
+    const readiness = evaluateItemReadiness({ ...item, category }, user, { ...options, now, selectedEquipmentId, asset,
+        equipReq, prerequisite,
         gateEvidence: gates.evaluateGateEvidence(item.sample, workItems, required) });
+    return { ...readiness, equipmentRequired: equipReq.isRequired,
+        equipmentBlocked: Boolean(readiness.blockers[0]?.startsWith('INSTRUMENT_')),
+        equipmentSnapshot: asset ? { equipmentId: asset.id, assetStatus: asset.status, readiness: asset.readinessState,
+            calibrationDueDate: asset.qualification?.nextCalibrationDueDate || null, criticality: asset.criticality,
+            requirement: equipReq.requirement, requirementSource: equipReq.requirementSource, evaluatedAt: now.toISOString() } : null };
 }
 
 module.exports = {
     evaluateItemReadiness,
-    evaluateExecutionReadiness
+    evaluateExecutionReadiness,
+    resolveEquipmentRequirement,
+    eligibleEquipmentForItem
 };

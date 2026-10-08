@@ -49,6 +49,7 @@ async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }, recordedAn
     installReferenceMaterials({ dbPath: file, apply: true }); installQcRules({ dbPath: file, apply: true });
     installQcRuns({ dbPath: file, apply: true });
     require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: file, apply: true });
+    require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     ownedFile.db = db;
     await db.unit.create({ data: { code: 'fixture-unit', display: 'Fixture unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });

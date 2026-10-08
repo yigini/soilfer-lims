@@ -14,7 +14,7 @@ const { evaluateBatchQc, getMissingQcValueTypes, flagBatchResults } = require('.
 const { linkReferences, retainReferences } = require('./referencePlacementService');
 const { resolveBatchRunProfile } = require('./qcRunProfileService');
 const { QC_RUN_INCLUDE, batchApiView, currentAnalyteEvidence, activeReopenEvent } = require('./qcRunViewService');
-const { snapshotEvidence } = require('./qcRunAuditService');
+const { snapshotEvidence, recordBatchAudit, withQcAudit, auditRunCommand } = require('./qcRunAuditService');
 const failure = (statusCode, code, message, details = {}) => Object.assign(new Error(message), { statusCode, code, details });
 const parsed = (value, fallback = null) => typeof value === 'string' ? JSON.parse(value) : value ?? fallback;
 
@@ -48,6 +48,8 @@ async function createProfileRun(db, actor, input) {
         const profile = await resolveBatchRunProfile({ labId, analysis: input.analysis, instrument: input.instrument,
             maxCapacity: input.maxCapacity || input.capacity, profile: input.profile }, tx);
         const id = typeof input.id === 'string' && input.id.trim() ? input.id.trim() : `BATCH-${randomUUID()}`, now = new Date();
+        await recordBatchAudit(tx, id, { entity: 'QC_BATCH', action: 'CREATE', now,
+            details: { message: `Batch created for ${input.analysis} (${profile.name}, max ${profile.capacity})`, runProfile: profile.profileKey, capacity: profile.capacity } });
         await tx.batch.create({ data: { id, labId, analysis: input.analysis, instrument: input.instrument || 'Manual',
             maxCapacity: profile.capacity, profile: profile.profileKey, status: 'OPEN', createdBy: performedBy,
             createdAt: now, notes: input.notes || '' } });
@@ -55,8 +57,6 @@ async function createProfileRun(db, actor, input) {
             status: 'OPEN', provenance: 'PROFILE_ONLY', methodResolution: 'UNRESOLVED_PROFILE' } });
         await tx.batchEvent.create({ data: { id: randomUUID(), batchId: id, type: 'CREATED', by: performedBy, at: now,
             payload: JSON.stringify({ historyEntry: { status: 'OPEN', changedBy: performedBy, timestamp: now } }) } });
-        await tx.auditLog.create({ data: { id: randomUUID(), entity: 'QC_BATCH', entityId: id, action: 'CREATE',
-            details: `Batch created for ${input.analysis} (${profile.name}, max ${profile.capacity})`, performedBy, timestamp: now } });
         return { ...batchApiView(await tx.batch.findUnique({ where: { id }, include: QC_RUN_INCLUDE })), runProfile: profile };
     });
 }
@@ -186,4 +186,8 @@ async function reopenInTransaction(tx, batch, actor, reason, now, analysisCode =
 async function reopenCompatibilityRun(db, batchId, actor, reason, analysisCode = null) {
     return inTransaction(db, async tx => reopenInTransaction(tx, await editableRun(tx, batchId, actor, analysisCode), actor, reason, new Date(), analysisCode));
 }
-module.exports = { createProfileRun, writeCompatibilityMeasurements, reopenCompatibilityRun, editableRun };
+module.exports = {
+    createProfileRun: (db, actor, input) => withQcAudit(db, { actor, input, operation: 'CREATE' }, tx => createProfileRun(tx, actor, input)),
+    writeCompatibilityMeasurements: auditRunCommand(writeCompatibilityMeasurements, (input, options = {}) => options.clear ? 'QC_CLEAR' : 'MEASUREMENT_WRITE'),
+    reopenCompatibilityRun: auditRunCommand(reopenCompatibilityRun, 'REOPEN'), editableRun
+};

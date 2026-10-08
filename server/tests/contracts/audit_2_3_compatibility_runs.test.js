@@ -53,6 +53,7 @@ async function fixture({ migrated = false, sampleMember = false, finalClear = fa
     const dryRun = installQcRuns({ dbPath: record.file, apply: false });
     installQcRuns({ dbPath: record.file, apply: true, planSha256: dryRun.backfillFingerprint });
     require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: record.file, apply: true });
+    require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: record.file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${record.file}` }) }); record.db = db;
     const actor = { id: username, username, role: 'LAB_MANAGER', labId }, f = { db, file: record.file, actor, labId, analysisCode };
     await db.analysis.create({ data: { code: analysisCode, name: 'Compatibility fixture analysis' } });
@@ -159,7 +160,13 @@ test.each(['PROFILE', 'NATIVE'])('a migrated REJECT_REANALYSIS item joins a new 
     expect(next.events.filter(row => row.type === 'MEMBER_REPEATED').map(row => JSON.parse(row.payload)))
         .toEqual([{ fromBatchId: old.id, workItemId, analysisCode: f.analysisCode }]);
     const retained = await f.db.batch.findUnique({ where: { id: old.id }, include: QC_RUN_INCLUDE });
-    for (const key of ['measurements', 'evaluations', 'dispositions', 'events', 'analytes']) expect(retained[key]).toEqual(old[key]);
+    for (const key of ['measurements', 'evaluations', 'dispositions', 'analytes']) expect(retained[key]).toEqual(old[key]);
+    expect(retained.events.filter(row => old.events.some(event => event.id === row.id))).toEqual(old.events);
+    const appended = retained.events.filter(row => !old.events.some(event => event.id === row.id));
+    expect(appended).toHaveLength(1); expect(appended[0].type).toBe('QC_EVIDENCE_SNAPSHOT');
+    expect(JSON.parse(appended[0].payload).historyEntry.changes).toEqual([expect.objectContaining({
+        entity: 'WorkItem', id: workItemId, before: expect.objectContaining({ batchId: old.id }),
+        after: expect.objectContaining({ batchId: next.id }) })]);
     expect(retained.positions.map(row => ({ ...row, workItems: row.workItems.map(({ workItem, ...link }) => link) })))
         .toEqual(old.positions.map(row => ({ ...row, workItems: row.workItems.map(({ workItem, ...link }) => link) })));
     const historical = await readQcRun(f.db, old.id, f.actor);
@@ -383,7 +390,8 @@ test.each([false, true])('profile/migrated ordinary resubmission retains every p
     for (const key of ['qcResults', 'workItemIds', 'disposition', 'history']) expect(raw[key]).toBe(original[key]);
     expect(await f.db.batchQcResult.count()).toBe(0);
     const snapshots = second.batch.history.filter(event => event.action === 'QC_EVIDENCE_SNAPSHOT');
-    expect(snapshots).toHaveLength(3); expect(snapshots.map(row => row.seq)).toEqual([1, 2, 3]);
+    expect(snapshots).toHaveLength(3); expect(snapshots.map(row => row.seq)).toEqual(migrated ? [1, 2, 3] : [2, 3, 4]);
+    if (!migrated) expect(second.batch.history.find(row => row.action === 'CREATE')).toMatchObject({ kind: 'QC_EVIDENCE_SNAPSHOT', seq: 1 });
     expect(snapshots[1].snapshot.qcItems).toEqual(JSON.parse(JSON.stringify(first.batch.qcItems)));
     expect((await f.db.auditLog.findMany({ where: { entityId: f.batch.id, action: 'QC_EVIDENCE_SNAPSHOT' }, orderBy: { timestamp: 'asc' } })).map(row => JSON.parse(row.details))).toEqual(snapshots);
 });

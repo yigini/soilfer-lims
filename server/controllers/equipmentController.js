@@ -1,6 +1,6 @@
 const prisma = require('../prisma');
 const { randomUUID: uuidv4 } = require('crypto');
-const { getReadiness, generateMismatchReport } = require('../services/equipmentQualificationService');
+const { equipmentView, generateMismatchReport } = require('../services/equipmentQualificationService');
 
 /**
  * Get all equipment for the user's lab
@@ -30,10 +30,7 @@ exports.getEquipment = async (req, res) => {
             }
         });
 
-        const enriched = assets.map(a => ({
-            ...a,
-            readiness: getReadiness(a)
-        }));
+        const enriched = await Promise.all(assets.map(asset => equipmentView(asset)));
 
         res.json(enriched);
     } catch (err) {
@@ -70,10 +67,7 @@ exports.getEquipmentDetails = async (req, res) => {
             return res.status(403).json({ error: 'Access Denied: Equipment belongs to another lab.' });
         }
 
-        res.json({
-            ...asset,
-            readiness: getReadiness(asset)
-        });
+        res.json(await equipmentView(asset));
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch equipment details' });
     }

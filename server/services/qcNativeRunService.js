@@ -1,4 +1,5 @@
 const { randomUUID } = require('node:crypto');
+const { withQcAudit, auditRunCommand } = require('./qcRunAuditService');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
@@ -210,4 +211,9 @@ async function rebuildNativeRun(db, batchId, actor, input) {
     return buildNativeRun(db, actor, input, { existingBatchId: batchId });
 }
 
-module.exports = { buildNativeRun, rebuildNativeRun, startNativeRun, instrumentFor, nextOrdinal };
+module.exports = {
+    buildNativeRun: (db, actor, input, options = {}) => withQcAudit(db,
+        { actor, input, batchId: options.existingBatchId, operation: options.existingBatchId ? 'REBUILD' : 'BUILD' }, tx => buildNativeRun(tx, actor, input, options)),
+    rebuildNativeRun: auditRunCommand(rebuildNativeRun, 'REBUILD'),
+    startNativeRun: auditRunCommand(startNativeRun, 'START'), instrumentFor, nextOrdinal
+};

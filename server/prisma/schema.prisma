@@ -731,6 +731,13 @@ model ProficiencyRound {
   outcome       String   // SATISFACTORY (|z|<=2), QUESTIONABLE (2<|z|<3), UNSATISFACTORY (|z|>=3)
   date          DateTime // Date of round / submission
   notes         String?
+  ncrStatus     String?  // PENDING | NULL; NCR creation is deferred to audit 3.4
+  classificationLimits String? // Frozen resolved lab/analysis z-score limits; legacy NULL
+  legacyScoreFlag String? // SIGMA_MISSING | SIGMA_NONPOSITIVE; preserves stored scores
+  legacyFlaggedAt DateTime?
+  deletedAt     DateTime?
+  deletedBy     String?
+  deleteReason  String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -1142,6 +1149,7 @@ model Result {
   enteredBy     String?
   analysedAt    DateTime?
   equipmentId   String?
+  equipmentReadiness String? // Insert-only frozen commit-time equipment evidence (#189).
   batchId       String?
   attemptId     String?   // Additive scalar; reference-preserving triggers enforce integrity.
   createdAt     DateTime  @default(now())

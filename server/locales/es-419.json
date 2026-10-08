@@ -648,6 +648,7 @@
     "warning": "Calibración por Vencer",
     "blocked": "Calibración Vencida / Bloqueado",
     "notConfigured": "No Configurado",
+    "unconfiguredWarning": "La calificación no está configurada; la política del laboratorio permite el uso con una advertencia.",
     "lastCalibration": "Última Calibración",
     "nextCalibration": "Próxima Calibración",
     "location": "Ubicación en Laboratorio",
@@ -938,7 +939,10 @@
       "qc_blankCorrection": "Corrección del blanco",
       "qc_failAction": "Acción ante fallo de QC",
       "qc_requireBatchQc": "Requisito de CC del lote",
-      "qc_calibrationFailAction": "Acción ante falla de calibración"
+      "qc_calibrationFailAction": "Acción ante falla de calibración",
+      "equipment_requireEquipment": "Equipo obligatorio",
+      "equipment_unconfiguredReadiness": "Disponibilidad del equipo sin configurar",
+      "pt_zScoreLimits": "Límites de puntuación z de aptitud"
     },
     "title": "Políticas",
     "yes": "Sí",
@@ -1039,7 +1043,9 @@
       "WARN": "Advertir",
       "AUTO": "Automático",
       "REQUIRED": "Obligatorio",
-      "NOT_REQUIRED": "No obligatorio"
+      "NOT_REQUIRED": "No obligatorio",
+      "BLOCK": "Bloquear",
+      "ALLOW": "Permitir"
     },
     "units": {
       "samples": "muestras",
@@ -1067,6 +1073,15 @@
     "help": {
       "qc_requireBatchQc": "AUTO exige CC de lote para métodos de medición con criterios de CC resueltos habilitados. Una excepción de método puede exigir o eximir la pertenencia al lote y su evaluación.",
       "qc_calibrationFailAction": "Elija la acción ante fallas de verificación inicial o continua de calibración y blancos de calibración."
+    },
+    "criticality": {
+      "CRITICAL": "Crítico",
+      "IMPORTANT": "Importante",
+      "NON_CRITICAL": "No crítico"
+    },
+    "ptLimits": {
+      "questionable": "Límite cuestionable",
+      "unsatisfactory": "Límite insatisfactorio"
     }
   },
   "referenceMaterials": {
@@ -1334,5 +1349,9 @@
       "QC_GATE_NO_BATCH": "Este método requiere un lote de QC vinculado.",
       "QC_GATE_REPEAT_ORDERED": "Se requiere repetir el análisis antes de aceptar o publicar."
     }
+  },
+  "proficiencyTesting": {
+    "legacySigmaMissing": "Esta puntuación histórica de aptitud se registró sin sigma de evaluación. No se ha recalculado; indique un sigma válido mediante una corrección explícita.",
+    "legacySigmaNonpositive": "Esta puntuación histórica de aptitud usó un sigma de evaluación no positivo o no finito. No se ha recalculado; indique un sigma válido mediante una corrección explícita."
   }
 }

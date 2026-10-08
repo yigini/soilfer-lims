@@ -13,6 +13,14 @@ export function PolicyValueEditor({ definition, value, onChange, t }) {
     if (definition.type === 'enum') return <select value={value === null ? '__null' : value} onChange={e => onChange(e.target.value === '__null' ? null : e.target.value)}>
         {definition.nullable && <option value="__null">{t('policies.none')}</option>}
         {definition.allowedValues.map(option => <option key={option} value={option} disabled={definition.unsupportedValues?.includes(option)}>{t(`policies.options.${option}`, option)}</option>)}</select>;
+    if (definition.type === 'equipmentReadinessMap') return <div>{Object.entries(value).map(([criticality, action]) => <label key={criticality}>
+        {t(`policies.criticality.${criticality}`)}<select value={action} onChange={e => onChange({ ...value, [criticality]: e.target.value })}>
+            {['BLOCK', 'WARN', 'ALLOW'].map(option => <option key={option} value={option}>{t(`policies.options.${option}`)}</option>)}</select>
+    </label>)}</div>;
+    if (definition.type === 'ptZScoreLimits') return <div>{Object.entries(value).map(([boundary, limit]) => <label key={boundary}>
+        {t(`policies.ptLimits.${boundary}`)}<input required type="number" min="0" step="any" value={limit}
+            onChange={e => onChange({ ...value, [boundary]: e.target.value === '' ? '' : Number(e.target.value) })} />
+    </label>)}</div>;
     if (definition.type === 'westgard') return <div>{definition.allowedValues.map(code => <div key={code} className="flex gap-4 items-center py-2">
         <span>{code}</span>{['reject', 'warn'].map(kind => <label key={kind}>
             <input type="checkbox" checked={value[kind].includes(code)} onChange={e => onChange({
@@ -78,6 +86,10 @@ export default function LabPolicies({ labId }) {
         if (definition.type === 'westgard') return `${t('policies.reject')}: ${value.reject.join(', ') || '—'}; ${t('policies.warn')}: ${value.warn.join(', ') || '—'}`;
         if (definition.type === 'runProfiles') return Object.values(value).map(p => `${p.name} (${p.capacity})`).join('; ');
         if (['qcFailAction', 'calibrationFailAction'].includes(definition.type)) return Object.entries(value).map(([type, action]) => `${t(definition.type === 'calibrationFailAction' ? `qcRuns.kinds.${type}` : `qcRules.types.${type}`, type)}: ${t(`qcRules.actions.${action}`)}`).join('; ');
+        if (definition.type === 'equipmentReadinessMap') return Object.entries(value).map(([criticality, action]) =>
+            `${t(`policies.criticality.${criticality}`)}: ${t(`policies.options.${action}`)}`).join('; ');
+        if (definition.type === 'ptZScoreLimits') return Object.entries(value).map(([boundary, limit]) =>
+            `${t(`policies.ptLimits.${boundary}`)}: ${limit}`).join('; ');
         if (definition.key === 'numbers.thousandsSeparator' && value === ' ') return t('numbers.space');
         return definition.type === 'enum' ? t(`policies.options.${value}`, value) : String(value);
     };
@@ -106,7 +118,7 @@ export default function LabPolicies({ labId }) {
             <tbody>{Object.entries(data.registry).map(([key, definition]) => {
                 const row = data.resolved[key], presetValue = definition.presets[data.presetCode || data.inheritedPreset];
                 const canChangeScope = definition.scope === 'LAB+METHOD' || !analysisCode ||
-                    (!methodologyId && definition.analysisOverrides?.includes(analysisCode));
+                    (!methodologyId && (definition.analysisOverridesAll || definition.analysisOverrides?.includes(analysisCode)));
                 return <tr key={key} className="border-t"><td className="p-2">{t(definition.description)}{definition.unit && <span> ({t(`policies.units.${definition.unit}`, definition.unit)})</span>}{definition.help && <p className="text-xs">{t(definition.help)}</p>}</td>
                     <td className="p-2">{display(definition, row.value)}
                         {definition.type === 'sampleFormat' && !row.value.includes('{CHK}') && <p role="alert">{t('policies.sampleCodeNoCheck')}</p>}</td><td className="p-2">{t(`policies.sources.${row.source}`)}

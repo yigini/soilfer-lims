@@ -1,4 +1,5 @@
 const { randomUUID } = require('node:crypto');
+const { auditRunCommand } = require('./qcRunAuditService');
 const { hasPermission } = require('../config/roles');
 const { actorName, inTransaction } = require('./workflowStateRules');
 const { readQcRun, QC_RUN_INCLUDE, batchApiView } = require('./qcRunViewService');
@@ -45,4 +46,4 @@ async function reorderNativeRun(db, batchId, actor, input = {}) {
         return batchApiView(await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE }));
     });
 }
-module.exports = { reorderNativeRun };
+module.exports = { reorderNativeRun: auditRunCommand(reorderNativeRun, 'REORDER') };

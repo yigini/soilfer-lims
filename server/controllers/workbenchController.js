@@ -479,51 +479,7 @@ exports.getQueue = async (req, res) => {
             spectralMap[key].push(s);
         });
 
-        // ─── Fix 2: Prefetch equipment eligibility per analysis/lab ───
-        const labIds = [...new Set(items.map(i => i.sample?.assignedLab || i.labId).filter(Boolean))];
-        const equipReqs = await prisma.equipmentMethodEligibility.findMany({
-            where: {
-                labId: { in: labIds },
-                analysisCode: { in: analysisCodes }
-            }
-        });
-        const equipReqMap = {};
-        equipReqs.forEach(e => {
-            equipReqMap[`${e.labId}::${e.analysisCode}`] = {
-                isRequired: e.isRequired,
-                eligibleIds: e.eligibleEquipmentIds ? JSON.parse(e.eligibleEquipmentIds) : []
-            };
-        });
-
-        // ─── Fix 2: Resolve eligible equipment IDs → actual assets with calibration ───
-        const allEligibleIds = [...new Set(
-            Object.values(equipReqMap).flatMap(e => e.eligibleIds)
-        )].filter(Boolean);
-
-        let assetMap = {};
-        if (allEligibleIds.length > 0) {
-            const assets = await prisma.equipmentAsset.findMany({
-                where: { id: { in: allEligibleIds }, status: 'IN_SERVICE' },
-                select: {
-                    id: true, labId: true, name: true, assetType: true, status: true,
-                    qualification: {
-                        select: { calibrationStatus: true, nextCalibrationDueDate: true }
-                    }
-                }
-            });
-            assets.forEach(a => {
-                assetMap[a.id] = {
-                    id: a.id,
-                    labId: a.labId,
-                    name: a.name,
-                    assetType: a.assetType,
-                    status: a.status,
-                    calibrationStatus: a.qualification?.calibrationStatus || 'NOT_CONFIGURED',
-                    nextCalibrationDue: a.qualification?.nextCalibrationDueDate || null,
-                    nextCalibrationDueDate: a.qualification?.nextCalibrationDueDate || null
-                };
-            });
-        }
+        const equipmentOptions = new Map();
 
         // Group by analysis
         const groupsMap = {};
@@ -532,17 +488,14 @@ exports.getQueue = async (req, res) => {
             const code = item.analysis;
             const labId = item.sample?.assignedLab || item.assignedLab || item.labId;
             if (!numberFormats.has(labId)) numberFormats.set(labId, await getNumberFormat(labId));
-            const equipKey = `${labId}::${code}`;
+            const equipKey = JSON.stringify([labId, code, item.methodologyId || null]);
+            if (!equipmentOptions.has(equipKey)) equipmentOptions.set(equipKey,
+                await readinessService.eligibleEquipmentForItem(prisma, item, labId));
+            const { eligibleEquipment } = equipmentOptions.get(equipKey);
 
             if (!groupsMap[code]) {
                 const meta = analysisMap[code] || {};
                 const categoryName = operationalChecklists[code] ? 'Operational Gates' : meta.categoryId ? (categoryMap[meta.categoryId] || 'Uncategorized') : 'Uncategorized';
-
-                // Build eligible equipment list for this group
-                const eligibleIds = equipReqMap[equipKey]?.eligibleIds || [];
-                const eligibleEquipment = eligibleIds
-                    .map(id => assetMap[id])
-                    .filter(Boolean);
 
                 groupsMap[code] = {
                     analysis: code,
@@ -550,20 +503,21 @@ exports.getQueue = async (req, res) => {
                     category: categoryName,
                     unit: operationalChecklists[code] ? null : meta.unit || null,
                     validation: meta.validation || null,
-                    equipmentRequired: equipReqMap[equipKey]?.isRequired || false,
-                    eligibleEquipment,
+                    equipmentRequired: false,
+                    eligibleEquipment: [],
                     items: []
                 };
             }
+            groupsMap[code].eligibleEquipment = [...new Map([...groupsMap[code].eligibleEquipment, ...eligibleEquipment]
+                .map(asset => [asset.id, asset])).values()];
 
             const resultKey = `${item.sampleId}::${code}`;
             const itemDraft = draftMap[item.id] || null;
             const selectedEquipId = item.equipmentId || itemDraft?.instrumentId || null;
             const readiness = await readinessService.evaluateExecutionReadiness(prisma, item, user, {
-                equipReq: equipReqMap[equipKey],
-                asset: assetMap[selectedEquipId],
                 selectedEquipmentId: selectedEquipId
             });
+            groupsMap[code].equipmentRequired ||= readiness.equipmentRequired;
 
             const isSpectral = SPECTRAL_ACQUISITION_CODES.includes(code);
             const modality = (code === 'SPEC_MIR' || code === 'SPEC_FTIR') ? 'MIR' : 'NIR';
@@ -596,7 +550,8 @@ exports.getQueue = async (req, res) => {
                 currentUnit: resultMap[resultKey]?.unit || null,
                 previousResult: operationalChecklists[code] ? null : resultMap[resultKey] || null,
                 equipmentId: item.equipmentId || null,
-                equipmentRequired: equipReqMap[equipKey]?.isRequired || false,
+                equipmentRequired: readiness.equipmentRequired,
+                eligibleEquipment,
                 dryingStatus: item.sample?.dryingStatus || 'PENDING',
                 preparationStatus: item.sample?.preparationStatus || 'PENDING',
                 sampleStatus: item.sample?.status || null,
@@ -794,7 +749,7 @@ exports.batchSave = async (req, res) => {
             if (!executionReadiness.isReady) {
                 if (executionReadiness.blockers.includes('GATE_STATE_MISMATCH')) throw new stateRules.TransitionError(
                     executionReadiness.reasons.join('; '), 409, 'GATE_STATE_MISMATCH');
-                errors.push({ workItemId: entry.workItemId, error: executionReadiness.reasons.join('; '), code: 'EXECUTION_BLOCKED' });
+                errors.push({ workItemId: entry.workItemId, error: executionReadiness.reasons.join('; '), code: executionReadiness.equipmentBlocked ? 'EQUIPMENT_NOT_READY' : 'EXECUTION_BLOCKED' });
                 continue;
             }
             if (isOperationalTask && entry.value != null && entry.value !== '') {
@@ -1030,28 +985,8 @@ exports.batchSave = async (req, res) => {
                     }
                 }
 
-                // ─── Fix 2b: Equipment validation (prefetched) ───
-                const equipLabId = sample.assignedLab || sample.labId;
-                const equipKey = `${equipLabId}::${item.analysis}`;
-                const equipReq = equipReqMap[equipKey];
-
-                if (entry.equipmentId) {
-                    const asset = assetMap[entry.equipmentId];
-                    if (!asset || asset.status !== 'IN_SERVICE') {
-                        errors.push({ workItemId: entry.workItemId, error: 'Selected equipment is not available (out of service or not found)' });
-                        continue;
-                    }
-                    // Verify it's in the eligible set
-                    if (equipReq && equipReq.eligibleIds.length > 0 && !equipReq.eligibleIds.includes(entry.equipmentId)) {
-                        errors.push({ workItemId: entry.workItemId, error: 'Selected equipment is not eligible for this analysis method' });
-                        continue;
-                    }
-                } else {
-                    if (equipReq?.isRequired && item.category !== 'Operational Gates' && item.category !== 'Post-Analytical') {
-                        errors.push({ workItemId: entry.workItemId, error: `Equipment required for ${item.analysis} — select an instrument before completing` });
-                        continue;
-                    }
-                }
+                // Equipment policy and method specificity use the shared
+                // readiness decision above and are re-read inside result writes.
 
                 // Block completion if value is empty
                 if (value === null || value === undefined || value === '') {
@@ -1153,7 +1088,8 @@ exports.batchSave = async (req, res) => {
                         const sourceResults = await tx.result.findMany({ where: { attemptId }, select: { id: true } });
                         await tx.workAttempt.update({ where: { id: attemptId }, data: { evidenceData: JSON.stringify({
                             fractions: textureClassification.fractions, className: texture.value,
-                            closureError: textureClassification.closureError, sourceResultIds: sourceResults.map(row => row.id)
+                            closureError: textureClassification.closureError, sourceResultIds: sourceResults.map(row => row.id),
+                            equipmentReadiness: texture.equipmentReadiness == null ? null : JSON.parse(texture.equipmentReadiness)
                         }) } });
                     } else {
                         await writeResult(tx, { sampleId: item.sampleId, workItemId: item.id, actor: user, measurement, now });
@@ -1230,7 +1166,7 @@ exports.batchSave = async (req, res) => {
                 await commitBundles(operationBundles);
             } catch (txError) {
                 // ─── Fix 3: Handle version conflict (P2025 = record not found) ───
-                if (['P2025', 'VERSION_CONFLICT', 'WORKITEM_STATE_CHANGED'].includes(txError.code)) {
+                if (txError.details?.equipmentBlocked || ['P2025', 'VERSION_CONFLICT', 'WORKITEM_STATE_CHANGED', 'EQUIPMENT_NOT_READY'].includes(txError.code)) {
                     // Determine which items had version conflicts
                     // Re-run individually to identify conflicts
                     const verifiedResults = [];
@@ -1254,7 +1190,7 @@ exports.batchSave = async (req, res) => {
                             } else {
                                 verifiedErrors.push({
                                     workItemId: bundle.workItemId,
-                                    error: `Save failed: ${itemErr.message}`, ...(itemErr.code && { code: itemErr.code })
+                                    error: `Save failed: ${itemErr.message}`, ...(itemErr.code && { code: itemErr.details?.equipmentBlocked ? 'EQUIPMENT_NOT_READY' : itemErr.code })
                                 });
                             }
                         }
@@ -1489,44 +1425,6 @@ exports.previewCompletion = async (req, res) => {
         const methodMap = {};
         methods.forEach(m => methodMap[m.code] = m);
 
-        const labCodes = [...new Set(workItems.map(wi => wi.sample?.assignedLab || wi.sample?.labId).filter(Boolean))];
-        const analysisCodes = [...new Set(workItems.map(wi => wi.analysis))];
-        const equipMappings = await prisma.equipmentMethodEligibility.findMany({
-            where: { labId: { in: labCodes }, analysisCode: { in: analysisCodes } }
-        });
-        const equipReqMap = {};
-        equipMappings.forEach(e => {
-            equipReqMap[`${e.labId}::${e.analysisCode}`] = {
-                isRequired: e.isRequired,
-                eligibleIds: e.eligibleEquipmentIds ? JSON.parse(e.eligibleEquipmentIds) : []
-            };
-        });
-
-        const allEquipIds = [
-            ...new Set([
-                ...Object.values(equipReqMap).flatMap(e => e.eligibleIds),
-                ...entries.map(e => e.equipmentId).filter(Boolean)
-            ])
-        ];
-        let assetMap = {};
-        if (allEquipIds.length > 0) {
-            const assets = await prisma.equipmentAsset.findMany({
-                where: { id: { in: allEquipIds } },
-                select: {
-                    id: true, labId: true, name: true, status: true,
-                    qualification: { select: { calibrationStatus: true, nextCalibrationDueDate: true } }
-                }
-            });
-            assets.forEach(a => assetMap[a.id] = {
-                id: a.id,
-                labId: a.labId,
-                name: a.name,
-                status: a.status,
-                calibrationStatus: a.qualification?.calibrationStatus || 'NOT_CONFIGURED',
-                nextCalibrationDueDate: a.qualification?.nextCalibrationDueDate || null
-            });
-        }
-
         const included = [];
         const excluded = [];
 
@@ -1563,14 +1461,14 @@ exports.previewCompletion = async (req, res) => {
             }
 
             const labId = item.sample?.assignedLab || item.sample?.labId || item.labId;
-            const equipKey = `${labId}::${item.analysis}`;
-            const equipReq = equipReqMap[equipKey];
-            const asset = assetMap[entry.equipmentId || item.equipmentId];
+
+
+
 
             // 1. Readiness check
             const readiness = await readinessService.evaluateExecutionReadiness(prisma, item, user, {
-                equipReq,
-                asset,
+
+
                 selectedEquipmentId: entry.equipmentId || item.equipmentId
             });
 
