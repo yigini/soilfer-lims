@@ -342,6 +342,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: targetDb, apply: true });
         require('../../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: targetDb, apply: true });
         require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: targetDb, apply: true });
+        require('../../scripts/install_work_attempt_contract').installWorkAttemptContract({ dbPath: targetDb, apply: true });
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
@@ -369,6 +370,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_proficiency_evidence.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_equipment_evidence.js',
                 `node "${path.join(serverDir, 'scripts/install_result_equipment_evidence.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_work_attempt_contract.js',
+                `node "${path.join(serverDir, 'scripts/install_work_attempt_contract.js').replace(/\\/g, '/')}"`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
 
         const entryScript = path.join(testDir, 'entrypoint.sh');

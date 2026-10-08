@@ -1,4 +1,4 @@
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -34,7 +34,8 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
             status: reviewNeeded ? 'PROCESSING' : 'APPROVED', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-08'), sampleId, analysis: 'PH_H2O',
             status: reviewNeeded ? 'SUBMITTED' : 'ACCEPTED', result: '6.2', batchId: batch.id } });
-        await createResultFixture(prisma, { data: { id: id('R-08'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
+        await createExecutionResultFixture(prisma, { attemptStatus: item.status,
+            data: { id: id('R-08'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, batchId: batch.id } });
         await normalizeLegacyQcFixture(prisma, batch.id);
         return { sampleId, batch, item };

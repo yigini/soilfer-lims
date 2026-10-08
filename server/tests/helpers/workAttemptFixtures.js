@@ -37,7 +37,7 @@ async function insertFixtureExecution(tx, ctx, allocation, evidence, attemptStat
 }
 
 async function createExecutionResultFixture(db, args) {
-    const { attemptStatus, ...resultArgs } = args;
+    const { attemptStatus, textureSourceResultIds, ...resultArgs } = args;
     await assertExecutionFixtureDatabase(db);
     return rules.inTransaction(db, async tx => {
         const data = args.data;
@@ -46,10 +46,34 @@ async function createExecutionResultFixture(db, args) {
         if (items.length !== 1) throw Error('Execution fixture requires exactly one existing canonical WorkItem.');
         const item = items[0];
         const equipmentReadiness = data.equipmentReadiness ? JSON.parse(data.equipmentReadiness) : null;
+        let textureSources;
+        if (textureSourceResultIds != null) {
+            // Pin6059445324: explicit, already-recorded separate fraction owners.
+            if (data.param !== 'TEXTURE' || attemptStatus != null && attemptStatus !== 'RECORDED' ||
+                equipmentReadiness || !Array.isArray(textureSourceResultIds) || textureSourceResultIds.length !== 3 ||
+                new Set(textureSourceResultIds).size !== 3) throw Error('Texture fixture requires three explicit fraction Results.');
+            const fractions = ['SAND', 'SILT', 'CLAY'];
+            const sourceRows = await tx.result.findMany({ where: { id: { in: textureSourceResultIds } } });
+            if (sourceRows.length !== 3 || fractions.some(param => sourceRows.filter(row => row.param === param).length !== 1) ||
+                sourceRows.some(row => row.sampleId !== data.sampleId || row.replicateNo !== (data.replicateNo ?? 1) ||
+                    row.provenance !== 'MEASURED' || !row.isCurrent || !row.attemptId)) {
+                throw Error('Texture fixture refuses unrelated or unrecorded fraction Results.');
+            }
+            textureSources = fractions.map(param => sourceRows.find(row => row.param === param));
+            for (const row of textureSources) {
+                const owners = await tx.workItem.findMany({ where: canonicalWorkItemWhere(data.sampleId, row.param) });
+                const attempt = await tx.workAttempt.findUnique({ where: { id: row.attemptId } });
+                if (owners.length !== 1 || !attempt || attempt.workItemId !== owners[0].id || attempt.status !== 'RECORDED') {
+                    throw Error('Texture fixture requires recorded evidence on each existing canonical fraction owner.');
+                }
+            }
+        }
         const ctx = { item, performedBy: 'system:fixture', batchId: data.batchId ?? null,
             method: null, equipmentReadiness, equipmentReadinessText: data.equipmentReadiness ?? null };
         const allocation = await allocateExecution(tx, ctx);
-        const evidence = { source: 'fixture', sourceResultIds: [data.id],
+        const evidence = { source: textureSources || data.provenance === 'DERIVED' ? 'test-fixture' : 'fixture',
+            sourceResultIds: textureSources ? textureSources.map(row => row.id) : [data.id],
+            ...(textureSources && { sourceAttemptIds: textureSources.map(row => row.attemptId) }),
             measurements: [{ resultId: data.id, param: data.param, replicateNo: data.replicateNo ?? 1,
                 value: data.value, rawInput: data.rawInput ?? null, numericValue: data.numericValue ?? null }] };
         await insertFixtureExecution(tx, ctx, allocation, evidence, attemptStatus);
