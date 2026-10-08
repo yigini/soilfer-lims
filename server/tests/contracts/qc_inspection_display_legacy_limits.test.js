@@ -6,10 +6,10 @@
  *    - Explicit limit (number or string) rendered as recorded limit.
  *    - Missing limit does NOT render expected concentration (e.g. 0) as upper limit.
  *    - Missing limit does NOT invent implicit SOP threshold (e.g. 0.05).
- *    - Missing limit renders "Not recorded" truthfully.
+ *    - Missing limit renders "not stored in this evaluation" truthfully (#188 part 1).
  *    - Explicit recorded status (e.g. PASS / FAIL) is preserved.
  *    - Missing/invalid measurements (empty string, whitespace, false, array, nonfinite) return null (Not evaluated).
- *    - Numeric 0 is valid for inference.
+ *    - Numeric 0 is retained; missing status never triggers client evaluation (#188 part 1).
  * 2. Disposition classification and display:
  *    - Legacy 'REJECT_REANALYSIS' displayed prominently with 'REJECTED FOR RE-ANALYSIS (Legacy)' title and badge,
  *      stating factually that it is preserved for audit/review without claiming old work items were altered.
@@ -79,10 +79,32 @@ const {
     default: BatchInspectionModal,
     getDispositionInfo,
     formatBlankLimit,
-    evaluateBlankStatus
+    evaluateBlankStatus,
+    StoredQcEvidence
 } = loadBatchInspectionModalModule();
 
 describe('QC Batch Inspection Display & Legacy Limits Contract Tests (#118)', () => {
+
+    test.each(['LEGACY_MIGRATED', 'PROFILE_ONLY', 'NATIVE'])('Audit 2.5: %s displays stored limits, full precision and missing fields without entry controls', provenance => {
+        const details = { verdict: 'FAIL', evaluation: { result: 'FAIL', qcRule: { version: 7 }, policyVersion: 12,
+            blanks: [{ id: 'stored-blank', kind: 'BLANK', position: 2, value: 0.123456789012345, maxAllowed: 0.111234567890123, status: 'FAIL', criterion: 'ABSOLUTE' }],
+            controls: [{ id: 'stored-control', measured: 7.123456789012345, expected: 7.111234567890123, minRecovery: 83.2, maxRecovery: 117.8, status: 'WARN' }],
+            duplicates: [{ id: 'stored-duplicate', value1: 3.123456789, value2: 3.223456789, maxRpd: 17.3 }] } };
+        const html = ReactDOMServer.renderToStaticMarkup(React.createElement(StoredQcEvidence, { batch: { status: 'CLOSED',
+            analytes: [{ analysisCode: 'STORED', provenance, evaluation: { verdict: 'FAIL', ruleVersion: 7, policyVersion: 12, details: JSON.stringify(details) } }] } }));
+        for (const value of ['0.123456789012345', '0.111234567890123', '7.123456789012345', '83.2', '117.8', '17.3', 'ABSOLUTE', 'WARN']) expect(html).toContain(value);
+        expect(html).toContain('not stored in this evaluation');
+        expect(html).not.toMatch(/<input|<select|<textarea|<button/);
+        expect(details.evaluation.duplicates[0].status).toBeUndefined();
+    });
+
+    test('Audit 2.5: inspector contains no QC maths, hard-coded limits or invented rack capacity', () => {
+        const source = fs.readFileSync(path.resolve(__dirname, '../../../client/src/components/qc/BatchInspectionModal.jsx'), 'utf8');
+        expect(source).not.toMatch(/90\s*%?\s*[–-]\s*110|90%|RPD\s*≤\s*10\s*%|parsedMeasured\s*<=|toFixed\(|\|\|\s*40/);
+        expect(source).not.toContain('/evaluate');
+        expect(source).not.toContain('/preview');
+        expect(source).toContain('row.evaluation.details');
+    });
 
     describe('1. Blank Upper Limit & Status Evaluation Logic', () => {
         test('Blank with explicit numeric limit renders the exact recorded limit', () => {
@@ -103,13 +125,13 @@ describe('QC Batch Inspection Display & Legacy Limits Contract Tests (#118)', ()
             expect(evaluateBlankStatus(blank)).toBe('PASS');
         });
 
-        test('CRITICAL: Blank with expected:0 but missing limit renders "Not recorded" (never 0, never implicit 0.05)', () => {
+        test('CRITICAL: Blank with expected:0 but missing limit reports it as not stored (never 0, never implicit 0.05)', () => {
             // Exact live condition from BATCH-GTM-2026-P-01:
             // {"label":"Extraction Reagent Blank","expected":0,"measured":0.03,"status":"PASS"}
             const blank = { label: 'Extraction Reagent Blank', expected: 0, measured: 0.03, status: 'PASS' };
             
             const limitText = formatBlankLimit(blank);
-            expect(limitText).toBe('Not recorded');
+            expect(limitText).toBe('not stored in this evaluation');
             expect(limitText).not.toBe('0');
             expect(limitText).not.toBe('≤ 0.05');
             
@@ -119,22 +141,24 @@ describe('QC Batch Inspection Display & Legacy Limits Contract Tests (#118)', ()
 
         test('Blank with missing limit and null status returns null for evaluation (Not evaluated, no invented threshold)', () => {
             const blank = { label: 'Un-evaluated Blank', expected: 0, measured: 0.03 };
-            expect(formatBlankLimit(blank)).toBe('Not recorded');
+            expect(formatBlankLimit(blank)).toBe('not stored in this evaluation');
             expect(evaluateBlankStatus(blank)).toBeNull();
         });
 
-        test('Blank without explicit status evaluates against recorded limit if both are valid finite numbers', () => {
+        test('Audit 2.5: blank without explicit status remains unevaluated even with valid measurements and limits', () => {
             const blankPass = { measured: 0.03, limit: 0.05 };
             const blankFail = { measured: 0.08, limit: 0.05 };
-            expect(evaluateBlankStatus(blankPass)).toBe('PASS');
-            expect(evaluateBlankStatus(blankFail)).toBe('FAIL');
+            expect(evaluateBlankStatus(blankPass)).toBeNull();
+            expect(evaluateBlankStatus(blankFail)).toBeNull();
         });
 
         test('Numeric 0 is a valid measured value and valid limit', () => {
-            expect(evaluateBlankStatus({ measured: 0, limit: 0.05 })).toBe('PASS');
-            expect(evaluateBlankStatus({ measured: '0', limit: 0.05 })).toBe('PASS');
-            expect(evaluateBlankStatus({ measured: 0, limit: 0 })).toBe('PASS');
-            expect(evaluateBlankStatus({ measured: 0.01, limit: 0 })).toBe('FAIL');
+            expect(evaluateBlankStatus({ measured: 0, limit: 0.05 })).toBeNull();
+            expect(evaluateBlankStatus({ measured: '0', limit: 0.05 })).toBeNull();
+            expect(evaluateBlankStatus({ measured: 0, limit: 0 })).toBeNull();
+            expect(evaluateBlankStatus({ measured: 0.01, limit: 0 })).toBeNull();
+            expect(evaluateBlankStatus({ measured: 0, limit: 0, status: 'PASS' })).toBe('PASS');
+            expect(evaluateBlankStatus({ measured: 0.01, limit: 0, status: 'FAIL' })).toBe('FAIL');
             expect(formatBlankLimit({ limit: 0 })).toBe('0');
         });
 
@@ -304,7 +328,7 @@ describe('QC Batch Inspection Display & Legacy Limits Contract Tests (#118)', ()
             expect(html).toContain('CRM recovery 124% exceeds acceptable limit');
 
             // 3. Blank limit shows "Not recorded"
-            expect(html).toContain('Not recorded');
+            expect(html).toContain('not stored in this evaluation');
 
             // 4. Form strictly suppressed (no decision selector or submit button)
             expect(html).not.toContain('Record Manager QC Disposition');

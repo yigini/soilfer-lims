@@ -1314,7 +1314,9 @@
       "REASON_REQUIRED": "Record a reason for this QC change.",
       "REFERENCE_VALUE_MISMATCH": "The submitted reference value must match the recorded placement.",
       "QC_SUPERSEDE_TARGET_MISMATCH": "The replacement must belong to the same recorded observation or reference position.",
-      "QC_BATCH_SCOPE_DENIED": "You do not have access to this laboratory’s QC run."
+      "QC_BATCH_SCOPE_DENIED": "You do not have access to this laboratory’s QC run.",
+      "QC_PREVIEW_UNAVAILABLE": "Preview requires a started native run with frozen criteria.",
+      "QC_PREVIEW_INPUT_INVALID": "Submit candidate observations only."
     },
     "chooseDuplicateParent": "Select the original sample position",
     "analysis": "Analysis",
@@ -1334,5 +1336,21 @@
       "QC_GATE_NO_BATCH": "This method requires a linked QC batch.",
       "QC_GATE_REPEAT_ORDERED": "Repeat analysis is required before acceptance or publication."
     }
+  },
+  "qcWorksheet": {
+    "notStored": "not stored in this evaluation",
+    "storedEvidence": "Stored QC evaluation — read only",
+    "verdict": "Verdict",
+    "ruleVersion": "Rule version",
+    "policyVersion": "Policy version",
+    "position": "Position",
+    "type": "Type",
+    "expected": "Expected",
+    "measured": "Measured",
+    "limits": "Limits",
+    "criterion": "Criterion",
+    "failAction": "Failure action",
+    "fullRecord": "Full stored evaluation",
+    "nativeRun": "Native run"
   }
 }
