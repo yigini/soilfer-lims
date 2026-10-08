@@ -190,7 +190,7 @@ describe('Audit 1.0: persistent lab policies', () => {
         const sampleId = id('POL-EXPORT'), project = id('POL-PROJECT');
         await edit([{ key: 'results.reportedValueRule', value: 'LATEST_VALID' }]);
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: labId, projectCode: project,
-            status: 'PROCESSING', preparationStatus: 'DONE', dryingStatus: 'DONE', requiredAnalyses: '["SOC"]' } });
+            status: 'PROCESSING', receptionDate: new Date(), preparationStatus: 'DONE', dryingStatus: 'DONE', requiredAnalyses: '["SOC"]' } });
         const item = await createWorkItemFixture(prisma, { data: { id: id('POL-EXPORT-WI'), sampleId, assignedLab: labId,
             assignedTo: actor.username, analysis: 'SOC', status: 'IN_PROGRESS', result: '9999' } });
         const old = await createExecutionResultFixture(prisma, { data: { id: id('POL-EXPORT-RES'), sampleId, param: 'SOC',
