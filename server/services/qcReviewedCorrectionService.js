@@ -97,26 +97,81 @@ function compatibilityCriteria(review, evidence, numberFormat) {
         if (!original) throw missingCriteria();
         const id = row.positionId || row.id;
         if (collection === 'blanks') {
-            if (!finite(original.maxAllowed) || !['ABSOLUTE', 'LT_LOQ', 'LT_HALF_LOQ'].includes(original.criterion)) throw missingCriteria();
-            if (original.criterion !== 'ABSOLUTE' && !finite(original.loq)) throw missingCriteria();
-            policies[id] = { maxAllowed: original.maxAllowed, mode: original.criterion,
+            const blankMode = value('blankLimitMode');
+            if (!['ABSOLUTE', 'LT_LOQ', 'LT_HALF_LOQ'].includes(blankMode)) throw missingCriteria();
+            if (!finite(original.maxAllowed) && !(original.criterion === 'NO_LOQ' && original.loq === null)) throw missingCriteria();
+            policies[id] = { maxAllowed: finite(original.maxAllowed) ? original.maxAllowed : value('blankAbsLimit'), mode: blankMode,
                 loq: original.loq, loqSource: original.loqSource, methodologyId: original.methodologyId };
         } else if (collection === 'duplicates') {
             const nearLoqMultiplier = stored.policyValues?.['qc.duplicateNearLoqMultiplier'];
-            if (!finite(original.maxRpd) || !finite(nearLoqMultiplier) || !Object.hasOwn(original, 'loq')) throw missingCriteria();
-            policies[id] = { numberFormat, maxRpd: original.maxRpd, nearLoqMultiplier, loq: original.loq,
+            if (!finite(original.maxRpd) || !finite(nearLoqMultiplier) || !Object.hasOwn(original, 'loq') ||
+                !(original.loq === null || finite(original.loq)) || !['RPD', 'ABS_DIFF'].includes(value('duplicateMode'))) throw missingCriteria();
+            for (const field of ['duplicateAbsMax', 'duplicateAbsMaxBelow5LOQ']) if (!(value(field) === null || finite(value(field)))) throw missingCriteria();
+            policies[id] = { recordedCriteria: true, numberFormat, maxRpd: original.maxRpd, nearLoqMultiplier, loq: original.loq,
                 loqSource: original.loqSource, methodologyId: original.methodologyId, mode: value('duplicateMode'),
                 absMax: value('duplicateAbsMax'), absMaxBelow5LOQ: value('duplicateAbsMaxBelow5LOQ') };
+            if (row.duplicateOfPositionId) {
+                const parent = policies[row.duplicateOfPositionId];
+                if (parent && parent.loq !== original.loq) throw missingCriteria();
+                policies[row.duplicateOfPositionId] = policies[id];
+            }
         } else {
             if (!finite(original.minRecovery) || !finite(original.maxRecovery)) throw missingCriteria();
+            if (!['RECOVERY', 'ABS_WINDOW'].includes(value('crmMode')) || !['FIXED_WINDOW', 'CONTROL_CHART'].includes(value('lrmMode'))) throw missingCriteria();
+            for (const field of ['crmAbsWindow', 'lrmWindowPct']) if (!(value(field) === null || finite(value(field)))) throw missingCriteria();
             policies[id] = { minRecovery: original.minRecovery, maxRecovery: original.maxRecovery,
                 crmMode: value('crmMode'), crmAbsWindow: value('crmAbsWindow'), lrmMode: value('lrmMode'), lrmWindowPct: value('lrmWindowPct') };
         }
     }
-    value('failAction');
+    const actions = value('failAction');
+    if (!actions || ['BLANK', 'DUPLICATE', 'LRM', 'CRM'].some(key => !['FAIL_BATCH', 'WARN'].includes(actions[key]))) throw missingCriteria();
     return { policy: { qcRule: structuredClone(rule), qcMode: mode, policyVersion: stored.policyVersion,
         policyValues: structuredClone(stored.policyValues) }, recordedObservationPolicies: policies, recordedRequirements: requirements,
         criteriaSource: { type: 'RECORDED_COMPATIBILITY_EVALUATION', evaluationId: review.previousEvaluation.id } };
 }
 
-module.exports = { MODE, EVENT, authorizeReviewedCorrection, reviewedCorrectionPayload, compatibilityCriteria };
+// Build arithmetic inputs from stored numeric facts, never reinterpret old raw
+// text using today's locale. The original raw text stays in the evidence view.
+function savedDuplicateObservation(row, numberFormat) {
+    if (!row) throw missingCriteria();
+    if (!row.censoring) return row.value;
+    if (!['<', '<=', '>', '>='].includes(row.censoring) || !Number.isFinite(row.censoringLimit) ||
+        !require('../../shared/numberParse').validateNumberFormat(numberFormat)) throw missingCriteria();
+    return `${row.censoring}${row.censoringLimit.toExponential(17).replace('.', numberFormat.decimal)}`;
+}
+function compatibilityArithmetic(projected, measurements, numberFormat) {
+    const arithmetic = structuredClone(projected);
+    const at = (positionId, replicateNo = 1) => measurements.find(row => row.positionId === positionId && row.replicateNo === replicateNo);
+    for (const row of arithmetic.blanks || []) row.rawInput = { value: row.value };
+    for (const row of arithmetic.controls || []) row.rawInput = { expected: row.expected, measured: row.measured };
+    for (const row of arithmetic.duplicates || []) row.rawInput = {
+        value1: savedDuplicateObservation(at(row.duplicateOfPositionId || row.id), numberFormat),
+        value2: savedDuplicateObservation(at(row.id, row.duplicateOfPositionId ? 1 : 2), numberFormat)
+    };
+    return arithmetic;
+}
+
+function nativeCriteria(analyte, evidence) {
+    let criteria;
+    try { criteria = JSON.parse(analyte.criteriaSnapshot); } catch { throw missingCriteria(); }
+    if (!criteria?.qcRule?.resolved || !criteria.requiredPositions || !criteria.policySnapshot?.values ||
+        !['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'].includes(criteria.qcMode) ||
+        !require('../../shared/numberParse').validateNumberFormat(criteria.numberFormat) ||
+        !criteria.methodContext || !Object.hasOwn(criteria.methodContext, 'loq')) throw missingCriteria();
+    const values = Object.fromEntries(Object.entries(criteria.qcRule.resolved).map(([key, row]) => [key, row?.value]));
+    const finite = value => typeof value === 'number' && Number.isFinite(value);
+    if (!['ABSOLUTE', 'LT_LOQ', 'LT_HALF_LOQ'].includes(values.blankLimitMode) || !['RPD', 'ABS_DIFF'].includes(values.duplicateMode) ||
+        !['RECOVERY', 'ABS_WINDOW'].includes(values.crmMode) || !['FIXED_WINDOW', 'CONTROL_CHART'].includes(values.lrmMode)) throw missingCriteria();
+    for (const key of ['blankAbsLimit', 'duplicateRpdMax', 'crmRecoveryMin', 'crmRecoveryMax', 'ccvMin', 'ccvMax']) if (!finite(values[key])) throw missingCriteria();
+    for (const key of ['duplicateAbsMax', 'duplicateAbsMaxBelow5LOQ', 'crmAbsWindow', 'lrmWindowPct']) if (!(values[key] === null || finite(values[key]))) throw missingCriteria();
+    if (!(criteria.methodContext.loq === null || finite(criteria.methodContext.loq)) ||
+        !finite(criteria.policySnapshot.values['qc.duplicateNearLoqMultiplier']) || !values.failAction ||
+        ['BLANK', 'DUPLICATE', 'LRM', 'CRM'].some(key => !['FAIL_BATCH', 'WARN'].includes(values.failAction[key])) ||
+        Object.values(criteria.requiredPositions).some(ids => !Array.isArray(ids))) throw missingCriteria();
+    const calibration = evidence.positions.filter(row => ['ICV', 'CCV', 'CCB'].includes(row.kind));
+    if (calibration.some(row => !['FAIL_BATCH', 'REPEAT_BRACKET', 'WARN'].includes(criteria.policySnapshot.values['qc.calibrationFailAction']?.[row.kind]))) throw missingCriteria();
+    return { type: 'FROZEN_NATIVE_CRITERIA', analyteId: analyte.id, criteriaSnapshot: analyte.criteriaSnapshot };
+}
+
+module.exports = { MODE, EVENT, authorizeReviewedCorrection, reviewedCorrectionPayload, compatibilityCriteria,
+    compatibilityArithmetic, savedDuplicateObservation, nativeCriteria, missingCriteria };

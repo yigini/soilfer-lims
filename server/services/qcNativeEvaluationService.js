@@ -16,7 +16,7 @@ function nativeCheckPolicy(criteria, position) {
 
 // A started run never reads current policy, method limits or catalogue values.
 // The result is separate from the aggregate state: NOT_REQUIRED is not a pass.
-function evaluateNativeEvidence(batch, analyte) {
+function evaluateNativeEvidence(batch, analyte, { recordedObservations = false } = {}) {
     const criteria = JSON.parse(analyte.criteriaSnapshot), evidence = currentAnalyteEvidence(batch, analyte.analysisCode);
     const values = Object.fromEntries(Object.entries(criteria.qcRule.resolved).map(([key, row]) => [key, row.value]));
     const calibrationActions = criteria.policySnapshot.values['qc.calibrationFailAction'];
@@ -44,12 +44,16 @@ function evaluateNativeEvidence(batch, analyte) {
         } else if (position.kind === 'DUPLICATE') {
             const parent = at(position.duplicateOfPositionId);
             if (!parent) continue;
-            const observation = row => row.censoring ? row.rawInput : row.value;
+            const observation = row => recordedObservations
+                ? require('./qcReviewedCorrectionService').savedDuplicateObservation(row, criteria.numberFormat)
+                : row.censoring ? row.rawInput : row.value;
             evaluated = evaluateDuplicate({ id: position.id, value1: parent.value, value2: measurement.value,
                 rawInput: { value1: observation(parent), value2: observation(measurement) } },
-            nativeCheckPolicy(criteria, position));
+            { ...nativeCheckPolicy(criteria, position), recordedCriteria: recordedObservations });
             evaluated.value1 = parent.value; evaluated.value2 = measurement.value;
             evaluated.rawInput = { value1: parent.rawInput, value2: measurement.rawInput };
+            if (recordedObservations) evaluated.censoringLimits = [parent, measurement].map(row => row.censoring
+                ? { qualifier: row.censoring, limit: row.censoringLimit, literalLoq: /^<LOQ$/i.test(row.rawInput || '') } : null);
             evaluated.duplicateOfPositionId = position.duplicateOfPositionId;
             duplicates.push(evaluated);
         } else {

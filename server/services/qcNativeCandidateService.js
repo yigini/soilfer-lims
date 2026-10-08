@@ -15,13 +15,14 @@ function observation(entry, position, criteria, enteredBy, enteredAt) {
         censoringLimit: parsed.censored ? parsed.literalLoq ? criteria.methodContext.loq : parsed.value : null, enteredBy, enteredAt };
 }
 
-function prepareNativeObservationEntries(batch, analysisCode, entries, { correction = false, preview = false, performedBy, now = new Date(), reason = '' } = {}) {
+function prepareNativeObservationEntries(batch, analysisCode, entries, { correction = false, preview = false, performedBy, now = new Date(), reason = '', numberFormat = null } = {}) {
     if (!Array.isArray(entries) || new Set(entries.map(row => row?.positionId)).size !== entries.length) {
         throw failure(400, 'QC_VALUES_MISSING', 'Submit distinct position observations.');
     }
     const analyte = batch.analytes.find(row => row.analysisCode === analysisCode);
     if (!analyte) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
     const criteria = JSON.parse(analyte.criteriaSnapshot), evidence = currentAnalyteEvidence(batch, analysisCode);
+    if (numberFormat) criteria.numberFormat = numberFormat;
     const replacements = [], observations = [];
     for (const entry of entries) {
         if (entry?.replicateNo !== undefined && entry.replicateNo !== 1) throw failure(400, 'QC_POSITION_NOT_IN_ANALYSIS', 'A Native physical position uses replicate 1.', { positionId: entry.positionId });
