@@ -229,11 +229,13 @@ test('real legacy-imported NULL authors and historical snapshots stay locked wit
     const connection = new Database(historical.file, { fileMustExist: true });
     try { connection.exec('CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL,"appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"details" TEXT)'); }
     finally { connection.close(); }
-    for (const [script, installer] of [['install_reference_materials', 'installReferenceMaterials'], ['install_qc_rules', 'installQcRules'], ['install_qc_runs', 'installQcRuns']]) {
+    for (const [script, installer] of [['install_result_attempt_links', 'installResultAttemptLinks'], ['install_sample_holds', 'installSampleHolds'],
+        ['install_reference_materials', 'installReferenceMaterials'], ['install_qc_rules', 'installQcRules'], ['install_qc_runs', 'installQcRuns'],
+        ['install_qc_gate_scope', 'installQcGateScope'], ['install_proficiency_evidence', 'installProficiencyEvidence'],
+        ['install_result_equipment_evidence', 'installResultEquipmentEvidence'], ['install_work_attempt_contract', 'installWorkAttemptContract']]) {
         const install = require(`../../scripts/${script}`)[installer], dry = install({ dbPath: historical.file });
         install({ dbPath: historical.file, apply: true, ...(script === 'install_qc_runs' && { planSha256: dry.backfillFingerprint }) });
     }
-    require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: historical.file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${historical.file}` }) });
     owned.push({ close: async () => {
         await db.$disconnect();
