@@ -1,7 +1,6 @@
 const prisma = require('../prisma');
 const policyService = require('../services/policyService');
 const { buildNativeRun, rebuildNativeRun, startNativeRun } = require('../services/qcNativeRunService');
-const { createProfileRun } = require('../services/qcCompatibilityRunService');
 const { mutateQcRun } = require('../services/qcRunMutationService');
 const { previewQcRun } = require('../services/qcRunPreviewService');
 const { QC_RUN_INCLUDE, readQcRun, batchApiView, currentAnalyteEvidence } = require('../services/qcRunViewService');
@@ -18,8 +17,9 @@ function respondError(res, error, fallback) {
 }
 exports.createBatch = async (req, res) => {
     try {
-        const batch = Object.hasOwn(req.body, 'workItemIds') ? await buildNativeRun(prisma, req.user, req.body)
-            : await createProfileRun(prisma, req.user, req.body);
+        // #252: new runs always use membership and server-resolved native QC.
+        // Stored PROFILE_ONLY runs retain their separate compatibility paths.
+        const batch = await buildNativeRun(prisma, req.user, req.body);
         return res.status(201).json(await apiRunView(prisma, batch));
     } catch (error) { return respondError(res, error, 'Failed to create batch'); }
 };

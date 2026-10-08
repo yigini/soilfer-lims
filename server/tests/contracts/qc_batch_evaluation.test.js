@@ -1,3 +1,4 @@
+const { createStoredProfileRunFixture } = require('../helpers/storedProfileRunFixture');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -48,13 +49,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
     test('Rejects adding items that exceed 40-sample capacity', async () => {
         // Create batch for PH_H2O
-        const batchRes = await request(app)
-            .post('/api/qc/batches')
-            .set('Authorization', `Bearer ${techToken}`)
-            .send({ analysis: 'PH_H2O', instrument: 'pH Meter' });
-
-        expect(batchRes.statusCode).toBe(201);
-        batchId = batchRes.body.id;
+        // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', instrument: 'pH Meter' } });
+        batchId = storedBatch.id;
 
         // Create 41 work items
         const sampleId = `SMP-QC-CAP-${Date.now()}`;
@@ -96,13 +93,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
     test('Permits texture aliases in a TEXTURE batch and rejects mismatched analyses', async () => {
         // Create batch for TEXTURE
-        const batchRes = await request(app)
-            .post('/api/qc/batches')
-            .set('Authorization', `Bearer ${techToken}`)
-            .send({ analysis: 'TEXTURE', instrument: 'Hydrometer' });
-
-        expect(batchRes.statusCode).toBe(201);
-        batchId = batchRes.body.id;
+        // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'TEXTURE', instrument: 'Hydrometer' } });
+        batchId = storedBatch.id;
 
         const sampleId = `SMP-QC-TEX-${Date.now()}`;
         createdSampleIds.push(sampleId);
@@ -162,11 +155,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
     });
 
     test('Rejects sealed work items from being added to batch', async () => {
-        const batchRes = await request(app)
-            .post('/api/qc/batches')
-            .set('Authorization', `Bearer ${techToken}`)
-            .send({ analysis: 'PH_H2O' });
-        batchId = batchRes.body.id;
+        // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O' } });
+        batchId = storedBatch.id;
 
         const sampleId = `SMP-QC-SEAL-${Date.now()}`;
         createdSampleIds.push(sampleId);
@@ -204,16 +195,12 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
     test('Assigns and persists rackPosition (1..N) and returns runProfile (A28, A29)', async () => {
         // Create 24-centrifuge batch
-        const batchRes = await request(app)
-            .post('/api/qc/batches')
-            .set('Authorization', `Bearer ${techToken}`)
-            .send({ analysis: 'SOC', instrument: '24-Place Digestion Block Centrifuge', profile: 'CENTRIFUGE_24' });
-
-        expect(batchRes.statusCode).toBe(201);
-        batchId = batchRes.body.id;
-        expect(batchRes.body.runProfile).toBeDefined();
-        expect(batchRes.body.runProfile.capacity).toBe(24);
-        expect(batchRes.body.runProfile.qcSlots.length).toBeGreaterThanOrEqual(3);
+        // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'SOC', instrument: '24-Place Digestion Block Centrifuge', profile: 'CENTRIFUGE_24' } });
+        batchId = storedBatch.id;
+        expect(storedBatch.runProfile).toBeDefined();
+        expect(storedBatch.runProfile.capacity).toBe(24);
+        expect(storedBatch.runProfile.qcSlots.length).toBeGreaterThanOrEqual(3);
 
         const sampleId = `SMP-QC-RACK-${Date.now()}`;
         createdSampleIds.push(sampleId);
@@ -265,25 +252,18 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
     });
 
     test('Supports 96-place Microplate profile capacity and rejects 97th item (A28)', async () => {
-        const batchRes = await request(app)
-            .post('/api/qc/batches')
-            .set('Authorization', `Bearer ${techToken}`)
-            .send({ analysis: 'PH_H2O', instrument: '96-Well Microplate Reader', profile: 'MICROPLATE_96' });
-
-        expect(batchRes.statusCode).toBe(201);
-        batchId = batchRes.body.id;
-        expect(batchRes.body.runProfile.capacity).toBe(96);
-        expect(batchRes.body.runProfile.qcSlots.some(s => s.position === 96)).toBe(true);
+        // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', instrument: '96-Well Microplate Reader', profile: 'MICROPLATE_96' } });
+        batchId = storedBatch.id;
+        expect(storedBatch.runProfile.capacity).toBe(96);
+        expect(storedBatch.runProfile.qcSlots.some(s => s.position === 96)).toBe(true);
     });
 
     describe('Cross-laboratory Batch Scope Isolation (Review Defect 1)', () => {
         test('Rejects foreign lab manager from reading TUN-LAB1 batch (403)', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O' });
-            expect(batchRes.statusCode).toBe(201);
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O' } });
+            batchId = storedBatch.id;
 
             const foreignRes = await request(app)
                 .get(`/api/qc/batches/${batchId}`)
@@ -294,11 +274,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         });
 
         test('Rejects foreign lab manager from mutating TUN-LAB1 batch (403)', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O' } });
+            batchId = storedBatch.id;
 
             const foreignUpdate = await request(app)
                 .put(`/api/qc/batches/${batchId}`)
@@ -310,11 +288,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         });
 
         test('Rejects foreign lab user from evaluating or adding items to TUN-LAB1 batch (403)', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O' } });
+            batchId = storedBatch.id;
 
             const foreignEval = await request(app)
                 .post(`/api/qc/batches/${batchId}/evaluate`)
@@ -334,12 +310,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
     describe('Rack Position Bounded Integers & QC Reservation Enforcement (Review Defect 2)', () => {
         test('Rejects sample assignment to QC-reserved slot (position 1 on RACK_40)', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
-            expect(batchRes.statusCode).toBe(201);
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', profile: 'RACK_40' } });
+            batchId = storedBatch.id;
 
             const sampleId = `SMP-QC-RES-${Date.now()}`;
             createdSampleIds.push(sampleId);
@@ -373,11 +346,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         });
 
         test('Rejects duplicate rack positions within payload and across batch', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', profile: 'RACK_40' } });
+            batchId = storedBatch.id;
 
             const sampleId = `SMP-QC-DUP-${Date.now()}`;
             createdSampleIds.push(sampleId);
@@ -438,11 +409,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         });
 
         test('Allows removing items from batch and freeing their rack positions', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', profile: 'RACK_40' } });
+            batchId = storedBatch.id;
 
             const sampleId = `SMP-QC-REM-${Date.now()}`;
             createdSampleIds.push(sampleId);
@@ -485,11 +454,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
     describe('State Machine & QC General-Update Bypass Hardening (Review 4)', () => {
         test('Rejects technician direct write of QC_PASS without QC evidence (400)', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', profile: 'RACK_40' } });
+            batchId = storedBatch.id;
 
             const updateRes = await request(app)
                 .put(`/api/qc/batches/${batchId}`)
@@ -501,11 +468,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         });
 
         test('Rejects direct write of QC_PASS when supplied QC measurements fail (400)', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', profile: 'RACK_40' } });
+            batchId = storedBatch.id;
 
             const updateRes = await request(app)
                 .put(`/api/qc/batches/${batchId}`)
@@ -520,11 +485,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         });
 
         test('Allows valid evaluated QC to update status to QC_PASS (200)', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', profile: 'RACK_40' } });
+            batchId = storedBatch.id;
 
             const updateRes = await request(app)
                 .put(`/api/qc/batches/${batchId}`)
@@ -540,11 +503,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         });
 
         test('Rejects technician closing a batch (403) and manager closing an unpassed batch (400)', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', profile: 'RACK_40' } });
+            batchId = storedBatch.id;
 
             // Technician attempt
             const techClose = await request(app)
@@ -563,11 +524,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         });
 
         test('Seals CLOSED batch: rejects further modifications (400)', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', profile: 'RACK_40' } });
+            batchId = storedBatch.id;
 
             // Pass QC
             await request(app)
@@ -598,11 +557,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
     describe('Review 5 Shared QC Evaluation & State Integrity Regressions', () => {
         test('Null blank does not coerce to zero and malformed submitted QC is refused without writing evidence', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', profile: 'RACK_40' } });
+            batchId = storedBatch.id;
 
             const before = await evidenceBatch(batchId);
             const res = await request(app)
@@ -625,11 +582,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         });
 
         test('Dedicated evaluate route rejects mutating a CLOSED batch (400)', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', profile: 'RACK_40' } });
+            batchId = storedBatch.id;
 
             // Pass QC and close
             await request(app)
@@ -660,11 +615,9 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         });
 
         test('Clearing QC evidence reverts QC_PASS to OPEN and invalidates stale dispositions', async () => {
-            const batchRes = await request(app)
-                .post('/api/qc/batches')
-                .set('Authorization', `Bearer ${techToken}`)
-                .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
-            batchId = batchRes.body.id;
+            // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', profile: 'RACK_40' } });
+            batchId = storedBatch.id;
 
             // Pass QC
             await request(app)

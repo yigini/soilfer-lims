@@ -688,6 +688,7 @@ export default function WorksheetArea({
                 onClose={() => setIsBatchModalOpen(false)}
                 analysisCode={activeGroup?.analysis || ''}
                 selectedWorkItemIds={Array.from(selectedRows)}
+                selectedWorkItems={items.filter(item => selectedRows.has(item.workItemId || item.id))}
                 onBatchUpdated={onBatchUpdated}
                 onOpenWorksheet={openWorksheet}
             />

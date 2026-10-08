@@ -65,6 +65,9 @@ async function changeRunMembers(db, batchId, actor, input, { remove = false } = 
         const resolved = groups.length && groups.every(group => group.every(item => item.methodologyId) && new Set(group.map(item => item.methodologyId)).size === 1);
         const migratedTexture = batch.analytes.some(row => row.provenance === 'LEGACY_MIGRATED') && TEXTURE_ALIASES.has(batch.analysis);
         const native = batch.analytes.some(row => row.provenance === 'NATIVE') || !migratedTexture && resolved || input.analyses !== undefined;
+        if (native && desired.length && batch.analytes.some(row => row.provenance === 'PROFILE_ONLY')) {
+            throw failure(409, 'QC_RUN_PROFILE_ONLY_STORED', 'This stored profile-only run cannot be converted. Create a new run.');
+        }
         let view;
         if (native && desired.length) view = await rebuildNativeRun(tx, batchId, actor, { ...input, workItemIds: desired, seed: input.seed || randomUUID() });
         else {

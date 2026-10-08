@@ -2959,5 +2959,26 @@
   "proficiencyTesting": {
     "legacySigmaMissing": "Esta pontuação histórica de proficiência foi registrada sem sigma de avaliação. Não foi recalculada; forneça um sigma válido em uma correção explícita.",
     "legacySigmaNonpositive": "Esta pontuação histórica de proficiência usou um sigma de avaliação não positivo ou não finito. Não foi recalculada; forneça um sigma válido em uma correção explícita."
+  },
+  "qcMembership": {
+    "membership": "Amostras da série",
+    "selectedWork": "Trabalhos selecionados",
+    "selectWork": "Selecione trabalhos na folha antes de criar uma série.",
+    "reloadWork": "Recarregue a folha para consultar os métodos dos trabalhos selecionados.",
+    "methodConflict": "Os trabalhos selecionados têm métodos registrados incompatíveis. Crie séries separadas.",
+    "recordedMethod": "Método registrado",
+    "method": "Método da série",
+    "chooseMethod": "Escolha um método controlado",
+    "loadingMethods": "Carregando métodos…",
+    "methodsUnavailable": "O catálogo de métodos está indisponível. Recarregue antes de criar uma série.",
+    "noMethods": "Nenhum método disponível para esta análise e laboratório. Peça ao responsável que configure um.",
+    "instrumentPlaceholder": "Nome opcional do instrumento ou bancada",
+    "created": "Série criada com amostras vinculadas.",
+    "createFailed": "Não foi possível criar a série.",
+    "storedRun": "Esta série armazenada conserva suas evidências originais. Crie uma nova série para medições nativas.",
+    "errors": {
+      "QC_WORK_ITEMS_REQUIRED": "Selecione trabalhos na folha antes de criar uma série.",
+      "QC_RUN_PROFILE_ONLY_STORED": "Esta série armazenada conserva suas evidências originais. Crie uma nova série para medições nativas."
+    }
   }
 }

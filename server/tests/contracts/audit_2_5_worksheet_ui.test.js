@@ -80,8 +80,8 @@ test.each(['PROFILE_ONLY', 'LEGACY_MIGRATED', 'NATIVE_CLOSED'])('%s renders stor
     expect(view.axios.post).not.toHaveBeenCalled(); expect(view.axios.put).not.toHaveBeenCalled();
 });
 
-test('an open compatibility run offers only the permission-gated existing rebuild action using actual work-item ids', async () => {
-    const batch = nativeFixture(); batch.analytes[0].provenance = 'PROFILE_ONLY';
+test('an open LEGACY_MIGRATED run retains the permission-gated existing rebuild action using actual work-item ids', async () => {
+    const batch = nativeFixture(); batch.analytes[0].provenance = 'LEGACY_MIGRATED';
     const props = { batch, loading: false, onChanged: jest.fn(), setLoading: jest.fn(), setError: jest.fn() };
     const view = mountUi('components/workbench/QcRunHistory.jsx', props); await view.render();
     expect(view.find('qc-legacy-readonly')).toBeDefined(); await view.find('rebuild-qc-run').props.onClick();

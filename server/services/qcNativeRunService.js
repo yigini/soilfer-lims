@@ -57,6 +57,11 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
         if (existingBatchId && !previous) throw error(404, 'BATCH_NOT_FOUND', 'Batch not found.');
         if (previous) {
             await scope(tx, actor, previous);
+            // #252 pin6062398663: retain this stored identity and all evidence.
+            // A future native execution must use a separately created run.
+            if (previous.analytes.some(row => row.provenance === 'PROFILE_ONLY')) {
+                throw error(409, 'QC_RUN_PROFILE_ONLY_STORED', 'This stored profile-only run cannot be converted. Create a new run.');
+            }
             if (previous.startedAt || previous.measurements.length || previous.analytes.some(row => row.legacyMembershipFrozen)) {
                 throw error(409, 'BATCH_MEMBERSHIP_FROZEN', 'Started or measured membership cannot be rebuilt.');
             }
