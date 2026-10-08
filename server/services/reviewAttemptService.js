@@ -1,6 +1,6 @@
 const rules = require('./workflowStateRules');
 const { hasPermission } = require('../config/roles');
-const { isNonMeasurement } = require('./resultEntryPolicy');
+const { isNonMeasurement } = require('./workItemKinds');
 
 // Pin6055535948: a review identifies measured evidence, never a latest row.
 async function resolveReviewAttempt(tx,item,decision,requestedAttemptId) {

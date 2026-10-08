@@ -21,7 +21,8 @@ async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS',
     for (const [script, method] of [['install_result_attempt_links', 'installResultAttemptLinks'], ['install_sample_holds', 'installSampleHolds'],
         ['install_reference_materials', 'installReferenceMaterials'], ['install_qc_rules', 'installQcRules'], ['install_qc_runs', 'installQcRuns'],
         ['install_qc_gate_scope', 'installQcGateScope'], ['install_proficiency_evidence', 'installProficiencyEvidence'],
-        ['install_result_equipment_evidence', 'installResultEquipmentEvidence']]) require(`../../scripts/${script}`)[method]({ dbPath: file, apply: true });
+        ['install_result_equipment_evidence', 'installResultEquipmentEvidence'],
+        ['install_work_attempt_contract','installWorkAttemptContract']]) require(`../../scripts/${script}`)[method]({ dbPath: file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     const actor = { username, role: 'SUPER_ADMIN', labId };
     await db.unit.create({ data: { code: 'fixture-unit', display: 'Fixture unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });

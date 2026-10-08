@@ -10,7 +10,7 @@ beforeEach(() => {
             executedMethodRevision TEXT,author TEXT,authorName TEXT,materialAliquot TEXT,instrumentId TEXT,qcBatchId TEXT,
             version INTEGER DEFAULT 1,status TEXT DEFAULT 'RECORDED',evidenceHash TEXT,evidenceData TEXT,createdAt DATETIME,updatedAt DATETIME);
         CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,replicateNo INTEGER,attemptId TEXT,isCurrent INTEGER,provenance TEXT DEFAULT 'MEASURED');
-        CREATE TABLE ReviewDecision(id TEXT PRIMARY KEY);`);
+        CREATE TABLE ReviewDecision(id TEXT PRIMARY KEY,workItemId TEXT,sampleId TEXT,attemptId TEXT,decision TEXT);`);
     source = loadWorkAttemptMigrationSource(); db.exec(source.schemaSql);
 });
 afterEach(() => db.close());

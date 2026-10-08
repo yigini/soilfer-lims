@@ -16,6 +16,28 @@ CREATE INDEX "WorkAttempt_workItemId_attemptNo_idx" ON "WorkAttempt"("workItemId
 CREATE INDEX "WorkAttempt_batchId_idx" ON "WorkAttempt"("batchId");
 
 -- INSTALLER_GUARDS_AFTER_BACKFILL
+CREATE TRIGGER "ReviewDecision_attempt_insert_guard" BEFORE INSERT ON "ReviewDecision"
+BEGIN
+    SELECT CASE
+        WHEN NEW."attemptId" IS NOT NULL AND NOT EXISTS (
+            SELECT 1 FROM "WorkAttempt" a JOIN "WorkItem" w ON w."id" = a."workItemId"
+            WHERE a."id" = NEW."attemptId" AND a."workItemId" = NEW."workItemId" AND w."sampleId" = NEW."sampleId"
+            AND EXISTS (SELECT 1 FROM "Result" r WHERE r."attemptId" = a."id" AND r."isCurrent" = 1))
+        THEN RAISE(ABORT, 'REVIEW_ATTEMPT_INVALID')
+        WHEN NEW."attemptId" IS NULL AND EXISTS (
+            SELECT 1 FROM "WorkItem" w WHERE w."id" = NEW."workItemId"
+            AND w."analysis" NOT IN ('ARCH','ARCHIVING','Archive','DISP','DISPOSAL','DRYING','Dispose','HOMOGENIZATION','MILLING','PREP','PREPARATION','SAMPLE_PREP','SIEVING','SPEC_FTIR','SPEC_MIR','SPEC_NIR','SPEC_VIS_NIR'))
+            AND NOT (NEW."decision" = 'OMIT' AND NOT EXISTS (SELECT 1 FROM "WorkAttempt" a WHERE a."workItemId" = NEW."workItemId"))
+        THEN RAISE(ABORT, 'REVIEW_ATTEMPT_REQUIRED')
+    END;
+END;
+
+CREATE TRIGGER "ReviewDecision_attempt_immutable" BEFORE UPDATE OF "attemptId" ON "ReviewDecision"
+WHEN NEW."attemptId" IS NOT OLD."attemptId"
+BEGIN
+    SELECT RAISE(ABORT, 'REVIEW_DECISION_IMMUTABLE');
+END;
+
 CREATE TRIGGER "Result_attempt_required_insert" BEFORE INSERT ON "Result"
 WHEN NEW."attemptId" IS NULL AND NOT COALESCE((NEW."provenance" = 'IMPORTED' AND NOT EXISTS (SELECT 1 FROM "WorkItem" w WHERE w."sampleId" = NEW."sampleId" AND w."analysis" = NEW."param" AND w."duplicateOf" IS NULL)), 0)
 BEGIN

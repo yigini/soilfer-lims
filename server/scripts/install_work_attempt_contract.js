@@ -31,7 +31,7 @@ function classify(db, source) {
     if (reason && (reason.type !== 'TEXT' || reason.notnull || reason.dflt_value !== null || reason.pk || reason.hidden)) differences.push('ReviewDecision.reasonCode differs');
     installedColumns.push(Boolean(reason));
     const objects = releaseObjects(source);
-    if (objects.length !== 15) throw fail('WORK_ATTEMPT_SOURCE_MISMATCH', 'The release requires two partial indexes and thirteen guards.');
+    if (objects.length !== 17) throw fail('WORK_ATTEMPT_SOURCE_MISMATCH', 'The release requires two partial indexes and fifteen guards.');
     const installedObjects = objects.map(expected => {
         const actual = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(expected.name);
         if (actual && (actual.type !== expected.type || normalize(actual.sql) !== normalize(expected.sql))) differences.push(`${expected.name} differs`);

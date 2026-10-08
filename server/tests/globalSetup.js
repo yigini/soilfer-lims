@@ -52,6 +52,7 @@ module.exports = async function globalSetup() {
         require('../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: testDbPath, apply: true });
         require('../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: testDbPath, apply: true });
         require('../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: testDbPath, apply: true });
+        require('../scripts/install_work_attempt_contract').installWorkAttemptContract({dbPath:testDbPath,apply:true});
     }
 
     process.env.DATABASE_PATH = testDbPath;

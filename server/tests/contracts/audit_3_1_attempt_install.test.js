@@ -23,8 +23,8 @@ function fixture() {
             evidenceHash TEXT,evidenceData TEXT,createdAt DATETIME NOT NULL,updatedAt DATETIME NOT NULL);
         CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,replicateNo INTEGER,attemptId TEXT,
             isCurrent INTEGER,value TEXT,equipmentReadiness TEXT,batchId TEXT,updatedAt TEXT,provenance TEXT DEFAULT 'MEASURED');
-        CREATE TABLE ReviewDecision(id TEXT PRIMARY KEY,reason TEXT);
-        INSERT INTO ReviewDecision VALUES ('legacy-review','stored reason');
+        CREATE TABLE ReviewDecision(id TEXT PRIMARY KEY,reason TEXT,workItemId TEXT,sampleId TEXT,attemptId TEXT,decision TEXT);
+        INSERT INTO ReviewDecision(id,reason) VALUES ('legacy-review','stored reason');
         CREATE TABLE AuditLog(id TEXT PRIMARY KEY,details TEXT);
         INSERT INTO AuditLog VALUES ('original','unchanged technical audit');
         INSERT INTO WorkItem(id,sampleId,analysis,status,result) VALUES ('measured','sample','P','ACCEPTED','original cache');

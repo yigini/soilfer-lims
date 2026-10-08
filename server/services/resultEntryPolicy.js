@@ -3,13 +3,7 @@ const { isAvailable } = require('./methodResolution');
 const { evaluateExecutionReadiness } = require('./workbenchReadinessService');
 
 // These are the existing entry classifiers, also used by the result authority.
-const PREP_CODES = new Set(['PREP', 'SAMPLE_PREP', 'SIEVING', 'MILLING', 'HOMOGENIZATION']);
-const SPECTRAL_CODES = new Set(['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR']);
-function isNonMeasurement(item) {
-    return GATE_CODES.has(item.analysis) || require('../workflowContract').CLOSURE_TASK_ANALYSES.includes(item.analysis) ||
-        PREP_CODES.has(item.analysis) || SPECTRAL_CODES.has(item.analysis) ||
-        Object.hasOwn(require('../data/operationalChecklists.json'), item.analysis);
-}
+const {PREP_CODES,SPECTRAL_CODES,isNonMeasurement}=require('./workItemKinds');
 
 // The legacy sample results endpoint must not bypass catalogue, assignment or sealed-work rules.
 async function validateResultEntries(db, sample, measurements, user) {
