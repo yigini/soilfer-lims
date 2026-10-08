@@ -1451,7 +1451,8 @@
       "WORK_REPEAT_ALREADY_OPEN": "A repeat is already waiting to be recorded.",
       "REPEAT_FAILED_BATCH": "Use a new batch for this repeat; the previous QC failure is retained.",
       "ATTEMPT_CORRECTION_REQUIRED": "Use a transcription correction for a typo.",
-      "AMENDMENT_WORKFLOW_REQUIRED": "A client retest requires the amendment workflow."
+      "AMENDMENT_WORKFLOW_REQUIRED": "A client retest requires the amendment workflow.",
+      "ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED": "This run needs a QC disposition before a repeat can be requested."
     }
   }
 }

@@ -40,6 +40,6 @@ test.each(['en','es','es-419','fr','pt'])('new repeat labels and errors are tran
     for(const catalogue of [labels,server]){
         for(const key of ['returnTitle','returnHelp','reasonLabel','chooseReason','noteLabel','notePlaceholder','confirmReturn'])expect(catalogue[key].trim()).not.toBe('');
         for(const code of Object.keys(require('../../services/workRepeatContract').RETURN_REASON_STATUS))expect(catalogue.reasons[code].trim()).not.toBe('');
-        for(const code of ['WORK_ATTEMPT_REASON_REQUIRED','ATTEMPT_LIMIT','ATTEMPT_LIMIT_NCR_UNAVAILABLE','REPEAT_FAILED_BATCH'])expect(catalogue.errors[code].trim()).not.toBe('');
+        for(const code of ['WORK_ATTEMPT_REASON_REQUIRED','ATTEMPT_LIMIT','ATTEMPT_LIMIT_NCR_UNAVAILABLE','REPEAT_FAILED_BATCH','ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED'])expect(catalogue.errors[code].trim()).not.toBe('');
     }
 });

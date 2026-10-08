@@ -455,16 +455,21 @@ test('#191 installs the same verified chain on an empty current-Prisma column sh
     expect(installWorkRepeatContract({ dbPath: file, apply: true })).toMatchObject({ classification: 'COMPLETE', previousClassification: 'FRESH_PRISMA', mode: 'APPLIED' });
 });
 
-test.each(['missing-190-receipt', 'missing-191-receipt', 'tampered-190-receipt', 'tampered-191-receipt',
-    'missing-successor', 'altered-successor', 'missing-event-guard', 'partial-column', 'receipt-before-guards'])(
+test.each(['missing-186-receipt', 'missing-187-receipt', 'missing-190-receipt', 'missing-191-receipt',
+    'tampered-186-receipt', 'tampered-187-receipt', 'tampered-190-receipt', 'tampered-191-receipt',
+    'missing-successor', 'altered-successor', 'missing-membership-successor', 'altered-membership-successor',
+    'missing-event-guard', 'partial-column', 'receipt-before-guards'])(
     '#191 broken chain (%s) refuses dry-run/apply/startup without changing database bytes', kind => {
         const file = repeatFixture();
         if (!['partial-column', 'receipt-before-guards'].includes(kind)) installWorkRepeatContract({ dbPath: file, apply: true });
         const db = new Database(file);
-        if (kind.startsWith('missing-') && kind.endsWith('-receipt')) db.prepare('DELETE FROM _schema_migrations WHERE id=?').run(kind === 'missing-190-receipt' ? MARKER : REPEAT_MARKER);
-        if (kind.startsWith('tampered-')) db.prepare('UPDATE _schema_migrations SET details=? WHERE id=?').run('{}', kind === 'tampered-190-receipt' ? MARKER : REPEAT_MARKER);
+        const receiptMarkers = { '186': '186_normalized_qc_runs', '187': '187_qc_gate_scope', '190': MARKER, '191': REPEAT_MARKER };
+        if (kind.startsWith('missing-') && kind.endsWith('-receipt')) db.prepare('DELETE FROM _schema_migrations WHERE id=?').run(receiptMarkers[kind.split('-')[1]]);
+        if (kind.startsWith('tampered-')) db.prepare('UPDATE _schema_migrations SET details=? WHERE id=?').run('{}', receiptMarkers[kind.split('-')[1]]);
         if (kind === 'missing-successor') db.exec('DROP TRIGGER WorkAttempt_evidence_update');
         if (kind === 'altered-successor') db.exec("DROP TRIGGER WorkAttempt_identity_update; CREATE TRIGGER WorkAttempt_identity_update BEFORE UPDATE ON WorkAttempt BEGIN SELECT RAISE(ABORT,'foreign guard'); END;");
+        if (kind === 'missing-membership-successor') db.exec('DROP TRIGGER WorkItem_batch_membership_guard');
+        if (kind === 'altered-membership-successor') db.exec("DROP TRIGGER WorkItem_batch_membership_guard; CREATE TRIGGER WorkItem_batch_membership_guard BEFORE UPDATE ON WorkItem BEGIN SELECT RAISE(ABORT,'foreign guard'); END;");
         if (kind === 'missing-event-guard') db.exec('DROP TRIGGER AuditLog_attempt_event_update');
         if (kind === 'partial-column') db.exec('ALTER TABLE WorkAttempt ADD COLUMN parentAttemptId TEXT');
         if (kind === 'receipt-before-guards') db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run(REPEAT_MARKER, '{}');
