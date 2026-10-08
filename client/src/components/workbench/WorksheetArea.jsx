@@ -154,7 +154,7 @@ export default function WorksheetArea({
 
     const visibleItems = runBatch && selectedRun ? runWorksheetRows(runBatch.positions || [], items, activeGroup?.analysis)
         .map(row => row.item).filter(Boolean) : filteredItems;
-    useEffect(() => { setSelectedRows(new Set()); }, [selectedRun, activeGroup?.analysis]);
+    useEffect(() => { if (selectedRun) setSelectedRows(new Set()); }, [selectedRun, activeGroup?.analysis]);
 
     // Active inspected item
     const inspectedItem = useMemo(() => {

@@ -75,7 +75,7 @@ test('an open compatibility run offers only the permission-gated existing rebuil
 });
 
 test('BatchModal exposes the worksheet action and retains the actual server profile and positions without typed QC inputs', async () => {
-    const batch = { ...nativeFixture(), profile: 'CENTRIFUGE_24', maxCapacity: 24, runProfile: { name: 'Configured centrifuge', maxSamples: 12 } };
+    const batch = { ...nativeFixture(), profile: 'CENTRIFUGE_24', maxCapacity: 24, runProfile: { name: 'Configured centrifuge', capacity: 24 } };
     const view = mountUi('components/workbench/BatchModal.jsx', { isOpen: true, analysisCode: 'A', onOpenWorksheet: jest.fn() }, { responses: { '/api/qc/batches': [batch] } });
     await view.render(); view.find('batch-tab-allocate').props.onClick(); await view.render();
     expect(view.text()).toContain('Configured centrifuge'); expect(view.text()).toContain('Max 24');

@@ -338,12 +338,6 @@ export default function BatchModal({
                                             {currentBatch.positions?.filter(row => row.kind !== 'SAMPLE').map(row => `${row.position} (${row.kind})`).join(', ') || t('qcWorksheet.notStored')}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between items-center text-xs">
-                                        <span className="text-sf-muted">Maximum Sample Capacity:</span>
-                                        <span className="font-bold text-sf-text">
-                                            {currentBatch.runProfile?.maxSamples ?? t('qcWorksheet.notStored')}
-                                        </span>
-                                    </div>
                                 </div>
                             )}
 
