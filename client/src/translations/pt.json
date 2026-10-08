@@ -2959,5 +2959,23 @@
   "proficiencyTesting": {
     "legacySigmaMissing": "Esta pontuação histórica de proficiência foi registrada sem sigma de avaliação. Não foi recalculada; forneça um sigma válido em uma correção explícita.",
     "legacySigmaNonpositive": "Esta pontuação histórica de proficiência usou um sigma de avaliação não positivo ou não finito. Não foi recalculada; forneça um sigma válido em uma correção explícita."
+  },
+  "attemptEvidence": {
+    "title": "Tentativas",
+    "number": "Tentativa #{number}",
+    "importedNoAttempt": "Importado, sem tentativa",
+    "legacy": "histórico",
+    "notRecorded": "Não registrado",
+    "status": {
+      "open": "Aberto",
+      "recorded": "Registrado",
+      "submitted": "Enviado",
+      "accepted": "Aceito",
+      "questioned": "Questionado",
+      "invalidated": "Invalidado",
+      "superseded": "Substituído",
+      "returnedLegacy": "Devolvido (histórico)",
+      "rejectedLegacy": "Rejeitado (histórico)"
+    }
   }
 }

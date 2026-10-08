@@ -14,9 +14,9 @@ const directory=path.resolve(__dirname,'../.tmp'),timestamp=Date.parse('2026-10-
 let db,client,file;
 const itemRow=(id,analysis='P')=>({id,sampleId:'sample',analysis,status:'COMPLETED',updatedAt:timestamp});
 const historicalAttempt=(id,workItemId='item',options={})=>({id,workItemId,attemptNo:1,status:'RECORDED',createdAt:timestamp,updatedAt:timestamp,...options});
-async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('another','R'),itemRow('new','S'),itemRow('different','T')],attempts=[],batches=[]}={}){
+async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('another','R'),itemRow('new','S'),itemRow('different','T')],attempts=[],batches=[],assignedLab=null}={}){
     fs.mkdirSync(directory,{recursive:true});file=path.join(directory,`audit_legacy_190_sql-${randomUUID()}.db`);
-    createPre190AttemptFixture({actor:'system:fixture',file,rows:{Sample:['sample','other-sample'].map(id=>({id,originalId:id,status:'PROCESSING',updatedAt:timestamp})),WorkItem:items,WorkAttempt:attempts,Batch:batches}});
+    createPre190AttemptFixture({actor:'system:fixture',file,rows:{Sample:['sample','other-sample'].map(id=>({id,originalId:id,status:'PROCESSING',assignedLab,updatedAt:timestamp})),WorkItem:items,WorkAttempt:attempts,Batch:batches}});
     // Actual complete release chain: no copied trigger subset or simplified FK.
     expect(installWorkflowStateGuards({dbPath:file,apply:true}).mode).toBe('APPLIED');
     expect(installWorkflowStateGuards({dbPath:file}).classification).toBe('COMPLETE');
@@ -25,6 +25,7 @@ async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('ano
     db=new Database(file);db.pragma('foreign_keys=ON');client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
 }
 afterEach(async()=>{
+    jest.restoreAllMocks();
     await client?.$disconnect();client=null;db?.close();db=null;
     if(file){if(path.dirname(file)!==directory||!path.basename(file).startsWith('audit_legacy_190_sql-'))throw Error('Unexpected owned guard fixture.');for(const suffix of ['','-wal','-shm'])fs.rmSync(file+suffix,{force:true});file=null;}
 });
@@ -138,4 +139,41 @@ test('the raw review guard permits only an unexecuted analytical OMIT with no at
 });
 test.each(require('../../services/workItemKinds').NON_MEASUREMENT_CODES)('SQL keeps non-measurement %s review on its separate evidence workflow',async analysis=>{
     await guarded({items:[itemRow('item',analysis)]});db.prepare('INSERT INTO ReviewDecision (id,workItemId,sampleId,decision,reviewerId) VALUES (?,?,?,?,?)').run('review','item','sample','ACCEPT','system:fixture');expect(db.prepare('SELECT attemptId FROM ReviewDecision').get().attemptId).toBeNull();
+});
+
+test('the authenticated workspace returns linked and unlinked attempt metadata without evidence or cross-lab access',async()=>{
+    // #190 pin6058381799: the existing exact factory caller supplies historical
+    // statuses before installation; the actual route then reads COMPLETE guards.
+    const labId='LAB-190-EVIDENCE',otherLab='LAB-190-OTHER';
+    await guarded({assignedLab:labId,items:[itemRow('item'),{...itemRow('orphan-child','NO_WORK'),duplicateOf:'item'}],attempts:[
+        historicalAttempt('legacy-returned','item',{status:'RETURNED',evidenceData:'{"private":"retained"}',authorName:'Original author'}),
+        historicalAttempt('legacy-rejected','item',{attemptNo:3,status:'REJECTED',evidenceHash:'private-hash',instrumentId:'private-instrument'})
+    ]});
+    for(const id of [labId,otherLab])await client.lab.create({data:{id,code:id,name:'Owned evidence laboratory',country:'TEST'}});
+    await insert('linked',{attemptNo:2,evidenceData:'{"private":"linked"}'});
+    result('linked-result',{attemptId:'linked'});result('imported',{param:'NO_WORK',provenance:'IMPORTED'});
+    const {createAuthTokenFixture}=require('../helpers/workflowFixtures');
+    const token=await createAuthTokenFixture(client,'LAB_MANAGER',labId),otherToken=await createAuthTokenFixture(client,'LAB_MANAGER',otherLab);
+    require('../helpers/legacyWorkflowDatabase').useLegacyRouteDatabase(require('../../prisma'),client,{allModels:true});
+    const request=require('supertest'),app=require('../../app');
+    const before=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all()
+        .map(({name})=>({name,rows:db.prepare(`SELECT * FROM "${name}"`).all()}));
+    const response=await request(app).get('/api/samples/sample/workspace').set('Authorization',`Bearer ${token}`);
+    expect(response.status).toBe(200);
+    const item=response.body.workItems.find(row=>row.id==='item');
+    expect(item.results.find(row=>row.id==='linked-result').attempt).toEqual({id:'linked',attemptNo:2,status:'RECORDED'});
+    // A duplicate child supplies the existing evidence block while the exact
+    // exemption still has no canonical WorkItem for the imported parameter.
+    const imported=response.body.workItems.find(row=>row.id==='orphan-child').results.find(row=>row.id==='imported');
+    expect(imported).toMatchObject({provenance:'IMPORTED',attemptId:null,attempt:null});
+    expect(item.attempts.map(row=>[row.id,row.attemptNo,row.status])).toEqual([
+        ['legacy-returned',1,'RETURNED'],['linked',2,'RECORDED'],['legacy-rejected',3,'REJECTED']]);
+    expect(item.attempts[0]).toMatchObject({authorName:'Original author',createdAt:expect.any(String)});
+    for(const attempt of [item.results[0].attempt,...item.attempts]){
+        for(const field of ['evidenceData','evidenceHash','instrumentId'])expect(attempt).not.toHaveProperty(field);
+    }
+    const denied=await request(app).get('/api/samples/sample/workspace').set('Authorization',`Bearer ${otherToken}`);
+    expect(denied).toMatchObject({status:403,body:{code:'FORBIDDEN_SCOPE'}});
+    expect(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all()
+        .map(({name})=>({name,rows:db.prepare(`SELECT * FROM "${name}"`).all()}))).toEqual(before);
 });

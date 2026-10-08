@@ -2959,5 +2959,23 @@
   "proficiencyTesting": {
     "legacySigmaMissing": "Ce score historique d’aptitude a été enregistré sans sigma d’évaluation. Il n’a pas été recalculé ; fournissez un sigma valide dans une correction explicite.",
     "legacySigmaNonpositive": "Ce score historique d’aptitude utilisait un sigma d’évaluation non positif ou non fini. Il n’a pas été recalculé ; fournissez un sigma valide dans une correction explicite."
+  },
+  "attemptEvidence": {
+    "title": "Tentatives",
+    "number": "Tentative nº {number}",
+    "importedNoAttempt": "Importé, sans tentative",
+    "legacy": "historique",
+    "notRecorded": "Non enregistré",
+    "status": {
+      "open": "Ouvert",
+      "recorded": "Enregistré",
+      "submitted": "Soumis",
+      "accepted": "Accepté",
+      "questioned": "À vérifier",
+      "invalidated": "Invalidé",
+      "superseded": "Remplacé",
+      "returnedLegacy": "Retourné (historique)",
+      "rejectedLegacy": "Rejeté (historique)"
+    }
   }
 }

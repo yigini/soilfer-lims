@@ -23,6 +23,16 @@ const EvidenceInspectionModal = ({ item, sample, isOpen, onClose, onViewSpectra 
     const hasResults = item.results && item.results.length > 0;
     const hasScans = item.spectralScans && item.spectralScans.length > 0;
     const isHistoricalGap = item.isHistoricalGap;
+    // #190 pin6058381799: display stored statuses without changing or mapping
+    // historical values into the canonical execution contract.
+    const statusKeys = {
+        OPEN: 'open', RECORDED: 'recorded', SUBMITTED: 'submitted', ACCEPTED: 'accepted',
+        QUESTIONED: 'questioned', INVALIDATED: 'invalidated', SUPERSEDED: 'superseded',
+        RETURNED: 'returnedLegacy', REJECTED: 'rejectedLegacy'
+    };
+    const statusLabel = status => Object.hasOwn(statusKeys, status)
+        ? t(`attemptEvidence.status.${statusKeys[status]}`)
+        : `${String(status)} (${t('attemptEvidence.legacy')})`;
 
     return (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-4">
@@ -141,11 +151,26 @@ const EvidenceInspectionModal = ({ item, sample, isOpen, onClose, onViewSpectra 
                                         {item.results.map((r, i) => (
                                             <div key={r.id || i} className="flex justify-between text-sf-muted font-mono">
                                                 <span>{getAnalysisDisplayName(r.param)}: {r.value} {r.unit || ''}</span>
-                                                <span>Attempt #{r.attemptNo || 1} • {new Date(r.createdAt).toLocaleDateString()}</span>
+                                                <span>{r.attempt
+                                                    ? t('attemptEvidence.number', { number: r.attempt.attemptNo })
+                                                    : t('attemptEvidence.importedNoAttempt')} • {new Date(r.createdAt).toLocaleDateString()}</span>
                                             </div>
                                         ))}
                                     </div>
                                 )}
+                            </div>
+                        )}
+                        {item.attempts?.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-sf-divider text-xs space-y-2">
+                                <h5 className="font-bold text-sf-text">{t('attemptEvidence.title')}</h5>
+                                {item.attempts.map(attempt => (
+                                    <div key={attempt.id} className="flex flex-wrap items-center gap-2 text-sf-muted">
+                                        <span>{t('attemptEvidence.number', { number: attempt.attemptNo })}</span>
+                                        <span className="rounded bg-sf-canvas px-2 py-0.5 border border-sf-divider">{statusLabel(attempt.status)}</span>
+                                        <span>{new Date(attempt.createdAt).toLocaleDateString()}</span>
+                                        <span>{attempt.authorName || t('attemptEvidence.notRecorded')}</span>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>

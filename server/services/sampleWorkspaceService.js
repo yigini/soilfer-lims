@@ -55,7 +55,11 @@ class SampleWorkspaceService {
                     },
                     spectralScans: true,
                     draft: true,
-                    workAttempts: true
+                    workAttempts: {
+                        select: { id: true, attemptNo: true, status: true, author: true, authorName: true,
+                            materialAliquot: true, executedMethodRevision: true, createdAt: true },
+                        orderBy: { attemptNo: 'asc' }
+                    }
                 }
             },
             results: {
@@ -119,6 +123,12 @@ class SampleWorkspaceService {
                 throw err;
             }
         }
+
+        // #190 pin6058381799: Result.attemptId is a guarded scalar, so resolve
+        // it by its exact id from this already-authorized sample's attempts.
+        // No parameter matching, fabricated identity or evidence fields.
+        const resultAttempts = new Map(sample.workItems.flatMap(item => (item.workAttempts || []).map(attempt =>
+            [attempt.id, { id: attempt.id, attemptNo: attempt.attemptNo, status: attempt.status }])));
 
         // 3. Fetch submissions for this sample
         const submissions = user?.role === 'EXTERNAL_VIEWER' ? [] : await prisma.submission.findMany({
@@ -194,7 +204,8 @@ class SampleWorkspaceService {
             };
 
             // Check linked results
-            const itemResults = sample.results.filter(r => r.param === item.analysis || r.param.startsWith(item.analysis + '_'));
+            const itemResults = sample.results.filter(r => r.param === item.analysis || r.param.startsWith(item.analysis + '_'))
+                .map(result => ({ ...result, attempt: resultAttempts.get(result.attemptId) || null }));
             const linkedScans = item.spectralScans.filter(s => s.isCurrent && !s.isDeleted);
             
             // Batch QC status
