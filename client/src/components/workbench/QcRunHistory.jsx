@@ -12,8 +12,9 @@ export default function QcRunHistory({ batch, onOpenWorksheet = null, onChanged,
     const { t } = useLanguage(), { hasPermission } = useAuth();
     const canEdit = hasPermission?.('CHANGE_STATUS') === true;
     const native = isNativeRun(batch);
+    const profileOnly = batch?.analytes?.some(row => row.provenance === 'PROFILE_ONLY');
     const rebuild = async () => {
-        if (!canEdit || native || batch.status === 'CLOSED' || loading) return;
+        if (!canEdit || native || profileOnly || batch.status === 'CLOSED' || loading) return;
         setLoading(true); setError(null);
         try {
             await axios.post(`/api/qc/batches/${encodeURIComponent(batch.id)}/rebuild`, {
@@ -29,7 +30,8 @@ export default function QcRunHistory({ batch, onOpenWorksheet = null, onChanged,
         <StoredQcEvidence batch={batch} t={t} />
         {native && batch.status !== 'CLOSED' && onOpenWorksheet && <button type="button" data-testid="open-qc-worksheet"
             disabled={loading} onClick={() => onOpenWorksheet(batch.id)}>{t('qcWorksheet.openWorksheet')}</button>}
-        {!native && batch.status !== 'CLOSED' && canEdit && <button type="button" data-testid="rebuild-qc-run"
+        {profileOnly && <p data-testid="qc-profile-only-retained">{t('qcMembership.storedRun')}</p>}
+        {!native && !profileOnly && batch.status !== 'CLOSED' && canEdit && <button type="button" data-testid="rebuild-qc-run"
             disabled={loading} onClick={rebuild}>{t('qcWorksheet.rebuild')}</button>}
     </section>;
 }

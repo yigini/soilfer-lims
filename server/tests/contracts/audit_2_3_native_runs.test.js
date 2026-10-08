@@ -22,6 +22,7 @@ const { mutateQcRun } = require('../../services/qcRunMutationService');
 const { dispositionBatch } = require('../../services/qcDispositionStateService');
 const { createResultFixture } = require('../../services/resultWriteService');
 const { createProfileRun } = require('../../services/qcCompatibilityRunService');
+const { createStoredProfileRunFixture } = require('../helpers/storedProfileRunFixture');
 const { writeCompatibilityMeasurements } = require('../../services/qcCompatibilityRunService');
 const { resolveReportingModes } = require('../../services/reportResultGovernance');
 const { assembleReport } = require('../../services/reportAssembly');
@@ -604,9 +605,14 @@ test('explicit evaluation records each OFF analyte without fake readings or pass
     expect(await f.db.qcEvaluation.count()).toBe(2); expect(await f.db.qcMeasurement.count()).toBe(0);
 });
 
-test('part 13 profile conversion and direct non-calibration runs preserve free text and may start without a registered asset', async () => {
+test('stored profile conversion refuses; separate direct non-calibration runs preserve free text and may start without a registered asset', async () => {
     const f = await fixture(), profile = await createProfileRun(f.db, f.actor, { analysis: f.analysisCode, instrument: 'Manual bench text', profile: 'RACK_40' });
-    const built = await rebuildNativeRun(f.db, profile.id, f.actor, { workItemIds: f.workItemIds });
+    const before = await evidence(f.db);
+    await expect(rebuildNativeRun(f.db, profile.id, f.actor, { workItemIds: f.workItemIds }))
+        .rejects.toMatchObject({ statusCode: 409, code: 'QC_RUN_PROFILE_ONLY_STORED' });
+    expect(await evidence(f.db)).toEqual(before);
+    const built = await buildNativeRun(f.db, f.actor, { workItemIds: f.workItemIds, instrument: 'Manual bench text' });
+    expect(built.id).not.toBe(profile.id);
     expect(built).toMatchObject({ instrumentId: null, instrument: 'Manual bench text' }); expect(built.analytes[0].provenance).toBe('NATIVE');
     const started = await startNativeRun(f.db, built.id, f.actor);
     expect(started).toMatchObject({ instrumentId: null, instrument: 'Manual bench text', status: 'RUNNING' });
@@ -619,8 +625,8 @@ test('part 13 calibration start requires a valid active scoped asset, refuses wi
     const f = await fixture();
     await policies.change(f.actor, f.labId, { reason: 'Calibration verification requires a registered fixture instrument',
         changes: [{ key: 'qc.calibrationVerification', value: true }] }, { db: f.db });
-    const profile = await createProfileRun(f.db, f.actor, { analysis: f.analysisCode, instrument: 'Recorded bench name' });
-    const built = await rebuildNativeRun(f.db, profile.id, f.actor, { workItemIds: f.workItemIds });
+    // New native run with membership; preserve every calibration assertion.
+    const built = await buildNativeRun(f.db, f.actor, { workItemIds: f.workItemIds, instrument: 'Recorded bench name' });
     const before = await evidence(f.db);
     await expect(startNativeRun(f.db, built.id, f.actor)).rejects.toMatchObject({ statusCode: 422, code: 'QC_INSTRUMENT_REQUIRED' });
     expect(await evidence(f.db)).toEqual(before);
@@ -727,17 +733,26 @@ test('actual manager disposition accepts a failed Native analyte with deviation,
     expect([raw.qcResults, raw.disposition, raw.history, raw.workItemIds]).toEqual([null, null, null, null]);
 });
 
-test('actual profile membership converts recorded methods to Native without an asset and remains frozen after manager reopen', async () => {
+test('actual stored profile membership refuses conversion; a separate new Native run works and remains frozen after manager reopen', async () => {
     const f = await fixture(2), lot = await referenceLot(f);
     await f.db.user.update({ where: { username: f.actor.username }, data: { labId: f.labId } });
     await withQcRunHttp(f.db, f.actor, async (app, token) => {
         const auth = { Authorization: `Bearer ${token}` };
-        const profile = await request(app).post('/api/qc/batches').set(auth).send({ analysis: f.analysisCode, instrument: 'Manual bench text', profile: 'RACK_40' });
-        expect(profile.status).toBe(201); const id = profile.body.id;
-        const added = await request(app).post(`/api/qc/batches/${id}/items`).set(auth).send({ workItemIds: f.workItemIds,
-            analyses: [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] });
-        expect(added.status).toBe(200); expect(added.body.batch).toMatchObject({ instrumentId: null, instrument: 'Manual bench text' });
-        expect(added.body.batch.analytes[0].provenance).toBe('NATIVE'); expect(added.body.batch.positions.filter(row => row.kind === 'SAMPLE')).toHaveLength(2);
+        // Preexisting stored PROFILE_ONLY data, pin6062398663; never a fake 201.
+        const profile = await createStoredProfileRunFixture(f.db, { actor: f.actor,
+            input: { analysis: f.analysisCode, instrument: 'Manual bench text', profile: 'RACK_40' } });
+        const input = { workItemIds: f.workItemIds, instrument: 'Manual bench text',
+            analyses: [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] };
+        const before = await evidence(f.db);
+        for (const command of ['items', 'rebuild']) {
+            const refused = await request(app).post(`/api/qc/batches/${profile.id}/${command}`).set(auth).send(input);
+            expect(refused.status).toBe(409); expect(refused.body.code).toBe('QC_RUN_PROFILE_ONLY_STORED');
+            expect(await evidence(f.db)).toEqual(before);
+        }
+        const created = await request(app).post('/api/qc/batches').set(auth).send(input);
+        expect(created.status).toBe(201); const id = created.body.id;
+        expect(id).not.toBe(profile.id); expect(created.body).toMatchObject({ instrumentId: null, instrument: 'Manual bench text' });
+        expect(created.body.analytes[0].provenance).toBe('NATIVE'); expect(created.body.positions.filter(row => row.kind === 'SAMPLE')).toHaveLength(2);
         const removed = await request(app).delete(`/api/qc/batches/${id}/items`).set(auth).send({ workItemIds: [f.workItemIds[1]] });
         expect(removed.status).toBe(200); expect(removed.body.remaining).toBe(1);
         expect(await f.db.workItem.findUnique({ where: { id: f.workItemIds[1] } })).toMatchObject({ batchId: null, rackPosition: null });

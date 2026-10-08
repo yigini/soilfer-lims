@@ -1,3 +1,4 @@
+const { createStoredProfileRunFixture } = require('../helpers/storedProfileRunFixture');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const request = require('supertest');
@@ -77,14 +78,10 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
     });
 
     test('2. Creates a QC batch and groups work items', async () => {
-        const createRes = await request(app)
-            .post('/api/qc/batches')
-            .set('Authorization', `Bearer ${techToken}`)
-            .send({ analysis: 'PH_H2O', instrument: 'Mettler Toledo pH' });
-
-        expect(createRes.status).toBe(201);
-        batchId = createRes.body.id;
-        expect(createRes.body.status).toBe('OPEN');
+        // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', instrument: 'Mettler Toledo pH' } });
+        batchId = storedBatch.id;
+        expect(storedBatch.status).toBe('OPEN');
 
         // Add work item to batch
         const addRes = await request(app)
@@ -174,13 +171,10 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
         expect(lockedRes.status).toBe(409);
         expect(lockedRes.body.code).toBe('QC_BATCH_LOCKED');
 
-        const createRes = await request(app)
-            .post('/api/qc/batches')
-            .set('Authorization', `Bearer ${techToken}`)
-            .send({ analysis: 'PH_H2O', instrument: 'Mettler Toledo pH' });
-        expect(createRes.status).toBe(201);
+        // Preexisting stored PROFILE_ONLY data, pin6062398663; QC assertions unchanged.
+        const storedBatch = await createStoredProfileRunFixture(prisma, { actor: require('jsonwebtoken').decode(techToken), input: { analysis: 'PH_H2O', instrument: 'Mettler Toledo pH' } });
         const evalRes = await request(app)
-            .post(`/api/qc/batches/${createRes.body.id}/evaluate`)
+            .post(`/api/qc/batches/${storedBatch.id}/evaluate`)
             .set('Authorization', `Bearer ${techToken}`)
             .send({
                 blanks: [{ id: 'B2', value: 0.01, maxAllowed: 0.05 }],

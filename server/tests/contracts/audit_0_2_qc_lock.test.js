@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
+const { createStoredProfileRunFixture } = require('../helpers/storedProfileRunFixture');
 const prisma = require('../../prisma');
 const { getAuthToken } = require('../setup');
 const { canPublish } = require('../../services/workEligibility');
@@ -33,17 +34,18 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
     const call = (method, path, body, role = 'LAB_TECHNICIAN') => request(app)[method](path)
         .set('Authorization', `Bearer ${tokens[role]}`).send(body);
     async function batch(status = 'OPEN', disposition = null) {
-        const res = await call('post', '/api/qc/batches', { id: id('AUDIT-02'), analysis: 'PH_H2O', profile: 'RACK_40' });
-        expect(res.status).toBe(201);
+        // Preexisting stored PROFILE_ONLY data, pin6062398663; lock assertions unchanged.
+        const stored = await createStoredProfileRunFixture(prisma, { actor: jwt.decode(tokens.LAB_TECHNICIAN),
+            input: { id: id('AUDIT-02'), analysis: 'PH_H2O', profile: 'RACK_40' } });
         if (status !== 'OPEN') {
-            await prisma.batch.update({ where: { id: res.body.id }, data: { status } });
-            await prisma.batchAnalyte.updateMany({ where: { batchId: res.body.id }, data: { status: legacyBatchAnalyteStatus(status) } });
+            await prisma.batch.update({ where: { id: stored.id }, data: { status } });
+            await prisma.batchAnalyte.updateMany({ where: { batchId: stored.id }, data: { status: legacyBatchAnalyteStatus(status) } });
         }
-        if (disposition) await prisma.batchDisposition.create({ data: { id: id('DISP'), batchId: res.body.id, analysisCode: 'PH_H2O',
+        if (disposition) await prisma.batchDisposition.create({ data: { id: id('DISP'), batchId: stored.id, analysisCode: 'PH_H2O',
             decision: { PROCEED_WITH_WARNING: 'ACCEPT_WITH_DEVIATION', REANALYZE_BATCH: 'REPEAT_BATCH' }[disposition.decision],
             reason: disposition.reason || null, decidedBy: jwt.decode(tokens.LAB_MANAGER).username, decidedAt: new Date(),
             legacySource: JSON.stringify({ originalDisposition: disposition }) } });
-        return res.body.id;
+        return stored.id;
     }
     async function evidence(batchId) {
         const raw = await prisma.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });

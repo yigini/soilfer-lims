@@ -2977,5 +2977,26 @@
       "returnedLegacy": "Returned (legacy)",
       "rejectedLegacy": "Rejected (legacy)"
     }
+  },
+  "qcMembership": {
+    "membership": "Run membership",
+    "selectedWork": "Selected work items",
+    "selectWork": "Select work items in the worksheet before creating a run.",
+    "reloadWork": "Reload the worksheet to retrieve the selected work-item methods.",
+    "methodConflict": "Selected work has conflicting recorded methods. Create separate runs.",
+    "recordedMethod": "Recorded method",
+    "method": "Run method",
+    "chooseMethod": "Choose a controlled method",
+    "loadingMethods": "Loading methods…",
+    "methodsUnavailable": "The method catalogue is unavailable. Reload before creating a run.",
+    "noMethods": "No method is available for this analysis and laboratory. Ask your lab manager to configure one.",
+    "instrumentPlaceholder": "Optional instrument or bench name",
+    "created": "Run created with sample membership.",
+    "createFailed": "Could not create the run.",
+    "storedRun": "This stored profile-only run retains its original evidence. Create a new run for native measurements.",
+    "errors": {
+      "QC_WORK_ITEMS_REQUIRED": "Select work items in the worksheet before creating a run.",
+      "QC_RUN_PROFILE_ONLY_STORED": "This stored profile-only run retains its original evidence. Create a new run for native measurements."
+    }
   }
 }
