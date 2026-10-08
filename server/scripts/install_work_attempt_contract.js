@@ -73,6 +73,12 @@ function classify(db, source) {
     // rehearsals retain their own guards and never adopt prerequisite receipts.
     const prerequisite = classifyDuplicateMarkerPrerequisite(db);
     const duplicateMarkerPrerequisite = { classification: prerequisite.classification, sources: prerequisite.sources };
+    // Pin6063339165: the planner needs this column, not a COMPLETE prerequisite
+    // classification. Column-present historical PARTIAL rehearsals stay valid.
+    if (!db.prepare('PRAGMA table_xinfo("WorkItem")').all().some(row => row.name === 'duplicateOf')) {
+        return { classification, sources, duplicateMarkerPrerequisite,
+            code:'WORK_ATTEMPT_PREREQUISITE_INCOMPLETE', plan:null, bootstrapRebuild:[] };
+    }
     const plan = planHistoricalAttempts(db);
     if (classification === 'COMPLETE' && (plan.status !== 'READY' || plan.links.length)) {
         throw fail('WORK_ATTEMPT_INTEGRITY_REFUSED', 'Completed WorkAttempt installation has unlinked or conflicting Results.', { plan });
@@ -134,7 +140,10 @@ function installWorkAttemptContract({ dbPath, apply = false } = {}) {
     const reader = new Database(target, { readonly:true,fileMustExist:true });
     let before;
     try { before = reader.transaction(() => classify(reader,{guardsSql:source.guardsSql,sha256:source.sha256}))(); } finally { reader.close(); }
-    if (!apply || before.classification === 'COMPLETE') return { ...before, mode:apply?'NO_OP':'DRY_RUN',totalChanges:0 };
+    if (!apply) return { ...before, mode:'DRY_RUN',totalChanges:0 };
+    if (before.code) throw fail(before.code, 'Install the reviewed WorkItem duplicate-marker prerequisite before planning attempts.',
+        { classification:before.classification, duplicateMarkerPrerequisite:before.duplicateMarkerPrerequisite, totalChanges:0 });
+    if (before.classification === 'COMPLETE') return { ...before, mode:'NO_OP',totalChanges:0 };
     if (before.plan.status !== 'READY') throw fail('WORK_ATTEMPT_BACKFILL_REFUSED', 'Resolve every backfill blocker before apply.', { plan:before.plan });
     const db = new Database(target, { fileMustExist:true,timeout:5000 });
     try {
@@ -145,6 +154,8 @@ function installWorkAttemptContract({ dbPath, apply = false } = {}) {
         db.pragma('foreign_keys=ON');
         return db.transaction(() => {
             const current = classify(db,{guardsSql:source.guardsSql,sha256:source.sha256});
+            if (current.code) throw fail(current.code, 'Install the reviewed WorkItem duplicate-marker prerequisite before planning attempts.',
+                { classification:current.classification, duplicateMarkerPrerequisite:current.duplicateMarkerPrerequisite, totalChanges:0 });
             if (current.classification === 'COMPLETE') return { ...current,mode:'NO_OP',totalChanges:0 };
             if (current.plan.status !== 'READY') throw fail('WORK_ATTEMPT_BACKFILL_REFUSED', 'Resolve every backfill blocker before apply.', { plan:current.plan });
             if (current.classification === 'PRE_190') db.exec(source.schemaSql);
@@ -169,6 +180,8 @@ function installWorkAttemptContract({ dbPath, apply = false } = {}) {
 }
 function assertWorkAttemptStartupReady(dbPath) {
     const plan = installWorkAttemptContract({dbPath});
+    if (plan.code) throw fail(plan.code, 'Install the reviewed WorkItem duplicate-marker prerequisite before startup.',
+        { classification:plan.classification, duplicateMarkerPrerequisite:plan.duplicateMarkerPrerequisite, totalChanges:0 });
     if (plan.classification !== 'COMPLETE') throw fail('WORK_ATTEMPT_NOT_INSTALLED', 'Install reviewed WorkAttempt evidence before startup.');
     return plan;
 }
@@ -187,6 +200,8 @@ function parseArguments(args) {
 if (require.main === module) {
     try { process.stdout.write(JSON.stringify(installWorkAttemptContract(parseArguments(process.argv.slice(2))),null,2)+'\n'); }
     catch (error) { process.stderr.write(JSON.stringify({error:error.code || 'WORK_ATTEMPT_INSTALL_REFUSED',message:error.message,
-        differences:error.differences || [], ...(error.plan && {plan:error.plan})})+'\n');process.exitCode=1; }
+        differences:error.differences || [], ...(error.plan && {plan:error.plan}),
+        ...(error.duplicateMarkerPrerequisite && {classification:error.classification,
+            duplicateMarkerPrerequisite:error.duplicateMarkerPrerequisite,totalChanges:error.totalChanges})})+'\n');process.exitCode=1; }
 }
 module.exports = { installWorkAttemptContract,assertWorkAttemptStartupReady,parseArguments,MARKER };

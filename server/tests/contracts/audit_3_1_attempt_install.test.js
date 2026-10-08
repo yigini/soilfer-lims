@@ -218,6 +218,40 @@ function emptyMarkerFixture() {
     createPre190AttemptFixture({actor:'system:fixture',file,rows:{}});
     return file;
 }
+
+// Pin6063339165: an owned pre-190 schema minus only the duplicate column/FK.
+// The four-caller historical factory and its pinned source/DDL stay unchanged.
+function absentAttemptMarkerFixture({foreignIndex=false}={}) {
+    const file=ownedFile(),bytes=fs.readFileSync(path.resolve(__dirname,'../helpers/fixtures/pre190_full_application_schema.sql'));
+    expect(createHash('sha256').update(bytes).digest('hex')).toBe('e2496a65a9c607e80a82924ff7ed6a4033d1da05fedb907c83dd0918f022923b');
+    const lines=bytes.toString('utf8').split('\n');
+    const removed=lines.filter(line=>/^    "duplicateOf" TEXT,\r?$/.test(line) ||
+        /^    CONSTRAINT "WorkItem_duplicateOf_fkey" /.test(line));
+    expect(removed).toHaveLength(2);
+    fs.closeSync(fs.openSync(file,'wx'));
+    const db=new Database(file,{fileMustExist:true});
+    try {
+        db.pragma('foreign_keys=ON');db.exec(lines.filter(line=>!removed.includes(line)).join('\n'));
+        db.exec('CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL, "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "details" TEXT)');
+        db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run('prior-retained','{"original":"receipt"}');
+        if(foreignIndex)db.exec('CREATE UNIQUE INDEX "WorkItem_one_active_per_analysis" ON "WorkItem"("id")');
+        expect(db.pragma('foreign_key_check')).toEqual([]);
+    } finally { db.close(); }
+    return file;
+}
+
+test.each([['ABSENT',false],['FOREIGN',true]])('missing duplicateOf reports %s without planning; apply and startup refuse without changing bytes',(classification,foreignIndex)=>{
+    const file=absentAttemptMarkerFixture({foreignIndex}),before=retained(file),bytes=hash(file);
+    expect(installWorkAttemptContract({dbPath:file})).toMatchObject({classification:'PRE_190',mode:'DRY_RUN',totalChanges:0,
+        duplicateMarkerPrerequisite:{classification},code:'WORK_ATTEMPT_PREREQUISITE_INCOMPLETE',plan:null});
+    expect(retained(file)).toEqual(before);expect(hash(file)).toBe(bytes);
+    const refusal=expect.objectContaining({code:'WORK_ATTEMPT_PREREQUISITE_INCOMPLETE',totalChanges:0,
+        duplicateMarkerPrerequisite:expect.objectContaining({classification})});
+    expect(()=>installWorkAttemptContract({dbPath:file,apply:true})).toThrow(refusal);
+    expect(()=>assertWorkAttemptStartupReady(file)).toThrow(refusal);
+    expect(retained(file)).toEqual(before);expect(hash(file)).toBe(bytes);
+});
+
 function absentMarkerFixture({duplicates=false}={}) {
     const file=ownedFile(),now=Date.UTC(2026,9,1);
     beforeGuards({actor:'system:fixture',file,schemaVariant:'PRE_1_1_DUPLICATES',markerPending:true,
