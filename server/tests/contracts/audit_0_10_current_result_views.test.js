@@ -1,6 +1,8 @@
 const { createExecutionResultFixture,createExecutionResultsFixture } = require('../helpers/workAttemptFixtures');
 const { createWorkItemFixture, createSampleFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const { correctAndApproveReportedValue } = require('../helpers/reportedValueReviewFixture');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -21,15 +23,17 @@ describe('Audit 0.10: current results in exports and working grid', () => {
         jest.spyOn(crypto, 'randomUUID').mockReturnValue('77778888-9999-4777-8888-999977778888');
         expect(id('SMP-010')).not.toMatch(/7777|8888|9999/);
     });
-    async function fixture({ status = 'APPROVED', receptionDate, projectCode = id('PROJ-010').toUpperCase(), assignedLab = labId } = {}) {
+    async function fixture({ status = 'APPROVED', itemStatus = 'ACCEPTED', receptionDate, projectCode = id('PROJ-010').toUpperCase(), assignedLab = labId } = {}) {
         const sampleId = id('SMP-010');
         const sample = await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId,
-            assignedLab, status, projectCode, receptionDate: receptionDate ? new Date(receptionDate) : new Date(), requiredAnalyses: '["SOC"]' } });
-        const item = await createWorkItemFixture(prisma, { data: { id: id('WI-010'), sampleId, analysis: 'SOC', status: 'ACCEPTED', result: '9999' } });
+            assignedLab, status, projectCode, preparationStatus: 'DONE', dryingStatus: 'DONE',
+            receptionDate: receptionDate ? new Date(receptionDate) : new Date(), requiredAnalyses: '["SOC"]' } });
+        const item = await createWorkItemFixture(prisma, { data: { id: id('WI-010'), sampleId, analysis: 'SOC',
+            status: itemStatus, assignedLab, assignedTo: jwt.decode(token).username, result: '9999' } });
         return { sample, item, projectCode };
     }
     async function result(f, value, data = {}) {
-        return createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
+        return createExecutionResultFixture(prisma, { attemptStatus: f.item.status === 'ACCEPTED' ? 'ACCEPTED' : 'RECORDED',
             data: { id: id('R-010'), sampleId: f.sample.id, param: 'SOC', value: String(value), unit: 'g/kg',
             isCurrent: true, isValid: true, ...data } });
     }
@@ -88,8 +92,11 @@ describe('Audit 0.10: current results in exports and working grid', () => {
         expect(response.status).toBe(200); expect(response.body.data).toHaveLength(1); expect(response.body.data[0].SOC).toBe(18);
     });
     test('LATEST_VALID uses the policy-selected newest current row and reads lab/method context', async () => {
-        const f = await fixture(); await result(f, 10, { createdAt: new Date('2020-01-01'), methodologyId: 'same-method' });
-        await result(f, 20, { createdAt: new Date('2021-01-01'), methodologyId: 'same-method' });
+        const f = await fixture({ status: 'PROCESSING', itemStatus: 'IN_PROGRESS' });
+        await prisma.methodology.create({ data: { id: 'same-method', analysisCode: 'SOC', name: 'Owned selection method', labId } });
+        await prisma.workItem.update({ where: { id: f.item.id }, data: { methodologyId: 'same-method' } });
+        const old = await result(f, 10, { createdAt: new Date('2020-01-01'), methodologyId: 'same-method' });
+        await correctAndApproveReportedValue(prisma, { app, token, labId, item: f.item, original: old, value: 20 });
         const original = policy.get;
         const lookup = jest.spyOn(policy, 'get').mockImplementation((lab, key, context) => key === 'results.reportedValueRule' ? 'LATEST_VALID' : original(lab, key, context));
         const response = await exportData(f.projectCode);
