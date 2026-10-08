@@ -114,6 +114,8 @@ test('SQL and runtime canonical lookup agree: only orphan historical imports can
     expect(canonicalWorkItemWhere('sample','P')).toEqual({sampleId:'sample',analysis:'P',duplicateOf:null});
     db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('canonical','sample','P',null);
     expect(()=>result.run('nonexempt-import','sample','P',3,null,1,'IMPORTED')).toThrow('RESULT_ATTEMPT_REQUIRED');
+    insert('valid-attempt',{workItemId:'canonical'});
+    insert('replacement',{workItemId:'canonical',attemptNo:2});
     result.run('linked-import','sample','P',3,'valid-attempt',1,'IMPORTED');
     for(const attemptId of [null,'replacement']) {
         expect(()=>db.prepare("UPDATE Result SET attemptId=? WHERE id='linked-import'").run(attemptId)).toThrow('RESULT_ATTEMPT_IMMUTABLE');
@@ -123,3 +125,42 @@ test('SQL and runtime canonical lookup agree: only orphan historical imports can
         expect(()=>result.run('refused','other-sample','P',1,null,1,provenance)).toThrow('RESULT_ATTEMPT_REQUIRED');
     }
 });
+
+test('raw review inserts require a current attempt of the same work item and sample', () => {
+    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('item','sample','P',null);
+    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('other','sample','Q',null);
+    insert('current'); insert('historical',{attemptNo:2}); insert('wrong-item',{workItemId:'other'});
+    db.exec(source.guardsSql);
+    const result=db.prepare('INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent) VALUES (?,?,?,?,?,?)');
+    result.run('current-result','sample','P',1,'current',1);
+    result.run('old-result','sample','P',1,'historical',0);
+    result.run('other-result','sample','Q',1,'wrong-item',1);
+    const decision=db.prepare('INSERT INTO ReviewDecision(id,workItemId,sampleId,attemptId,decision) VALUES (?,?,?,?,?)');
+    for (const [attemptId,sampleId,code] of [[null,'sample','REVIEW_ATTEMPT_REQUIRED'],
+        ['historical','sample','REVIEW_ATTEMPT_INVALID'],['wrong-item','sample','REVIEW_ATTEMPT_INVALID'],
+        ['current','other-sample','REVIEW_ATTEMPT_INVALID'],['missing','sample','REVIEW_ATTEMPT_INVALID']]) {
+        expect(()=>decision.run('invalid','item',sampleId,attemptId,'ACCEPT')).toThrow(code);
+        expect(db.prepare('SELECT count(*) n FROM ReviewDecision').get().n).toBe(0);
+    }
+    decision.run('accepted','item','sample','current','ACCEPT');
+    expect(()=>db.prepare('UPDATE ReviewDecision SET attemptId=NULL').run()).toThrow('REVIEW_DECISION_IMMUTABLE');
+    expect(db.prepare('SELECT attemptId FROM ReviewDecision').get().attemptId).toBe('current');
+});
+
+test('the raw review guard permits only an unexecuted analytical OMIT with no attempt', () => {
+    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('item','sample','P',null);
+    db.exec(source.guardsSql);
+    const decision=db.prepare('INSERT INTO ReviewDecision(id,workItemId,sampleId,decision) VALUES (?,?,?,?)');
+    decision.run('unexecuted-waiver','item','sample','OMIT');
+    expect(()=>decision.run('unexecuted-accept','item','sample','ACCEPT')).toThrow('REVIEW_ATTEMPT_REQUIRED');
+    insert('executed-without-current-result');
+    expect(()=>decision.run('executed-waiver','item','sample','OMIT')).toThrow('REVIEW_ATTEMPT_REQUIRED');
+});
+
+test.each(require('../../services/workItemKinds').NON_MEASUREMENT_CODES)(
+    'SQL keeps non-measurement %s review on its separate evidence workflow', analysis => {
+        db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('item','sample',analysis,null);
+        db.exec(source.guardsSql);
+        db.prepare('INSERT INTO ReviewDecision(id,workItemId,sampleId,decision) VALUES (?,?,?,?)').run('review','item','sample','ACCEPT');
+        expect(db.prepare('SELECT attemptId FROM ReviewDecision').get().attemptId).toBeNull();
+    });

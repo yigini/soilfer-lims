@@ -48,7 +48,7 @@ async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS',
     const f = { file, db, actor, labId, analysisCode: items[0].analysis, method: methods[0], methods, instrument, items,
         workItemIds: items.map(item => item.id), input: { instrumentId: instrument.id, workItemIds: items.map(item => item.id), seed: 'gate-fixture' } };
     f.setPolicy = changes => require('../../services/policyService').change(actor, labId, { reason: 'Reviewed test policy', changes }, { db });
-    f.result = item => require('../../services/resultWriteService').createResultFixture(db, { data: { id: randomUUID(), sampleId: item.sampleId,
+    f.result = item => require('./workAttemptFixtures').createExecutionResultFixture(db, { data: { id: randomUUID(), sampleId: item.sampleId,
         param: item.analysis, methodologyId: item.methodologyId, batchId: item.batchId, value: '7.123456789', numericValue: 7.123456789,
         isCurrent: true, isValid: true, flags: '[]', unit: 'fixture-unit' } });
     f.snapshot = async () => JSON.parse(JSON.stringify(await Promise.all([

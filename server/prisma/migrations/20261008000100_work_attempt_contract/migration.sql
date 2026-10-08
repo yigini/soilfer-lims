@@ -46,6 +46,9 @@ END;
 
 CREATE TRIGGER "Result_attempt_link_immutable" BEFORE UPDATE OF "attemptId" ON "Result"
 WHEN OLD."attemptId" IS NOT NULL AND NEW."attemptId" IS NOT OLD."attemptId"
+ AND (NEW."attemptId" IS NULL OR EXISTS (
+    SELECT 1 FROM "WorkAttempt" a JOIN "WorkItem" w ON w."id" = a."workItemId"
+    WHERE a."id" = NEW."attemptId" AND w."sampleId" = NEW."sampleId"))
 BEGIN
     SELECT RAISE(ABORT, 'RESULT_ATTEMPT_IMMUTABLE');
 END;
@@ -120,6 +123,7 @@ BEGIN
 END;
 
 CREATE TRIGGER "WorkAttempt_delete" BEFORE DELETE ON "WorkAttempt"
+WHEN NOT EXISTS (SELECT 1 FROM "Result" r WHERE r."attemptId" = OLD."id")
 BEGIN
     SELECT RAISE(ABORT, 'WORK_ATTEMPT_DELETE_REFUSED');
 END;

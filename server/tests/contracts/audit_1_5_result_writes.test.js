@@ -78,18 +78,24 @@ test('workbench, offline sync, results API and import have a common shape and se
             isCurrent: true, enteredBy: actor.username, batchId, provenance: source === 'import' ? 'IMPORTED' : 'MEASURED' });
         expect((await prisma.workItem.findUnique({ where: { id: f.item.id } })).result).toBe('6.42');
         const attempts = await prisma.workAttempt.findMany({ where: { workItemId: f.item.id } });
-        if (source === 'sync') { expect(attempts).toHaveLength(1); expect(rows[0].attemptId).toBe(attempts[0].id); }
-        else { expect(attempts).toHaveLength(0); expect(rows[0].attemptId).toBeNull(); }
+        // #190 pin6056586906 intentionally gives every canonical execution a link.
+        expect(attempts).toHaveLength(1);
+        expect(rows[0].attemptId).toBe(attempts[0].id);
+        expect(attempts[0].workItemId).toBe(f.item.id);
         expect(await prisma.auditLog.count({ where: { entityId: rows[0].id, action: 'RESULT_RECORDED' } })).toBe(1);
         outputs.push(Object.keys(rows[0]).sort());
     }
     expect(outputs.every(keys => JSON.stringify(keys) === JSON.stringify(outputs[0]))).toBe(true);
 });
 
-test('unbatched measurement and historical import succeed with null batch and attempt', async () => {
+test('unbatched measurement gets an attempt; the orphan historical import remains unlinked', async () => {
     const f = await fixture({ batch: null });
     expect((await apiSave(f.sample.id, [measurement()])).status).toBe(200);
-    expect(await prisma.result.findFirst({ where: { sampleId: f.sample.id } })).toMatchObject({ batchId: null, attemptId: null });
+    const measured = await prisma.result.findFirst({ where: { sampleId: f.sample.id } });
+    expect(measured).toMatchObject({ batchId: null, attemptId: expect.any(String) });
+    const attempts = await prisma.workAttempt.findMany({ where: { workItemId: f.item.id } });
+    expect(attempts).toHaveLength(1);
+    expect(measured.attemptId).toBe(attempts[0].id);
     const imported = randomUUID();
     const response = await request(app).post('/api/import/execute').set('Authorization', `Bearer ${token}`).send({ sampleIdColumn: 'sample', labId,
         columnMappings: [{ column: 'value', analysisCode: code, methodologyId: methodId, unitCode: 'g/kg' }], rows: [{ sample: imported, value: '<0,5' }] });
@@ -247,9 +253,9 @@ test('offline texture supersedes legacy non-numeric PSA classes, preserves numer
     await prisma.analysis.upsert({ where: { code: 'PSA' }, update: {},
         create: { code: 'PSA', name: 'Legacy particle size analysis', units: '%', validation: '{"type":"texture","tolerance":2}' } });
     const f = await fixture({ analysis: 'PSA' });
-    const oldClass = await writer.createResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
+    const oldClass = await require('../helpers/workAttemptFixtures').createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
         param: 'PSA', value: 'Sandy clay', numericValue: null, rawInput: 'historical class', flags: '["HISTORICAL"]' } });
-    const numeric = await writer.createResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
+    const numeric = await require('../helpers/workAttemptFixtures').createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
         param: 'PSA', value: '50', numericValue: 50 } });
     const operation = { operationId: randomUUID(), type: 'COMPLETE_WORK', target: { workItemId: f.item.id }, baseVersion: 0,
         payload: { values: { sand: '50', silt: '35', clay: '15' }, flags: ['OFFLINE_CAPTURE'] } };

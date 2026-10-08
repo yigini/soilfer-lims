@@ -4,6 +4,7 @@ const Database=require('better-sqlite3');
 const {PrismaClient}=require('../../prisma_client');
 const {PrismaBetterSqlite3}=require('@prisma/adapter-better-sqlite3');
 const {beforeGuards}=require('../helpers/legacyWorkflowDatabase');
+const {createSampleFixture,createWorkItemFixture}=require('../helpers/workflowFixtures');
 const {installWorkAttemptContract}=require('../../scripts/install_work_attempt_contract');
 const writer=require('../../services/resultWriteService');
 const {validateResultEntries}=require('../../services/resultEntryPolicy');
@@ -25,10 +26,10 @@ afterAll(async()=>{
 });
 async function fixture(analyses=['AT190'],{work=true}={}) {
     const sampleId=randomUUID();
-    const sample=await client.sample.create({data:{id:sampleId,originalId:sampleId,labId:sampleId,assignedLab:labId,status:'PROCESSING',
+    const sample=await createSampleFixture(client,{data:{id:sampleId,originalId:sampleId,labId:sampleId,assignedLab:labId,status:'PROCESSING',
         dryingStatus:'DONE',preparationStatus:'DONE',requiredAnalyses:JSON.stringify(analyses)}});
     const items=[];
-    if(work)for(const analysis of analyses)items.push(await client.workItem.create({data:{id:randomUUID(),sampleId,analysis,assignedLab:labId,status:'IN_PROGRESS',history:'[]'}}));
+    if(work)for(const analysis of analyses)items.push(await createWorkItemFixture(client,{data:{id:randomUUID(),sampleId,analysis,assignedLab:labId,status:'IN_PROGRESS',history:'[]'}}));
     return {sample,items};
 }
 const options=(f,param='AT190',value='6.42')=>({sampleId:f.sample.id,actor,measurement:{param,value,replicateNo:1}});

@@ -3,7 +3,7 @@ const { createHash } = require('node:crypto');
 const { LEGACY_IMPORT_EXEMPT_SQL, REPEAT_REASON_LIST } = require('./workAttemptContract');
 const {NON_MEASUREMENT_CODES}=require('./workItemKinds');
 const DIRECTORY = '20261008000100_work_attempt_contract';
-const SHA256 = '5187d4dab9e555cdcfd9d6608e7d66135675a22f51f95544a7efed9be07fe20e';
+const SHA256 = '7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2';
 function loadWorkAttemptMigrationSource() {
     const root = path.resolve(__dirname, '..', fs.existsSync('/.dockerenv') ? '.migrations-backup/190' : 'prisma/migrations', DIRECTORY);
     let bytes;

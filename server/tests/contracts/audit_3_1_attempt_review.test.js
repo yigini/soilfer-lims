@@ -4,6 +4,8 @@ const Database=require('better-sqlite3');
 const {PrismaClient}=require('../../prisma_client');
 const {PrismaBetterSqlite3}=require('@prisma/adapter-better-sqlite3');
 const {beforeGuards}=require('../helpers/legacyWorkflowDatabase');
+const {createSampleFixture,createWorkItemFixture}=require('../helpers/workflowFixtures');
+const {createResultFixture}=require('../../services/resultWriteService');
 const {installWorkAttemptContract}=require('../../scripts/install_work_attempt_contract');
 const {resolveReviewAttempt,createReviewDecision,inReviewTransaction}=require('../../services/reviewAttemptService');
 const directory=path.resolve(__dirname,'../.tmp');
@@ -25,13 +27,13 @@ afterAll(async()=>{
 
 async function fixture({attempts=1,analysis='PH_H2O',current=true,labId=manager.labId}={}) {
     const sampleId=randomUUID(),workItemId=randomUUID();
-    await client.sample.create({data:{id:sampleId,originalId:sampleId,labId:sampleId,assignedLab:labId,status:'PROCESSING'}});
-    const item=await client.workItem.create({data:{id:workItemId,sampleId,analysis,assignedLab:labId,status:'SUBMITTED',history:'[]'}});
+    await createSampleFixture(client,{data:{id:sampleId,originalId:sampleId,labId:sampleId,assignedLab:labId,status:'PROCESSING'}});
+    const item=await createWorkItemFixture(client,{data:{id:workItemId,sampleId,analysis,assignedLab:labId,status:'SUBMITTED',history:'[]'}});
     const ids=[];
     for(let number=1;number<=attempts;number++) {
         const id=randomUUID();ids.push(id);
         await client.workAttempt.create({data:{id,workItemId,attemptNo:number,status:'RECORDED'}});
-        await client.result.create({data:{id:randomUUID(),sampleId,param:analysis,attemptId:id,replicateNo:1,
+        await createResultFixture(client,{data:{id:randomUUID(),sampleId,param:analysis,attemptId:id,replicateNo:1,
             value:String(6+number/10),numericValue:6+number/10,isCurrent:current}});
     }
     return {item,ids};
@@ -74,7 +76,7 @@ test('only an unexecuted analytical WAIVE may keep its attempt null',async()=>{
 });
 test('several current Results on one attempt are one review candidate',async()=>{
     const {item,ids}=await fixture();
-    await client.result.create({data:{id:randomUUID(),sampleId:item.sampleId,param:item.analysis,replicateNo:2,attemptId:ids[0],value:'6.4',isCurrent:true}});
+    await createResultFixture(client,{data:{id:randomUUID(),sampleId:item.sampleId,param:item.analysis,replicateNo:2,attemptId:ids[0],value:'6.4',isCurrent:true}});
     await expect(client.$transaction(tx=>resolveReviewAttempt(tx,item,'ACCEPT'))).resolves.toBe(ids[0]);
 });
 test('bulk ambiguity lists all affected ids before writes, and any later failure rolls back every decision',async()=>{
