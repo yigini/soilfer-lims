@@ -488,9 +488,12 @@ const firstFill = { status: 'RECORDED', evidenceData: '{"equipmentReadiness":{"e
     qcBatchId: 'batch', materialAliquot: 'aliquot-ref' };
 firstFill.evidenceHash = createHash('sha256').update(firstFill.evidenceData).digest('hex');
 function fill(db, changes = {}) {
-    const values = { ...firstFill, ...changes }, names = Object.keys(values);
-    return db.prepare(`UPDATE WorkAttempt SET ${names.map(name => `"${name}"=?`).join(',')} WHERE id=?`)
-        .run(...Object.values(values), 'open-attempt');
+    const values = { ...db.prepare('SELECT * FROM WorkAttempt WHERE id=?').get('open-attempt'), ...firstFill, ...changes };
+    return db.prepare(`UPDATE WorkAttempt SET status=?,evidenceData=?,evidenceHash=?,instrumentId=?,executedMethodRevision=?,author=?,authorName=?,qcBatchId=?,materialAliquot=?,
+        id=?,workItemId=?,orderLineId=?,attemptNo=?,batchId=?,reason=?,requestedBy=?,requestedAt=?,parentAttemptId=?,note=?,rawData=?,calcVersion=?,dilutionFactor=?,aliquotId=?,legacyAttemptNoConflict=?,version=?,createdAt=?,updatedAt=? WHERE id=?`)
+        .run(...['status','evidenceData','evidenceHash','instrumentId','executedMethodRevision','author','authorName','qcBatchId','materialAliquot',
+            'id','workItemId','orderLineId','attemptNo','batchId','reason','requestedBy','requestedAt','parentAttemptId','note','rawData','calcVersion','dilutionFactor','aliquotId','legacyAttemptNoConflict','version','createdAt','updatedAt']
+            .map(name => values[name]), 'open-attempt');
 }
 test('#191 actual SQLite guards permit exactly one NULL-only first fill and freeze it immediately', () => {
     const file = repeatFixture(); installWorkRepeatContract({ dbPath: file, apply: true });
@@ -528,7 +531,7 @@ test('#191 an unreviewed added column is frozen by default under actual SQLite t
     const db = new Database(file);
     try {
         db.exec('ALTER TABLE WorkAttempt ADD COLUMN unreviewedEvidence TEXT');
-        expect(() => fill(db, { unreviewedEvidence: 'caller value' })).toThrow('WORK_ATTEMPT_COLUMN_CONTRACT_MISMATCH');
+        expect(() => db.prepare('UPDATE WorkAttempt SET unreviewedEvidence=? WHERE id=?').run('caller value', 'open-attempt')).toThrow('WORK_ATTEMPT_COLUMN_CONTRACT_MISMATCH');
         expect(() => fill(db)).toThrow('WORK_ATTEMPT_COLUMN_CONTRACT_MISMATCH');
     } finally { db.close(); }
     const bytes = hash(file);
