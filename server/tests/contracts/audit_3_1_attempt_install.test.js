@@ -129,6 +129,22 @@ test('a receipt-write failure rolls back metadata, attempts, links, guards and i
     expect(retained(file)).toEqual(before);expect(installWorkAttemptContract({dbPath:file}).classification).toBe('PRE_190');
 });
 
+test('existing exchange UDF triggers compile without emitting amendments for an attemptId-only backfill',()=>{
+    const file=fixture(),db=new Database(file);
+    db.exec(`CREATE TABLE _exchange_journal(id TEXT PRIMARY KEY,content_hash TEXT);
+        INSERT INTO _exchange_journal VALUES ('retained','original exchange evidence');
+        CREATE TRIGGER existing_exchange_trigger AFTER UPDATE ON Result
+        WHEN NEW.value IS NOT OLD.value
+        BEGIN INSERT INTO _exchange_journal VALUES ('unexpected',exchange_compute_hash('{}','[]')); END;`);
+    const trigger=db.prepare("SELECT sql FROM sqlite_master WHERE name='existing_exchange_trigger'").get().sql;
+    db.close();
+    expect(installWorkAttemptContract({dbPath:file,apply:true})).toMatchObject({classification:'COMPLETE',linkedResultCount:1});
+    const after=new Database(file,{readonly:true});
+    expect(after.prepare('SELECT * FROM _exchange_journal').all()).toEqual([{id:'retained',content_hash:'original exchange evidence'}]);
+    expect(after.prepare("SELECT sql FROM sqlite_master WHERE name='existing_exchange_trigger'").get().sql).toBe(trigger);
+    after.close();
+});
+
 test('fresh Prisma gets partial uniqueness before COMPLETE (actual db push on Linux, compiler-emitted DDL on Windows)',()=>{
     const file=ownedFile();
     // Use the existing closed fixture authority: Linux/CI runs actual db push;

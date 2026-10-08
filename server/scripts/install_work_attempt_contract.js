@@ -123,6 +123,10 @@ function installWorkAttemptContract({ dbPath, apply = false } = {}) {
     if (before.plan.status !== 'READY') throw fail('WORK_ATTEMPT_BACKFILL_REFUSED', 'Resolve every backfill blocker before apply.', { plan:before.plan });
     const db = new Database(target, { fileMustExist:true,timeout:5000 });
     try {
+        // Existing exchange triggers compile their UDFs even when an
+        // attemptId-only backfill does not qualify as an amendment. Register
+        // the application functions on this connection; never remove guards.
+        require('../services/exchangeDbFunctions').registerDbFunctions(db);
         db.pragma('foreign_keys=ON');
         return db.transaction(() => {
             const current = classify(db,source);
