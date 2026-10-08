@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import numberParse from '@lims/number-parse';
 import { useLanguage } from '../../context/LanguageContext';
+import { StoredQcEvidence } from '../qc/BatchInspectionModal';
 
 const LIMIT_FIELDS = ['maxAllowed', 'maxRpd', 'absMax', 'absMaxBelow5LOQ', 'nearLoqMultiplier', 'loq',
     'minRecovery', 'maxRecovery', 'crmAbsWindow', 'lrmWindowPct', 'mode', 'crmMode', 'lrmMode'];
@@ -219,5 +220,6 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
             <button type="button" data-testid="native-qc-save" disabled={!submitAllowed || changedLots.length > 0 || !entered.length} onClick={() => submit(false)}>{t('qcRuns.save')}</button>
             <button type="button" data-testid="native-qc-evaluate" disabled={!submitAllowed || !complete || Boolean(previewError) || changedLots.length > 0} onClick={() => submit(true)}>{t('qcRuns.evaluate')}</button>
         </div>
+        {analyte.reviewedCorrections?.length > 0 && <StoredQcEvidence batch={{ ...batch, analytes: [analyte], reviewedCorrections: analyte.reviewedCorrections }} t={t} />}
     </section>;
 }

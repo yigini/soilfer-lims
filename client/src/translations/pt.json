@@ -2980,5 +2980,23 @@
       "QC_WORK_ITEMS_REQUIRED": "Selecione trabalhos na folha antes de criar uma série.",
       "QC_RUN_PROFILE_ONLY_STORED": "Esta série armazenada conserva suas evidências originais. Crie uma nova série para medições nativas."
     }
+  },
+  "qcReviewedCorrection": {
+    "policyDescription": "Permitir correção revisada de erros de transcrição em CQ reprovado sem decisão",
+    "title": "Revisar uma correção de transcrição",
+    "help": "Um segundo revisor pode corrigir um erro de entrada registrado. Identifique a planilha ou o arquivo original. A leitura reprovada permanece no histórico e nos relatórios futuros.",
+    "analysis": "Análise",
+    "original": "Leitura original",
+    "correctedValue": "Leitura corrigida",
+    "reason": "Motivo",
+    "sourceReference": "Referência da fonte registrada",
+    "submit": "Aprovar a correção e reavaliar",
+    "saving": "Salvando a correção…",
+    "refused": "Correção recusada",
+    "disclosure": "Correção revisada de transcrição de CQ",
+    "originalFailure": "Avaliação reprovada original",
+    "replacement": "Avaliação substituta",
+    "reviewer": "Revisor",
+    "authors": "Autores das observações originais"
   }
 }

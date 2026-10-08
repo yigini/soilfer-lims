@@ -19,6 +19,9 @@ async function failedFixture(native, { author = 'analyst', enabled = true } = {}
         f[name] = { id: user.id, username: user.username, role: user.role, labId: f.labId };
     }
     if (enabled) await f.setPolicy([{ key: 'qc.reviewedTranscriptionCorrectionEnabled', value: true }]);
+    if (!native) await require('../../services/qcRuleService').change(f.actor, { labId: f.labId, analysisCode: f.analysisCode,
+        criteria: { blankPerBatch: 1, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0 }, expectedVersion: 0,
+        reason: 'Analysis-wide criteria for unresolved compatibility method' }, { db: f.db });
     const authorActor = author === 'system' ? f.actor : f[author];
     if (native) {
         f.run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.analyst, f.input)).id, f.analyst);

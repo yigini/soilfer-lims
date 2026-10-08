@@ -2980,5 +2980,23 @@
       "QC_WORK_ITEMS_REQUIRED": "Seleccione trabajos en la hoja antes de crear una serie.",
       "QC_RUN_PROFILE_ONLY_STORED": "Esta serie almacenada conserva su evidencia original. Cree una nueva serie para mediciones nativas."
     }
+  },
+  "qcReviewedCorrection": {
+    "policyDescription": "Permitir la corrección revisada de errores de transcripción en CC fallido sin disposición",
+    "title": "Revisar una corrección de transcripción",
+    "help": "Un segundo revisor puede corregir un error de entrada registrado. Identifique la hoja o el archivo original. La lectura fallida se conserva en el historial y en los informes futuros.",
+    "analysis": "Análisis",
+    "original": "Lectura original",
+    "correctedValue": "Lectura corregida",
+    "reason": "Motivo",
+    "sourceReference": "Referencia de la fuente registrada",
+    "submit": "Aprobar la corrección y reevaluar",
+    "saving": "Guardando la corrección…",
+    "refused": "Corrección rechazada",
+    "disclosure": "Corrección revisada de transcripción de CC",
+    "originalFailure": "Evaluación fallida original",
+    "replacement": "Evaluación de reemplazo",
+    "reviewer": "Revisor",
+    "authors": "Autores de las observaciones originales"
   }
 }
