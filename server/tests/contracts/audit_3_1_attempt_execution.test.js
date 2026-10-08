@@ -8,6 +8,7 @@ const {createSampleFixture,createWorkItemFixture}=require('../helpers/workflowFi
 const {installWorkAttemptContract}=require('../../scripts/install_work_attempt_contract');
 const writer=require('../../services/resultWriteService');
 const {validateResultEntries}=require('../../services/resultEntryPolicy');
+const request=require('supertest'),jwt=require('jsonwebtoken'),express=require('express');
 const directory=path.resolve(__dirname,'../.tmp'),file=path.join(directory,'audit_legacy_190_execution-'+randomUUID()+'.db');
 const labId='LAB-190-EXECUTION',actor={username:'attempt-executor',role:'LAB_MANAGER',labId};
 let client;
@@ -16,6 +17,7 @@ beforeAll(async()=>{
     const db=new Database(file);db.exec('CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT NOT NULL)');db.close();
     installWorkAttemptContract({dbPath:file,apply:true});client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
     await client.lab.create({data:{id:labId,code:labId,name:'Attempt execution laboratory',country:'TEST'}});
+    await client.unit.create({data:{code:'%',display:'%',quantityKind:'MASS_FRACTION',factorToBase:1}});
     for(const code of ['AT190','TEXTURE','SAND','SILT','CLAY'])await client.analysis.create({data:{code,name:'Controlled '+code+' measurand',
         units:code==='AT190'?'g/kg':'%',validation:code==='TEXTURE'?'{"tolerance":2}':'{"type":"numeric"}',prerequisites:'[]'}});
 },60000);
@@ -24,6 +26,54 @@ afterAll(async()=>{
     if(path.dirname(file)!==directory || !path.basename(file).startsWith('audit_legacy_190_execution-'))throw Error('Unexpected fixture path');
     for(const suffix of ['','-wal','-shm'])fs.rmSync(file+suffix,{force:true});
 });
+
+test.each(['saveResults','batchSave'].flatMap(route=>[null,'another-analyst'].map(textureOwner=>[route,textureOwner])))
+    ('%s retains fraction-only technician saves when canonical TEXTURE is owned by %s',async(route,textureOwner)=>{
+        const analyst={id:randomUUID(),username:'fraction-analyst-'+randomUUID(),role:'LAB_TECHNICIAN',labId};
+        await client.user.create({data:{...analyst,email:randomUUID()+'@example.test',password:'isolated-fixture',countries:'[]',projects:'[]'}});
+        if(textureOwner)await client.user.upsert({where:{username:textureOwner},update:{},
+            create:{id:randomUUID(),username:textureOwner,role:'LAB_TECHNICIAN',labId,email:randomUUID()+'@example.test',password:'isolated-fixture'}});
+        const f=await fixture(['SAND','SILT','CLAY','TEXTURE']);
+        const fractions=f.items.filter(item=>item.analysis!=='TEXTURE'),owner=f.items.find(item=>item.analysis==='TEXTURE');
+        for(const item of fractions)await client.workItem.update({where:{id:item.id},data:{assignedTo:analyst.username}});
+        await client.workItem.update({where:{id:owner.id},data:{assignedTo:textureOwner}});
+        const readiness=await require('../../services/workbenchReadinessService').evaluateExecutionReadiness(client,
+            {...owner,assignedTo:textureOwner,sample:f.sample},analyst);
+        expect(readiness.blockers).toContain('UNASSIGNED_TO_USER');
+        const previousSecret=process.env.JWT_SECRET;process.env.JWT_SECRET='owned-fraction-route-secret';
+        try {
+            await jest.isolateModulesAsync(async()=>{
+                jest.doMock('../../prisma',()=>client);
+                const app=express();app.use(express.json());
+                app.use('/api/results',require('../../routes/resultsRoutes'));
+                app.use('/api/workbench',require('../../routes/workbenchRoutes'));
+                const token=jwt.sign({id:analyst.id,tokenVersion:0},process.env.JWT_SECRET,{expiresIn:'10m'});
+                const auth={Authorization:`Bearer ${token}`},values=[40,40,20];
+                const response=route==='saveResults'?
+                    await request(app).post(`/api/results/${f.sample.id}`).set(auth).send({measurements:fractions.map((item,i)=>({param:item.analysis,value:String(values[i]),unit:'%'}))}):
+                    await request(app).post('/api/workbench/batch-save').set(auth).send({draft:false,entries:fractions.map((item,i)=>({workItemId:item.id,value:String(values[i]),version:item.version}))});
+                expect(response).toMatchObject({status:200});
+                if(route==='batchSave')expect(response.body).toMatchObject({saved:3});
+                const rows=await client.result.findMany({where:{sampleId:f.sample.id,isCurrent:true}});
+                expect(rows.map(row=>row.param).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
+                for(const [i,item]of fractions.entries()){
+                    const row=rows.find(result=>result.param===item.analysis);
+                    expect(row.numericValue).toBe(values[i]);
+                    expect(await client.workAttempt.findUnique({where:{id:row.attemptId}})).toMatchObject({workItemId:item.id,status:'RECORDED'});
+                }
+                const derived=rows.find(row=>row.param==='TEXTURE');
+                expect(derived).toMatchObject({provenance:'DERIVED',equipmentId:null,equipmentReadiness:null});
+                const attempt=await client.workAttempt.findUnique({where:{id:derived.attemptId}});
+                expect(attempt).toMatchObject({workItemId:owner.id,attemptNo:1,status:'RECORDED',instrumentId:null});
+                expect(JSON.parse(attempt.evidenceData)).toMatchObject({equipmentReadiness:null,
+                    sourceResultIds:expect.arrayContaining(rows.filter(row=>row.param!=='TEXTURE').map(row=>row.id))});
+                expect(await client.workItem.findUnique({where:{id:owner.id}})).toMatchObject({assignedTo:textureOwner,status:'IN_PROGRESS'});
+            });
+        }finally{
+            jest.dontMock('../../prisma');
+            if(previousSecret===undefined)delete process.env.JWT_SECRET;else process.env.JWT_SECRET=previousSecret;
+        }
+    });
 async function fixture(analyses=['AT190'],{work=true}={}) {
     const sampleId=randomUUID();
     const sample=await createSampleFixture(client,{data:{id:sampleId,originalId:sampleId,labId:sampleId,assignedLab:labId,status:'PROCESSING',

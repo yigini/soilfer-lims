@@ -303,7 +303,10 @@ async function deriveTextureResult(tx, { sampleId, replicateNo = 1, actor, now =
         }
         ctx.attemptId=sharedAttemptId;ctx.equipmentReadiness=recorded;ctx.equipmentReadinessText=snapshot;ctx.equipmentId=sharedAttempt.instrumentId;
     } else {
-        await validateExecutionReadiness(tx,ctx);ctx.equipmentReadiness=null;ctx.equipmentReadinessText=null;ctx.equipmentId=null;
+        // Derived TEXTURE calculates already-validated fraction executions.
+        // Its canonical owner need not be assigned to the fraction analyst,
+        // and it has no separate instrument or execution-readiness evidence.
+        ctx.equipmentReadiness=null;ctx.equipmentReadinessText=null;ctx.equipmentId=null;
     }
     await insertExecution(tx,ctx,allocation,{source:'derived',fractions:Object.fromEntries(fractions.map(row=>[row.param.toLowerCase(),row.numericValue])),
         className:classification.className,closureError:classification.closureError,
