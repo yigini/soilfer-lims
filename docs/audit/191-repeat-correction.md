@@ -120,6 +120,13 @@ Applied by precedent / deliberate setup inventory:
   hint share one explicit owned execution (6069938801). All queue, draft,
   currentness and cached88 assertions remain unchanged. This seventh caller
   has the same closed import boundary and no direct-write exemption.
+- catalogue_result_entry, "Completed or submitted work cannot be edited":
+  the original stored5 and all three lifecycle states remain. The generic400
+  deliberately becomes409 ATTEMPT_CORRECTION_REQUIRED under6069938801, with
+  a full zero-write snapshot for each refused save.
+- audit_3_1_attempt_execution: the owned migration-receipt table includes its
+  actual required appliedAt field before the real QC predecessor installer.
+  Original DDL assets, receipts, guards and all execution assertions stay.
 - audit_0_10_current_result_views and audit_1_0_lab_policies LATEST_VALID:
   one retained initial value is corrected through the actual route, then
   submitted/reviewed/approved. An owned lab/method/SOC zero-frequency rule is

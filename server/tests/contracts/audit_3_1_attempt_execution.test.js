@@ -15,7 +15,7 @@ const labId='LAB-190-EXECUTION',actor={username:'attempt-executor',role:'LAB_MAN
 let client;
 beforeAll(async()=>{
     fs.mkdirSync(directory,{recursive:true});beforeGuards({actor:'system:fixture',file,qcBootstrap:'CREATE_PRISMA'});
-    const db=new Database(file);db.exec('CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT NOT NULL)');db.close();
+    const db=new Database(file);db.exec('CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,appliedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,details TEXT NOT NULL)');db.close();
     installWorkAttemptContract({dbPath:file,apply:true});
     require('../helpers/repeatQcPredecessors').installRepeatQcPredecessors(file);
     require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({dbPath:file,apply:true});
