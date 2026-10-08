@@ -41,7 +41,7 @@ function mapResultWriteError(error) {
     return code ? new TransitionError('The database refused an invalid result attempt link.', 409, code) : rules.mapStateError(error);
 }
 
-async function context(tx, { sampleId, workItemId, attemptId = null, actor, measurement, source = 'measurement' }) {
+async function context(tx, { sampleId, workItemId, attemptId = null, actor, measurement, source = 'measurement', allowRecordedReplicates = false }) {
     rules.requireTransaction(tx);
     if (!measurement || typeof measurement.param !== 'string' || !measurement.param) throw new TransitionError('Choose a parameter.', 400, 'RESULT_PARAMETER_REQUIRED');
     if (measurement.flags != null && !Array.isArray(measurement.flags)) throw new TransitionError('Result flags must be an array.', 400, 'RESULT_FLAGS_INVALID');
@@ -66,6 +66,22 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (item && isNonMeasurement(item) || isNonMeasurement({ analysis: measurement.param })) {
         throw new TransitionError('Use the non-measurement evidence workflow.', 409, 'OPERATIONAL_SCALAR_FORBIDDEN');
     }
+    // Pin6069938801: only a single current RECORDED execution may receive
+    // an absent replicate. An OPEN reasoned repeat takes its normal first fill.
+    let recordedAttempt = null, recordedResults = [];
+    if (allowRecordedReplicates && item && source !== 'legacy-import' &&
+        !await tx.workAttempt.count({ where: { workItemId: item.id, status: 'OPEN' } })) {
+        recordedResults = await tx.result.findMany({ where: { sampleId, param: measurement.param, isCurrent: true,
+            supersededBy: null, attempt: { workItemId: item.id } }, include: { attempt: true } });
+        if (recordedResults.length) {
+            const ids = new Set(recordedResults.map(row => row.attemptId));
+            recordedAttempt = ids.size === 1 ? recordedResults[0].attempt : null;
+            if (!recordedAttempt || recordedAttempt.status !== 'RECORDED' || item.status === 'SUBMITTED') {
+                throw new TransitionError('Use a correction or a reasoned repeat for recorded work.',409,'ATTEMPT_CORRECTION_REQUIRED');
+            }
+            if (attemptId && attemptId !== recordedAttempt.id) throw new TransitionError('Choose the current recorded execution.',409,'ATTEMPT_CONTEXT_MISMATCH');
+        }
+    }
     if (attempt?.qcBatchId && item?.batchId && attempt.qcBatchId !== item.batchId) {
         throw new TransitionError('Attempt and work item batches disagree.', 409, 'RESULT_BATCH_CONFLICT');
     }
@@ -77,6 +93,11 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (!Number.isInteger(replicateNo) || replicateNo < 1) throw new TransitionError('Replicate number must be a positive integer.', 400, 'RESULT_REPLICATE_INVALID');
     const labId = sample.assignedLab || item?.assignedLab || sample.labId;
     const methodId = item?.methodologyId || measurement.methodologyId || null;
+    const equipmentId = measurement.equipmentId || item?.equipmentId || null;
+    if (recordedAttempt && (recordedResults.some(row => row.methodologyId !== methodId || row.equipmentId !== equipmentId) ||
+        recordedAttempt.instrumentId !== equipmentId || measurement.methodologyId && measurement.methodologyId !== methodId)) {
+        throw new TransitionError('Use the instrument and method frozen on the recorded attempt.',409,'ATTEMPT_CONTEXT_MISMATCH');
+    }
     if (item?.methodologyId && measurement.methodologyId && measurement.methodologyId !== item.methodologyId) {
         throw new TransitionError('Use the assigned method.', 409, 'RESULT_METHOD_MISMATCH');
     }
@@ -87,12 +108,16 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (issues.length) throw new TransitionError(issues.join(' '), 409, 'RESULT_CONFIGURATION_INVALID');
     const method = methodId ? await tx.methodology.findUnique({ where: { id: methodId } }) : null;
     if (methodId && !isAvailable(method, analysisCode, labId)) throw new TransitionError('Method belongs to another parameter or laboratory.', 409, 'RESULT_METHOD_MISMATCH');
+    if (recordedAttempt && recordedAttempt.executedMethodRevision !== (method?.version == null ? null : String(method.version))) {
+        throw new TransitionError('The recorded method revision differs; request a repeat.',409,'ATTEMPT_CONTEXT_MISMATCH');
+    }
     // #182 pin 6005018712: historical imports have no work to execute. An
     // existing canonical item must satisfy the same commit rules as every path.
     if (!importing || item) {
         require('./resultEvidenceService').assertAmendable(sample);
         if (item) {
-            if (['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED', 'AWAITING_VERIFICATION'].includes(item.status) && source !== 'derived') {
+            if (['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED', 'AWAITING_VERIFICATION'].includes(item.status) && source !== 'derived' &&
+                !(recordedAttempt && item.status === 'COMPLETED')) {
                 throw new TransitionError('Recorded or sealed work requires its correction workflow.', 409, 'RESULT_WORKITEM_SEALED');
             }
             item = { ...item, sample, equipmentId: measurement.equipmentId || item.equipmentId };
@@ -100,7 +125,7 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     }
     return { sample, item, attemptId, batchId, replicateNo, performedBy, labId, methodId, analysis, method, source,
         basis: ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(measurement.basis) ? measurement.basis : 'AIR_DRY',
-        equipmentId: measurement.equipmentId || item?.equipmentId || null, equipmentReadiness:null,equipmentReadinessText:null };
+        equipmentId, equipmentReadiness:null,equipmentReadinessText:null, recordedAttempt, recordedResults };
 }
 
 async function validateExecutionReadiness(tx,ctx) {
@@ -222,7 +247,7 @@ async function writeResultsExecution(tx, options) {
     if (!measurements.length) throw new TransitionError('Choose a parameter.',400,'RESULT_PARAMETER_REQUIRED');
     options = writeOptions({...options,measurement:measurements[0]});
     measurements[0]=options.measurement;
-    const ctx = await context(tx, options);
+    const ctx = await context(tx, {...options,allowRecordedReplicates:true});
     ctx.actor = options.actor;
     if (options.measurement.param !== ctx.item?.analysis && ctx.item &&
         !(TEXTURE_ANALYSES.has(ctx.item.analysis) && FRACTIONS.includes(options.measurement.param))) {
@@ -238,14 +263,26 @@ async function writeResultsExecution(tx, options) {
             throw new TransitionError('Use a distinct positive replicate number.',400,'RESULT_REPLICATE_INVALID');
         }
         seenReplicates.add(replicateNo);
-        if(measurement.methodologyId && measurement.methodologyId!==ctx.methodId)throw new TransitionError('Use the assigned method.',409,'RESULT_METHOD_MISMATCH');
+        if(measurement.methodologyId && measurement.methodologyId!==ctx.methodId)throw new TransitionError('Use the assigned method.',409,ctx.recordedAttempt?'ATTEMPT_CONTEXT_MISMATCH':'RESULT_METHOD_MISMATCH');
         if(Object.hasOwn(measurement,'batchId') && measurement.batchId!==ctx.batchId)throw new TransitionError('Supplied result batch differs from the server batch.',409,'RESULT_BATCH_MISMATCH');
         if(measurement.equipmentId && measurement.equipmentId!==ctx.equipmentId || measurement.basis && measurement.basis!==ctx.basis) {
-            throw new TransitionError('Replicates must share their execution context.',409,'RESULT_EXECUTION_CONTEXT_MISMATCH');
+            throw new TransitionError('Replicates must share their execution context.',409,ctx.recordedAttempt?'ATTEMPT_CONTEXT_MISMATCH':'RESULT_EXECUTION_CONTEXT_MISMATCH');
         }
     }
-    const allocation=await allocateExecution(tx,ctx,options);
+    if (ctx.recordedAttempt && prepared.some(row=>ctx.recordedResults.some(old=>old.replicateNo===Number(row.replicateNo ?? 1)))) {
+        throw new TransitionError('Use the transcription correction route or request a repeat to change a recorded cell.',409,'ATTEMPT_CORRECTION_REQUIRED');
+    }
+    const allocation=ctx.recordedAttempt ? {id:ctx.recordedAttempt.id,existing:true,status:'RECORDED'} : await allocateExecution(tx,ctx,options);
     await validateExecutionReadiness(tx,ctx);
+    if(ctx.recordedAttempt) {
+        const snapshot=ctx.recordedResults[0].equipmentReadiness;
+        if(ctx.recordedResults.some(row=>row.equipmentReadiness!==snapshot))throw new TransitionError('Recorded execution snapshots differ.',409,'ATTEMPT_CONTEXT_MISMATCH');
+        let evidence;
+        try { evidence=JSON.parse(ctx.recordedAttempt.evidenceData); }
+        catch (_) { throw new TransitionError('Recorded execution evidence is unavailable.',409,'ATTEMPT_CONTEXT_MISMATCH'); }
+        if(JSON.stringify(evidence.equipmentReadiness ?? null)!==(snapshot || 'null'))throw new TransitionError('Recorded execution snapshots differ.',409,'ATTEMPT_CONTEXT_MISMATCH');
+        ctx.attemptId=ctx.recordedAttempt.id;ctx.equipmentReadiness=evidence.equipmentReadiness ?? null;ctx.equipmentReadinessText=snapshot;
+    }
     const format=await getNumberFormat(ctx.labId,{db:tx,analysisCode:ctx.analysis.code,methodologyId:ctx.methodId});
     const values=[];
     for(const measurement of prepared)values.push(await numericValues(tx,ctx,measurement,null,format));
@@ -253,9 +290,11 @@ async function writeResultsExecution(tx, options) {
         qualifier:values[0].censoring==='NONE'?null:values[0].censoring,recordedAt:now.toISOString(),resultId:prepared[0].id,
         sourceResultIds:prepared.map(row=>row.id),measurements:prepared.map((row,index)=>({resultId:row.id,replicateNo:Number(row.replicateNo ?? 1),
             rawValue:values[index].rawInput,normalizedValue:values[index].numericValue,censoring:values[index].censoring}))};
-    await insertExecution(tx,ctx,allocation,evidence,now,options.attemptMetadata);
+    if(!ctx.recordedAttempt)await insertExecution(tx,ctx,allocation,evidence,now,options.attemptMetadata);
     const rows=[];
     for(const [index,measurement] of prepared.entries())rows.push(await appendResult(tx,{...ctx,replicateNo:Number(measurement.replicateNo ?? 1)},measurement,values[index],now));
+    if(ctx.recordedAttempt)await require('./workAttemptEventService').appendAttemptEvent(tx,ctx.item,ctx.recordedAttempt.id,ctx.actor,
+        {action:'REPLICATE_ADDED',from:'RECORDED',to:'RECORDED',newResultIds:rows.map(row=>row.id)});
     if (!options.deferCache) await cacheResult(tx, ctx.item, rows.at(-1).value);
     return rows;
 }

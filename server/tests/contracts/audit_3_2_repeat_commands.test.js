@@ -40,6 +40,12 @@ async function fixture({ replicates = 1, role = 'LAB_TECHNICIAN', criteria = {},
             .set('Authorization','Bearer ' + token).send(input); });
         return response;
     };
+    f.save = async (measurements,connection=f.db) => {
+        let response;
+        await withQcRunHttp(connection,f.actor,async(app,token)=>{response=await request(app)
+            .post('/api/results/'+f.items[0].sampleId).set('Authorization','Bearer '+token).send({measurements});},{repeatCommands:true});
+        return response;
+    };
     return f;
 }
 async function reviewer(f,role='LAB_MANAGER') {
@@ -109,7 +115,9 @@ test('an OPEN repeat fills once in the real Result transaction and keeps every r
     const event=await f.db.auditLog.findFirst({where:{entity:'WORK_ATTEMPT',entityId:filled.id,action:'FIRST_FILL'}});
     expect(JSON.parse(event.details)).toMatchObject({from:'OPEN',to:'RECORDED',reason:'PREP_ERROR',newResultIds:[results[0].id]});
     const before=await f.all();
-    await expect(f.record(1,{attemptId:filled.id})).rejects.toMatchObject({code:'WORK_ATTEMPT_FIRST_FILL_REFUSED'});
+    // Pin6069938801: a second write of this recorded cell is a correction;
+    // absent replicas may append, but no path refills the execution evidence.
+    await expect(f.record(1,{attemptId:filled.id})).rejects.toMatchObject({code:'ATTEMPT_CORRECTION_REQUIRED'});
     expect(await f.all()).toEqual(before);
 });
 
@@ -208,6 +216,47 @@ test('a failed correction event rolls back the new Result, old supersession and 
     }}}});
     await expect(require('../../services/workAttemptCorrectionService').correctAttempt(fault,f.attempt.id,f.actor,
         {value:'7.7',reason:'TRANSCRIPTION_ERROR',note:'Check correction atomicity'})).rejects.toThrow('Owned correction-event storage failure');
+    expect(await f.all()).toEqual(before);
+});
+
+test('the ordinary save appends an absent replicate to the same frozen RECORDED attempt, then refuses cell changes and post-submit additions',async()=>{
+    const f=await fixture(),attempt=f.attempt,original=f.results[0];
+    const response=await f.save([{param:f.analysisCode,value:'7.12456789',replicateNo:2,equipmentId:f.instrument.id}]);
+    expect(response.status).toBe(200);
+    const results=await f.db.result.findMany({where:{attemptId:attempt.id},orderBy:{replicateNo:'asc'}});
+    expect(results).toHaveLength(2);expect(results[0]).toEqual(original);
+    expect(results[1]).toMatchObject({attemptId:attempt.id,replicateNo:2,numericValue:7.12456789,methodologyId:original.methodologyId,
+        equipmentId:original.equipmentId,equipmentReadiness:original.equipmentReadiness});
+    expect(await f.db.workAttempt.findUnique({where:{id:attempt.id}})).toEqual(attempt);
+    const event=await f.db.auditLog.findFirst({where:{entity:'WORK_ATTEMPT',entityId:attempt.id,action:'REPLICATE_ADDED'}});
+    expect(JSON.parse(event.details)).toMatchObject({from:'RECORDED',to:'RECORDED',oldResultIds:[],newResultIds:[results[1].id]});
+    let before=await f.all();
+    const correction=await f.save([{param:f.analysisCode,value:'8',replicateNo:1,equipmentId:f.instrument.id}]);
+    expect({status:correction.status,code:correction.body.code}).toEqual({status:409,code:'ATTEMPT_CORRECTION_REQUIRED'});
+    expect(await f.all()).toEqual(before);
+    await f.submit();before=await f.all();
+    const submitted=await f.save([{param:f.analysisCode,value:'8',replicateNo:3,equipmentId:f.instrument.id}]);
+    expect({status:submitted.status,code:submitted.body.code}).toEqual({status:409,code:'ATTEMPT_CORRECTION_REQUIRED'});
+    expect(await f.all()).toEqual(before);
+});
+
+test.each(['instrument','method'])('an incremental replicate refuses a changed frozen %s with zero writes',async kind=>{
+    const f=await fixture(),measurement={param:f.analysisCode,value:'7.1',replicateNo:2,equipmentId:f.instrument.id};
+    if(kind==='instrument')measurement.equipmentId=(await f.db.equipmentAsset.create({data:{id:randomUUID(),labId:f.labId,
+        name:'Different instrument',assetType:'OTHER',status:'IN_SERVICE',criticality:'NON_CRITICAL'}})).id;
+    else measurement.methodologyId=(await f.db.methodology.create({data:{analysisCode:f.analysisCode,name:'Different method',loq:0.1}})).id;
+    const before=await f.all(),response=await f.save([measurement]);
+    expect({status:response.status,code:response.body.code}).toEqual({status:409,code:'ATTEMPT_CONTEXT_MISMATCH'});
+    expect(await f.all()).toEqual(before);
+});
+
+test('failure to append the replicate event rolls back its Result, cache and every audit row',async()=>{
+    const f=await fixture(),before=await f.all();
+    const fault=f.db.$extends({query:{auditLog:{create({args,query}){
+        if(args.data.entity==='WORK_ATTEMPT' && args.data.action==='REPLICATE_ADDED')throw Error('Owned replicate-event storage failure');
+        return query(args);
+    }}}});
+    expect((await f.save([{param:f.analysisCode,value:'7.1',replicateNo:2,equipmentId:f.instrument.id}],fault)).status).toBe(500);
     expect(await f.all()).toEqual(before);
 });
 

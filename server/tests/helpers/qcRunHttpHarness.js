@@ -16,6 +16,7 @@ async function withQcRunHttp(db, actor, exercise, { reports = false, reviews = f
             if (repeatCommands) {
                 app.use('/api/work-items', require('../../routes/workRepeatRoutes'));
                 app.use('/api/attempts', require('../../routes/workAttemptRoutes'));
+                app.use('/api/results', require('../../routes/resultsRoutes'));
             }
             if (reports) app.use('/api/reports', require('../../routes/reportRoutes'));
             if (reviews) {

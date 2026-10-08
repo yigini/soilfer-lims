@@ -1,6 +1,6 @@
 const { randomUUID } = require('node:crypto');
 const rules = require('./workflowStateRules');
-const ACTIONS = Object.freeze(['CREATED', 'FIRST_FILL', 'SUBMITTED', 'ACCEPTED', 'QUESTIONED', 'INVALIDATED', 'CORRECTED']);
+const ACTIONS = Object.freeze(['CREATED', 'FIRST_FILL', 'SUBMITTED', 'ACCEPTED', 'QUESTIONED', 'INVALIDATED', 'CORRECTED', 'REPLICATE_ADDED', 'DERIVED_RECALCULATED']);
 const EDGES = Object.freeze({ RECORDED: ['SUBMITTED', 'QUESTIONED', 'INVALIDATED'], SUBMITTED: ['ACCEPTED', 'QUESTIONED', 'INVALIDATED'] });
 async function appendAttemptEvent(tx, item, attemptId, actor, { action, from, to, reason = null, note = null,
     oldResultIds = [], newResultIds = [] }) {

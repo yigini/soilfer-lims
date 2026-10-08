@@ -56,8 +56,11 @@ test.each(['REQUIRED_WARN', 'ADVISORY'])('failed CCV in frozen %s mode can be re
     const f = await fixture({ mode });
     await writeNativeMeasurements(f.db, f.run.id, f.actor, { measurements: f.readings([25]) });
     const item = f.items[0];
-    for (const status of ['COMPLETED', 'SUBMITTED']) await require('../../services/workItemStateService')
-        .transitionWorkItem(item.id, status, f.actor, 'Ready for actual review', {}, f.db);
+    await require('../../services/workItemStateService').transitionWorkItem(item.id,'COMPLETED',f.actor,'Ready for actual review',{},f.db);
+    // Pin6061487810: reach the existing acceptance assertions through the
+    // actual submission authority, including its #191 attempt transition.
+    await require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,
+        sampleId:item.sampleId,type:'FULL',workItemIds:[item.id]});
     await withQcRunHttp(f.db, f.actor, async (app, token) => {
         const auth = `Bearer ${token}`;
         const review = await request(app).post(`/api/work/${item.id}/review`).set('Authorization', auth)

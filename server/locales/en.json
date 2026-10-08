@@ -1452,6 +1452,7 @@
       "REPEAT_FAILED_BATCH": "Use a new batch for this repeat; the previous QC failure is retained.",
       "ATTEMPT_CORRECTION_REQUIRED": "Use a transcription correction for a typo.",
       "AMENDMENT_WORKFLOW_REQUIRED": "A client retest requires the amendment workflow.",
+      "ATTEMPT_CONTEXT_MISMATCH": "Use the instrument and method recorded for this attempt.",
       "WORK_ATTEMPT_FORBIDDEN": "Your role cannot request repeats or correct attempts.",
       "ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED": "This run needs a QC disposition before a repeat can be requested."
     }
