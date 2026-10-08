@@ -213,3 +213,45 @@ test('compatibility replay retains required counts when the current run profile 
     expect(evaluation.qcRule.requirements.BLANK.required).toBe(1); expect(evaluation.qcRule.requirements.BLANK.found).toBe(1);
     expect(after.evaluations[0]).toEqual(original.evaluations[0]);
 });
+
+test('real legacy-imported NULL authors and historical snapshots stay locked without inventing authors or criteria', async () => {
+    const fs = require('node:fs'), path = require('node:path'), Database = require('better-sqlite3');
+    const { PrismaClient } = require('../../prisma_client'), { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+    const labId = randomUUID(), batchId = randomUUID(), analysis = `LEGACY-${randomUUID()}`, username = `legacy-reviewer-${randomUUID()}`, userId = randomUUID();
+    const failed = value => ({ blanks: [{ value, status: 'FAIL', maxAllowed: 0.05 }], controls: [], duplicates: [], overallStatus: 'QC_FAIL', summary: {} });
+    const historical = require('../helpers/legacyWorkflowDatabase').beforeGuards({ actor: 'system:fixture', schemaVariant: 'PRE_1_3_SAMPLE_CODES',
+        relatedRows: { Lab: [{ id: labId, code: labId, name: 'Retained QC author fixture', country: 'TEST', updatedAt: Date.now() }],
+            User: [{ id: userId, username, email: `${randomUUID()}@example.test`, password: 'fixture', role: 'SUPER_ADMIN', updatedAt: Date.now() }] },
+        batches: [{ id: batchId, labId, analysis, status: 'QC_FAIL', createdBy: username, workItemIds: '[]',
+            qcResults: JSON.stringify(failed(9.123456789)), history: JSON.stringify([{ action: 'QC_EVIDENCE_SNAPSHOT', seq: 1,
+                snapshot: { qcResults: failed(8.123456789), qcItems: [], status: 'QC_FAIL', disposition: null, workItemIds: [] } }]) }] });
+    const connection = new Database(historical.file, { fileMustExist: true });
+    try { connection.exec('CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL,"appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"details" TEXT)'); }
+    finally { connection.close(); }
+    for (const [script, installer] of [['install_reference_materials', 'installReferenceMaterials'], ['install_qc_rules', 'installQcRules'], ['install_qc_runs', 'installQcRuns']]) {
+        const install = require(`../../scripts/${script}`)[installer], dry = install({ dbPath: historical.file });
+        install({ dbPath: historical.file, apply: true, ...(script === 'install_qc_runs' && { planSha256: dry.backfillFingerprint }) });
+    }
+    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${historical.file}` }) });
+    owned.push({ close: async () => {
+        await db.$disconnect();
+        if (path.dirname(historical.file) !== path.resolve(__dirname, '../.tmp') || !path.basename(historical.file).startsWith('audit_legacy_')) throw Error('Only the owned retained fixture may be removed.');
+        for (const suffix of ['', '-wal', '-shm']) if (fs.existsSync(historical.file + suffix)) fs.unlinkSync(historical.file + suffix);
+    } });
+    const actor = { id: userId, username, role: 'SUPER_ADMIN', labId };
+    await require('../../services/policyService').change(actor, labId, { reason: 'Explicit retained author guard fixture',
+        changes: [{ key: 'qc.reviewedTranscriptionCorrectionEnabled', value: true }] }, { db });
+    const batch = await db.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
+    const snapshot = async () => JSON.parse(JSON.stringify(await Promise.all([db.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE }), db.auditLog.findMany()])));
+    expect(batch.measurements.every(row => row.enteredBy === null)).toBe(true);
+    for (const [position, code] of [[batch.positions.find(row => row.historicalSnapshotSeq == null), 'QC_REVIEWED_AUTHOR_UNKNOWN'],
+        [batch.positions.find(row => row.historicalSnapshotSeq === 1), 'QC_MEASUREMENT_NOT_FOUND']]) {
+        expect(position).toBeDefined(); const before = await snapshot();
+        await withQcRunHttp(db, actor, async (app, token) => {
+            const response = await request(app).post(`/api/qc/batches/${batchId}/corrections`).set('Authorization', `Bearer ${token}`)
+                .send({ mode: MODE, analysisCode: analysis, reason: 'Source value needs correction', sourceReference: 'Retained worksheet line 4', corrections: [{ positionId: position.id, value: 0.01 }] });
+            expect(response.status).toBeGreaterThanOrEqual(400); expect(response.body.code).toBe(code);
+        });
+        expect(await snapshot()).toEqual(before);
+    }
+});
