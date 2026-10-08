@@ -498,10 +498,20 @@ describe('WP-B: Unified Action and Scope Model', () => {
                 .set('Authorization', 'Bearer ' + tokens.nat);
             expect(res.status).toBe(200);
 
-            // GTM labs are LAB-A and LAB-B; users should only belong to GTM labs
+            // Pin6060409081: retained fixtures also own legitimate labs in this country.
+            // This fixture stores Guatemala (the actor's existing country string).
+            const labs = await prisma.lab.findMany({ select: { id: true, country: true } });
+            const authorizedCountries = JSON.parse(nationalUser.countries);
+            const countryLabs = new Set(labs.filter(lab => authorizedCountries.includes(lab.country)).map(lab => lab.id));
+            const otherCountryLabs = new Set(labs.filter(lab => !authorizedCountries.includes(lab.country)).map(lab => lab.id));
+            const usernames = res.body.map(user => user.username);
+            expect(usernames).toContain(techA.username);
+            expect(usernames).toContain(techB.username);
+            expect(usernames).not.toContain(`ptech_${testPrefix}`);
             for (const user of res.body) {
                 if (user.labId) {
-                    expect([labA.id, labB.id]).toContain(user.labId);
+                    expect(countryLabs.has(user.labId)).toBe(true);
+                    expect(otherCountryLabs.has(user.labId)).toBe(false);
                     expect(user.labId).not.toBe(labPaused.id);
                 }
             }

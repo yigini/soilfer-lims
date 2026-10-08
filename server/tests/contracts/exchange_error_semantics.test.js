@@ -1,6 +1,5 @@
-const { createResultsFixture } = require('../../services/resultWriteService');
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -34,7 +33,10 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
                 longitude: -90.5
             }
         });
-        await createResultsFixture(prisma, { data: [
+        // Pin6060286651: explicit accepted owners and one final attempt per original row.
+        await createWorkItemFixture(prisma, { data: { id: `${sampleApproved.id}-PH_H2O`, sampleId: sampleApproved.id,
+            analysis: 'PH_H2O', assignedLab: sampleApproved.assignedLab, status: 'ACCEPTED' } });
+        for (const data of [
                         {
                             id: `res-a0-1-${timestamp}`,
                             param: 'PH_H2O',
@@ -44,7 +46,7 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
                             isCurrent: true,
                             provenance: 'MEASURED'
                         }
-                    ].map(result => ({ ...result, sampleId: sampleApproved.id })) });
+                    ].map(result => ({ ...result, sampleId: sampleApproved.id }))) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
 
         sampleProcessing = await createSampleFixture(prisma, {
             data: {
@@ -117,27 +119,7 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
         `).run(`link_a0_${timestamp}`, connId, testKey.id);
     });
 
-    afterAll(async () => {
-        // Cleanup test data
-        await prisma.result.deleteMany({
-            where: { id: { in: [`res-a0-1-${timestamp}`] } }
-        }).catch(() => {});
-
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
-            where: { id: { in: [sampleApproved?.id, sampleProcessing?.id, sampleHold?.id].filter(Boolean) } }
-        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
-
-        await prisma.apiKey.deleteMany({
-            where: { id: testKey?.id }
-        }).catch(() => {});
-
-        const { getDb } = require('../../services/exchangeStateService');
-        const db = getDb();
-        try {
-            db.prepare('DELETE FROM _exchange_connection_keys WHERE api_key_id = ?').run(testKey?.id);
-            db.prepare('DELETE FROM _exchange_connections WHERE id = ?').run(`conn_a0_${timestamp}`);
-        } catch (e) {}
-    });
+    // Pin6060286651: retain analytical and scope parents until whole-owned-DB teardown.
 
     describe('E07-min: Unforgeable Request Correlation & Headers', () => {
         test('Generates server-assigned X-Request-Id prefixed with xchg_ even before authentication', async () => {

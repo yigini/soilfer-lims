@@ -1,6 +1,6 @@
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -95,8 +95,11 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
             }
         });
 
+        // Pins6060286651/6060409081: retain the literal method string without inventing a controlled revision.
+        await createWorkItemFixture(prisma, { data: { id: `${sampleGtmId}-SOC`, sampleId: sampleGtmId,
+            analysis: 'SOC', assignedLab: 'LAB-GTM', status: 'ACCEPTED' } });
         // Create paired reference wet chemistry result
-        await createResultFixture(prisma, {
+        const reference = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: resultId,
                 sampleId: sampleGtmId,
@@ -110,6 +113,10 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
                 isCurrent: true
             }
         });
+
+        const referenceAttempt = await prisma.workAttempt.findUnique({ where: { id: reference.attemptId } });
+        expect(referenceAttempt).toMatchObject({ workItemId: `${sampleGtmId}-SOC`, status: 'ACCEPTED', executedMethodRevision: null });
+        expect(reference).toMatchObject({ methodologyId: 'Walkley-Black', value: '18.5', unit: 'g/kg', basis: 'AIR_DRY', provenance: 'MEASURED' });
 
         // Create GTM spectrum
         await prisma.spectralData.create({
@@ -160,22 +167,7 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
         });
     });
 
-    afterAll(async () => {
-        await prisma.spectralData.deleteMany({
-            where: { id: { in: [scanGtmId, scanMozId] } }
-        });
-        await prisma.result.deleteMany({
-            where: { id: resultId }
-        });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
-            where: { id: { in: [sampleGtmId, sampleMozId] } }
-        }), select: { id: true } })).map(row => row.id), { single: false });
-        await prisma.apiKey.deleteMany({
-            where: {
-                id: { in: ['test-stage-e-key-gtm', 'test-stage-e-key-moz', 'test-stage-e-key-unscoped'] }
-            }
-        });
-    });
+    // Pin6060286651: retain reference/scan and scope parents until whole-owned-DB teardown.
 
     test('SL-22: Scoped API key can only read its authorized laboratory spectra; absent scope is denied', async () => {
         // GTM Key can read GTM spectrum but not MOZ
@@ -278,12 +270,5 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
         expect(resExport.body.data.some(s => s.id === scanMozId)).toBe(false);
     });
 
-    afterAll(async () => {
-        try {
-            await prisma.spectralData.deleteMany({ where: { id: { in: [scanGtmId, scanMozId] } } });
-            await prisma.result.deleteMany({ where: { id: resultId } });
-            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
-            await prisma.apiKey.deleteMany({ where: { id: { in: ['test-stage-e-key-gtm', 'test-stage-e-key-moz', 'test-stage-e-key-unscoped'] } } });
-        } catch (e) {}
-    });
+    // Pin6060286651: retain reference/scan and scope parents until whole-owned-DB teardown.
 });
