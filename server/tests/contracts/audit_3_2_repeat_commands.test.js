@@ -43,7 +43,8 @@ async function fixture({ replicates = 1, role = 'LAB_TECHNICIAN', criteria = {},
     f.save = async (measurements,connection=f.db) => {
         let response;
         await withQcRunHttp(connection,f.actor,async(app,token)=>{response=await request(app)
-            .post('/api/results/'+f.items[0].sampleId).set('Authorization','Bearer '+token).send({measurements});},{repeatCommands:true});
+            .post('/api/results/'+f.items[0].sampleId).set('Authorization','Bearer '+token)
+            .send({measurements:measurements.map(row=>({methodologyId:f.methods[0].id,...row}))});},{repeatCommands:true});
         return response;
     };
     return f;
@@ -66,6 +67,28 @@ async function nativeFixture({blankValue=0,started=true,criteria={}}={}) {
     f.runEvidence=()=>f.db.batch.findUnique({where:{id:run.id},include:require('../../services/qcRunViewService').QC_RUN_INCLUDE});
     return f;
 }
+
+test('the narrow owned fixture records explicit replicas together, retains literal evidence and refuses reuse',async()=>{
+    const f=await fixture({recorded:false});
+    const data=[{id:randomUUID(),sampleId:f.items[0].sampleId,param:f.analysisCode,value:'7.0',numericValue:7,unit:'explicit-unit',replicateNo:1,isValid:false},
+        {id:randomUUID(),sampleId:f.items[0].sampleId,param:f.analysisCode,value:'7.2',numericValue:7.2,unit:'explicit-unit',replicateNo:2,isValid:true}];
+    const helper=require('../helpers/workAttemptFixtures').createExecutionResultsFixture;
+    const rows=await helper(f.db,{data});expect(rows).toHaveLength(2);expect(rows[1].attemptId).toBe(rows[0].attemptId);
+    for(const [index,row] of rows.entries())expect(row).toMatchObject(data[index]);
+    const attempt=await f.db.workAttempt.findUnique({where:{id:rows[0].attemptId}});
+    expect(attempt).toMatchObject({workItemId:f.items[0].id,status:'RECORDED',attemptNo:1});
+    expect(JSON.parse(attempt.evidenceData).sourceResultIds).toEqual(data.map(row=>row.id));
+    const before=await f.all();
+    await expect(helper(f.db,{data:data.map(row=>({...row,id:randomUUID()}))})).rejects.toThrow('reuse');
+    expect(await f.all()).toEqual(before);
+});
+
+test('the owned result-set fixture refuses duplicate current replicas before any execution or Result writes',async()=>{
+    const f=await fixture({recorded:false}),before=await f.all();
+    await expect(require('../helpers/workAttemptFixtures').createExecutionResultsFixture(f.db,{data:[1,2].map(value=>({
+        id:randomUUID(),sampleId:f.items[0].sampleId,param:f.analysisCode,value:String(value),replicateNo:1}))})).rejects.toThrow('two current');
+    expect(await f.all()).toEqual(before);
+});
 
 test('a scoped technician requests INSTRUMENT_FAULT before submission, reserving exactly one immutable OPEN attempt', async () => {
     const f=await fixture(), previous=f.attempt;

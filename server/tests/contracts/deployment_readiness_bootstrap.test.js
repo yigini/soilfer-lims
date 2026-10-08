@@ -381,6 +381,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_workitem_uniqueness.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_work_attempt_contract.js',
                 `node "${path.join(serverDir, 'scripts/install_work_attempt_contract.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_work_repeat_contract.js',
+                `node "${path.join(serverDir, 'scripts/install_work_repeat_contract.js').replace(/\\/g, '/')}"`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
 
         const entryScript = path.join(testDir, 'entrypoint.sh');

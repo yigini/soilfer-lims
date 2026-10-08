@@ -26,7 +26,10 @@ async function validateResultEntries(db, sample, measurements, user) {
         if (configurationIssues(analysis).length) return `${analysis.name}: the parameter configuration requires correction before recording results.`;
         const items = await db.workItem.findMany({ where: require('./workAttemptContract').canonicalWorkItemWhere(sample.id,param) });
         if (!items.length) throw new (require('./workflowStateRules').TransitionError)('Reconcile the order before recording this parameter.',409,'RESULT_WORKITEM_REQUIRED');
-        if (items.some(item => ['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'APPROVED', 'VALIDATED'].includes(item.status))) return `${analysis.name} is already recorded or sealed. Use the correction workflow.`;
+        for(const item of items.filter(row=>['COMPLETED','SUBMITTED','ACCEPTED','APPROVED','VALIDATED'].includes(row.status))) {
+            const recorded=await require('./resultWriteService').recordedExecution(db,item,param);
+            if(item.status!=='COMPLETED' || !recorded)return `${analysis.name} is already recorded or sealed. Use the correction workflow.`;
+        }
         if (user?.role === 'LAB_TECHNICIAN' && !items.some(item => item.assignedTo === user.username)) return `${analysis.name} is not assigned to you.`;
         for (const item of items) {
             const readiness = await evaluateExecutionReadiness(db, { ...item, sample }, user);

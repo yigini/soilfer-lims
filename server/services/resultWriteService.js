@@ -41,6 +41,43 @@ function mapResultWriteError(error) {
     return code ? new TransitionError('The database refused an invalid result attempt link.', 409, code) : rules.mapStateError(error);
 }
 
+async function recordedExecution(db, item, param) {
+    if (await db.workAttempt.count({where:{workItemId:item.id,status:'OPEN'}}))return null;
+    const attempts=await db.workAttempt.findMany({where:{workItemId:item.id}});
+    const results=await db.result.findMany({where:{sampleId:item.sampleId,param,isCurrent:true,supersededBy:null,
+        attemptId:{in:attempts.map(row=>row.id)}}});
+    if(!results.length)return null;
+    const ids=new Set(results.map(row=>row.attemptId));
+    const attempt=ids.size===1 ? attempts.find(row=>row.id===results[0].attemptId) : null;
+    if(!attempt || attempt.status!=='RECORDED' || ['SUBMITTED','ACCEPTED'].includes(item.status)) {
+        throw new TransitionError('Use the correction route or request a reasoned repeat.',409,'ATTEMPT_CORRECTION_REQUIRED');
+    }
+    return {attempt,results};
+}
+
+// The HTTP preflight and the transactional writer use the same ownership
+// rule. The transaction rechecks it; this read-only preflight grants no write.
+async function assertRecordedResultSave(db,sample,measurements) {
+    if(!Array.isArray(measurements))return;
+    for(const measurement of measurements) {
+        if(!measurement || typeof measurement.param!=='string')continue;
+        const items=await db.workItem.findMany({where:canonicalWorkItemWhere(sample.id,measurement.param)});
+        for(const item of items) {
+            const recorded=await recordedExecution(db,item,measurement.param);
+            if(!recorded)continue;
+            if(recorded.results.some(row=>row.replicateNo===Number(measurement.replicateNo ?? 1))) {
+                throw new TransitionError('Use the correction route or request a reasoned repeat.',409,'ATTEMPT_CORRECTION_REQUIRED');
+            }
+            const methodId=item.methodologyId || measurement.methodologyId || null;
+            const equipmentId=measurement.equipmentId || item.equipmentId || null;
+            if(recorded.results.some(row=>row.methodologyId!==methodId || row.equipmentId!==equipmentId) ||
+                recorded.attempt.instrumentId!==equipmentId || measurement.methodologyId && measurement.methodologyId!==methodId) {
+                throw new TransitionError('Use the frozen method and instrument for an absent replicate.',409,'ATTEMPT_CONTEXT_MISMATCH');
+            }
+        }
+    }
+}
+
 async function context(tx, { sampleId, workItemId, attemptId = null, actor, measurement, source = 'measurement', allowRecordedReplicates = false }) {
     rules.requireTransaction(tx);
     if (!measurement || typeof measurement.param !== 'string' || !measurement.param) throw new TransitionError('Choose a parameter.', 400, 'RESULT_PARAMETER_REQUIRED');
@@ -70,17 +107,10 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     // an absent replicate. An OPEN reasoned repeat takes its normal first fill.
     let recordedAttempt = null, recordedResults = [];
     if (allowRecordedReplicates && item && source !== 'legacy-import' &&
-        !await tx.workAttempt.count({ where: { workItemId: item.id, status: 'OPEN' } })) {
-        // Result.attemptId is a guarded scalar, not a Prisma relation.
-        const executions = await tx.workAttempt.findMany({ where: { workItemId: item.id } });
-        recordedResults = await tx.result.findMany({ where: { sampleId, param: measurement.param, isCurrent: true,
-            supersededBy: null, attemptId: { in: executions.map(row => row.id) } } });
-        if (recordedResults.length) {
-            const ids = new Set(recordedResults.map(row => row.attemptId));
-            recordedAttempt = ids.size === 1 ? executions.find(row => row.id === recordedResults[0].attemptId) : null;
-            if (!recordedAttempt || recordedAttempt.status !== 'RECORDED' || item.status === 'SUBMITTED') {
-                throw new TransitionError('Use a correction or a reasoned repeat for recorded work.',409,'ATTEMPT_CORRECTION_REQUIRED');
-            }
+        source !== 'derived') {
+        const recorded=await recordedExecution(tx,item,measurement.param);
+        if(recorded) {
+            recordedAttempt=recorded.attempt;recordedResults=recorded.results;
             if (attemptId && attemptId !== recordedAttempt.id) throw new TransitionError('Choose the current recorded execution.',409,'ATTEMPT_CONTEXT_MISMATCH');
         }
     }
@@ -461,5 +491,5 @@ function createRawResultFixture(db, data) {
 }
 
 module.exports = { writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
-    writeResultsExecution, appendAttemptCorrection,
+    writeResultsExecution, appendAttemptCorrection, recordedExecution, assertRecordedResultSave,
     createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError };

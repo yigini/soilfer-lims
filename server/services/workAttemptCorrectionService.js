@@ -1,9 +1,11 @@
 const rules = require('./workflowStateRules');
 const { hasPermission } = require('../config/roles');
 const { appendAttemptEvent } = require('./workAttemptEventService');
+// Pin6070309684: input compatibility only; never copy these keys to evidence.
+const DISCARDED_CORRECTION_KEYS = Object.freeze(['id', 'rawInput', 'flags', 'provenance']);
 function correctionRequest(input) {
     if (!input || typeof input !== 'object' || Array.isArray(input) ||
-        Object.keys(input).some(key => !['value', 'reason', 'note', 'resultId'].includes(key)) ||
+        Object.keys(input).some(key => !['value', 'reason', 'note', 'resultId', ...DISCARDED_CORRECTION_KEYS].includes(key)) ||
         input.reason !== 'TRANSCRIPTION_ERROR' || !Object.hasOwn(input, 'value') ||
         !['string', 'number'].includes(typeof input.value)) {
         throw new rules.TransitionError('Choose a value and TRANSCRIPTION_ERROR for the correction.', 400, 'ATTEMPT_CORRECTION_FIELDS_INVALID');
@@ -12,7 +14,7 @@ function correctionRequest(input) {
     if (input.resultId != null && (typeof input.resultId !== 'string' || !input.resultId.trim())) {
         throw new rules.TransitionError('Choose a current Result on this attempt.', 409, 'ATTEMPT_CORRECTION_TARGET_INVALID');
     }
-    return { ...input, note: input.note.trim() };
+    return { value: input.value, reason: input.reason, resultId: input.resultId, note: input.note.trim() };
 }
 async function correctAttempt(db, attemptId, actor, input) {
     const request = correctionRequest(input);
@@ -52,4 +54,4 @@ async function correctAttempt(db, attemptId, actor, input) {
         return { workItem: updated, attemptId: attempt.id, oldResultId: target.id, result: corrected, requiresReview: attempt.status === 'SUBMITTED' };
     });
 }
-module.exports = { correctionRequest, correctAttempt };
+module.exports = { correctionRequest, correctAttempt, DISCARDED_CORRECTION_KEYS };
