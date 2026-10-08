@@ -203,7 +203,9 @@ function beforeGuards(options) {
                 'legacyScoreFlag', 'legacyFlaggedAt', 'deletedAt', 'deletedBy', 'deleteReason'] });
             // #190 is additive. Never reinterpret a captured historical schema
             // as a fresh one when its attempt/review metadata is absent.
-            expected.push({table:'WorkAttempt',fields:['batchId','reason','requestedBy','requestedAt','rawData','calcVersion','dilutionFactor','aliquotId','legacyAttemptNoConflict']},
+            // #191 adds exactly parentAttemptId and note; the captured DDL
+            // remains unchanged and the real #191 installer adds them later.
+            expected.push({table:'WorkAttempt',fields:['batchId','reason','requestedBy','requestedAt','parentAttemptId','note','rawData','calcVersion','dilutionFactor','aliquotId','legacyAttemptNoConflict']},
                 {table:'ReviewDecision',fields:['reasonCode']});
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));

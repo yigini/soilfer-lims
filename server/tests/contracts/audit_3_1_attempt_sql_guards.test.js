@@ -9,6 +9,7 @@ const {createRawResultFixture}=require('../../services/resultWriteService');
 const {installWorkflowStateGuards}=require('../../scripts/install_workflow_state_guards');
 const {installResultAttemptLinks}=require('../../scripts/install_result_attempt_links');
 const {installWorkAttemptContract}=require('../../scripts/install_work_attempt_contract');
+const {loadWorkRepeatMigrationSource}=require('../../services/workRepeatMigrationSource');
 const {WORK_ATTEMPT_STATUS_LIST,LEGACY_WORK_ATTEMPT_STATUS_LIST,REPEAT_REASON_LIST,assertRepeatReason,canonicalWorkItemWhere}=require('../../services/workAttemptContract');
 const directory=path.resolve(__dirname,'../.tmp'),timestamp=Date.parse('2026-10-01T12:00:00Z');
 let db,client,file;
@@ -25,7 +26,7 @@ async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('ano
     // The predecessor guard suite intentionally remains pre-191 (including
     // its historical nullable-reason case). Add only the nullable model
     // columns so the current generated client can read its literal old rows.
-    const modelColumns=require('../../services/workRepeatMigrationSource').loadWorkRepeatMigrationSource();
+    const modelColumns=loadWorkRepeatMigrationSource();
     const shape=new Database(file);shape.exec(modelColumns.schemaSql);shape.close();
     db=new Database(file);db.pragma('foreign_keys=ON');client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
 }

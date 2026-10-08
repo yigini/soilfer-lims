@@ -489,10 +489,12 @@ const firstFill = { status: 'RECORDED', evidenceData: '{"equipmentReadiness":{"e
 firstFill.evidenceHash = createHash('sha256').update(firstFill.evidenceData).digest('hex');
 function fill(db, changes = {}) {
     const values = { ...db.prepare('SELECT * FROM WorkAttempt WHERE id=?').get('open-attempt'), ...firstFill, ...changes };
+    if(Object.hasOwn(changes,'legacyAttemptNoConflict'))return db.prepare('UPDATE WorkAttempt SET status=?,evidenceData=?,evidenceHash=?,legacyAttemptNoConflict=? WHERE id=?')
+        .run(values.status,values.evidenceData,values.evidenceHash,values.legacyAttemptNoConflict,'open-attempt');
     return db.prepare(`UPDATE WorkAttempt SET status=?,evidenceData=?,evidenceHash=?,instrumentId=?,executedMethodRevision=?,author=?,authorName=?,qcBatchId=?,materialAliquot=?,
-        id=?,workItemId=?,orderLineId=?,attemptNo=?,batchId=?,reason=?,requestedBy=?,requestedAt=?,parentAttemptId=?,note=?,rawData=?,calcVersion=?,dilutionFactor=?,aliquotId=?,legacyAttemptNoConflict=?,version=?,createdAt=?,updatedAt=? WHERE id=?`)
+        id=?,workItemId=?,orderLineId=?,attemptNo=?,batchId=?,reason=?,requestedBy=?,requestedAt=?,parentAttemptId=?,note=?,rawData=?,calcVersion=?,dilutionFactor=?,aliquotId=?,version=?,createdAt=?,updatedAt=? WHERE id=?`)
         .run(...['status','evidenceData','evidenceHash','instrumentId','executedMethodRevision','author','authorName','qcBatchId','materialAliquot',
-            'id','workItemId','orderLineId','attemptNo','batchId','reason','requestedBy','requestedAt','parentAttemptId','note','rawData','calcVersion','dilutionFactor','aliquotId','legacyAttemptNoConflict','version','createdAt','updatedAt']
+            'id','workItemId','orderLineId','attemptNo','batchId','reason','requestedBy','requestedAt','parentAttemptId','note','rawData','calcVersion','dilutionFactor','aliquotId','version','createdAt','updatedAt']
             .map(name => values[name]), 'open-attempt');
 }
 test('#191 actual SQLite guards permit exactly one NULL-only first fill and freeze it immediately', () => {
@@ -546,9 +548,8 @@ test('#191 attempt audit events cannot be rewritten, retagged or deleted; other 
         db.prepare('INSERT INTO AuditLog(id,entity,entityId,action,performedBy,details) VALUES (?,?,?,?,?,?)')
             .run('attempt-event', 'WORK_ATTEMPT', 'open-attempt', 'CREATED', 'authenticated-tech', '{"from":null,"to":"OPEN"}');
         const before = db.prepare('SELECT * FROM AuditLog WHERE id=?').get('attempt-event');
-        for (const sql of ['UPDATE AuditLog SET details=? WHERE id=?', 'UPDATE AuditLog SET entity=? WHERE id=?']) {
-            expect(() => db.prepare(sql).run('changed', 'attempt-event')).toThrow('WORK_ATTEMPT_EVENT_IMMUTABLE');
-        }
+        expect(() => db.prepare('UPDATE AuditLog SET details=? WHERE id=?').run('changed','attempt-event')).toThrow('WORK_ATTEMPT_EVENT_IMMUTABLE');
+        expect(() => db.prepare('UPDATE AuditLog SET entity=? WHERE id=?').run('changed','attempt-event')).toThrow('WORK_ATTEMPT_EVENT_IMMUTABLE');
         expect(() => db.prepare('DELETE FROM AuditLog WHERE id=?').run('attempt-event')).toThrow('WORK_ATTEMPT_EVENT_IMMUTABLE');
         expect(db.prepare('SELECT * FROM AuditLog WHERE id=?').get('attempt-event')).toEqual(before);
         expect(db.prepare('UPDATE AuditLog SET details=? WHERE id=?').run('ordinary updated details', 'original').changes).toBe(1);
