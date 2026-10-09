@@ -299,7 +299,7 @@ test.each([
 test('a method with no active calculation keeps the generic #197 calibration maximum',async()=>{
     const f=context;
     await activations.change(f.db,f.manager,f.template.id,{labId:f.lab.id,analysisCode:'P_OLSEN',methodologyId:f.method.id,
-        expectedVersion:f.template.version,action:'DEACTIVATE',expectedActivationId:f.activation.id,reason:'Owned non-calculated method comparison'});
+        expectedVersion:f.template.version,action:'DEACTIVATE',expectedActivationId:f.activation.id,verifiedAgainstSop:true,reason:'Owned non-calculated method comparison'});
     await require('../../services/policyService').change(f.manager,f.lab.id,{reason:'Owned generic maximum',changes:[
         {key:'results.calibrationMax',analysisCode:'P_OLSEN',methodologyId:f.method.id,value:3}]},{db:f.db});
     await f.start();

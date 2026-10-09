@@ -99,7 +99,8 @@ describe('Audit 4.2: real DOM barcode wedge and value-cell boundaries', () => {
         scroll = jest.fn(); window.HTMLElement.prototype.scrollIntoView = scroll;
         host = document.getElementById('root');
         createRoot = require('../../../client/node_modules/react-dom/client').createRoot; reactRoot = createRoot(host);
-        axios = { get: jest.fn(async () => ({ data: { data: { active: null, rows: [] } } })), post: jest.fn(async () => ({ data: { data: {} } })) };
+        axios = { get: jest.fn(async url => ({ data: { data: url === '/api/calculation-templates' ? [] : { active: null, rows: [] } } })),
+            post: jest.fn(async () => ({ data: { data: {} } })) };
         audio = { playSuccessChime: jest.fn(), playErrorBuzz: jest.fn() };
         for (const file of Object.keys(cache)) delete cache[file];
     });

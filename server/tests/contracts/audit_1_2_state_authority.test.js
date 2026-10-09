@@ -97,6 +97,7 @@ beforeAll(async () => {
         email: `${user.username}@example.test`, password: 'isolated-fixture', role: user.role, labId: user.labId } });
     for (const code of ['DRYING', 'PREPARATION', 'PH_H2O']) await client.analysis.create({ data: { code, name: code } });
     const soc = require('../../seeds/data/catalogue.json').analyses.find(row => row.code === 'SOC');
+    await client.unit.create({ data: require('../../seeds/units').UNITS.find(row => row.code === soc.unitCode) });
     await client.analysis.create({ data: { code: soc.code, name: soc.name, unitCode: soc.unitCode, units: soc.units, isGlobal: true } });
 });
 
