@@ -255,13 +255,17 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     const rowHeight=Math.max(16,valueHeight+8);
                     const noteText=notReportable ? String(item.value ?? '') : '';
                     const noteHeight=noteText ? doc.font('Helvetica').fontSize(7.5).heightOfString(noteText,{width:pageWidth-12})+8 : 0;
-                    if (currentY+rowHeight+noteHeight > 750) {
+                    // Keep short explanations with their row. Long explanations
+                    // flow across pages, reserving the publication footer.
+                    const fitsWholePage=rowHeight+noteHeight <= 710;
+                    if (currentY+rowHeight+(fitsWholePage ? noteHeight : 28) > 750) {
                         doc.addPage();
                         currentY = 40;
                     }
 
                     const bg = rowCount % 2 === 0 ? '#FFFFFF' : '#F8FAFC';
-                    doc.rect(startX, currentY, pageWidth, rowHeight+noteHeight).fillAndStroke(bg, cBorder);
+                    const noteFits=currentY+rowHeight+noteHeight <= 750;
+                    doc.rect(startX, currentY, pageWidth, rowHeight+(noteFits ? noteHeight : 0)).fillAndStroke(bg, cBorder);
 
                     // Capture values for scientific checks
                     const paramUpper = String(item.param).toUpperCase();
@@ -271,7 +275,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     if (paramUpper === 'SOC') socVal = Number(item.value);
                     if (paramUpper === 'TN') tnVal = Number(item.value);
 
-                    const interp = getInterpretation(item.param, item.value);
+                    const interp = notReportable ? '' : getInterpretation(item.param, item.value);
 
                     doc.fillColor(cDark).font('Helvetica-Bold').fontSize(7.5)
                         .text(item.name || item.param, col1 + 6, currentY + 4, { width: 145, ellipsis: true });
@@ -288,9 +292,14 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     doc.font('Helvetica-Bold').fontSize(7.5).fillColor(interp.includes('Optimal') || interp.includes('Adequate') ? '#059669' : interp.includes('Low') || interp.includes('Acidic') ? '#D97706' : cDark)
                         .text(interp, col5 + 4, currentY + 4, { width: 100, ellipsis: true });
 
-                    if(noteText)doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                        .text(noteText,startX+6,currentY+rowHeight+4,{width:pageWidth-12});
-                    currentY += rowHeight+noteHeight;
+                    if(noteText) {
+                        const bottomMargin=doc.page.margins.bottom;
+                        doc.page.margins.bottom=92;
+                        doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
+                            .text(noteText,startX+6,currentY+rowHeight+4,{width:pageWidth-12});
+                        currentY=doc.y+4;
+                        doc.page.margins.bottom=bottomMargin;
+                    } else currentY += rowHeight;
                     rowCount++;
                 });
             });
