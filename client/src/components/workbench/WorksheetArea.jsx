@@ -261,7 +261,8 @@ export default function WorksheetArea({
 
     const changeResultDraft = (id, value, extra) => {
         setExcludedDrafts(previous => { const next = new Map(previous); next.delete(id); return next; });
-        onDraftChange(id, value, extra);
+        if (extra === undefined) onDraftChange(id, value);
+        else onDraftChange(id, value, extra);
     };
 
     const handlePasteApply = (pastedUpdates) => {

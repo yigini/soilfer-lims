@@ -75,7 +75,7 @@ test('mouse exclusion lasts until the next draft change; Record all ready uses t
     await view.render(); expect(view.find('record-all-ready').props['aria-disabled']).toBe(true);
     const editor = view.all().find(node => node.type === view.children['./NumericEditor']);
     row.draft.value = '6.3'; editor.props.onChange('6.3'); await view.render();
-    view.find('record-all-ready').props.onClick(); expect(record).toHaveBeenCalledWith(['one']); expect(change).toHaveBeenCalledWith('one', '6.3', undefined);
+    view.find('record-all-ready').props.onClick(); expect(record).toHaveBeenCalledWith(['one']); expect(change).toHaveBeenCalledWith('one', '6.3');
     expect(view.axios.post).not.toHaveBeenCalled();
 });
 

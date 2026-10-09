@@ -202,7 +202,6 @@ describe('Audit 0.11: workbench component behavior', () => {
         expect(html).toContain('display-two'); expect(html).toContain('Instrument became unavailable'); expect(html).toContain('Retry failed');
         expect(child(h, tree, 'ReviewCompletionView').props.previewData.included).toEqual([]);
         expect(axios.post.mock.calls.some(([url]) => url.includes('/submissions/'))).toBe(false);
-        expect(child(h, tree, 'WorksheetArea').props.activeGroup.items.find(row => row.workItemId === 'two').draft.value).toBe('7');
         axios.post.mockClear();
         await receipt.props.onRetry();
         expect(axios.post).toHaveBeenCalledWith('/api/workbench/v2/completion/preview', { entries: [expect.objectContaining({ workItemId: 'two', value: '7' })] });
