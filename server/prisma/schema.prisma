@@ -1841,6 +1841,11 @@ model SampleAmendment {
   affectedResults    String?   // JSON array of result IDs
   affectedReports    String?   // JSON array of report IDs
   impactAssessment   String?
+  requestPayload     String?   // Immutable JSON request, #210; historical rows remain NULL.
+  version            Int?      // Compare-and-swap revision for the new request/authorise flow.
+  priorApprovedBy    String?
+  priorApprovedAt    DateTime?
+  selectedWorkItemIds String?  // Immutable JSON array of the selected current order-line IDs.
   authorizedBy       String?
   authorizedAt       DateTime?
   resolution         String?
