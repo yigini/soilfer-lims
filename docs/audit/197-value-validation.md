@@ -56,3 +56,14 @@ No production migration/backfill count or full-suite pass is claimed.
 199's future run-curve calibration maximum is deferred and will take precedence.
 Production freeze remains; #195's #196-merge prerequisite is now met.
 No production-host action.
+
+Full validation at ba0b3171 exposed two integration gaps before completing:
+the existing complete-startup fixture needed the actual #197 installer, and
+the new SQL tests directly seeded protected Sample/WorkItem/Result rows and
+used an unsupported inline migration-loader expression. The startup fixture
+now installs the new prerequisite and additionally checks its read-only gate
+before listening, with every prior assertion retained. New SQL tests use
+qcGateFixture and the actual request and Result writers, retaining all SQL
+refusal/history assertions and adding terminal-insert refusal. The fresh-DDL
+test binds the exact migration source to a const for scanner inspection; no
+scanner exemption or existing test weakening was added. Fresh validation follows.
