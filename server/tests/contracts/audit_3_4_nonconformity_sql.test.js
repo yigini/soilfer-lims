@@ -7,11 +7,13 @@ const owned=[];afterEach(()=>{for(const db of owned.splice(0))db.close();});
 function fixture() {
     const db=new Database(':memory:');owned.push(db);db.pragma('foreign_keys=ON');
     db.exec('CREATE TABLE Lab(id TEXT PRIMARY KEY); INSERT INTO Lab VALUES (\'lab-a\'),(\'lab-b\'); CREATE TABLE ProficiencyRound(id TEXT PRIMARY KEY,labId TEXT NOT NULL,zScore REAL,outcome TEXT);');
-    db.exec(loadProficiencyMigrationSource().sql);
+    const predecessor=loadProficiencyMigrationSource();
+    db.exec(predecessor.sql);
     db.prepare('INSERT INTO ProficiencyRound(id,labId,zScore,outcome,ncrStatus) VALUES (?,?,?,?,?)').run('historical','lab-a',4,'UNSATISFACTORY','PENDING');
     db.prepare('INSERT INTO ProficiencyRound(id,labId,zScore,outcome) VALUES (?,?,?,?)').run('correction','lab-a',1,'SATISFACTORY');
     const retained=db.prepare('SELECT id,labId,zScore,outcome,ncrStatus FROM ProficiencyRound ORDER BY id').all();
-    db.exec(loadNonconformityMigrationSource().sql);
+    const successor=loadNonconformityMigrationSource();
+    db.exec(successor.sql);
     expect(db.prepare('SELECT id,labId,zScore,outcome,ncrStatus FROM ProficiencyRound ORDER BY id').all()).toEqual(retained);
     const raise=(id,patch={})=>{
         const row={id,labId:'lab-a',source:'PT',refType:'ProficiencyRound',refId:id==='history-ncr'?'historical':'correction',
@@ -42,13 +44,14 @@ test.each(['missing','otherLab','otherSource','otherType','otherRound'])('PT RAI
 });
 test.each(['newPending','nullPending','pendingNull','nullLinked','raiseWithoutLink','insertRaiseWithoutLink'])('PT %s refuses with zero writes',kind=>{
     const f=fixture();f.raise('ncr');const before=f.snapshot();
-    const sql={newPending:'INSERT INTO ProficiencyRound(id,labId,ncrStatus) VALUES (\'new\',\'lab-a\',\'PENDING\')',
-        nullPending:'UPDATE ProficiencyRound SET ncrStatus=\'PENDING\' WHERE id=\'correction\'',
-        pendingNull:'UPDATE ProficiencyRound SET ncrStatus=NULL WHERE id=\'historical\'',
-        nullLinked:'UPDATE ProficiencyRound SET nonconformityId=\'ncr\' WHERE id=\'correction\'',
-        raiseWithoutLink:'UPDATE ProficiencyRound SET ncrStatus=\'RAISED\' WHERE id=\'correction\'',
-        insertRaiseWithoutLink:'INSERT INTO ProficiencyRound(id,labId,ncrStatus) VALUES (\'new\',\'lab-a\',\'RAISED\')'}[kind];
-    expect(()=>f.db.exec(sql)).toThrow('PT_NCR_STATUS_INVALID');expect(f.snapshot()).toBe(before);
+    const write=()=>{
+        if(['newPending','insertRaiseWithoutLink'].includes(kind))return f.db.prepare('INSERT INTO ProficiencyRound(id,labId,ncrStatus) VALUES (?,?,?)')
+            .run('new','lab-a',kind==='newPending'?'PENDING':'RAISED');
+        const status={nullPending:'PENDING',pendingNull:null,nullLinked:null,raiseWithoutLink:'RAISED'}[kind];
+        return f.db.prepare('UPDATE ProficiencyRound SET ncrStatus=?,nonconformityId=? WHERE id=?')
+            .run(status,kind==='nullLinked'?'ncr':null,kind==='pendingNull'?'historical':'correction');
+    };
+    expect(write).toThrow('PT_NCR_STATUS_INVALID');expect(f.snapshot()).toBe(before);
 });
 test.each(['clear','replace','pending','null'])('a RAISED PT %s link/status refuses with zero writes',kind=>{
     const f=fixture();f.raise('ncr');f.db.exec('UPDATE ProficiencyRound SET ncrStatus=\'RAISED\',nonconformityId=\'ncr\' WHERE id=\'correction\'');

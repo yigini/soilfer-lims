@@ -82,7 +82,10 @@ test.each(['partialColumn','oldGuards','oldReceipt','extraColumn','partialNewGua
     const file=kind==='partialColumn'?historical():fresh();
     raw(file,db=>{
         if(kind==='partialColumn')db.exec('ALTER TABLE ProficiencyRound ADD COLUMN nonconformityId TEXT;');
-        if(kind==='oldGuards')db.exec(loadProficiencyMigrationSource().guardsSql);
+        if(kind==='oldGuards') {
+            const predecessor=loadProficiencyMigrationSource();
+            db.exec(predecessor.guardsSql);
+        }
         if(kind==='oldReceipt')db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run('189_proficiency_evidence',JSON.stringify({migrationSha256:loadProficiencyMigrationSource().sha256}));
         if(kind==='extraColumn')db.exec('ALTER TABLE NonconformityReport ADD COLUMN stray TEXT;');
         if(kind==='partialNewGuard')db.exec('CREATE TRIGGER NonconformityReport_delete_guard BEFORE DELETE ON NonconformityReport BEGIN SELECT RAISE(ABORT,\'NCR_DELETE_REFUSED\'); END;');

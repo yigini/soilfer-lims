@@ -9,13 +9,12 @@ const owned = [];
 beforeAll(async () => {
     ownedDatabase = await require('../helpers/qcGateFixture').qcGateFixture();
     prisma = ownedDatabase.db;
-    await jest.isolateModulesAsync(async () => {
-        jest.doMock('../../prisma', () => prisma);
-        app = require('../../app');
-    });
-    jest.dontMock('../../prisma');
+    // Keep the owned connection installed while actual requests execute:
+    // authentication loads session validation lazily at request time.
+    jest.doMock('../../prisma', () => prisma);
+    app = require('../../app');
 });
-afterAll(async () => { if (ownedDatabase) await ownedDatabase.close(); });
+afterAll(async () => { try { if (ownedDatabase) await ownedDatabase.close(); } finally { jest.dontMock('../../prisma'); } });
 
 test.each([null, 0, true, false, '', 'invalid-date'])('explicit invalid PT date %s refuses create and update with zero writes', async date => {
     const f = await fixture(), before = await f.snapshot(), created = await f.post({ ...f.body, date });

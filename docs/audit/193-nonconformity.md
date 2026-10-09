@@ -80,3 +80,9 @@ No full-suite pass or production migration/backfill is claimed.
 The workflow scanner inspects the independently byte-bound NCR DDL/loader,
 including schema and guard sections, while retaining all writer restrictions.
 No new test-factory caller or writer exemption is added.
+
+The four new SQL probes use fixed byte-bound source variables or parameterized
+PT statements, so the existing scanner can inspect their actual SQL. The PT
+HTTP fixture holds its owned Prisma injection for the entire request lifetime,
+including lazy principal validation; real authentication and permissions stay
+enabled.
