@@ -92,11 +92,17 @@ test('REVIEWER_PICKS refuses implicit texture, but an explicit DERIVED confirmat
 test('a replacement fraction selection makes retained TEXTURE stale without changing it',async()=>{
     const f=await fixture();await f.acceptFractions();expect(await f.review('TEXTURE')).toMatchObject({status:200});
     const first=(await f.read()).rows[0],item=f.textureItems.SAND;
+    const frozen=await Promise.all([f.db.workAttempt.findMany({where:{workItemId:f.textureItems.TEXTURE.id},orderBy:{id:'asc'}}),
+        f.db.result.findMany({where:{sampleId:f.sample.id,param:'TEXTURE'},orderBy:{id:'asc'}}),
+        f.db.reviewDecision.findMany({where:{workItemId:f.textureItems.TEXTURE.id},orderBy:{id:'asc'}})]);
     const current=await rules.inTransaction(f.db,tx=>selections.readReportedSelection(tx,item));
     await selections.replaceReportedSelection(f.db,item.id,f.actor,{expectedGroupId:current.rows[0].selectionGroupId,
         selection:{mode:'ATTEMPT',attemptIds:JSON.parse(current.rows[0].attemptIds),reason:'Fraction selection re-confirmed'}});
     await expect(f.read()).rejects.toMatchObject({code:'REPORTED_VALUE_STALE'});
     expect(await f.db.reportedValueSelection.findUnique({where:{id:first.id}})).toEqual(first);
+    expect(await Promise.all([f.db.workAttempt.findMany({where:{workItemId:f.textureItems.TEXTURE.id},orderBy:{id:'asc'}}),
+        f.db.result.findMany({where:{sampleId:f.sample.id,param:'TEXTURE'},orderBy:{id:'asc'}}),
+        f.db.reviewDecision.findMany({where:{workItemId:f.textureItems.TEXTURE.id},orderBy:{id:'asc'}})])).toEqual(frozen);
 });
 
 test('canonical uniqueness prevents a duplicate owner; unresolved retained owners refuse layout with ids and zero writes',async()=>{
