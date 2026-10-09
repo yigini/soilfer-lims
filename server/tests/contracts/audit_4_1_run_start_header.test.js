@@ -55,7 +55,7 @@ test('40 policy-permitted samples start atomically with the LabMethodDefault and
     await withQcRunHttp(f.db, f.actor, async (app, token) => {
         for (const item of f.items) {
             const response = await request(app).post(`/api/results/${item.sampleId}`).set('Authorization', `Bearer ${token}`)
-                .send({ measurements: [{ param: item.analysis, value: '7.1' }] });
+                .send({ measurements: [{ param: item.analysis, value: '7.1', methodologyId: f.method.id }] });
             expect(response.body).toMatchObject({ success: true }); expect(response.status).toBe(200);
             const result = await f.db.result.findFirst({ where: { sampleId: item.sampleId, param: item.analysis } });
             expect(result).toMatchObject({ batchId: batch.id, equipmentId: batch.instrumentId });
@@ -70,7 +70,7 @@ test.each(['null', 'same', 'different', 'unready', 'method-changed'])('real HTTP
     const f = await fixture(), batch = await startWorkbenchRun(f.db, f.actor, f.startInput);
     const blank = batch.positions.find(row => row.kind === 'BLANK');
     await writeNativeMeasurements(f.db, batch.id, f.actor, { measurements: [{ positionId: blank.id, value: 0.01 }] });
-    const measurement = { param: f.analysisCode, value: '7.1' };
+    const measurement = { param: f.analysisCode, value: '7.1', methodologyId: f.method.id };
     if (kind === 'null') measurement.equipmentId = null;
     if (kind === 'same') measurement.equipmentId = f.instrument.id;
     if (kind === 'different') measurement.equipmentId = 'different-from-run';
@@ -87,6 +87,37 @@ test.each(['null', 'same', 'different', 'unready', 'method-changed'])('real HTTP
             expect(response.body.code).toBe({ different: 'RESULT_INSTRUMENT_MISMATCH', unready: 'INSTRUMENT_CALIBRATION_OVERDUE', 'method-changed': 'RESULT_METHOD_REVISION_CHANGED' }[kind]);
             expect(await snapshot(f)).toEqual(before);
         }
+    }, { repeatCommands: true });
+});
+
+test.each(['no-batch', 'unstarted', 'legacy-null'])('real HTTP keeps the existing WorkItem/live-revision rule for %s', async kind => {
+    const f = await fixture(); let item = f.items[0];
+    if (kind === 'unstarted') await buildNativeRun(f.db, f.actor, f.input);
+    if (kind === 'legacy-null') {
+        const sampleId = randomUUID(), workItemId = randomUUID(), batchId = randomUUID();
+        await createSampleFixture(f.db, { data: { id: sampleId, originalId: randomUUID(), assignedLab: f.labId,
+            status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE' } });
+        await f.db.batch.create({ data: { id: batchId, labId: f.labId, analysis: f.analysisCode, instrumentId: null,
+            startedAt: new Date(), status: 'OPEN', createdBy: f.actor.username, profile: 'RACK_40',
+            qcResults: '{}', history: '[]', workItemIds: JSON.stringify([workItemId]) } });
+        item = await createWorkItemFixture(f.db, { data: { id: workItemId, sampleId, labId: f.labId,
+            analysis: f.analysisCode, methodologyId: f.method.id, status: 'IN_PROGRESS', batchId } });
+        for (const analysis of ['DRYING', 'PREPARATION']) await createWorkItemFixture(f.db, { data: {
+            id: randomUUID(), sampleId, labId: f.labId, analysis, status: 'COMPLETED', history: '[]' } });
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(f.db, batchId);
+    }
+    await f.db.workItem.update({ where: { id: item.id }, data: { equipmentId: f.instrument.id } });
+    await f.db.methodology.update({ where: { id: f.method.id }, data: { version: 8 } });
+    const context = await require('../../services/resultWriteService').resolveResultRunContext(f.db, await f.db.workItem.findUnique({ where: { id: item.id } }));
+    expect(context).toEqual({ equipmentId: f.instrument.id, instrumentSource: 'WORK_ITEM', frozenMethodRevision: null });
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const response = await request(app).post(`/api/results/${item.sampleId}`).set('Authorization', `Bearer ${token}`)
+            .send({ measurements: [{ param: f.analysisCode, value: '7.1', methodologyId: f.method.id }] });
+        expect(response.body).toMatchObject({ success: true }); expect(response.status).toBe(200);
+        const result = await f.db.result.findFirst({ where: { sampleId: item.sampleId, param: f.analysisCode } });
+        expect(result.equipmentId).toBe(f.instrument.id);
+        expect(await f.db.workAttempt.findUnique({ where: { id: result.attemptId } })).toMatchObject({ instrumentId: f.instrument.id, executedMethodRevision: '8' });
+        expect((await f.db.workItem.findUnique({ where: { id: item.id } })).equipmentId).toBe(f.instrument.id);
     }, { repeatCommands: true });
 });
 
