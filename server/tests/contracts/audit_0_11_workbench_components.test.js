@@ -52,6 +52,12 @@ function harness(name, { groups, width = 1200, axios, offline } = {}) {
     const component = load(path.resolve(__dirname, `../../../client/src/components/workbench/${name}.jsx`)).default;
     return { children, render(props) { stateCursor = refCursor = 0; return component(props); } };
 }
+test('Audit4.1: the default workbench opens My runs while explicit sample navigation keeps its worksheet', () => {
+    const defaultView = harness('WorkbenchShell', { groups: [{ analysis: 'PH_H2O', items: [] }] });
+    expect(child(defaultView, defaultView.render({}), 'MyRunsPanel')).toBeDefined();
+    const linkedView = harness('WorkbenchShell', { groups: [{ analysis: 'PH_H2O', items: [] }] });
+    expect(child(linkedView, linkedView.render({ initialAnalysis: 'PH_H2O' }), 'WorksheetArea')).toBeDefined();
+});
 function elements(tree, predicate) {
     if (Array.isArray(tree)) return tree.flatMap(node => elements(node, predicate));
     if (!tree || typeof tree !== 'object') return [];

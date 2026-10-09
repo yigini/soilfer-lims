@@ -757,6 +757,7 @@ export default function WorkbenchShell({
                     <WorkbenchQueue
                         groups={groups}
                         onOpenWorksheet={(analysis, sampleId) => {
+                            setActiveRunId(null); setOpenedRun(null);
                             setActiveAnalysis(analysis);
                             if (sampleId) setActiveSampleId(sampleId);
                             setActiveTab('worksheet');

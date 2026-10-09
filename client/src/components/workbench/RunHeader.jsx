@@ -15,7 +15,7 @@ export default function RunHeader({ batch, analysisCode, canEdit = false, onChan
     useEffect(() => {
         let current = true; setChoices([]); setLotId(''); setRole(''); setWithdrawId(''); setReason(''); setError(null);
         if (editable) axios.get(`/api/qc/batches/${encodeURIComponent(batch.id)}/reagent-lot-options`)
-            .then(response => { if (current) setChoices(response.data.data || []); })
+            .then(response => { if (current) setChoices(Array.isArray(response.data.data) ? response.data.data : []); })
             .catch(() => { if (current) setError(t('runFirst.lotsLoadFailed')); });
         return () => { current = false; };
     }, [batch.id, editable, t]);
