@@ -55,7 +55,7 @@ function installNonconformityReports({dbPath,apply=false}={}) {
             db.exec(source.guardsSql);
             const expected={...before,ProficiencyRound:before.ProficiencyRound.map(row=>current.classification==='PRE_193'?{...row,nonconformityId:null}:row)};
             if(e.fingerprint(retainedRows(db))!==e.fingerprint(expected)||db.prepare('SELECT count(*) n FROM NonconformityReport').get().n!==0||
-                e.fingerprint(db.prepare('SELECT * FROM _schema_migrations WHERE id NOT IN (?,?) ORDER BY id').all())!==
+                e.fingerprint(db.prepare('SELECT * FROM _schema_migrations WHERE id NOT IN (?,?) ORDER BY id').all(e.PT_MARKER,e.MARKER))!==
                 e.fingerprint(ledger.filter(row=>![e.PT_MARKER,e.MARKER].includes(row.id)))||
                 !e.ptReceiptMatches(db)||current.classification==='PRE_193'&&
                 e.fingerprint(db.prepare('SELECT * FROM _schema_migrations WHERE id=?').all(e.PT_MARKER))!==e.fingerprint(ledger.filter(row=>row.id===e.PT_MARKER)))
