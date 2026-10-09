@@ -17,6 +17,7 @@ const stateRules = require('../services/workflowStateRules');
 const { transitionWorkItem } = require('../services/workItemStateService');
 const { transitionSample } = require('../services/sampleStateService');
 const { deriveSubmissionLifecycle } = require('../services/submissionLifecycleService');
+const { sampleReplicateQueueView } = require('../services/sampleReplicateQueueService');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/workbench/queue
@@ -270,7 +271,9 @@ exports.getQueue = async (req, res) => {
             whereClause.status = { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] };
         } else {
             // Default: 'my_work'
-            whereClause.status = { in: ['ASSIGNED', 'IN_PROGRESS', 'REPEAT_REQUIRED', 'REANALYSIS_REQUIRED'] };
+            // Retain only completed rows with an eligible absent required/third
+            // reading below; other completed rows keep the existing views.
+            whereClause.status = { in: ['ASSIGNED', 'IN_PROGRESS', 'REPEAT_REQUIRED', 'REANALYSIS_REQUIRED', 'COMPLETED'] };
         }
 
         if (searchTerm) {
@@ -521,6 +524,11 @@ exports.getQueue = async (req, res) => {
             groupsMap[code].equipmentRequired ||= readiness.equipmentRequired;
 
             const isSpectral = SPECTRAL_ACQUISITION_CODES.includes(code);
+            const isTexture = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(code);
+            const sampleReplicates = !isSpectral && !isTexture && !operationalChecklists[code]
+                ? await sampleReplicateQueueView(prisma, item, user, readiness) : null;
+            if (!['ready_to_submit', 'submitted', 'completed'].includes(view) && item.status === 'COMPLETED' &&
+                !sampleReplicates?.canAppend && targetScopedItem?.id !== item.id) continue;
             const modality = (code === 'SPEC_MIR' || code === 'SPEC_FTIR') ? 'MIR' : 'NIR';
             const scans = isSpectral ? (spectralMap[`${item.sampleId}::${modality}`] || []) : [];
             const latestScan = scans.length > 0 ? scans[0] : null;
@@ -562,6 +570,7 @@ exports.getQueue = async (req, res) => {
                 rackPosition: item.rackPosition !== undefined ? item.rackPosition : null,
                 batchId: item.batchId || null,
                 readiness,
+                sampleReplicates,
                 draft: itemDraft,
                 spectralScans: isSpectral ? scans : undefined,
                 hasSpectrum: scans.length > 0,
@@ -582,7 +591,7 @@ exports.getQueue = async (req, res) => {
         }
 
         // Sort groups: Operational Gates first, then alphabetically
-        const groups = Object.values(groupsMap).sort((a, b) => {
+        const groups = Object.values(groupsMap).filter(group => group.items.length > 0).sort((a, b) => {
             if (a.category === 'Operational Gates' && b.category !== 'Operational Gates') return -1;
             if (b.category === 'Operational Gates' && a.category !== 'Operational Gates') return 1;
             return a.analysisName.localeCompare(b.analysisName);
@@ -608,7 +617,7 @@ exports.getQueue = async (req, res) => {
             totalReanalysis: items.filter(i => workflow.normalizeWorkItemState(i.status) === 'REPEAT_REQUIRED').length,
             totalDrafts: userDrafts.length,
             totalGroups: groups.length,
-            totalItems: items.length,
+            totalItems: groups.reduce((total, group) => total + group.items.length, 0),
             myWorkCount,
             readyToSubmitCount,
             submittedCount,

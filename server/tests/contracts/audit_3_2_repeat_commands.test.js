@@ -9,16 +9,30 @@ afterEach(async () => { for (const f of owned.splice(0)) await f.close(); });
 
 async function fixture({ replicates = 1, role = 'LAB_TECHNICIAN', criteria = {}, recorded = true } = {}) {
     const f = await qcGateFixture({criteria}); owned.push(f);
+    // #198 pin6080751135: this suite explicitly exercises two required readings.
+    // The production/default policy remains one; no writer/fixture exemption.
+    await f.setPolicy([{key:'results.replicatesRequired',value:2}]);
     const username = 'repeat-actor-' + randomUUID();
     const user = await f.db.user.create({ data: { id: randomUUID(), username, email: randomUUID() + '@example.test',
         password: 'owned-http-fixture', role, labId: f.labId } });
     f.actor = { id: user.id, username, role, labId: f.labId };
     await f.db.workItem.update({ where: { id: f.items[0].id }, data: { assignedTo: username, equipmentId: f.instrument.id } });
-    f.record = async (count = 1, extra = {}) => inTransaction(f.db, tx => writeResultsExecution(tx, {
+    const record = async (count = 1, extra = {}, firstPair = false) => inTransaction(f.db, tx => writeResultsExecution(tx, {
         sampleId: f.items[0].sampleId, workItemId: f.items[0].id, actor: f.actor,
-        measurements: Array.from({ length: count }, (_, index) => ({ param: f.analysisCode, value: String(7 + index / 10),
+        measurements: Array.from({ length: count }, (_, index) => ({ param: f.analysisCode, value: String(firstPair && index===1 ? 12 : 7 + index / 10),
             equipmentId: f.instrument.id, replicateNo: index + 1 })), ...extra
     }));
+    f.record = async (count = 1, extra = {}) => {
+        if(count!==3)return record(count,extra);
+        // Create the retained three-reading parent through the actual writer:
+        // first record a failing pair, then append its third reading.
+        const pair=await record(2,extra,true);
+        const third=await inTransaction(f.db,tx=>writeResultsExecution(tx,{
+            sampleId:f.items[0].sampleId,workItemId:f.items[0].id,actor:f.actor,
+            measurements:[{param:f.analysisCode,value:'7.2',equipmentId:f.instrument.id,replicateNo:3}]
+        }));
+        return [...pair,...third];
+    };
     f.submit=async()=> {
         await require('../../services/workItemStateService').transitionWorkItem(f.items[0].id,'COMPLETED',f.actor,'Recorded execution ready for submission',{},f.db);
         return require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,sampleId:f.items[0].sampleId,
@@ -265,11 +279,17 @@ test('a failed correction event rolls back the new Result, old supersession and 
 
 test.each([[2,1,[2],null],[3,2,[3],null],[2,1,[2],3]])('a repeat with %i parent replicas and %i filled refuses missing %j even with extra replica %s',async(replicates,filled,missing,extra)=>{
     const f=await fixture({replicates,role:'LAB_MANAGER'}),original=f.results,parent=f.attempt;
+    if(replicates===3)await f.setPolicy([{key:'results.replicatesRequired',value:1}]);
     const repeat=await f.command({reason:'CONFIRMATION',note:'Remeasure the complete parent execution'});
     expect(repeat.status).toBe(201);
     const child=repeat.body.attempt;
     await f.record(filled);
-    if(extra)expect((await f.save([{param:f.analysisCode,value:'7.3',replicateNo:extra,equipmentId:f.instrument.id}])).status).toBe(200);
+    if(extra){
+        const beforeExtra=await f.all();
+        const refusal=await f.save([{param:f.analysisCode,value:'7.3',replicateNo:extra,equipmentId:f.instrument.id}]);
+        expect({status:refusal.status,code:refusal.body.code}).toEqual({status:409,code:'REPLICATE_NOT_REQUIRED'});
+        expect(await f.all()).toEqual(beforeExtra);
+    }
     for(const old of original.filter(row=>missing.includes(row.replicateNo))) {
         expect(await f.db.result.findUnique({where:{id:old.id}})).toEqual(old);
     }
@@ -285,7 +305,7 @@ test.each([[2,1,[2],null],[3,2,[3],null],[2,1,[2],3]])('a repeat with %i parent 
         replicateNo,equipmentId:f.instrument.id})));
     expect({status:appended.status,body:appended.body}).toMatchObject({status:200});
     const current=await f.db.result.findMany({where:{sampleId:f.items[0].sampleId,isCurrent:true},orderBy:{replicateNo:'asc'}});
-    const count=replicates+(extra?1:0);
+    const count=replicates;
     expect(current).toHaveLength(count);
     expect(current.map(row=>row.replicateNo)).toEqual(Array.from({length:count},(_,index)=>index+1));
     expect(current.every(row=>row.attemptId===child.id)).toBe(true);
@@ -294,7 +314,7 @@ test.each([[2,1,[2],null],[3,2,[3],null],[2,1,[2],3]])('a repeat with %i parent 
     expect(await f.db.workAttempt.findUnique({where:{id:parent.id}})).toEqual({...parent,status:'QUESTIONED'});
     await submit();
     expect(await f.db.workAttempt.findUnique({where:{id:child.id}})).toMatchObject({status:'SUBMITTED'});
-    expect(await f.db.result.count({where:{sampleId:f.items[0].sampleId}})).toBe(replicates*2+(extra?1:0));
+    expect(await f.db.result.count({where:{sampleId:f.items[0].sampleId}})).toBe(replicates*2);
 });
 
 test('the ordinary save appends an absent replicate to the same frozen RECORDED attempt, then refuses cell changes and post-submit additions',async()=>{

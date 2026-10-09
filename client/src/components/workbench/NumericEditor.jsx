@@ -22,7 +22,8 @@ export default function NumericEditor({
     inputRef = null,
     numberFormat,
     onBarcodeRejected = null,
-    onRevertValue = null
+    onRevertValue = null,
+    worksheetColumn = null
 }) {
     const Input = onBarcodeRejected ? BarcodeSafeInput : 'input';
     const focusValue = useRef(null);
@@ -50,6 +51,7 @@ export default function NumericEditor({
                 disabled={disabled}
                 placeholder={placeholder}
                 aria-label={ariaLabel}
+                data-worksheet-column={worksheetColumn ?? undefined}
                 aria-invalid={isInvalid}
                 className={`w-28 px-2.5 py-1.5 text-sm font-mono tabular-nums rounded-md border transition-colors
                     bg-sf-surface text-sf-text placeholder:text-sf-muted

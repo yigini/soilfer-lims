@@ -6,6 +6,7 @@ afterEach(async()=>{for(const f of owned.splice(0))await f.close();});
 test('actual acceptance uses a started run frozen r after a later method-specific QcRule revision',async()=>{
     const f=await qcGateFixture({criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0,repeatabilityLimit:1}});
     owned.push(f);
+    await f.setPolicy([{key:'results.replicatesRequired',value:2,analysisCode:f.items[0].analysis,methodologyId:f.method.id}]);
     const native=require('../../services/qcNativeRunService');
     const run=await native.startNativeRun(f.db,(await native.buildNativeRun(f.db,f.actor,f.input)).id,f.actor);
     const item=await f.db.workItem.findUnique({where:{id:f.items[0].id}});

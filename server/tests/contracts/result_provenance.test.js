@@ -174,6 +174,10 @@ describe('WP-31: Result Provenance Tracking', () => {
     });
 
     test('5. WP-40: saveResults supports multiple replicates without overwriting previous determination', async () => {
+        await require('../../services/policyService').change(repeatReviewer, analyst.labId, {
+            reason: 'Explicit two-reading policy for the retained provenance contract',
+            changes: [{ key: 'results.replicatesRequired', value: 2, analysisCode: 'TOTAL_N' }]
+        }, { db: prisma });
         const reqR1 = {
             params: { sampleId: testSampleId },
             body: {
