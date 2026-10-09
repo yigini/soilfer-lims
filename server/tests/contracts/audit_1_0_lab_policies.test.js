@@ -238,7 +238,8 @@ describe('Audit 1.0: persistent lab policies', () => {
     test('report generation freezes the lab policy version and content across later changes', async () => {
         const sampleId = id('POL-REPORT');
         await edit([], { presetCode: 'ADVISORY' });
-        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED' } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED',
+            approvedBy: actor.username, approvedAt: new Date() } });
         await createWorkItemFixture(prisma, { data: { id: id('POL-REPORT-WI'), sampleId, assignedLab: labId, analysis: 'PH_H2O', status: 'ACCEPTED', result: '7.2' } });
         await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: id('POL-REPORT-RES'), sampleId, param: 'PH_H2O', value: '7.2', numericValue: 7.2, isValid: true, isCurrent: true } });
         await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,
