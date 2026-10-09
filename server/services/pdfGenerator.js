@@ -163,7 +163,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             doc.fillColor(cPrimary).font('Helvetica-Bold').fontSize(8.5)
                 .text('SAMPLE PROVENANCE & IDENTIFICATION', rightX + 8, currentY + 5);
 
-            const sampleDepth = sample.depthTop !== undefined && sample.depthBottom !== undefined 
+            const sampleDepth = sample.depthTop != null && sample.depthBottom != null
                 ? `${sample.depthTop} - ${sample.depthBottom} cm` 
                 : labels.notRecorded;
 

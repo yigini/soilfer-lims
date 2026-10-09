@@ -252,7 +252,8 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         if (mode === 'REQUIRED_WARN') {
             const review = await call(`/api/work/${f.item.id}/review`, { status: 'ACCEPTED', qcAcknowledgement: { reason: 'Retained QC warning checked' } });
             expect(review.status).toBe(200);
-            await require('../../services/sampleStateService').transitionSample(f.sampleId, 'APPROVED', jwt.decode(token), 'Reviewed warning fixture');
+            await require('../../services/sampleStateService').transitionSample(f.sampleId, 'APPROVED', jwt.decode(token), 'Reviewed warning fixture',
+                { approvedBy: jwt.decode(token).username, approvedAt: new Date() });
         }
         if(['ADVISORY','OFF'].includes(mode)) await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,f.item.id,token);
         const before = await reviewedState(f);
@@ -299,7 +300,8 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         mockQcMode('REQUIRED_WARN');
         const f = await fixture({status:'PROCESSING',itemStatus:'SUBMITTED',batchStatus: 'QC_FAIL', valid: false, flags: ['QC_BATCH_FAILED'] });
         expect(await call(`/api/work/${f.item.id}/review`,{status:'ACCEPTED',qcAcknowledgement:{reason:'Localized warning reviewed'}})).toMatchObject({status:200});
-        await require('../../services/sampleStateService').transitionSample(f.sampleId,'APPROVED',jwt.decode(token),'Reviewed localized warning fixture');
+        await require('../../services/sampleStateService').transitionSample(f.sampleId,'APPROVED',jwt.decode(token),'Reviewed localized warning fixture',
+            { approvedBy: jwt.decode(token).username, approvedAt: new Date() });
         expect((await reportValues(f, language)).content.qcWarningStatement).toBe(require(`../../locales/${language}.json`).resultReports.qcWarningStatement);
     });
     test.each(['individual', 'bulk', 'submission'])('%s RETURN preserves values, merges flags and prevents assembly', async path => {

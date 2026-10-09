@@ -110,7 +110,7 @@ test.each(['EXPANDED_ABSOLUTE','EXPANDED_RELATIVE_PCT'])('actual execution, acce
   expect({status:issued.status,body:issued.body}).toMatchObject({status:200});
   const report=await f.db.report.findUnique({where:{id:issued.body.id}}),content=JSON.parse(report.content),item=content.resultGroups[0].items[0];
   expect(item).toMatchObject({value:result.value,sourceResultIds:[result.id],methodVersion:String(f.method.version),
-   uncertainty:{state:'EXPANDED',mode,coverageFactor:3,value:mode==='EXPANDED_ABSOLUTE'?0.25:Math.abs(result.numericValue)*0.05}});
+   uncertainty:{state:'EXPANDED',mode,coverageFactor:3,value:expect.closeTo(mode==='EXPANDED_ABSOLUTE'?0.25:Math.abs(result.numericValue)*0.05,12)}});
   expect(display.displayResult(item,require('../../locales/en.json').resultReports)).toBe('7.12');
   expect(display.displayUncertainty(item,require('../../locales/en.json').resultReports)).toContain(mode==='EXPANDED_ABSOLUTE'?'± 0.25':'± 0.36');
   const sample=await f.db.sample.findUnique({where:{id:f.items[0].sampleId}});

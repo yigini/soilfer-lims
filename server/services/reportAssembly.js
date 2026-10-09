@@ -228,10 +228,6 @@ async function assembleReport(sampleId, user, options = {}) {
             episodeNumber: 1,
             label: 'Initial Analytical Pass',
             approvedAt: sample.approvedAt,
-            depthTop: sample.depthTop,
-            depthBottom: sample.depthBottom,
-            horizon: sample.horizon,
-            reportEvidence: contentEvidence.sampleContentEvidence(sample, reportedSelectionProof.sourceResults, sourceAttempts),
             approvedBy: sample.approvedBy
         });
     }
@@ -275,6 +271,10 @@ async function assembleReport(sampleId, user, options = {}) {
             acceptedAt: sample.acceptedAt,
             approvedBy: sample.approvedBy,
             approvedAt: sample.approvedAt,
+            depthTop: sample.depthTop,
+            depthBottom: sample.depthBottom,
+            horizon: sample.horizon,
+            reportEvidence: contentEvidence.sampleContentEvidence(sample, reportedSelectionProof.sourceResults, sourceAttempts),
             episodes
         },
         // Client/Farmer Info
