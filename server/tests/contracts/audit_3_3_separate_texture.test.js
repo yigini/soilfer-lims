@@ -22,7 +22,9 @@ async function fixture({mean=false}={}) {
         f.textureItems[analysis]=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:sample.id,assignedLab:f.labId,
             analysis,methodologyId:method.id,status:'IN_PROGRESS'}});
     }
-    for(const [param,values] of [['SAND',mean?[59.8,60.2]:[60]],['SILT',[25]],['CLAY',[15]]]) {
+    // Both retained sand replicates close with the same silt/clay execution;
+    // the selected mean still has two source ids and requires a derived class.
+    for(const [param,values] of [['SAND',mean?[60,60]:[60]],['SILT',[25]],['CLAY',[15]]]) {
         const rows=await rules.inTransaction(f.db,tx=>require('../../services/resultWriteService').writeResultsExecution(tx,{
             sampleId:sample.id,workItemId:f.textureItems[param].id,actor:f.actor,
             measurements:values.map((value,index)=>({param,value:String(value),unit:'%',replicateNo:index+1,equipmentId:f.instrument.id}))}));

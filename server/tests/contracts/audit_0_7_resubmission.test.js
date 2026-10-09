@@ -138,7 +138,7 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
         const currentReview = await post(`/api/submissions/${newSubmissionId}/review`, {
             decisions: [{ workItemId: f.item.id, decision: 'ACCEPT',reportedValueSelection:{mode:'ATTEMPT',attemptIds:[currentResult.attemptId]} }]
         });
-        expect(currentReview.status).toBe(200);
+        expect({status:currentReview.status,body:currentReview.body}).toMatchObject({status:200});
         expect((await prisma.workItem.findUnique({ where: { id: f.item.id } })).status).toBe('ACCEPTED');
         expect(await prisma.reviewDecision.findFirst({ where: { workItemId: f.item.id, decision: 'ACCEPT' } })).toMatchObject({ submissionItemId: newSubmissionId });
         expect((await prisma.result.findUnique({ where: { id: f.result.id } })).value).toBe('6.2');
