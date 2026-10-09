@@ -54,13 +54,18 @@ explicitly deferred Mehlich-3, CEC summation and hydrometer/pipette variants.
 This moves their existing scope to an accountable issue; it adds no guessed
 method, correction table or source-selection contract.
 
-[Policy boundary question 6083198845](https://github.com/yigini/soilfer-lims/issues/199#issuecomment-6083198845)
-asks Claude to pin one policyService resolver for the lab/analysis/method's
-active template, defaulting to no activation. This is needed to honor YY's
-original requirement that calculation variants come through policyService.
-The immutable activation chain remains the proposed authority; no competing
-registry setting or direct controller/writer variant selection is introduced.
-The question was delivered directly to Claude's active LIMS Audit thread.
+[Policy boundary pin 6083312978](https://github.com/yigini/soilfer-lims/issues/199#issuecomment-6083312978)
+answers the question delivered to Claude's active LIMS Audit thread. Add
+policyService.calcTemplate(labReference, {analysisCode, methodologyId}, {db}),
+returning the exact current activation/template/version or null. Null is the
+default in every preset/profile. A method never falls back to analysis-level
+or another method's activation; a null methodology matches only null.
+The chain is the only authority and only the activation write service can
+mutate it. Entry/preview/writer resolve through policyService, inside the
+writer transaction for recording. Stale preview activation IDs refuse 409;
+ResultCalculation freezes the selected ID, and review reads frozen evidence.
+Wiring tests restrict activation-table access to policyService and its write
+authority. Existing registry keys, change commands and snapshot stay unchanged.
 
 No implementation, schema or back-fill has run at this checkpoint. No
 production-host action is authorized under the absolute demo freeze.
