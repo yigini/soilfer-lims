@@ -94,7 +94,7 @@ test('first unsatisfactory correction jumps NULL to RAISED; later classification
         expect(await f.db.nonconformityReport.findUnique({where:{id:retained.id}})).toEqual(retained);
     }
     expect(await f.db.nonconformityReport.count({where:{source:'PT',refId:first.id}})).toBe(1);
-    const audit=await f.db.auditLog.findFirst({where:{entityId:first.id,action:'UPDATE_PT'},orderBy:{performedAt:'asc'}});
+    const audit=await f.db.auditLog.findFirst({where:{entityId:first.id,action:'UPDATE_PT'},orderBy:{timestamp:'asc'}});
     expect(JSON.parse(audit.before)).toMatchObject({ncrStatus:null,nonconformityId:null});
     expect(JSON.parse(audit.after)).toMatchObject({ncrStatus:'RAISED',nonconformityId:retained.id});
 });
