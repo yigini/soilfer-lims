@@ -22,7 +22,7 @@ async function fixture({mean=false}={}) {
         f.textureItems[analysis]=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:sample.id,assignedLab:f.labId,
             analysis,methodologyId:method.id,status:'IN_PROGRESS'}});
     }
-    for(const [param,values] of [['SAND',mean?[60,62]:[60]],['SILT',[25]],['CLAY',mean?[14]:[15]]]) {
+    for(const [param,values] of [['SAND',mean?[59.8,60.2]:[60]],['SILT',[25]],['CLAY',[15]]]) {
         const rows=await rules.inTransaction(f.db,tx=>require('../../services/resultWriteService').writeResultsExecution(tx,{
             sampleId:sample.id,workItemId:f.textureItems[param].id,actor:f.actor,
             measurements:values.map((value,index)=>({param,value:String(value),unit:'%',replicateNo:index+1,equipmentId:f.instrument.id}))}));
@@ -63,9 +63,9 @@ test('a fraction MEAN re-derives a single class and retains every one of its fou
     const saved=(await f.read()).rows[0];expect(saved).toMatchObject({mode:'DERIVED',rule:'AUTO_DERIVED_FROM_FRACTIONS',derivation:'calculateUsdaTexture'});
     expect(JSON.parse(saved.attemptIds)).toEqual([]);
     expect(JSON.parse(saved.resultIds)).toEqual(f.fractions.map(row=>row.id).sort());
-    expect(saved.valueText).toBe(require('../../utils/soilCalculations').calculateUsdaTexture(61,25,14).className);
+    expect(saved.valueText).toBe(require('../../utils/soilCalculations').calculateUsdaTexture(60,25,15).className);
     const sand=JSON.parse(saved.evidenceSnapshot).fractionSelections.find(row=>row.analysisCode==='SAND');
-    expect(sand.value).toBe(61);expect(sand.resultIds).toHaveLength(2);
+    expect(sand.value).toBe(60);expect(sand.resultIds).toHaveLength(2);
     expect(await f.db.result.findMany({orderBy:{id:'asc'}})).toEqual(retained);
 });
 test.each(['en','es','es-419','fr','pt'])('a not-reportable fraction propagates its id and localized reason to TEXTURE (%s)',async locale=>{
@@ -97,13 +97,18 @@ test('a replacement fraction selection makes retained TEXTURE stale without chan
     expect(await f.db.reportedValueSelection.findUnique({where:{id:first.id}})).toEqual(first);
 });
 
-test('another canonical fraction owner refuses actual texture acceptance with involved ids and zero writes',async()=>{
+test('canonical uniqueness prevents a duplicate owner; unresolved retained owners refuse layout with ids and zero writes',async()=>{
     const f=await fixture();await f.acceptFractions();
-    const duplicate=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:f.sample.id,analysis:'SAND',
-        assignedLab:f.labId,status:'WAIVED'}});
-    const before=await f.all(),response=await f.review('TEXTURE');
-    expect(response).toMatchObject({status:409,body:{code:'REPORTED_VALUE_LAYOUT_UNSUPPORTED'}});
-    expect(response.body.workItemIds).toEqual(expect.arrayContaining([duplicate.id,f.textureItems.SAND.id,f.textureItems.TEXTURE.id]));
+    const before=await f.all(),duplicate={...f.textureItems.SAND,id:randomUUID()};
+    await expect(createWorkItemFixture(f.db,{data:{id:duplicate.id,sampleId:f.sample.id,analysis:'SAND',
+        assignedLab:f.labId,status:'WAIVED'}})).rejects.toMatchObject({code:'P2002'});
+    await expect(rules.inTransaction(f.db,async tx=>{
+        const context=await require('../../services/reportedValueSelectionContext').loadSelectionEvidence(tx,f.textureItems.TEXTURE);
+        const items=await tx.workItem.findMany({where:{sampleId:f.sample.id,duplicateOf:null}});
+        return require('../../services/reportedValueTextureService').textureLayout({workItem:{findMany:async()=>[...items,duplicate]}},
+            f.textureItems.TEXTURE,context);
+    })).rejects.toMatchObject({code:'REPORTED_VALUE_LAYOUT_UNSUPPORTED',details:{workItemIds:
+        expect.arrayContaining([duplicate.id,f.textureItems.SAND.id,f.textureItems.TEXTURE.id])}});
     expect(await f.all()).toBe(before);
 });
 
