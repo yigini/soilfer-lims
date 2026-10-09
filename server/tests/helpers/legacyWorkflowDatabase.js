@@ -207,6 +207,10 @@ function beforeGuards(options) {
             // remains unchanged and the real #191 installer adds them later.
             expected.push({table:'WorkAttempt',fields:['batchId','reason','requestedBy','requestedAt','parentAttemptId','note','rawData','calcVersion','dilutionFactor','aliquotId','legacyAttemptNoConflict']},
                 {table:'ReviewDecision',fields:['reasonCode']});
+            // #192 adds exactly one new table. Keep every captured baseline,
+            // allowed payload, column list and caller unchanged; the real
+            // additive installer creates this empty evidence table later.
+            expected.push({ table: 'ReportedValueSelection', missingTable: true });
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }

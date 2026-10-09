@@ -1,6 +1,6 @@
 const { TransitionError } = require('./workflowStateRules');
 const { assertSelectionFresh } = require('./reportedValueSelectionLineage');
-function assertReportedSelectionGroup(rows, outputParams, attempts, results) {
+function assertSelectionGroupStructure(rows, outputParams) {
     if (!rows.length) throw new TransitionError('Choose a reported value before reporting this test.', 409, 'REPORTED_VALUE_SELECTION_REQUIRED');
     const stale = () => new TransitionError('The reported-value selection group is incomplete or stale.', 409, 'REPORTED_VALUE_STALE');
     const first = rows[0];
@@ -13,7 +13,11 @@ function assertReportedSelectionGroup(rows, outputParams, attempts, results) {
     try { expected = JSON.parse(first.outputParams); } catch { throw stale(); }
     if (!Array.isArray(expected) || expected.length !== outputParams.length || new Set(expected).size !== expected.length ||
         expected.some(param => !outputParams.includes(param))) throw stale();
-    assertSelectionFresh(first.lineageSnapshot, attempts, results);
     return rows;
 }
-module.exports = { assertReportedSelectionGroup };
+function assertReportedSelectionGroup(rows, outputParams, attempts, results) {
+    assertSelectionGroupStructure(rows, outputParams);
+    assertSelectionFresh(rows[0].lineageSnapshot, attempts, results);
+    return rows;
+}
+module.exports = { assertReportedSelectionGroup, assertSelectionGroupStructure };

@@ -54,9 +54,11 @@ WHEN NEW."mode" NOT IN ('ATTEMPT','MEAN','NOT_REPORTABLE')
  OR CASE WHEN json_valid(NEW."evidenceSnapshot") THEN json_type(NEW."evidenceSnapshot") <> 'object' ELSE 1 END
  OR CASE WHEN json_valid(NEW."lineageSnapshot") THEN json_type(NEW."lineageSnapshot") <> 'object' ELSE 1 END
  OR CASE WHEN json_valid(NEW."outputParams") THEN json_type(NEW."outputParams") <> 'array' ELSE 1 END
- OR NOT EXISTS(SELECT 1 FROM json_each(NEW."outputParams") WHERE value=NEW."analysisCode")
+ OR NOT EXISTS(SELECT 1 FROM json_each(CASE WHEN json_valid(NEW."outputParams") THEN NEW."outputParams" ELSE '[]' END) WHERE value=NEW."analysisCode")
  OR (NEW."mode"='NOT_REPORTABLE' AND (NEW."reason" IS NULL OR length(trim(NEW."reason"))=0 OR NEW."value" IS NOT NULL OR NEW."valueText"<>''))
- OR (NEW."mode"<>'NOT_REPORTABLE' AND (json_array_length(NEW."attemptIds")=0 OR json_array_length(NEW."resultIds")=0))
+ OR (NEW."mode"<>'NOT_REPORTABLE' AND (
+     CASE WHEN json_valid(NEW."attemptIds") THEN json_array_length(NEW."attemptIds") ELSE 0 END=0
+     OR CASE WHEN json_valid(NEW."resultIds") THEN json_array_length(NEW."resultIds") ELSE 0 END=0))
  OR (NEW."supersedesId" IS NOT NULL AND NOT EXISTS(SELECT 1 FROM "ReportedValueSelection" old
      WHERE old."id"=NEW."supersedesId" AND old."workItemId"=NEW."workItemId" AND old."analysisCode"=NEW."analysisCode"
        AND old."selectionGroupId"<>NEW."selectionGroupId"))

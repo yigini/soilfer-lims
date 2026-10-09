@@ -45,19 +45,23 @@ async function recordedLimit(tx, item, sample, candidate, events) {
         reason: resolved.resolved.repeatabilityLimit.value == null ? 'LIMIT_MISSING' : null };
 }
 
-async function loadSelectionContext(tx, item) {
+async function loadSelectionEvidence(tx, item) {
     rules.requireTransaction(tx);
     const sample = await tx.sample.findUnique({ where: { id: item.sampleId } });
     if (!sample) throw new rules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
     const attempts = await tx.workAttempt.findMany({ where: { workItemId: item.id } });
     const ids = attempts.map(row => row.id);
     const results = await tx.result.findMany({ where: { attemptId: { in: ids } } });
-    const events = await tx.auditLog.findMany({ where: { entity: 'WORK_ATTEMPT', entityId: { in: ids } } });
-    const lineage = buildSelectionLineage(attempts, results), limits = {};
+    return { sample, attempts, results, lineage: buildSelectionLineage(attempts, results) };
+}
+async function loadSelectionContext(tx, item) {
+    const evidence = await loadSelectionEvidence(tx, item);
+    const { sample, attempts, lineage } = evidence, limits = {};
+    const events = await tx.auditLog.findMany({ where: { entity: 'WORK_ATTEMPT', entityId: { in: attempts.map(row => row.id) } } });
     for (const candidate of lineage.eligible) limits[candidate.attempt.id] = await recordedLimit(tx, item, sample, candidate, events);
     const policy = await policyService.resolve(sample.assignedLab || sample.labId || item.assignedLab || item.labId,
         'results.reportedValueRule', { db: tx, analysisCode: item.analysis, methodologyId: item.methodologyId || null });
-    return { sample, attempts, results, lineage, limits, policy };
+    return { ...evidence, limits, policy };
 }
 
-module.exports = { loadSelectionContext };
+module.exports = { loadSelectionContext, loadSelectionEvidence };
