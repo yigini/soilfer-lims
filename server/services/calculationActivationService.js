@@ -17,7 +17,10 @@ async function state(db, labId, analysisCode, methodologyId) {
 }
 async function getState(db, actor, { labId, analysisCode, methodologyId } = {}) {
     const lab = await templates.laboratory(db, actor, labId, true);
-    if (typeof analysisCode !== 'string' || !analysisCode || methodologyId === undefined) throw fail(422, 'CALC_TEMPLATE_SCOPE_INVALID', 'Select an exact analysis and method scope.');
+    if (typeof analysisCode !== 'string' || !analysisCode || methodologyId === undefined ||
+        methodologyId !== null && (typeof methodologyId !== 'string' || !methodologyId.trim())) {
+        throw fail(422, 'CALC_TEMPLATE_SCOPE_INVALID', 'Select an exact analysis and method scope.');
+    }
     await templates.methodScope(db, lab, analysisCode, methodologyId);
     const current = await state(db, lab.id, analysisCode, methodologyId);
     return { activationHeadId: current.head?.id || null, active: current.active };

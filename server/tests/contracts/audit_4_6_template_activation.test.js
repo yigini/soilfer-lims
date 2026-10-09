@@ -12,6 +12,7 @@ const { installCalculationReferences } = require('../../services/calculationRefe
 const templates = require('../../services/calculationTemplateService');
 const activations = require('../../services/calculationActivationService');
 const policy = require('../../services/policyService');
+const { PRESETS } = require('../../config/policyRegistry');
 const { calculate } = require('../../../shared/soilCalculation');
 const files = [];
 let context;
@@ -51,7 +52,7 @@ afterAll(() => { for (const file of files) fs.rmSync(assertOwnedTestDatabase(fil
 
 test('all lab profiles and the inactive library resolve no implicit template or method fallback', async () => {
     const { db, labA, labB, method } = context;
-    for (const lab of [labA, labB]) for (const preset of ['ISO17025_STRICT', 'GLOSOLAN_STANDARD', 'SMALL_LAB']) {
+    for (const lab of [labA, labB]) for (const preset of PRESETS) {
         expect(await policy.calcTemplate(lab.id, { analysisCode: 'SOC', methodologyId: method.id }, { db, profile: { preset } })).toBeNull();
         expect(await policy.calcTemplate(lab.code, { analysisCode: 'SOC', methodologyId: null }, { db, profile: { preset } })).toBeNull();
     }
