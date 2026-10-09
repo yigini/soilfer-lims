@@ -88,7 +88,7 @@ test.each(['en','es','es-419','fr','pt'])('SIS v1 receives the requesting user l
 });
 test('an unselected unresolved historical TEXTURE test is disclosed without resolving its layout or hiding the selected scalar',async()=>{
     const f=await fixture();await f.choose();
-    const item=await require('../helpers/workflowFixtures').createWorkItemFixture(f.db,{data:{sampleId:f.items[0].sampleId,
+    const item=await require('../helpers/workflowFixtures').createWorkItemFixture(f.db,{data:{id:require('node:crypto').randomUUID(),sampleId:f.items[0].sampleId,
         analysis:'TEXTURE',assignedLab:f.labId,status:'ACCEPTED'}});
     const before=await f.snapshot(),response=await invoke(f,'dataResultsController','getAnalyticalResults');
     expect(response.status).toBe(200);expect(response.body.data[0][f.analysisCode]).toBe(Number(f.row.value));
