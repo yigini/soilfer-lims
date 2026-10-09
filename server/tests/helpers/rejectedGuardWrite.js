@@ -81,7 +81,7 @@ function rejectedGuardWrite(options) {
                 scratchDb.prepare('INSERT INTO BatchPositionWorkItem(id,positionId,workItemId,analysisCode) VALUES (?,?,?,?)')
                     .run('membership-'+index,'position-'+index,'item',c.textureAlias?itemAnalysis:code);
             }
-            assert.deepEqual(scratchDb.pragma('foreign_key_check'),[]);
+            assert.equal(scratchDb.pragma('foreign_key_check').length,0);
             const membership = require('../../services/qcBracketMembershipMigrationSource').loadBracketMembershipSource();
             function exactTriggers(source) {
                 return [...source.matchAll(/^CREATE TRIGGER "([^"]+)"[\s\S]*?^END;/gm)];
@@ -105,16 +105,19 @@ function rejectedGuardWrite(options) {
             const update = scratchDb.prepare("UPDATE WorkItem SET status='REPEAT_REQUIRED',batchId=NULL,rackPosition=NULL WHERE id=?");
             if (c.accept) {
                 assert.equal(update.run('item').changes,1);
-                assert.deepEqual(scratchDb.prepare('SELECT status,batchId,rackPosition FROM WorkItem WHERE id=?').get('item'),
-                    {status:'REPEAT_REQUIRED',batchId:null,rackPosition:null});
-                assert.deepEqual(allRows().filter(row=>row.name!=='WorkItem'),before.filter(row=>row.name!=='WorkItem'));
-                assert.deepEqual(scratchDb.prepare('SELECT * FROM WorkItem').all(),before.find(row=>row.name==='WorkItem').rows
-                    .map(row=>({...row,status:'REPEAT_REQUIRED',batchId:null,rackPosition:null})));
+                const pointer=scratchDb.prepare('SELECT status,batchId,rackPosition FROM WorkItem WHERE id=?').get('item');
+                assert.equal(pointer.status,'REPEAT_REQUIRED');assert.equal(pointer.batchId,null);assert.equal(pointer.rackPosition,null);
+                // Compare every SQLite value/column, without depending on the
+                // native binding's array/object realm under Jest's VM.
+                assert.equal(JSON.stringify(allRows().filter(row=>row.name!=='WorkItem')),
+                    JSON.stringify(before.filter(row=>row.name!=='WorkItem')));
+                assert.equal(JSON.stringify(scratchDb.prepare('SELECT * FROM WorkItem').all()),
+                    JSON.stringify(before.find(row=>row.name==='WorkItem').rows.map(row=>({...row,status:'REPEAT_REQUIRED',batchId:null,rackPosition:null}))));
                 // Include real retained Result evidence, not an empty-table proof.
                 assert.equal(before.find(row=>row.name==='Result').rows.length,1);
             } else {
                 assert.throws(()=>update.run('item'),error=>error.message==='BATCH_MEMBERSHIP_FROZEN');
-                assert.deepEqual(allRows(),before);assert.deepEqual(fs.readFileSync(scratch),beforeBytes);
+                assert.equal(JSON.stringify(allRows()),JSON.stringify(before));assert.deepEqual(fs.readFileSync(scratch),beforeBytes);
             }
             probeChanges = scratchDb.prepare('SELECT total_changes() n').get().n-beforeChanges;
             assert.equal(probeChanges,c.accept?1:0);
