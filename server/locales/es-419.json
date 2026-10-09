@@ -945,6 +945,9 @@
       "results_replicatesRequired": "Réplicas de muestra requeridas",
       "results_reportedValueRule": "Regla de selección del valor informado",
       "results_betweenLodLoq": "Valores entre los límites de detección y cuantificación",
+      "results_typicalMin": "Mínimo típico",
+      "results_typicalMax": "Máximo típico",
+      "results_calibrationMax": "Máximo de calibración",
       "results_phMin": "pH mínimo",
       "results_phMax": "pH máximo",
       "repeats_maxAttemptsBeforeNcr": "Intentos antes de revisión de no conformidad (0: sin límite)",
@@ -1670,5 +1673,55 @@
       "RESULT_INSTRUMENT_MISMATCH": "Utilice el instrumento fijado al iniciar esta serie.",
       "RESULT_METHOD_REVISION_CHANGED": "La revisión del método cambió después de iniciar la serie. Utilice una serie nueva."
     }
+  },
+  "valueValidation": {
+    "hardMin": "Mínimo absoluto",
+    "hardMax": "Máximo absoluto",
+    "typicalMin": "Mínimo habitual",
+    "typicalMax": "Máximo habitual",
+    "loq": "LC",
+    "lod": "LD",
+    "calibrationMax": "Máximo de calibración",
+    "unit": "Unidad",
+    "notConfigured": "Sin configurar",
+    "fillLoq": "Usar LC del método",
+    "LOQ_NOT_CONFIGURED": "La LC del método no está configurada",
+    "NUMBER_FORMAT_POLICY_INVALID": "La política de formato numérico no es válida",
+    "flags": {
+      "VALUE_REQUIRED": "Se requiere un valor",
+      "INVALID_FORMAT": "Número no válido",
+      "BELOW_MIN": "Por debajo del mínimo absoluto",
+      "ABOVE_MAX": "Por encima del máximo absoluto",
+      "CENSOR_LIMIT_BELOW_LOQ": "Límite censurado inferior a la LC del método",
+      "BELOW_LOQ": "Por debajo de la LC del método",
+      "BELOW_LOD": "Por debajo de la LD del método",
+      "OUTSIDE_TYPICAL_RANGE": "Fuera del intervalo habitual",
+      "ABOVE_RANGE": "Por encima del intervalo de calibración",
+      "AMBIGUOUS_NUMBER": "Separador decimal o de miles ambiguo",
+      "INVALID_NUMBER": "Formato numérico no válido",
+      "NUMBER_FORMAT_POLICY_INVALID": "La política de formato numérico no es válida"
+    }
+  },
+  "overrideRequests": {
+    "reason": "Motivo",
+    "request": "Solicitar excepción",
+    "useApproval": "Usar esta aprobación",
+    "cancel": "Cancelar solicitud",
+    "recordFirst": "Registre primero esta lectura y luego solicite una repetición con dilución.",
+    "diluteRepeat": "¿Diluir y repetir?",
+    "inbox": "Solicitudes de excepción",
+    "empty": "No hay solicitudes de excepción.",
+    "replicate": "Réplica {number}",
+    "decisionReason": "Motivo de la decisión",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "status": {
+      "REQUESTED": "Solicitada",
+      "APPROVED": "Aprobada",
+      "REJECTED": "Rechazada",
+      "CANCELLED": "Cancelada",
+      "CONSUMED": "Usada para el registro"
+    },
+    "loadFailed": "No se pudieron cargar las solicitudes de excepción."
   }
 }

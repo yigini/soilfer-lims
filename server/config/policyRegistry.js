@@ -61,6 +61,9 @@ key('results.replicatesRequired', 'integer', 1, 1, 1, { min: 1, max: 2 });
 key('results.betweenLodLoq', 'enum', 'REPORT_LT_LOQ', 'REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED', { allowedValues: ['REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED'] });
 key('results.phMin', 'number', 2, 2, 2, { min: 0, unit: 'pH' });
 key('results.phMax', 'number', 14, 14, 14, { min: 0, unit: 'pH' });
+key('results.typicalMin', 'number', null, null, null, { nullable: true, unit: 'method unit' });
+key('results.typicalMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
+key('results.calibrationMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
 key('repeats.maxAttemptsBeforeNcr', 'integer', 3, 5, 0, integer);
 key('repeats.technicianSelfRepeatBeforeSubmit', 'boolean', true);
 key('review.secondPersonRequired', 'boolean', true, true, false);
@@ -98,7 +101,8 @@ function valid(name, value) {
     case 'enum': return d.allowedValues.includes(value) && !d.unsupportedValues?.includes(value);
     case 'boolean': return typeof value === 'boolean';
     case 'integer': return Number.isSafeInteger(value) && value >= (d.min ?? 0) && (d.max === undefined || value <= d.max);
-    case 'number': return typeof value === 'number' && Number.isFinite(value) && value >= (d.min ?? 0) && (d.max === undefined || value <= d.max);
+    case 'number': return typeof value === 'number' && Number.isFinite(value) &&
+        (d.min === undefined || value >= d.min) && (d.max === undefined || value <= d.max);
     case 'qcFailAction': return !!value && typeof value === 'object' && !Array.isArray(value) &&
         Object.keys(value).length === 4 && ['BLANK', 'DUPLICATE', 'LRM', 'CRM'].every(type => ['FAIL_BATCH', 'WARN'].includes(value[type]));
     case 'calibrationFailAction': return !!value && typeof value === 'object' && !Array.isArray(value) &&

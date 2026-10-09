@@ -48,9 +48,12 @@ try {
     console.log(JSON.stringify({event:'REPORTED_VALUE_STARTUP_READY',...selectionsReady}));
     const reagentLotsReady=require('./scripts/install_batch_reagent_lots').assertBatchReagentLotsStartupReady(dbPath);
     console.log(JSON.stringify({event:'REAGENT_LOT_STARTUP_READY',...reagentLotsReady}));
+    const overrideRequestsReady=require('./scripts/install_result_override_requests').assertResultOverrideRequestsStartupReady(dbPath);
+    console.log(JSON.stringify({event:'RESULT_OVERRIDE_STARTUP_READY',...overrideRequestsReady}));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('QC_GATE_SCOPE_') ? 'Keep the lab stopped and follow docs/audit/2.4-qc-gate.md.'
+            : error.code?.startsWith('OVERRIDE_') ? 'Keep the lab stopped and follow docs/audit/197-value-validation.md.'
             : error.code?.startsWith('REAGENT_LOT_') ? 'Keep the lab stopped and follow docs/audit/194-run-first.md.'
             : error.code?.startsWith('REPORTED_VALUE_') ? 'Keep the lab stopped and follow docs/audit/192-reported-value.md.'
             : error.code?.startsWith('NCR_') ? 'Keep the lab stopped and follow docs/audit/193-nonconformity.md.'

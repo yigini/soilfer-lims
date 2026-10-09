@@ -30,6 +30,7 @@ function harness(name, { groups, width = 1200, axios, offline } = {}) {
             window: { innerWidth: width }, navigator: { onLine: true },
             require: mod => {
                 if (mod === 'react') return hooks;
+                if (mod === '@lims/result-value-validation') return require('../../../shared/resultValueValidation');
                 if (mod === 'axios') return axios;
                 if (mod === '@lims/number-parse') return require('../../../shared/numberParse');
                 if (mod === 'lucide-react') return new Proxy({}, { get: () => () => null });
