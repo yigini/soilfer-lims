@@ -13,6 +13,15 @@ Existing real installer-chain tests remain separate. The SQL handoff binds
 both parent run fields, non-NULL evidence, becoming REPEAT_REQUIRED and every
 membership's accepted analyte, including the documented texture alias.
 
+Pin6072132694 places the fourteen fixed trigger cases in the existing
+rejectedGuardWrite export, with exact option and caller restrictions. It
+creates its own scratch, rolls back setup and probes, removes the file, and
+never opens the caller database. Ten cases refuse with zero probe changes;
+four prove one accepted pointer update before rollback. The earlier fifteenth
+probe was unknown-name refusal; it remains and also tests unknown options
+and callers. The source scanner binds both current #191 loader and DDL bytes;
+an added test refuses the previous digest. Its exemptions remain unchanged.
+
 The disposable Docker release rehearsal now copies the stopped genuine
 baseline before candidate startup, installs the actual predecessors, checks
 #191 dry-run/apply/no-op, both COMPLETE receipts and every original row/field.
