@@ -6,7 +6,7 @@ const json = value => { try {return typeof value==='string'?JSON.parse(value):va
 const sorted = ids => [...ids].sort();
 
 function derivationSources(result,attempt) {
-    const flags=json(result.flags), evidence=json(attempt.evidenceData);
+    const flags=json(result.flags ?? []), evidence=json(attempt.evidenceData);
     if(!Array.isArray(flags)) return null;
     const links=flags.filter(flag=>typeof flag==='string' && flag.startsWith('SOURCE_'));
     if(links.length) {

@@ -248,13 +248,20 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 currentY += 15;
 
                 (group.items || []).forEach(item => {
-                    if (currentY > 740) {
+                    const notReportable=item.reportedMode==='NOT_REPORTABLE';
+                    const valueText=notReportable ? require('../locales/'+locale+'.json').reportedValue.notReportable :
+                        item.reportedValueSelectionId ? formatReportedValue(item) : String(item.value ?? '—');
+                    const valueHeight=doc.font('Helvetica-Bold').fontSize(8).heightOfString(valueText,{width:60});
+                    const rowHeight=Math.max(16,valueHeight+8);
+                    const noteText=notReportable ? String(item.value ?? '') : '';
+                    const noteHeight=noteText ? doc.font('Helvetica').fontSize(7.5).heightOfString(noteText,{width:pageWidth-12})+8 : 0;
+                    if (currentY+rowHeight+noteHeight > 750) {
                         doc.addPage();
                         currentY = 40;
                     }
 
                     const bg = rowCount % 2 === 0 ? '#FFFFFF' : '#F8FAFC';
-                    doc.rect(startX, currentY, pageWidth, 16).fillAndStroke(bg, cBorder);
+                    doc.rect(startX, currentY, pageWidth, rowHeight+noteHeight).fillAndStroke(bg, cBorder);
 
                     // Capture values for scientific checks
                     const paramUpper = String(item.param).toUpperCase();
@@ -273,8 +280,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                         .text(item.method || item.standard || 'SoilFER SOP', col2 + 4, currentY + 4, { width: 120, ellipsis: true });
 
                     doc.font('Helvetica-Bold').fontSize(8).fillColor(cDark)
-                        .text(item.reportedValueSelectionId ? formatReportedValue(item) : String(item.value !== undefined && item.value !== null ? item.value : '—'),
-                            col3 + 4, currentY + 4, { width:60,align:'right' });
+                        .text(valueText,col3+4,currentY+4,{width:60,align:'right'});
 
                     doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
                         .text(item.unit || '', col4 + 4, currentY + 4);
@@ -282,7 +288,9 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     doc.font('Helvetica-Bold').fontSize(7.5).fillColor(interp.includes('Optimal') || interp.includes('Adequate') ? '#059669' : interp.includes('Low') || interp.includes('Acidic') ? '#D97706' : cDark)
                         .text(interp, col5 + 4, currentY + 4, { width: 100, ellipsis: true });
 
-                    currentY += 16;
+                    if(noteText)doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
+                        .text(noteText,startX+6,currentY+rowHeight+4,{width:pageWidth-12});
+                    currentY += rowHeight+noteHeight;
                     rowCount++;
                 });
             });
