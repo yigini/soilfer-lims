@@ -33,8 +33,8 @@ const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599
 const QC_EVIDENCE_SOURCES = Object.freeze([
     // #199: inspect the exact additive source; no runtime writer exemption.
     Object.freeze({ functionName: 'loadCalculationTemplateMigrationSource', loader: 'services/calculationTemplateMigrationSource.js',
-        loaderSha256: '93326b3aaa9ffa9de1a296d52535d70736505ff0962c614d2ce52afa39eeb675',
-        directory: '20261009000400_calculation_templates', sqlSha256: 'cdae7f98f7bafa069e3276e29572ded88e9e656ae187c16f622589bcce3843ca',
+        loaderSha256: '1166493efd034a13be2cf89e972f0071ccbfb2ed207d75ea6db9f97d56213040',
+        directory: '20261009000400_calculation_templates', sqlSha256: '9b81a48c07f038f3e78d7065fa7803864fc6e1fe4240855ccdaa659edef02623',
         boundary: '-- Contract guards' }),
     // #272 pin6087372517: inspect only the unchanged rawInput additive DDL.
     Object.freeze({ functionName: 'loadResultRawInputMigrationSource', loader: 'services/resultRawInputMigrationSource.js',

@@ -86,17 +86,19 @@ async function prepareCorrection(db, ctx, original, measurement, numberFormat) {
         throw fail(409, 'CALC_CORRECTION_BASIS_SUPERSEDED', 'The original curve was revised; this needs a separate recalculation decision.');
     let template, units, curve = null, previousInputs;
     try {
+        const labId = (await policy.resolveLab(ctx.labId, db))?.id;
+        if (!labId) throw Error('Original laboratory is unavailable');
         template = templates.decode(bound.template);
         const parameters = JSON.parse(bound.parameters);
         previousInputs = JSON.parse(bound.inputs); units = JSON.parse(bound.unitConversion);
         if (template.id !== bound.templateId || template.version !== bound.templateVersion || template.analysisCode !== original.param ||
-            template.labId !== null && template.labId !== ctx.labId || template.methodologyId !== null && template.methodologyId !== original.methodologyId ||
+            template.labId !== null && template.labId !== labId || template.methodologyId !== null && template.methodologyId !== original.methodologyId ||
             JSON.stringify(parameters) !== JSON.stringify(template.parameters) || !previousInputs || typeof previousInputs !== 'object' || Array.isArray(previousInputs) ||
             Object.keys(previousInputs).length !== template.inputs.length || template.inputs.some(row =>
                 !Object.hasOwn(previousInputs, row.key) || !['string', 'number'].includes(typeof previousInputs[row.key])) ||
             bound.activation?.action !== 'ACTIVATE' || bound.activation.id !== bound.activationId ||
             bound.activation.templateId !== bound.templateId || bound.activation.templateVersion !== bound.templateVersion ||
-            bound.activation.labId !== ctx.labId || bound.activation.analysisCode !== original.param ||
+            bound.activation.labId !== labId || bound.activation.analysisCode !== original.param ||
             bound.activation.methodologyId !== original.methodologyId || units?.native?.code !== bound.nativeUnit ||
             units?.reporting?.code !== bound.outputUnit || bound.outputUnit !== original.unit)
             throw Error('Original calculation basis differs');
@@ -105,7 +107,7 @@ async function prepareCorrection(db, ctx, original, measurement, numberFormat) {
             curve = curves.completeCurve(bound.curve);
             const fit = fitCurve(curve.points);
             if (curve.id !== bound.curveId || curve.batchId !== original.batchId || curve.methodologyId !== original.methodologyId ||
-                curve.labId !== ctx.labId || curve.templateId !== bound.templateId || curve.templateVersion !== bound.templateVersion ||
+                curve.labId !== labId || curve.templateId !== bound.templateId || curve.templateVersion !== bound.templateVersion ||
                 curve.status !== 'PASS' || !fit.usable || ['slope', 'intercept', 'r', 'rSquared', 'pointCount', 'levelCount'].some(key => fit[key] !== curve[key]) ||
                 curve.levelCount < curve.minPointsApplied || curve.r < curve.minRApplied)
                 throw Error('Original calibration basis differs');

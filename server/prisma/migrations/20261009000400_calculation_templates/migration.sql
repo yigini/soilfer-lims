@@ -274,7 +274,22 @@ BEGIN
         AND result.enteredBy=NEW.computedBy AND activation.labId=lab.id AND activation.action='ACTIVATE'
         AND activation.templateId=NEW.templateId AND activation.templateVersion=NEW.templateVersion
         AND activation.analysisCode=result.param AND activation.methodologyId IS result.methodologyId
-        AND NOT EXISTS (SELECT 1 FROM "CalcTemplateActivation" child WHERE child.supersedesId=activation.id)
+        AND (NOT EXISTS (SELECT 1 FROM "CalcTemplateActivation" child WHERE child.supersedesId=activation.id)
+          OR EXISTS (
+            -- Pins6089591961/6089821987: only an existing #191 supersession
+            -- witness may retain a historical activation for a correction.
+            SELECT 1 FROM "Result" original JOIN "ResultCalculation" bound ON bound.resultId=original.id
+            WHERE original.isCurrent=0 AND original.supersededBy=NEW.resultId
+              AND original.attemptId IS NOT NULL AND original.attemptId=result.attemptId
+              AND original.sampleId=result.sampleId AND original.param=result.param
+              AND original.replicateNo=result.replicateNo AND original.methodologyId IS result.methodologyId
+              AND original.batchId IS result.batchId AND original.equipmentId IS result.equipmentId
+              AND original.equipmentReadiness IS result.equipmentReadiness
+              AND original.basis IS result.basis AND original.provenance IS result.provenance
+              AND bound.templateId=NEW.templateId AND bound.templateVersion=NEW.templateVersion
+              AND bound.activationId=NEW.activationId AND bound.curveId IS NEW.curveId
+              AND bound.parameters=NEW.parameters AND bound.unitConversion=NEW.unitConversion
+          ))
         AND template.version=NEW.templateVersion AND template.outputUnit=NEW.nativeUnit AND template.parameters=NEW.parameters
         AND analysis.unitCode=NEW.outputUnit AND native.quantityKind=reporting.quantityKind
         AND native.factorToBase>0 AND reporting.factorToBase>0 AND NEW.conversionFactor IS (native.factorToBase/reporting.factorToBase)
