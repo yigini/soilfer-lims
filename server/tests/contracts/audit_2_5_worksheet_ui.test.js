@@ -3,7 +3,7 @@ const { mountUi, nativeHost, nativeFixture, nodes, content } = require('../helpe
 
 test('the real worksheet table combines linked Result editors and all QC positions while keeping their writes separate', async () => {
     const batch = nativeFixture();
-    const items = [{ workItemId: 'wi-0', sampleId: 'sample-0', sampleDisplayId: 'CODE-0', status: 'IN_PROGRESS', readiness: { isReady: true }, draft: { value: '99.123456789' } },
+    const items = [{ workItemId: 'wi-0', sampleId: 'sample-0', sampleDisplayId: 'CODE-0', status: 'IN_PROGRESS', readiness: { isReady: true }, numberFormat: { decimal: '.', thousands: null }, draft: { value: '99.123456789' } },
         { workItemId: 'outside-run', sampleId: 'outside', status: 'IN_PROGRESS', readiness: { isReady: true }, draft: { value: '42' } }];
     const onDraftChange = jest.fn(), onReviewRecord = jest.fn();
     const view = mountUi('components/workbench/WorksheetArea.jsx', { activeGroup: { analysis: 'A', items }, allGroups: [{ analysis: 'A', items }],
