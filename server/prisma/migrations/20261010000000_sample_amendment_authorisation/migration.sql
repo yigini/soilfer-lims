@@ -15,8 +15,8 @@ CREATE TRIGGER "SampleAmendment_new_request_guard"
 BEFORE INSERT ON "SampleAmendment"
 WHEN NEW.version IS NOT NULL AND (
  typeof(NEW.version) <> 'integer' OR NEW.version <> 1 OR NEW.status <> 'PENDING'
- OR NEW.requestPayload IS NULL OR NOT json_valid(NEW.requestPayload) OR json_type(NEW.requestPayload) <> 'object'
- OR NEW.selectedWorkItemIds IS NULL OR NOT json_valid(NEW.selectedWorkItemIds) OR json_type(NEW.selectedWorkItemIds) <> 'array'
+ OR CASE WHEN json_valid(NEW.requestPayload) THEN json_type(NEW.requestPayload) ELSE NULL END IS NOT 'object'
+ OR CASE WHEN json_valid(NEW.selectedWorkItemIds) THEN json_type(NEW.selectedWorkItemIds) ELSE NULL END IS NOT 'array'
  OR NEW.authorizedBy IS NOT NULL OR NEW.authorizedAt IS NOT NULL
  OR NEW.priorApprovedBy IS NOT NULL OR NEW.priorApprovedAt IS NOT NULL)
 BEGIN SELECT RAISE(ABORT, 'AMENDMENT_REQUEST_INVALID'); END;
