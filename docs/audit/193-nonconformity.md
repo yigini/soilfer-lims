@@ -1,8 +1,10 @@
 # Audit3.4 — nonconformity reports (#193), WIP
 
 Prepared after PR260/#191 merged, refreshed to maind2b69b8. The requested NCR model is
-absent; unsatisfactory PT still records PENDING and the repeat contract still
-refuses NCR strings. No runtime change, migration, backfill or test claim yet.
+absent in that base; unsatisfactory PT recorded PENDING and the repeat contract
+refused NCR strings. The branch now adds the NCR model/SQL guards, scoped
+lifecycle authority and atomic PT classification links. Installer/backfill,
+QC/repeat integrations and the QA list are still being implemented.
 
 Authoritative pins:
 - [6071242717](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6071242717): source identity and explicit one-use manager override.
@@ -40,5 +42,13 @@ forward moves and zero-write refusals (skip, reopen, CLOSED edit, blank text,
 DELETE); and CRM missing-mode refusal to create an NCR. Earlier pinned tests
 remain required.
 
-Notes are parked and pushed while the current #192 audit fixes are validated.
+Validation: the additive SQL boundary suite passes25/25. Actual PT/lifecycle
+runtime validation is in progress; no claim of full-suite success yet.
+
+Applied by precedent:
+
+| Fixture | Old expectation | Required expectation / pin |
+| --- | --- | --- |
+| `legacyWorkflowDatabase.js` captured-schema completeness | The pinned historical ProficiencyRound lacks exactly the seven #189 fields, and the generated model has no NCR table. | The unchanged historical DDL also lacks precisely `nonconformityId` and `NonconformityReport`; assert that exact gap without relaxing any other model/field completeness check (6075820954). |
+
 Production remains under the #162 demo freeze.
