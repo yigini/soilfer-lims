@@ -16,14 +16,16 @@ async function state(db, labId, analysisCode, methodologyId) {
     return { head: heads[0] || null, active };
 }
 async function getState(db, actor, { labId, analysisCode, methodologyId } = {}) {
-    const lab = await templates.laboratory(db, actor, labId, true);
-    if (typeof analysisCode !== 'string' || !analysisCode || methodologyId === undefined ||
-        methodologyId !== null && (typeof methodologyId !== 'string' || !methodologyId.trim())) {
-        throw fail(422, 'CALC_TEMPLATE_SCOPE_INVALID', 'Select an exact analysis and method scope.');
-    }
-    await templates.methodScope(db, lab, analysisCode, methodologyId);
-    const current = await state(db, lab.id, analysisCode, methodologyId);
-    return { activationHeadId: current.head?.id || null, active: current.active };
+    return db.$transaction(async tx => {
+        const lab = await templates.laboratory(tx, actor, labId, true);
+        if (typeof analysisCode !== 'string' || !analysisCode || methodologyId === undefined ||
+            methodologyId !== null && (typeof methodologyId !== 'string' || !methodologyId.trim())) {
+            throw fail(422, 'CALC_TEMPLATE_SCOPE_INVALID', 'Select an exact analysis and method scope.');
+        }
+        await templates.methodScope(tx, lab, analysisCode, methodologyId);
+        const current = await state(tx, lab.id, analysisCode, methodologyId);
+        return { activationHeadId: current.head?.id || null, active: current.active };
+    });
 }
 async function compatibleUnits(db, template, analysis) {
     const [native, reporting] = await Promise.all([
