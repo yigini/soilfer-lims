@@ -39,6 +39,9 @@ model User {
   
   sentMessages       Message[]  @relation("SentMessages")
   receivedMessages   Message[]  @relation("ReceivedMessages")
+  requestedOverrides ResultOverrideRequest[] @relation("OverrideRequester")
+  decidedOverrides ResultOverrideRequest[] @relation("OverrideDecider")
+  cancelledOverrides ResultOverrideRequest[] @relation("OverrideCanceller")
 }
 
 model Message {
@@ -197,6 +200,7 @@ model Sample {
   batchPositions    BatchPosition[]
 
   @@index([consignmentId])
+  resultOverrideRequests ResultOverrideRequest[]
 }
 
 // Stage C: RC-12 Consignment Entity
@@ -308,6 +312,7 @@ model WorkItem {
   reviewDecisions ReviewDecision[]
   batchPositions  BatchPositionWorkItem[]
   reportedValueSelections ReportedValueSelection[]
+  resultOverrideRequests ResultOverrideRequest[]
 }
 
 model SampleHold {
@@ -710,6 +715,7 @@ model Lab {
   referenceMaterials ReferenceMaterial[]
   nonconformityReports NonconformityReport[]
   batchReagentLots    BatchReagentLot[]
+  resultOverrideRequests ResultOverrideRequest[]
 }
 
 model LabPolicy {
@@ -971,6 +977,7 @@ model EquipmentAsset {
   usage              WorkItemEquipmentUse[]
   spectralScans      SpectralData[]
   batches            Batch[]
+  resultOverrideRequests ResultOverrideRequest[]
 }
 
 model EquipmentQualification {
@@ -1208,6 +1215,7 @@ model Result {
   @@index([sampleId, param, isCurrent])
   @@index([batchId])
   @@index([attemptId])
+  consumedOverrideRequest ResultOverrideRequest?
 }
 
 // Preparation reversions preserve the result and its QC flags. Evidence is append-only.
@@ -1302,6 +1310,7 @@ model Analysis {
   methodologies      Methodology[]
   qcRules            QcRule[]
   referenceValues    ReferenceValue[]
+  resultOverrideRequests ResultOverrideRequest[]
 }
 
 model ExternalMapping {
@@ -1348,6 +1357,7 @@ model Methodology {
   qcRules          QcRule[]
   referenceValues  ReferenceValue[]
   batchAnalytes    BatchAnalyte[]
+  resultOverrideRequests ResultOverrideRequest[]
 }
 
 // #184: each certificate/lot has its own material; assigned values are immutable.
@@ -1883,3 +1893,45 @@ model GlobalAppearanceSetting {
   updatedBy   String?
 }
 
+
+// #197: retained context and single-use approval; SQL guards enforce edges.
+model ResultOverrideRequest {
+  id String @id
+  labId String
+  lab Lab @relation(fields:[labId], references:[id], onDelete:Restrict)
+  workItemId String
+  workItem WorkItem @relation(fields:[workItemId], references:[id], onDelete:Restrict)
+  sampleId String
+  sample Sample @relation(fields:[sampleId], references:[id], onDelete:Restrict)
+  analysisCode String
+  analysis Analysis @relation(fields:[analysisCode], references:[code], onDelete:Restrict)
+  replicateNo Int
+  rawValue String
+  unit String?
+  basis String
+  methodologyId String?
+  methodology Methodology? @relation(fields:[methodologyId], references:[id], onDelete:Restrict)
+  methodRevision String?
+  instrumentId String?
+  instrument EquipmentAsset? @relation(fields:[instrumentId], references:[id], onDelete:Restrict)
+  rulesSha256 String
+  flags String
+  reason String
+  requestedBy String
+  requester User @relation("OverrideRequester", fields:[requestedBy], references:[id], onDelete:Restrict)
+  requestedAt DateTime @default(now())
+  status String @default("REQUESTED")
+  decidedBy String?
+  decider User? @relation("OverrideDecider", fields:[decidedBy], references:[id], onDelete:Restrict)
+  decidedAt DateTime?
+  decisionReason String?
+  cancelledBy String?
+  canceller User? @relation("OverrideCanceller", fields:[cancelledBy], references:[id], onDelete:Restrict)
+  cancelledAt DateTime?
+  cancelReason String?
+  consumedResultId String? @unique
+  consumedResult Result? @relation(fields:[consumedResultId], references:[id], onDelete:Restrict)
+  consumedAt DateTime?
+  @@index([labId,status,requestedAt])
+  @@index([workItemId,replicateNo])
+}

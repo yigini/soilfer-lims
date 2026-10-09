@@ -49,3 +49,6 @@ server/prisma/migrations/20261009000100_reported_value_selection/migration.sql t
 server/services/reportedValueMigrationSource.js text eol=lf
 server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql text eol=lf
 server/services/batchReagentLotMigrationSource.js text eol=lf
+
+server/prisma/migrations/20261009000300_result_override_requests/migration.sql text eol=lf
+server/services/resultOverrideMigrationSource.js text eol=lf
