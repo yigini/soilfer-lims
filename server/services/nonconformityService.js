@@ -2,8 +2,7 @@ const {randomUUID}=require('node:crypto');
 const rules=require('./workflowStateRules');
 const scopeGuard=require('../utils/scopeGuard');
 const {hasPermission}=require('../config/roles');
-const SOURCES=Object.freeze(['QC','PT','REPEAT_LIMIT','CUSTOMER','INTAKE','OTHER']);
-const STATUSES=Object.freeze(['OPEN','ACTION','CLOSED']);
+const {SOURCES,STATUSES}=require('../../shared/nonconformityContract');
 const fail=(code,message,status=409)=>new rules.TransitionError(message,status,code);
 const meaningful=value=>typeof value==='string' && value.trim().length>0;
 function assertScope(actor,row) {
@@ -58,4 +57,15 @@ async function transition(db,id,actor,input) {
         return after;
     });
 }
-module.exports={SOURCES,STATUSES,raise,transition};
+async function list(db,actor,filters={}) {
+    if(!hasPermission(actor,'VIEW_AUDIT'))throw fail('NCR_READ_FORBIDDEN','Nonconformity records require QA read authority.',403);
+    if(!filters || typeof filters!=='object' || Array.isArray(filters) ||
+        Object.keys(filters).some(key=>!['status','source'].includes(key)) ||
+        filters.status && !STATUSES.includes(filters.status) || filters.source && !SOURCES.includes(filters.source))
+        throw fail('NCR_FILTER_INVALID','Choose a supported status or source filter.',400);
+    const where={...(filters.status && {status:filters.status}),...(filters.source && {source:filters.source})};
+    try {scopeGuard.getLabScope(actor);}catch{throw fail('NCR_SCOPE_DENIED','A laboratory scope is required.',403);}
+    return db.nonconformityReport.findMany({where:scopeGuard.buildScopedWhere(actor,where,
+        {labField:'labId',altLabField:null,entityType:'NonconformityReport'}),orderBy:[{createdAt:'desc'},{id:'asc'}]});
+}
+module.exports={SOURCES,STATUSES,raise,transition,list};

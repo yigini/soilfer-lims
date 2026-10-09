@@ -51,5 +51,7 @@ Applied by precedent:
 | Fixture | Old expectation | Required expectation / pin |
 | --- | --- | --- |
 | `legacyWorkflowDatabase.js` captured-schema completeness | The pinned historical ProficiencyRound lacks exactly the seven #189 fields, and the generated model has no NCR table. | The unchanged historical DDL also lacks precisely `nonconformityId` and `NonconformityReport`; assert that exact gap without relaxing any other model/field completeness check (6075820954). |
+| `audit_3_2_repeat_commands.test.js` two unchecked `ncrId`/`override` inputs | The ordinary repeat route returns409 `ATTEMPT_LIMIT_NCR_UNAVAILABLE`. | The ordinary route now returns400 `REPEAT_FIELDS_INVALID` for both unchecked fields, retaining zero writes. The separate manager-only `/repeats/limit-override` command creates a fresh child/NCR at the actual policy limit, with the same reason rules (6071242717). |
+| `rbac_enforcement.test.js` mounted routers | Existing mutating router inventory excludes the new NCR commands. | Add the actual NCR router so all existing negative permission checks also cover its lifecycle command; no exemptions or weakened expectations. |
 
 Production remains under the #162 demo freeze.

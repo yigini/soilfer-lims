@@ -303,6 +303,7 @@ app.use('/api/spectral', spectralRoutes);
 app.use('/api/reception', verifyToken, require('./routes/receptionRoutes'));
 app.use('/api/work', verifyToken, require('./routes/workRoutes'));
 app.use('/api/work-items', require('./routes/workRepeatRoutes'));
+app.use('/api/nonconformities', require('./routes/nonconformityRoutes'));
 app.use('/api/attempts', require('./routes/workAttemptRoutes'));
 app.use('/api/workbench', verifyToken, require('./routes/workbenchRoutes'));
 app.use('/api/sync', require('./routes/syncRoutes'));

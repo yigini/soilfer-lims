@@ -9,6 +9,7 @@ import {
     FileSpreadsheet, Activity, History, Loader2
 } from 'lucide-react';
 import BatchInspectionModal from '../components/qc/BatchInspectionModal';
+import NonconformityList from '../components/qc/NonconformityList';
 
 export default function QADashboard() {
     const { token } = useAuth();
@@ -17,7 +18,8 @@ export default function QADashboard() {
     const batchIdParam = searchParams.get('batchId');
     const tabParam = searchParams.get('tab');
 
-    const [activeTab, setActiveTab] = useState(tabParam === 'amendments' || tabParam === 'audit' ? tabParam : 'qc');
+    const [activeTab, setActiveTab] = useState(['amendments', 'audit', 'nonconformities'].includes(tabParam) ? tabParam : 'qc');
+    const [ncrRefreshKey, setNcrRefreshKey] = useState(0);
     const [selectedBatchId, setSelectedBatchId] = useState(batchIdParam);
     const [isInspectionOpen, setIsInspectionOpen] = useState(Boolean(batchIdParam));
     const [search, setSearch] = useState('');
@@ -32,7 +34,7 @@ export default function QADashboard() {
     }, [batchIdParam]);
 
     useEffect(() => {
-        if (tabParam && ['qc', 'amendments', 'audit'].includes(tabParam)) {
+        if (tabParam && ['qc', 'amendments', 'audit', 'nonconformities'].includes(tabParam)) {
             setActiveTab(tabParam);
         }
     }, [tabParam]);
@@ -142,7 +144,7 @@ export default function QADashboard() {
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
-                        onClick={() => fetchData(true)}
+                        onClick={() => { fetchData(true); setNcrRefreshKey(value => value + 1); }}
                         disabled={isRefreshing}
                         className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-sf-text bg-sf-surface border border-sf-divider hover:bg-sf-raised shadow-sm transition-all"
                     >
@@ -190,7 +192,11 @@ export default function QADashboard() {
 
             {/* Navigation Tabs & Search */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-                <div className="flex items-center gap-2 border-b sm:border-b-0 border-sf-divider pb-2 sm:pb-0">
+                <div className="flex flex-wrap items-center gap-2 border-b sm:border-b-0 border-sf-divider pb-2 sm:pb-0">
+                    <button type="button" onClick={() => setActiveTab('nonconformities')}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'nonconformities' ? 'bg-indigo-600 text-white shadow-sm' : 'text-sf-muted hover:bg-sf-raised'}`}>
+                        {t('nonconformity.title')}
+                    </button>
                     <button
                         type="button"
                         onClick={() => setActiveTab('qc')}
@@ -245,7 +251,7 @@ export default function QADashboard() {
 
             {/* Tab Contents */}
             <div className="bg-sf-surface/80 rounded-xl border border-sf-divider/80 shadow-sm overflow-hidden">
-                {loading ? (
+                {activeTab === 'nonconformities' ? <NonconformityList refreshKey={ncrRefreshKey} /> : loading ? (
                     <div className="p-12 text-center text-gray-400 flex flex-col items-center justify-center">
                         <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-2" />
                         <span className="text-xs">{t('qaSection.loadingRecords', 'Loading quality records…')}</span>

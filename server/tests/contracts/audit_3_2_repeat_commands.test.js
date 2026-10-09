@@ -134,8 +134,8 @@ test.each([
     [{reason:'TRANSCRIPTION_ERROR'},409,'ATTEMPT_CORRECTION_REQUIRED'],[{reason:'CLIENT_RETEST'},409,'AMENDMENT_WORKFLOW_REQUIRED'],
     [{reason:'OTHER'},400,'REPEAT_NOTE_REQUIRED'],[{reason:'INSTRUMENT_FAULT',sameBatchAllowed:true},400,'REPEAT_FIELDS_INVALID'],
     [{reason:'INSTRUMENT_FAULT',author:'caller'},400,'REPEAT_FIELDS_INVALID'],
-    [{reason:'INSTRUMENT_FAULT',ncrId:'unverified'},409,'ATTEMPT_LIMIT_NCR_UNAVAILABLE'],
-    [{reason:'INSTRUMENT_FAULT',override:false},409,'ATTEMPT_LIMIT_NCR_UNAVAILABLE']
+    [{reason:'INSTRUMENT_FAULT',ncrId:'unverified'},400,'REPEAT_FIELDS_INVALID'],
+    [{reason:'INSTRUMENT_FAULT',override:false},400,'REPEAT_FIELDS_INVALID']
 ])('the actual repeat API refuses %j with zero evidence/state writes',async(input,status,code)=>{
     const f=await fixture(),before=await f.all(),response=await f.command(input);
     expect(response.status).toBe(status);expect(response.body.code).toBe(code);expect(await f.all()).toEqual(before);

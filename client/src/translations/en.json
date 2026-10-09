@@ -3125,5 +3125,46 @@
     },
     "reportDerived": "Report class from selected fractions",
     "fractionNotReportable": "{{fraction}} is not reportable (selection {{selectionId}})."
+  },
+  "nonconformity": {
+    "title": "Nonconformities",
+    "status": "Status",
+    "source": "Source",
+    "allStatuses": "All statuses",
+    "allSources": "All sources",
+    "loading": "Loading nonconformities…",
+    "empty": "No nonconformities match these filters.",
+    "description": "Description",
+    "raisedBy": "Raised by",
+    "impactAssessment": "Impact assessment",
+    "correctiveAction": "Corrective action",
+    "statuses": {
+      "OPEN": "Open",
+      "ACTION": "Action",
+      "CLOSED": "Closed"
+    },
+    "sources": {
+      "QC": "Quality control",
+      "PT": "Proficiency testing",
+      "REPEAT_LIMIT": "Repeat limit",
+      "CUSTOMER": "Customer",
+      "INTAKE": "Intake",
+      "OTHER": "Other"
+    },
+    "errors": {
+      "NCR_FAILED": "Unable to load nonconformities.",
+      "NCR_READ_FORBIDDEN": "QA read permission is required.",
+      "NCR_SCOPE_DENIED": "This record is outside your laboratory scope.",
+      "NCR_FILTER_INVALID": "Choose a valid status or source.",
+      "NCR_MANAGEMENT_FORBIDDEN": "Review authority is required.",
+      "NCR_ASSESSMENT_REQUIRED": "Record a description and impact assessment.",
+      "NCR_ACTION_REQUIRED": "Record the corrective action.",
+      "NCR_TRANSITION_REFUSED": "Move from open to action, then closed.",
+      "NCR_INPUT_INVALID": "Choose a supported nonconformity command.",
+      "NCR_NOT_FOUND": "Nonconformity not found.",
+      "NCR_STATE_CHANGED": "This record changed. Reload before retrying.",
+      "NCR_SOURCE_SCOPE_MISMATCH": "The source must belong to this record and laboratory.",
+      "ATTEMPT_LIMIT_OVERRIDE_NOT_NEEDED": "The work has not reached its repeat limit."
+    }
   }
 }

@@ -3,14 +3,16 @@ const rules = require('./workflowStateRules');
 const { hasPermission } = require('../config/roles');
 const { isNonMeasurement } = require('./workItemKinds');
 const policy = require('./policyService');
-const { repeatRequest, SELF_REPEAT_REASONS } = require('./workRepeatContract');
+const { repeatRequest, repeatLimitOverrideRequest, SELF_REPEAT_REASONS } = require('./workRepeatContract');
 const { appendAttemptEvent, transitionAttempt } = require('./workAttemptEventService');
 
-async function assertRepeatCapacity(tx, item, sample) {
+async function assertRepeatCapacity(tx, item, sample, limitOverride = false) {
     const limit = await policy.get(sample.assignedLab || item.labId, 'repeats.maxAttemptsBeforeNcr',
         { analysisCode: item.analysis, methodologyId: item.methodologyId, db: tx });
     const count = await tx.workAttempt.count({ where: { workItemId: item.id } });
-    if (limit !== 0 && count >= limit) throw new rules.TransitionError('The configured attempt limit requires the NCR workflow.', 409, 'ATTEMPT_LIMIT', { limit, count });
+    const atLimit = limit !== 0 && count >= limit;
+    if (limitOverride && !atLimit) throw new rules.TransitionError('This work has not reached its configured attempt limit.', 409, 'ATTEMPT_LIMIT_OVERRIDE_NOT_NEEDED', { limit, count });
+    if (atLimit && !limitOverride) throw new rules.TransitionError('The configured attempt limit requires the NCR workflow.', 409, 'ATTEMPT_LIMIT', { limit, count });
     return count;
 }
 async function preflightRepeat(tx, item, sample, actor, request, attemptId) {
@@ -22,6 +24,7 @@ async function preflightRepeat(tx, item, sample, actor, request, attemptId) {
         throw new rules.TransitionError('This work cannot request a measurement repeat.', 409, 'WORK_REPEAT_STATE_REFUSED');
     }
     const reviewer = hasPermission(actor, 'APPROVE_RESULTS');
+    if (request.limitOverride && !reviewer) throw new rules.TransitionError('A repeat-limit override requires review authority.', 403, 'NCR_MANAGEMENT_FORBIDDEN');
     if (!reviewer) {
         if (!hasPermission(actor, 'ENTER_RESULTS') || item.assignedTo !== rules.actorName(actor) ||
             ['SUBMITTED', 'QA_PENDING'].includes(item.status) || !SELF_REPEAT_REASONS.includes(request.reason) ||
@@ -39,7 +42,7 @@ async function preflightRepeat(tx, item, sample, actor, request, attemptId) {
     if (!parent || !['RECORDED', 'SUBMITTED'].includes(parent.status) || parent.status === 'SUBMITTED' && !reviewer) {
         throw new rules.TransitionError('The recorded attempt is not eligible for this repeat.', 409, 'WORK_REPEAT_STATE_REFUSED');
     }
-    await assertRepeatCapacity(tx, item, sample);
+    await assertRepeatCapacity(tx, item, sample, Boolean(request.limitOverride));
     return { parent, attemptNo: Math.max(0, ...attempts.map(row => row.attemptNo)) + 1 };
 }
 async function reserveRepeat(tx, item, sample, actor, request, preflight) {
@@ -50,11 +53,26 @@ async function reserveRepeat(tx, item, sample, actor, request, preflight) {
     const attempt = await tx.workAttempt.create({ data: { id, workItemId: item.id, attemptNo: plan.attemptNo, status: 'OPEN',
         parentAttemptId: plan.parent.id, reason: request.reason, note: request.note, requestedBy: rules.actorName(actor), requestedAt: now,
         createdAt: now, updatedAt: now } });
-    await appendAttemptEvent(tx, { ...item, sample }, id, actor, { action: 'CREATED', from: null, to: 'OPEN', reason: request.reason, note: request.note });
+    let nonconformityId;
+    if (request.limitOverride) {
+        const { report } = await require('./nonconformityService').raise(tx, actor, {
+            labId: sample.assignedLab || item.labId, source: 'REPEAT_LIMIT', refType: 'WorkAttempt', refId: id,
+            ...request.limitOverride
+        });
+        nonconformityId = report.id;
+    }
+    await appendAttemptEvent(tx, { ...item, sample }, id, actor, { action: 'CREATED', from: null, to: 'OPEN', reason: request.reason,
+        note: request.note, ...(nonconformityId && { nonconformityId }) });
     return attempt;
 }
 async function requestRepeat(db, workItemId, actor, input) {
-    const request = repeatRequest(input);
+    return executeRepeat(db, workItemId, actor, repeatRequest(input));
+}
+async function requestRepeatLimitOverride(db, workItemId, actor, input) {
+    if (!hasPermission(actor, 'APPROVE_RESULTS')) throw new rules.TransitionError('A repeat-limit override requires review authority.', 403, 'NCR_MANAGEMENT_FORBIDDEN');
+    return executeRepeat(db, workItemId, actor, repeatLimitOverrideRequest(input));
+}
+async function executeRepeat(db, workItemId, actor, request) {
     return rules.inTransaction(db, async tx => {
         const item = await tx.workItem.findUnique({ where: { id: workItemId } });
         if (!item) throw new rules.TransitionError('Work item not found.', 404, 'WORK_ITEM_NOT_FOUND');
@@ -77,4 +95,4 @@ async function requestRepeat(db, workItemId, actor, input) {
         return { workItem: updated, attempt };
     }).catch(error=>{throw require('./workRepeatBatchService').mapRepeatRunError(error);});
 }
-module.exports = { assertRepeatCapacity, preflightRepeat, reserveRepeat, requestRepeat };
+module.exports = { assertRepeatCapacity, preflightRepeat, reserveRepeat, requestRepeat, requestRepeatLimitOverride };
