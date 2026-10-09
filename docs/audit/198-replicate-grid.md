@@ -42,6 +42,7 @@ Existing test changes, all under that pin:
 | #190 two-reading execution | Explicit required count2 for AT190 through policyService | All original shared-attempt, immutable evidence, repeat ownership and preservation assertions |
 | #192 separate-fraction mean setup | Explicit method-scoped required count2 for its two SAND readings through policyService | All original four-source lineage, derived texture, malformed-proof SQL and reader/refusal assertions |
 | Retained provenance and draft-integrity two-reading cases | Explicit required count2 through policyService before the second reading | All original immutable determination, replicate value, report provenance and draft lifecycle assertions |
+| #192 frozen duplicate-mean acceptance | Explicit method-scoped required count2 before starting the native run | All original frozen rule, exact mean, lineage and byte-identical retained Result/BatchAnalyte assertions |
 
 No factory/writer exemption or scanner change. Migration/backfill counts0.
 No changes to analytical/QC/audit data or the native QC evaluator. Production
