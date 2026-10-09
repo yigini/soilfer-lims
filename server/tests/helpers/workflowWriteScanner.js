@@ -35,7 +35,7 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
     // Existing sources and writer restrictions retain their exact behaviour.
     Object.freeze({ functionName: 'loadWorkRepeatMigrationSource', loader: 'services/workRepeatMigrationSource.js',
         loaderSha256: '6c228cc37678663dc3d06b49581a11765d3c21412f1a5f5facc0e52bed51d50d',
-        directory: '20261008000200_repeat_correction_contract', sqlSha256: '09fd801c9ad5e28ba0d05a099270846adfe311e1a0c6c00ca3aed121c1f0c4d3',
+        directory: '20261008000200_repeat_correction_contract', sqlSha256: '600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd',
         boundary: '-- INSTALLER_GUARDS_AFTER_SCHEMA' }),
     Object.freeze({ functionName: 'loadProficiencyMigrationSource', loader: 'services/proficiencyMigrationSource.js',
         loaderSha256: 'e4210caee7aa209d3fdc438b268d72e0728eb6b3a7a2ab102e4b9c8eedfdea0f',
