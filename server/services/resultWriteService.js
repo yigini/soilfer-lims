@@ -377,7 +377,7 @@ async function writeResultsExecution(tx, options) {
     const format=await getNumberFormat(ctx.labId,{db:tx,analysisCode:ctx.analysis.code,methodologyId:ctx.methodId});
     const values=[], calculations=[];
     for(const measurement of prepared) {
-        const calculated = await calculationService.prepare(tx,ctx,measurement,format);
+        const calculated = await calculationService.prepareCalculation(tx,ctx,measurement,format);
         calculations.push(calculated);
         const value = await numericValues(tx,ctx,calculated ? {...measurement,unit:calculated.calculated.outputUnit} : measurement,null,format);
         if (calculated?.selected.curve && calculated.calculated.intermediate.aboveRange)
@@ -410,7 +410,7 @@ async function previewResultCalculation(db, { sampleId, workItemId, actor, input
         await validateExecutionReadiness(tx,ctx);
         if (measurement) {
             const numberFormat=await getNumberFormat(ctx.labId,{db:tx,analysisCode:ctx.analysis.code,methodologyId:ctx.methodId});
-            const evidence=await calculationService.prepare(tx,ctx,measurement,numberFormat);
+            const evidence=await calculationService.prepareCalculation(tx,ctx,measurement,numberFormat);
             if(!evidence)return {active:null,template:null,calculation:null};
             const {selected,calculated}=evidence;
             return {active:{activationId:selected.activationId,templateId:selected.templateId,templateVersion:selected.templateVersion},

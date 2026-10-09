@@ -287,7 +287,14 @@ test('receipt refusal rolls every new guard, unit and reference back atomically'
 test.each(['partial-guard', 'changed-column', 'wrong-unit', 'wrong-reference'])('refuses %s with unchanged bytes before any installation writes', async variant => {
     const file = await freshFixture();
     raw(file, db => {
-        if (variant === 'partial-guard') db.exec(loadCalculationTemplateMigrationSource().guardsSql.match(/^CREATE TRIGGER[\s\S]*?^END;/m)[0]);
+        if (variant === 'partial-guard') {
+            const partialGuard = `CREATE TRIGGER "CalcTemplate_update_immutable" BEFORE UPDATE ON "CalcTemplate"
+BEGIN
+  SELECT RAISE(ABORT,'CALC_TEMPLATE_IMMUTABLE');
+END;`;
+            expect(loadCalculationTemplateMigrationSource().guardsSql).toContain(partialGuard);
+            db.exec(partialGuard);
+        }
         else if (variant === 'changed-column') db.exec('ALTER TABLE "CalibrationPoint" ADD COLUMN unexpected TEXT');
         else if (variant === 'wrong-unit') db.prepare('INSERT INTO Unit(code,display,quantityKind,factorToBase,synonyms,updatedAt) VALUES(?,?,?,?,?,?)')
             .run('pct_mass', '%', 'RATIO', 1, '[]', Date.now());

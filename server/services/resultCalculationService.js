@@ -41,7 +41,7 @@ async function preview(db, ctx, rawInputs) {
     return { active: { activationId: selected.activationId, templateId: selected.templateId, templateVersion: selected.templateVersion },
         template: selected.template, curve: selected.curve, curveBlocker: selected.curveBlocker, numberFormat, units: selected.units, calculation: calculated };
 }
-async function prepare(db, ctx, measurement, numberFormat) {
+async function prepareCalculation(db, ctx, measurement, numberFormat) {
     // Historical imports and spectral predictions retain their authorized input
     // authority. An activated laboratory template governs typed measurements.
     if (ctx.source !== 'measurement') {
@@ -154,4 +154,4 @@ async function freeze(db, ctx, result, evidence, now) {
 async function retained(db, resultId) {
     return db.resultCalculation.findUnique({ where: { resultId }, include: { template: true, curve: { include: { points: { orderBy: { ordinal: 'asc' } } } } } });
 }
-module.exports = { selection, preview, prepare, prepareCorrection, freeze, retained };
+module.exports = { selection, preview, prepareCalculation, prepareCorrection, freeze, retained };

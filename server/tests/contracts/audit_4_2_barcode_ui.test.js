@@ -23,6 +23,7 @@ describe('Audit 4.2: real DOM barcode wedge and value-cell boundaries', () => {
                 if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
                 if (name === 'clsx') return require('../../../client/node_modules/clsx');
                 if (name === '@lims/number-parse') return require('../../../shared/numberParse');
+                if (name === '@lims/soil-calculation') return require('../../../shared/soilCalculation');
                 if (name.includes('LanguageContext')) return { useLanguage: () => ({ t }) };
                 if (name.includes('AuthContext')) return { useAuth: () => ({ hasPermission: () => true }) };
                 if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
@@ -97,7 +98,7 @@ describe('Audit 4.2: real DOM barcode wedge and value-cell boundaries', () => {
         scroll = jest.fn(); window.HTMLElement.prototype.scrollIntoView = scroll;
         host = document.getElementById('root');
         createRoot = require('../../../client/node_modules/react-dom/client').createRoot; reactRoot = createRoot(host);
-        axios = { get: jest.fn(), post: jest.fn(async () => ({ data: { data: {} } })) };
+        axios = { get: jest.fn(async () => ({ data: { data: { active: null, rows: [] } } })), post: jest.fn(async () => ({ data: { data: {} } })) };
         audio = { playSuccessChime: jest.fn(), playErrorBuzz: jest.fn() };
         for (const file of Object.keys(cache)) delete cache[file];
     });

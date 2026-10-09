@@ -148,7 +148,9 @@ const CALCULATION_FIXTURE = Object.freeze({
 const CALCULATION_PREREQUISITES = Object.freeze({
     file: 'tests/helpers/calculationReleasePrerequisites.js', exportName: 'installCalculationReleasePrerequisites',
     sha256: 'bb8d5befaeb4484fd8660ff0e163a32384d731eef6562d4e4fbe9e426ebb9600',
-    callers: ['tests/helpers/qcGateFixture.js', 'tests/helpers/normalizedQcFixture.js', 'tests/helpers/repeatQcPredecessors.js']
+    callers: ['tests/helpers/qcGateFixture.js', 'tests/helpers/normalizedQcFixture.js', 'tests/helpers/repeatQcPredecessors.js',
+        'tests/contracts/audit_2_3_native_runs.test.js', 'tests/contracts/audit_1_2_guard_installer.test.js',
+        'tests/contracts/deployment_readiness_bootstrap.test.js']
 });
 // #272 pin6087435363: one closed, no-argument baseline factory and caller.
 const RAW_INPUT_FIXTURE = Object.freeze({

@@ -16,6 +16,7 @@ const os = require('os');
 const cp = require('child_process');
 const { createHash } = require('node:crypto');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const { installCalculationReleasePrerequisites } = require('../helpers/calculationReleasePrerequisites');
 const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
 
 describe('Deployment Readiness Bootstrap & Packaging Verification', () => {
@@ -326,6 +327,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
             file: path.resolve(__dirname, '../.tmp', `audit_legacy_bootstrap_${TS}.db`), qcBootstrap: 'CREATE_PRISMA' });
         ownedSchemaDatabases.push(fixture.file);
         require('../../scripts/install_workflow_state_guards').installWorkflowStateGuards({ dbPath: fixture.file, apply: true });
+        installCalculationReleasePrerequisites(fixture.file);
         // The inspection uses a fresh guarded schema, never working specimens.
         const Database = require('better-sqlite3');
         if (fs.existsSync(targetDb)) throw new Error('Owned startup target already exists.');

@@ -16,6 +16,7 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
     const testDeviceId = 'test_dev_mobile_001';
 
     beforeAll(async () => {
+        await require('../setup').ensureTestLab('LAB-TEST-SYNC', 'TEST');
         const secret = process.env.JWT_SECRET || 'test_secret';
 
         // Generate tech token

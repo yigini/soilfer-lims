@@ -5,6 +5,7 @@ const { spawnSync, spawn } = require('node:child_process');
 const net = require('node:net');
 const Database = require('better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const { installCalculationReleasePrerequisites } = require('../helpers/calculationReleasePrerequisites');
 const { rejectedGuardWrite } = require('../helpers/rejectedGuardWrite');
 const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
 const { SOURCES } = require('../../services/workflowMigrationSources');
@@ -386,6 +387,7 @@ test('a complete guarded database passes the read-only gate, listens and answers
     require('../../scripts/install_reported_value_selections').installReportedValueSelections({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: fixture.file, apply: true });
+    installCalculationReleasePrerequisites(fixture.file);
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const ready = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"WORKFLOW_STARTUP_READY"')));

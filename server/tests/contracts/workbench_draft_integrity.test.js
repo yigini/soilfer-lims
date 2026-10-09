@@ -12,6 +12,7 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
     const testUser = { username: 'tech_marcos', role: 'LAB_TECHNICIAN', labId: 'LAB-DEFAULT' };
 
     beforeAll(async () => {
+        await require('../setup').ensureTestLab(testUser.labId, 'TEST');
         testSampleId = `SMP-DRAFT-TEST-${Date.now()}`;
         testWorkItemId1 = `WI-DRAFT-1-${Date.now()}`;
         testWorkItemId2 = `WI-DRAFT-2-${Date.now()}`;

@@ -4,11 +4,12 @@ const jwt = require('jsonwebtoken');
 const { randomUUID } = require('node:crypto');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { getAuthToken } = require('../setup');
+const { getAuthToken, ensureTestLab } = require('../setup');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const labId = 'LAB-LEGACY-RESULTS-179', analysis = 'PH_LEGACY_RESULT_179';
 let token, actor, repeatReviewer;
 beforeAll(async () => {
+    await ensureTestLab(labId, 'TEST');
     token = await getAuthToken('LAB_TECHNICIAN', labId);
     actor = jwt.decode(token);
     repeatReviewer=jwt.decode(await getAuthToken('LAB_MANAGER',labId));

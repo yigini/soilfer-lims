@@ -23,12 +23,25 @@ function mount(batch) {
                     { module: navigation, exports: navigation.exports });
                 return navigation.exports;
             }
-            if (name === './BarcodeSafeInput') {
+            if (name === './BarcodeSafeInput' || name === './CalibrationCurvePanel') {
                 const child = { exports: {} };
-                const source = fs.readFileSync(path.resolve(__dirname, '../../../client/src/components/workbench/BarcodeSafeInput.jsx'), 'utf8');
+                const source = fs.readFileSync(path.resolve(__dirname, '../../../client/src/components/workbench', name + '.jsx'), 'utf8');
                 vm.runInNewContext(esbuild.transformSync(source, { loader: 'jsx', format: 'cjs' }).code,
                     { module: child, exports: child.exports, Date, setTimeout, clearTimeout,
-                        require(dependency) { if (dependency === 'react') return react; throw Error(`Unexpected barcode input import ${dependency}`); } });
+                        require(dependency) {
+                            if (dependency === 'react') return react;
+                            if (dependency === 'axios') return axios;
+                            if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: key => key }) };
+                            if (name === './CalibrationCurvePanel' && dependency === './BarcodeSafeInput') {
+                                const barcode = { exports: {} };
+                                const barcodeSource = fs.readFileSync(path.resolve(__dirname, '../../../client/src/components/workbench/BarcodeSafeInput.jsx'), 'utf8');
+                                vm.runInNewContext(esbuild.transformSync(barcodeSource, { loader: 'jsx', format: 'cjs' }).code,
+                                    { module: barcode, exports: barcode.exports, Date, setTimeout, clearTimeout,
+                                        require(imported) { if (imported === 'react') return react; throw Error(`Unexpected barcode input import ${imported}`); } });
+                                return barcode.exports;
+                            }
+                            throw Error(`Unexpected Native child import ${dependency}`);
+                        } });
                 return child.exports;
             }
             throw Error(`Unexpected Native component import ${name}`); } });

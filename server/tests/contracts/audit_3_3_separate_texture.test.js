@@ -11,7 +11,10 @@ async function fixture({mean=false,clayValue=15}={}) {
     const f=await qcGateFixture();owned.push(f);
     const sample=await createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,
         status:'PROCESSING',dryingStatus:'DONE',preparationStatus:'DONE',requiredAnalyses:'["SAND","SILT","CLAY","TEXTURE"]'}});
-    await f.db.unit.create({data:{code:'%',display:'%',quantityKind:'MASS_FRACTION',factorToBase:1}});
+    // The real #199 prerequisite installer already retains the published unit.
+    // This fixture must not overwrite its kind or create a duplicate code.
+    const percent=require('../../seeds/units').UNITS.find(row=>row.code==='%');
+    expect(await f.db.unit.findUnique({where:{code:'%'}})).toMatchObject(percent);
     f.textureItems={};f.fractions=[];
     for(const analysis of ['SAND','SILT','CLAY','TEXTURE']) {
         await f.db.analysis.create({data:{code:analysis,name:'Owned '+analysis.toLowerCase()+' measurement',units:analysis==='TEXTURE'?'USDA_12_CLASS':'%',validation:'{}'}});
