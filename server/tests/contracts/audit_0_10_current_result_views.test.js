@@ -62,9 +62,11 @@ describe('Audit 0.10: current results in exports and working grid', () => {
             {value:10,replicateNo:1},{value:20,replicateNo:2}],{select:false});
         const before=await prisma.auditLog.count();
         const refused=await exportData(f.projectCode),refusedGrid=await grid({project:f.projectCode});
-        expect(refused).toMatchObject({status:409,body:{code:'REPORTED_VALUE_SELECTION_REQUIRED'}});
-        expect(refusedGrid).toMatchObject({status:409,body:{code:'REPORTED_VALUE_SELECTION_REQUIRED'}});
-        expect(await prisma.auditLog.count()).toBe(before);
+        expect(refused).toMatchObject({status:200,body:{meta:{reportedValueErrors:[{workItemId:f.item.id,code:'REPORTED_VALUE_SELECTION_REQUIRED'}]}}});
+        expect(refused.body.data[0].SOC).toBeUndefined();
+        expect(refusedGrid).toMatchObject({status:200,body:{reportedValueErrors:[{workItemId:f.item.id,code:'REPORTED_VALUE_SELECTION_REQUIRED'}]}}});
+        expect(refusedGrid.body.data[0].SOC).toMatchObject({status:'UNAVAILABLE',code:'REPORTED_VALUE_SELECTION_REQUIRED'});
+        expect(await prisma.auditLog.count()).toBe(before+1);
         const valid=await fixture(),[first,second]=await resultSet(valid,[{value:10,replicateNo:1},{value:20,replicateNo:2}]);
         const exported = await exportData(valid.projectCode);
         expect(exported.status).toBe(200);
@@ -83,7 +85,8 @@ describe('Audit 0.10: current results in exports and working grid', () => {
         const f=await fixture();await resultSet(f,[{value:1,unit:'%',replicateNo:1},{value:20,replicateNo:2}],{select:false});
         await expect(choose(f)).rejects.toMatchObject({code:'REPORTED_VALUE_SELECTION_REQUIRED'});
         const response = await exportData(f.projectCode);
-        expect(response).toMatchObject({status:409,body:{code:'REPORTED_VALUE_SELECTION_REQUIRED'}});
+        expect(response).toMatchObject({status:200,body:{meta:{reportedValueErrors:[{workItemId:f.item.id,code:'REPORTED_VALUE_SELECTION_REQUIRED'}]}}});
+        expect(response.body.data[0].SOC).toBeUndefined();
         expect(await prisma.reportedValueSelection.count({where:{workItemId:f.item.id}})).toBe(0);
     });
     test.each(['methodology', 'unit', 'qualified'])('ambiguous %s evidence refuses until an explicit not-reportable choice; other selected samples remain intact', async kind => {
@@ -93,8 +96,11 @@ describe('Audit 0.10: current results in exports and working grid', () => {
             {value:kind==='qualified'?'<0.1':20,replicateNo:2,methodologyId:kind==='methodology'?'method-b':null,
                 censoring:kind==='qualified'?'BELOW_LOQ':'NONE',unit:kind==='unit'?'mg/L':'g/kg'}],{select:false});
         const auditBefore=await prisma.auditLog.count();
-        expect(await exportData(good.projectCode)).toMatchObject({status:409,body:{code:'REPORTED_VALUE_SELECTION_REQUIRED'}});
-        expect(await prisma.auditLog.count()).toBe(auditBefore);
+        const partial=await exportData(good.projectCode);
+        expect(partial).toMatchObject({status:200,body:{meta:{reportedValueErrors:[{workItemId:bad.item.id,code:'REPORTED_VALUE_SELECTION_REQUIRED'}]}}});
+        expect(partial.body.data.find(row=>row['Sample ID']===bad.sample.id).SOC).toBeUndefined();
+        expect(partial.body.data.find(row=>row['Sample ID']===good.sample.id).SOC).toBe(42);
+        expect(await prisma.auditLog.count()).toBe(auditBefore+1);
         await expect(choose(bad)).rejects.toMatchObject({code:'REPORTED_VALUE_SELECTION_REQUIRED'});
         const reason='Retained '+kind+' evidence cannot be combined';
         await choose(bad,{mode:'NOT_REPORTABLE',reason});
@@ -140,7 +146,7 @@ describe('Audit 0.10: current results in exports and working grid', () => {
         expect(lookup.mock.calls.filter(([,key])=>key==='results.reportedValueRule')).toEqual([]);
         expect(await prisma.reportedValueSelection.findUnique({where:{id:saved.id}})).toEqual(saved);
     });
-    test('an unknown policy refuses a new choice; a missing choice refuses export without an audit', async () => {
+    test('an unknown policy refuses a new choice; bulk export discloses the missing choice without an analytical value', async () => {
         const f = await fixture();await resultSet(f,[{value:10}],{select:false});
         const before = await prisma.auditLog.count();
         const original = policy.resolve;
@@ -148,8 +154,10 @@ describe('Audit 0.10: current results in exports and working grid', () => {
             {...await original(lab,key,context),value:'UNKNOWN'}:original(lab,key,context));
         await expect(choose(f)).rejects.toMatchObject({code:'RESULT_POLICY_UNRESOLVED'});
         const response = await exportData(f.projectCode);
-        expect(response.status).toBe(409); expect(response.body.code).toBe('REPORTED_VALUE_SELECTION_REQUIRED');
-        expect(await prisma.auditLog.count()).toBe(before);
+        expect(response.status).toBe(200);expect(response.body.meta.reportedValueErrors)
+            .toEqual([expect.objectContaining({workItemId:f.item.id,code:'REPORTED_VALUE_SELECTION_REQUIRED'})]);
+        expect(response.body.data[0].SOC).toBeUndefined();
+        expect(await prisma.auditLog.count()).toBe(before+1);
     });
     test.each([
         [{ startDate: '2026-01-02T00:00:00Z', endDate: '2026-01-02T23:59:59Z' }, [2]],

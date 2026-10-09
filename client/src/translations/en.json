@@ -3105,7 +3105,10 @@
       "REPORTED_VALUE_REASON_REQUIRED": "Explain why the questioned evidence is being reported.",
       "REPORTED_VALUE_REVIEW_REQUIRED": "Retained non-current or returned evidence needs an explicit reviewer choice.",
       "REPORTED_VALUE_LAYOUT_UNSUPPORTED": "The texture layout is incomplete or mixed.",
-      "REPORTED_VALUE_SOURCE_SELECTION_REQUIRED": "Accept and select SAND, SILT and CLAY before TEXTURE."
+      "REPORTED_VALUE_SOURCE_SELECTION_REQUIRED": "Accept and select SAND, SILT and CLAY before TEXTURE.",
+      "REPORTED_VALUE_SOURCE_INVALID": "The selected source evidence is invalid.",
+      "REPORTED_VALUE_SOURCE_QC_BLOCKED": "Quality control blocks the selected source evidence.",
+      "REPORTED_VALUE_LINEAGE_INVALID": "The retained attempt lineage is incomplete."
     },
     "statuses": {
       "OPEN": "Open",

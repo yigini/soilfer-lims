@@ -126,6 +126,7 @@ exports.getExportData = async (req, res) => {
         let ambiguousCellCount = 0;
         const headerNotes = new Set();
         const selectionPolicies = new Map();
+        const reportedValueErrors = [];
 
         if (type === 'LIST') {
             const samples = await prisma.sample.findMany({
@@ -196,7 +197,8 @@ exports.getExportData = async (req, res) => {
                     } catch (e) { }
                 }
 
-                const reported = type==='WET_CHEM' ? await readSampleReportedValues(prisma,sample) : null;
+                const reported = type==='WET_CHEM' ? await readSampleReportedValues(prisma,sample,{partial:true}) : null;
+                if(reported) reportedValueErrors.push(...reported.errors);
                 if (sample.results || reported) {
                     const groups = (reported?.values || sample.results).map(result=>[result]);
                     for (const replicates of groups) {
@@ -285,7 +287,7 @@ exports.getExportData = async (req, res) => {
                 details: JSON.stringify({
                     filters: { project, lab, startDate, endDate, viewFilters },
                     count: data.length,
-                    ...(type === 'WET_CHEM' ? { ambiguousCellCount, headerNotes: [...headerNotes], selectionPolicies: [...selectionPolicies.values()] } : {}),
+                    ...(type === 'WET_CHEM' ? { ambiguousCellCount, reportedValueErrors, headerNotes: [...headerNotes], selectionPolicies: [...selectionPolicies.values()] } : {}),
                     signOff: { name: signOffName, reason: signOffReason }
                 })
             }
@@ -299,7 +301,7 @@ exports.getExportData = async (req, res) => {
                 generatedBy: signOffName || user.name,
                 recordCount: data.length,
                 analysisMetadata,
-                ...(type === 'WET_CHEM' ? { ambiguousCellCount, headerNotes: [...headerNotes], selectionPolicies: [...selectionPolicies.values()] } : {})
+                ...(type === 'WET_CHEM' ? { ambiguousCellCount, reportedValueErrors, headerNotes: [...headerNotes], selectionPolicies: [...selectionPolicies.values()] } : {})
             },
             columns,
             data

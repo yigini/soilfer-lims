@@ -217,7 +217,7 @@ async function generateReport(req, res) {
         }
         if (err.statusCode) {
             const { code, workItemIds, params, gate, acknowledgementRequired } = err.publishCheck || {};
-            return res.status(err.statusCode).json({ error: err.message, code: code || err.code, workItemIds, params, gate, acknowledgementRequired,
+            return res.status(err.statusCode).json({ error: err.message, ...err.details, code: code || err.code, workItemIds, params, gate, acknowledgementRequired,
                 ...(err.qcModeEvidence && { qcModeEvidence: err.qcModeEvidence }) });
         }
         console.error('[Report] Generate error:', err);
@@ -884,6 +884,7 @@ async function getSampleReportPdf(req, res) {
         return res.send(pdfBuffer);
     } catch (err) {
         console.error('[Report] Sample PDF error:', err);
+        if(err.statusCode) return res.status(err.statusCode).json({error:err.message,code:err.code,...err.details});
         return res.status(500).json({ error: err.message || 'Failed to generate PDF' });
     }
 }

@@ -46,7 +46,7 @@ exports.getAnalyticalResults = async (req, res) => {
         };
         const analysisKeys = new Set();
         const reportedBySample = new Map();
-        for(const sample of samples) reportedBySample.set(sample.id,await readSampleReportedValues(prisma,sample));
+        for(const sample of samples) reportedBySample.set(sample.id,await readSampleReportedValues(prisma,sample,{partial:true}));
         const data = samples.flatMap(sample => {
             const reported = reportedBySample.get(sample.id).values;
             const codes = [...new Set([...(parseJson(sample.requiredAnalyses) || []),
@@ -56,10 +56,13 @@ exports.getAnalyticalResults = async (req, res) => {
                 id: sample.id, sampleId: sample.id, labId: sample.labId || sample.originalId || 'N/A', originalId: sample.originalId,
                 project: sample.projectCode, country: sample.countryName, status: sample.status,
                 submitter: sample.submitter || parseJson(sample.metadata)?.submitterName || '',
-                collectionDate: sample.collectionDate, receptionDate: sample.receptionDate, latitude: '', longitude: ''
+                collectionDate: sample.collectionDate, receptionDate: sample.receptionDate, latitude: '', longitude: '',
+                reportedValueErrors:reportedBySample.get(sample.id).errors.filter(error=>included(error.analysisCode))
             };
             const pending = {};
             for (const code of codes) {
+                const refusal=base.reportedValueErrors.find(error=>error.analysisCode===code);
+                if(refusal) {pending[code]={status:'UNAVAILABLE',code:refusal.code,workItemId:refusal.workItemId};continue;}
                 const items = sample.workItems.filter(item => item.analysis === code);
                 const item = items[0];
                 const modality = ['SPEC_MIR', 'MIR Soil Spectra'].includes(code) ? 'MIR' : 'NIR';
@@ -92,7 +95,7 @@ exports.getAnalyticalResults = async (req, res) => {
             return { key: code, label: `${name}${definition?.units ? ` (${definition.units})` : ''}`,
                 shortLabel: name, unit: definition?.units || null, isResult: true };
         }));
-        res.json({ data, columns: [
+        res.json({ data, reportedValueErrors:[...reportedBySample.values()].flatMap(proof=>proof.errors).filter(error=>included(error.analysisCode)), columns: [
             { key: 'labId', label: 'Lab ID', frozen: true }, { key: 'originalId', label: 'Original ID' },
             { key: 'project', label: 'Project' }, { key: 'country', label: 'Country' }, { key: 'status', label: 'Status' },
             { key: 'collectionDate', label: 'Collected' }, { key: 'receptionDate', label: 'Received' },

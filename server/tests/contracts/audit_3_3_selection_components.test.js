@@ -1,6 +1,16 @@
 const { mountUi } = require('../helpers/qcWorksheetUi');
 const english = require('../../../client/src/translations/en.json');
-const t = (key, fallback) => key.split('.').reduce((value,part) => value?.[part],english) ?? fallback ?? key;
+const fs = require('node:fs'),vm=require('node:vm'),esbuild=require('../../../client/node_modules/esbuild');
+const formatter={exports:{}};
+vm.runInNewContext(esbuild.transformSync(fs.readFileSync(require('node:path').resolve(__dirname,'../../../client/src/utils/messageFormatter.js'),'utf8'),
+    {loader:'js',format:'cjs'}).code,{module:formatter,exports:formatter.exports,require:name=>require('../../../client/node_modules/'+name),console});
+const translate=locale=>(key,paramsOrFallback)=>{
+    const catalogue=require('../../../client/src/translations/'+locale+'.json');
+    const pattern=key.split('.').reduce((value,part)=>value?.[part],catalogue);
+    return pattern==null ? typeof paramsOrFallback==='string'?paramsOrFallback:key :
+        formatter.exports.formatMessage(pattern,typeof paramsOrFallback==='object'?paramsOrFallback:{},locale);
+};
+const t = translate('en');
 const output = value => ({ analysisCode: 'PH', valueText: String(value), unit: 'pH' });
 function data({ automatic = false, mean = true, status = 'SUBMITTED' } = {}) {
     return { status, current: { groupId: 'old-group', code: null, rows: [] },
@@ -111,13 +121,23 @@ test('separate texture offers fraction-derived confirmation and no categorical m
     expect(view.text()).toContain('Sandy Loam');
 });
 
-test('separate texture displays propagated not-reportable reason from the translated key',async()=>{
+test.each(['en','es','es-419','fr','pt'])('separate texture displays fraction and selection id through the real %s formatter',async locale=>{
     const response={...data({automatic:true}),layout:'SEPARATE',derived:{allowed:false,code:'REPORTED_VALUE_SELECTION_REQUIRED'}};
     response.automatic.choice={mode:'NOT_REPORTABLE',reason:JSON.stringify({code:'FRACTION_NOT_REPORTABLE',
         fractions:[{analysisCode:'SAND',selectionId:'sand-choice'}]}),outputs:[{analysisCode:'TEXTURE',valueText:''}]};
-    const view=mount({},response);await view.render();
-    expect(view.text()).toContain('SAND is not reportable (selection sand-choice).');
+    const view=mount({t:translate(locale)},response);await view.render();
+    expect(view.text()).toContain(translate(locale)('reportedValue.fractionNotReportable',{fraction:'SAND',selectionId:'sand-choice'}));
+    expect(view.text()).toContain('SAND');expect(view.text()).toContain('sand-choice');
     expect(view.text()).not.toContain('FRACTION_NOT_REPORTABLE');
+});
+test.each(['en','es','es-419','fr','pt'])('source and lineage refusals use the %s locale instead of an English API fallback',async locale=>{
+    for(const code of ['REPORTED_VALUE_SOURCE_INVALID','REPORTED_VALUE_SOURCE_QC_BLOCKED','REPORTED_VALUE_LINEAGE_INVALID']) {
+        const response=data();response.mean={allowed:false,code,error:'English server refusal'};
+        const expected=require('../../../client/src/translations/'+locale+'.json').reportedValue.errors[code];
+        expect(typeof expected).toBe('string');
+        const view=mount({t:translate(locale)},response);await view.render();
+        expect(view.text()).toContain(expected);expect(view.text()).not.toContain('English server refusal');
+    }
 });
 
 test.each(['en','es','es-419','fr','pt'])('reported-value labels, statuses and refusals match both %s catalogues', locale => {

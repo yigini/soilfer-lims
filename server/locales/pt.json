@@ -1500,7 +1500,10 @@
       "REPORTED_VALUE_REASON_REQUIRED": "Explique por que as evidências questionadas estão sendo reportadas.",
       "REPORTED_VALUE_REVIEW_REQUIRED": "As evidências retidas não atuais ou devolvidas exigem uma escolha explícita do revisor.",
       "REPORTED_VALUE_LAYOUT_UNSUPPORTED": "A estrutura da textura está incompleta ou misturada.",
-      "REPORTED_VALUE_SOURCE_SELECTION_REQUIRED": "Aceite e selecione SAND, SILT e CLAY antes de TEXTURE."
+      "REPORTED_VALUE_SOURCE_SELECTION_REQUIRED": "Aceite e selecione SAND, SILT e CLAY antes de TEXTURE.",
+      "REPORTED_VALUE_SOURCE_INVALID": "A evidência de origem selecionada é inválida.",
+      "REPORTED_VALUE_SOURCE_QC_BLOCKED": "O controle de qualidade bloqueia a evidência de origem selecionada.",
+      "REPORTED_VALUE_LINEAGE_INVALID": "O histórico de tentativas preservado está incompleto."
     },
     "statuses": {
       "OPEN": "Aberto",

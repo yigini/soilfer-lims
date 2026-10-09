@@ -104,7 +104,6 @@ function fractionOutcome(context) {
 }
 
 function separateTextureChoice(context,explicit,{allowMissingReason=false}={}) {
-    const derived=fractionOutcome(context), matching=derived.matching;
     if(explicit!=null) {
         if(typeof explicit!=='object' || !['DERIVED','ATTEMPT','NOT_REPORTABLE'].includes(explicit.mode) ||
             Object.keys(explicit).some(key=>!['mode','attemptIds','reason'].includes(key)) ||
@@ -113,9 +112,12 @@ function separateTextureChoice(context,explicit,{allowMissingReason=false}={}) {
             if(!explicit.reason?.trim() || explicit.attemptIds!=null && (!Array.isArray(explicit.attemptIds) || explicit.attemptIds.length)) {
                 throw fail('REPORTED_VALUE_SELECTION_INVALID','Not reportable needs a reason and no attempts.');
             }
-            return {mode:'NOT_REPORTABLE',attemptIds:[],rule:'REVIEWER',reason:explicit.reason.trim(),fractionSelections:derived.fractionSelections,
+            return {mode:'NOT_REPORTABLE',attemptIds:[],rule:'REVIEWER',reason:explicit.reason.trim(),fractionSelections:context.fractions.map(row=>row.proof),
                 outputs:[{analysisCode:'TEXTURE',value:null,valueText:'',unit:null,censoring:'NONE',methodologyId:null,resultIds:[],derivation:null}]};
         }
+    }
+    const derived=fractionOutcome(context), matching=derived.matching;
+    if(explicit!=null) {
         if(explicit.mode==='DERIVED' && explicit.attemptIds!=null && (!Array.isArray(explicit.attemptIds) || explicit.attemptIds.length) ||
             explicit.mode==='ATTEMPT' && (!matching || !Array.isArray(explicit.attemptIds) || explicit.attemptIds.length!==1 || explicit.attemptIds[0]!==matching.attempt.id)) {
             throw fail('REPORTED_VALUE_SELECTION_INVALID','The chosen attempt is not the exact matching texture result.');

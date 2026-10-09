@@ -7,8 +7,8 @@ const {canPublish}=require('../../services/workEligibility');
 const {formatReportedValue}=require('../../../shared/reportedValueFormat');
 const owned=[];
 afterEach(async()=>{for(const f of owned.splice(0))await f.close();});
-async function fixture() {
-    const f=await qcGateFixture({status:'ACCEPTED',criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0}});
+async function fixture({count=1,sharedSample=false}={}) {
+    const f=await qcGateFixture({count,sharedSample,status:'ACCEPTED',criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0}});
     owned.push(f);f.row=await f.result(f.items[0]);
     await f.db.sample.update({where:{id:f.items[0].sampleId},data:{latitude:1,longitude:2}});
     f.choose=choice=>rules.inTransaction(f.db,tx=>appendReportedSelection(tx,f.items[0],f.actor,choice));
@@ -52,6 +52,39 @@ test('accepted measured work with no selection refuses assembly instead of readi
     const f=await fixture(), before=await f.snapshot();
     await expect(assembleReport(f.items[0].sampleId,f.actor,{db:f.db})).rejects.toMatchObject({code:'REPORTED_VALUE_SELECTION_REQUIRED'});
     expect(await f.snapshot()).toEqual(before);
+});
+test('draft PDF reports a missing selection as 409 with its refused work item and zero writes',async()=>{
+    const f=await fixture(),before=await f.snapshot();
+    const response=await invoke(f,'reportController','getSampleReportPdf',{params:{sampleId:f.items[0].sampleId}});
+    expect(response).toMatchObject({status:409,body:{code:'REPORTED_VALUE_SELECTION_REQUIRED',workItemId:f.items[0].id}});
+    expect(await f.snapshot()).toEqual(before);
+});
+test.each([false,true])('bulk views disclose only a missing test and retain good selections (shared sample: %s)',async sharedSample=>{
+    const f=await fixture({count:2,sharedSample});await f.choose();await f.result(f.items[1]);
+    await f.db.sample.update({where:{id:f.items[1].sampleId},data:{latitude:1,longitude:2}});
+    const goodSample=await f.db.sample.findUnique({where:{id:f.items[0].sampleId}}),badSample=await f.db.sample.findUnique({where:{id:f.items[1].sampleId}});
+    const error={sampleId:f.items[1].sampleId,workItemId:f.items[1].id,analysisCode:f.items[1].analysis,code:'REPORTED_VALUE_SELECTION_REQUIRED'};
+    const grid=await invoke(f,'dataResultsController','getAnalyticalResults');expect(grid.status).toBe(200);
+    expect(grid.body.reportedValueErrors).toEqual([expect.objectContaining(error)]);
+    expect(grid.body.data.some(row=>row.sampleId===f.items[0].sampleId && row[f.analysisCode]===Number(f.row.value))).toBe(true);
+    const exported=await invoke(f,'exportController','getExportData',{body:{type:'WET_CHEM',includeUnapproved:true}});
+    expect(exported.status).toBe(200);expect(exported.body.meta.reportedValueErrors).toEqual([expect.objectContaining(error)]);
+    expect(exported.body.data.find(row=>row['Sample ID']===goodSample.originalId)[f.analysisCode]).toBe(Number(f.row.value));
+    if(!sharedSample)expect(exported.body.data.find(row=>row['Sample ID']===badSample.originalId)[f.items[1].analysis]).toBeUndefined();
+    for(const action of ['getSamples','getGeoJson','getResultsMatrix','syncDelta']) {
+        const response=await invoke(f,'sisController',action,{query:{updatedSince:'2020-01-01T00:00:00Z'}});expect(response.status).toBe(200);
+        const rows=action==='getGeoJson'?response.body.features.map(row=>row.properties):action==='syncDelta'?response.body.samples:response.body.data;
+        expect(rows.flatMap(row=>row.reportedValueErrors)).toEqual([expect.objectContaining(error)]);
+        const good=rows.find(row=>(row.id || row.sample_id)===f.items[0].sampleId);
+        if(action==='getSamples' || action==='syncDelta')expect(good.analyticalResults[f.analysisCode].value).toBe(Number(f.row.value));
+        else expect(good[action==='getGeoJson'?f.analysisCode.toLowerCase():f.analysisCode]).toBe(Number(f.row.value));
+    }
+});
+test.each(['en','es','es-419','fr','pt'])('SIS v1 receives the requesting user locale for a not-reportable value (%s)',async locale=>{
+    const f=await fixture();f.actor.language=locale;await f.choose({mode:'NOT_REPORTABLE',reason:'Missing worksheet'});
+    const response=await invoke(f,'sisController','getSamples');expect(response.status).toBe(200);
+    expect(response.body.data[0].analyticalResults[f.analysisCode].value)
+        .toBe(require('../../locales/'+locale+'.json').reportedValue.notReportable+': Missing worksheet');
 });
 test.each(['ATTEMPT','NOT_REPORTABLE'])('WET_CHEM, reported grid and every SIS v1 surface match the persisted %s outcome',async mode=>{
     const f=await fixture(), reason='Reference worksheet incomplete';

@@ -384,6 +384,9 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
             const reviewed=await request(app).post('/api/work/'+f.items[analysis].id+'/review').set('Authorization','Bearer '+token).send({decision:'ACCEPT'});
             if(reviewed.status!==200)throw Error('Fraction review refused: '+JSON.stringify(reviewed.body));
             expect(reviewed.status).toBe(200);
+            const current=await require('../../services/workflowStateRules').inTransaction(prisma,tx=>require('../../services/reportedValueSelectionService').readReportedSelection(tx,f.items[analysis]));
+            expect(current.rows).toHaveLength(1);
+            expect(current.rows[0]).toMatchObject({workItemId:f.items[analysis].id,analysisCode:analysis});
         }
         await require('../../services/workItemStateService').transitionWorkItem(f.items.TEXTURE.id,'COMPLETED',actor,'Derived fixture ready for review',{},prisma);
         await require('../../services/submissionStateService').createSubmissionForItems({db:prisma,actor,sampleId:f.sampleId,type:'PARTIAL',workItemIds:[f.items.TEXTURE.id]});

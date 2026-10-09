@@ -1500,7 +1500,10 @@
       "REPORTED_VALUE_REASON_REQUIRED": "Expliquer pourquoi les preuves contestées sont rapportées.",
       "REPORTED_VALUE_REVIEW_REQUIRED": "Les preuves conservées non actuelles ou retournées exigent un choix explicite du réviseur.",
       "REPORTED_VALUE_LAYOUT_UNSUPPORTED": "La structure de texture est incomplète ou mixte.",
-      "REPORTED_VALUE_SOURCE_SELECTION_REQUIRED": "Acceptez et sélectionnez SAND, SILT et CLAY avant TEXTURE."
+      "REPORTED_VALUE_SOURCE_SELECTION_REQUIRED": "Acceptez et sélectionnez SAND, SILT et CLAY avant TEXTURE.",
+      "REPORTED_VALUE_SOURCE_INVALID": "Les preuves sources sélectionnées ne sont pas valides.",
+      "REPORTED_VALUE_SOURCE_QC_BLOCKED": "Le contrôle qualité bloque les preuves sources sélectionnées.",
+      "REPORTED_VALUE_LINEAGE_INVALID": "L’historique des tentatives conservées est incomplet."
     },
     "statuses": {
       "OPEN": "Ouvert",

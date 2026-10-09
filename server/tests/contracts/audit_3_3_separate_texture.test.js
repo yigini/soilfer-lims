@@ -7,7 +7,7 @@ const rules=require('../../services/workflowStateRules');
 const selections=require('../../services/reportedValueSelectionService');
 const owned=[];
 afterEach(async()=>{for(const f of owned.splice(0))await f.close();});
-async function fixture({mean=false}={}) {
+async function fixture({mean=false,clayValue=15}={}) {
     const f=await qcGateFixture();owned.push(f);
     const sample=await createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,
         status:'PROCESSING',dryingStatus:'DONE',preparationStatus:'DONE',requiredAnalyses:'["SAND","SILT","CLAY","TEXTURE"]'}});
@@ -32,6 +32,14 @@ async function fixture({mean=false}={}) {
     }
     f.texture=await rules.inTransaction(f.db,tx=>require('../../services/resultWriteService').deriveTextureResult(tx,{sampleId:sample.id,actor:f.actor}));
     expect(f.texture).not.toBeNull();
+    if(clayValue!==15) {
+        await require('../../services/workRepeatService').requestRepeat(f.db,f.textureItems.CLAY.id,f.actor,
+            {reason:'CONFIRMATION',note:'Confirm retained clay before any fraction acceptance'});
+        const [row]=await rules.inTransaction(f.db,tx=>require('../../services/resultWriteService').writeResultsExecution(tx,{
+            sampleId:sample.id,workItemId:f.textureItems.CLAY.id,actor:f.actor,
+            measurements:[{param:'CLAY',value:clayValue,unit:'%',equipmentId:f.instrument.id}]}));
+        f.clayAttemptId=row.attemptId;f.fractions.push(row);
+    }
     for(const item of Object.values(f.textureItems)) await require('../../services/workItemStateService').transitionWorkItem(item.id,'COMPLETED',f.actor,'Owned texture review',{},f.db);
     await require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,sampleId:sample.id,type:'FULL',
         workItemIds:Object.values(f.textureItems).map(row=>row.id)});
@@ -41,7 +49,8 @@ async function fixture({mean=false}={}) {
             response=await request(app).post('/api/work/'+f.textureItems[param].id+'/review').set('Authorization','Bearer '+token).send({decision:'ACCEPT',...body});
         },{reviews:true});return response;
     };
-    f.acceptFractions=async()=>{for(const param of ['SAND','SILT','CLAY'])expect(await f.review(param)).toMatchObject({status:200});};
+    f.acceptFractions=async()=>{for(const param of ['SAND','SILT','CLAY'])expect(await f.review(param,
+        param==='CLAY' && f.clayAttemptId ? {reportedValueSelection:{mode:'ATTEMPT',attemptIds:[f.clayAttemptId]}}:{})).toMatchObject({status:200});};
     f.all=async()=>JSON.stringify([await f.snapshot(),await f.db.workAttempt.findMany({orderBy:{id:'asc'}}),
         await f.db.reportedValueSelection.findMany({orderBy:{id:'asc'}})]);
     f.read=()=>rules.inTransaction(f.db,tx=>selections.readReportedSelection(tx,f.textureItems.TEXTURE));
@@ -89,6 +98,38 @@ test('REVIEWER_PICKS refuses implicit texture, but an explicit DERIVED confirmat
     expect(await f.review('TEXTURE',{reportedValueSelection:{mode:'DERIVED',reason:'Fraction report values verified'}})).toMatchObject({status:200});
     expect((await f.read()).rows[0]).toMatchObject({mode:'DERIVED',rule:'REVIEWER',reason:'Fraction report values verified'});
 });
+test.each(['<15','>15'])('explicit NOT_REPORTABLE saves three current fraction proofs when CLAY is censored (%s)',async clayValue=>{
+    const f=await fixture({clayValue});await f.acceptFractions();
+    const retained=await f.db.result.findMany({orderBy:{id:'asc'}}),before=await f.all();
+    expect(await f.review('TEXTURE')).toMatchObject({status:409,body:{code:'REPORTED_VALUE_TEXTURE_UNRESOLVED'}});
+    expect(await f.all()).toBe(before);
+    expect(await f.review('TEXTURE',{reportedValueSelection:{mode:'NOT_REPORTABLE',reason:'Censored clay cannot determine a class'}}))
+        .toMatchObject({status:200});
+    const saved=(await f.read()).rows[0];expect(saved).toMatchObject({mode:'NOT_REPORTABLE',rule:'REVIEWER',reason:'Censored clay cannot determine a class'});
+    const proofs=JSON.parse(saved.evidenceSnapshot).fractionSelections;
+    expect(proofs).toHaveLength(3);
+    for(const proof of proofs)expect(await f.db.reportedValueSelection.findUnique({where:{id:proof.selectionId}}))
+        .toMatchObject({workItemId:proof.workItemId,selectionGroupId:proof.selectionGroupId,analysisCode:proof.analysisCode});
+    expect(proofs.find(row=>row.analysisCode==='CLAY').censoring).not.toBe('NONE');
+    expect(await f.db.result.findMany({orderBy:{id:'asc'}})).toEqual(retained);
+});
+test('v2 membership of fraction sources prefers their owning test over a shared TEXTURE derivation',async()=>{
+    const f=await fixture({mean:true});await f.acceptFractions();expect(await f.review('TEXTURE')).toMatchObject({status:200});
+    const read=require('../../services/reportedValueReadService').rawSelectionIds;
+    const history=await f.db.reportedValueSelection.findMany(),before=await f.all();
+    // Exercise both retained work-item orders through the real transaction and
+    // validation authorities. Only query order changes, never stored evidence.
+    for(const ordered of [history,[...history].reverse()]) {
+        const db={$transaction:callback=>f.db.$transaction(tx=>callback(new Proxy(tx,{get(target,key){
+            if(key!=='reportedValueSelection')return target[key];
+            return new Proxy(target[key],{get(model,method){return method==='findMany'?
+                async args=>args.orderBy?.workItemId ? ordered : model.findMany(args):model[method];}});
+        }})))};
+        const ids=await read(db,f.fractions);
+        for(const source of f.fractions)expect(ids[source.id]).toBe(history.find(row=>row.analysisCode===source.param).id);
+    }
+    expect(await f.all()).toBe(before);
+});
 test('a replacement fraction selection makes retained TEXTURE stale without changing it',async()=>{
     const f=await fixture();await f.acceptFractions();expect(await f.review('TEXTURE')).toMatchObject({status:200});
     const first=(await f.read()).rows[0],item=f.textureItems.SAND;
@@ -103,6 +144,34 @@ test('a replacement fraction selection makes retained TEXTURE stale without chan
     expect(await Promise.all([f.db.workAttempt.findMany({where:{workItemId:f.textureItems.TEXTURE.id},orderBy:{id:'asc'}}),
         f.db.result.findMany({where:{sampleId:f.sample.id,param:'TEXTURE'},orderBy:{id:'asc'}}),
         f.db.reviewDecision.findMany({where:{workItemId:f.textureItems.TEXTURE.id},orderBy:{id:'asc'}})])).toEqual(frozen);
+});
+test('a stale TEXTURE sample cannot hide a good neighboring sample in the grid; its draft PDF still refuses 409',async()=>{
+    const f=await fixture();await f.acceptFractions();expect(await f.review('TEXTURE')).toMatchObject({status:200});
+    const sand=await rules.inTransaction(f.db,tx=>selections.readReportedSelection(tx,f.textureItems.SAND));
+    await selections.replaceReportedSelection(f.db,f.textureItems.SAND.id,f.actor,{expectedGroupId:sand.rows[0].selectionGroupId,
+        selection:{mode:'ATTEMPT',attemptIds:JSON.parse(sand.rows[0].attemptIds),reason:'Fraction worksheet confirmed'}});
+    const goodSample=await createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,status:'PROCESSING',dryingStatus:'DONE',preparationStatus:'DONE'}});
+    const goodItem=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:goodSample.id,analysis:f.analysisCode,
+        methodologyId:f.method.id,assignedLab:f.labId,status:'ACCEPTED'}});
+    const goodResult=await f.result(goodItem);
+    const [goodSelection]=await rules.inTransaction(f.db,tx=>selections.appendReportedSelection(tx,goodItem,f.actor));
+    const before=await f.all();let response;
+    await jest.isolateModulesAsync(async()=>{
+        jest.doMock('../../prisma',()=>f.db);
+        try {await require('../../controllers/dataResultsController').getAnalyticalResults({user:f.actor,query:{}},
+            {json:body=>{response={status:200,body};},status(status){this.json=body=>{response={status,body};};return this;}});}
+        finally {jest.dontMock('../../prisma');}
+    });
+    expect(response.status).toBe(200);
+    expect(response.body.reportedValueErrors).toEqual([expect.objectContaining({sampleId:f.sample.id,
+        workItemId:f.textureItems.TEXTURE.id,analysisCode:'TEXTURE',code:'REPORTED_VALUE_STALE'})]);
+    expect(response.body.data.find(row=>row.sampleId===goodSample.id)).toMatchObject({reportedValueSelectionId:goodSelection.id,[f.analysisCode]:Number(goodResult.value)});
+    expect(response.body.data.filter(row=>row.sampleId===f.sample.id).map(row=>row.reportedValueSelectionId)).toHaveLength(3);
+    await withQcRunHttp(f.db,f.actor,async(app,token)=>{
+        expect(await request(app).get('/api/reports/sample/'+f.sample.id+'/pdf').set('Authorization','Bearer '+token))
+            .toMatchObject({status:409,body:{code:'REPORTED_VALUE_STALE',workItemId:f.textureItems.TEXTURE.id}});
+    },{reports:true});
+    expect(await f.all()).toBe(before);
 });
 
 test('canonical uniqueness prevents a duplicate owner; unresolved retained owners refuse layout with ids and zero writes',async()=>{

@@ -72,8 +72,7 @@ export default function ReportedValueReview({ itemId, itemVersion, itemStatus, t
             try {
                 const stored=JSON.parse(displayed);
                 if(stored.code==='FRACTION_NOT_REPORTABLE') displayed=stored.fractions.map(fraction=>
-                    t('reportedValue.fractionNotReportable').replace('{{fraction}}',fraction.analysisCode)
-                        .replace('{{selectionId}}',fraction.selectionId)).join(' ');
+                    t('reportedValue.fractionNotReportable',{fraction:fraction.analysisCode,selectionId:fraction.selectionId})).join(' ');
             } catch { /* Keep the recorded reviewer reason. */ }
             return `${row.analysisCode}: ${t('reportedValue.notReportable')}: ${displayed}`;
         }

@@ -195,6 +195,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         const f = await fixture({ valid: false, flags: ['REVIEW_RETURNED'] });
         const res = await generate(f);
         expect(res.status).toBe(409); expect(res.body.code).toBe('REPORTED_VALUE_SELECTION_REQUIRED');
+        expect(res.body.workItemId).toBe(f.item.id);
     });
     test.each(['WAIVED', 'CANCELLED'])('%s work neither blocks nor prints a value', async itemStatus => {
         const f = await fixture({ itemStatus, valid: true, batchStatus: 'QC_FAIL', flags: ['METHOD_NOTE'] });
