@@ -48,6 +48,13 @@ describe('BLK-3: Report & Certificate PDF Generation Contract', () => {
                 { id: `RES-5-${Date.now()}`, sampleId: s.id, param: 'CLAY', value: '15.0', unit: '%', isValid: true, createdAt: now, updatedAt: now }
             ]) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
 
+        // #192: publication consumes persisted choices, while the PDF contract
+        // keeps every original binary/share/revocation assertion.
+        for (const analysis of ['PH_H2O','SOC','SAND','SILT','CLAY']) {
+            await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,
+                `reviewed-${s.id}-${analysis}`, mgrToken);
+        }
+
         // 1. Generate Report
         const genRes = await request(app)
             .post(`/api/reports/generate/${sampleId}`)

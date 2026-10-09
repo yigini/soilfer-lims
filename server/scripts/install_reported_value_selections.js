@@ -55,8 +55,9 @@ function installReportedValueSelections({ dbPath, apply = false } = {}) {
             const current = classify(db, source);
             if (current.classification === 'COMPLETE') return { ...current, mode: 'NO_OP', totalChanges: 0, newSelectionCount: 0 };
             const saved = fingerprint(retained(db));
-            if (current.classification === 'PRE_192') db.exec(source.schemaSql);
-            db.exec(source.guardsSql);
+            const installationSql = loadReportedValueMigrationSource();
+            if (current.classification === 'PRE_192') db.exec(installationSql.schemaSql);
+            db.exec(installationSql.guardsSql);
             if (fingerprint(retained(db)) !== saved) throw fail('Reported-value installation changed retained rows.');
             db.prepare('INSERT INTO "_schema_migrations"(id,details) VALUES (?,?)').run(MARKER, JSON.stringify({ migrationSha256: source.sha256,
                 predecessorReceiptSha256: predecessor.receipt.receiptSha256, retainedRowsSha256: saved, newSelectionCount: 0 }));

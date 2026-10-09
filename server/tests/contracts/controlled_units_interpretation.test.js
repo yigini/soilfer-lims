@@ -55,6 +55,9 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
                 { id: `RES-I10-${Date.now()}`, sampleId: s.id, param: 'SILT', value: '230', unit: 'g/kg', isValid: true, createdAt: now, updatedAt: now }, // Should convert to 23.0%
                 { id: `RES-I11-${Date.now()}`, sampleId: s.id, param: 'CLAY', value: '150', unit: 'g/kg', isValid: true, createdAt: now, updatedAt: now }  // Should convert to 15.0%
             ]) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
+        for (const item of await prisma.workItem.findMany({where:{sampleId,status:'ACCEPTED'}})) {
+            await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,item.id,mgrToken);
+        }
     });
 
     test('1. Normalizes synonym units and applies scientific conversion factors', () => {

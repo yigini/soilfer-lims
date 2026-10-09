@@ -48,6 +48,7 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
                 updatedAt: now
             }
         });
+        await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,`${testSample.id}-SOC`,superAdminToken);
     });
 
     test('1. Export controller emits dual columns (soc_as_measured, soc_unit, soc_normalized, soc_controlled_unit)', async () => {

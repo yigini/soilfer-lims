@@ -239,7 +239,9 @@ describe('Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts', () =
                 ]
             };
 
-            const formatted = formatSampleV1(sample);
+            const formatted = formatSampleV1(sample, {}, {reportedValues:[{...sample.results[0],id:'selection-1',
+                selectionId:'selection-1',sourceResultIds:['r1'],mode:'ATTEMPT',rule:'AUTO_SINGLE'}]});
+            expect(formatSampleV1(sample).analyticalResults).toEqual({});
 
             // Legacy keys preserved
             expect(formatted.id).toBe('FIELD-BAG-77');
