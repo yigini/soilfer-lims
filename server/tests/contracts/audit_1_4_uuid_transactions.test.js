@@ -350,8 +350,10 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         }
         await require('../../services/workItemStateService').transitionWorkItem(f.items.TEXTURE.id,'COMPLETED',actor,'Derived fixture ready for review',{},prisma);
         await require('../../services/submissionStateService').createSubmissionForItems({db:prisma,actor,sampleId:f.sampleId,type:'PARTIAL',workItemIds:[f.items.TEXTURE.id]});
-        expect((await request(app).post(`/api/work/${f.items.TEXTURE.id}/review`).set('Authorization',`Bearer ${token}`)
-            .send({decision:'ACCEPT',attemptId:texture.attemptId,note:'Reviewed original derived value'})).status).toBe(200);
+        const originalReview=await request(app).post(`/api/work/${f.items.TEXTURE.id}/review`).set('Authorization',`Bearer ${token}`)
+            .send({decision:'ACCEPT',attemptId:texture.attemptId,note:'Reviewed original derived value'});
+        if(originalReview.status!==200)throw Error('Texture review refused: '+JSON.stringify(originalReview.body));
+        expect(originalReview.status).toBe(200);
         const frozen=await prisma.workAttempt.findUnique({where:{id:texture.attemptId}});expect(frozen.status).toBe('ACCEPTED');
         const repeat=await require('../../services/workRepeatService').requestRepeat(prisma,f.items.SAND.id,actor,{reason:'CONFIRMATION',note:'Confirm sand determination'});
         const changed=await request(app).post('/api/workbench/batch-save').set('Authorization',`Bearer ${token}`)
