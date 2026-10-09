@@ -22,6 +22,7 @@ export default function NumericEditor({
     numberFormat,
     onBarcodeRejected = null
 }) {
+    const Input = onBarcodeRejected ? BarcodeSafeInput : 'input';
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -33,13 +34,13 @@ export default function NumericEditor({
 
     return (
         <div className="flex items-center gap-1.5">
-            <BarcodeSafeInput
+            <Input
                 ref={inputRef}
                 type="text"
                 inputMode="decimal"
                 value={value ?? ''}
-                onValueChange={onChange}
-                onBarcodeRejected={onBarcodeRejected}
+                onChange={event => onChange(event.target.value)}
+                {...(onBarcodeRejected ? { onBarcodeRejected } : {})}
                 onKeyDown={handleKeyDown}
                 disabled={disabled}
                 placeholder={placeholder}

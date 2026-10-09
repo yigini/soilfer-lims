@@ -12,12 +12,12 @@ export function isBarcodeBurst(event) {
 
 // Hold a possible wedge locally until its inter-key gap ends. A long wedge
 // terminated by Enter never calls the draft or QC observation writer.
-const BarcodeSafeInput = forwardRef(function BarcodeSafeInput({ value, onValueChange,
+const BarcodeSafeInput = forwardRef(function BarcodeSafeInput({ value, onChange,
     onBarcodeRejected, onKeyDown, onBlur, ...props }, forwardedRef) {
     const [text, setText] = useState(String(value ?? ''));
-    const node = useRef(null), pending = useRef(null), timer = useRef(null);
+    const node = useRef(null), pending = useRef(null), timer = useRef(null), blurTimer = useRef(null);
     const handlers = useRef(null);
-    handlers.current = { onValueChange, onBarcodeRejected, onBlur };
+    handlers.current = { onChange, onBarcodeRejected, onBlur };
     const clear = () => {
         clearTimeout(timer.current); timer.current = null;
         if (node.current) candidates.delete(node.current);
@@ -26,10 +26,10 @@ const BarcodeSafeInput = forwardRef(function BarcodeSafeInput({ value, onValueCh
     const flush = () => {
         const next = pending.current?.next;
         clear();
-        if (next !== undefined) handlers.current.onValueChange(next);
+        if (next !== undefined) handlers.current.onChange({target:{value:next},currentTarget:node.current});
     };
     useEffect(() => { clear(); setText(String(value ?? '')); }, [value]);
-    useEffect(() => () => clear(), []);
+    useEffect(() => () => { clear(); clearTimeout(blurTimer.current); }, []);
     const keyDown = event => {
         if (onBarcodeRejected && isBarcodeBurst(event)) {
             event.preventDefault(); event.stopPropagation();
@@ -49,7 +49,7 @@ const BarcodeSafeInput = forwardRef(function BarcodeSafeInput({ value, onValueCh
     const change = event => {
         const next = event.target.value;
         setText(next);
-        if (!onBarcodeRejected || !pending.current) { handlers.current.onValueChange(next); return; }
+        if (!onBarcodeRejected || !pending.current) { handlers.current.onChange(event); return; }
         pending.current.next = next;
         clearTimeout(timer.current); timer.current = setTimeout(flush, BURST_GAP_MS);
     };
@@ -57,7 +57,7 @@ const BarcodeSafeInput = forwardRef(function BarcodeSafeInput({ value, onValueCh
         const buffered = pending.current?.next !== undefined;
         flush();
         // Read the refreshed parent's handler after its draft state commits.
-        if (buffered) setTimeout(() => handlers.current.onBlur?.(event), 0);
+        if (buffered) blurTimer.current = setTimeout(() => handlers.current.onBlur?.(event), 0);
         else onBlur?.(event);
     };
     return <input {...props} ref={element => {

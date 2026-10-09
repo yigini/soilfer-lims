@@ -5,6 +5,8 @@ import {
     AlertTriangle, Sparkles, Check, Layers, LayoutList, Table as TableIcon
 } from 'lucide-react';
 import NumericEditor from './NumericEditor';
+import { isBarcodeBurst } from './BarcodeSafeInput';
+import { useRunBarcodeScan } from './useRunBarcodeScan';
 import TextureEditor from './TextureEditor';
 import OperationalTaskEditor from './OperationalTaskEditor';
 import WorkbenchInspector from './WorkbenchInspector';
@@ -74,6 +76,8 @@ export default function WorksheetArea({
     selectedRunRef.current = selectedRun;
     const [runBatch, setRunBatch] = useState(null), [referenceMaterials, setReferenceMaterials] = useState([]);
     const [runLoading, setRunLoading] = useState(false), [runError, setRunError] = useState(null), [runSuccess, setRunSuccess] = useState(null);
+    const scanner = useRunBarcodeScan({ runBatch, selectedRunRef, activeGroup, allGroups, inputRefs,
+        onSelectGroup, setSelectedItemId, setSearchQuery, t });
     const runRequest = useRef(0);
     useEffect(() => {
         let current = true;
@@ -243,7 +247,9 @@ export default function WorksheetArea({
                     <div className="lg:col-span-3 rounded-xl border border-sf-divider overflow-hidden bg-sf-surface flex flex-col shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-left text-xs" data-testid="worksheet-grid"
-                            onKeyDownCapture={nativeControls ? event => advanceWorksheetCell(event, reviewButtonRef.current) : undefined}>
+                            onKeyDownCapture={nativeControls ? event => {
+                                if (!isBarcodeBurst(event)) advanceWorksheetCell(event, reviewButtonRef.current);
+                            } : undefined}>
                             <thead>
                                 <tr className="bg-sf-inset text-sf-muted border-b border-sf-divider">
                                     <th className="py-2.5 px-3 w-8">
@@ -349,6 +355,7 @@ export default function WorksheetArea({
                                             <td className="py-3 px-3" onClick={e => e.stopPropagation()}>
                                                 {isTexture ? (
                                                     <TextureEditor
+                                                        onBarcodeRejected={scanner.rejectValueBurst}
                                                         numberFormat={item.numberFormat}
                                                         disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
                                                         values={draft?.values || []}
@@ -411,6 +418,7 @@ export default function WorksheetArea({
                                                     </div>
                                                 ) : (
                                                     <NumericEditor
+                                                        onBarcodeRejected={scanner.rejectValueBurst}
                                                         numberFormat={item.numberFormat}
                                                         disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
                                                         value={draft?.value ?? ''}
@@ -622,6 +630,14 @@ export default function WorksheetArea({
                 </div>
             </div>
 
+            {!isOperationalGate && !isSpectral && <label className="flex items-center gap-2 my-2 text-sm">
+                {t('barcodeScan.label')}
+                <input ref={scanner.scanRef} value={scanner.value} data-testid="worksheet-scan" aria-label={t('barcodeScan.label')}
+                    placeholder={t('barcodeScan.placeholder')} onChange={event => scanner.setValue(event.target.value)}
+                    onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); scanner.scan(); } }}
+                    className="px-3 py-2 rounded border border-sf-divider bg-sf-surface text-sf-text" />
+            </label>}
+            {scanner.error && <p role="alert" data-testid="worksheet-scan-error" className="p-3 rounded bg-red-50 text-red-800">{scanner.error}</p>}
             {runError && <p role="alert" data-testid="worksheet-run-error">{runError}</p>}
             {runSuccess && <p role="status">{runSuccess}</p>}
 
@@ -650,6 +666,8 @@ export default function WorksheetArea({
 
             {viewMode === 'single' ? (
                 <SingleSampleEditor
+                    onBarcodeRejected={scanner.rejectValueBurst}
+                    onInputRef={(id, node) => node ? inputRefs.current.set(id, node) : inputRefs.current.delete(id)}
                     activeGroup={activeGroup}
                     items={filteredItems}
                     currentIndex={Math.max(0, filteredItems.findIndex(i => i.workItemId === inspectedItem?.workItemId))}
@@ -667,6 +685,7 @@ export default function WorksheetArea({
                     isHistoricalRun(runBatch, activeGroup?.analysis) ?
                         <QcRunHistory batch={runBatch} onChanged={refreshRun} loading={runLoading} setLoading={updateRunLoading} setError={updateRunError} /> :
                         <NativeRunPanel key={runBatch.id} batch={runBatch} referenceMaterials={referenceMaterials}
+                            onBarcodeRejected={scanner.rejectValueBurst}
                             analysisCode={activeGroup?.analysis} onAnalysisChanged={onSelectGroup} canEdit={canEditQc}
                             onChanged={refreshRun} loading={runLoading} setLoading={updateRunLoading} setError={updateRunError}
                             setSuccessMsg={updateRunSuccess} renderWorksheet={renderTable} />

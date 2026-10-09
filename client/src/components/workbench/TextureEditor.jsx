@@ -2,6 +2,7 @@ import React, { useMemo, useRef } from 'react';
 import { calculateUsdaTexture } from '../../utils/soilCalculations';
 import numberParse from '@lims/number-parse';
 import NumberPreview from './NumberPreview';
+import BarcodeSafeInput from './BarcodeSafeInput';
 
 /**
  * TextureEditor
@@ -17,8 +18,10 @@ export default function TextureEditor({
     sampleId = '',
     tolerance = null,
     inputRef = null,
-    numberFormat
+    numberFormat,
+    onBarcodeRejected = null
 }) {
+    const Input = onBarcodeRejected ? BarcodeSafeInput : 'input';
     let sandVal = '';
     let siltVal = '';
     let clayVal = '';
@@ -76,7 +79,8 @@ export default function TextureEditor({
             <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1">
                     <span className="text-[11px] text-sf-muted font-medium">Sand:</span>
-                    <input
+                    <Input
+                        {...(onBarcodeRejected ? { onBarcodeRejected } : {})}
                         ref={node => { sandRef.current = node; if (inputRef) inputRef(node); }}
                         type="text"
                         inputMode="decimal"
@@ -99,7 +103,8 @@ export default function TextureEditor({
 
                 <div className="flex items-center gap-1">
                     <span className="text-[11px] text-sf-muted font-medium">Silt:</span>
-                    <input
+                    <Input
+                        {...(onBarcodeRejected ? { onBarcodeRejected } : {})}
                         ref={siltRef}
                         type="text"
                         inputMode="decimal"
@@ -122,7 +127,8 @@ export default function TextureEditor({
 
                 <div className="flex items-center gap-1">
                     <span className="text-[11px] text-sf-muted font-medium">Clay:</span>
-                    <input
+                    <Input
+                        {...(onBarcodeRejected ? { onBarcodeRejected } : {})}
                         ref={clayRef}
                         type="text"
                         inputMode="decimal"

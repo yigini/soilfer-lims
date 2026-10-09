@@ -35,7 +35,9 @@ export default function SingleSampleEditor({
     onUpdateItemMeta,
     onReviewRecord,
     onConfirmOperation,
-    onOpenSpectralIntake
+    onOpenSpectralIntake,
+    onBarcodeRejected = null,
+    onInputRef = null
 }) {
     const getAnalysisDisplayName = useAnalysisNames();
     const { t } = useLanguage();
@@ -200,6 +202,8 @@ export default function SingleSampleEditor({
                 {/* Editor Components */}
                 {isTexture ? (
                     <TextureEditor
+                        onBarcodeRejected={onBarcodeRejected}
+                        inputRef={node => onInputRef?.(currentItem.workItemId, node)}
                         numberFormat={currentItem.numberFormat}
                         values={draft?.values || []}
                         onChange={values => onDraftChange(currentItem.workItemId, null, { values })}
@@ -233,6 +237,8 @@ export default function SingleSampleEditor({
                 ) : (
                     <div className="space-y-3">
                         <NumericEditor
+                            onBarcodeRejected={onBarcodeRejected}
+                            inputRef={node => onInputRef?.(currentItem.workItemId, node)}
                             numberFormat={currentItem.numberFormat}
                             value={draft?.value ?? ''}
                             unit={activeGroup?.unit}
