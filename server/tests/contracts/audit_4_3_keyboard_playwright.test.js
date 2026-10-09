@@ -85,6 +85,8 @@ test('real Chromium types and records 40 values through the production app with 
             expect(committed).toMatchObject({ saved: 40 }); expect(committed.errors || []).toHaveLength(0);
             const results = await f.db.result.findMany({ where: { sampleId: { in: (await f.db.workItem.findMany({ where: { id: { in: ids } } })).map(item => item.sampleId) } } });
             expect(results).toHaveLength(40); expect(results.every(row => row.attemptId && row.isCurrent && row.equipmentId === f.instrument.id)).toBe(true);
+            expect(new Set(results.map(row => row.attemptId)).size).toBe(40);
+            expect(results.map(row => row.value).sort()).toEqual(Array.from({ length: 40 }, (_, index) => `6.${String(index + 1).padStart(2, '0')}`).sort());
             expect((await f.db.workItem.findMany({ where: { id: { in: ids } } })).every(row => row.status === 'COMPLETED')).toBe(true);
             expect(await page.evaluate(() => window.__keyboardMouseEvents)).toBe(0);
             await page.screenshot({ path: path.join(artifactRoot, 'audit-196-keyboard-40.png'), fullPage: true });
