@@ -18,7 +18,7 @@ const ATTEMPT_ERRORS = ['RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMA
 // batchId is retained only to compare with the server-derived batch in context.
 function selectMeasurement(measurement) {
     if (!measurement || typeof measurement !== 'object') return measurement;
-    return Object.fromEntries(['param', 'value', 'unit', 'methodologyId', 'equipmentId', 'basis', 'overrideReason', 'replicateNo', 'batchId']
+    return Object.fromEntries(['param', 'value', 'unit', 'methodologyId', 'equipmentId', 'basis', 'overrideReason', 'overrideRequestId', 'replicateNo', 'batchId']
         .filter(key => Object.hasOwn(measurement, key)).map(key => [key, measurement[key]]));
 }
 
@@ -227,19 +227,23 @@ async function appendResult(tx, ctx, measurement, values, now) {
         data: { isCurrent: false, supersededBy: id, ...(targetId && {updatedAt:targetUpdatedAt}) } });
     if(targetId && superseded.count!==1)throw new TransitionError('The superseded Result changed; reload before retrying.',409,
         ctx.correctionTargetId?'ATTEMPT_CORRECTION_TARGET_INVALID':'ATTEMPT_CONTEXT_MISMATCH');
+    const { approvedRequest, ...storedValues } = values;
     let row;
     try {
         row = await tx.result.create({ data: { id, sampleId: ctx.sample.id, param: measurement.param,
-            ...values, basis: ctx.basis, methodologyId: ctx.methodId, replicateNo: ctx.replicateNo,
+            ...storedValues, basis: ctx.basis, methodologyId: ctx.methodId, replicateNo: ctx.replicateNo,
             isCurrent: true, enteredBy: ctx.performedBy, analysedAt: now, equipmentId: ctx.equipmentId,
             equipmentReadiness: ctx.equipmentReadinessText,
             batchId: ctx.batchId, attemptId: ctx.attemptId, createdAt: now, updatedAt: now } });
     } catch (error) { throw mapResultWriteError(error); }
+    const overrideApproval = approvedRequest
+        ? await require('./resultOverrideService').consume(tx,ctx.actor,approvedRequest,row,now) : null;
     await tx.auditLog.create({ data: { id: randomUUID(), entity: 'RESULT', entityId: row.id, action: 'RESULT_RECORDED',
         sampleId: ctx.sample.id, labId: ctx.labId, analysisCode: row.param, performedBy: ctx.performedBy,
         details: JSON.stringify({ attemptId: ctx.attemptId, batchId: ctx.batchId, provenance: row.provenance,
+            ...(approvedRequest && {overrideRequestId:approvedRequest.id,approverId:approvedRequest.decidedBy}),
             ...(measurement.overrideReason && { overrideReason: measurement.overrideReason.trim() }) }), timestamp: now } });
-    return row;
+    return overrideApproval ? {...row,overrideApproval} : row;
 }
 
 async function cacheResult(tx, item, text) {
@@ -324,7 +328,10 @@ async function resolveResultValidationContext(tx, options) {
 }
 
 async function numericValues(tx, ctx, measurement, parsedValue=null, numberFormat=null) {
-    const { validation, unit } = await numericValidationContext(tx, ctx, measurement, parsedValue, numberFormat);
+    const resolved = await numericValidationContext(tx, ctx, measurement, parsedValue, numberFormat);
+    const { validation, unit } = resolved;
+    const approvedRequest = measurement.overrideRequestId
+        ? await require('./resultOverrideService').matchApproval(tx,ctx,measurement,resolved) : null;
     const importing = ctx.source === 'legacy-import';
     if (!importing && validation.nonOverridable) {
         throw new TransitionError('A censoring limit must not be below the method LOQ.', 422, 'CENSOR_LIMIT_BELOW_LOQ', { flags: validation.flags });
@@ -332,16 +339,17 @@ async function numericValues(tx, ctx, measurement, parsedValue=null, numberForma
     if (!importing && !validation.isValid && (!validation.normalizedValue && validation.normalizedValue !== 0 || validation.flags.includes('INVALID_FORMAT') || validation.isBlank)) {
         throw new TransitionError('Enter a valid numeric value or censoring qualifier.', 400, validation.code || 'INVALID_NUMBER');
     }
-    if (!importing && !validation.isValid && (!measurement.overrideReason?.trim() || !hasPermission(ctx.actor, 'APPROVE_RESULTS'))) {
+    if (!importing && !validation.isValid && !approvedRequest && (!measurement.overrideReason?.trim() || !hasPermission(ctx.actor, 'APPROVE_RESULTS'))) {
         throw new TransitionError('Result is outside the configured limits; a manager override reason is required.', 422, 'OUT_OF_RANGE', { flags: validation.flags });
     }
-    const overridden = !importing && !validation.isValid && Boolean(measurement.overrideReason?.trim()) && hasPermission(ctx.actor, 'APPROVE_RESULTS');
+    const overridden = !importing && !validation.isValid && !approvedRequest && Boolean(measurement.overrideReason?.trim()) && hasPermission(ctx.actor, 'APPROVE_RESULTS');
     const flags = [...new Set([...validation.flags, ...(measurement.flags || []),
         ...(importing && !validation.isValid ? ['IMPORTED_UNVALIDATED'] : []),
-        ...(overridden ? ['MANAGER_OVERRIDE'] : [])])];
+        ...(overridden ? ['MANAGER_OVERRIDE'] : []), ...(approvedRequest ? ['OVERRIDE_APPROVED'] : [])])];
     return { value: importing && !validation.isValid ? validation.rawInput : validation.raw, rawInput: validation.rawInput,
         numericValue: validation.normalizedValue, unit, flags: JSON.stringify(flags),
-        isValid: validation.isValid || overridden,
+        isValid: validation.isValid || overridden || Boolean(approvedRequest),
+        ...(approvedRequest && {approvedRequest}),
         censoring: validation.censoring, provenance: importing ? 'IMPORTED' : ctx.source === 'spectral-prediction' ? 'PREDICTED' : 'MEASURED' };
 }
 
@@ -350,6 +358,17 @@ async function writeResult(tx, options) {
 }
 
 async function writeResultsExecution(tx, options) {
+    const approvalMeasurements = options.measurements.filter(row=>row?.overrideRequestId);
+    try {
+        for(const measurement of approvalMeasurements)await require('./resultOverrideService').available(tx,measurement.overrideRequestId,options.actor);
+        return await writeResultsExecutionChecked(tx,options);
+    } catch(error) {
+        if(approvalMeasurements.length)throw require('./resultOverrideService').mapContextError(error);
+        throw error;
+    }
+}
+
+async function writeResultsExecutionChecked(tx, options) {
     const measurements=options.measurements.map(selectMeasurement);
     if (!measurements.length) throw new TransitionError('Choose a parameter.',400,'RESULT_PARAMETER_REQUIRED');
     options = writeOptions({...options,measurement:measurements[0]});

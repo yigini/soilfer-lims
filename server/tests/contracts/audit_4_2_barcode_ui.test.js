@@ -23,6 +23,7 @@ describe('Audit 4.2: real DOM barcode wedge and value-cell boundaries', () => {
                 if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
                 if (name === 'clsx') return require('../../../client/node_modules/clsx');
                 if (name === '@lims/number-parse') return require('../../../shared/numberParse');
+                if (name === '@lims/result-value-validation') return require('../../../shared/resultValueValidation');
                 if (name.includes('LanguageContext')) return { useLanguage: () => ({ t }) };
                 if (name.includes('AuthContext')) return { useAuth: () => ({ hasPermission: () => true }) };
                 if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
