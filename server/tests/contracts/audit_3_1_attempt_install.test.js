@@ -62,6 +62,22 @@ test('read-only PRE_190 dry-run plans one attempt and one link, without changing
     expect(hash(file)).toBe(before);
 });
 
+test.each(['SUBMITTED','ACCEPTED'])('191 release inventory reports %s work owned by RECORDED evidence without repairing it',status=>{
+    const file=fixture({status,extra:{WorkAttempt:[{id:'recorded-owner',workItemId:'measured',attemptNo:1,
+        status:'RECORDED',evidenceHash:'retained-hash',evidenceData:'retained-evidence',createdAt:timestamp,updatedAt:timestamp}]}});
+    installWorkAttemptContract({dbPath:file,apply:true});
+    require('../helpers/repeatQcPredecessors').installRepeatQcPredecessors(file);
+    const before=hash(file),rows=retained(file);
+    const dry=installWorkRepeatContract({dbPath:file});
+    expect(dry.releaseInventory).toEqual({blockedWorkItemCount:1,totalChanges:0,
+        blockedWorkItems:[{workItemId:'measured',status,owners:[{attemptId:'recorded-owner',resultIds:['result']}]}]});
+    expect(dry.totalChanges).toBe(0);expect(hash(file)).toBe(before);expect(retained(file)).toEqual(rows);
+    installWorkRepeatContract({dbPath:file,apply:true});
+    const installed=hash(file);
+    expect(assertWorkRepeatStartupReady(file).releaseInventory).toEqual(dry.releaseInventory);
+    expect(hash(file)).toBe(installed);
+});
+
 test('atomic additive apply links every Result, records provenance, preserves original values and is idempotent',()=>{
     const file=fixture(),before=retained(file);
     const applied=installWorkAttemptContract({dbPath:file,apply:true});

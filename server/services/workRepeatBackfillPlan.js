@@ -12,4 +12,24 @@ function planInterimRepeatReasons(db) {
         backfilledCount: 0, originalReasonFieldsPreserved: true };
 }
 
-module.exports = { planInterimRepeatReasons };
+// Read-only release inventory. Historical review state is never inferred or
+// repaired: an operator must resolve these owners before releasing #191.
+function inventorySubmittedRecordedOwners(db) {
+    const rows = db.prepare(`SELECT item.id workItemId, item.status workItemStatus,
+        attempt.id attemptId, result.id resultId
+        FROM WorkItem item JOIN WorkAttempt attempt ON attempt.workItemId=item.id
+        JOIN Result result ON result.attemptId=attempt.id AND result.isCurrent=1
+        WHERE item.status IN ('SUBMITTED','ACCEPTED') AND attempt.status='RECORDED'
+        ORDER BY item.id,attempt.id,result.id`).all();
+    const items = new Map();
+    for (const row of rows) {
+        if (!items.has(row.workItemId)) items.set(row.workItemId,
+            { workItemId: row.workItemId, status: row.workItemStatus, owners: [] });
+        const owners = items.get(row.workItemId).owners;
+        let owner = owners.find(entry => entry.attemptId === row.attemptId);
+        if (!owner) { owner = { attemptId: row.attemptId, resultIds: [] }; owners.push(owner); }
+        owner.resultIds.push(row.resultId);
+    }
+    return { blockedWorkItemCount: items.size, blockedWorkItems: [...items.values()], totalChanges: 0 };
+}
+module.exports = { planInterimRepeatReasons, inventorySubmittedRecordedOwners };

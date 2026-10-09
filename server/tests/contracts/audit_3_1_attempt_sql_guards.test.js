@@ -50,6 +50,104 @@ function result(id,{sampleId='sample',param='P',replicateNo=1,attemptId=null,isC
 function probe(statement,parameters,expectedGuardCode,expectedConstraint){return rejectedGuardWrite({actor:'system:fixture',file,statement,parameters,expectedGuardCode,...(expectedConstraint&&{expectedConstraint})});}
 const attemptInsert='INSERT INTO WorkAttempt (id,workItemId,attemptNo,status,batchId,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?)';
 
+// Revised pin6071874424: these are trigger-level probes, deliberately not
+// installation proofs. No historical factory, classifier or receipt is used.
+const HANDOFF_CASES=Object.freeze({
+    'old-repeat-required':{oldStatus:'REPEAT_REQUIRED'},
+    'parent-null-hash':{hash:null},
+    'parent-wrong-batch':{parentBatch:'other-batch'},
+    'parent-wrong-qc-batch':{parentQcBatch:'other-batch'},
+    'wrong-analyte':{analysis:'Q'},
+    'mixed-failed-membership':{secondStatus:'QC_FAIL'},
+    'mixed-accepted-wrong-membership':{secondStatus:'QC_PASS'},
+    'qc-fail':{status:'QC_FAIL'},
+    'qc-pending':{status:'QC_PENDING'},
+    'open-unstarted':{status:'OPEN',startedAt:null},
+    'accepted-pass':{status:'QC_PASS'},
+    'accepted-warn':{status:'QC_WARN'},
+    'accepted-deviation':{status:'ACCEPTED_WITH_DEVIATION'},
+    'accepted-texture-alias':{textureAlias:true,status:'QC_PASS'}
+});
+function triggerFrom(source,name) {
+    const matches=[...source.matchAll(/^CREATE TRIGGER "([^"]+)"[\s\S]*?^END;/gm)].filter(match=>match[1]===name);
+    expect(matches).toHaveLength(1);expect(source.includes(matches[0][0])).toBe(true);
+    return matches[0][0];
+}
+function handoffTriggerProbe(caseName) {
+    if(!Object.hasOwn(HANDOFF_CASES,caseName))throw Error('Unknown closed handoff trigger case.');
+    const c=HANDOFF_CASES[caseName];
+    fs.mkdirSync(directory,{recursive:true});file=path.join(directory,`audit_legacy_190_sql-${randomUUID()}.db`);
+    require('../helpers/testOwnedDatabase').assertOwnedTestDatabase(file,'system:fixture');
+    const ddl=fs.readFileSync(path.resolve(__dirname,'../helpers/fixtures/pre190_full_application_schema.sql'));
+    expect(createHash('sha256').update(ddl).digest('hex')).toBe('e2496a65a9c607e80a82924ff7ed6a4033d1da05fedb907c83dd0918f022923b');
+    db=new Database(file);db.pragma('foreign_keys=ON');db.exec(ddl.toString('utf8'));
+    const predecessor=require('../../services/workAttemptMigrationSource').loadWorkAttemptMigrationSource();
+    const successor=loadWorkRepeatMigrationSource();
+    db.exec(predecessor.schemaSql);db.exec(successor.schemaSql);
+    const analysis=c.textureAlias?'SOIL_PSD_TEXTURE':c.analysis||'P';
+    const itemAnalysis=c.textureAlias?'TEXTURE':'P';
+    const evidenceData='{"retained":"original execution"}';
+    db.prepare('INSERT INTO Sample(id,originalId,status,updatedAt) VALUES (?,?,?,?)').run('sample','sample','PROCESSING',timestamp);
+    for(const id of ['batch','other-batch'])db.prepare('INSERT INTO Batch(id,analysis,status,createdBy,startedAt) VALUES (?,?,?,?,?)')
+        .run(id,analysis,'OPEN','system:fixture',Object.hasOwn(c,'startedAt')?c.startedAt:timestamp);
+    db.prepare('INSERT INTO WorkItem(id,sampleId,analysis,status,batchId,rackPosition,updatedAt) VALUES (?,?,?,?,?,?,?)')
+        .run('item','sample',itemAnalysis,c.oldStatus||'COMPLETED','batch',1,timestamp);
+    db.prepare('INSERT INTO WorkAttempt(id,workItemId,attemptNo,status,evidenceHash,evidenceData,batchId,qcBatchId,updatedAt) VALUES (?,?,?,?,?,?,?,?,?)')
+        .run('parent','item',1,'QUESTIONED',Object.hasOwn(c,'hash')?c.hash:createHash('sha256').update(evidenceData).digest('hex'),
+            evidenceData,c.parentBatch||'batch',c.parentQcBatch||'batch',timestamp);
+    db.prepare('INSERT INTO WorkAttempt(id,workItemId,attemptNo,status,parentAttemptId,reason,requestedBy,requestedAt,updatedAt) VALUES (?,?,?,?,?,?,?,?,?)')
+        .run('child','item',2,'OPEN','parent','CONFIRMATION','system:fixture',timestamp,timestamp);
+    db.prepare('INSERT INTO AuditLog(id,entity,entityId,action,details,performedBy) VALUES (?,?,?,?,?,?)')
+        .run('created','WORK_ATTEMPT','child','CREATED',JSON.stringify({from:null,to:'OPEN',reason:'CONFIRMATION',note:null}),'system:fixture');
+    const members=[[analysis,c.status||'QC_PASS'],...(c.secondStatus?[['Q',c.secondStatus]]:[])];
+    for(const [index,[code,status]] of members.entries()) {
+        db.prepare('INSERT INTO BatchAnalyte(id,batchId,analysisCode,status,provenance) VALUES (?,?,?,?,?)')
+            .run('analyte-'+index,'batch',code,status,'NATIVE');
+        db.prepare('INSERT INTO BatchPosition(id,batchId,position,kind,sampleId,provenance,legacySource) VALUES (?,?,?,?,?,?,?)')
+            .run('position-'+index,'batch',index+1,'SAMPLE','sample','NATIVE',c.textureAlias?JSON.stringify({textureAlias:1,batchAnalysis:analysis}):null);
+        db.prepare('INSERT INTO BatchPositionWorkItem(id,positionId,workItemId,analysisCode) VALUES (?,?,?,?)')
+            .run('membership-'+index,'position-'+index,'item',c.textureAlias?itemAnalysis:code);
+    }
+    expect(db.pragma('foreign_key_check')).toEqual([]);
+    const membership=require('../../services/qcBracketMembershipMigrationSource').loadBracketMembershipSource();
+    const priorTrigger=triggerFrom(membership.sql,'WorkItem_batch_membership_guard');
+    db.exec(priorTrigger);
+    expect(db.prepare("SELECT sql FROM sqlite_master WHERE name='WorkItem_batch_membership_guard'").get().sql+';').toBe(priorTrigger);
+    // The committed successor atomically replaces its predecessor guards.
+    // Execute the actual release statements; no copied or weakened SQL.
+    db.transaction(()=>{db.exec(predecessor.guardsSql);db.exec(successor.guardsSql);})();
+    for(const match of successor.guardsSql.matchAll(/^CREATE TRIGGER "([^"]+)"[\s\S]*?^END;/gm))
+        expect(db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(match[1]).sql+';').toBe(triggerFrom(successor.sql,match[1]));
+    expect(db.prepare("SELECT name FROM sqlite_master WHERE name='_schema_migrations'").get()).toBeUndefined();
+}
+function triggerRows() {
+    return db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all()
+        .map(({name})=>({name,rows:db.prepare(`SELECT * FROM "${name}"`).all()}));
+}
+describe('#191 membership trigger SQL defence in depth (not installer or receipt evidence)',()=>{
+    test.each(Object.keys(HANDOFF_CASES).filter(name=>!name.startsWith('accepted-')))('%s refuses a direct repeat pointer clear with exact zero writes',caseName=>{
+        handoffTriggerProbe(caseName);
+        const before=triggerRows(),changes=db.prepare('SELECT total_changes() n').get().n;
+        const bytes=createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+        expect(()=>db.prepare("UPDATE WorkItem SET status='REPEAT_REQUIRED',batchId=NULL,rackPosition=NULL WHERE id=?").run('item'))
+            .toThrow('BATCH_MEMBERSHIP_FROZEN');
+        expect(db.prepare('SELECT total_changes() n').get().n-changes).toBe(0);
+        expect(triggerRows()).toEqual(before);
+        expect(createHash('sha256').update(fs.readFileSync(file)).digest('hex')).toBe(bytes);
+    });
+    test.each(Object.keys(HANDOFF_CASES).filter(name=>name.startsWith('accepted-')))('%s permits the proven SQL handoff and retains all old execution/QC evidence',caseName=>{
+        handoffTriggerProbe(caseName);const before=triggerRows();
+        expect(db.prepare("UPDATE WorkItem SET status='REPEAT_REQUIRED',batchId=NULL,rackPosition=NULL WHERE id=?").run('item').changes).toBe(1);
+        expect(triggerRows().filter(row=>row.name!=='WorkItem')).toEqual(before.filter(row=>row.name!=='WorkItem'));
+        expect(db.prepare('SELECT status,batchId,rackPosition FROM WorkItem WHERE id=?').get('item'))
+            .toEqual({status:'REPEAT_REQUIRED',batchId:null,rackPosition:null});
+    });
+    test('an unknown trigger probe case refuses before creating an owned database',()=>{
+        expect(()=>handoffTriggerProbe('unreviewed-case')).toThrow('Unknown closed handoff trigger case.');
+        expect(file).toBeNull();
+    });
+});
+
 describe('all #190 refusals remain effective after the receipt-verified #191 successor installation',()=>{
     test.each(['evidenceData','evidenceHash','instrumentId'])('creating-transaction evidence %s still refuses and rolls back',async field=>{
         await guarded({successor:true});const evidenceData='{"final":"recorded before the attempted edit"}';

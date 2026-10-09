@@ -5,7 +5,7 @@ const { loadWorkAttemptMigrationSource } = require('../services/workAttemptMigra
 const { classifyWorkAttemptContract } = require('./install_work_attempt_contract');
 const { MARKER, SUCCESSORS, MEMBERSHIP_SUCCESSOR, repeatReleaseObjects, repeatSources, inspectRepeatColumns,
     assertRepeatInstallationEvidence, normalize, fingerprint } = require('../services/workRepeatInstallationEvidence');
-const { planInterimRepeatReasons } = require('../services/workRepeatBackfillPlan');
+const { planInterimRepeatReasons, inventorySubmittedRecordedOwners } = require('../services/workRepeatBackfillPlan');
 const fail = (code, message, details = {}) => Object.assign(new Error(message), { code, totalChanges: 0, ...details });
 function classify(db) {
     const qc=require('../services/qcRunSchemaService').classifyQcRunSchema(db,require('../services/qcRunMigrationSource').loadQcRunMigrationSource());
@@ -33,7 +33,8 @@ function classify(db) {
     if (differences.length) throw fail('WORK_REPEAT_SCHEMA_MISMATCH', 'Repeat schema differs from the release.', { differences });
     return { classification, sources: verified?.sources || repeatSources(db), ...(verified && { receipt: verified.receipt }),
         predecessor: { classification: predecessor.classification, sources: predecessor.sources,
-            receiptSha256: predecessor.receipt.receiptSha256 }, plan: planInterimRepeatReasons(db), bootstrapRebuild: [] };
+            receiptSha256: predecessor.receipt.receiptSha256 }, plan: planInterimRepeatReasons(db),
+        releaseInventory: inventorySubmittedRecordedOwners(db), bootstrapRebuild: [] };
 }
 function retainedRows(db) {
     return Object.fromEntries(['WorkAttempt', 'WorkItem', 'Result', 'ReviewDecision', 'AuditLog', '_schema_migrations',
