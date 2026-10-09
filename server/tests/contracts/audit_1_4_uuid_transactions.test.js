@@ -335,8 +335,19 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
     });
 
     test('an accepted derived attempt stays frozen while a recalculated Result requires a new real review',async()=>{
-        const f=await textureFixture({repeatFractions:[]}),actor=jwt.decode(token),texture=f.rows.find(row=>row.param==='TEXTURE' && row.replicateNo===2);
+        const actor=jwt.decode(token);
+        for(const analysisCode of ['SAND','SILT','CLAY'])await require('../../services/qcRuleService').change(actor,{
+            labId,analysisCode,methodologyId:null,expectedVersion:0,reason:'Owned equal-replicate texture selection fixture',
+            criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0,repeatabilityLimit:0}},{db:prisma});
+        const f=await textureFixture({repeatFractions:[]}),texture=f.rows.find(row=>row.param==='TEXTURE' && row.replicateNo===2);
         await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(prisma,actor,labId);
+        for(const analysis of ['SAND','SILT','CLAY']) {
+            await require('../../services/workItemStateService').transitionWorkItem(f.items[analysis].id,'COMPLETED',actor,'Fraction review before texture',{},prisma);
+            await require('../../services/submissionStateService').createSubmissionForItems({db:prisma,actor,sampleId:f.sampleId,type:'PARTIAL',workItemIds:[f.items[analysis].id]});
+            const reviewed=await request(app).post('/api/work/'+f.items[analysis].id+'/review').set('Authorization','Bearer '+token).send({decision:'ACCEPT'});
+            if(reviewed.status!==200)throw Error('Fraction review refused: '+JSON.stringify(reviewed.body));
+            expect(reviewed.status).toBe(200);
+        }
         await require('../../services/workItemStateService').transitionWorkItem(f.items.TEXTURE.id,'COMPLETED',actor,'Derived fixture ready for review',{},prisma);
         await require('../../services/submissionStateService').createSubmissionForItems({db:prisma,actor,sampleId:f.sampleId,type:'PARTIAL',workItemIds:[f.items.TEXTURE.id]});
         expect((await request(app).post(`/api/work/${f.items.TEXTURE.id}/review`).set('Authorization',`Bearer ${token}`)
@@ -346,6 +357,16 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         const changed=await request(app).post('/api/workbench/batch-save').set('Authorization',`Bearer ${token}`)
             .send({draft:false,entries:[{workItemId:f.items.SAND.id,value:'20',replicateNo:2,version:repeat.workItem.version}]});
         expect(changed.status).toBe(200);
+        const originalTextureSelection=await prisma.reportedValueSelection.findFirst({where:{workItemId:f.items.TEXTURE.id}});
+        await expect(require('../../services/workflowStateRules').inTransaction(prisma,tx=>
+            require('../../services/reportedValueSelectionService').readReportedSelection(tx,f.items.TEXTURE)))
+            .rejects.toMatchObject({code:'REPORTED_VALUE_STALE'});
+        const sandResult=await prisma.result.findFirst({where:{sampleId:f.sampleId,param:'SAND',replicateNo:2,isCurrent:true}});
+        await require('../../services/submissionStateService').createSubmissionForItems({db:prisma,actor,sampleId:f.sampleId,type:'PARTIAL',workItemIds:[f.items.SAND.id]});
+        const sandReview=await request(app).post('/api/work/'+f.items.SAND.id+'/review').set('Authorization','Bearer '+token)
+            .send({decision:'ACCEPT',reportedValueSelection:{mode:'ATTEMPT',attemptIds:[sandResult.attemptId]}});
+        if(sandReview.status!==200)throw Error('Repeat fraction review refused: '+JSON.stringify(sandReview.body));
+        expect(sandReview.status).toBe(200);
         const item=await prisma.workItem.findUnique({where:{id:f.items.TEXTURE.id}}),current=await prisma.result.findFirst({where:{sampleId:f.sampleId,param:'TEXTURE',replicateNo:2,isCurrent:true}});
         expect(item).toMatchObject({status:'SUBMITTED',reviewedBy:null,reviewedAt:null,reviewDecision:null});
         expect(await prisma.workAttempt.findUnique({where:{id:frozen.id}})).toEqual(frozen);
@@ -355,6 +376,8 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
             .send({decision:'ACCEPT',attemptId:frozen.id,note:'Reviewed recalculation and new source evidence'})).status).toBe(200);
         expect(await prisma.workAttempt.findUnique({where:{id:frozen.id}})).toEqual(frozen);
         expect(await prisma.reviewDecision.count({where:{workItemId:item.id}})).toBe(2);
+        expect(await prisma.reportedValueSelection.findUnique({where:{id:originalTextureSelection.id}})).toEqual(originalTextureSelection);
+        expect(await prisma.reportedValueSelection.findFirst({where:{workItemId:item.id,supersedesId:originalTextureSelection.id}})).not.toBeNull();
         const events=await prisma.auditLog.findMany({where:{entity:'WORK_ATTEMPT',entityId:frozen.id,action:'ACCEPTED'}});
         expect(events).toHaveLength(2);expect(events.some(event=>JSON.parse(event.details).newResultIds.includes(current.id))).toBe(true);
         const before=await prisma.auditLog.count();
