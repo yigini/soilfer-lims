@@ -59,6 +59,7 @@ test('direct startup refuses a corrupted PT receipt without repairing it or load
 });
 test('direct startup refuses missing Result equipment guards before any application writer starts', () => {
     const file = fixture(); installProficiencyEvidence({ dbPath: file, apply: true });
+    require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: file, apply: true });
     const before = hash(file), result = startup(file);
     expect(result.status).toBe(1); expect(result.stdout).toContain('PT_STARTUP_READY');
     expect(result.stderr).toContain('RESULT_EQUIPMENT_NOT_INSTALLED');
