@@ -31,6 +31,11 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // #272 pin6087372517: inspect only the unchanged rawInput additive DDL.
+    Object.freeze({ functionName: 'loadResultRawInputMigrationSource', loader: 'services/resultRawInputMigrationSource.js',
+        loaderSha256: '9b421ca380840aad87482d52f1f681c861ee0d536016e21a755d488cca090b56',
+        directory: '20261004064500_add_result_raw_input',
+        sqlSha256: '850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc', wholeSql: true }),
     // Inspect the exact #192 additive DDL; this grants no writer exception.
     Object.freeze({functionName:'loadReportedValueMigrationSource',loader:'services/reportedValueMigrationSource.js',
         loaderSha256:'4a8776908a58c7f07b858f8a80e0e1b182a6409cf2c2b8171704fea8792bb2ec',
@@ -126,11 +131,27 @@ const ATTEMPT_FIXTURE = Object.freeze({
     }),
     orphanTest: 'a literal pre-190 measured orphan refuses the installer and COMPLETE startup without writes'
 });
+// #272 pin6087435363: one closed, no-argument baseline factory and caller.
+const RAW_INPUT_FIXTURE = Object.freeze({
+    file: 'tests/helpers/rawInputHistoricalFixture.js', exportName: 'createRawInputSupportedBaselineFixture',
+    sha256: '2d2e926605ee61d8bf62c8714feea483b3cf7b69368f53b04a8e727c99f2c2b7',
+    ddl: 'tests/helpers/fixtures/raw_input_supported_baseline.sql',
+    ddlSha256: '6fce034bc43633d55431423ccad8a0e1e81dcdc98ba9b4174c112bef3e672983',
+    caller: 'tests/contracts/audit_1_5_raw_input_install.test.js'
+});
 
 function scanSource(source, filename, exceptions = []) {
     const violations = [];
     const report = (node, code, detail) => violations.push({ file: filename, line: node?.loc?.start?.line || node?.loc?.line || 1, code, detail });
     let validAttemptFixture = false;
+    let validRawInputFixture = false;
+    if (filename === RAW_INPUT_FIXTURE.file) {
+        try {
+            validRawInputFixture = createHash('sha256').update(source).digest('hex') === RAW_INPUT_FIXTURE.sha256 &&
+                createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', RAW_INPUT_FIXTURE.ddl))).digest('hex') === RAW_INPUT_FIXTURE.ddlSha256;
+        } catch { validRawInputFixture = false; }
+        if (!validRawInputFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pinned #272 factory or supported-baseline DDL digest differs.');
+    }
     if (filename === ATTEMPT_FIXTURE.file) {
         try {
             validAttemptFixture = createHash('sha256').update(source).digest('hex') === ATTEMPT_FIXTURE.sha256 &&
@@ -573,6 +594,7 @@ function scanSource(source, filename, exceptions = []) {
         const name = owner(p);
         if (!exportedNames.has(name)) return false;
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName) return true;
+        if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName) return true;
         const removal = ['delete', 'deleteMany'].includes(operation);
         if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample', 'writeSampleHoldCompatibility'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
         if (filename === 'services/workItemStateService.js' && (['createWorkItem', 'transitionWorkItem'].includes(name) || removal && name === 'removeUnstartedWorkItems') && entities.every(entity => entity === 'WorkItem')) return true;
@@ -582,6 +604,7 @@ function scanSource(source, filename, exceptions = []) {
     function resultProbe(p) {
         const name = owner(p);
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName && exportedNames.has(name)) return true;
+        if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName && exportedNames.has(name)) return true;
         return exportedNames.has(name) && exceptions.some(entry => entry.file === filename && entry.exportName === name);
     }
     function pinnedCorruptProjectConnection(p, sql) {
@@ -642,6 +665,9 @@ function scanSource(source, filename, exceptions = []) {
                     parent.get('arguments.0').isStringLiteral({ value: ATTEMPT_FIXTURE.orphanTest })));
                 if (!callerAllowed || !namedOrphan) report(p.node,
                     filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+            }
+            if (resolved === RAW_INPUT_FIXTURE.file.replace(/\.js$/, '') && filename !== RAW_INPUT_FIXTURE.caller) {
+                report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             }
             if (filename.startsWith('tests/')) continue;
             if (exceptions.some(entry => resolved === entry.file.replace(/\.js$/, '')) || (rehearsalLauncher && resolved.startsWith('tests/'))) {
