@@ -16,6 +16,14 @@ function mount(batch) {
         { module, exports: module.exports, require(name) { if (name === 'react') return react; if (name === 'axios') return axios;
             if (name.includes('LanguageContext')) return { useLanguage: () => ({ t: key => key }) };
             if (name === '@lims/number-parse') return require('../../../shared/numberParse'); if (name === './NumberPreview') return () => null;
+            if (name === './BarcodeSafeInput') {
+                const child = { exports: {} };
+                const source = fs.readFileSync(path.resolve(__dirname, '../../../client/src/components/workbench/BarcodeSafeInput.jsx'), 'utf8');
+                vm.runInNewContext(esbuild.transformSync(source, { loader: 'jsx', format: 'cjs' }).code,
+                    { module: child, exports: child.exports, Date, setTimeout, clearTimeout,
+                        require(dependency) { if (dependency === 'react') return react; throw Error(`Unexpected barcode input import ${dependency}`); } });
+                return child.exports;
+            }
             throw Error(`Unexpected Native component import ${name}`); } });
     return { axios, props, async render(patch = {}) { Object.assign(props, patch); for (let index = 0; index < 3; index++) { cursor = 0;
         tree = module.exports.default(props); effects.splice(0).forEach(effect => effect()); await new Promise(resolve => setImmediate(resolve)); } },
