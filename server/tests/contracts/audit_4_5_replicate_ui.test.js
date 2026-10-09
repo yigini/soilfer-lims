@@ -93,8 +93,8 @@ test('actual DOM keyboard movement keeps replica2 across rows with different ret
     vm.runInNewContext(esbuild.transformSync(fs.readFileSync(path.resolve(__dirname,
         '../../../client/src/components/workbench/qcWorksheetNavigation.js'),'utf8'),{format:'cjs'}).code,
         {module:moduleObject,exports:moduleObject.exports});
-    const dom=new JSDOM('<table><tr><td><output>10</output><input id="a2" data-worksheet-column="replicate-2"></td></tr>'+ 
-        '<tr><td><input id="b1" data-worksheet-column="replicate-1"><input id="b2" data-worksheet-column="replicate-2" disabled></td></tr>'+ 
+    const dom=new JSDOM('<table><tr><td><output>10</output><input id="a2" data-worksheet-column="replicate-2"></td></tr>'+
+        '<tr><td><input id="b1" data-worksheet-column="replicate-1"><input id="b2" data-worksheet-column="replicate-2" disabled></td></tr>'+
         '<tr><td><input id="c1" data-worksheet-column="replicate-1"><input id="c2" data-worksheet-column="replicate-2"></td></tr></table><button id="record">Record</button>');
     try{const doc=dom.window.document,move=(id,key)=>{const target=doc.getElementById(id);target.focus();
         moduleObject.exports.advanceWorksheetCell({target,currentTarget:doc.querySelector('table'),key,
