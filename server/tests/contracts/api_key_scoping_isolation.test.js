@@ -123,6 +123,12 @@ describe('API Key Scoping Isolation Contract (SL-22 Security Fix)', () => {
                     provenance: 'MEASURED'
                 }
             ]) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
+        for(const [sampleId,assignedLab] of [[sampleGtmId,'LAB-GTM'],[sampleMozId,'LAB-MOZ']]) {
+            await require('../setup').ensureTestLab(assignedLab,'TEST');
+            const reviewer=await require('../setup').getAuthToken('LAB_MANAGER',assignedLab);
+            await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(prisma,reviewer,assignedLab);
+            await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,sampleId+'-pH',reviewer);
+        }
     });
 
     // Pin6060286651: retain analytical and scope parents until whole-owned-DB teardown.

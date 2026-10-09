@@ -211,7 +211,8 @@ exports.getExportData = async (req, res) => {
                         let measuredUnit = rawUnit;
                         if (type === 'WET_CHEM') {
                             selectionPolicies.set(r.selectionId,{labId:sample.assignedLab || sample.labId,analysisCode:colKey,
-                                methodologyId:r.methodologyId,version:r.policyVersion,rule:r.rule,reportedValueSelectionId:r.selectionId});
+                                methodologyId:r.methodologyId,version:r.policyVersion,rule:r.policyRule,source:r.policySource,
+                                selectionRule:r.rule,reportedValueSelectionId:r.selectionId});
                             row[`${pLower}_n`] = r.sourceResultIds.length;
                             row[`${pLower}_flag`] = r.mode==='NOT_REPORTABLE'?'NOT_REPORTABLE':r.rule;
                             row[`${pLower}_selection_id`] = r.selectionId;

@@ -241,6 +241,8 @@ describe('Audit 1.0: persistent lab policies', () => {
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED' } });
         await createWorkItemFixture(prisma, { data: { id: id('POL-REPORT-WI'), sampleId, assignedLab: labId, analysis: 'PH_H2O', status: 'ACCEPTED', result: '7.2' } });
         await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: id('POL-REPORT-RES'), sampleId, param: 'PH_H2O', value: '7.2', numericValue: 7.2, isValid: true, isCurrent: true } });
+        await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,
+            (await prisma.workItem.findFirst({where:{sampleId,analysis:'PH_H2O'}})).id,manager);
         const response = await request(app).post(`/api/reports/generate/${sampleId}`).set('Authorization', `Bearer ${manager}`).send({});
         expect({ status: response.status, body: response.body }).toMatchObject({ status: 200 });
         const report = await prisma.report.findFirst({ where: { sampleId } });

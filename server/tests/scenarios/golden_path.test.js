@@ -178,10 +178,14 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         expect(fullSubRes.status).toBe(201);
 
         // 9. Approve & Archive
-        await request(app)
+        const repeatResult=await prisma.result.findFirst({where:{sampleId,param:'PH_H2O',isCurrent:true}});
+        const reviewRes=await request(app)
             .post(`/api/submissions/${fullSubRes.body.submission.id}/review`)
             .set('Authorization', `Bearer ${mgrToken}`)
-            .send({ decisions: [{ workItemId: phItem.id, decision: 'ACCEPT' }, { workItemId: condItem.id, decision: 'ACCEPT' }, { workItemId: socItem.id, decision: 'ACCEPT' }] });
+            .send({ decisions: [{ workItemId: phItem.id, decision: 'ACCEPT',
+                reportedValueSelection:{mode:'ATTEMPT',attemptIds:[repeatResult.attemptId]} },
+                { workItemId: condItem.id, decision: 'ACCEPT' }, { workItemId: socItem.id, decision: 'ACCEPT' }] });
+        expect(reviewRes.status).toBe(200);expect(reviewRes.body.errors).toEqual([]);
 
         await request(app).post(`/api/samples/${sampleId}/approve`).set('Authorization', `Bearer ${mgrToken}`);
         const archiveRes = await request(app).post(`/api/samples/${sampleId}/archive`).set('Authorization', `Bearer ${mgrToken}`).send({ archiveLocation: 'A1' });

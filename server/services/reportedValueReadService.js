@@ -22,6 +22,7 @@ async function readSampleReportedValues(db,sample) {
                 values.push({ id:row.id,selectionId:row.id,selectionGroupId:row.selectionGroupId,workItemId:item.id,sampleId:item.sampleId,
                     param:row.analysisCode,value:row.valueText,numericValue:row.value,unit:row.unit,censoring:row.censoring,
                     methodologyId:row.methodologyId,mode:row.mode,reason:row.reason,rule:row.rule,policyVersion:row.policyVersion,
+                    policyRule:row.policyRule,policySource:JSON.parse(row.evidenceSnapshot).policy?.source || null,
                     sourceResultIds:ids,attemptIds:selection.attemptIds,provenance:provenance.length===1 ? provenance[0] : null,
                     basis:bases.length===1 ? bases[0] : null,flags:[],isValid:true,
                     ...(row.derivation && {provenance:'DERIVED'}) });
