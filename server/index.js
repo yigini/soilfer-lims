@@ -34,6 +34,8 @@ try {
     console.log(JSON.stringify({ event: 'QC_GATE_SCOPE_STARTUP_READY', ...qcScopeReady }));
     const ptReady = require('./scripts/install_proficiency_evidence').assertProficiencyStartupReady(dbPath);
     console.log(JSON.stringify({ event: 'PT_STARTUP_READY', ...ptReady }));
+    const ncrReady = require('./scripts/install_nonconformity_reports').assertNonconformityStartupReady(dbPath);
+    console.log(JSON.stringify({event:'NCR_STARTUP_READY',classification:ncrReady.classification,sources:ncrReady.sources,totalChanges:ncrReady.totalChanges}));
     const equipmentReady = require('./scripts/install_result_equipment_evidence').assertResultEquipmentStartupReady(dbPath);
     console.log(JSON.stringify({ event: 'RESULT_EQUIPMENT_STARTUP_READY', ...equipmentReady }));
     const attemptsReady=require('./scripts/install_work_attempt_contract').assertWorkAttemptStartupReady(dbPath);
@@ -48,6 +50,7 @@ try {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('QC_GATE_SCOPE_') ? 'Keep the lab stopped and follow docs/audit/2.4-qc-gate.md.'
             : error.code?.startsWith('REPORTED_VALUE_') ? 'Keep the lab stopped and follow docs/audit/192-reported-value.md.'
+            : error.code?.startsWith('NCR_') ? 'Keep the lab stopped and follow docs/audit/193-nonconformity.md.'
             : error.code?.startsWith('WORK_REPEAT_') ? 'Keep the lab stopped and follow docs/audit/191-repeat-correction.md.'
             : error.code?.startsWith('WORK_ATTEMPT_') ? 'Keep the lab stopped and follow docs/audit/3.1-work-attempts.md.'
             : error.code?.startsWith('PT_') || error.code?.startsWith('RESULT_EQUIPMENT_') ? 'Keep the lab stopped and follow docs/audit/2.6-qc-audit-pt-equipment.md.'

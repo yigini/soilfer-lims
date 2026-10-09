@@ -68,10 +68,10 @@ test.each(['ncrRow','linkedRound','raisedRound','badPending'])('fresh bootstrap 
     const file=fresh(),id=randomUUID(),labId=randomUUID();
     raw(file,db=>{
         db.prepare('INSERT INTO Lab(id,code,name,country,updatedAt) VALUES (?,?,?,?,?)').run(labId,labId,'Owned fresh NCR lab','TEST',Date.now());
-        if(kind==='ncrRow')db.prepare('INSERT INTO NonconformityReport(id,labId,source,refType,refId,description,status,raisedBy,updatedAt) VALUES (?,?,?,?,?,?,?,?,?)').run(id,labId,'OTHER','OwnedSource',id,'Owned historical NCR','OPEN','system:fixture',Date.now());
-        else db.prepare(`INSERT INTO ProficiencyRound(id,labId,provider,roundRef,analysisCode,assignedValue,uncertainty,labResult,zScore,outcome,date,updatedAt,ncrStatus,nonconformityId)
+        if(['ncrRow','linkedRound'].includes(kind))db.prepare('INSERT INTO NonconformityReport(id,labId,source,refType,refId,description,status,raisedBy,updatedAt) VALUES (?,?,?,?,?,?,?,?,?)').run(id,labId,'OTHER','OwnedSource',id,'Owned historical NCR','OPEN','system:fixture',Date.now());
+        if(kind!=='ncrRow')db.prepare(`INSERT INTO ProficiencyRound(id,labId,provider,roundRef,analysisCode,assignedValue,uncertainty,labResult,zScore,outcome,date,updatedAt,ncrStatus,nonconformityId)
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(id,labId,'Owned','Old','PH',0,1,3,3,kind==='badPending'?'SATISFACTORY':'UNSATISFACTORY',Date.now(),Date.now(),
-                kind==='raisedRound'?'RAISED':kind==='badPending'?'PENDING':null,kind==='linkedRound'?randomUUID():null);
+                kind==='raisedRound'?'RAISED':kind==='badPending'?'PENDING':null,kind==='linkedRound'?id:null);
     });
     const before=hash(file);
     let failure;try{installNonconformityReports({dbPath:file,apply:true});}catch(error){failure=error;}

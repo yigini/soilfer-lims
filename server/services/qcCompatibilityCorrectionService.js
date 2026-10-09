@@ -81,9 +81,11 @@ async function correctCompatibilityMeasurements(db, batchId, actor, input) {
             if (changed.count !== 1) throw failure(409, 'QC_MEASUREMENT_CHANGED', 'The observation changed. Reload before retrying.');
             await tx.qcMeasurement.create({ data: next });
         }
-        await tx.qcEvaluation.create({ data: { id, batchId, analysisCode, version: previous.version + 1, supersedesId: previous.id,
+        const storedEvaluation = await tx.qcEvaluation.create({ data: { id, batchId, analysisCode, version: previous.version + 1, supersedesId: previous.id,
             ruleId: policy.qcRule.id, ruleVersion: policy.qcRule.version, policyVersion: policy.policyVersion, verdict,
-            evaluatedBy: performedBy, evaluatedAt: now, details: JSON.stringify({ ...details, evaluation: evaluated }) } });
+            evaluatedBy: performedBy, evaluatedAt: now, details: JSON.stringify({ ...details, evaluation: evaluated,
+                mode:policy.qcMode,criteriaSnapshot:JSON.stringify(policy) }) } });
+        await require('./nonconformityQcService').raiseCrmFailures(tx, actor, storedEvaluation);
         analyte.status = verdict === 'FAIL' ? 'QC_FAIL' : verdict === 'INCOMPLETE' ? 'QC_PENDING' : verdict === 'WARN' ? 'QC_WARN' : 'QC_PASS';
         await tx.batchAnalyte.update({ where: { id: analyte.id }, data: { status: analyte.status } });
         await tx.batch.update({ where: { id: batchId }, data: { status: aggregateBatchStatus(batch.analytes, { startedAt: batch.startedAt }) } });
