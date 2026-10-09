@@ -72,6 +72,7 @@ module.exports = async function globalSetup() {
         require('../scripts/install_work_attempt_contract').installWorkAttemptContract({dbPath:testDbPath,apply:true});
         require('../scripts/install_work_repeat_contract').installWorkRepeatContract({dbPath:testDbPath,apply:true});
         require('../scripts/install_reported_value_selections').installReportedValueSelections({dbPath:testDbPath,apply:true});
+        require('../scripts/install_batch_reagent_lots').installBatchReagentLots({dbPath:testDbPath,apply:true});
     }
 
     process.env.DATABASE_PATH = testDbPath;

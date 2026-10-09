@@ -196,6 +196,13 @@ async function startNativeRun(db, batchId, actor, input = {}) {
         const instrument = await instrumentFor(tx, batch, Object.hasOwn(input, 'instrumentId') ? input.instrumentId : batch.instrumentId, actor);
         if (!instrument && analyses.some(row => row.calibrationVerification)) throw error(422, 'QC_INSTRUMENT_REQUIRED', 'Calibration verification requires a registered instrument.');
         const validated = validateRunSequence({ positions: batch.positions, analyses });
+        const methodRevisions = [];
+        for (const row of batch.analytes) {
+            const method = await tx.methodology.findUnique({ where: { id: row.methodologyId } });
+            if (!method) throw error(422, 'QC_BATCH_METHOD_AMBIGUOUS', 'The recorded run method is unavailable.');
+            methodRevisions.push({ analysisCode: row.analysisCode, methodRevision: {
+                methodologyId: method.id, name: method.name, standard: method.standard, version: method.version } });
+        }
         const now = new Date(), changed = await tx.batch.updateMany({ where: { id: batch.id, status: 'OPEN', startedAt: null },
             data: { startedAt: now, analystUsername: performedBy, instrumentId: instrument?.id || null, status: aggregateBatchStatus(['IN_RUN'], { startedAt: now }) } });
         if (changed.count !== 1) throw error(409, 'QC_SEQUENCE_STALE', 'The run changed before first start.');
@@ -203,10 +210,12 @@ async function startNativeRun(db, batchId, actor, input = {}) {
             const criteria = validated.forecasts.find(forecast => forecast.analysisCode === row.analysisCode);
             await tx.batchAnalyte.update({ where: { id: row.id }, data: { status: 'IN_RUN', crmOrdinal: criteria.crmOrdinal,
                 policyVersion: criteria.policyVersion, qcRuleId: criteria.qcRule.id, qcRuleVersion: criteria.qcRule.version,
-                criteriaSnapshot: JSON.stringify({ ...criteria, instrumentId: instrument?.id || null, instrumentText: batch.instrument }) } });
+                criteriaSnapshot: JSON.stringify({ ...criteria, instrumentId: instrument?.id || null, instrumentText: batch.instrument,
+                    methodRevision: methodRevisions.find(revision => revision.analysisCode === row.analysisCode).methodRevision }) } });
         }
         await tx.batchEvent.create({ data: { id: randomUUID(), batchId: batch.id, type: 'RUN_STARTED', by: performedBy, at: now,
             payload: JSON.stringify({ positions: validated.positions, instrumentId: instrument?.id || null, instrumentText: batch.instrument,
+                methodRevisions, methodRevision: methodRevisions.find(row => row.analysisCode === batch.analysis)?.methodRevision,
                 crmOrdinals: analyses.map(row => ({ analysisCode: row.analysisCode, crmOrdinal: row.crmOrdinal })) }) } });
         return batchApiView(await tx.batch.findUnique({ where: { id: batch.id }, include: QC_RUN_INCLUDE }));
     });

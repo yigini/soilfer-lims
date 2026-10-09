@@ -20,6 +20,7 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import NativeRunPanel from './NativeRunPanel';
+import RunHeader from './RunHeader';
 import QcRunHistory, { isHistoricalRun } from './QcRunHistory';
 import { runWorksheetRows, advanceWorksheetCell } from './qcWorksheetNavigation';
 
@@ -37,6 +38,7 @@ export default function WorksheetArea({
     allGroups = [],
     initialSampleId = null,
     initialWorkItemId = null,
+    initialRunId = null,
     onSelectGroup,
     onDraftChange,
     onUpdateItemMeta,
@@ -73,6 +75,7 @@ export default function WorksheetArea({
     const canEditQc = hasPermission?.('CHANGE_STATUS') === true;
     const [runList, setRunList] = useState([]), [selectedRun, setSelectedRun] = useState('');
     const selectedRunRef = useRef(selectedRun);
+    useEffect(() => { if (initialRunId) setSelectedRun(initialRunId); }, [initialRunId]);
     selectedRunRef.current = selectedRun;
     const [runBatch, setRunBatch] = useState(null), [referenceMaterials, setReferenceMaterials] = useState([]);
     const [runLoading, setRunLoading] = useState(false), [runError, setRunError] = useState(null), [runSuccess, setRunSuccess] = useState(null);
@@ -541,6 +544,7 @@ export default function WorksheetArea({
 
                 {/* Docked Inspector (1 col) */}
                 <WorkbenchInspector
+                    runBatch={runBatch}
                     selectedItem={inspectedItem}
                     methodDefinition={activeGroup}
                     eligibleEquipment={activeGroup?.eligibleEquipment || []}
@@ -682,7 +686,9 @@ export default function WorksheetArea({
                     onOpenSpectralIntake={onOpenSpectralIntake}
                 />
             ) : (
-                selectedRun ? (runLoading || !runBatch ? <p>{t('qcWorksheet.loading')}</p> :
+                selectedRun ? (runLoading || !runBatch ? <p>{t('qcWorksheet.loading')}</p> : <>
+                    <RunHeader batch={runBatch} analysisCode={activeGroup?.analysis} canEdit={canEditQc} onChanged={refreshRun} />
+                    {
                     isHistoricalRun(runBatch, activeGroup?.analysis) ?
                         <QcRunHistory batch={runBatch} onChanged={refreshRun} loading={runLoading} setLoading={updateRunLoading} setError={updateRunError} /> :
                         <NativeRunPanel key={runBatch.id} batch={runBatch} referenceMaterials={referenceMaterials}
@@ -690,6 +696,7 @@ export default function WorksheetArea({
                             analysisCode={activeGroup?.analysis} onAnalysisChanged={onSelectGroup} canEdit={canEditQc}
                             onChanged={refreshRun} loading={runLoading} setLoading={updateRunLoading} setError={updateRunError}
                             setSuccessMsg={updateRunSuccess} renderWorksheet={renderTable} />
+                    }</>
                 ) : renderTable()
             )}
 

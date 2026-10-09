@@ -64,6 +64,25 @@ async function recordedExecution(db, item, param) {
     return {attempt,results:results.filter(row=>row.attemptId===attempt.id)};
 }
 
+// #194 pin6079078551: one read-only resolver for recording, readiness and
+// queue context. Retained WorkItem equipment and historical evidence stay put.
+async function resolveResultRunContext(db, item, { batchId = item?.batchId ?? null, equipmentId } = {}) {
+    const context = { equipmentId: equipmentId || item?.equipmentId || null,
+        instrumentSource: 'WORK_ITEM', frozenMethodRevision: null };
+    if (!batchId || !item) return context;
+    const batch = await db.batch.findUnique({ where: { id: batchId }, select: {
+        startedAt: true, instrumentId: true, analytes: { select: { analysisCode: true, provenance: true, criteriaSnapshot: true } }
+    } });
+    if (!batch?.startedAt || !batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE')) return context;
+    const analyte = batch.analytes.find(row => row.analysisCode === item.analysis);
+    context.frozenMethodRevision = parseJson(analyte?.criteriaSnapshot, {}).methodRevision || null;
+    if (batch.instrumentId == null) return context;
+    if (equipmentId != null && equipmentId !== batch.instrumentId) {
+        throw new TransitionError('Use the instrument frozen on this run.', 409, 'RESULT_INSTRUMENT_MISMATCH');
+    }
+    return { ...context, equipmentId: batch.instrumentId, instrumentSource: 'RUN' };
+}
+
 // The HTTP preflight and the transactional writer use the same ownership
 // rule. The transaction rechecks it; this read-only preflight grants no write.
 async function assertRecordedResultSave(db,sample,measurements) {
@@ -78,8 +97,8 @@ async function assertRecordedResultSave(db,sample,measurements) {
                 throw new TransitionError('Use the correction route or request a reasoned repeat.',409,'ATTEMPT_CORRECTION_REQUIRED');
             }
             const methodId=item.methodologyId || measurement.methodologyId || null;
-            const equipmentId=measurement.equipmentId || item.equipmentId || null;
             const batchId=item.batchId ?? null;
+            const { equipmentId }=await resolveResultRunContext(db,item,{batchId,equipmentId:measurement.equipmentId});
             if(recorded.attempt.qcBatchId!==batchId || recorded.results.some(row=>row.batchId!==batchId) ||
                 recorded.results.some(row=>row.methodologyId!==methodId || row.equipmentId!==equipmentId) ||
                 recorded.attempt.instrumentId!==equipmentId || measurement.methodologyId && measurement.methodologyId!==methodId) {
@@ -134,6 +153,7 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
         throw new TransitionError('Attempt and work item batches disagree.', 409, 'RESULT_BATCH_CONFLICT');
     }
     const batchId = attempt?.qcBatchId ?? item?.batchId ?? null;
+    const runContext = await resolveResultRunContext(tx, item, { batchId, equipmentId: measurement.equipmentId });
     if (Object.hasOwn(measurement, 'batchId') && measurement.batchId !== batchId) {
         throw new TransitionError('Supplied result batch differs from the server batch.', 409, 'RESULT_BATCH_MISMATCH');
     }
@@ -141,7 +161,7 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (!Number.isInteger(replicateNo) || replicateNo < 1) throw new TransitionError('Replicate number must be a positive integer.', 400, 'RESULT_REPLICATE_INVALID');
     const labId = sample.assignedLab || item?.assignedLab || sample.labId;
     const methodId = item?.methodologyId || measurement.methodologyId || null;
-    const equipmentId = measurement.equipmentId || item?.equipmentId || null;
+    const equipmentId = runContext.equipmentId;
     if (recordedAttempt && (recordedResults.some(row => row.methodologyId !== methodId || row.equipmentId !== equipmentId) ||
         recordedAttempt.instrumentId !== equipmentId || measurement.methodologyId && measurement.methodologyId !== methodId)) {
         throw new TransitionError('Use the instrument and method frozen on the recorded attempt.',409,'ATTEMPT_CONTEXT_MISMATCH');
@@ -159,6 +179,9 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (recordedAttempt && recordedAttempt.executedMethodRevision !== (method?.version == null ? null : String(method.version))) {
         throw new TransitionError('The recorded method revision differs; request a repeat.',409,'ATTEMPT_CONTEXT_MISMATCH');
     }
+    if (runContext.frozenMethodRevision && method?.version !== runContext.frozenMethodRevision.version) {
+        throw new TransitionError('The method revision changed after run start; use a new run.',409,'RESULT_METHOD_REVISION_CHANGED');
+    }
     // #182 pin 6005018712: historical imports have no work to execute. An
     // existing canonical item must satisfy the same commit rules as every path.
     if (!importing || item) {
@@ -168,7 +191,7 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
                 !(recordedAttempt && item.status === 'COMPLETED')) {
                 throw new TransitionError('Recorded or sealed work requires its correction workflow.', 409, 'RESULT_WORKITEM_SEALED');
             }
-            item = { ...item, sample, equipmentId: measurement.equipmentId || item.equipmentId };
+            item = { ...item, sample, equipmentId };
         }
     }
     return { sample, item, attemptId, batchId, replicateNo, performedBy, labId, methodId, analysis, method, source,
@@ -563,4 +586,4 @@ function createRawResultFixture(db, data) {
 
 module.exports = { writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
     writeResultsExecution, appendAttemptCorrection, recordedExecution, assertRecordedResultSave,
-    createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError };
+    createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError, resolveResultRunContext };

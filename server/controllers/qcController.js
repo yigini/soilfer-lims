@@ -9,6 +9,8 @@ const { resolveRunProfile } = require('../services/qcRunProfileService');
 const { changeRunMembers } = require('../services/qcRunMembershipService');
 const { reorderNativeRun } = require('../services/qcRunOrderService');
 const qcGate = require('../services/qcGateService');
+const { linkReagentLot, withdrawReagentLot, availableReagentLots } = require('../services/batchReagentLotService');
+const { runOptions, startWorkbenchRun } = require('../services/workbenchRunService');
 const { normalizeBatchState } = require('../workflowContract');
 function respondError(res, error, fallback) {
     if (!error.statusCode) console.error('[QC run]', error);
@@ -23,9 +25,38 @@ exports.createBatch = async (req, res) => {
         return res.status(201).json(await apiRunView(prisma, batch));
     } catch (error) { return respondError(res, error, 'Failed to create batch'); }
 };
+exports.linkReagentLot = async (req, res) => {
+    try {
+        const outcome = await linkReagentLot(prisma, req.params.id, req.user, req.body);
+        return res.status(outcome.created ? 201 : 200).json(outcome);
+    } catch (error) { return respondError(res, error, 'Failed to link reagent lot'); }
+};
+exports.runOptions = async (req, res) => {
+    try { return res.json(await runOptions(prisma, req.user, req.query)); }
+    catch (error) { return respondError(res, error, 'Failed to load run options'); }
+};
+exports.startWorkbenchRun = async (req, res) => {
+    try { return res.status(201).json({ batch: await startWorkbenchRun(prisma, req.user, req.body) }); }
+    catch (error) { return respondError(res, error, 'Failed to start run'); }
+};
+exports.withdrawReagentLot = async (req, res) => {
+    try { return res.json(await withdrawReagentLot(prisma, req.params.id, req.user, { ...req.body, inventoryLotId: req.params.lotId })); }
+    catch (error) { return respondError(res, error, 'Failed to withdraw reagent lot'); }
+};
+exports.availableReagentLots = async (req, res) => {
+    try { return res.json({ data: await availableReagentLots(prisma, req.params.id, req.user) }); }
+    catch (error) { return respondError(res, error, 'Failed to load reagent lots'); }
+};
 exports.getBatches = async (req, res) => {
     try {
         const filter = {};
+        if (req.query.view !== undefined && !['my_runs', 'all_runs'].includes(req.query.view)) {
+            return res.status(400).json({ code: 'QC_RUN_FILTER_INVALID', error: 'Select My runs or All runs.' });
+        }
+        if (req.query.view === 'my_runs') filter.OR = [
+            { analystUsername: req.user.username },
+            { status: 'OPEN', startedAt: null, createdBy: req.user.username }
+        ];
         if (req.query.status) filter.status = normalizeBatchState(req.query.status);
         if (req.query.analysis) filter.analysis = req.query.analysis;
         const where = await scopedBatchWhere(prisma, req.user, filter);

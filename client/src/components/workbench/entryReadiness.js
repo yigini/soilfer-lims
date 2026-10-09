@@ -1,5 +1,10 @@
 const SEALED = ['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED'];
 
+// The RUN identity is supplied by the server's central Result context.
+export function entryInstrumentId(item, overrideId) {
+    return item?.instrumentSource === 'RUN' ? item.equipmentId : overrideId || item?.draft?.instrumentId || item?.equipmentId;
+}
+
 export function canSelectInstrument(item) {
     if (!item || SEALED.includes(item.status)) return false;
     const blockers = item.readiness?.blockers || [];
@@ -9,7 +14,7 @@ export function canSelectInstrument(item) {
 
 export function isEntryReady(item, equipment = []) {
     if (!item || SEALED.includes(item.status)) return false;
-    const selectedId = item.draft?.instrumentId || item.equipmentId;
+    const selectedId = entryInstrumentId(item);
     const asset = (item.eligibleEquipment || equipment).find(candidate => candidate.id === selectedId);
     if (asset && (asset.status !== 'IN_SERVICE' || ['BLOCKED', 'NOT_CONFIGURED'].includes(asset.readiness) ||
         ['OVERDUE', 'FAILED'].includes(asset.calibrationStatus))) return false;

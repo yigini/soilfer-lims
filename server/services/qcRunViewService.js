@@ -9,6 +9,7 @@ const QC_RUN_INCLUDE = {
     analytes: true, positions: { include: { workItems: { include: { workItem: { select: WORK_ITEM_SELECT } } }, references: true }, orderBy: { position: 'asc' } },
     measurements: true, evaluations: { orderBy: [{ analysisCode: 'asc' }, { version: 'asc' }] },
     dispositions: true, events: true,
+    reagentLots: { include: { inventoryLot: { select: { id: true, lotNumber: true, status: true, expiryDate: true } } }, orderBy: [{ linkedAt: 'asc' }, { id: 'asc' }] },
     workItems: { select: WORK_ITEM_SELECT, orderBy: { rackPosition: 'asc' } }
 };
 function parsed(value, fallback = null) {
@@ -140,7 +141,10 @@ function batchApiView(batch, { serialized = false } = {}) {
     const workItems = [...new Map((batch.positions || []).filter(position => position.kind === 'SAMPLE')
         .flatMap(position => (position.workItems || []).filter(link => link.workItem).map(link => [link.workItemId,
             { ...link.workItem, rackPosition: position.position, currentBatchId: link.workItem.batchId }]))).values()].sort((a, b) => a.rackPosition - b.rackPosition);
-    return { ...batch, analytes, reviewedCorrections: reviewedCorrections(batch), result: current.result, qcItems: current.qcItems, qcResults: serialized && current.qcResults !== null ? JSON.stringify(current.qcResults) : current.qcResults,
+    const withdrawnLotIds = new Set((batch.events || []).filter(event => event.type === 'REAGENT_LOT_WITHDRAWN').map(event => parsed(event.payload, {}).inventoryLotId));
+    const retainedReagentLots = batch.retainedReagentLots || batch.reagentLots || [];
+    return { ...batch, analytes, retainedReagentLots, reagentLots: retainedReagentLots.filter(link => !withdrawnLotIds.has(link.inventoryLotId)),
+        reviewedCorrections: reviewedCorrections(batch), result: current.result, qcItems: current.qcItems, qcResults: serialized && current.qcResults !== null ? JSON.stringify(current.qcResults) : current.qcResults,
         workItemIds: serialized ? JSON.stringify(workItemIds) : workItemIds,
         workItems: Array.isArray(batch.positions) ? workItems : batch.workItems || [],
         disposition: serialized && current.disposition !== null ? JSON.stringify(current.disposition) : current.disposition,

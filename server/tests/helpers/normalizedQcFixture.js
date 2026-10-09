@@ -11,6 +11,7 @@ async function normalizeLegacyQcFixture(client, batchId) {
     const file = path.resolve(databases.find(row => row.name === 'main')?.file || '');
     if (process.env.NODE_ENV !== 'test' || path.dirname(file) !== path.resolve(__dirname, '../.tmp') ||
         !/^[^/\\]+\.db$/.test(path.basename(file)) || !fs.existsSync(file) || fs.realpathSync(file) !== file) throw Error('QC fixture translation requires its disposable test database.');
+    require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: file, apply: true });
     const guardReader = new Database(file, { readonly: true, fileMustExist: true });
     let installed;
     try { installed = guardReader.prepare("SELECT count(*) n FROM sqlite_master WHERE type='trigger' AND name IN ('Batch_legacy_qc_immutable','BatchPosition_membership_insert_guard','QcMeasurement_insert_guard')").get().n; }

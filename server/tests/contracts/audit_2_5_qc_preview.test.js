@@ -29,7 +29,7 @@ async function fixture(criteria = {}, { mode = 'ADVISORY', start = true } = {}) 
     connection.close();
     for (const [script, installer] of [['result_attempt_links', 'installResultAttemptLinks'], ['sample_holds', 'installSampleHolds'],
         ['reference_materials', 'installReferenceMaterials'], ['qc_rules', 'installQcRules'], ['qc_runs', 'installQcRuns'], ['qc_gate_scope', 'installQcGateScope'],
-        ['proficiency_evidence', 'installProficiencyEvidence'], ['result_equipment_evidence', 'installResultEquipmentEvidence']]) {
+        ['proficiency_evidence', 'installProficiencyEvidence'], ['result_equipment_evidence', 'installResultEquipmentEvidence'], ['batch_reagent_lots', 'installBatchReagentLots']]) {
         require(`../../scripts/install_${script}`)[installer]({ dbPath: file, apply: true });
     }
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) }); resource.db = db;

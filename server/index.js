@@ -46,9 +46,12 @@ try {
         sources:repeatsReady.sources,totalChanges:repeatsReady.totalChanges}));
     const selectionsReady=require('./scripts/install_reported_value_selections').assertReportedValueStartupReady(dbPath);
     console.log(JSON.stringify({event:'REPORTED_VALUE_STARTUP_READY',...selectionsReady}));
+    const reagentLotsReady=require('./scripts/install_batch_reagent_lots').assertBatchReagentLotsStartupReady(dbPath);
+    console.log(JSON.stringify({event:'REAGENT_LOT_STARTUP_READY',...reagentLotsReady}));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('QC_GATE_SCOPE_') ? 'Keep the lab stopped and follow docs/audit/2.4-qc-gate.md.'
+            : error.code?.startsWith('REAGENT_LOT_') ? 'Keep the lab stopped and follow docs/audit/194-run-first.md.'
             : error.code?.startsWith('REPORTED_VALUE_') ? 'Keep the lab stopped and follow docs/audit/192-reported-value.md.'
             : error.code?.startsWith('NCR_') ? 'Keep the lab stopped and follow docs/audit/193-nonconformity.md.'
             : error.code?.startsWith('WORK_REPEAT_') ? 'Keep the lab stopped and follow docs/audit/191-repeat-correction.md.'

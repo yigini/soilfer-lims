@@ -430,6 +430,24 @@ model Batch {
   dispositions BatchDisposition[]
   events      BatchEvent[]
   workAttempts WorkAttempt[]
+  reagentLots BatchReagentLot[]
+}
+
+// #194 pin6072013517: retained links, never an inventory consumption record.
+model BatchReagentLot {
+  id             String       @id
+  batchId        String
+  batch          Batch        @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  labId          String
+  lab            Lab          @relation(fields: [labId], references: [id], onDelete: Restrict)
+  inventoryLotId String
+  inventoryLot   InventoryLot @relation(fields: [inventoryLotId], references: [id], onDelete: Restrict)
+  role           String?
+  linkedBy       String
+  linkedAt       DateTime     @default(now())
+
+  @@unique([batchId, inventoryLotId])
+  @@index([labId, batchId])
 }
 
 // #186 scope pins 1–12. String enums and immutable evidence are guarded by the
@@ -691,6 +709,7 @@ model Lab {
   qcRules            QcRule[]
   referenceMaterials ReferenceMaterial[]
   nonconformityReports NonconformityReport[]
+  batchReagentLots    BatchReagentLot[]
 }
 
 model LabPolicy {
@@ -846,6 +865,7 @@ model InventoryLot {
   transactions     InventoryTransaction[]
   reservations     InventoryReservation[]
   referenceMaterials ReferenceMaterial[]
+  batchReagentLots  BatchReagentLot[]
 
   @@index([inventoryItemId])
   @@index([labId])

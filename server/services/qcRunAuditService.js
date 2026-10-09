@@ -33,6 +33,7 @@ async function evidence(tx, batchId, extraIds = []) {
     add('QcEvaluation', batch?.evaluations || []);
     add('BatchDisposition', batch?.dispositions || []);
     add('BatchEvent', batch?.events || []);
+    add('BatchReagentLot', batch?.reagentLots || [], ['inventoryLot']);
     add('BatchQcResult', qcItems);
     add('WorkItem', workItems);
     add('Result', results);

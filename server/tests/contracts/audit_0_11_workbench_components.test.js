@@ -52,6 +52,12 @@ function harness(name, { groups, width = 1200, axios, offline } = {}) {
     const component = load(path.resolve(__dirname, `../../../client/src/components/workbench/${name}.jsx`)).default;
     return { children, render(props) { stateCursor = refCursor = 0; return component(props); } };
 }
+test('Audit4.1: the default workbench opens My runs while explicit sample navigation keeps its worksheet', () => {
+    const defaultView = harness('WorkbenchShell', { groups: [{ analysis: 'PH_H2O', items: [] }] });
+    expect(child(defaultView, defaultView.render({}), 'MyRunsPanel')).toBeDefined();
+    const linkedView = harness('WorkbenchShell', { groups: [{ analysis: 'PH_H2O', items: [] }] });
+    expect(child(linkedView, linkedView.render({ initialAnalysis: 'PH_H2O' }), 'WorksheetArea')).toBeDefined();
+});
 function elements(tree, predicate) {
     if (Array.isArray(tree)) return tree.flatMap(node => elements(node, predicate));
     if (!tree || typeof tree !== 'object') return [];
@@ -205,5 +211,15 @@ describe('Audit 0.11: workbench component behavior', () => {
         const h = harness('WorkbenchShell', { groups, axios });
         await child(h, h.render({ initialAnalysis: 'PH_H2O' }), 'WorksheetArea').props.onReviewRecord(['repeat']);
         expect(axios.post.mock.calls[0][1].entries[0].value).toBeUndefined();
+    });
+    test('Audit4.1: completion uses the server RUN instrument even when a retained draft names another instrument', async () => {
+        const groups = [{ analysis: 'PH_H2O', items: [item('run-row', { equipmentId: 'run-A', instrumentSource: 'RUN',
+            draft: { value: '7', instrumentId: 'old-B' } })] }];
+        const axios = { post: jest.fn().mockResolvedValue({ data: { included: [], excluded: [] } }) };
+        const h = harness('WorkbenchShell', { groups, axios });
+        await child(h, h.render({ initialAnalysis: 'PH_H2O' }), 'WorksheetArea').props.onReviewRecord(['run-row']);
+        expect(axios.post).toHaveBeenCalledWith('/api/workbench/v2/completion/preview', { entries: [expect.objectContaining({
+            workItemId: 'run-row', value: '7', equipmentId: 'run-A'
+        })] });
     });
 });

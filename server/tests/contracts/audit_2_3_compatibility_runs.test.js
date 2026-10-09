@@ -55,6 +55,7 @@ async function fixture({ migrated = false, sampleMember = false, finalClear = fa
     require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: record.file, apply: true });
     require('../../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: record.file, apply: true });
     require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: record.file, apply: true });
+    require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: record.file, apply: true });
     require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: record.file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${record.file}` }) }); record.db = db;
     const actor = { id: username, username, role: 'LAB_MANAGER', labId }, f = { db, file: record.file, actor, labId, analysisCode };

@@ -54,6 +54,15 @@ async function apiRunView(db, batch, { detail = false } = {}) {
         }
     }
     for (const row of decorated) {
+        const frozen = row.criteriaSnapshot ? JSON.parse(row.criteriaSnapshot).methodRevision : null;
+        const historical = row.provenance !== 'NATIVE';
+        let methodRevision = frozen || null;
+        if (!batch.startedAt && !historical && row.methodologyId) {
+            const method = await db.methodology.findUnique({ where: { id: row.methodologyId } });
+            if (method) methodRevision = { methodologyId: method.id, name: method.name, standard: method.standard, version: method.version };
+        }
+        row.methodRevision = methodRevision;
+        row.methodRevisionSource = batch.startedAt || historical ? frozen ? 'FROZEN' : 'UNKNOWN' : 'CURRENT';
         row.repeatBracketScope = null;
         if (row.status === 'QC_FAIL') {
             try { row.repeatBracketScope = require('./qcCalibrationBracketService').repeatBracketScope(row, currentAnalyteEvidence(batch, row.analysisCode)); }
