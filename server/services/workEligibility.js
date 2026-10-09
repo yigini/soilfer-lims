@@ -325,9 +325,10 @@ function canPublish(sample, report, user, options = {}) {
             workItemIds: pending.map(item => item.id) };
     }
 
-    const qc = reportingQc(sample, options);
-    if (qc.blocker) {
-        const { batch, gate } = qc.blocker;
+    const qc = reportingQc(sample, {...options,reportedSelectionProof:undefined});
+    const selectedQc = options.reportedSelectionProof ? reportingQc(sample,options) : {warnings:[]};
+    if (qc.blocker || selectedQc.blocker) {
+        const { batch, gate } = qc.blocker || selectedQc.blocker;
         return { allowed: false, code: gate.code || (batch.status === 'QC_FAIL' ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING'),
             reason: gate.code || `Cannot publish report: ${gate.error}`, gate: gate.gate,
             acknowledgementRequired: gate.acknowledgementRequired };
@@ -358,7 +359,8 @@ function canPublish(sample, report, user, options = {}) {
             workItemIds: missing.map(item => item.id) };
     }
 
-    return { allowed: true, reason: null, qcWarnings: qc.warnings };
+    return { allowed: true, reason: null, qcWarnings: [...new Map([...qc.warnings,...selectedQc.warnings]
+        .map(row=>[row.resultId,row])).values()] };
 }
 
 const UNFINISHED_WORK_STATUSES = [

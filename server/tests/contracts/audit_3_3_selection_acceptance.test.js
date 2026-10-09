@@ -3,11 +3,13 @@ const { qcGateFixture } = require('../helpers/qcGateFixture');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const owned = [];
 afterEach(async () => { for (const f of owned.splice(0)) await f.close(); });
-async function fixture(count = 1) {
-    const f = await qcGateFixture({ count, criteria: { blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0, ccvEvery: 0 } });
+async function fixture(count = 1,criteria={},initialValue=null) {
+    const f = await qcGateFixture({ count, criteria: { blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0, ccvEvery: 0,...criteria } });
     owned.push(f); f.rows = []; f.submissions = [];
     for (const item of f.items) {
-        f.rows.push(await f.result(item));
+        f.rows.push(initialValue===null ? await f.result(item) : (await require('../../services/workflowStateRules').inTransaction(f.db,
+            tx=>require('../../services/resultWriteService').writeResultsExecution(tx,{sampleId:item.sampleId,workItemId:item.id,
+                actor:f.actor,measurements:[{param:item.analysis,value:String(initialValue),equipmentId:f.instrument.id}]})))[0]);
         await require('../../services/workItemStateService').transitionWorkItem(item.id, 'COMPLETED', f.actor, 'Recorded owned selection test', {}, f.db);
         f.submissions.push(await require('../../services/submissionStateService').createSubmissionForItems({ db: f.db, actor: f.actor,
             sampleId: item.sampleId, type: 'FULL', workItemIds: [item.id] }));
@@ -149,4 +151,28 @@ test('actual RETURN, repeat recording and accept retain a questioned original, r
     expect(reported.values[0]).toMatchObject({value:f.rows[0].value,sourceResultIds:[f.rows[0].id]});
     expect(reported.sourceResults[0]).toMatchObject({id:f.rows[0].id,isCurrent:false,isValid:false});
     expect(await f.all()).toBe(retained);
+});
+
+test.each([{r:1,allowed:true},{r:0.5,allowed:false}])('actual questioned12.0/repeat12.6 uses recorded r$r and complete retained evidence',async({r,allowed})=>{
+    const f=await fixture(1,{repeatabilityLimit:r},12), item=f.items[0];
+    const returned=await f.http('/api/work/'+item.id+'/review',{decision:'RETURN',attemptId:f.rows[0].attemptId,
+        reasonCode:'REVIEW_OUTLIER',note:'Compare original worksheet measurement with repeat'});
+    expect(returned.status).toBe(200);
+    const [repeat]=await require('../../services/workflowStateRules').inTransaction(f.db,tx=>require('../../services/resultWriteService').writeResultsExecution(tx,{
+        sampleId:item.sampleId,workItemId:item.id,actor:f.actor,measurements:[{param:item.analysis,value:'12.6',equipmentId:f.instrument.id}]}));
+    await require('../../services/workItemStateService').transitionWorkItem(item.id,'COMPLETED',f.actor,'Complete repeat',{},f.db);
+    await require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,sampleId:item.sampleId,type:'FULL',workItemIds:[item.id]});
+    const retained=await f.db.result.findMany({orderBy:{id:'asc'}}), before=await f.all();
+    const selection={mode:'MEAN',attemptIds:[f.rows[0].attemptId,repeat.attemptId],reason:'Compare complete original and repeat determinations'};
+    const response=await f.http('/api/work/'+item.id+'/review',{decision:'ACCEPT',reportedValueSelection:selection});
+    if(!allowed) {
+        expect(response.status).toBe(409);expect(response.body.code).toBe('REPORTED_VALUE_OUTSIDE_LIMIT');expect(await f.all()).toBe(before);
+    } else {
+        expect({status:response.status,body:response.body}).toMatchObject({status:200});
+        const saved=await f.db.reportedValueSelection.findFirst();expect(saved).toMatchObject({value:12.3,valueText:'12.3',rule:'REVIEWER'});
+        expect(JSON.parse(saved.resultIds)).toEqual([f.rows[0].id,repeat.id].sort());
+        const report=await require('../../services/reportAssembly').assembleReport(item.sampleId,f.actor,{db:f.db});
+        expect(report.content.resultGroups[0].items).toEqual([expect.objectContaining({value:'12.3',sourceResultIds:[f.rows[0].id,repeat.id].sort()})]);
+        expect(await f.db.result.findMany({orderBy:{id:'asc'}})).toEqual(retained);
+    }
 });

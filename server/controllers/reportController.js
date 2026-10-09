@@ -129,15 +129,20 @@ async function generateReport(req, res) {
                 include: require('../services/qcRunViewService').QC_RUN_INCLUDE }) : [];
             const { qcModes, qcModeEvidence } = await resolveReportingModes(currentSample, qcBatches, { db: tx });
             const { qcGates, qcAcknowledgements } = await require('../services/qcGateService').resolveForSample(currentSample, qcBatches, tx);
-            const reportedSelectionProof = await require('../services/reportedValueReadService').readSampleReportedValues(tx,currentSample);
-            Object.assign(qcGates,reportedSelectionProof.qcGates); Object.assign(qcAcknowledgements,reportedSelectionProof.qcAcknowledgements);
-            for(const [id,gate] of Object.entries(reportedSelectionProof.qcGates)) qcModes[id]=gate.mode;
             const { canPublish } = require('../services/workEligibility');
             const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
             const spectralItemIds = currentSample.workItems.filter(item => SPECTRAL_ACQUISITION_CODES.includes(item.analysis)).map(item => item.id);
             const spectralScans = spectralItemIds.length ? await tx.spectralData.findMany({ where: {
                 sampleId, workItemId: { in: spectralItemIds }, isCurrent: true, status: 'APPROVED'
             } }) : [];
+            const originalCheck=canPublish(currentSample,null,req.user,{qcBatches,qcModes,qcGates,qcAcknowledgements,spectralScans});
+            if(!originalCheck.allowed && originalCheck.code!=='ACCEPTED_ITEM_WITHOUT_VALID_RESULT') {
+                throw Object.assign(new Error(originalCheck.reason),{statusCode:originalCheck.code==='PERMISSION_DENIED'?403:409,
+                    publishCheck:originalCheck,qcModeEvidence});
+            }
+            const reportedSelectionProof = await require('../services/reportedValueReadService').readSampleReportedValues(tx,currentSample);
+            Object.assign(qcGates,reportedSelectionProof.qcGates); Object.assign(qcAcknowledgements,reportedSelectionProof.qcAcknowledgements);
+            for(const [id,gate] of Object.entries(reportedSelectionProof.qcGates)) qcModes[id]=gate.mode;
             const publishCheck = canPublish(currentSample, null, req.user, { qcBatches, qcModes, qcGates, qcAcknowledgements, spectralScans, reportedSelectionProof });
             if (!publishCheck.allowed) {
                 const statusCode = publishCheck.code === 'PERMISSION_DENIED' ? 403 : 409;
