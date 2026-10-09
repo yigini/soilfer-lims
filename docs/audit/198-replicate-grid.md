@@ -46,4 +46,18 @@ Existing test changes, all under that pin:
 
 No factory/writer exemption or scanner change. Migration/backfill counts0.
 No changes to analytical/QC/audit data or the native QC evaluator. Production
-freeze and195 release hold remain in force.
+freeze remains in force. The #195 prerequisite is satisfied by #196's merge;
+that does not authorize a production release.
+
+The corrected pre-keyboard-rebase head7a8c0132 passed the full owned Windows
+suite:298/298 suites,4421/4421 tests,zero skips,1157.283s. Client build passed
+in20.16s; lint passed with0 errors and14 existing warnings. The missing lab
+in the old draft-integrity setup was repaired through ensureTestLab before its
+policyService call; no original assertions were removed or weakened.
+
+Rebased onto merged #196 at6093198e. Integration preserves replica column
+identity during Enter/Up/Down navigation when other rows contain retained
+readings, passes Escape through the existing client-only restore with the
+replica number, and counts an equal second reading as independent evidence.
+Readiness never treats a retained replica cell as editable. New behavioral
+tests cover those cases; fresh build/lint/full proof follows on this head.

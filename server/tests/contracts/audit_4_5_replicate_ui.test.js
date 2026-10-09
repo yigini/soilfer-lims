@@ -68,3 +68,38 @@ test.each(['WorksheetArea','SingleSampleEditor'])('%s uses the pair editor only 
     expect(host.all().some(node=>node.props?.item===row&&node.props?.onDraftChange===onDraftChange)).toBe(false);
     expect(host.all().some(node=>node.props?.ariaLabel==='Owned sample determination')).toBe(true);
 });
+
+test('equal replica2 becomes ready independently of replica1, while a retained cell stays immutable', async()=>{
+    const row=item({currentResult:'10.0',draft:{replicateNo:2,value:'10.0'},sampleReplicates:{requiredCount:2,
+        status:'PENDING',measurements:[{replicateNo:1,rawInput:'10.0'}],canAppend:true}}),record=jest.fn();
+    const host=mountUi('components/workbench/WorksheetArea.jsx',{activeGroup:{analysis:'OWNED-NUMERIC',items:[row]},
+        onDraftChange:jest.fn(),onReviewRecord:record});
+    await host.render();host.find('record-all-ready').props.onClick();expect(record).toHaveBeenCalledWith(['owned-work']);
+    row.draft.replicateNo=1;await host.render();expect(host.find('record-all-ready').props['aria-disabled']).toBe(true);
+});
+
+test('replicate Escape uses the existing client-only restore with the exact replica number',async()=>{
+    const restore=jest.fn(),options={...props(item({draft:{replicateNo:2,value:'12.0'},sampleReplicates:{requiredCount:2,
+        status:'PENDING',measurements:[{replicateNo:1,value:'10'}]}})),onRevertDraft:restore};
+    const host=mountUi('components/workbench/SampleReplicateEntry.jsx',options);await host.render();
+    expect(editors(host)[0].props.worksheetColumn).toBe('replicate-2');
+    editors(host)[0].props.onRevertValue('11.0');expect(restore).toHaveBeenCalledWith('owned-work','11.0',{replicateNo:2});
+    expect(options.onDraftChange).not.toHaveBeenCalled();expect(host.axios.post).not.toHaveBeenCalled();
+});
+
+test('actual DOM keyboard movement keeps replica2 across rows with different retained cells',()=>{
+    const {JSDOM}=require('jsdom'),vm=require('node:vm'),esbuild=require('../../../client/node_modules/esbuild');
+    const moduleObject={exports:{}};
+    vm.runInNewContext(esbuild.transformSync(fs.readFileSync(path.resolve(__dirname,
+        '../../../client/src/components/workbench/qcWorksheetNavigation.js'),'utf8'),{format:'cjs'}).code,
+        {module:moduleObject,exports:moduleObject.exports});
+    const dom=new JSDOM('<table><tr><td><output>10</output><input id="a2" data-worksheet-column="replicate-2"></td></tr>'+ 
+        '<tr><td><input id="b1" data-worksheet-column="replicate-1"><input id="b2" data-worksheet-column="replicate-2" disabled></td></tr>'+ 
+        '<tr><td><input id="c1" data-worksheet-column="replicate-1"><input id="c2" data-worksheet-column="replicate-2"></td></tr></table><button id="record">Record</button>');
+    try{const doc=dom.window.document,move=(id,key)=>{const target=doc.getElementById(id);target.focus();
+        moduleObject.exports.advanceWorksheetCell({target,currentTarget:doc.querySelector('table'),key,
+            preventDefault:jest.fn(),stopPropagation:jest.fn()},doc.getElementById('record'));return doc.activeElement.id;};
+        expect(move('a2','Enter')).toBe('c2');expect(move('c2','ArrowUp')).toBe('a2');
+        expect(move('c2','Enter')).toBe('record');expect(move('a2','Tab')).toBe('b1');
+    }finally{dom.window.close();}
+});

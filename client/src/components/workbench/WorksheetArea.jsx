@@ -470,6 +470,7 @@ export default function WorksheetArea({
                                                     <SampleReplicateEntry item={item} unit={activeGroup?.unit || ''}
                                                         disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
                                                         onDraftChange={onDraftChange}
+                                                        onRevertDraft={onRevertDraft}
                                                         onBarcodeRejected={scanner.rejectValueBurst}
                                                         onEnterNext={() => handleEnterNext(idx)}
                                                         inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)} />

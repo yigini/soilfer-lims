@@ -5,7 +5,7 @@ import { useLanguage } from '../../context/LanguageContext';
 // One durable existing draft at a time. Recording/confirmation remains the
 // worksheet's ordinary completion flow; retained cells are never refilled.
 export default function SampleReplicateEntry({ item, disabled, unit, onDraftChange,
-    onEnterNext, inputRef, onBarcodeRejected }) {
+    onEnterNext, inputRef, onBarcodeRejected, onRevertDraft }) {
     const { t } = useLanguage();
     const [showThird, setShowThird] = useState(false);
     const view = item.sampleReplicates, rows = view.measurements || [];
@@ -24,10 +24,12 @@ export default function SampleReplicateEntry({ item, disabled, unit, onDraftChan
                 {stored(number) ? <output className="block font-mono" data-replicate={number}>
                     {stored(number).rawInput ?? stored(number).value}
                 </output> : <NumericEditor numberFormat={item.numberFormat} unit={unit}
+                    worksheetColumn={`replicate-${number}`}
                     value={Number(item.draft?.replicateNo || 1) === number ? item.draft?.value ?? '' : ''}
                     disabled={disabled || number !== active}
                     ariaLabel={`${item.sampleDisplayId || item.sampleId} ${t(`replicateGrid.rep${number}`, `Rep ${number}`)}`}
                     onChange={value => onDraftChange(item.workItemId, value, { replicateNo: number })}
+                    onRevertValue={onRevertDraft && (value => onRevertDraft(item.workItemId, value, { replicateNo: number }))}
                     onEnterNext={onEnterNext} inputRef={number === active ? inputRef : null}
                     onBarcodeRejected={onBarcodeRejected} />}
             </div>)}
