@@ -16,6 +16,8 @@ router.post('/batches/:id/evaluate', checkPermission('CHANGE_STATUS'), qcControl
 router.post('/batches/:id/preview', checkPermission('CHANGE_STATUS'), qcController.previewBatch);
 router.post('/batches/:id/corrections', checkPermission('CHANGE_STATUS'), qcController.correctMeasurements);
 router.post('/batches/:id/start', checkPermission('CHANGE_STATUS'), qcController.startRun);
+router.post('/batches/:id/reagent-lots', checkPermission('CHANGE_STATUS'), qcController.linkReagentLot);
+router.post('/batches/:id/reagent-lots/:lotId/withdraw', checkPermission('CHANGE_STATUS'), qcController.withdrawReagentLot);
 router.post('/batches/:id/rebuild', checkPermission('CHANGE_STATUS'), qcController.rebuildRun);
 router.post('/batches/:id/reorder', checkPermission('CHANGE_STATUS'), qcController.reorderRun);
 router.post('/batches/:id/items', checkPermission('CHANGE_STATUS'), qcController.addItemsToBatch);
