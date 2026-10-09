@@ -8,6 +8,7 @@ Authoritative pins:
 - [6071242717](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6071242717): source identity and explicit one-use manager override.
 - [6034830001](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6034830001): retained PT evidence, nullable nonconformityId and idempotent PENDING backfill.
 - [6075820954](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6075820954): exact additive PT successor, no WorkAttempt column, lifecycle commands, retained links and recorded compatibility mode.
+- [6076135661](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6076135661): first UNSATISFACTORY record/correction writes RAISED directly with its NCR in the same transaction. PENDING is historical-only; no NULL-round backfill.
 
 Implementation boundaries:
 - SQL unique(source,refType,refId); retries retain the original NCR.
@@ -26,7 +27,7 @@ capacity/preflight/reservation and workRepeatContract's current NCR refusal.
 All original migration sources, receipts and refusals must stay verified.
 
 Additive successor and lifecycle:
-- Preserve the original #189 migration bytes/receipt. Only its two PT ncrStatus guards change in the new #193 migration: PENDING requires a null link; RAISED requires the correct same-lab PT NCR. PENDING→RAISED is the sole change, and an established link is permanent, including after reclassification.
+- Preserve the original #189 migration bytes/receipt. Only its two PT ncrStatus guards change in the new #193 migration. New rows allow NULL or correctly linked RAISED; new PENDING refuses. Updates allow NULL→RAISED for a first unsatisfactory correction or historical PENDING→RAISED for backfill. Established links remain permanent on later reclassification. This newer6076135661 edge pin supersedes the earlier PENDING-only transition wording.
 - #189's verifier recognizes only its original complete state or the exact #193 column/guards/receipt bound to the successor SQL digest; partial, mixed or tampered states refuse.
 - NCR DELETE refuses; source identity, lab, description, raisedBy, first evaluation and createdAt stay immutable. CLOSED is fully immutable, and assessment/action cannot be cleared once set.
 - APPROVE_RESULTS plus scopeGuard authorizes OPEN→ACTION with a nonblank assessment and ACTION→CLOSED with a nonblank action and closedBy/closedAt. No skipping, reopening or automatic closure. Each accepted change and its old/new values is audited in the same transaction; refusals make zero writes.
