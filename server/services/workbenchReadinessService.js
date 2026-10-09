@@ -192,7 +192,9 @@ async function evaluateExecutionReadiness(db, item, user, options = {}) {
     const gates = require('./gateEvidenceService');
     if (!item.sample) return evaluateItemReadiness(item, user, options);
     const labId = item.sample.assignedLab || item.assignedLab || item.sample.labId;
-    const selectedEquipmentId = options.selectedEquipmentId || item.equipmentId;
+    const runContext = await require('./resultWriteService').resolveResultRunContext(db, item,
+        { equipmentId: options.selectedEquipmentId });
+    const selectedEquipmentId = runContext.equipmentId;
     // A transaction caller must read qualification dates afresh, rather than
     // trusting the queue's cached calibration label.
     const equipReq = await resolveEquipmentRequirement(db, item, labId);
@@ -213,7 +215,8 @@ async function evaluateExecutionReadiness(db, item, user, options = {}) {
     const readiness = evaluateItemReadiness({ ...item, category }, user, { ...options, now, selectedEquipmentId, asset,
         equipReq, prerequisite,
         gateEvidence: gates.evaluateGateEvidence(item.sample, workItems, required) });
-    return { ...readiness, equipmentRequired: equipReq.isRequired,
+    return { ...readiness, equipmentRequired: equipReq.isRequired, instrumentSource: runContext.instrumentSource,
+        equipmentId: selectedEquipmentId,
         equipmentBlocked: Boolean(readiness.blockers[0]?.startsWith('INSTRUMENT_')),
         equipmentSnapshot: asset ? { equipmentId: asset.id, assetStatus: asset.status, readiness: asset.readinessState,
             calibrationDueDate: asset.qualification?.nextCalibrationDueDate || null, criticality: asset.criticality,

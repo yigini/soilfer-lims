@@ -212,4 +212,14 @@ describe('Audit 0.11: workbench component behavior', () => {
         await child(h, h.render({ initialAnalysis: 'PH_H2O' }), 'WorksheetArea').props.onReviewRecord(['repeat']);
         expect(axios.post.mock.calls[0][1].entries[0].value).toBeUndefined();
     });
+    test('Audit4.1: completion uses the server RUN instrument even when a retained draft names another instrument', async () => {
+        const groups = [{ analysis: 'PH_H2O', items: [item('run-row', { equipmentId: 'run-A', instrumentSource: 'RUN',
+            draft: { value: '7', instrumentId: 'old-B' } })] }];
+        const axios = { post: jest.fn().mockResolvedValue({ data: { included: [], excluded: [] } }) };
+        const h = harness('WorkbenchShell', { groups, axios });
+        await child(h, h.render({ initialAnalysis: 'PH_H2O' }), 'WorksheetArea').props.onReviewRecord(['run-row']);
+        expect(axios.post).toHaveBeenCalledWith('/api/workbench/v2/completion/preview', { entries: [expect.objectContaining({
+            workItemId: 'run-row', value: '7', equipmentId: 'run-A'
+        })] });
+    });
 });

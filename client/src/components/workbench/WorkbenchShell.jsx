@@ -12,6 +12,7 @@ import {
 import WorkbenchQueue from './WorkbenchQueue';
 import MyRunsPanel from './MyRunsPanel';
 import WorksheetArea from './WorksheetArea';
+import { entryInstrumentId } from './entryReadiness';
 import ReviewCompletionView from './ReviewCompletionView';
 import ReviewSubmissionView from './ReviewSubmissionView';
 import ActivityReceiptsView from './ActivityReceiptsView';
@@ -318,7 +319,7 @@ export default function WorkbenchShell({
                             checks: extra.checks !== undefined ? extra.checks : existingDraft.checks,
                             basis: extra.basis || existingDraft.basis || 'AIR_DRY',
                             replicateNo: extra.replicateNo || existingDraft.replicateNo || 1,
-                            instrumentId: extra.instrumentId || existingDraft.instrumentId || item.equipmentId,
+                            instrumentId: entryInstrumentId(item, extra.instrumentId),
                             draftVersion: nextDraftVersion,
                             updatedAt: new Date().toISOString()
                         }
@@ -373,7 +374,7 @@ export default function WorkbenchShell({
                                 checks: extra.checks || currentItem?.draft?.checks,
                                 basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
                                 replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
-                                equipmentId: extra.instrumentId || currentItem?.draft?.instrumentId || currentItem?.equipmentId,
+                                equipmentId: entryInstrumentId(currentItem, extra.instrumentId),
                                 draftVersion: nextDraftVersion,
                                 clientDraftVersion: nextDraftVersion
                             },
@@ -398,7 +399,7 @@ export default function WorkbenchShell({
                             checks: extra.checks || currentItem?.draft?.checks,
                             basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
                             replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
-                            equipmentId: extra.instrumentId || currentItem?.draft?.instrumentId || currentItem?.equipmentId,
+                            equipmentId: entryInstrumentId(currentItem, extra.instrumentId),
                             version: currentItem?.version || 0,
                             draftVersion: nextDraftVersion
                         }
@@ -422,7 +423,7 @@ export default function WorkbenchShell({
                                 checks: extra.checks || currentItem?.draft?.checks,
                                 basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
                                 replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
-                                equipmentId: extra.instrumentId || currentItem?.draft?.instrumentId || currentItem?.equipmentId,
+                                equipmentId: entryInstrumentId(currentItem, extra.instrumentId),
                                 draftVersion: nextDraftVersion,
                                 clientDraftVersion: nextDraftVersion
                             },
@@ -537,7 +538,7 @@ export default function WorkbenchShell({
                 checks: i.draft?.checks,
                 basis: i.draft?.basis || 'AIR_DRY',
                 replicateNo: i.draft?.replicateNo || 1,
-                equipmentId: i.draft?.instrumentId || i.equipmentId,
+                equipmentId: entryInstrumentId(i),
                 version: i.version
             }));
 

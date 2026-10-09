@@ -513,7 +513,8 @@ exports.getQueue = async (req, res) => {
 
             const resultKey = `${item.sampleId}::${code}`;
             const itemDraft = draftMap[item.id] || null;
-            const selectedEquipId = item.equipmentId || itemDraft?.instrumentId || null;
+            const runContext = await require('../services/resultWriteService').resolveResultRunContext(prisma, item);
+            const selectedEquipId = runContext.instrumentSource === 'RUN' ? runContext.equipmentId : item.equipmentId || itemDraft?.instrumentId || null;
             const readiness = await readinessService.evaluateExecutionReadiness(prisma, item, user, {
                 selectedEquipmentId: selectedEquipId
             });
@@ -549,7 +550,8 @@ exports.getQueue = async (req, res) => {
                 currentResult: resultMap[resultKey]?.value ?? (operationalChecklists[code] ? item.result : null),
                 currentUnit: resultMap[resultKey]?.unit || null,
                 previousResult: operationalChecklists[code] ? null : resultMap[resultKey] || null,
-                equipmentId: item.equipmentId || null,
+                equipmentId: runContext.equipmentId,
+                instrumentSource: runContext.instrumentSource,
                 equipmentRequired: readiness.equipmentRequired,
                 eligibleEquipment,
                 dryingStatus: item.sample?.dryingStatus || 'PENDING',
@@ -745,7 +747,7 @@ exports.batchSave = async (req, res) => {
             const checklist = operationalChecklists[item.analysis];
             const isOperationalTask = !!checklist;
             const executionReadiness = await readinessService.evaluateExecutionReadiness(prisma, item, user,
-                { selectedEquipmentId: entry.equipmentId || item.equipmentId });
+                { selectedEquipmentId: entry.equipmentId });
             if (!executionReadiness.isReady) {
                 if (executionReadiness.blockers.includes('GATE_STATE_MISMATCH')) throw new stateRules.TransitionError(
                     executionReadiness.reasons.join('; '), 409, 'GATE_STATE_MISMATCH');
@@ -1046,7 +1048,7 @@ exports.batchSave = async (req, res) => {
 
             const updateData = {
                 status: targetStatus,
-                equipmentId: entry.equipmentId || item.equipmentId,
+                ...(executionReadiness.instrumentSource !== 'RUN' && { equipmentId: entry.equipmentId || item.equipmentId }),
                 version: { increment: 1 },
                 history: JSON.stringify(history),
                 updatedAt: now
@@ -1463,7 +1465,7 @@ exports.previewCompletion = async (req, res) => {
             const readiness = await readinessService.evaluateExecutionReadiness(prisma, item, user, {
 
 
-                selectedEquipmentId: entry.equipmentId || item.equipmentId
+                selectedEquipmentId: entry.equipmentId
             });
 
             // 2. Validation check
@@ -1562,7 +1564,7 @@ exports.previewCompletion = async (req, res) => {
                     checks: entry.checks,
                     basis: entry.basis || 'AIR_DRY',
                     replicateNo: entry.replicateNo || 1,
-                    equipmentId: entry.equipmentId || item.equipmentId,
+                    equipmentId: (await require('../services/resultWriteService').resolveResultRunContext(prisma, item, { equipmentId: entry.equipmentId })).equipmentId,
                     version: item.version,
                     validation,
                     warnings: readiness.warnings

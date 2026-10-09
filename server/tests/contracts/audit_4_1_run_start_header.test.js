@@ -32,6 +32,10 @@ afterEach(async () => { for (const f of owned.splice(0)) await f.close(); });
 
 test('40 policy-permitted samples start atomically with the LabMethodDefault and every committed Result retains its run instrument', async () => {
     const f = await fixture(40);
+    const otherInstrument = await f.db.equipmentAsset.create({ data: { id: randomUUID(), labId: f.labId,
+        name: 'Retained work-item instrument B', assetType: 'OTHER', status: 'IN_SERVICE', criticality: 'NON_CRITICAL' } });
+    for (const item of f.items.slice(0, 20)) await f.db.workItem.update({ where: { id: item.id }, data: { equipmentId: otherInstrument.id } });
+    const retainedEquipment = await f.db.workItem.findMany({ where: { id: { in: f.workItemIds } }, select: { id: true, equipmentId: true }, orderBy: { id: 'asc' } });
     const options = await runOptions(f.db, f.actor, { labId: f.labId, analysisCode: f.analysisCode });
     expect(options).toMatchObject({ defaultMethodologyId: f.method.id, methodologyId: f.method.id, maxBatchSize: 40, equipmentRequired: true });
     expect(options.eligibleEquipment.map(row => row.id)).toEqual([f.instrument.id]);
@@ -48,14 +52,68 @@ test('40 policy-permitted samples start atomically with the LabMethodDefault and
     expect(JSON.parse(started.payload)).toMatchObject({ methodRevision: revision, methodRevisions: [{ analysisCode: f.analysisCode, methodRevision: revision }] });
     const blank = batch.positions.find(row => row.kind === 'BLANK');
     await writeNativeMeasurements(f.db, batch.id, f.actor, { measurements: [{ positionId: blank.id, value: 0.01 }] });
-    for (const item of f.items) {
-        const result = await f.db.$transaction(tx => writeResult(tx, { sampleId: item.sampleId, actor: f.actor,
-            measurement: { param: item.analysis, value: '7.1', equipmentId: batch.instrumentId } }));
-        expect(result).toMatchObject({ batchId: batch.id, equipmentId: batch.instrumentId });
-        expect(await f.db.workAttempt.findUnique({ where: { id: result.attemptId } })).toMatchObject({ instrumentId: batch.instrumentId, qcBatchId: batch.id });
-    }
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        for (const item of f.items) {
+            const response = await request(app).post(`/api/results/${item.sampleId}`).set('Authorization', `Bearer ${token}`)
+                .send({ measurements: [{ param: item.analysis, value: '7.1' }] });
+            expect(response.body).toMatchObject({ success: true }); expect(response.status).toBe(200);
+            const result = await f.db.result.findFirst({ where: { sampleId: item.sampleId, param: item.analysis } });
+            expect(result).toMatchObject({ batchId: batch.id, equipmentId: batch.instrumentId });
+            expect(await f.db.workAttempt.findUnique({ where: { id: result.attemptId } })).toMatchObject({ instrumentId: batch.instrumentId, qcBatchId: batch.id, executedMethodRevision: '7' });
+        }
+    }, { repeatCommands: true });
     expect(await f.db.result.count({ where: { batchId: batch.id, equipmentId: batch.instrumentId } })).toBe(40);
+    expect(await f.db.workItem.findMany({ where: { id: { in: f.workItemIds } }, select: { id: true, equipmentId: true }, orderBy: { id: 'asc' } })).toEqual(retainedEquipment);
 }, 60000);
+
+test.each(['null', 'same', 'different', 'unready', 'method-changed'])('real HTTP Result recording uses frozen run context: %s', async kind => {
+    const f = await fixture(), batch = await startWorkbenchRun(f.db, f.actor, f.startInput);
+    const blank = batch.positions.find(row => row.kind === 'BLANK');
+    await writeNativeMeasurements(f.db, batch.id, f.actor, { measurements: [{ positionId: blank.id, value: 0.01 }] });
+    const measurement = { param: f.analysisCode, value: '7.1' };
+    if (kind === 'null') measurement.equipmentId = null;
+    if (kind === 'same') measurement.equipmentId = f.instrument.id;
+    if (kind === 'different') measurement.equipmentId = 'different-from-run';
+    if (kind === 'unready') await f.db.equipmentQualification.update({ where: { equipmentId: f.instrument.id }, data: { nextCalibrationDueDate: new Date('2000-01-01') } });
+    if (kind === 'method-changed') await f.db.methodology.update({ where: { id: f.method.id }, data: { version: 8 } });
+    const before = await snapshot(f);
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const response = await request(app).post(`/api/results/${f.items[0].sampleId}`).set('Authorization', `Bearer ${token}`).send({ measurements: [measurement] });
+        if (['null', 'same'].includes(kind)) {
+            expect(response.status).toBe(200);
+            expect(await f.db.result.findFirst({ where: { sampleId: f.items[0].sampleId } })).toMatchObject({ equipmentId: f.instrument.id });
+        } else {
+            expect(response.status).toBe(409);
+            expect(response.body.code).toBe({ different: 'RESULT_INSTRUMENT_MISMATCH', unready: 'INSTRUMENT_CALIBRATION_OVERDUE', 'method-changed': 'RESULT_METHOD_REVISION_CHANGED' }[kind]);
+            expect(await snapshot(f)).toEqual(before);
+        }
+    }, { repeatCommands: true });
+});
+
+test('the queue exposes RUN context, and real completion retains a different WorkItem instrument', async () => {
+    const f = await fixture();
+    const other = await f.db.equipmentAsset.create({ data: { id: randomUUID(), labId: f.labId, name: 'Retained instrument B',
+        assetType: 'OTHER', status: 'IN_SERVICE', criticality: 'NON_CRITICAL' } });
+    await f.db.workItem.update({ where: { id: f.items[0].id }, data: { assignedTo: f.actor.username, equipmentId: other.id } });
+    const batch = await startWorkbenchRun(f.db, f.actor, f.startInput);
+    await writeNativeMeasurements(f.db, batch.id, f.actor, { measurements: [{ positionId: batch.positions.find(row => row.kind === 'BLANK').id, value: 0.01 }] });
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        app.use('/api/workbench', require('../../routes/workbenchRoutes'));
+        const auth = { Authorization: `Bearer ${token}` };
+        const queue = await request(app).get('/api/workbench/queue').set(auth);
+        expect(queue.status).toBe(200);
+        const row = queue.body.groups.flatMap(group => group.items).find(item => item.workItemId === f.items[0].id);
+        expect(row).toMatchObject({ equipmentId: f.instrument.id, instrumentSource: 'RUN', readiness: { isReady: true } });
+        const payload = { entries: [{ workItemId: row.workItemId, value: '7.1', version: row.version }] };
+        const preview = await request(app).post('/api/workbench/v2/completion/preview').set(auth).send(payload);
+        expect(preview.status).toBe(200); expect(preview.body.included).toHaveLength(1);
+        expect(preview.body.included[0].equipmentId).toBe(f.instrument.id);
+        const committed = await request(app).post('/api/workbench/v2/completion/commit').set(auth).send({ entries: preview.body.included });
+        expect(committed.status).toBe(200); expect(committed.body.saved).toBe(1);
+        expect((await f.db.workItem.findUnique({ where: { id: row.workItemId } })).equipmentId).toBe(other.id);
+        expect(await f.db.result.findFirst({ where: { sampleId: row.sampleId } })).toMatchObject({ equipmentId: f.instrument.id });
+    });
+});
 test.each(['ineligible', 'overdue', 'method-mismatch', 'held', 'capacity', 'curve'])('%s start refuses with a stable 4xx and rolls back every run/membership/audit row', async kind => {
     const f = await fixture(kind === 'capacity' ? 2 : 1); let input = { ...f.startInput }, code;
     if (kind === 'ineligible') { input.instrumentId = 'unregistered'; code = 'INSTRUMENT_NOT_ELIGIBLE'; }

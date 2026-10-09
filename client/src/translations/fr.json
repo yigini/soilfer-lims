@@ -3229,7 +3229,9 @@
       "REASON_REQUIRED": "Indiquez un motif.",
       "QC_WORK_ITEM_ALREADY_BATCHED": "Un échantillon appartient déjà à une autre série. Utilisez son circuit de répétition autorisé.",
       "QC_WORK_ITEMS_REQUIRED": "Choisissez des échantillons éligibles distincts.",
-      "QC_RUN_FILTER_INVALID": "Choisissez Mes séries ou Toutes les séries."
+      "QC_RUN_FILTER_INVALID": "Choisissez Mes séries ou Toutes les séries.",
+      "RESULT_INSTRUMENT_MISMATCH": "Utilisez l’instrument figé au démarrage de cette série.",
+      "RESULT_METHOD_REVISION_CHANGED": "La révision de la méthode a changé après le démarrage. Utilisez une nouvelle série."
     }
   }
 }

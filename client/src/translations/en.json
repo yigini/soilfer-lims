@@ -3229,7 +3229,9 @@
       "REASON_REQUIRED": "Provide a reason.",
       "QC_WORK_ITEM_ALREADY_BATCHED": "A sample already belongs to another run. Use its authorized repeat workflow.",
       "QC_WORK_ITEMS_REQUIRED": "Select distinct eligible samples.",
-      "QC_RUN_FILTER_INVALID": "Select My runs or All runs."
+      "QC_RUN_FILTER_INVALID": "Select My runs or All runs.",
+      "RESULT_INSTRUMENT_MISMATCH": "Use the instrument frozen on this run.",
+      "RESULT_METHOD_REVISION_CHANGED": "The method revision changed after run start. Use a new run."
     }
   }
 }

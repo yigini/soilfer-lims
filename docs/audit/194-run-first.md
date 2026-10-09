@@ -110,3 +110,20 @@ gates, both schema relations and both digest-bound sources. All ten locale
 merges verify every main key and every runFirst key unchanged. Combined
 whole-suite/build/lint and CI verification remain required before a PR audit.
 Production remains under the #162 demo freeze.
+
+[Pin6079078551](https://github.com/yigini/soilfer-lims/issues/194#issuecomment-6079078551)
+resolves the header-to-Result handoff in the existing central Result context.
+A started native run supplies its frozen instrument for omitted/null input;
+different supplied instruments refuse RESULT_INSTRUMENT_MISMATCH. The same
+resolver supplies queue, readiness and attempt evidence. WorkItem equipment
+is never overwritten. Existing qualification/recorded-attempt guards remain.
+A changed live Methodology version refuses RESULT_METHOD_REVISION_CHANGED;
+it never relabels the frozen run or silently records a different revision.
+The 40-Result test now records through real HTTP with equipment omitted,
+including WorkItems retaining another instrument. The real queue/completion
+and client preview tests verify server RUN context instead of stale drafts.
+
+The initial combined whole-suite run failed because the owned template omitted
+CI's profile/catalogue/unit/reference seeds; no green receipt was claimed.
+After the actual CI seed sequence, all33 initially failing suites pass504/504
+at9ef663bf. This is a diagnostic regression receipt, not final-head validation.

@@ -1624,7 +1624,9 @@
       "REASON_REQUIRED": "Indique un motivo.",
       "QC_WORK_ITEM_ALREADY_BATCHED": "Una muestra ya pertenece a otra serie. Utilice su flujo autorizado de repetición.",
       "QC_WORK_ITEMS_REQUIRED": "Seleccione muestras elegibles distintas.",
-      "QC_RUN_FILTER_INVALID": "Seleccione Mis series o Todas las series."
+      "QC_RUN_FILTER_INVALID": "Seleccione Mis series o Todas las series.",
+      "RESULT_INSTRUMENT_MISMATCH": "Utilice el instrumento fijado al iniciar esta serie.",
+      "RESULT_METHOD_REVISION_CHANGED": "La revisión del método cambió después de iniciar la serie. Utilice una serie nueva."
     }
   }
 }

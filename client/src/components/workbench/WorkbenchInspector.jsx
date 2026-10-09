@@ -58,7 +58,7 @@ export default function WorkbenchInspector({
 
     const basis = draft?.basis || 'AIR_DRY';
     const replicateNo = draft?.replicateNo || 1;
-    const selectedEquipId = draft?.instrumentId || selectedItem.equipmentId || '';
+    const selectedEquipId = selectedItem.instrumentSource === 'RUN' ? selectedItem.equipmentId : draft?.instrumentId || selectedItem.equipmentId || '';
 
     const selectedAsset = eligibleEquipment.find(e => e.id === selectedEquipId);
 
@@ -195,8 +195,8 @@ export default function WorkbenchInspector({
                             Instrument Qualification
                         </label>
                         <select
-                            disabled={Boolean(runBatch) || !canSelectInstrument(selectedItem) || eligibleEquipment.length === 0}
-                            value={runBatch?.instrumentId || selectedEquipId}
+                            disabled={Boolean(runBatch) || selectedItem.instrumentSource === 'RUN' || !canSelectInstrument(selectedItem) || eligibleEquipment.length === 0}
+                            value={selectedEquipId}
                             onChange={(e) => onUpdateMeta(workItemId, 'instrumentId', e.target.value)}
                             className="w-full px-2 py-1 text-xs rounded border border-sf-divider bg-sf-canvas text-sf-text focus:outline-none focus:ring-1 focus:ring-sf-primary focus:border-sf-primary"
                         >
