@@ -690,6 +690,7 @@ model Lab {
   policyOverrides    LabPolicyOverride[]
   qcRules            QcRule[]
   referenceMaterials ReferenceMaterial[]
+  nonconformityReports NonconformityReport[]
 }
 
 model LabPolicy {
@@ -733,7 +734,9 @@ model ProficiencyRound {
   outcome       String   // SATISFACTORY (|z|<=2), QUESTIONABLE (2<|z|<3), UNSATISFACTORY (|z|>=3)
   date          DateTime // Date of round / submission
   notes         String?
-  ncrStatus     String?  // PENDING | NULL; NCR creation is deferred to audit 3.4
+  ncrStatus     String?  // NULL | RAISED; PENDING is retained pre-193 evidence only
+  nonconformityId String?
+  nonconformity NonconformityReport? @relation(fields: [nonconformityId], references: [id], onDelete: Restrict)
   classificationLimits String? // Frozen resolved lab/analysis z-score limits; legacy NULL
   legacyScoreFlag String? // SIGMA_MISSING | SIGMA_NONPOSITIVE; preserves stored scores
   legacyFlaggedAt DateTime?
@@ -745,6 +748,29 @@ model ProficiencyRound {
 
   @@index([labId, analysisCode])
   @@index([date])
+}
+
+model NonconformityReport {
+  id                    String   @id
+  labId                 String
+  lab                   Lab      @relation(fields: [labId], references: [id], onDelete: Restrict)
+  source                String   // QC | PT | REPEAT_LIMIT | CUSTOMER | INTAKE | OTHER
+  refType               String
+  refId                 String
+  description           String
+  impactAssessment      String?
+  correctiveAction      String?
+  status                String   @default("OPEN") // OPEN | ACTION | CLOSED
+  raisedBy              String
+  closedBy              String?
+  closedAt              DateTime?
+  firstQcEvaluationId   String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  proficiencyRounds     ProficiencyRound[]
+
+  @@unique([source, refType, refId])
+  @@index([labId, status, source])
 }
 
 // Junction table for many-to-many Project <-> Lab relationship
