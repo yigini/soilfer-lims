@@ -1,4 +1,44 @@
 {
+  "replicateGrid": {
+    "rep1": "Rep 1",
+    "rep2": "Rep 2",
+    "rep3": "Rep 3",
+    "mean": "Mean",
+    "rpd": "RPD",
+    "limit": "Limit",
+    "range": "Range",
+    "criteria": "Criteria",
+    "count": "Required count",
+    "runThird": "Run third replicate",
+    "recordInOrder": "Record each reading with the worksheet review and confirmation before entering the next.",
+    "selectionHint": "These calculations do not select the reported value. Review decides the reported value.",
+    "status": {
+      "PENDING": "Pending",
+      "PASS": "Pair passes",
+      "FAIL": "Pair fails",
+      "NOT_EVALUABLE": "Not evaluable",
+      "REVIEW_REQUIRED": "Review required",
+      "NOT_REQUIRED": "Not required"
+    },
+    "source": {
+      "FROZEN": "Frozen at run start",
+      "CURRENT": "Current policy"
+    },
+    "reason": {
+      "CONTEXT_MISMATCH": "Measurement contexts differ",
+      "CENSORED": "Censored reading",
+      "NON_NUMERIC": "Non-numeric reading",
+      "NO_LOQ": "LOQ not configured",
+      "ABS_DIFF_UNSET": "Absolute limit not configured",
+      "INVALID_NONPOSITIVE": "RPD needs positive readings"
+    },
+    "errors": {
+      "REPLICATE_NOT_REQUIRED": "Record a failing required pair before adding a third reading.",
+      "REPLICATE_LIMIT": "A new sample execution may contain at most three readings.",
+      "REPLICATE_CRITERIA_INVALID": "Recorded replicate criteria are unavailable.",
+      "REPLICATE_SCOPE_DENIED": "The run belongs to another laboratory."
+    }
+  },
   "barcodeScan": {
     "label": "Scan",
     "placeholder": "Scan a sample barcode (F2)",
@@ -2489,6 +2529,7 @@
       "qc_controlMaxRecovery": "Maximum control recovery",
       "qc_duplicateNearLoqMultiplier": "Duplicate near-LOQ threshold",
       "qc_duplicateMaxRpd": "Maximum duplicate RPD",
+      "results_replicatesRequired": "Required sample replicates",
       "results_reportedValueRule": "Reported-value selection rule",
       "results_betweenLodLoq": "Values between detection and quantification limits",
       "results_typicalMin": "Typical minimum",

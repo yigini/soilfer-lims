@@ -1,4 +1,44 @@
 {
+  "replicateGrid": {
+    "rep1": "Rep 1",
+    "rep2": "Rep 2",
+    "rep3": "Rep 3",
+    "mean": "Media",
+    "rpd": "DPR",
+    "limit": "Límite",
+    "range": "Rango",
+    "criteria": "Criterios",
+    "count": "Cantidad requerida",
+    "runThird": "Medir tercera réplica",
+    "recordInOrder": "Registre cada lectura con la revisión y confirmación de la hoja antes de introducir la siguiente.",
+    "selectionHint": "Estos cálculos no seleccionan el valor informado. La revisión determina el valor informado.",
+    "status": {
+      "PENDING": "Pendiente",
+      "PASS": "Par conforme",
+      "FAIL": "Par no conforme",
+      "NOT_EVALUABLE": "No evaluable",
+      "REVIEW_REQUIRED": "Requiere revisión",
+      "NOT_REQUIRED": "No requerido"
+    },
+    "source": {
+      "FROZEN": "Fijados al iniciar la corrida",
+      "CURRENT": "Política actual"
+    },
+    "reason": {
+      "CONTEXT_MISMATCH": "Los contextos de medición difieren",
+      "CENSORED": "Lectura censurada",
+      "NON_NUMERIC": "Lectura no numérica",
+      "NO_LOQ": "LOQ no configurado",
+      "ABS_DIFF_UNSET": "Límite absoluto no configurado",
+      "INVALID_NONPOSITIVE": "La DPR requiere lecturas positivas"
+    },
+    "errors": {
+      "REPLICATE_NOT_REQUIRED": "Registre un par requerido no conforme antes de añadir una tercera lectura.",
+      "REPLICATE_LIMIT": "Una ejecución nueva puede contener como máximo tres lecturas.",
+      "REPLICATE_CRITERIA_INVALID": "Los criterios registrados de réplicas no están disponibles.",
+      "REPLICATE_SCOPE_DENIED": "La corrida pertenece a otro laboratorio."
+    }
+  },
   "sampleHolds": {
     "metadataRepairNeeded": "Es necesario reparar los metadatos antes de resolver esta retención.",
     "title": "Retenciones de la muestra",
@@ -902,6 +942,7 @@
       "qc_controlMaxRecovery": "Recuperación máxima del control",
       "qc_duplicateNearLoqMultiplier": "Umbral de duplicados cerca del límite de cuantificación",
       "qc_duplicateMaxRpd": "Diferencia porcentual relativa máxima de duplicados",
+      "results_replicatesRequired": "Réplicas de muestra requeridas",
       "results_reportedValueRule": "Regla de selección del valor informado",
       "results_betweenLodLoq": "Valores entre los límites de detección y cuantificación",
       "results_typicalMin": "Mínimo típico",

@@ -57,6 +57,7 @@ key('qc.repeatabilityLimit', 'number', null, null, null, { min: 0, nullable: tru
 key('qc.blankCorrection', 'enum', 'NONE', undefined, undefined, { allowedValues: ['NONE', 'SUBTRACT_MEAN_BLANK'], unsupportedValues: ['SUBTRACT_MEAN_BLANK'] });
 key('qc.failAction', 'qcFailAction', { BLANK: 'FAIL_BATCH', DUPLICATE: 'FAIL_BATCH', LRM: 'FAIL_BATCH', CRM: 'FAIL_BATCH' });
 key('results.reportedValueRule', 'enum', 'MEAN_IF_WITHIN_R', 'MEAN_IF_WITHIN_R', 'LATEST_VALID', { allowedValues: ['MEAN_IF_WITHIN_R', 'LATEST_VALID', 'REVIEWER_PICKS'] });
+key('results.replicatesRequired', 'integer', 1, 1, 1, { min: 1, max: 2 });
 key('results.betweenLodLoq', 'enum', 'REPORT_LT_LOQ', 'REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED', { allowedValues: ['REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED'] });
 key('results.phMin', 'number', 2, 2, 2, { min: 0, unit: 'pH' });
 key('results.phMax', 'number', 14, 14, 14, { min: 0, unit: 'pH' });
@@ -99,7 +100,7 @@ function valid(name, value) {
     switch (d.type) {
     case 'enum': return d.allowedValues.includes(value) && !d.unsupportedValues?.includes(value);
     case 'boolean': return typeof value === 'boolean';
-    case 'integer': return Number.isSafeInteger(value) && value >= (d.min ?? 0);
+    case 'integer': return Number.isSafeInteger(value) && value >= (d.min ?? 0) && (d.max === undefined || value <= d.max);
     case 'number': return typeof value === 'number' && Number.isFinite(value) &&
         (d.min === undefined || value >= d.min) && (d.max === undefined || value <= d.max);
     case 'qcFailAction': return !!value && typeof value === 'object' && !Array.isArray(value) &&

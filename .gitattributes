@@ -52,3 +52,7 @@ server/services/batchReagentLotMigrationSource.js text eol=lf
 
 server/prisma/migrations/20261009000300_result_override_requests/migration.sql text eol=lf
 server/services/resultOverrideMigrationSource.js text eol=lf
+server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql text eol=lf
+server/services/resultRawInputMigrationSource.js text eol=lf
+server/tests/helpers/fixtures/raw_input_supported_baseline.sql -text
+server/tests/helpers/rawInputHistoricalFixture.js text eol=lf

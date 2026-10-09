@@ -3,7 +3,7 @@ import { classifyResultValue } from '@lims/result-value-validation';
 import { calculateUsdaTexture } from '../../utils/soilCalculations';
 import { isEntryReady } from './entryReadiness';
 
-export const resultDraftSignature = item => JSON.stringify([item.draft?.value ?? '', item.draft?.values ?? null]);
+export const resultDraftSignature = item => JSON.stringify([item.draft?.value ?? '', item.draft?.values ?? null, item.draft?.replicateNo ?? 1]);
 
 const fractions = values => Array.isArray(values) ? values : ['sand', 'silt', 'clay'].map(key =>
     values?.[key] ?? values?.[key.toUpperCase()] ?? values?.[key[0].toUpperCase() + key.slice(1)] ?? '');
@@ -29,5 +29,12 @@ export function isResultDraftReady(item, group, canEnter) {
     const value = numberParse.parseNumber(item.draft.value, item.numberFormat);
     const validation = classifyResultValue(item.draft.value, item.valueRules, item.numberFormat);
     if (validation.severity === 'RED' && !(validation.canOverride && item.overrideRequestId)) return false;
+    if (item.sampleReplicates?.requiredCount === 2) {
+        // Equal readings in distinct replicate cells are valid independent evidence.
+        const number = Number(item.draft.replicateNo ?? 1);
+        const retained = item.sampleReplicates.measurements || [];
+        return value.valid && !retained.some(row => row.replicateNo === number) &&
+            (number === 1 || number === 2 || number === 3 && item.sampleReplicates.canAddThird === true);
+    }
     return value.valid && parsedKey(value) !== parsedKey(numberParse.parseNumber(current, item.numberFormat));
 }

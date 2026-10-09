@@ -1,4 +1,44 @@
 {
+  "replicateGrid": {
+    "rep1": "Rép 1",
+    "rep2": "Rép 2",
+    "rep3": "Rép 3",
+    "mean": "Moyenne",
+    "rpd": "DPR",
+    "limit": "Limite",
+    "range": "Étendue",
+    "criteria": "Critères",
+    "count": "Nombre requis",
+    "runThird": "Mesurer une troisième répétition",
+    "recordInOrder": "Enregistrez chaque lecture avec la révision et la confirmation de la feuille avant de saisir la suivante.",
+    "selectionHint": "Ces calculs ne sélectionnent pas la valeur publiée. La révision détermine la valeur publiée.",
+    "status": {
+      "PENDING": "En attente",
+      "PASS": "Paire conforme",
+      "FAIL": "Paire non conforme",
+      "NOT_EVALUABLE": "Non évaluable",
+      "REVIEW_REQUIRED": "Révision requise",
+      "NOT_REQUIRED": "Non requis"
+    },
+    "source": {
+      "FROZEN": "Fixés au démarrage de la série",
+      "CURRENT": "Politique actuelle"
+    },
+    "reason": {
+      "CONTEXT_MISMATCH": "Les contextes de mesure diffèrent",
+      "CENSORED": "Lecture censurée",
+      "NON_NUMERIC": "Lecture non numérique",
+      "NO_LOQ": "LOQ non configurée",
+      "ABS_DIFF_UNSET": "Limite absolue non configurée",
+      "INVALID_NONPOSITIVE": "La DPR nécessite des lectures positives"
+    },
+    "errors": {
+      "REPLICATE_NOT_REQUIRED": "Enregistrez une paire requise non conforme avant une troisième lecture.",
+      "REPLICATE_LIMIT": "Une nouvelle exécution peut contenir au maximum trois lectures.",
+      "REPLICATE_CRITERIA_INVALID": "Les critères enregistrés des répétitions sont indisponibles.",
+      "REPLICATE_SCOPE_DENIED": "La série appartient à un autre laboratoire."
+    }
+  },
   "barcodeScan": {
     "label": "Scanner",
     "placeholder": "Scanner le code d'un échantillon (F2)",
@@ -2489,6 +2529,7 @@
       "qc_controlMaxRecovery": "Récupération maximale du contrôle",
       "qc_duplicateNearLoqMultiplier": "Seuil des duplicatas près de la limite de quantification",
       "qc_duplicateMaxRpd": "Écart relatif maximal des duplicatas",
+      "results_replicatesRequired": "Répétitions requises pour les échantillons",
       "results_reportedValueRule": "Règle de sélection de la valeur rapportée",
       "results_betweenLodLoq": "Valeurs entre les limites de détection et de quantification",
       "results_typicalMin": "Minimum habituel",

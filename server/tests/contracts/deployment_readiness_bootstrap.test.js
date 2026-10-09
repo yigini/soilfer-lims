@@ -395,6 +395,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_batch_reagent_lots.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_override_requests.js',
                 `node "${path.join(serverDir, 'scripts/install_result_override_requests.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_result_raw_input.js',
+                `node "${path.join(serverDir, 'scripts/install_result_raw_input.js').replace(/\\/g, '/')}"`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
 
         const entryScript = path.join(testDir, 'entrypoint.sh');
@@ -419,6 +421,9 @@ bash "${entryScript.replace(/\\/g, '/')}"
         expect(res.stdout).toContain('"mode": "NO_OP"');
         expect(res.stdout).toContain('"classification": "COMPLETE"');
         expect(res.stdout).toContain('"totalChanges": 0');
+        expect(res.stdout).toContain('Installing retained raw input column');
+        expect(res.stdout).toContain('"classification": "ALREADY_PRESENT"');
+        expect(res.stdout).toContain('850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc');
         expect(res.stdout).toContain('Installing duplicate-marker prerequisite');
         expect(res.stdout).toContain('20261004190000_add_workitem_duplicate_marker');
         expect(res.stdout).toContain('20261004190100_unique_active_workitem');

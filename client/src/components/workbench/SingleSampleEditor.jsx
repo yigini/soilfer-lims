@@ -13,6 +13,7 @@ import {
     HelpCircle
 } from 'lucide-react';
 import NumericEditor from './NumericEditor';
+import SampleReplicateEntry from './SampleReplicateEntry';
 import TextureEditor from './TextureEditor';
 import OperationalTaskEditor from './OperationalTaskEditor';
 import clsx from 'clsx';
@@ -184,7 +185,8 @@ export default function SingleSampleEditor({
             </div>
 
             {/* Editor Card */}
-            <div className="bg-sf-surface border border-sf-divider rounded-2xl p-4 shadow-sm space-y-4">
+            <div className={`border border-sf-divider rounded-2xl p-4 shadow-sm space-y-4 ${
+                ['FAIL', 'REVIEW_REQUIRED'].includes(currentItem.sampleReplicates?.status) ? 'bg-amber-500/10' : 'bg-sf-surface'}`}>
                 <div className="flex items-center justify-between border-b border-sf-divider pb-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-sf-text">
                         {isTexture ? 'Soil Texture Fractions' :
@@ -237,6 +239,10 @@ export default function SingleSampleEditor({
                             Open Spectral Capture
                         </button>
                     </div>
+                ) : currentItem.sampleReplicates?.requiredCount === 2 ? (
+                    <SampleReplicateEntry key={currentItem.workItemId} item={currentItem} unit={activeGroup?.unit || ''}
+                        disabled={disabled} onDraftChange={onDraftChange} onBarcodeRejected={onBarcodeRejected}
+                        inputRef={node => onInputRef?.(currentItem.workItemId, node)} />
                 ) : (
                     <div className="space-y-3">
                         <NumericEditor
