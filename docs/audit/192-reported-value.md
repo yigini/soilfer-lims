@@ -82,6 +82,31 @@ unchecked mean. Raw observation and spectral-reference expectations remain.
 | `audit_0_3_publication.test.js` (REQUIRED_WARN, all five locales) | Accepted status plus a request acknowledgement permits printing. | Make the real review and durable acknowledgement, then preserve the exact translated QC caveat assertions (6073676241). |
 | `audit_0_8_report_truthfulness.test.js`, `audit_0_9_public_report_superseded.test.js` (positive reports) | Raw scalar evidence is sufficient. | Append a normal saved choice; retain number, version, historical content, QC, share and supersession assertions (6073676241). |
 | `audit_0_7_resubmission.test.js` (S1/S2 isolation, individual and bulk RETURN) | Accept the new submission implicitly. | Explicitly choose the repeat while its original remains QUESTIONED; preserve all old-submission isolation and retained-data assertions (6072757161, 6073013502). |
+| `audit_1_0_lab_policies.test.js` (positive reported outcomes) | Resolve the current reporting policy during export. | Save the choice first and expose its frozen policy source/version and selection rule; later policy changes do not rewrite it (5975240263, 6073676241). |
+| `scenarios/golden_path.test.js` (reviewed PH repeat) | Submission acceptance implicitly selects the repeat. | Choose the repeat explicitly through real submission acceptance, with zero review errors; retained original evidence remains QUESTIONED (6072757161, 6073013502). |
+| `audit_253_reviewed_qc_correction.test.js` (#253 positive corrected-QC report) | Fixture status alone makes its measurement reportable. | Complete, submit and review normally to append a fresh selection; preserve the original QC/repeat/reporting assertions (6073676241). |
+| `api_key_scoping_isolation.test.js`, `nsis_policy_and_scoping.test.js` (positive scoped reads) | Accepted raw Results suffice, including legacy lab aliases. | Ensure the fixtures' declared labs, apply their owned non-QC policy and save choices normally; all foreign-lab/id refusal assertions remain (6073676241). |
+| `result_provenance.test.js` | Manually reviewed raw Results and a standalone TEXTURE class can print. | Use real submission/review; declare TOTAL_N repeatability before its Results; provide a real composite texture with 35/35/30 fraction evidence and the unchanged calculated class (6073057498, 6073676241). |
+| `audit_2_3_native_runs.test.js` (two reporting cases) | Legacy raw fixtures are ready to print; invalid sources are excluded. | Upgrade the owned fixture through #190, #191 and #192, save its choice normally and preserve every QC mode contribution. Invalid source selection refuses with zero writes, and an absent selection refuses report generation (6073676241). |
+| `audit_2_4_bracket_disposition.test.js` (later failed bracket scope) | Build accepted rows before the later QC failure. | Establish actual passing QC and real reviews first, then append the later failed observation through normal run reopening and a reasoned correction; keep all original scope and frozen-report assertions (6073676241). |
+| `audit_0_10_current_result_views.test.js` (replicas and units) | Mean raw replicas and normalize unlike units before averaging. | Refuse incomplete evidence and unlike controlled units with no export audit. A complete, declared-r duplicate selection emits one full-precision value and retains every raw id (6072618378, 6073013502, 6073676241). |
+| `audit_0_10_current_result_views.test.js` (ambiguous methodology/qualifier) | Export a blank ambiguous value. | First refuse missing selection with zero writes, then allow an explicit NOT_REPORTABLE with the localized saved reason; retain independent good values and every raw row (6073676241). |
+| `audit_0_10_current_result_views.test.js` (policy changes and unknown rule) | Re-resolve policy on export or use an unchecked mean. | Freeze the saved rule/version; unknown selection policy refuses preflight. Actual mean contracts require r and test the exact boundary and missing-r refusal (5975240263, 6072618378, 6073676241). |
+| `audit_1_4_uuid_transactions.test.js` (accepted texture followed by fraction repeat) | Repeat an accepted fraction and review its recalculated TEXTURE again. | Real fraction/TEXTURE acceptance, then 409 WORK_REPEAT_STATE_REFUSED and identical counts/content for WorkItem/history, WorkAttempt, Result, ReviewDecision, AuditLog/WORKITEM events and selections. Preserve frozen accepted evidence (6074706976). |
+
+Pin [6074706976](https://github.com/yigini/soilfer-lims/issues/192#issuecomment-6074706976)
+keeps recalculation coverage in `workbench appends the second replica of a repeated
+fraction, recalculates from REPLICATE_ADDED and requires a new real review`: the
+actual event causes recalculation before acceptance, no review is inherited,
+and a new real ReviewDecision binds the recalculated Result. The separate
+texture test `a replacement fraction selection makes retained TEXTURE stale
+without changing it` compares the accepted attempt, analytical Result and
+ReviewDecision unchanged, as well as retaining the old selection row.
+
+PDF explanations retain their full localized saved reason, including across
+page boundaries, followed by the next frozen-format numeric result. An
+unavailable value has no numeric interpretation. Layout contracts cover short
+and multiple-page reasons in all five locales, with rendered PDF inspection.
 
 Dry back-fill reports invalid layouts or incomplete lineage per work item as
 AMBIGUOUS, with ids and reason codes. Separate TEXTURE needs persisted fraction

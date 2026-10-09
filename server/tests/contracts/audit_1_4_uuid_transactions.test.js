@@ -354,7 +354,10 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         expect(decisions).toHaveLength(1);
         expect(decisions[0]).toMatchObject({attemptId:texture.attemptId,decision:'ACCEPT'});
         const acceptedEvent=await prisma.auditLog.findFirst({where:{entity:'WORK_ATTEMPT',entityId:texture.attemptId,action:'ACCEPTED'}});
-        expect(JSON.parse(acceptedEvent.details)).toMatchObject({reviewDecisionId:decisions[0].id,newResultIds:expect.arrayContaining([texture.id])});
+        expect(JSON.parse(acceptedEvent.details)).toMatchObject({reviewDecisionId:decisions[0].id});
+        const saved=await prisma.reportedValueSelection.findFirst({where:{workItemId:textureItem.id}});
+        expect(JSON.parse(saved.lineageSnapshot).eligible).toEqual(expect.arrayContaining([
+            expect.objectContaining({id:texture.attemptId,resultIds:expect.arrayContaining([texture.id])})]));
         expect(await prisma.result.findUnique({where:{id:texture.id}})).toEqual(texture);
     });
 
@@ -398,13 +401,18 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
             {reason:'CONFIRMATION',note:'Confirm sand determination'})).rejects.toMatchObject({statusCode:409,code:'WORK_REPEAT_STATE_REFUSED'});
         expect(await snapshot()).toEqual(retained);
         const item=await prisma.workItem.findUnique({where:{id:f.items.TEXTURE.id}});
-        expect(item).toMatchObject({status:'ACCEPTED',reviewDecision:'ACCEPT'});
+        expect(item).toEqual(retained[0].find(row=>row.id===item.id));
+        expect(item.status).toBe('ACCEPTED');
         expect(await prisma.workAttempt.findUnique({where:{id:frozen.id}})).toEqual(frozen);
         expect(await prisma.result.findUnique({where:{id:texture.id}})).toEqual(texture);
         expect(await prisma.reviewDecision.count({where:{workItemId:item.id}})).toBe(1);
         expect(await prisma.reportedValueSelection.findUnique({where:{id:originalTextureSelection.id}})).toEqual(originalTextureSelection);
         const events=await prisma.auditLog.findMany({where:{entity:'WORK_ATTEMPT',entityId:frozen.id,action:'ACCEPTED'}});
-        expect(events).toHaveLength(1);expect(events.some(event=>JSON.parse(event.details).newResultIds.includes(texture.id))).toBe(true);
+        expect(events).toHaveLength(1);
+        const decision=await prisma.reviewDecision.findFirst({where:{workItemId:item.id}});
+        expect(JSON.parse(events[0].details).reviewDecisionId).toBe(decision.id);
+        expect(JSON.parse(originalTextureSelection.lineageSnapshot).eligible).toEqual(expect.arrayContaining([
+            expect.objectContaining({id:texture.attemptId,resultIds:expect.arrayContaining([texture.id])})]));
         const before=await prisma.auditLog.count();
         await expect(prisma.$transaction(tx=>require('../../services/workAttemptEventService').transitionAttempt(tx,item,frozen.id,'ACCEPTED',actor)))
             .rejects.toMatchObject({code:'WORK_ATTEMPT_TRANSITION_REFUSED'});
