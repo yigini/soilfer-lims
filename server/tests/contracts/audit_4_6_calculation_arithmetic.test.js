@@ -40,8 +40,8 @@ describe('Audit 4.6 shared, source-derived arithmetic', () => {
         expect(result.intermediate).toMatchObject({ titreDifference: 8, carbonMass: 0.012 });
     });
     test('WB recovery remains supplied by the immutable template, including the separately published 1.33 variant', () => {
-        // EPA/600/R-02/069, September 2002, p10, describes the 1.33
-        // correction variant. Its arithmetic is derived using SOP-02 §9.1:
+        // Bierer et al., SSSAJ85 (2021)438–451, doi:10.1002/saj2.20165,
+        // §2.3 establishes 1.33. Arithmetic is derived using SOP-02 §9.1:
         // 8 * 0.5 * 0.003 * 100 * 1.33 / 1 = 1.596 -> 1.60%.
         const input = { blankTitre: '20', sampleTitre: '12', sampleMass: '1', moistureCorrectionFactor: '1' };
         const labA = template('WALKLEY_BLACK', { ferrousNormality: 0.5, carbonGramsPerMilliEquivalent: 0.003, recoveryFactor: 1.30 });
