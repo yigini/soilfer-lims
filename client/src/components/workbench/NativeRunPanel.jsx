@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import numberParse from '@lims/number-parse';
 import { useLanguage } from '../../context/LanguageContext';
+import { revertWorksheetCell } from './qcWorksheetNavigation';
 
 const LIMIT_FIELDS = ['maxAllowed', 'maxRpd', 'absMax', 'absMaxBelow5LOQ', 'nearLoqMultiplier', 'loq',
     'minRecovery', 'maxRecovery', 'crmAbsWindow', 'lrmWindowPct', 'mode', 'crmMode', 'lrmMode'];
@@ -29,6 +30,7 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
     const [reason, setReason] = useState(''), [draggedId, setDraggedId] = useState(null);
     const [preview, setPreview] = useState(null), [previewError, setPreviewError] = useState(null);
     const previewGeneration = useRef(0);
+    const focusValues = useRef(new Map());
     const analyte = batch.analytes.find(row => row.analysisCode === (analysisCode || selectedCode)) || batch.analytes.find(row => row.analysisCode === batch.analysis) || batch.analytes[0];
     const positions = batch.positions || [], served = new Set(analyte.positions.map(row => row.id));
     const parents = new Set(positions.filter(row => row.kind === 'DUPLICATE' && served.has(row.id)).map(row => row.duplicateOfPositionId));
@@ -147,6 +149,8 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
                 <ValueInput {...(onBarcodeRejected ? { onBarcodeRejected } : {})} type="text" value={values[row.id] || ''} disabled={!batch.startedAt || locked || loading || accepted || correction && !correcting[row.id]}
                     data-testid={`native-value-${row.id}`} aria-label={`${row.position} ${row.kind} ${t(row.kind === 'SAMPLE' ? 'qcWorksheet.parentObservation' : 'qcRules.fields.measured')}`}
                     onChange={event => changeObservation(row.id, event.target.value)} onBlur={commitPreview}
+                    onFocus={event => { focusValues.current.set(row.id, event.currentTarget.value); }}
+                    onKeyDown={event => revertWorksheetCell(event, focusValues.current.get(row.id) ?? null, value => changeObservation(row.id, value))}
                     className="p-2 rounded border border-sf-divider bg-sf-canvas" />
             </label>}
             {parsed && <p>{t('qcWorksheet.serverParse')}: <output data-testid={`native-parsed-${row.id}`}>{JSON.stringify(parsed)}</output></p>}

@@ -23,6 +23,7 @@ import NativeRunPanel from './NativeRunPanel';
 import RunHeader from './RunHeader';
 import QcRunHistory, { isHistoricalRun } from './QcRunHistory';
 import { runWorksheetRows, advanceWorksheetCell } from './qcWorksheetNavigation';
+import { isResultDraftReady, resultDraftSignature } from './worksheetReady';
 
 const isOperationalGroup = group => group?.category === 'Operational Gates' ||
     ['SPEC_VIS_NIR', 'SPEC_MIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(group?.analysis);
@@ -41,6 +42,7 @@ export default function WorksheetArea({
     initialRunId = null,
     onSelectGroup,
     onDraftChange,
+    onRevertDraft,
     onUpdateItemMeta,
     onDiscardDraft,
     onResolveConflict,
@@ -66,6 +68,7 @@ export default function WorksheetArea({
     });
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRows, setSelectedRows] = useState(new Set());
+    const [excludedDrafts, setExcludedDrafts] = useState(new Map());
     const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
     const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
     const [viewMode, setViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768) ? 'single' : 'table');
@@ -169,6 +172,18 @@ export default function WorksheetArea({
 
     const visibleItems = runBatch && selectedRun ? runWorksheetRows(runBatch.positions || [], items, activeGroup?.analysis)
         .map(row => row.item).filter(Boolean) : filteredItems;
+    const isResultGrid = !isOperationalGate && !isSpectral;
+    const readyCandidates = isResultGrid ? visibleItems.filter(item => isResultDraftReady(item, activeGroup, hasPermission?.('ENTER_RESULTS') === true)) : [];
+    const readyIds = new Set(readyCandidates.filter(item => excludedDrafts.get(item.workItemId) !== resultDraftSignature(item)).map(item => item.workItemId));
+    useEffect(() => {
+        setExcludedDrafts(previous => {
+            const next = new Map([...previous].filter(([id, signature]) => {
+                const item = items.find(row => row.workItemId === id);
+                return item && resultDraftSignature(item) === signature;
+            }));
+            return next.size === previous.size ? previous : next;
+        });
+    }, [items]);
     useEffect(() => { if (selectedRun) setSelectedRows(new Set()); }, [selectedRun, activeGroup?.analysis]);
 
     // Active inspected item
@@ -205,8 +220,17 @@ export default function WorksheetArea({
     }, [inspectedItem, registerBlockers, clearBlockers]);
 
     // Select all handler
-    const allSelected = visibleItems.length > 0 && visibleItems.every(i => selectedRows.has(i.workItemId));
+    const allSelected = isResultGrid ? readyCandidates.length > 0 && readyCandidates.every(item => readyIds.has(item.workItemId)) :
+        visibleItems.length > 0 && visibleItems.every(i => selectedRows.has(i.workItemId));
     const toggleSelectAll = () => {
+        if (isResultGrid) {
+            setExcludedDrafts(previous => {
+                const next = new Map(previous);
+                readyCandidates.forEach(item => allSelected ? next.set(item.workItemId, resultDraftSignature(item)) : next.delete(item.workItemId));
+                return next;
+            });
+            return;
+        }
         if (allSelected) {
             setSelectedRows(new Set());
         } else {
@@ -215,6 +239,17 @@ export default function WorksheetArea({
     };
 
     const toggleRowSelect = (workItemId) => {
+        if (isResultGrid) {
+            const item = readyCandidates.find(row => row.workItemId === workItemId);
+            if (!item) return;
+            setExcludedDrafts(previous => {
+                const next = new Map(previous);
+                if (readyIds.has(workItemId)) next.set(workItemId, resultDraftSignature(item));
+                else next.delete(workItemId);
+                return next;
+            });
+            return;
+        }
         const next = new Set(selectedRows);
         if (next.has(workItemId)) {
             next.delete(workItemId);
@@ -222,6 +257,12 @@ export default function WorksheetArea({
             next.add(workItemId);
         }
         setSelectedRows(next);
+    };
+
+    const changeResultDraft = (id, value, extra) => {
+        setExcludedDrafts(previous => { const next = new Map(previous); next.delete(id); return next; });
+        if (extra === undefined) onDraftChange(id, value);
+        else onDraftChange(id, value, extra);
     };
 
     const handlePasteApply = (pastedUpdates) => {
@@ -250,7 +291,7 @@ export default function WorksheetArea({
                     <div className="lg:col-span-3 rounded-xl border border-sf-divider overflow-hidden bg-sf-surface flex flex-col shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-left text-xs" data-testid="worksheet-grid"
-                            onKeyDownCapture={nativeControls ? event => {
+                            onKeyDownCapture={!isOperationalGate && !isSpectral ? event => {
                                 if (!isBarcodeBurst(event)) advanceWorksheetCell(event, reviewButtonRef.current);
                             } : undefined}>
                             <thead>
@@ -258,6 +299,7 @@ export default function WorksheetArea({
                                     <th className="py-2.5 px-3 w-8">
                                         <input
                                             type="checkbox"
+                                            tabIndex={-1}
                                             checked={allSelected}
                                             onChange={toggleSelectAll}
                                             aria-label="Select all rows"
@@ -285,7 +327,7 @@ export default function WorksheetArea({
                                         <td className="p-3" />
                                     </tr>;
                                     const isSelected = item.workItemId === inspectedItem?.workItemId;
-                                    const isChecked = selectedRows.has(item.workItemId);
+                                    const isChecked = isResultGrid ? readyIds.has(item.workItemId) : selectedRows.has(item.workItemId);
                                     const draft = item.draft;
                                     const hasConflict = !!draft?.conflictValue;
                                     const isRecorded = item.status === 'COMPLETED';
@@ -321,6 +363,7 @@ export default function WorksheetArea({
                                                     type="checkbox"
                                                     tabIndex={-1}
                                                     checked={isChecked}
+                                                    disabled={isResultGrid && !readyCandidates.some(row => row.workItemId === item.workItemId)}
                                                     onChange={() => toggleRowSelect(item.workItemId)}
                                                     aria-label={`Select ${item.sampleDisplayId || item.sampleId}`}
                                                     className="w-4 h-4 rounded text-sf-primary focus:ring-sf-primary"
@@ -363,7 +406,8 @@ export default function WorksheetArea({
                                                         disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
                                                         values={draft?.values || []}
                                                         tolerance={activeGroup?.validation?.tolerance ?? null}
-                                                        onChange={(vals) => onDraftChange(item.workItemId, null, { values: vals })}
+                                                        onChange={(vals) => changeResultDraft(item.workItemId, null, { values: vals })}
+                                                        onRevertValues={onRevertDraft && (vals => onRevertDraft(item.workItemId, null, { values: vals }))}
                                                         sampleId={item.sampleId}
                                                         onEnterNext={() => handleEnterNext(idx)}
                                                         inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)}
@@ -425,7 +469,8 @@ export default function WorksheetArea({
                                                         numberFormat={item.numberFormat}
                                                         disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
                                                         value={draft?.value ?? ''}
-                                                        onChange={(val) => onDraftChange(item.workItemId, val)}
+                                                        onChange={(val) => changeResultDraft(item.workItemId, val)}
+                                                        onRevertValue={onRevertDraft && (val => onRevertDraft(item.workItemId, val))}
                                                         unit={activeGroup?.unit || ''}
                                                         placeholder="0.00"
                                                         ariaLabel={`${item.sampleDisplayId || item.sampleId} determination`}
@@ -506,7 +551,7 @@ export default function WorksheetArea({
                     {/* Footer */}
                     <div className="p-3 bg-sf-raised border-t border-sf-divider flex items-center justify-between flex-wrap gap-2 text-xs">
                         <span className="text-sf-muted">
-                            <strong className="text-sf-text">{selectedRows.size}</strong> selected · Press <kbd className="px-1 py-0.5 rounded border border-sf-divider bg-sf-surface text-sf-text font-mono">Enter</kbd> to advance to next row
+                            {isResultGrid ? t('keyboardGrid.readyHint', { count: readyIds.size }) : <><strong className="text-sf-text">{selectedRows.size}</strong> selected · Press <kbd className="px-1 py-0.5 rounded border border-sf-divider bg-sf-surface text-sf-text font-mono">Enter</kbd> to advance to next row</>}
                         </span>
 
                         {isOperationalGate ? (
@@ -531,11 +576,12 @@ export default function WorksheetArea({
                             <button
                                 type="button"
                                 ref={reviewButtonRef}
-                                onClick={() => selectedRows.size > 0 && onReviewRecord(Array.from(selectedRows))}
-                                aria-disabled={selectedRows.size === 0}
+                                onClick={() => { const ids = isResultGrid ? readyIds : selectedRows; if (ids.size) onReviewRecord(Array.from(ids)); }}
+                                aria-disabled={(isResultGrid ? readyIds : selectedRows).size === 0}
+                                data-testid="record-all-ready"
                                 className="px-4 py-2 rounded-lg text-xs font-semibold bg-sf-primary text-sf-on-primary hover:bg-sf-primary-hover disabled:opacity-50 transition-colors flex items-center gap-1.5"
                             >
-                                <span>Review Completion ({selectedRows.size})</span>
+                                <span>{isResultGrid ? t('keyboardGrid.recordAllReady', { count: readyIds.size }) : `Review Completion (${selectedRows.size})`}</span>
                                 <ArrowRight size={13} />
                             </button>
                         )}

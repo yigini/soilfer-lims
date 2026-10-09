@@ -57,7 +57,8 @@ test('reverse grid navigation and modified keys never jump into run setup', () =
     advanceWorksheetCell(f.event(f.blank, 'Tab', true), f.review);
     expect(f.parent.focus).toHaveBeenCalledTimes(1);
     advanceWorksheetCell(f.event(f.sample, 'Tab', true), f.review);
-    expect(f.duplicate.focus).toHaveBeenCalledTimes(1);
+    expect(f.duplicate.focus).not.toHaveBeenCalled();
+    expect(f.review.focus).not.toHaveBeenCalled();
     const shortcut = { ...f.event(f.sample, 'Enter'), ctrlKey: true };
     advanceWorksheetCell(shortcut, f.review);
     expect(shortcut.preventDefault).not.toHaveBeenCalled();

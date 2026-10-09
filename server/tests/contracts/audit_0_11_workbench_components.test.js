@@ -31,6 +31,7 @@ function harness(name, { groups, width = 1200, axios, offline } = {}) {
             require: mod => {
                 if (mod === 'react') return hooks;
                 if (mod === 'axios') return axios;
+                if (mod === '@lims/number-parse') return require('../../../shared/numberParse');
                 if (mod === 'lucide-react') return new Proxy({}, { get: () => () => null });
                 if (mod === 'clsx') return (...values) => values.filter(Boolean).join(' ');
                 if (mod.includes('LanguageContext')) return { useLanguage: () => ({ t: (_, fallback) => fallback }) };
@@ -39,7 +40,7 @@ function harness(name, { groups, width = 1200, axios, offline } = {}) {
                 if (mod.includes('HelpContext')) return { useHelp: () => ({ clearBlockers() {}, registerBlockers() {} }) };
                 if (mod.includes('NotificationContext')) return { useNotifications: () => ({}) };
                 if (mod.includes('/offline/')) return offline || {};
-                if (['./entryReadiness', './qcWorksheetNavigation', './useRunBarcodeScan', './BarcodeSafeInput', '../../utils/audioCues'].includes(mod))
+                if (['./entryReadiness', './qcWorksheetNavigation', './worksheetReady', '../../utils/soilCalculations', './useRunBarcodeScan', './BarcodeSafeInput', '../../utils/audioCues'].includes(mod))
                     return load(path.resolve(path.dirname(filename), mod + (mod === './BarcodeSafeInput' ? '.jsx' : '.js')));
                 if (mod.endsWith('.json')) return require(path.resolve(path.dirname(filename), mod));
                 const childName = path.basename(mod);
@@ -204,6 +205,20 @@ describe('Audit 0.11: workbench component behavior', () => {
         axios.post.mockClear();
         await receipt.props.onRetry();
         expect(axios.post).toHaveBeenCalledWith('/api/workbench/v2/completion/preview', { entries: [expect.objectContaining({ workItemId: 'two', value: '7' })] });
+    });
+    test('Escape restoration cancels a pending server/outbox save and changes only the local draft', async () => {
+        jest.useFakeTimers();
+        const groups = [{ analysis: 'PH_H2O', items: [item('escape', { draft: { value: '6.2' } })] }];
+        const axios = { post: jest.fn().mockResolvedValue({ data: {} }) };
+        const offline = { saveLocalDraft: jest.fn().mockResolvedValue(), removePendingDraftOperations: jest.fn().mockResolvedValue(), recordSyncOperation: jest.fn() };
+        const h = harness('WorkbenchShell', { groups, axios, offline });
+        let tree = h.render({ initialAnalysis: 'PH_H2O' });
+        child(h, tree, 'WorksheetArea').props.onDraftChange('escape', '7'); tree = h.render({ initialAnalysis: 'PH_H2O' });
+        child(h, tree, 'WorksheetArea').props.onRevertDraft('escape', '6.2'); tree = h.render({ initialAnalysis: 'PH_H2O' });
+        await jest.advanceTimersByTimeAsync(1000);
+        expect(axios.post).not.toHaveBeenCalled(); expect(offline.recordSyncOperation).not.toHaveBeenCalled();
+        expect(offline.removePendingDraftOperations).toHaveBeenCalledWith('escape', 'tech');
+        expect(child(h, tree, 'WorksheetArea').props.activeGroup.items[0].draft.value).toBe('6.2');
     });
     test('completion preview never substitutes a previous result for a missing draft', async () => {
         const groups = [{ analysis: 'PH_H2O', items: [item('repeat', { currentResult: '99' })] }];

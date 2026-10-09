@@ -11,7 +11,7 @@ const cache = {};
 function load(name) {
     if (cache[name]) return cache[name];
     const module = { exports: {} };
-    const file = path.join(root, `${name}.jsx`);
+    const file = path.join(root, `${name}.${name === 'qcWorksheetNavigation' ? 'js' : 'jsx'}`);
     const code = esbuild.transformSync(fs.readFileSync(file, 'utf8'), { loader: 'jsx', format: 'cjs' }).code;
     vm.runInNewContext(code, { module, exports: module.exports, require: dependency => {
         if (dependency === 'react') return { ...React, useRef: value => ({ current: value }), useMemo: fn => fn() };
@@ -19,6 +19,7 @@ function load(name) {
         if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: (_, fallback) => fallback }) };
         if (dependency === './NumberPreview') return load('NumberPreview');
         if (dependency === './BarcodeSafeInput') return load('BarcodeSafeInput');
+        if (dependency === './qcWorksheetNavigation') return load('qcWorksheetNavigation');
         if (dependency.includes('soilCalculations')) {
             const calculation = { exports: {} };
             const utility = fs.readFileSync(path.resolve(root, '../../utils/soilCalculations.js'), 'utf8');

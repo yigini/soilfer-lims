@@ -16,6 +16,7 @@ const BarcodeSafeInput = forwardRef(function BarcodeSafeInput({ value, onChange,
     onBarcodeRejected, onKeyDown, onBlur, ...props }, forwardedRef) {
     const [text, setText] = useState(String(value ?? ''));
     const node = useRef(null), pending = useRef(null), timer = useRef(null), blurTimer = useRef(null);
+    const lastEmitted = useRef(null);
     const handlers = useRef(null);
     handlers.current = { onChange, onBarcodeRejected, onBlur };
     const clear = () => {
@@ -26,9 +27,18 @@ const BarcodeSafeInput = forwardRef(function BarcodeSafeInput({ value, onChange,
     const flush = () => {
         const next = pending.current?.next;
         clear();
-        if (next !== undefined) handlers.current.onChange({target:{value:next},currentTarget:node.current});
+        if (next !== undefined) {
+            lastEmitted.current = String(next);
+            handlers.current.onChange({target:{value:next},currentTarget:node.current});
+        }
     };
-    useEffect(() => { clear(); setText(String(value ?? '')); }, [value]);
+    useEffect(() => {
+        const supplied = String(value ?? '');
+        // The parent may acknowledge a flush after a newer key has arrived.
+        // Keep that pending edit and its timer; only an external value resets.
+        if (supplied === lastEmitted.current) return;
+        clear(); setText(supplied);
+    }, [value]);
     useEffect(() => () => { clear(); clearTimeout(blurTimer.current); }, []);
     const keyDown = event => {
         if (onBarcodeRejected && isBarcodeBurst(event)) {
@@ -49,7 +59,10 @@ const BarcodeSafeInput = forwardRef(function BarcodeSafeInput({ value, onChange,
     const change = event => {
         const next = event.target.value;
         setText(next);
-        if (!onBarcodeRejected || !pending.current) { handlers.current.onChange(event); return; }
+        if (!onBarcodeRejected || !pending.current) {
+            lastEmitted.current = String(next);
+            handlers.current.onChange(event); return;
+        }
         pending.current.next = next;
         clearTimeout(timer.current); timer.current = setTimeout(flush, BURST_GAP_MS);
     };

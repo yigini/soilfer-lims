@@ -290,7 +290,7 @@ export default function WorkbenchShell({
     // ─────────────────────────────────────────────────────────────────────────
     // Debounced Draft Persistence
     // ─────────────────────────────────────────────────────────────────────────
-    const handleDraftChange = useCallback((workItemId, value, extra = {}) => {
+    const handleDraftChange = useCallback((workItemId, value, extra = {}, { localOnly = false } = {}) => {
         // Look up current draft version
         let currentItemSnapshot = null;
         for (const g of groups) {
@@ -337,6 +337,14 @@ export default function WorkbenchShell({
                 draftVersion: nextDraftVersion,
                 updatedAt: new Date().toISOString()
             }).catch(e => console.warn('[workbench] Failed to persist local draft:', e));
+        }
+
+        if (localOnly) {
+            clearTimeout(debounceTimers.current[workItemId]);
+            delete debounceTimers.current[workItemId];
+            // An Escape restoration must not replay a queued draft command.
+            if (user?.id) removePendingDraftOperations(workItemId, user.id).catch(() => {});
+            return;
         }
 
         setSyncStatus('saving');
@@ -785,6 +793,7 @@ export default function WorkbenchShell({
                         onDiscardDraft={handleDiscardDraft}
                         onResolveConflict={handleResolveConflict}
                         onReviewRecord={handleReviewRecord}
+                        onRevertDraft={(id, value, extra) => handleDraftChange(id, value, extra, { localOnly: true })}
                         onConfirmOperation={handleConfirmOperation}
                         onOpenSpectralIntake={(item) => {
                             setSelectedSpectralItem(item);

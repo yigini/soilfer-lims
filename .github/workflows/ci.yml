@@ -55,6 +55,10 @@ jobs:
           JWT_SECRET: ci-test-secret-key-12345
           DATABASE_PATH: ${{ github.workspace }}/server/prisma/dev.db
 
+      - name: Install Chromium for keyboard-only recording contract
+        run: npx playwright install --with-deps chromium
+        working-directory: server
+
       - name: Run server test suite
         run: npm test
         working-directory: server
