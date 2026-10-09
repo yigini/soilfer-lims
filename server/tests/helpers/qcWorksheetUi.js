@@ -27,7 +27,7 @@ function mountUi(filename, props = {}, { canEdit = true, responses = {}, axios: 
         if (cache[file]) return cache[file];
         const module = { exports: {} };
         vm.runInNewContext(esbuild.transformSync(fs.readFileSync(file, 'utf8'), { loader: file.endsWith('.jsx') ? 'jsx' : 'js', format: 'cjs' }).code,
-            { module, exports: module.exports, console, window: { innerWidth: 1200 }, require(name) {
+            { module, exports: module.exports, console, setTimeout, clearTimeout, Date, window: { innerWidth: 1200 }, require(name) {
                 if (name === 'react') return react;
                 if (name === 'axios') return axios;
                 if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
@@ -36,8 +36,10 @@ function mountUi(filename, props = {}, { canEdit = true, responses = {}, axios: 
                 if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
                 if (name.includes('HelpContext')) return { useHelp: () => ({ registerBlockers() {}, clearBlockers() {} }) };
                 if (name === '@lims/number-parse') return require('../../../shared/numberParse');
-                if (name === './entryReadiness' || name === './qcWorksheetNavigation' || name === './QcRunHistory' || name === '../qc/BatchInspectionModal')
-                    return load(path.resolve(path.dirname(file), name + (name.endsWith('Navigation') || name.endsWith('Readiness') ? '.js' : '.jsx')));
+                if (['./entryReadiness', './qcWorksheetNavigation', './useRunBarcodeScan', './BarcodeSafeInput',
+                    './QcRunHistory', '../qc/BatchInspectionModal', '../../utils/audioCues'].includes(name))
+                    return load(path.resolve(path.dirname(file), name +
+                        (/Navigation$|Readiness$|useRunBarcodeScan$|audioCues$/.test(name) ? '.js' : '.jsx')));
                 return children[name] || (children[name] = () => null);
             } });
         return cache[file] = module.exports;

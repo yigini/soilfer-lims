@@ -1,4 +1,15 @@
 {
+  "barcodeScan": {
+    "label": "Scan",
+    "placeholder": "Scan a sample barcode (F2)",
+    "notFound": "Sample not found. Rescan the barcode.",
+    "checkCharacterInvalid": "Check character doesn't match; rescan.",
+    "ambiguous": "This barcode matches several samples.",
+    "notInRun": "This sample is not in the selected run.",
+    "rowUnavailable": "This sample has no available value cell in the run.",
+    "noRun": "Select a run before scanning.",
+    "valueCell": "Looks like a barcode; scan into the Scan field"
+  },
   "sampleHolds": {
     "metadataRepairNeeded": "Metadata repair is needed before this hold can be resolved.",
     "title": "Sample holds",

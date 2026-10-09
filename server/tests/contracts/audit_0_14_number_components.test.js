@@ -18,6 +18,7 @@ function load(name) {
         if (dependency === '@lims/number-parse') return numberParse;
         if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: (_, fallback) => fallback }) };
         if (dependency === './NumberPreview') return load('NumberPreview');
+        if (dependency === './BarcodeSafeInput') return load('BarcodeSafeInput');
         if (dependency.includes('soilCalculations')) {
             const calculation = { exports: {} };
             const utility = fs.readFileSync(path.resolve(root, '../../utils/soilCalculations.js'), 'utf8');

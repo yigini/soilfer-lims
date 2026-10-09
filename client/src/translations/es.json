@@ -1,4 +1,15 @@
 {
+  "barcodeScan": {
+    "label": "Escanear",
+    "placeholder": "Escanear el código de una muestra (F2)",
+    "notFound": "Muestra no encontrada. Vuelva a escanear el código.",
+    "checkCharacterInvalid": "El carácter de control no coincide; vuelva a escanear.",
+    "ambiguous": "Este código coincide con varias muestras.",
+    "notInRun": "Esta muestra no está en la serie seleccionada.",
+    "rowUnavailable": "Esta muestra no tiene una celda de valor disponible en la serie.",
+    "noRun": "Seleccione una serie antes de escanear.",
+    "valueCell": "Parece un código de barras; escanéelo en el campo Escanear"
+  },
   "sampleHolds": {
     "metadataRepairNeeded": "Es necesario reparar los metadatos antes de resolver esta retención.",
     "title": "Retenciones de la muestra",

@@ -637,7 +637,8 @@ export default function WorksheetArea({
                     onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); scanner.scan(); } }}
                     className="px-3 py-2 rounded border border-sf-divider bg-sf-surface text-sf-text" />
             </label>}
-            {scanner.error && <p role="alert" data-testid="worksheet-scan-error" className="p-3 rounded bg-red-50 text-red-800">{scanner.error}</p>}
+            {scanner.error && <p role="alert" data-testid="worksheet-scan-error" data-scan-code={scanner.error.code}
+                className="p-3 rounded bg-red-50 text-red-800">{scanner.error.message}</p>}
             {runError && <p role="alert" data-testid="worksheet-run-error">{runError}</p>}
             {runSuccess && <p role="status">{runSuccess}</p>}
 

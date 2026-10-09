@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { playErrorBuzz, playSuccessChime } from '../../utils/audioCues';
 import { runWorksheetRows } from './qcWorksheetNavigation';
@@ -6,7 +6,7 @@ import { runWorksheetRows } from './qcWorksheetNavigation';
 const ERROR_KEYS = {
     SAMPLE_NOT_FOUND: 'notFound', SCAN_CHECK_CHARACTER_INVALID: 'checkCharacterInvalid',
     SAMPLE_LOOKUP_AMBIGUOUS: 'ambiguous', SCAN_SAMPLE_NOT_IN_RUN: 'notInRun',
-    SCAN_ROW_UNAVAILABLE: 'rowUnavailable', SCAN_RUN_REQUIRED: 'noRun'
+    SCAN_ROW_UNAVAILABLE: 'rowUnavailable', SCAN_RUN_REQUIRED: 'noRun', SCAN_VALUE_CELL_BURST: 'valueCell'
 };
 
 export function useRunBarcodeScan({ runBatch, selectedRunRef, activeGroup, allGroups, inputRefs,
@@ -14,8 +14,10 @@ export function useRunBarcodeScan({ runBatch, selectedRunRef, activeGroup, allGr
     const scanRef = useRef(null), request = useRef(0), burst = useRef({ text: '', lastAt: 0 });
     const [value, setValue] = useState(''), [error, setError] = useState(null), [target, setTarget] = useState(null);
     useEffect(() => { request.current++; setTarget(null); setError(null); }, [runBatch?.id]);
-    const refuse = code => { setError(t(`barcodeScan.${ERROR_KEYS[code] || 'notFound'}`)); playErrorBuzz(); };
-    const rejectValueBurst = () => { setError(t('barcodeScan.valueCell')); playErrorBuzz(); };
+    const refuse = useCallback(code => {
+        setError({ code, message: t(`barcodeScan.${ERROR_KEYS[code] || 'notFound'}`) }); playErrorBuzz();
+    }, [t]);
+    const rejectValueBurst = useCallback(() => refuse('SCAN_VALUE_CELL_BURST'), [refuse]);
     const scan = async () => {
         const code = value.trim(), batchId = runBatch?.id, generation = ++request.current;
         setTarget(null); setError(null);
@@ -58,9 +60,10 @@ export function useRunBarcodeScan({ runBatch, selectedRunRef, activeGroup, allGr
             setTarget(null); playSuccessChime();
         });
         return () => window.cancelAnimationFrame(frame);
-    }, [target, activeGroup, inputRefs, selectedRunRef]);
+    }, [target, activeGroup, inputRefs, selectedRunRef, refuse]);
     useEffect(() => {
         if (typeof window.addEventListener !== 'function') return;
+        const requests = request;
         const keyDown = event => {
             if (event.key === 'F2') {
                 event.preventDefault(); scanRef.current?.focus(); return;
@@ -79,7 +82,7 @@ export function useRunBarcodeScan({ runBatch, selectedRunRef, activeGroup, allGr
             }
         };
         window.addEventListener('keydown', keyDown, true);
-        return () => { window.removeEventListener('keydown', keyDown, true); request.current++; };
+        return () => { window.removeEventListener('keydown', keyDown, true); requests.current++; };
     }, [runBatch]);
     return { scanRef, value, setValue, error, scan, rejectValueBurst };
 }
