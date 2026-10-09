@@ -59,11 +59,11 @@ async function fixture() {
     const sample = await createSampleFixture(db, { data: { id: randomUUID(), originalId: randomUUID(), status: 'PROCESSING', assignedLab: lab.id,
         dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date() } });
     const item = await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: sample.id, labId: lab.id, analysis: method.analysisCode,
-        methodologyId: method.id, status: 'IN_PROGRESS', history: '[]' } });
+        methodologyId: method.id, assignedTo: analyst.username, status: 'IN_PROGRESS', history: '[]' } });
     const run = await native.buildNativeRun(db, analyst, { labId: lab.id, workItemIds: [item.id], analyses: [{ analysisCode: method.analysisCode, methodologyId: method.id }], seed: 'owned-calibration' });
     const input = { analysisCode: method.analysisCode, templateId: template.id, templateVersion: template.version, activationId: activation.id,
         expectedCurveId: null, points: [{ standardConcentration: 0, response: 1 }, { standardConcentration: 1, response: 3 }, { standardConcentration: 2, response: 5 }] };
-    return { file, db, lab, analyst, otherAnalyst, manager, outsider, method, template, activation, run, input,
+    return { file, db, lab, analyst, otherAnalyst, manager, outsider, method, template, activation, run, input, sample, item,
         start: () => native.startNativeRun(db, run.id, analyst),
         snapshot: async () => JSON.parse(JSON.stringify(await Promise.all([db.calibrationCurve.findMany({ orderBy: { id: 'asc' } }),
             db.calibrationPoint.findMany({ orderBy: [{ curveId: 'asc' }, { ordinal: 'asc' }] }), db.auditLog.findMany({ orderBy: { id: 'asc' } }),
@@ -86,6 +86,36 @@ test('only a started native run supplies the real frozen method revision; refusa
     expect(saved.points.map(point => point.ordinal)).toEqual([1, 2, 3]);
     const active = await curves.activeTemplate(f.db, await curves.executionContext(f.db, f.run.id, f.analyst, 'P_OLSEN'));
     expect(await curves.requireLatestCurve(f.db, await curves.executionContext(f.db, f.run.id, f.analyst, 'P_OLSEN'), active)).toMatchObject({ id: saved.id });
+});
+
+test('the actual Result writer recomputes every reading, refuses tampering and atomically freezes its curve and raw inputs', async () => {
+    const f = context; await f.start();
+    const curve = await curves.recordCurve(f.db, f.run.id, f.analyst, f.input);
+    const writer = require('../../services/resultWriteService'), calculations = require('../../services/resultCalculationService');
+    const inputs = { absorbance: '3.00', blankConcentration: '0', extractVolume: '20', dilutionFactor: '2', sampleMass: '1', moistureCorrectionFactor: '1' };
+    const preview = await writer.previewResultCalculation(f.db,{sampleId:f.sample.id,workItemId:f.item.id,actor:f.analyst,inputs});
+    expect(preview.calculation).toMatchObject({ output: 40, nativeValue: 40, conversionFactor: 1, outputUnit: 'mg/kg' });
+    const measurement = { param: 'P_OLSEN', value: '40', calculation: { ...preview.active, curveId: curve.id, inputs } };
+    const before = await f.snapshot();
+    const record = value => f.db.$transaction(tx => writer.writeResult(tx,{sampleId:f.sample.id,workItemId:f.item.id,actor:f.analyst,measurement:value}));
+    await expect(record({...measurement,value:'41'})).rejects.toMatchObject({ statusCode: 409, code: 'CALCULATION_MISMATCH' });
+    await expect(record({...measurement,calculation:{...measurement.calculation,templateVersion:99}}))
+        .rejects.toMatchObject({ statusCode: 409, code: 'CALC_TEMPLATE_VERSION_CHANGED' });
+    await expect(record({...measurement,calculation:{...measurement.calculation,inputs:{...inputs,sampleMass:''}}}))
+        .rejects.toMatchObject({ statusCode: 422, code: 'CALC_INPUT_REQUIRED' });
+    expect(await f.snapshot()).toEqual(before); expect(await f.db.resultCalculation.count()).toBe(0);
+    const result = await record(measurement), frozen = await calculations.retained(f.db,result.id);
+    expect(frozen).toMatchObject({ resultId:result.id,templateId:f.template.id,templateVersion:1,activationId:f.activation.id,
+        output:40,nativeValue:40,conversionFactor:1,outputUnit:'mg/kg',curveId:curve.id,computedBy:f.analyst.username });
+    expect(JSON.parse(frozen.inputs).absorbance).toMatchObject({ raw:'3.00',value:3 });
+    expect(frozen.curve.points).toHaveLength(3);
+    expect(await f.db.auditLog.count({where:{entity:'RESULT_CALCULATION',entityId:frozen.id}})).toBe(1);
+    const attempt = await f.db.workAttempt.findUnique({where:{id:result.attemptId}});
+    expect(attempt.rawData).toBeNull(); expect(attempt.calcVersion).toBeNull();
+    await activations.change(f.db,f.manager,f.template.id,{labId:f.lab.id,analysisCode:'P_OLSEN',methodologyId:f.method.id,
+        expectedVersion:1,expectedActivationId:f.activation.id,action:'DEACTIVATE',verifiedAgainstSop:true,reason:'Future entries use the unactivated method path'});
+    expect(await calculations.retained(f.db,result.id)).toEqual(frozen);
+    expect(await f.db.result.findUnique({where:{id:result.id}})).toEqual(result);
 });
 
 test('every replicate participates in the unweighted fit; zero counts and repeated standards add no distinct levels', async () => {
