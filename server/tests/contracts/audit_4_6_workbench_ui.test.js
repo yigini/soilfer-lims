@@ -4,9 +4,10 @@ const {decode}=require('../../services/calculationTemplateService');
 const {calculate}=require('../../../shared/soilCalculation');
 const inputs={absorbance:'3.00',blankConcentration:'0',extractVolume:'20',dilutionFactor:'2',sampleMass:'1',moistureCorrectionFactor:'1'};
 const active={activationId:'activation',templateId:'template',templateVersion:1};
-const template=decode(referenceRows().find(row=>row.templateKey==='olsen-phosphorus'));
+const template={...decode(referenceRows().find(row=>row.templateKey==='olsen-phosphorus')),outputDecimals:2,
+    precisionSource:{kind:'LOCAL_SOP',citation:'Synthetic UI fixture SOP, two decimals'}};
 const numberFormat={decimal:'.',thousands:null},curve={id:'curve',revision:1,slope:2,intercept:1,calibrationMax:2};
-const units={native:{code:'mg/kg',dimension:'MASS_FRACTION',factor:1},reporting:{code:'mg/kg',dimension:'MASS_FRACTION',factor:1}};
+const units={native:{code:'mg/kg',quantityKind:'MASS_FRACTION',factorToBase:1},reporting:{code:'mg/kg',quantityKind:'MASS_FRACTION',factorToBase:1}};
 const context={active,template,numberFormat,curve,units};
 const calculation=calculate(template,inputs,{numberFormat,curve,units});
 const item={sampleId:'sample',workItemId:'work',calculationTemplate:active,draft:{value:'40',values:{calculation:{...active,curveId:'curve',inputs}}}};
