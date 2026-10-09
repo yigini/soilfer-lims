@@ -81,9 +81,12 @@ test.each([false,true])('bulk views disclose only a missing test and retain good
     }
 });
 
-test('later persisted QC failure isolates the blocked accepted test in every bulk surface and preserves good values and history',async()=>{
+test.each([
+    ['REQUIRED_WARN','REPORTED_VALUE_SOURCE_QC_BLOCKED'],
+    ['REQUIRED_BLOCKING','REPORTED_VALUE_SOURCE_INVALID']
+])('later persisted QC failure isolates the blocked accepted test in every bulk surface (%s) and preserves history',async(mode,code)=>{
     const f=await qcGateFixture({count:2,criteria:{blankPerBatch:1,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0}});
-    owned.push(f);await f.setPolicy([{key:'qc.mode',value:'REQUIRED_WARN'}]);
+    owned.push(f);await f.setPolicy([{key:'qc.mode',value:mode}]);
     const native=require('../../services/qcNativeRunService'),measurements=require('../../services/qcNativeMeasurementService');
     const runs=[],results=[];
     for(const item of f.items) {
@@ -104,7 +107,7 @@ test('later persisted QC failure isolates the blocked accepted test in every bul
         corrections:[{positionId:run.positions.find(row=>row.kind==='BLANK').id,value:10}]},{correction:true});
     expect(await f.db.reportedValueSelection.findMany({orderBy:{id:'asc'}})).toEqual(beforeLateResults);
     const sample=await f.db.sample.findUnique({where:{id:bad.sampleId}}),error={sampleId:bad.sampleId,workItemId:bad.id,
-        analysisCode:bad.analysis,code:'REPORTED_VALUE_SOURCE_QC_BLOCKED'};
+        analysisCode:bad.analysis,code};
     await expect(readSampleReportedValues(f.db,sample)).rejects.toMatchObject({code:error.code,statusCode:409,details:{workItemId:bad.id}});
     const before=await f.snapshot(),attempts=await f.db.workAttempt.findMany({orderBy:{id:'asc'}}),
         qc=await Promise.all([f.db.qcEvaluation.findMany({orderBy:{id:'asc'}}),f.db.qcMeasurement.findMany({orderBy:{id:'asc'}})]);
@@ -135,9 +138,22 @@ test('later persisted QC failure isolates the blocked accepted test in every bul
         if(index!==5)expect(after[index]).toEqual(rows);
         else expect(after[index]).toEqual(expect.arrayContaining(rows));
     });
-    expect(after[5].filter(row=>!before[5].some(old=>old.id===row.id)).every(row=>row.action==='EXPORT')).toBe(true);
+    const appended=after[5].filter(row=>!before[5].some(old=>old.id===row.id));
+    expect(appended).toHaveLength(1);expect(appended[0]).toMatchObject({entity:'EXPORT',action:'WET_CHEM'});
     expect(await f.db.workAttempt.findMany({orderBy:{id:'asc'}})).toEqual(attempts);
     expect(await Promise.all([f.db.qcEvaluation.findMany({orderBy:{id:'asc'}}),f.db.qcMeasurement.findMany({orderBy:{id:'asc'}})])).toEqual(qc);
+});
+
+test.each(['P2021','REPORTED_VALUE_STORAGE_FAILURE'])('partial reader still throws an unexpected storage error (%s) with zero writes',async code=>{
+    const f=await fixture();await f.choose();const before=await f.snapshot(),sample=await f.db.sample.findUnique({where:{id:f.items[0].sampleId}});
+    const failure=Object.assign(new Error('Owned database fault'),{code,statusCode:500});
+    const db={$transaction:execute=>f.db.$transaction(tx=>execute(new Proxy(tx,{get(target,key){
+        if(key==='reportedValueSelection')return new Proxy(target[key],{get(delegate,operation){
+            if(operation==='findMany')return async()=>{throw failure;};return delegate[operation];
+        }});return target[key];
+    }})))};
+    await expect(readSampleReportedValues(db,sample,{partial:true})).rejects.toBe(failure);
+    expect(await f.snapshot()).toEqual(before);
 });
 test.each(['en','es','es-419','fr','pt'])('SIS v1 receives the requesting user locale for a not-reportable value (%s)',async locale=>{
     const f=await fixture();f.actor.language=locale;await f.choose({mode:'NOT_REPORTABLE',reason:'Missing worksheet'});
