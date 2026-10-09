@@ -1,4 +1,15 @@
 {
+  "barcodeScan": {
+    "label": "Scanner",
+    "placeholder": "Scanner le code d'un échantillon (F2)",
+    "notFound": "Échantillon introuvable. Scannez à nouveau le code.",
+    "checkCharacterInvalid": "Le caractère de contrôle ne correspond pas ; scannez à nouveau.",
+    "ambiguous": "Ce code correspond à plusieurs échantillons.",
+    "notInRun": "Cet échantillon ne fait pas partie de la série sélectionnée.",
+    "rowUnavailable": "Cet échantillon n'a aucune cellule de valeur disponible dans la série.",
+    "noRun": "Sélectionnez une série avant de scanner.",
+    "valueCell": "Cela ressemble à un code-barres ; utilisez le champ Scanner"
+  },
   "sampleHolds": {
     "metadataRepairNeeded": "Les métadonnées doivent être réparées avant de résoudre ce blocage.",
     "title": "Blocages de l’échantillon",

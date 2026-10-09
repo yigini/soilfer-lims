@@ -1,3 +1,4 @@
+import BarcodeSafeInput from './BarcodeSafeInput';
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import numberParse from '@lims/number-parse';
@@ -20,8 +21,9 @@ const verdictColour = status => status === 'PASS' || status === 'NOT_REQUIRED' ?
     : status === 'FAIL' ? 'text-red-700 dark:text-red-300' : 'text-amber-700 dark:text-amber-300';
 
 export default function NativeRunPanel({ batch, referenceMaterials, onChanged, loading, setLoading, setError, setSuccessMsg,
-    renderWorksheet = null, canEdit = true, analysisCode = null, onAnalysisChanged = null }) {
+    renderWorksheet = null, canEdit = true, analysisCode = null, onAnalysisChanged = null, onBarcodeRejected = null }) {
     const { t } = useLanguage();
+    const ValueInput = onBarcodeRejected ? BarcodeSafeInput : 'input';
     const [selectedCode, setSelectedCode] = useState(batch.analysis);
     const [values, setValues] = useState({}), [lots, setLots] = useState({}), [correcting, setCorrecting] = useState({});
     const [reason, setReason] = useState(''), [draggedId, setDraggedId] = useState(null);
@@ -142,7 +144,7 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
             {old && <p className="font-mono">{t('qcRuns.recorded')}: {old.rawInput ?? old.value ?? t('common.notRecorded')}</p>}
             {(!old || correcting[row.id]) && <label className="grid gap-1">
                 {t(row.kind === 'SAMPLE' ? 'qcWorksheet.parentObservation' : 'qcRules.fields.measured')}
-                <input type="text" value={values[row.id] || ''} disabled={!batch.startedAt || locked || loading || accepted || correction && !correcting[row.id]}
+                <ValueInput {...(onBarcodeRejected ? { onBarcodeRejected } : {})} type="text" value={values[row.id] || ''} disabled={!batch.startedAt || locked || loading || accepted || correction && !correcting[row.id]}
                     data-testid={`native-value-${row.id}`} aria-label={`${row.position} ${row.kind} ${t(row.kind === 'SAMPLE' ? 'qcWorksheet.parentObservation' : 'qcRules.fields.measured')}`}
                     onChange={event => changeObservation(row.id, event.target.value)} onBlur={commitPreview}
                     className="p-2 rounded border border-sf-divider bg-sf-canvas" />

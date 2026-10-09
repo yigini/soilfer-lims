@@ -1,4 +1,15 @@
 {
+  "barcodeScan": {
+    "label": "Ler código",
+    "placeholder": "Ler o código de uma amostra (F2)",
+    "notFound": "Amostra não encontrada. Leia o código novamente.",
+    "checkCharacterInvalid": "O carácter de controlo não corresponde; leia novamente.",
+    "ambiguous": "Este código corresponde a várias amostras.",
+    "notInRun": "Esta amostra não está na série selecionada.",
+    "rowUnavailable": "Esta amostra não tem uma célula de valor disponível na série.",
+    "noRun": "Selecione uma série antes de ler o código.",
+    "valueCell": "Parece um código de barras; use o campo Ler código"
+  },
   "sampleHolds": {
     "metadataRepairNeeded": "É necessário reparar os metadados antes de resolver esta retenção.",
     "title": "Bloqueios da amostra",

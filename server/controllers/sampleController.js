@@ -14,6 +14,7 @@ const sampleStateService = require('../services/sampleStateService');
 const sampleAnalysisStateService = require('../services/sampleAnalysisStateService');
 const profileIdentity = require('../services/profileIdentityService');
 const sampleHolds = require('../services/sampleHoldService');
+const policyService = require('../services/policyService');
 
 exports.getSampleHolds = async (req, res) => {
     try {
@@ -55,7 +56,28 @@ exports.lookupSample = async (req, res) => {
         });
         const matches = scopedRows.filter(sample => scopeGuard.canAccessEntity(req.user, sample,
             { entityType: 'Sample', labField: 'labId', altLabField: 'assignedLab' }));
-        if (!matches.length) return res.status(404).json({ code: 'SAMPLE_NOT_FOUND', error: 'Sample not found.' });
+        if (!matches.length) {
+            let failureCode = 'SAMPLE_NOT_FOUND';
+            // Diagnose only a failed lookup. Issued labels and original IDs
+            // above remain valid independently of today's numbering policy.
+            const labReference = scopeGuard.hasGlobalAccess(req.user)
+                ? (typeof req.query.scanLabId === 'string' ? req.query.scanLabId : null)
+                : req.user.labId ? scopeGuard.getLabScope(req.user) : null;
+            if (labReference) {
+                try {
+                    const lab = await policyService.resolveLab(labReference, prisma);
+                    if (lab) {
+                        const format = await policyService.get(lab.id, 'sample.codeFormat', { db: prisma });
+                        if (format.endsWith('{CHK}') && (format.match(/\{CHK\}/g) || []).length === 1 &&
+                            !sampleCodes.verifyCheckCharacter(code)) failureCode = 'SCAN_CHECK_CHARACTER_INVALID';
+                    }
+                } catch {
+                    // A missing/unreadable diagnostic policy must preserve
+                    // the existing scoped not-found response.
+                }
+            }
+            return res.status(404).json({ code: failureCode, error: 'Sample not found.' });
+        }
         if (matches.length > 1) return res.status(409).json({ code: 'SAMPLE_LOOKUP_AMBIGUOUS', error: 'This identifier matches several samples.',
             candidates: matches.map(sample => ({ id: sample.id, displayId: sample.originalId || sample.labId || sample.id, labId: sample.labId, originalId: sample.originalId })) });
         return res.json({ ...matches[0], held: await sampleHolds.isHeld(prisma, matches[0]) });

@@ -39,7 +39,8 @@ function harness(name, { groups, width = 1200, axios, offline } = {}) {
                 if (mod.includes('HelpContext')) return { useHelp: () => ({ clearBlockers() {}, registerBlockers() {} }) };
                 if (mod.includes('NotificationContext')) return { useNotifications: () => ({}) };
                 if (mod.includes('/offline/')) return offline || {};
-                if (mod === './entryReadiness') return load(path.join(path.dirname(filename), 'entryReadiness.js'));
+                if (['./entryReadiness', './qcWorksheetNavigation', './useRunBarcodeScan', './BarcodeSafeInput', '../../utils/audioCues'].includes(mod))
+                    return load(path.resolve(path.dirname(filename), mod + (mod === './BarcodeSafeInput' ? '.jsx' : '.js')));
                 if (mod.endsWith('.json')) return require(path.resolve(path.dirname(filename), mod));
                 const childName = path.basename(mod);
                 return children[childName] || (children[childName] = () => null);

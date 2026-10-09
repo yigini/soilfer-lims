@@ -1,5 +1,6 @@
 import React from 'react';
 import NumberPreview from './NumberPreview';
+import BarcodeSafeInput from './BarcodeSafeInput';
 
 /**
  * NumericEditor
@@ -18,12 +19,10 @@ export default function NumericEditor({
     onEnterNext = null,
     ariaLabel = 'Numeric determination',
     inputRef = null,
-    numberFormat
+    numberFormat,
+    onBarcodeRejected = null
 }) {
-    const handleChange = (e) => {
-        onChange(e.target.value);
-    };
-
+    const Input = onBarcodeRejected ? BarcodeSafeInput : 'input';
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -35,12 +34,13 @@ export default function NumericEditor({
 
     return (
         <div className="flex items-center gap-1.5">
-            <input
+            <Input
                 ref={inputRef}
                 type="text"
                 inputMode="decimal"
                 value={value ?? ''}
-                onChange={handleChange}
+                onChange={event => onChange(event.target.value)}
+                {...(onBarcodeRejected ? { onBarcodeRejected } : {})}
                 onKeyDown={handleKeyDown}
                 disabled={disabled}
                 placeholder={placeholder}
