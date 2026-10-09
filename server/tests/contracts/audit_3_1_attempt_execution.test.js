@@ -103,6 +103,8 @@ test('a reasoned repeat allocates max+1 and preserves every old field except its
 });
 test('all replicates in one submitted execution share one attempt; later execution preserves that evidence',async()=>{
     const f=await fixture();
+    await require('../../services/policyService').change(actor,labId,{reason:'Owned two-reading execution case',
+        changes:[{key:'results.replicatesRequired',value:2,analysisCode:'AT190'}]},{db:client});
     const rows=await client.$transaction(tx=>writer.writeResultsExecution(tx,{sampleId:f.sample.id,actor,
         measurements:[{param:'AT190',value:'6.41',replicateNo:1},{param:'AT190',value:'6.42',replicateNo:2}]}));
     expect(new Set(rows.map(row=>row.attemptId)).size).toBe(1);

@@ -38,9 +38,10 @@ export function advanceWorksheetCell(event, completionButton) {
     const rowCells = [...rows.values()];
     const rowIndex = rowCells.findIndex(row => row.includes(event.target));
     const column = rowCells[rowIndex].indexOf(event.target);
+    const namedColumn = event.target.dataset?.worksheetColumn;
     for (let nextRow = rowIndex + (backwards ? -1 : 1); nextRow >= 0 && nextRow < rowCells.length;
         nextRow += backwards ? -1 : 1) {
-        const next = rowCells[nextRow][column];
+        const next = namedColumn ? rowCells[nextRow].find(cell => cell.dataset?.worksheetColumn === namedColumn) : rowCells[nextRow][column];
         if (next && available(next)) { next.focus(); return; }
     }
     if (!backwards) completionButton?.focus();

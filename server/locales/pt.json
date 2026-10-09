@@ -1,4 +1,44 @@
 {
+  "replicateGrid": {
+    "rep1": "Rep 1",
+    "rep2": "Rep 2",
+    "rep3": "Rep 3",
+    "mean": "Média",
+    "rpd": "DPR",
+    "limit": "Limite",
+    "range": "Amplitude",
+    "criteria": "Critérios",
+    "count": "Quantidade exigida",
+    "runThird": "Medir terceira réplica",
+    "recordInOrder": "Registe cada leitura com a revisão e confirmação da folha antes de inserir a seguinte.",
+    "selectionHint": "Estes cálculos não selecionam o valor reportado. A revisão determina o valor reportado.",
+    "status": {
+      "PENDING": "Pendente",
+      "PASS": "Par aprovado",
+      "FAIL": "Par reprovado",
+      "NOT_EVALUABLE": "Não avaliável",
+      "REVIEW_REQUIRED": "Revisão exigida",
+      "NOT_REQUIRED": "Não exigido"
+    },
+    "source": {
+      "FROZEN": "Fixados no início da série",
+      "CURRENT": "Política atual"
+    },
+    "reason": {
+      "CONTEXT_MISMATCH": "Os contextos de medição diferem",
+      "CENSORED": "Leitura censurada",
+      "NON_NUMERIC": "Leitura não numérica",
+      "NO_LOQ": "LOQ não configurado",
+      "ABS_DIFF_UNSET": "Limite absoluto não configurado",
+      "INVALID_NONPOSITIVE": "A DPR exige leituras positivas"
+    },
+    "errors": {
+      "REPLICATE_NOT_REQUIRED": "Registe um par exigido reprovado antes de adicionar uma terceira leitura.",
+      "REPLICATE_LIMIT": "Uma nova execução pode conter no máximo três leituras.",
+      "REPLICATE_CRITERIA_INVALID": "Os critérios registados de réplicas estão indisponíveis.",
+      "REPLICATE_SCOPE_DENIED": "A série pertence a outro laboratório."
+    }
+  },
   "sampleHolds": {
     "metadataRepairNeeded": "É necessário reparar os metadados antes de resolver esta retenção.",
     "title": "Bloqueios da amostra",
@@ -902,6 +942,7 @@
       "qc_controlMaxRecovery": "Recuperação máxima do controle",
       "qc_duplicateNearLoqMultiplier": "Limiar de duplicatas próximo ao limite de quantificação",
       "qc_duplicateMaxRpd": "Diferença percentual relativa máxima de duplicatas",
+      "results_replicatesRequired": "Réplicas de amostra exigidas",
       "results_reportedValueRule": "Regra de seleção do valor relatado",
       "results_betweenLodLoq": "Valores entre os limites de detecção e quantificação",
       "results_phMin": "pH mínimo",

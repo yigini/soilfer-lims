@@ -22,6 +22,11 @@ async function fixture({mean=false,clayValue=15}={}) {
         f.textureItems[analysis]=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:sample.id,assignedLab:f.labId,
             analysis,methodologyId:method.id,status:'IN_PROGRESS'}});
     }
+    // #198: the existing two-sand-reading selection fixture declares its
+    // required count through policyService; every original source assertion
+    // and the texture derivation authority remain unchanged.
+    if(mean)await f.setPolicy([{key:'results.replicatesRequired',value:2,analysisCode:'SAND',
+        methodologyId:f.textureItems.SAND.methodologyId}]);
     // Both retained sand replicates close with the same silt/clay execution;
     // the selected mean still has two source ids and requires a derived class.
     for(const [param,values] of [['SAND',mean?[60,60]:[60]],['SILT',[25]],['CLAY',[15]]]) {
