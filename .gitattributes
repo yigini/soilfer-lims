@@ -43,3 +43,5 @@ server/tests/helpers/workAttemptHistoricalFixtures.js text eol=lf
 server/services/workItemUniquenessMigrationSource.js text eol=lf
 server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql text eol=lf
 server/services/workRepeatMigrationSource.js text eol=lf
+server/prisma/migrations/20261009000100_reported_value_selection/migration.sql text eol=lf
+server/services/reportedValueMigrationSource.js text eol=lf

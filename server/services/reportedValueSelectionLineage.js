@@ -29,7 +29,7 @@ function buildSelectionLineage(attempts, results) {
     const snapshot = { version: 1, attempts: ordered.map(row => ({ id: row.id, status: row.status })),
         eligible: eligible.map(({ attempt, results: final }) => ({ id: attempt.id,
             evidenceHash: attempt.evidenceHash ?? null, resultIds: final.map(row => row.id) })) };
-    return { snapshot, eligible };
+    return { snapshot, eligible, attempts: ordered };
 }
 
 function assertSelectionFresh(snapshot, attempts, results) {
