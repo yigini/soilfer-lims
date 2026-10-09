@@ -20,12 +20,19 @@ async function fixture(options={}) {
         f.db.workItem.findMany({orderBy:{id:'asc'}}),f.db.result.findMany({orderBy:{id:'asc'}})])));
     return f;
 }
-async function crm(f) {
+async function crm(f,kind='CRM') {
     const lot=await f.db.referenceMaterial.create({data:{id:randomUUID(),labId:f.labId,code:randomUUID(),name:'Owned NCR CRM',
-        kind:'CRM',matrix:'SOIL',lotNumber:'fixture',status:'ACTIVE',createdBy:f.actor.username}});
+        kind,matrix:'SOIL',lotNumber:'fixture',status:'ACTIVE',createdBy:f.actor.username}});
     const value=await f.db.referenceValue.create({data:{id:randomUUID(),referenceMaterialId:lot.id,analysisCode:f.analysisCode,
-        assignedValue:10,unit:'fixture-unit',valueType:'CERTIFIED',createdBy:f.actor.username}});
+        assignedValue:10,unit:'fixture-unit',valueType:kind==='CRM'?'CERTIFIED':'LAB_ASSIGNED',createdBy:f.actor.username}});
     return {lot,value};
+}
+async function reviewers(f) {
+    const people=[];
+    for(let index=0;index<3;index++)people.push(await f.db.user.create({data:{id:randomUUID(),username:'ncr-person-'+randomUUID(),
+        email:randomUUID()+'@example.test',password:'fixture',role:'LAB_MANAGER',labId:f.labId,isActive:true}}));
+    f.author=people[0];f.reviewers=people.slice(1);
+    await f.setPolicy([{key:'qc.reviewedTranscriptionCorrectionEnabled',value:true}]);
 }
 async function nativeCrm(f) {
     const {lot}=await crm(f),built=await buildNativeRun(f.db,f.actor,{...f.input,analyses:[{analysisCode:f.analysisCode,
@@ -50,13 +57,16 @@ test('multi-analyte REJECT raises one NCR per actual disposition and a retry pre
 });
 test.each(['REQUIRED_BLOCKING','REQUIRED_WARN'])('native CRM failure uses frozen %s and keeps its first evaluation across fail/fail/pass',async mode=>{
     const f=await fixture({criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:1}});
+    await reviewers(f);
     await f.setPolicy([{key:'qc.mode',value:mode}]);const run=await nativeCrm(f),position=run.positions.find(row=>row.kind==='CRM');
     await f.setPolicy([{key:'qc.mode',value:'OFF'}]);
-    await writeNativeMeasurements(f.db,run.id,f.actor,{measurements:[{positionId:position.id,value:25}]});
+    await writeNativeMeasurements(f.db,run.id,f.author,{measurements:[{positionId:position.id,value:25}]});
     const first=await f.db.qcEvaluation.findFirst({where:{batchId:run.id}}),report=await f.db.nonconformityReport.findFirst({where:{refId:position.id}});
     expect(JSON.parse(first.details).mode).toBe(mode);
     expect(report).toMatchObject({source:'QC',refType:'BatchPosition',refId:position.id,firstQcEvaluationId:first.id,status:'OPEN'});
-    for(const value of [22,10])await writeNativeMeasurements(f.db,run.id,f.actor,{reason:'Owned reasoned CRM correction',corrections:[{positionId:position.id,value}]},{correction:true});
+    for(const [index,value] of [22,10].entries())await writeNativeMeasurements(f.db,run.id,f.reviewers[index],{
+        mode:'REVIEWED_TRANSCRIPTION',sourceReference:'Owned original CRM worksheet',analysisCode:f.analysisCode,
+        reason:'Owned reasoned CRM correction',corrections:[{positionId:position.id,value}]},{correction:true});
     expect(await f.db.qcEvaluation.count({where:{batchId:run.id}})).toBe(3);
     expect(await f.db.nonconformityReport.count({where:{refId:position.id}})).toBe(1);
     expect(await f.db.nonconformityReport.findUnique({where:{id:report.id}})).toEqual(report);
@@ -71,14 +81,17 @@ test.each(['ADVISORY','OFF'])('compatibility CRM FAIL recorded in %s raises no N
     expect(await f.db.nonconformityReport.count()).toBe(0);
 });
 test('compatibility writes retain actual mode; repeated correction of the same failing CRM position reuses its NCR',async()=>{
-    const f=await fixture({criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0}}),{lot}=await crm(f);
-    const run=await createStoredProfileRunFixture(f.db,{actor:f.actor,input:{analysis:f.analysisCode}});
-    await writeCompatibilityMeasurements(f.db,run.id,f.actor,{controls:[{referenceMaterialId:lot.id,referenceUse:'CRM',measured:25}]});
+    const f=await fixture({criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0}}),{lot}=await crm(f),lrm=await crm(f,'LRM');
+    await reviewers(f);
+    const run=await createStoredProfileRunFixture(f.db,{actor:f.author,input:{analysis:f.analysisCode}});
+    await writeCompatibilityMeasurements(f.db,run.id,f.author,{blanks:[{value:0}],duplicates:[{value1:7,value2:7},{value1:7,value2:7}],
+        controls:[{referenceMaterialId:lot.id,referenceUse:'CRM',measured:25},{referenceMaterialId:lrm.lot.id,referenceUse:'LRM',measured:10}]});
     const first=await f.db.qcEvaluation.findFirst({where:{batchId:run.id}}),position=await f.db.batchPosition.findFirst({where:{batchId:run.id,kind:'CRM'}});
     const report=await f.db.nonconformityReport.findFirst({where:{refId:position.id}});
     expect(JSON.parse(JSON.parse(first.details).criteriaSnapshot).qcMode).toBe('REQUIRED_BLOCKING');
     expect(report).toMatchObject({firstQcEvaluationId:first.id,status:'OPEN'});
-    await correctCompatibilityMeasurements(f.db,run.id,f.actor,{reason:'Owned persisted CRM correction',corrections:[{positionId:position.id,value:22}]});
+    await correctCompatibilityMeasurements(f.db,run.id,f.reviewers[0],{mode:'REVIEWED_TRANSCRIPTION',sourceReference:'Owned original CRM worksheet',
+        analysisCode:f.analysisCode,reason:'Owned persisted CRM correction',corrections:[{positionId:position.id,value:22}]});
     expect(await f.db.nonconformityReport.count({where:{refId:position.id}})).toBe(1);
     expect(await f.db.nonconformityReport.findUnique({where:{id:report.id}})).toEqual(report);
 });
@@ -90,8 +103,8 @@ test('a persisted CRM failure with no stored mode does not infer NCR eligibility
     delete details.mode;delete details.criteriaSnapshot;
     await f.setPolicy([{key:'qc.mode',value:'REQUIRED_BLOCKING'}]);
     await f.db.$transaction(async tx=>{
-        const stored=await tx.qcEvaluation.create({data:{id:randomUUID(),batchId:run.id,analysisCode:f.analysisCode,version:original.version+1,
-            verdict:original.verdict,evaluatedBy:f.actor.username,evaluatedAt:new Date(),supersedesId:original.id,details:JSON.stringify(details)}});
+        const stored=await tx.qcEvaluation.create({data:{...original,id:randomUUID(),version:original.version+1,
+            evaluatedAt:new Date(),supersedesId:original.id,details:JSON.stringify(details)}});
         expect(await raiseCrmFailures(tx,f.actor,stored)).toEqual([]);
     });
     expect(await f.db.nonconformityReport.count()).toBe(0);
