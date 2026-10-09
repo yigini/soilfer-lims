@@ -17,6 +17,11 @@ async function fixture(count = 1) {
             response = await request(app).post(path).set('Authorization','Bearer '+token).send(body);
         }, { reviews: true }); return response;
     };
+    f.get = async (actor = f.actor) => {
+        let response; await withQcRunHttp(f.db, actor, async (app, token) => {
+            response = await request(app).get('/api/work/'+f.items[0].id+'/reported-value').set('Authorization','Bearer '+token);
+        }, { reviews: true }); return response;
+    };
     f.all = async () => JSON.stringify({ retained: await f.snapshot(), attempts: await f.db.workAttempt.findMany({ orderBy: { id: 'asc' } }),
         selections: await f.db.reportedValueSelection.findMany({ orderBy: { id: 'asc' } }) });
     return f;
@@ -75,4 +80,43 @@ test('a SQL refusal after review writes rolls back just that bulk row, including
     expect(await f.db.auditLog.findMany({ where: { sampleId: failedItem.sampleId }, orderBy: { id: 'asc' } })).toEqual(audit);
     expect(await f.db.reviewDecision.count({ where: { workItemId: failedItem.id } })).toBe(0);
     expect(await f.db.reportedValueSelection.count({ where: { workItemId: failedItem.id } })).toBe(0);
+});
+
+test('actual review preview exposes complete attempt evidence and disabled mean reason with zero writes', async () => {
+    const f = await fixture(), before = await f.all(), response = await f.get();
+    expect({ status: response.status, body: response.body }).toMatchObject({ status: 200, body: {
+        automatic: { choice: { rule: 'AUTO_SINGLE' } },
+        attempts: [{ id: f.rows[0].attemptId, status: 'SUBMITTED', eligible: true,
+            results: [{ id: f.rows[0].id, valueText: f.rows[0].value, replicateNo: 1 }], option: { allowed: true } }],
+        mean: { allowed: false, code: 'REPORTED_VALUE_SELECTION_INVALID' },
+        current: { groupId: null, code: 'REPORTED_VALUE_SELECTION_REQUIRED' }
+    } });
+    expect(response.body.attempts[0].qcGates).toHaveLength(1);
+    expect(await f.all()).toBe(before);
+    const preview = await f.http('/api/work/'+f.items[0].id+'/reported-value/preview', { mode: 'ATTEMPT', attemptIds: ['foreign'] });
+    expect(preview.status).toBe(409); expect(preview.body).toMatchObject({ allowed: false, code: 'REPORTED_VALUE_SELECTION_INVALID' });
+    expect(await f.all()).toBe(before);
+});
+
+test('actual accepted selection endpoint appends a whole replacement and rejects the stale displayed group with zero writes', async () => {
+    const f = await fixture(); await f.http('/api/work/'+f.items[0].id+'/review', { decision: 'ACCEPT' });
+    const current = await f.get(), first = await f.db.reportedValueSelection.findFirst();
+    expect(current.body.current).toMatchObject({ groupId: first.selectionGroupId, code: null });
+    const path = '/api/work/'+f.items[0].id+'/reported-value', body = { expectedGroupId: first.selectionGroupId,
+        selection: { mode: 'NOT_REPORTABLE', reason: 'Reviewer excluded this determination' } };
+    const next = await f.http(path, body);
+    expect(next.status).toBe(201); expect(next.body.selections[0]).toMatchObject({ supersedesId: first.id, mode: 'NOT_REPORTABLE' });
+    expect(await f.db.reportedValueSelection.findUnique({ where: { id: first.id } })).toEqual(first);
+    const before = await f.all(), stale = await f.http(path, body);
+    expect(stale.status).toBe(409); expect(stale.body.code).toBe('REPORTED_VALUE_SELECTION_CONFLICT');
+    expect(await f.all()).toBe(before);
+});
+
+test('selection inspection checks lab scope before exposing attempts, values or policy', async () => {
+    const f = await fixture(); const other = await f.db.user.create({ data: { id: require('node:crypto').randomUUID(),
+        username: 'foreign-selection-reviewer', email: 'foreign-selection@example.test',
+        password: 'unused-owned-test', role: 'LAB_MANAGER', labId: null } });
+    const response = await f.get(other);
+    expect(response.status).toBe(403);
+    expect(response.body.attempts).toBeUndefined(); expect(response.body.policy).toBeUndefined();
 });

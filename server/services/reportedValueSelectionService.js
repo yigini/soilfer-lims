@@ -77,4 +77,74 @@ async function readReportedSelection(tx, item) {
     assertReportedSelectionGroup(rows, selectionOutputs(item), context.attempts, context.results);
     return { rows, context };
 }
-module.exports = { preflightReportedSelection, appendReportedSelection, readReportedSelection };
+async function reviewItem(tx, workItemId, actor) {
+    if (!hasPermission(actor, 'APPROVE_RESULTS')) throw new rules.TransitionError('Review is not authorized.', 403, 'REVIEW_FORBIDDEN');
+    const item = await tx.workItem.findUnique({ where: { id: workItemId } });
+    if (!item) throw new rules.TransitionError('Work item not found.', 404, 'WORK_ITEM_NOT_FOUND');
+    const sample = await tx.sample.findUnique({ where: { id: item.sampleId } });
+    if (!sample) throw new rules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
+    rules.assertScope(actor, sample);
+    return { item, sample };
+}
+
+function previewChoice(item, context, choice) {
+    try { return { allowed: true, choice: explicitReportedChoice(item, context.lineage, choice, context.limits) }; }
+    catch (error) {
+        if (!error.code?.startsWith('REPORTED_VALUE_')) throw error;
+        return { allowed: false, code: error.code, error: error.message };
+    }
+}
+
+// Preview uses the same complete-attempt authority as acceptance. It never
+// writes a selection, review decision, QC evaluation, or attempt event.
+async function reviewReportedSelection(db, workItemId, actor, explicit) {
+    return rules.inTransaction(db, async tx => {
+        const { item } = await reviewItem(tx, workItemId, actor);
+        if (require('./workItemKinds').isNonMeasurement(item)) return { workItemId: item.id, notRequired: true };
+        const context = await loadSelectionContext(tx, item);
+        if (explicit !== undefined) return previewChoice(item, context, explicit);
+        const rows = await currentRows(tx, item.id);
+        let currentCode = null;
+        try { assertReportedSelectionGroup(rows, selectionOutputs(item), context.attempts, context.results); }
+        catch (error) {
+            if (!['REPORTED_VALUE_SELECTION_REQUIRED','REPORTED_VALUE_SELECTION_STALE'].includes(error.code)) throw error;
+            currentCode = error.code;
+        }
+        const attempts = [];
+        for (const attempt of [...context.attempts].sort((a,b) => a.attemptNo-b.attemptNo || a.id.localeCompare(b.id))) {
+            const candidate = context.lineage.eligible.find(row => row.attempt.id === attempt.id);
+            const results = candidate?.results || [];
+            const attemptItem = { ...item, batchId: attempt.qcBatchId || attempt.batchId };
+            const gates = await Promise.all(results.map(result => require('./qcGateService').forResult(result, {
+                db: tx, sample: context.sample, workItems: [attemptItem] })));
+            attempts.push({ id: attempt.id, attemptNo: attempt.attemptNo, status: attempt.status,
+                batchId: attempt.qcBatchId || attempt.batchId, qcGates: gates,
+                analyst: attempt.authorName || attempt.author, recordedAt: context.limits[attempt.id]?.recordedAt || null,
+                reason: attempt.reason, note: attempt.note, eligible: Boolean(candidate), limit: context.limits[attempt.id] || null,
+                results: results.map(row => ({ id: row.id, param: row.param, replicateNo: row.replicateNo,
+                    valueText: row.value, unit: row.unit, censoring: row.censoring ?? 'NONE' })),
+                option: candidate ? previewChoice(item, context, { mode: 'ATTEMPT', attemptIds: [attempt.id] }) : null });
+        }
+        return { workItemId: item.id, analysisCode: item.analysis, status: item.status, policy: context.policy,
+            automatic: automaticReportedChoice(item, context.lineage, context.policy.value, context.limits), attempts,
+            mean: previewChoice(item, context, { mode: 'MEAN', attemptIds: context.lineage.eligible.map(row => row.attempt.id) }),
+            current: { groupId: rows[0]?.selectionGroupId || null, code: currentCode, rows } };
+    });
+}
+
+async function replaceReportedSelection(db, workItemId, actor, request) {
+    if (!request || !Object.hasOwn(request, 'expectedGroupId') ||
+        request.expectedGroupId !== null && typeof request.expectedGroupId !== 'string' ||
+        Object.keys(request).some(key => !['expectedGroupId','selection'].includes(key)) || !request.selection) {
+        throw new rules.TransitionError('Reload the current selection before choosing again.', 409, 'REPORTED_VALUE_SELECTION_CONFLICT');
+    }
+    return rules.inTransaction(db, async tx => {
+        const { item, sample } = await reviewItem(tx, workItemId, actor);
+        if (require('./workItemKinds').isNonMeasurement(item)) throw new rules.TransitionError('This work item has no reported analytical value.', 409, 'REPORTED_VALUE_SELECTION_INVALID');
+        require('./resultEvidenceService').assertAmendable(sample);
+        return appendReportedSelection(tx, item, actor, request.selection, { expectedGroupId: request.expectedGroupId });
+    });
+}
+
+module.exports = { preflightReportedSelection, appendReportedSelection, readReportedSelection,
+    reviewReportedSelection, replaceReportedSelection };

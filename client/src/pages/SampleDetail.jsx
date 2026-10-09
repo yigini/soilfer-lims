@@ -10,6 +10,7 @@ import { useDialog } from '../context/DialogContext';
 import { useNotifications } from '../context/NotificationContext';
 import WorkItemsTable from '../components/sample/WorkItemsTable';
 import RepeatReasonFields from '../components/sample/RepeatReasonFields';
+import ReportedValueReview from '../components/sample/ReportedValueReview';
 import FieldMetadataCard from '../components/sample/FieldMetadataCard';
 import {ProfileReferenceSummary} from '../components/reception/ProfileReferenceFields';
 import ProfileCorrectionDialog from '../components/sample/ProfileCorrectionDialog';
@@ -52,7 +53,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const { token, user } = useAuth();
+    const { token, user, hasPermission } = useAuth();
     const { showDialog } = useDialog();
     const { subscribeToEvent } = useNotifications();
     const { t } = useLanguage();
@@ -170,9 +171,11 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     const [reviewChecked, setReviewChecked] = useState(false);
     const [qcAcknowledgementReason, setQcAcknowledgementReason] = useState('');
     const [qcAcknowledgementRequested, setQcAcknowledgementRequested] = useState(false);
+    const [reportedChoices, setReportedChoices] = useState({});
     useEffect(() => {
         setQcAcknowledgementReason('');
         setQcAcknowledgementRequested(false);
+        setReportedChoices({});
     }, [id]);
     const [returningSubmissionId, setReturningSubmissionId] = useState(null);
     const [returnReason, setReturnReason] = useState('');
@@ -349,6 +352,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
         }
         try {
             await axios.post(`/api/work/${itemId}/review`, { status, note,
+                ...(status === 'ACCEPTED' && reportedChoices[itemId]?.selection && { reportedValueSelection: reportedChoices[itemId].selection }),
                 ...(status === 'REANALYSIS_REQUIRED' && { reasonCode }),
                 ...(status === 'ACCEPTED' && qcAcknowledgementReason.trim() && { qcAcknowledgement: { reason: qcAcknowledgementReason.trim() } }) });
             fetchWorkspaceData(true);
@@ -364,9 +368,14 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
 
     const handleReviewBulk = async (itemIds, status) => {
         try {
-            await axios.post(`/api/work/review/bulk`, { workItemIds: itemIds, status, note: 'Bulk Review',
+            const response = await axios.post(`/api/work/review/bulk`, { workItemIds: itemIds, status, note: 'Bulk Review',
+                ...(status === 'ACCEPTED' && { reportedValueSelections: Object.fromEntries(itemIds.filter(itemId => reportedChoices[itemId]?.selection)
+                    .map(itemId => [itemId, reportedChoices[itemId].selection])) }),
                 ...(status === 'ACCEPTED' && qcAcknowledgementReason.trim() && { qcAcknowledgement: { reason: qcAcknowledgementReason.trim() } }) });
-            showInfo(t('common.success', 'Success'), `Successfully reviewed ${itemIds.length} items.`);
+            const errors = response.data.errors || [];
+            showInfo(t(errors.length ? 'common.error' : 'common.success', errors.length ? 'Error' : 'Success'),
+                t('reportedValue.bulkReceipt', { accepted: response.data.results?.length ?? itemIds.length, refused: errors.length }) +
+                (errors.length ? '\n' + errors.map(row => `${row.workItemId}: ${t(`reportedValue.errors.${row.code}`, row.error || row.code)}`).join('\n') : ''));
             fetchWorkspaceData(true);
         } catch (err) {
             console.error('Bulk review failed', err);
@@ -1169,7 +1178,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                 {/* Items awaiting review */}
                                 <div className="space-y-3">
                                     {workItems.filter(w => w.status === 'SUBMITTED').map(item => (
-                                        <div key={item.id} className="p-4 rounded-xl border border-sf-divider bg-sf-canvas flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div key={item.id} className="p-4 rounded-xl border border-sf-divider bg-sf-canvas space-y-3">
+                                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                             <div className="space-y-1">
                                                 <div className="flex items-center gap-2">
                                                     <span className="font-bold text-sf-text text-sm">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
@@ -1196,7 +1206,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                     <div className="flex items-center gap-1">
                                                         <button
                                                             onClick={() => handleReviewItem(item.id, 'ACCEPTED')}
-                                                            disabled={Boolean(item.qcGateCode && item.qcGateCode !== 'QC_ACKNOWLEDGEMENT_REQUIRED') || item.qcAcknowledgementRequired && !qcAcknowledgementReason.trim()}
+                                                            disabled={!reportedChoices[item.id]?.ready || Boolean(item.qcGateCode && item.qcGateCode !== 'QC_ACKNOWLEDGEMENT_REQUIRED') || item.qcAcknowledgementRequired && !qcAcknowledgementReason.trim()}
                                                             className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
                                                             title="Accept Item"
                                                         >
@@ -1212,6 +1222,10 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                     </div>
                                                 )}
                                             </div>
+                                          </div>
+                                          <ReportedValueReview itemId={item.id} itemVersion={item.version} itemStatus={item.status} token={token} t={t}
+                                              canReview={Boolean(hasPermission?.('APPROVE_RESULTS'))}
+                                              onChoice={choice => setReportedChoices(previous => ({ ...previous, [item.id]: choice }))} />
                                         </div>
                                     ))}
                                 </div>
@@ -1244,7 +1258,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                     handleReviewBulk(subItems.map(i => i.id), 'ACCEPTED');
                                                 }}
                                                 disabled={!reviewChecked || workItems.some(item => item.status === 'SUBMITTED' &&
-                                                    (item.qcGateCode && item.qcGateCode !== 'QC_ACKNOWLEDGEMENT_REQUIRED' || item.qcAcknowledgementRequired && !qcAcknowledgementReason.trim()))}
+                                                    (!reportedChoices[item.id]?.ready || item.qcGateCode && item.qcGateCode !== 'QC_ACKNOWLEDGEMENT_REQUIRED' || item.qcAcknowledgementRequired && !qcAcknowledgementReason.trim()))}
                                                 className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow transition-colors"
                                             >
                                                 Accept {counters.submitted} submitted result(s)
@@ -1254,6 +1268,12 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                 )}
                             </div>
                         )}
+                        {hasPermission?.('APPROVE_RESULTS') && workItems.filter(item => item.status === 'ACCEPTED').map(item =>
+                            <div key={item.id} className="bg-sf-surface rounded-xl p-4 border border-sf-divider">
+                                <h3 className="font-bold text-sm">{getAnalysisDisplayName(item.analysis, item.analysisName)}</h3>
+                                <ReportedValueReview itemId={item.id} itemVersion={item.version} itemStatus={item.status} token={token} t={t} canReview
+                                    onSaved={() => fetchWorkspaceData(true)} />
+                            </div>)}
                     </div>
                 )}
 
