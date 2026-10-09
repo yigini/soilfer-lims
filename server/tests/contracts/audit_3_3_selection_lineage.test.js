@@ -4,9 +4,9 @@ const fixture = () => ({ attempts: [
     { id: 'original', status: 'QUESTIONED', evidenceHash: 'recorded-original' },
     { id: 'child', status: 'ACCEPTED', evidenceHash: 'recorded-child' }
 ], results: [
-    { id: 'old-transcription', workAttemptId: 'original', value: '120', isCurrent: false, supersededBy: 'questioned-final' },
-    { id: 'questioned-final', workAttemptId: 'original', value: '12.0', isCurrent: false, supersededBy: 'child-final' },
-    { id: 'child-final', workAttemptId: 'child', value: '12.6', isCurrent: true, supersededBy: null }
+    { id: 'old-transcription', attemptId: 'original', value: '120', isCurrent: false, supersededBy: 'questioned-final' },
+    { id: 'questioned-final', attemptId: 'original', value: '12.0', isCurrent: false, supersededBy: 'child-final' },
+    { id: 'child-final', attemptId: 'child', value: '12.6', isCurrent: true, supersededBy: null }
 ] });
 
 test('retained QUESTIONED12.0 remains final after a cross-attempt repeat, while its earlier same-attempt correction is excluded', () => {
@@ -34,7 +34,7 @@ test.each(['correction', 'repeat', 'RETURN', 'evidence'])('%s makes the prior se
     const data = fixture(), saved = JSON.stringify(buildSelectionLineage(data.attempts, data.results).snapshot);
     if (change === 'correction') {
         data.results[2].supersededBy = 'corrected-child';
-        data.results.push({ id: 'corrected-child', workAttemptId: 'child', value: '12.7', isCurrent: true, supersededBy: null });
+        data.results.push({ id: 'corrected-child', attemptId: 'child', value: '12.7', isCurrent: true, supersededBy: null });
     } else if (change === 'repeat') data.attempts.push({ id: 'new-open-child', status: 'OPEN', evidenceHash: null });
     else if (change === 'RETURN') data.attempts[1].status = 'QUESTIONED';
     else data.attempts[1].evidenceHash = 'different-retained-hash';
@@ -55,7 +55,7 @@ test.each(['unknown replacement', 'cycle', 'foreign owner', 'duplicate row', 'ma
     const data = fixture();
     if (problem === 'unknown replacement') data.results[2].supersededBy = 'missing-result';
     if (problem === 'cycle') data.results[2].supersededBy = data.results[0].id;
-    if (problem === 'foreign owner') data.results[2].workAttemptId = 'outside-work-item';
+    if (problem === 'foreign owner') data.results[2].attemptId = 'outside-work-item';
     if (problem === 'duplicate row') data.results.push({ ...data.results[0] });
     const run = () => problem === 'malformed snapshot' ? assertSelectionFresh('{broken', data.attempts, data.results)
         : buildSelectionLineage(data.attempts, data.results);
