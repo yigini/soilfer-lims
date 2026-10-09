@@ -199,8 +199,11 @@ function beforeGuards(options) {
                 ...runTables.map(table => ({ table, missingTable: true })));
             // #189 adds only these seven nullable fields. Keep the captured
             // historical schema literal and continue refusing every other gap.
-            expected.push({ table: 'ProficiencyRound', fields: ['ncrStatus', 'classificationLimits',
+            expected.push({ table: 'ProficiencyRound', fields: ['ncrStatus', 'nonconformityId', 'classificationLimits',
                 'legacyScoreFlag', 'legacyFlaggedAt', 'deletedAt', 'deletedBy', 'deleteReason'] });
+            // #193's exact new table/link are absent from the unchanged captured
+            // historical DDL. Account for those gaps; unexpected gaps still fail.
+            expected.push({table:'NonconformityReport',missingTable:true});
             // #190 is additive. Never reinterpret a captured historical schema
             // as a fresh one when its attempt/review metadata is absent.
             // #191 adds exactly parentAttemptId and note; the captured DDL

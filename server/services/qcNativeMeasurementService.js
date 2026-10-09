@@ -112,11 +112,12 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         for (const { analyte, previous, evaluated } of evaluations) {
             const id = randomUUID();
             if (reviewed && analyte.analysisCode === analysisCode) reviewedEvaluationId = id;
-            await tx.qcEvaluation.create({ data: { id, batchId, analysisCode: analyte.analysisCode, version: (previous?.version || 0) + 1,
+            const storedEvaluation = await tx.qcEvaluation.create({ data: { id, batchId, analysisCode: analyte.analysisCode, version: (previous?.version || 0) + 1,
                 ruleId: analyte.qcRuleId, ruleVersion: analyte.qcRuleVersion, policyVersion: analyte.policyVersion,
                 verdict: evaluated.verdict, evaluatedBy: performedBy, evaluatedAt: now, supersedesId: previous?.id || null,
                 details: JSON.stringify({ ...evaluated, entryMode: correction ? 'CORRECTION' : 'NATIVE_ENTRY', correctionReason: correction ? reason : null,
                     ...(reviewed && { correctionMode: MODE, sourceReference: reviewed.sourceReference, criteriaSource }) }) } });
+            await require('./nonconformityQcService').raiseCrmFailures(tx, actor, storedEvaluation);
             await tx.batchAnalyte.update({ where: { id: analyte.id }, data: { status: evaluated.status } });
             analyte.status = evaluated.status;
             if (['QC_FAIL', 'QC_PASS', 'QC_WARN'].includes(evaluated.status)) {

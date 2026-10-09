@@ -6,10 +6,17 @@ const EDGES = Object.freeze({ RECORDED: ['SUBMITTED', 'QUESTIONED', 'INVALIDATED
 // recalculation. A historical event id or a caller-supplied id grants no proof.
 const transactionEvents = new WeakMap();
 async function appendAttemptEvent(tx, item, attemptId, actor, { action, from, to, reason = null, note = null,
-    oldResultIds = [], newResultIds = [], oldSourceResultIds, newSourceResultIds, sourceEventIds, reviewDecisionId }) {
+    oldResultIds = [], newResultIds = [], oldSourceResultIds, newSourceResultIds, sourceEventIds, reviewDecisionId, nonconformityId }) {
     rules.requireTransaction(tx);
     if (!ACTIONS.includes(action)) throw new rules.TransitionError('Unknown attempt event.', 409, 'WORK_ATTEMPT_EVENT_INVALID');
     const performedBy = rules.actorName(actor), now = new Date();
+    if (nonconformityId) {
+        const report = await tx.nonconformityReport.findUnique({ where: { id: nonconformityId } });
+        if (action !== 'CREATED' || !report || report.source !== 'REPEAT_LIMIT' || report.refType !== 'WorkAttempt' ||
+            report.refId !== attemptId || report.labId !== (item.sample?.assignedLab || item.labId)) {
+            throw new rules.TransitionError('The repeat-limit NCR must name this child and laboratory.', 409, 'NCR_SOURCE_SCOPE_MISMATCH');
+        }
+    }
     const derived=action==='DERIVED_RECALCULATED' ? {oldSourceResultIds,newSourceResultIds,sourceEventIds} : {};
     if(action==='DERIVED_RECALCULATED' && (!Array.isArray(sourceEventIds) || !sourceEventIds.length ||
         !Array.isArray(oldSourceResultIds) || oldSourceResultIds.length!==3 ||
@@ -20,7 +27,7 @@ async function appendAttemptEvent(tx, item, attemptId, actor, { action, from, to
         performedBy, performedByName: actor?.name || performedBy, timestamp: now,
         sampleId: item.sampleId, labId: item.labId || item.sample?.assignedLab || null, analysisCode: item.analysis,
         details: JSON.stringify({ from, to, reason, note, resultId: oldResultIds.length === 1 ? oldResultIds[0] : null, oldResultIds, newResultIds,
-            ...derived,...(reviewDecisionId && {reviewDecisionId}) }),
+            ...derived,...(reviewDecisionId && {reviewDecisionId}), ...(nonconformityId && {nonconformityId}) }),
         before: JSON.stringify({ status: from, resultIds: oldResultIds }), after: JSON.stringify({ status: to, resultIds: newResultIds }) } });
     const events=transactionEvents.get(tx) || [];events.push(event);transactionEvents.set(tx,events);
     return event;

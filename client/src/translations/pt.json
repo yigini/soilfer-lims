@@ -3125,5 +3125,46 @@
     },
     "reportDerived": "Informar a classe das frações selecionadas",
     "fractionNotReportable": "{{fraction}} não pode ser reportada (seleção {{selectionId}})."
+  },
+  "nonconformity": {
+    "title": "Não conformidades",
+    "status": "Estado",
+    "source": "Origem",
+    "allStatuses": "Todos os estados",
+    "allSources": "Todas as origens",
+    "loading": "A carregar não conformidades…",
+    "empty": "Nenhuma não conformidade corresponde a estes filtros.",
+    "description": "Descrição",
+    "raisedBy": "Registada por",
+    "impactAssessment": "Avaliação do impacto",
+    "correctiveAction": "Ação corretiva",
+    "statuses": {
+      "OPEN": "Aberta",
+      "ACTION": "Em ação",
+      "CLOSED": "Fechada"
+    },
+    "sources": {
+      "QC": "Controlo de qualidade",
+      "PT": "Ensaio de aptidão",
+      "REPEAT_LIMIT": "Limite de repetições",
+      "CUSTOMER": "Cliente",
+      "INTAKE": "Receção",
+      "OTHER": "Outro"
+    },
+    "errors": {
+      "NCR_FAILED": "Não foi possível carregar as não conformidades.",
+      "NCR_READ_FORBIDDEN": "É necessária permissão de leitura de qualidade.",
+      "NCR_SCOPE_DENIED": "Este registo está fora do âmbito do seu laboratório.",
+      "NCR_FILTER_INVALID": "Escolha um estado ou origem válido.",
+      "NCR_MANAGEMENT_FORBIDDEN": "É necessária autoridade de revisão.",
+      "NCR_ASSESSMENT_REQUIRED": "Registe uma descrição e a avaliação do impacto.",
+      "NCR_ACTION_REQUIRED": "Registe a ação corretiva.",
+      "NCR_TRANSITION_REFUSED": "Passe de aberta para ação e depois para fechada.",
+      "NCR_INPUT_INVALID": "Escolha um comando de não conformidade válido.",
+      "NCR_NOT_FOUND": "Não conformidade não encontrada.",
+      "NCR_STATE_CHANGED": "Este registo mudou. Atualize antes de tentar novamente.",
+      "NCR_SOURCE_SCOPE_MISMATCH": "A origem deve corresponder a este registo e laboratório.",
+      "ATTEMPT_LIMIT_OVERRIDE_NOT_NEEDED": "O trabalho não atingiu o seu limite de repetições."
+    }
   }
 }

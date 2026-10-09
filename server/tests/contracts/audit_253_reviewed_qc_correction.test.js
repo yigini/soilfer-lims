@@ -238,7 +238,8 @@ test('real legacy-imported NULL authors and historical snapshots stay locked wit
     for (const [script, installer] of [['install_result_attempt_links', 'installResultAttemptLinks'], ['install_sample_holds', 'installSampleHolds'],
         ['install_reference_materials', 'installReferenceMaterials'], ['install_qc_rules', 'installQcRules'], ['install_qc_runs', 'installQcRuns'],
         ['install_qc_gate_scope', 'installQcGateScope'], ['install_proficiency_evidence', 'installProficiencyEvidence'],
-        ['install_result_equipment_evidence', 'installResultEquipmentEvidence'], ['install_work_attempt_contract', 'installWorkAttemptContract']]) {
+        ['install_result_equipment_evidence', 'installResultEquipmentEvidence'], ['install_work_attempt_contract', 'installWorkAttemptContract'],
+        ['install_nonconformity_reports', 'installNonconformityReports']]) {
         const install = require(`../../scripts/${script}`)[installer], dry = install({ dbPath: historical.file });
         install({ dbPath: historical.file, apply: true, ...(script === 'install_qc_runs' && { planSha256: dry.backfillFingerprint }) });
     }

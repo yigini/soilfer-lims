@@ -22,6 +22,16 @@ function classify(db, source) {
     }
     if (!db.prepare('PRAGMA table_xinfo("_schema_migrations")').all().some(row => row.name === 'details')) differences.push('Migration ledger absent');
     if (differences.length) throw fail('PT_SCHEMA_MISMATCH', 'Install the prior application schema first.', differences);
+    const ncrEvidence = require('../services/nonconformityInstallationEvidence');
+    if (ncrEvidence.extensionPresent(db)) {
+        try {
+            const successor = ncrEvidence.assertCompleteNcrEvidence(db);
+            return { classification: 'COMPLETE', successor: successor.classification,
+                sources: { migrationSha256: source.sha256 }, successorSources: successor.sources,
+                bootstrapRebuild: [], backfillCount: 0,
+                roundCount: db.prepare('SELECT count(*) n FROM "ProficiencyRound"').get().n, scoreOutcomeSha256: scores(db) };
+        } catch (error) { throw fail('PT_SCHEMA_MISMATCH', 'PT successor is partial, mixed or differs from its reviewed release.', error.differences); }
+    }
     const present = Object.entries(FIELDS).map(([name, type]) => {
         const column = columns.find(row => row.name === name);
         if (column && (column.type !== type || column.notnull || column.dflt_value !== null || column.pk || column.hidden)) differences.push(`${name} differs`);

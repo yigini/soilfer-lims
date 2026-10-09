@@ -345,12 +345,13 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_qc_rules').installQcRules({ dbPath: targetDb, apply: true });
         require('../../scripts/install_qc_runs').installQcRuns({ dbPath: targetDb, apply: true });
         require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: targetDb, apply: true });
-        require('../../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: targetDb, apply: true });
+        require('../../scripts/bootstrap_pt_nonconformity').bootstrapPtNonconformity({ dbPath: targetDb, apply: true });
         require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: targetDb, apply: true });
         require('../../scripts/install_workitem_uniqueness').installWorkItemUniqueness({ dbPath: targetDb, apply: true });
         require('../../scripts/install_work_attempt_contract').installWorkAttemptContract({ dbPath: targetDb, apply: true });
         require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({ dbPath: targetDb, apply: true });
         require('../../scripts/install_reported_value_selections').installReportedValueSelections({ dbPath: targetDb, apply: true });
+        require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: targetDb, apply: true });
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
@@ -376,6 +377,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_qc_gate_scope.js').replace(/\\/g, '/')}" --db "\${DATABASE_PATH:-/app/server/prisma/dev.db}" --apply`)
             .replaceAll('node scripts/install_proficiency_evidence.js',
                 `node "${path.join(serverDir, 'scripts/install_proficiency_evidence.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/bootstrap_pt_nonconformity.js',
+                `node "${path.join(serverDir, 'scripts/bootstrap_pt_nonconformity.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_equipment_evidence.js',
                 `node "${path.join(serverDir, 'scripts/install_result_equipment_evidence.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_workitem_uniqueness.js',

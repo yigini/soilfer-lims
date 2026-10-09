@@ -157,7 +157,7 @@ node scripts/install_qc_gate_scope.js --db "${DATABASE_PATH:-/app/server/prisma/
 # Install nullable PT evidence only. Legacy sigma/NCR backfill remains a
 # separate reviewed command; startup never approves its own backfill plan.
 echo "📦 Installing proficiency evidence..."
-node scripts/install_proficiency_evidence.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+node scripts/bootstrap_pt_nonconformity.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 node scripts/install_result_equipment_evidence.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
 echo "📦 Installing duplicate-marker prerequisite..."

@@ -3125,5 +3125,46 @@
     },
     "reportDerived": "Reportar clase a partir de las fracciones seleccionadas",
     "fractionNotReportable": "{{fraction}} no es reportable (selección {{selectionId}})."
+  },
+  "nonconformity": {
+    "title": "No conformidades",
+    "status": "Estado",
+    "source": "Origen",
+    "allStatuses": "Todos los estados",
+    "allSources": "Todos los orígenes",
+    "loading": "Cargando no conformidades…",
+    "empty": "Ninguna no conformidad coincide con estos filtros.",
+    "description": "Descripción",
+    "raisedBy": "Registrada por",
+    "impactAssessment": "Evaluación del impacto",
+    "correctiveAction": "Acción correctiva",
+    "statuses": {
+      "OPEN": "Abierta",
+      "ACTION": "En acción",
+      "CLOSED": "Cerrada"
+    },
+    "sources": {
+      "QC": "Control de calidad",
+      "PT": "Ensayo de aptitud",
+      "REPEAT_LIMIT": "Límite de repeticiones",
+      "CUSTOMER": "Cliente",
+      "INTAKE": "Recepción",
+      "OTHER": "Otro"
+    },
+    "errors": {
+      "NCR_FAILED": "No se pudieron cargar las no conformidades.",
+      "NCR_READ_FORBIDDEN": "Se requiere permiso de lectura de calidad.",
+      "NCR_SCOPE_DENIED": "El registro está fuera del ámbito de su laboratorio.",
+      "NCR_FILTER_INVALID": "Seleccione un estado u origen válido.",
+      "NCR_MANAGEMENT_FORBIDDEN": "Se requiere autoridad de revisión.",
+      "NCR_ASSESSMENT_REQUIRED": "Registre una descripción y la evaluación del impacto.",
+      "NCR_ACTION_REQUIRED": "Registre la acción correctiva.",
+      "NCR_TRANSITION_REFUSED": "Pase de abierta a acción y después a cerrada.",
+      "NCR_INPUT_INVALID": "Seleccione un comando de no conformidad válido.",
+      "NCR_NOT_FOUND": "No conformidad no encontrada.",
+      "NCR_STATE_CHANGED": "El registro cambió. Actualice antes de reintentar.",
+      "NCR_SOURCE_SCOPE_MISMATCH": "El origen debe corresponder al registro y al laboratorio.",
+      "ATTEMPT_LIMIT_OVERRIDE_NOT_NEEDED": "El trabajo no ha alcanzado su límite de repeticiones."
+    }
   }
 }

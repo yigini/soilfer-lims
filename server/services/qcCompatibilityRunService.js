@@ -151,11 +151,13 @@ async function writeCompatibilityMeasurements(db, batchId, actor, input = {}, { 
         for (const data of measurements) await tx.qcMeasurement.create({ data });
         const id = randomUUID(), positionIds = positions.map(row => row.id);
         const measurementIds = [...new Set([...measurements.map(row => row.id), ...[...parentReadings.values()].map(row => row.id)])];
-        await tx.qcEvaluation.create({ data: { id, batchId, analysisCode, version: (previous?.version || 0) + 1,
+        const storedEvaluation = await tx.qcEvaluation.create({ data: { id, batchId, analysisCode, version: (previous?.version || 0) + 1,
             ruleId: policy.qcRule.id, ruleVersion: policy.qcRule.version, policyVersion: policy.policyVersion,
             verdict, evaluatedBy: performedBy, evaluatedAt: now, supersedesId: previous?.id || null,
             details: JSON.stringify({ entryMode: 'LEGACY_RESUBMISSION', actor: { id: actor.id || null, username: actor.username },
-                reopenEventId: reopen?.id || null, evaluation: evaluated, positionIds, measurementIds }) } });
+                reopenEventId: reopen?.id || null, evaluation: evaluated, positionIds, measurementIds,
+                mode:policy.qcMode,criteriaSnapshot:JSON.stringify(policy) }) } });
+        await require('./nonconformityQcService').raiseCrmFailures(tx, actor, storedEvaluation);
         analyte.status = verdict === 'INCOMPLETE' ? 'QC_PENDING' : verdict === 'WARN' ? 'QC_WARN' : verdict === 'FAIL' ? 'QC_FAIL' : 'QC_PASS';
         await tx.batchAnalyte.update({ where: { id: analyte.id }, data: { status: analyte.status } });
         const status = aggregateBatchStatus(batch.analytes, { startedAt: batch.startedAt });

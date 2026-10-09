@@ -14,7 +14,7 @@ export default defineConfig({
         __BUILD_DATE__: JSON.stringify(buildDate),
     },
     build: {
-        commonjsOptions: { include: [/node_modules/, /shared[\\/](numberParse|reportedValueFormat)\.js$/] },
+        commonjsOptions: { include: [/node_modules/, /shared[\\/](?:numberParse|reportedValueFormat|nonconformityContract)\.js$/] },
         rollupOptions: {
             output: {
                 manualChunks: {
@@ -30,8 +30,9 @@ export default defineConfig({
         chunkSizeWarningLimit: 1000
     },
     resolve: { alias: { '@lims/number-parse': fileURLToPath(new URL('../shared/numberParse.js', import.meta.url)),
-        '@lims/reported-value-format': fileURLToPath(new URL('../shared/reportedValueFormat.js', import.meta.url)) } },
-    optimizeDeps: { include: ['@lims/number-parse','@lims/reported-value-format'] },
+        '@lims/reported-value-format': fileURLToPath(new URL('../shared/reportedValueFormat.js', import.meta.url)),
+        '@lims/nonconformity': fileURLToPath(new URL('../shared/nonconformityContract.js', import.meta.url)) } },
+    optimizeDeps: { include: ['@lims/number-parse', '@lims/reported-value-format', '@lims/nonconformity'] },
     server: {
         proxy: {
             '/api': {
