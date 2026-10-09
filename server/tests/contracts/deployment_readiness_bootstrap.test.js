@@ -345,7 +345,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_qc_rules').installQcRules({ dbPath: targetDb, apply: true });
         require('../../scripts/install_qc_runs').installQcRuns({ dbPath: targetDb, apply: true });
         require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: targetDb, apply: true });
-        require('../../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: targetDb, apply: true });
+        require('../../scripts/bootstrap_pt_nonconformity').bootstrapPtNonconformity({ dbPath: targetDb, apply: true });
         require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: targetDb, apply: true });
         require('../../scripts/install_workitem_uniqueness').installWorkItemUniqueness({ dbPath: targetDb, apply: true });
         require('../../scripts/install_work_attempt_contract').installWorkAttemptContract({ dbPath: targetDb, apply: true });

@@ -35,7 +35,8 @@ function expectedSchema() {
     const db=new Database(':memory:');
     try {
         db.exec('CREATE TABLE Lab(id TEXT PRIMARY KEY); CREATE TABLE ProficiencyRound(id TEXT PRIMARY KEY,ncrStatus TEXT);');
-        db.exec(loadNonconformityMigrationSource().schemaSql);
+        const source=loadNonconformityMigrationSource();
+        db.exec(source.schemaSql);
         const columns=db.prepare('PRAGMA table_xinfo("NonconformityReport")').all();
         const foreignKeys=db.prepare('PRAGMA foreign_key_list("NonconformityReport")').all();
         const indexes=db.prepare("SELECT name,sql FROM sqlite_master WHERE type='index' AND tbl_name='NonconformityReport' AND sql IS NOT NULL ORDER BY name").all();
