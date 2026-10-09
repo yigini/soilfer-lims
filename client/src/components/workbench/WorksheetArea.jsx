@@ -467,6 +467,7 @@ export default function WorksheetArea({
                                                     <NumericEditor
                                                         onBarcodeRejected={scanner.rejectValueBurst}
                                                         numberFormat={item.numberFormat}
+                                                        validation={item.valueRules}
                                                         disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
                                                         value={draft?.value ?? ''}
                                                         onChange={(val) => changeResultDraft(item.workItemId, val)}

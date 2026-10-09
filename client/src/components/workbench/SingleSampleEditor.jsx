@@ -240,6 +240,7 @@ export default function SingleSampleEditor({
                             onBarcodeRejected={onBarcodeRejected}
                             inputRef={node => onInputRef?.(currentItem.workItemId, node)}
                             numberFormat={currentItem.numberFormat}
+                            validation={currentItem.valueRules}
                             value={draft?.value ?? ''}
                             unit={activeGroup?.unit}
                             onChange={value => onDraftChange(currentItem.workItemId, value)}

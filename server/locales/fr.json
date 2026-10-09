@@ -1632,5 +1632,33 @@
       "RESULT_INSTRUMENT_MISMATCH": "Utilisez l’instrument figé au démarrage de cette série.",
       "RESULT_METHOD_REVISION_CHANGED": "La révision de la méthode a changé après le démarrage. Utilisez une nouvelle série."
     }
+  },
+  "valueValidation": {
+    "hardMin": "Minimum absolu",
+    "hardMax": "Maximum absolu",
+    "typicalMin": "Minimum habituel",
+    "typicalMax": "Maximum habituel",
+    "loq": "LQ",
+    "lod": "LD",
+    "calibrationMax": "Maximum de calibration",
+    "unit": "Unité",
+    "notConfigured": "Non configuré",
+    "fillLoq": "Insérer la LQ de la méthode",
+    "LOQ_NOT_CONFIGURED": "La LQ de la méthode n’est pas configurée",
+    "NUMBER_FORMAT_POLICY_INVALID": "Le format numérique configuré est invalide",
+    "flags": {
+      "VALUE_REQUIRED": "Valeur requise",
+      "INVALID_FORMAT": "Nombre invalide",
+      "BELOW_MIN": "Sous le minimum absolu",
+      "ABOVE_MAX": "Au-dessus du maximum absolu",
+      "CENSOR_LIMIT_BELOW_LOQ": "Limite censurée inférieure à la LQ de la méthode",
+      "BELOW_LOQ": "Sous la LQ de la méthode",
+      "BELOW_LOD": "Sous la LD de la méthode",
+      "OUTSIDE_TYPICAL_RANGE": "Hors de la plage habituelle",
+      "ABOVE_RANGE": "Au-dessus de la plage de calibration",
+      "AMBIGUOUS_NUMBER": "Séparateur décimal ou de milliers ambigu",
+      "INVALID_NUMBER": "Format numérique invalide",
+      "NUMBER_FORMAT_POLICY_INVALID": "Le format numérique configuré est invalide"
+    }
   }
 }

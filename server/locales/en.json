@@ -1632,5 +1632,33 @@
       "RESULT_INSTRUMENT_MISMATCH": "Use the instrument frozen on this run.",
       "RESULT_METHOD_REVISION_CHANGED": "The method revision changed after run start. Use a new run."
     }
+  },
+  "valueValidation": {
+    "hardMin": "Hard minimum",
+    "hardMax": "Hard maximum",
+    "typicalMin": "Typical minimum",
+    "typicalMax": "Typical maximum",
+    "loq": "LOQ",
+    "lod": "LOD",
+    "calibrationMax": "Calibration maximum",
+    "unit": "Unit",
+    "notConfigured": "Not configured",
+    "fillLoq": "Fill method LOQ",
+    "LOQ_NOT_CONFIGURED": "Method LOQ is not configured",
+    "NUMBER_FORMAT_POLICY_INVALID": "Number format policy is invalid",
+    "flags": {
+      "VALUE_REQUIRED": "Value required",
+      "INVALID_FORMAT": "Invalid number",
+      "BELOW_MIN": "Below hard minimum",
+      "ABOVE_MAX": "Above hard maximum",
+      "CENSOR_LIMIT_BELOW_LOQ": "Censor limit below method LOQ",
+      "BELOW_LOQ": "Below method LOQ",
+      "BELOW_LOD": "Below method LOD",
+      "OUTSIDE_TYPICAL_RANGE": "Outside typical range",
+      "ABOVE_RANGE": "Above calibration range",
+      "AMBIGUOUS_NUMBER": "Ambiguous decimal or thousands separator",
+      "INVALID_NUMBER": "Invalid number format",
+      "NUMBER_FORMAT_POLICY_INVALID": "Number format policy is invalid"
+    }
   }
 }

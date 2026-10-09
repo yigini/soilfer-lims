@@ -54,7 +54,7 @@ test('existing manager inline range override remains available and retains its o
 test('the request context inherits the started native run instrument rather than stale WorkItem equipment',async()=>{
     const f=await fixture(),native=require('../../services/qcNativeRunService');
     const run=await native.startNativeRun(f.db,(await native.buildNativeRun(f.db,f.actor,f.input)).id,f.actor);
-    const stale=await f.db.equipmentAsset.create({data:{labId:f.labId,name:'Stale work item instrument',assetType:'OTHER',status:'IN_SERVICE',criticality:'NON_CRITICAL'}});
+    const stale=await f.db.equipmentAsset.create({data:{id:require('node:crypto').randomUUID(),labId:f.labId,name:'Stale work item instrument',assetType:'OTHER',status:'IN_SERVICE',criticality:'NON_CRITICAL'}});
     await f.db.workItem.update({where:{id:f.items[0].id},data:{equipmentId:stale.id}});
     const resolved=await f.resolve('65',{equipmentId:null});
     expect(resolved.ctx).toMatchObject({batchId:run.id,equipmentId:f.instrument.id});
