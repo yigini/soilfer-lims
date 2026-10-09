@@ -3215,6 +3215,7 @@
       "QC_RUN_LAB_REQUIRED": "Selecione um laboratório dentro do seu âmbito.",
       "QC_SEQUENCE_ANALYSES_INVALID": "Selecione uma análise para esta série.",
       "QC_BATCH_METHOD_AMBIGUOUS": "Selecione o método registrado; um método diferente requer outra série.",
+      "INSTRUMENT_REQUIRED": "Selecione o instrumento exigido para esta execução e método.",
       "INSTRUMENT_NOT_ELIGIBLE": "Selecione um instrumento elegível e disponível para este método.",
       "QC_RUN_INPUT_INVALID": "Selecione análise, método, instrumento e amostras.",
       "QC_RUN_NOT_READY": "Uma amostra não está pronta. Verifique seus pré-requisitos e atribuição.",

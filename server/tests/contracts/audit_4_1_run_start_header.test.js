@@ -152,6 +152,37 @@ test('the queue exposes RUN context, and real completion retains a different Wor
         expect(await f.db.result.findFirst({ where: { sampleId: row.sampleId } })).toMatchObject({ equipmentId: f.instrument.id });
     });
 });
+test.each(['AUTO', 'REQUIRED'].flatMap(policy => ['omitted', 'null', 'empty'].map(input => [policy, input])))('%s rejects a %s required run instrument through the real API with zero writes', async (policy, missing) => {
+    const f = await fixture();
+    // A ready WorkItem instrument must not conceal a missing run instrument.
+    await f.db.workItem.update({ where: { id: f.items[0].id }, data: { equipmentId: f.instrument.id } });
+    if (policy === 'REQUIRED') {
+        await f.db.equipmentMethodEligibility.updateMany({ where: { labId: f.labId }, data: { isRequired: false } });
+        await f.setPolicy([{ key: 'equipment.requireEquipment', value: policy, analysisCode: f.analysisCode, methodologyId: f.method.id }]);
+    }
+    const input = { ...f.startInput };
+    if (missing === 'omitted') delete input.instrumentId;
+    if (missing === 'null') input.instrumentId = null;
+    if (missing === 'empty') input.instrumentId = '';
+    const before = await snapshot(f);
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const response = await request(app).post('/api/qc/runs/start').set('Authorization', `Bearer ${token}`).send(input);
+        expect(response.status).toBe(422);
+        expect(response.body.code).toBe('INSTRUMENT_REQUIRED');
+    });
+    expect(await snapshot(f)).toEqual(before);
+});
+
+test.each(['AUTO', 'NOT_REQUIRED'])('%s retains instrument-optional run starts when the resolved requirement is false', async policy => {
+    const f = await fixture();
+    if (policy === 'AUTO') await f.db.equipmentMethodEligibility.updateMany({ where: { labId: f.labId }, data: { isRequired: false } });
+    else await f.setPolicy([{ key: 'equipment.requireEquipment', value: policy, analysisCode: f.analysisCode, methodologyId: f.method.id }]);
+    expect((await runOptions(f.db, f.actor, f.startInput)).equipmentRequired).toBe(false);
+    const input = { ...f.startInput }; delete input.instrumentId;
+    const batch = await startWorkbenchRun(f.db, f.actor, input);
+    expect(batch).toMatchObject({ status: 'RUNNING', instrumentId: null });
+});
+
 test.each(['ineligible', 'overdue', 'method-mismatch', 'held', 'capacity', 'curve'])('%s start refuses with a stable 4xx and rolls back every run/membership/audit row', async kind => {
     const f = await fixture(kind === 'capacity' ? 2 : 1); let input = { ...f.startInput }, code;
     if (kind === 'ineligible') { input.instrumentId = 'unregistered'; code = 'INSTRUMENT_NOT_ELIGIBLE'; }

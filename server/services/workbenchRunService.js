@@ -61,6 +61,9 @@ async function startWorkbenchRun(db, actor, input = {}) {
         const options = await runOptions(tx, actor, input);
         if (!options.methodologyId) throw failure(422, 'QC_BATCH_METHOD_AMBIGUOUS', 'Select the laboratory method for this run.');
         const instrumentId = input.instrumentId || null;
+        if (options.equipmentRequired && !instrumentId) {
+            throw failure(422, 'INSTRUMENT_REQUIRED', 'Select the required run instrument for this method.');
+        }
         if (instrumentId && !options.eligibleEquipment.some(asset => asset.id === instrumentId)) {
             throw failure(422, 'INSTRUMENT_NOT_ELIGIBLE', 'Select an eligible, ready instrument for this method.');
         }

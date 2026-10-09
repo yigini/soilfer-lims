@@ -1610,6 +1610,7 @@
       "QC_RUN_LAB_REQUIRED": "Select a laboratory in your scope.",
       "QC_SEQUENCE_ANALYSES_INVALID": "Select one analysis for this run.",
       "QC_BATCH_METHOD_AMBIGUOUS": "Select the recorded method; a different method requires another run.",
+      "INSTRUMENT_REQUIRED": "Select the required run instrument for this method.",
       "INSTRUMENT_NOT_ELIGIBLE": "Select an eligible, ready instrument for this method.",
       "QC_RUN_INPUT_INVALID": "Select the analysis, method, instrument and samples.",
       "QC_RUN_NOT_READY": "A selected sample is not ready. Check its prerequisites and assignment.",
