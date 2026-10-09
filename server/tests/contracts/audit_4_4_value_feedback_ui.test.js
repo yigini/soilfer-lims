@@ -32,6 +32,15 @@ test('unconfigured LOQ disables the quick key with its stable reason; null warni
     expect(onChange).not.toHaveBeenCalled();expect(event.preventDefault).not.toHaveBeenCalled();
     expect(host.all().find(node=>node.props?.['data-value-severity']).props.title).toContain('valueValidation.calibrationMax: valueValidation.notConfigured');
 });
+test('a barcode-protected cell waits for the actual burst boundary before expanding a single less-than character',async()=>{
+    const onChange=jest.fn(),host=mountUi('components/workbench/NumericEditor.jsx',{
+        value:'',onChange,validation:rules,numberFormat:format,onBarcodeRejected:jest.fn()});
+    await host.render();const editor=host.all().find(node=>node.props?.onBarcodeRejected);
+    const event={key:'<',preventDefault:jest.fn()};editor.props.onKeyDown(event);
+    expect(onChange).not.toHaveBeenCalled();expect(event.preventDefault).not.toHaveBeenCalled();
+    // Only BarcodeSafeInput's accepted, buffered change may expand the quick key.
+    editor.props.onChange({target:{value:'<'}});expect(onChange).toHaveBeenCalledWith('<0.5');
+});
 test.each(['WorksheetArea','SingleSampleEditor'])('%s passes the actual per-row server rules into the numeric input',async name=>{
     const row={workItemId:'owned-work',sampleId:'owned-sample',sampleDisplayId:'Owned sample',analysis:'PH_H2O',status:'IN_PROGRESS',
         numberFormat:format,valueRules:rules,readiness:{isReady:true},draft:{value:'65'}};

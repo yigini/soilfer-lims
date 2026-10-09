@@ -42,7 +42,7 @@ export default function NumericEditor({
     const focusValue = useRef(null);
     const handleKeyDown = (e) => {
         if (revertWorksheetCell(e, focusValue.current, onRevertValue)) return;
-        if (e.key === '<' && quick.value !== null && !disabled) {
+        if (!onBarcodeRejected && e.key === '<' && quick.value !== null && !disabled) {
             e.preventDefault();
             onChange(quick.value);
             return;
@@ -63,7 +63,8 @@ export default function NumericEditor({
                 type="text"
                 inputMode="decimal"
                 value={value ?? ''}
-                onChange={event => onChange(event.target.value)}
+                onChange={event => onChange(event.target.value === '<' && quick.value !== null
+                    ? quick.value : event.target.value)}
                 onFocus={event => { focusValue.current = event.currentTarget.value; }}
                 {...(onBarcodeRejected ? { onBarcodeRejected } : {})}
                 onKeyDown={handleKeyDown}
