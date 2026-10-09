@@ -20,7 +20,7 @@ function classifyCalculationSchema(db, source) {
     for (const [table, fields] of [['Lab', ['id']], ['User', ['username']], ['Analysis', ['code', 'unitCode']],
         ['Unit', ['code', 'quantityKind', 'factorToBase']], ['Methodology', ['id', 'analysisCode']],
         ['Batch', ['id', 'labId', 'startedAt']], ['BatchAnalyte', ['id', 'labId', 'batchId', 'methodologyId', 'criteriaSnapshot', 'provenance']],
-        ['Result', ['id', 'rawInput', 'numericValue', 'unitCode']], ['_schema_migrations', ['id', 'appliedAt', 'details']]]) {
+        ['Result', ['id', 'rawInput', 'numericValue', 'unit']], ['_schema_migrations', ['id', 'appliedAt', 'details']]]) {
         const object = db.prepare('SELECT type FROM sqlite_master WHERE name=?').get(table);
         const columns = db.prepare(`PRAGMA table_xinfo("${table}")`).all();
         if (object?.type !== 'table') differences.push(`${table} absent`);

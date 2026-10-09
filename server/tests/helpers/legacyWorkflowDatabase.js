@@ -217,6 +217,11 @@ function beforeGuards(options) {
             // allowed payload, column list and caller unchanged; the real
             // additive installer creates this empty evidence table later.
             expected.push({ table: 'ReportedValueSelection', missingTable: true });
+            // #199 pin6088661994: exactly five additive tables; partial datamodels still fail.
+            const calculationTables = ['CalcTemplate', 'CalcTemplateActivation', 'CalibrationCurve', 'CalibrationPoint', 'ResultCalculation'];
+            const calculationModels = calculationTables.filter(table => modelNames.includes(table));
+            assert.ok(calculationModels.length === 0 || calculationModels.length === calculationTables.length, 'Generated calculation datamodel is partial.');
+            if (calculationModels.length) expected.push(...calculationTables.map(table => ({ table, missingTable: true })));
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }
