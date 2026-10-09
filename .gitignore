@@ -70,3 +70,4 @@ scratch/
 server/tests/.tmp/
 server/tests/.tmp*
 preflight-summary.json
+output/playwright/

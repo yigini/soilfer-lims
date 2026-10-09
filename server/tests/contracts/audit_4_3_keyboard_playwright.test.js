@@ -8,7 +8,7 @@ const { createSampleFixture, createWorkItemFixture } = require('../helpers/workf
 test('real Chromium types and records 40 values through the production app with keyboard input only', async () => {
     const f = await qcGateFixture({ criteria: { blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0 } });
     const previousServe = process.env.SERVE_CLIENT, previousSecret = process.env.JWT_SECRET;
-    let browser, server, app;
+    let browser, server, app, context, page;
     const artifactRoot = path.resolve(__dirname, '../../../output/playwright');
     fs.mkdirSync(artifactRoot, { recursive: true });
     try {
@@ -37,7 +37,7 @@ test('real Chromium types and records 40 values through the production app with 
             const token = jwt.sign({ id: f.actor.username, tokenVersion: 0 }, process.env.JWT_SECRET, { expiresIn: '10m' });
             const user = await f.db.user.findUnique({ where: { username: f.actor.username } });
             browser = await chromium.launch();
-            const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, locale: 'en-US' });
+            context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, locale: 'en-US' });
             await context.addInitScript(({ token, user }) => {
                 localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user));
                 sessionStorage.setItem('soilfer_locale_override', 'en');
@@ -45,7 +45,7 @@ test('real Chromium types and records 40 values through the production app with 
                 document.addEventListener('mousedown', () => window.__keyboardMouseEvents++);
             }, { token, user });
             await context.tracing.start({ screenshots: true, snapshots: true, sources: true });
-            const page = await context.newPage();
+            page = await context.newPage();
             await page.goto(`http://127.0.0.1:${server.address().port}/workbench?analysis=${encodeURIComponent(f.analysisCode)}&queue=my_work`);
             await page.locator('[data-testid="worksheet-grid"] input[aria-label$=" determination"]').first().waitFor();
             expect(await page.locator('[data-testid="worksheet-grid"] input[aria-label$=" determination"]').count()).toBe(40);
@@ -89,6 +89,17 @@ test('real Chromium types and records 40 values through the production app with 
             await context.tracing.stop({ path: path.join(artifactRoot, 'audit-196-keyboard-40.zip') });
             await context.close();
         });
+    } catch (error) {
+        if (page && !page.isClosed()) {
+            await page.screenshot({ path: path.join(artifactRoot, 'audit-196-keyboard-failure.png'), fullPage: true });
+            fs.writeFileSync(path.join(artifactRoot, 'audit-196-keyboard-failure.json'), JSON.stringify(await page.evaluate(() => ({
+                focus: document.activeElement?.outerHTML,
+                cells: [...document.querySelectorAll('[data-testid="worksheet-grid"] input')].map(input => ({ label: input.getAttribute('aria-label'),
+                    type: input.type, disabled: input.disabled, readOnly: input.readOnly, tabIndex: input.tabIndex, value: input.value }))
+            })), null, 2));
+            await context.tracing.stop({ path: path.join(artifactRoot, 'audit-196-keyboard-failure.zip') });
+        }
+        throw error;
     } finally {
         await browser?.close();
         if (server) await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
