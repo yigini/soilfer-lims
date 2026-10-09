@@ -3289,6 +3289,7 @@
       "REJECTED": "Rejected",
       "CANCELLED": "Cancelled",
       "CONSUMED": "Used for recording"
-    }
+    },
+    "loadFailed": "Could not load override requests."
   }
 }

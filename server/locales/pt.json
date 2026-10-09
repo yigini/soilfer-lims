@@ -1680,6 +1680,7 @@
       "REJECTED": "Rejeitada",
       "CANCELLED": "Cancelada",
       "CONSUMED": "Usada para o registo"
-    }
+    },
+    "loadFailed": "Não foi possível carregar as solicitações de exceção."
   }
 }

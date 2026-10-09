@@ -253,7 +253,7 @@ export default function SingleSampleEditor({
                     </div>
                 )}
                 {!isOperationalGate && <PreviousResultHint result={currentItem.previousResult} />}
-                {!isOperationalGate && !isTexture && !isSpectral && <ResultValueActions item={currentItem}
+                {!isOperationalGate && !isTexture && !isSpectral && currentItem.valueRules && <ResultValueActions item={currentItem}
                     onChooseApproval={onChooseApproval} onChanged={onChanged} />}
                 {!isOperationalGate && equipment.length > 0 && (
                     <label className="block text-xs text-sf-muted">

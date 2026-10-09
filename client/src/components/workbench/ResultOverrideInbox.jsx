@@ -8,14 +8,21 @@ export default function ResultOverrideInbox({ actorId }) {
     const [rows, setRows] = useState([]), [reasons, setReasons] = useState({});
     const [error, setError] = useState(null), [busy, setBusy] = useState(false);
     const allowed = hasPermission?.('APPROVE_RESULTS') === true;
-    const load = async () => { const response = await axios.get('/api/result-overrides');setRows(response.data); };
+    const load = async () => {
+        const response = await axios.get('/api/result-overrides');
+        if (!Array.isArray(response.data)) throw new Error(t('overrideRequests.loadFailed'));
+        setRows(response.data);
+    };
     useEffect(() => {
         if (!allowed) return;
         let current = true;
-        axios.get('/api/result-overrides').then(response => { if (current) setRows(response.data); })
+        axios.get('/api/result-overrides').then(response => {
+            if (!Array.isArray(response.data)) throw new Error(t('overrideRequests.loadFailed'));
+            if (current) setRows(response.data);
+        })
             .catch(failure => { if (current) setError(failure.response?.data?.error || failure.message); });
         return () => { current = false; };
-    }, [allowed]);
+    }, [allowed, t]);
     const decide = async (row, status) => {
         setBusy(true);setError(null);
         try { await axios.post(`/api/result-overrides/${encodeURIComponent(row.id)}/decision`, {

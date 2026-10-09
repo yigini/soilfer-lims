@@ -1680,6 +1680,7 @@
       "REJECTED": "Rejetée",
       "CANCELLED": "Annulée",
       "CONSUMED": "Utilisée pour l’enregistrement"
-    }
+    },
+    "loadFailed": "Impossible de charger les demandes de dérogation."
   }
 }

@@ -111,7 +111,8 @@ test('actual workbench preview and commit keep the approved id, consume it once 
     expect({status:preview.status,body:preview.body}).toMatchObject({status:200,body:{included:[{overrideRequestId:approved.id,unit:'fixture-unit'}],excluded:[]}});
     expect(await f.state()).toEqual(before);
     const committed=await f.http(f.tech,'post','/api/workbench/v2/completion/commit',{entries:preview.body.included});
-    expect({status:committed.status,body:committed.body}).toMatchObject({status:200,body:{saved:1,errors:[]}});
+    expect({status:committed.status,body:committed.body}).toMatchObject({status:200,body:{saved:1}});
+    expect(committed.body.errors || []).toEqual([]);
     const result=await f.db.result.findFirst();expect(JSON.parse(result.flags)).toContain('OVERRIDE_APPROVED');
     expect(await f.db.resultOverrideRequest.findUnique({where:{id:approved.id}})).toMatchObject({status:'CONSUMED',consumedResultId:result.id});
     const history=await f.http(f.tech,'get','/api/results/'+item.sampleId+'/history');

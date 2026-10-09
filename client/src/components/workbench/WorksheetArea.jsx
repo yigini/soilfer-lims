@@ -482,7 +482,7 @@ export default function WorksheetArea({
                                                     />
                                                 )}
                                                 {!isOperationalGate && <PreviousResultHint result={item.previousResult} />}
-                                                {!isOperationalGate && !isTexture && !isSpectral && <ResultValueActions item={item}
+                                                {!isOperationalGate && !isTexture && !isSpectral && item.valueRules && <ResultValueActions item={item}
                                                     onChooseApproval={onChooseApproval} onChanged={onBatchUpdated} />}
                                                 {position && nativeControls.renderObservation(position)}
                                             </td>

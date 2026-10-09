@@ -3289,6 +3289,7 @@
       "REJECTED": "Rechazada",
       "CANCELLED": "Cancelada",
       "CONSUMED": "Usada para el registro"
-    }
+    },
+    "loadFailed": "No se pudieron cargar las solicitudes de excepción."
   }
 }

@@ -14,16 +14,20 @@ export default function ResultValueActions({ item, onChooseApproval, onChanged }
     useEffect(() => {
         let current = true;
         axios.get('/api/result-overrides', { params: { workItemId: item.workItemId } })
-            .then(response => { if (current) setRows(response.data); })
+            .then(response => {
+                if (!Array.isArray(response.data)) throw new Error(t('overrideRequests.loadFailed'));
+                if (current) setRows(response.data);
+            })
             .catch(failure => { if (current) setError(failure.response?.data?.error || failure.message); });
         return () => { current = false; };
-    }, [item.workItemId]);
+    }, [item.workItemId, t]);
     const active = rows.find(row => row.replicateNo === number && ['REQUESTED', 'APPROVED'].includes(row.status));
     const command = async (url, body) => {
         setBusy(true);setError(null);
         try {
             await axios.post(url, body);
             const response = await axios.get('/api/result-overrides', { params: { workItemId: item.workItemId } });
+            if (!Array.isArray(response.data)) throw new Error(t('overrideRequests.loadFailed'));
             setRows(response.data);setReason('');
             onChooseApproval?.(item.workItemId, null);
         } catch (failure) { setError(failure.response?.data?.error || failure.message); }
