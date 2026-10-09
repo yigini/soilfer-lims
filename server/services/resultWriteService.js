@@ -251,7 +251,7 @@ async function cacheResult(tx, item, text) {
 
 // #191: a correction appends within the actual recorded attempt. Neither its
 // execution/readiness evidence nor another replicate is replaced or refilled.
-async function appendAttemptCorrection(tx, { item, sample, attempt, target, actor, value }) {
+async function appendAttemptCorrection(tx, { item, sample, attempt, target, actor, value, calculation }) {
     rules.requireTransaction(tx);
     const original = await tx.result.findFirst({ where: { id: target.id, attemptId: attempt.id, isCurrent: true, supersededBy: null } });
     const owner = await tx.workAttempt.findUnique({ where: { id: attempt.id }, include: { workItem: { include: { sample: true } } } });
@@ -283,9 +283,14 @@ async function appendAttemptCorrection(tx, { item, sample, attempt, target, acto
     const ctx = { sample,item,attemptId:attempt.id,correctionTargetId:original.id,correctionOriginalUpdatedAt:original.updatedAt,actor,performedBy:rules.actorName(actor),labId,
         analysis,method,methodId:original.methodologyId,batchId:original.batchId,replicateNo:original.replicateNo,
         basis:original.basis,equipmentId:original.equipmentId,equipmentReadiness,equipmentReadinessText:original.equipmentReadiness,source:'measurement' };
-    const measurement = { param:original.param,value,unit:original.unit,replicateNo:original.replicateNo }, now = new Date();
-    const values = await numericValues(tx,ctx,measurement);
+    const measurement = { param:original.param,value,unit:original.unit,replicateNo:original.replicateNo,calculation }, now = new Date();
+    const format = await getNumberFormat(ctx.labId, { db: tx, analysisCode: ctx.analysis.code, methodologyId: ctx.methodId });
+    const evidence = await calculationService.prepareCorrection(tx,ctx,original,measurement,format);
+    const values = await numericValues(tx,ctx,measurement,null,format);
+    if (evidence?.selected.curve && evidence.calculated.intermediate.aboveRange)
+        values.flags = JSON.stringify([...new Set([...JSON.parse(values.flags || '[]'),'ABOVE_RANGE'])]);
     const row = await appendResult(tx,ctx,measurement,{...values,provenance:original.provenance},now);
+    await calculationService.freeze(tx,ctx,row,evidence,now);
     if (row.param === item.analysis) await cacheResult(tx,item,row.value);
     return row;
 }

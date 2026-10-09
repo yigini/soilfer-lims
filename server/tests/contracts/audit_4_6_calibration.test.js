@@ -261,3 +261,114 @@ test('the pinned prerequisite helper has exactly the three approved owned succes
     const runtime = "const {installCalculationReleasePrerequisites}=require('../tests/helpers/calculationReleasePrerequisites');installCalculationReleasePrerequisites(file);";
     expect(scanSource(runtime,'services/fourthCaller.js')).toContainEqual(expect.objectContaining({code:'TEST_HELPER_IMPORTED_BY_RUNTIME'}));
 });
+
+const correctionInputs={absorbance:'3.00',blankConcentration:'0',extractVolume:'20',dilutionFactor:'2',sampleMass:'1',moistureCorrectionFactor:'1'};
+async function correctionReading(f) {
+    await f.start(); const curve=await curves.recordCurve(f.db,f.run.id,f.analyst,f.input);
+    const result=await f.db.$transaction(tx=>require('../../services/resultWriteService').writeResult(tx,
+        {sampleId:f.sample.id,workItemId:f.item.id,actor:f.analyst,measurement:{param:'P_OLSEN',value:40,
+            calculation:{activationId:f.activation.id,templateId:f.template.id,templateVersion:1,curveId:curve.id,inputs:correctionInputs}}}));
+    return {curve,result,calculation:await f.db.resultCalculation.findUnique({where:{resultId:result.id}})};
+}
+const correctionSnapshot=async f=>JSON.parse(JSON.stringify(await Promise.all([f.snapshot(),f.db.resultCalculation.findMany({orderBy:{id:'asc'}}),
+    f.db.workItem.findMany({orderBy:{id:'asc'}}),f.db.workAttempt.findMany({orderBy:{id:'asc'}}),f.db.calcTemplate.findMany({orderBy:{id:'asc'}}),
+    f.db.calcTemplateActivation.findMany({orderBy:{id:'asc'}})])));
+const correctReading=(f,result,extra={})=>require('../../services/workAttemptCorrectionService').correctAttempt(f.db,result.attemptId,f.analyst,
+    {value:'40.01',reason:'TRANSCRIPTION_ERROR',note:'Correct the mistyped absorbance from the original worksheet',
+        resultId:result.id,calculation:{inputs:{...correctionInputs,absorbance:'3.0004'}},...extra});
+
+test.each(['newer-active','deactivated'])('a calculated transcription correction keeps the original basis after %s, preserving every original scientific field',async mode=>{
+    const f=context,original=await correctionReading(f);
+    if(mode==='newer-active') {
+        const next=await templates.revise(f.db,f.manager,f.template.id,{labId:f.lab.id,expectedVersion:1,outputDecimals:4,
+            reason:'A future SOP uses four reporting decimals',sopCitation:'Synthetic future SOP §9'});
+        await activations.change(f.db,f.manager,next.id,{labId:f.lab.id,analysisCode:'P_OLSEN',methodologyId:f.method.id,
+            expectedVersion:next.version,expectedActivationId:f.activation.id,action:'ACTIVATE',verifiedAgainstSop:true,reason:'Future entries use the revised SOP'});
+    } else await activations.change(f.db,f.manager,f.template.id,{labId:f.lab.id,analysisCode:'P_OLSEN',methodologyId:f.method.id,
+        expectedVersion:1,expectedActivationId:f.activation.id,action:'DEACTIVATE',verifiedAgainstSop:true,reason:'Pause future calculations without rebasing historical entries'});
+    const definitions=await f.db.calcTemplate.findMany({orderBy:{id:'asc'}}),activationRows=await f.db.calcTemplateActivation.findMany({orderBy:{id:'asc'}});
+    const corrected=await correctReading(f,original.result),frozen=await f.db.resultCalculation.findUnique({where:{resultId:corrected.result.id}});
+    expect(corrected.result).toMatchObject({numericValue:40.01,attemptId:original.result.attemptId,replicateNo:original.result.replicateNo,
+        methodologyId:original.result.methodologyId,batchId:original.result.batchId,equipmentId:original.result.equipmentId,
+        equipmentReadiness:original.result.equipmentReadiness,basis:original.result.basis,provenance:original.result.provenance});
+    expect(frozen).toMatchObject({templateId:original.calculation.templateId,templateVersion:original.calculation.templateVersion,
+        activationId:original.calculation.activationId,curveId:original.calculation.curveId,parameters:original.calculation.parameters,
+        unitConversion:original.calculation.unitConversion,output:40.01});
+    expect(await f.db.result.findUnique({where:{id:original.result.id}})).toEqual({...original.result,isCurrent:false,supersededBy:corrected.result.id});
+    expect(await f.db.resultCalculation.findUnique({where:{resultId:original.result.id}})).toEqual(original.calculation);
+    expect(await f.db.calcTemplate.findMany({orderBy:{id:'asc'}})).toEqual(definitions);
+    expect(await f.db.calcTemplateActivation.findMany({orderBy:{id:'asc'}})).toEqual(activationRows);
+    const audit=await f.db.auditLog.findFirst({where:{entity:'RESULT_CALCULATION',entityId:frozen.id,action:'RESULT_CALCULATION_CORRECTED'}});
+    expect(JSON.parse(audit.details)).toMatchObject({templateId:original.calculation.templateId,templateVersion:1,activationId:f.activation.id,
+        curveId:original.curve.id,correction:{originalResultCalculationId:original.calculation.id,originalResultId:original.result.id,
+            changedInputs:[{key:'absorbance',oldValue:'3.00',newValue:'3.0004'}]}});
+});
+
+test('calculated final-only, mismatched output and partial raw-input corrections refuse with exact zero-write snapshots',async()=>{
+    const f=context,{result}=await correctionReading(f),before=await correctionSnapshot(f);
+    for(const [extra,code,statusCode] of [[{calculation:undefined},'CALC_CORRECTION_INPUTS_REQUIRED',422],
+        [{value:41},'CALCULATION_MISMATCH',409],[{calculation:{inputs:{absorbance:3}}},'CALC_INPUT_REQUIRED',422]]) {
+        const input={value:'40.01',reason:'TRANSCRIPTION_ERROR',note:'Controlled original-basis correction',resultId:result.id,
+            calculation:{inputs:{...correctionInputs,absorbance:'3.0004'}},...extra};
+        if(Object.hasOwn(extra,'calculation') && extra.calculation===undefined)delete input.calculation;
+        await expect(require('../../services/workAttemptCorrectionService').correctAttempt(f.db,result.attemptId,f.analyst,input))
+            .rejects.toMatchObject({code,statusCode});
+        expect(await correctionSnapshot(f)).toEqual(before);
+    }
+});
+
+test.each(['activationId','templateId','templateVersion','curveId'])('a correction cannot request a different %s basis',async key=>{
+    const f=context,{result}=await correctionReading(f),before=await correctionSnapshot(f);
+    await expect(correctReading(f,result,{calculation:{inputs:correctionInputs,[key]:'untrusted-basis'}}))
+        .rejects.toMatchObject({statusCode:400,code:'ATTEMPT_CORRECTION_FIELDS_INVALID'});
+    expect(await correctionSnapshot(f)).toEqual(before);
+});
+
+test('a revised original curve refuses a transcription correction without writes to either Result or calculation',async()=>{
+    const f=context,{result,curve}=await correctionReading(f);
+    await curves.recordCurve(f.db,f.run.id,f.analyst,{...f.input,expectedCurveId:curve.id,reason:'Retain a revised batch calibration'});
+    const before=await correctionSnapshot(f);
+    await expect(correctReading(f,result)).rejects.toMatchObject({statusCode:409,code:'CALC_CORRECTION_BASIS_SUPERSEDED'});
+    expect(await correctionSnapshot(f)).toEqual(before);
+});
+
+test('the actual correction HTTP route recomputes the extract-range flag and binds only stored ids',async()=>{
+    const f=context,{result,calculation}=await correctionReading(f),inputs={...correctionInputs,absorbance:'5.1'};
+    await withQcRunHttp(f.db,f.analyst,async(app,token)=>{
+        const response=await request(app).post(`/api/attempts/${result.attemptId}/corrections`).set('Authorization',`Bearer ${token}`)
+            .send({resultId:result.id,value:82,reason:'TRANSCRIPTION_ERROR',note:'Correct an absorbance copied from the worksheet',calculation:{inputs}});
+        expect(response.status).toBe(201);expect(response.body.result.numericValue).toBe(82);
+        expect(JSON.parse(response.body.result.flags)).toContain('ABOVE_RANGE');
+        const frozen=await f.db.resultCalculation.findUnique({where:{resultId:response.body.result.id}});
+        expect(JSON.parse(frozen.intermediate)).toMatchObject({extractConcentration:2.05,calibrationMax:2,calibrationUnit:'mg/L',aboveRange:true});
+        expect(await f.db.resultCalculation.findUnique({where:{resultId:result.id}})).toEqual(calculation);
+    },{repeatCommands:true});
+});
+
+test('a calculation field on a non-calculated Result is refused, while its old final-only correction remains available',async()=>{
+    const f=context;await f.start();
+    await activations.change(f.db,f.manager,f.template.id,{labId:f.lab.id,analysisCode:'P_OLSEN',methodologyId:f.method.id,
+        expectedVersion:1,expectedActivationId:f.activation.id,action:'DEACTIVATE',verifiedAgainstSop:true,reason:'Use the existing unactivated result path'});
+    const result=await f.db.$transaction(tx=>require('../../services/resultWriteService').writeResult(tx,
+        {sampleId:f.sample.id,workItemId:f.item.id,actor:f.analyst,measurement:{param:'P_OLSEN',value:7}}));
+    const before=await correctionSnapshot(f);
+    await expect(correctReading(f,result)).rejects.toMatchObject({statusCode:400,code:'ATTEMPT_CORRECTION_FIELDS_INVALID'});
+    expect(await correctionSnapshot(f)).toEqual(before);
+    const response=await require('../../services/workAttemptCorrectionService').correctAttempt(f.db,result.attemptId,f.analyst,
+        {value:'7.25',reason:'TRANSCRIPTION_ERROR',note:'Existing uncalculated correction contract'});
+    expect(response.result.numericValue).toBe(7.25);expect(await f.db.resultCalculation.count()).toBe(0);
+});
+
+test('the authoritative completion preview verifies nested raw calculations, refuses tampering and allocates no Result',async()=>{
+    const f=context;await f.start();const curve=await curves.recordCurve(f.db,f.run.id,f.analyst,f.input),before=await correctionSnapshot(f);
+    const calculation={activationId:f.activation.id,templateId:f.template.id,templateVersion:1,curveId:curve.id,inputs:correctionInputs};
+    await withQcRunHttp(f.db,f.analyst,async(app,token)=>{
+        const endpoint='/api/workbench/v2/completion/preview',entry={workItemId:f.item.id,value:'40',values:{calculation}};
+        const accepted=await request(app).post(endpoint).set('Authorization',`Bearer ${token}`).send({entries:[entry]});
+        expect(accepted.status).toBe(200);expect(accepted.body.eligibleCount).toBe(1);
+        expect(accepted.body.included[0].calculationEvidence).toMatchObject({output:40,templateId:f.template.id,activationId:f.activation.id,curveId:curve.id});
+        const refused=await request(app).post(endpoint).set('Authorization',`Bearer ${token}`).send({entries:[{...entry,value:41}]});
+        expect(refused.status).toBe(200);expect(refused.body.excluded[0].blockers).toContain('CALCULATION_MISMATCH');
+    },{workbench:true});
+    expect(await correctionSnapshot(f)).toEqual(before);
+});
