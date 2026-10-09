@@ -3,9 +3,9 @@ const { evaluateDuplicate } = require('./qcService');
 
 // A read projection over a caller's complete, explicitly owned execution.
 // It cannot allocate an attempt, select a reported value, or alter QC status.
-function sampleReplicatePairView(measurements, { requiredCount, source, policy }) {
+function sampleReplicatePairView(measurements, { requiredCount, source, countSource = source, policy }) {
     const rows = measurements.filter(row => [1, 2, 3].includes(row.replicateNo));
-    const view = { requiredCount, source, status: 'PENDING', reason: null,
+    const view = { requiredCount, source, countSource, status: 'PENDING', reason: null,
         measurements: rows.map(row => ({ id: row.id, attemptId: row.attemptId, replicateNo: row.replicateNo,
             value: row.value, rawInput: row.rawInput ?? null, unit: row.unit, basis: row.basis })),
         mean: null, rpd: null, absoluteDifference: null, range: null };
