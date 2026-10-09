@@ -304,6 +304,26 @@ test.each(['newer-active','deactivated'])('a calculated transcription correction
             changedInputs:[{key:'absorbance',oldValue:'3.00',newValue:'3.0004'}]}});
 });
 
+test('a correction of a correction keeps the first calculation basis and binds its own original evidence',async()=>{
+    const f=context,original=await correctionReading(f);
+    await activations.change(f.db,f.manager,f.template.id,{labId:f.lab.id,analysisCode:'P_OLSEN',methodologyId:f.method.id,
+        expectedVersion:1,expectedActivationId:f.activation.id,action:'DEACTIVATE',verifiedAgainstSop:true,reason:'Pause future calculations'});
+    const first=await correctReading(f,original.result),firstCalculation=await f.db.resultCalculation.findUnique({where:{resultId:first.result.id}});
+    const retainedOriginal=await f.db.result.findUnique({where:{id:original.result.id}});
+    const second=await correctReading(f,first.result,{value:'40.02',calculation:{inputs:{...correctionInputs,absorbance:'3.0008'}}});
+    const secondCalculation=await f.db.resultCalculation.findUnique({where:{resultId:second.result.id}});
+    for(const key of ['templateId','templateVersion','activationId','curveId','parameters','conversionFactor','unitConversion'])
+        expect(secondCalculation[key]).toEqual(original.calculation[key]);
+    expect(second.result).toMatchObject({numericValue:40.02,attemptId:original.result.attemptId,replicateNo:original.result.replicateNo});
+    expect(await f.db.result.findUnique({where:{id:original.result.id}})).toEqual(retainedOriginal);
+    expect(await f.db.result.findUnique({where:{id:first.result.id}})).toEqual({...first.result,isCurrent:false,supersededBy:second.result.id});
+    expect(await f.db.resultCalculation.findUnique({where:{resultId:original.result.id}})).toEqual(original.calculation);
+    expect(await f.db.resultCalculation.findUnique({where:{resultId:first.result.id}})).toEqual(firstCalculation);
+    const audit=await f.db.auditLog.findFirst({where:{entity:'RESULT_CALCULATION',entityId:secondCalculation.id,action:'RESULT_CALCULATION_CORRECTED'}});
+    expect(JSON.parse(audit.details).correction).toEqual({originalResultCalculationId:firstCalculation.id,originalResultId:first.result.id,
+        changedInputs:[{key:'absorbance',oldValue:'3.0004',newValue:'3.0008'}]});
+});
+
 test('calculated final-only, mismatched output and partial raw-input corrections refuse with exact zero-write snapshots',async()=>{
     const f=context,{result}=await correctionReading(f),before=await correctionSnapshot(f);
     for(const [extra,code,statusCode] of [[{calculation:undefined},'CALC_CORRECTION_INPUTS_REQUIRED',422],

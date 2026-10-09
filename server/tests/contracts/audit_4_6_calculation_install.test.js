@@ -151,7 +151,8 @@ async function correctionSqlFixture({ resultField, calculationField, noWitness =
             action: 'DEACTIVATE', verifiedAgainstSop: true, reason: 'Later SOP decision retains the original evidence' });
         const pending = { ...originalCalculation, id: randomUUID(), resultId: appended.id };
         if (calculationField) pending[calculationField] = { templateId: source.id, templateVersion: 2, activationId: deactivation.id,
-            curveId: null, parameters: '[]', conversionFactor: 2, unitConversion: JSON.stringify({ ...computed.unitConversion, extra: 'changed frozen evidence' }) }[calculationField];
+            curveId: null, parameters: '[{"key":"changed-owned-parameter","value":1}]', conversionFactor: 2,
+            unitConversion: JSON.stringify({ ...computed.unitConversion, extra: 'changed frozen evidence' }) }[calculationField];
         const calculationFields = ['templateId', 'templateVersion', 'activationId', 'curveId', 'parameters', 'conversionFactor', 'unitConversion'];
         expect(calculationFields.filter(key => originalCalculation[key] !== pending[key])).toEqual(calculationField ? [calculationField] : []);
         if (revisedCurve) raw(file, sqlite => {
