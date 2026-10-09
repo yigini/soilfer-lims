@@ -96,7 +96,15 @@
     "approvalRole": "Rol de aprobación",
     "approvedAt": "Aprobado el",
     "issuedBy": "Emitido por",
-    "issuerRole": "Rol del emisor"
+    "issuerRole": "Rol del emisor",
+    "notStated": "no indicado",
+    "expandedUncertainty": "U (expandida)",
+    "conditionOnReceipt": "Condición al recibir",
+    "intakeNonconformities": "No conformidades de recepción",
+    "analysisDates": "Fechas de análisis",
+    "sampling": "Muestreo",
+    "issuedAt": "Fecha de emisión",
+    "approvalNotRecorded": "Aprobación: no registrada"
   },
   "common": {
     "save": "Guardar",
@@ -999,7 +1007,9 @@
       "equipment_requireEquipment": "Equipo obligatorio",
       "equipment_unconfiguredReadiness": "Disponibilidad del equipo sin configurar",
       "pt_zScoreLimits": "Límites de puntuación z de aptitud",
-      "qc_reviewedTranscriptionCorrectionEnabled": "Permitir la corrección revisada de errores de transcripción en CC fallido sin disposición"
+      "qc_reviewedTranscriptionCorrectionEnabled": "Permitir la corrección revisada de errores de transcripción en CC fallido sin disposición",
+      "report_uncertaintyMode": "Informar incertidumbre expandida",
+      "report_uncertaintyCoverageFactor": "Factor de cobertura de incertidumbre"
     },
     "title": "Políticas",
     "yes": "Sí",

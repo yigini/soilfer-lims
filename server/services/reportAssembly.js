@@ -7,6 +7,7 @@ const { normalizeUnit, interpretParameter, evaluateSoilProfile } = require('./in
 const { isCurrentValidAnalyticalResult, matchingItems, governingItems,
     getReportingMode, reportingQc, linkedBatchIds, resolveReportingModes } = require('./reportResultGovernance');
 const { freezeReportEvidence, describeReportEvidence } = require('./reportTruthfulnessService');
+const contentEvidence = require('./reportContentEvidence');
 
 /**
  * Assemble a full report object for a given sample.
@@ -58,13 +59,8 @@ async function assembleReport(sampleId, user, options = {}) {
         });
     }
 
-    // Approval is the recorded sample actor and time. A directory lookup may
-    // supply its display name; it must never select another laboratory manager.
-    const approvers = sample.approvedBy ? await db.user.findMany({
-        where: { OR: [{ username: sample.approvedBy }, { id: sample.approvedBy }] },
-        select: { name: true, username: true }
-    }) : [];
-    const approver = approvers.length === 1 ? approvers[0] : null;
+    const attemptIds = [...new Set(reportedSelectionProof.sourceResults.map(row => row.attemptId).filter(Boolean))];
+    const sourceAttempts = attemptIds.length ? await db.workAttempt.findMany({ where: { id: { in: attemptIds } } }) : [];
 
     // 4. Parse metadata
     const metadata = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
@@ -82,7 +78,7 @@ async function assembleReport(sampleId, user, options = {}) {
     let specificMethodologies = [];
     try {
         specificMethodologies = resultMethodIds.length > 0 ? await db.methodology.findMany({
-            where: { id: { in: resultMethodIds } }, include: { reference: true }
+            where: { id: { in: resultMethodIds } }
         }) : [];
     } catch (e) { /* methodologies table may be empty */ }
     const specificMethodMap = new Map(specificMethodologies.map(m => [m.id, m]));
@@ -102,6 +98,15 @@ async function assembleReport(sampleId, user, options = {}) {
         const sources = reportedSelectionProof.sourceResults.filter(row => result.sourceResultIds.includes(row.id));
         const flags = [...new Set(sources.flatMap(row => typeof row.flags === 'string' ? JSON.parse(row.flags) : row.flags || []))];
         const methodology = result.methodologyId ? specificMethodMap.get(result.methodologyId) : null;
+        const methods = contentEvidence.executedMethods(sources, sourceAttempts, evidenceBatches);
+        const scope = { db, analysisCode: result.param, methodologyId: result.methodologyId || null };
+        const policy = lab ? { mode: await require('./policyService').get(lab.id, 'report.uncertaintyMode', scope),
+            coverageFactor: await require('./policyService').get(lab.id, 'report.uncertaintyCoverageFactor', scope) } : {};
+        const uncertainty = contentEvidence.expandedUncertainty(result.numericValue, methodology, policy, {
+            censored: result.censoring && result.censoring !== 'NONE',
+            methodKnown: methods.length > 0 && methods.every(row => row.methodologyId === methodology?.id &&
+                row.methodVersion != null && String(row.methodVersion) === String(methodology?.version))
+        });
         const rawUnit = result.unit || analysis?.units || '';
         const notReportable = result.mode==='NOT_REPORTABLE';
         const interp = notReportable ? {unit:'',rating:null,label:null,advisory:null} : interpretParameter(result.param, result.value, rawUnit);
@@ -120,13 +125,13 @@ async function assembleReport(sampleId, user, options = {}) {
             attemptIds: result.attemptIds,
             selectionRule: result.rule,
             selectionPolicyVersion: result.policyVersion,
-            method: methodology?.name || null,
-            standard: methodology?.standard || null,
-            methodologyId: methodology?.id || result.methodologyId || null,
-            methodVersion: methodology?.version ?? null,
-            methodReference: methodology?.reference ? { id: methodology.reference.id, authority: methodology.reference.authority,
-                citation: methodology.reference.citation, title: methodology.reference.title, year: methodology.reference.year,
-                url: methodology.reference.url } : null,
+            method: methods.map(row => row.method).filter(Boolean).join('; ') || null,
+            standard: methods.map(row => row.standard).filter(Boolean).join('; ') || null,
+            methodologyId: result.methodologyId || null,
+            methodVersion: methods.length === 1 ? methods[0].methodVersion : null,
+            executedMethods: methods,
+            uncertainty,
+            uncertaintyPolicy: policy,
             interpretation: {
                 rating: interp.rating,
                 label: interp.label,
@@ -177,14 +182,12 @@ async function assembleReport(sampleId, user, options = {}) {
     // 11. Build unique methodologies list for footnotes
     const usedMethods = [];
     const seenMethods = new Set();
-    for (const item of Object.values(groupedResults).flatMap(group => group.items)) {
-        const key = JSON.stringify([item.param, item.methodologyId, item.methodVersion]);
+    for (const item of Object.values(groupedResults).flatMap(group => group.items)) for (const method of item.executedMethods) {
+        const key = JSON.stringify(method);
         if (!seenMethods.has(key)) {
             seenMethods.add(key);
             usedMethods.push({
-                param: item.param, paramName: item.name, methodologyId: item.methodologyId,
-                methodVersion: item.methodVersion, method: item.method, standard: item.standard,
-                reference: item.methodReference
+                ...method, paramName: item.name
             });
         }
     }
@@ -193,13 +196,6 @@ async function assembleReport(sampleId, user, options = {}) {
     const locationData = extractLocationData(fieldMeta, receptionData, sample);
 
     // 14. Build signedBy block
-    const signedBy = {
-        name: approver?.name || sample.approvedBy || null,
-        username: sample.approvedBy || null,
-        title: null, // Approval-time role is not recorded by the current model.
-        date: sample.approvedAt || null
-    };
-
     // SD-17: Compute analytical episodes for reopened samples
     const auditLogs = await db.auditLog.findMany({
         where: { OR: [{ sampleId: sample.id }, { entityId: sample.id }] },
@@ -207,6 +203,7 @@ async function assembleReport(sampleId, user, options = {}) {
     });
     const undoLogs = auditLogs.filter(a => a.action === 'UNDO_APPROVAL' || a.action === 'SAMPLE_REOPENED');
     const approvalLogs = auditLogs.filter(a => a.action === 'SAMPLE_APPROVED' || (a.action === 'STATUS_CHANGE' && a.details && a.details.includes('APPROVED')));
+    const signedBy = contentEvidence.approvalEvidence(sample, auditLogs);
 
     const episodes = [];
     if (undoLogs.length > 0) {
@@ -231,6 +228,10 @@ async function assembleReport(sampleId, user, options = {}) {
             episodeNumber: 1,
             label: 'Initial Analytical Pass',
             approvedAt: sample.approvedAt,
+            depthTop: sample.depthTop,
+            depthBottom: sample.depthBottom,
+            horizon: sample.horizon,
+            reportEvidence: contentEvidence.sampleContentEvidence(sample, reportedSelectionProof.sourceResults, sourceAttempts),
             approvedBy: sample.approvedBy
         });
     }

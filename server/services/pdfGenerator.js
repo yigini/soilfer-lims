@@ -6,7 +6,8 @@
  */
 
 const PDFDocument = require('pdfkit');
-const { displayResult, resultNotes } = require('./reportContentDisplay');
+const { displayResult, resultNotes, displayUncertainty } = require('./reportContentDisplay');
+const { iso } = require('./reportContentEvidence');
 const { calculateUsdaTexture, evaluateCnRatio, evaluateCecAndBases } = require('../utils/soilCalculations');
 const { interpretParameter, normalizeUnit } = require('./interpretationService');
 const { describeReportEvidence } = require('./reportTruthfulnessService');
@@ -149,11 +150,9 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 .text(lab.name || 'National Soil Testing Laboratory', startX + 8, currentY + 24, { width: colWidth - 16, ellipsis: true });
 
             doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                .text(`Lab Code: ${lab.code || sample?.assignedLab || 'LAB-GTM'}`, startX + 8, currentY + 40)
-                .text(`Address: ${lab.address || 'Central Research Station'}, ${lab.city || ''}`, startX + 8, currentY + 52)
-                .text(`Email: ${lab.email || 'lab@soilfer.org'} | Tel: ${lab.phone || '+502 2300-0000'}`, startX + 8, currentY + 64)
-                .text(`Registration: GLOSOLAN Registered Laboratory`, startX + 8, currentY + 76)
-                .text(`Quality System: ISO/IEC 17025 Aligned Quality Records`, startX + 8, currentY + 88);
+                .text(`Lab Code: ${lab.code || labels.notRecorded}`, startX + 8, currentY + 40)
+                .text(`Address: ${lab.address || labels.notRecorded}${lab.city ? ', ' + lab.city : ''}`, startX + 8, currentY + 52)
+                .text(`Email: ${lab.email || labels.notRecorded} | Tel: ${lab.phone || labels.notRecorded}`, startX + 8, currentY + 64);
 
             // --- Right Box: Sample Identification & Provenance ---
             const rightX = startX + colWidth + 12;
@@ -166,7 +165,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
 
             const sampleDepth = sample.depthTop !== undefined && sample.depthBottom !== undefined 
                 ? `${sample.depthTop} - ${sample.depthBottom} cm` 
-                : '0 - 20 cm (Topsoil)';
+                : labels.notRecorded;
 
             doc.fillColor(cDark).font('Helvetica-Bold').fontSize(8)
                 .text('Laboratory ID:', rightX + 8, currentY + 24)
@@ -183,7 +182,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 .text(`${sample.projectCode || reportContent.project?.code || 'SOILFER'} (${sample.countryName || 'Regional'})`, rightX + 110, currentY + 48)
                 .text(`${client.name || sample.clientName || 'General Intake'}`, rightX + 110, currentY + 60, { width: colWidth - 118, ellipsis: true })
                 .text(`${sampleDepth} ${sample.horizon ? `[${sample.horizon}]` : ''}`, rightX + 110, currentY + 72)
-                .text(`${sample.receptionDate ? String(sample.receptionDate).split('T')[0] : 'Recorded'}`, rightX + 110, currentY + 84)
+                .text(iso(sample.receptionDate)?.split('T')[0] || labels.notRecorded, rightX + 110, currentY + 84)
                 .text(issuedDate, rightX + 110, currentY + 96);
 
             currentY += boxHeight + 12;
@@ -201,6 +200,19 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 .text(preparationStatement, startX + 10, currentY + 20, { width: pageWidth - 20 });
 
             currentY += preparationHeight + 8;
+
+            const sampleEvidence = sample.reportEvidence || {};
+            const condition = sampleEvidence.conditionOnReceipt || {};
+            const sampleText = [
+                `${labels.conditionOnReceipt}: ${[condition.moisture, condition.status, condition.note].filter(Boolean).join(' · ') || labels.notRecorded}`,
+                `${labels.intakeNonconformities}: ${sampleEvidence.intakeNonconformities?.join('; ') || labels.notRecorded}`,
+                `${labels.analysisDates}: ${sampleEvidence.analysisStart || labels.notRecorded} – ${sampleEvidence.analysisEnd || labels.notRecorded}`,
+                `${labels.sampling}: ${sampleEvidence.sampling || labels.notStated}`
+            ].join('\n');
+            const bottomMargin = doc.page.margins.bottom;
+            doc.page.margins.bottom = 92;
+            doc.font('Helvetica').fontSize(7.5).fillColor(cGray).text(sampleText, startX, currentY, { width: pageWidth });
+            currentY = doc.y + 10; doc.page.margins.bottom = bottomMargin;
 
             // =========================================================================
             // 5. TEST RESULTS TABLE (Categorized)
@@ -223,7 +235,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 .text('METHOD / STANDARD', col2 + 4, currentY + 5)
                 .text('RESULT', col3 + 4, currentY + 5, { width: 60, align: 'right' })
                 .text('UNIT', col4 + 4, currentY + 5)
-                .text('FAO INTERPRETATION', col5 + 4, currentY + 5);
+                .text(labels.expandedUncertainty, col5 + 4, currentY + 5);
 
             currentY += 19;
 
@@ -251,7 +263,9 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     const notReportable=item.reportedMode==='NOT_REPORTABLE';
                     const valueText=notReportable ? require('../locales/'+locale+'.json').reportedValue.notReportable : displayResult(item, labels);
                     const valueHeight=doc.font('Helvetica-Bold').fontSize(8).heightOfString(valueText,{width:60});
-                    const rowHeight=Math.max(16,valueHeight+8);
+                    const uncertaintyText = displayUncertainty(item, labels);
+                    const uncertaintyHeight = doc.font('Helvetica').fontSize(7.5).heightOfString(uncertaintyText, { width: 100 });
+                    const rowHeight=Math.max(16,valueHeight+8,uncertaintyHeight+8);
                     const noteText=resultNotes(item, labels);
                     const noteHeight=noteText ? doc.font('Helvetica').fontSize(7.5).heightOfString(noteText,{width:pageWidth-12})+8 : 0;
                     // Keep short explanations with their row. Long explanations
@@ -274,8 +288,6 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     if (paramUpper === 'SOC') socVal = Number(item.value);
                     if (paramUpper === 'TN') tnVal = Number(item.value);
 
-                    const interp = notReportable || item.censoring && item.censoring !== 'NONE' ? '' : getInterpretation(item.param, item.value);
-
                     doc.fillColor(cDark).font('Helvetica-Bold').fontSize(7.5)
                         .text(item.name || item.param, col1 + 6, currentY + 4, { width: 145, ellipsis: true });
 
@@ -288,8 +300,8 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
                         .text(item.unit || '', col4 + 4, currentY + 4);
 
-                    doc.font('Helvetica-Bold').fontSize(7.5).fillColor(interp.includes('Optimal') || interp.includes('Adequate') ? '#059669' : interp.includes('Low') || interp.includes('Acidic') ? '#D97706' : cDark)
-                        .text(interp, col5 + 4, currentY + 4, { width: 100, ellipsis: true });
+                    doc.font('Helvetica').fontSize(7.5).fillColor(cDark)
+                        .text(uncertaintyText, col5 + 4, currentY + 4, { width: 100 });
 
                     if(noteText) {
                         const bottomMargin=doc.page.margins.bottom;
@@ -392,16 +404,18 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
 
             const signedBy = reportContent.signedBy || {};
             doc.font('Helvetica-Bold').fontSize(9).fillColor(cDark)
-                .text(signedBy.name || labels.notRecorded, sigX, currentY + 24, { width: 160 });
+                .text(signedBy.username && signedBy.date ? signedBy.name || signedBy.username : labels.approvalNotRecorded,
+                    sigX, currentY + 24, { width: 160 });
 
             doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
                 .text(`${labels.approvalRole}: ${signedBy.title || labels.notRecorded}`, sigX, currentY + 38, { width: 160 })
-                .text(`${labels.approvedAt}: ${signedBy.date ? String(signedBy.date) : labels.notRecorded}`, sigX, currentY + 51, { width: 160 });
-            const issuer = reportContent.generated || {};
+                .text(`${labels.approvedAt}: ${iso(signedBy.date) || labels.notRecorded}`, sigX, currentY + 51, { width: 160 });
+            const issuer = reportContent.publication?.issuer || {};
             doc.font('Helvetica-Bold').fontSize(8).fillColor(cDark)
-                .text(`${labels.issuedBy}: ${issuer.byName || issuer.by || labels.notRecorded}`, sigX, currentY + 78, { width: 160 });
+                .text(`${labels.issuedBy}: ${issuer.name || issuer.username || labels.notRecorded}`, sigX, currentY + 78, { width: 160 });
             doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                .text(`${labels.issuerRole}: ${issuer.role || labels.notRecorded}`, sigX, currentY + 92, { width: 160 });
+                .text(`${labels.issuerRole}: ${issuer.role || labels.notRecorded}`, sigX, currentY + 92, { width: 160 })
+                .text(`${labels.issuedAt}: ${iso(issuedAt) || labels.notRecorded}`, sigX, currentY + 105, { width: 160 });
 
             currentY += endorseHeight + 14;
 

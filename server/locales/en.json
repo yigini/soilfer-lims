@@ -96,7 +96,15 @@
     "approvalRole": "Approval role",
     "approvedAt": "Approved at",
     "issuedBy": "Issued by",
-    "issuerRole": "Issuer role"
+    "issuerRole": "Issuer role",
+    "notStated": "not stated",
+    "expandedUncertainty": "U (expanded)",
+    "conditionOnReceipt": "Condition on receipt",
+    "intakeNonconformities": "Intake nonconformities",
+    "analysisDates": "Dates of analysis",
+    "sampling": "Sampling",
+    "issuedAt": "Issued at",
+    "approvalNotRecorded": "Approval: not recorded"
   },
   "common": {
     "save": "Save",
@@ -999,7 +1007,9 @@
       "equipment_requireEquipment": "Required equipment",
       "equipment_unconfiguredReadiness": "Unconfigured equipment readiness",
       "pt_zScoreLimits": "PT z-score limits",
-      "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC"
+      "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC",
+      "report_uncertaintyMode": "Report expanded uncertainty",
+      "report_uncertaintyCoverageFactor": "Uncertainty coverage factor"
     },
     "title": "Policies",
     "yes": "Yes",

@@ -1682,7 +1682,9 @@ exports.approveSample = async (req, res) => {
                 'Final Approval by Manager', { approvedBy: user.username, approvedAt: now }, tx);
             await tx.auditLog.create({ data: {
                 id: crypto.randomUUID(), entity: 'SAMPLE', entityId: String(id), action: 'SAMPLE_APPROVED',
-                details: 'Final Approval by Manager', performedBy: user.username, timestamp: now, sampleId: String(id)
+                details: 'Final Approval by Manager', performedBy: user.username, timestamp: now, sampleId: String(id),
+                after: JSON.stringify({ approval: { username: user.username, name: user.name || user.username,
+                    role: user.role || null, approvedAt: now.toISOString() } })
             } });
             return { eligibility, updated };
         });
