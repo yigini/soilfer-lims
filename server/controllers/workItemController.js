@@ -1019,7 +1019,8 @@ exports.reviewWorkItem = async (req, res) => {
                 await invalidateReturnedResults(tx, item, user, effectiveReason);
             }
             return rows;
-        }, undefined, { qcAcknowledgement: req.body.qcAcknowledgement, reasonCode:req.body.reasonCode, note:effectiveReason, attemptId:req.body.attemptId });
+        }, undefined, { qcAcknowledgement: req.body.qcAcknowledgement, reasonCode:req.body.reasonCode, note:effectiveReason, attemptId:req.body.attemptId,
+            reportedValueSelection:req.body.reportedValueSelection });
         const result = { workItemId: id, status, decision: decisionVerdict };
         if (item.submissionId) await reconcileSubmission(prisma, item.submissionId, user, [result]);
         for (const notify of notifications) await notify();
@@ -1307,12 +1308,13 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                     }
                     return rows;
                 }, undefined, { qcAcknowledgement: req.body.qcAcknowledgement,
-                    reasonCode:req.body.reasonCodes?.[item.id] || req.body.reasonCode,note:effectiveReason,attemptId:req.body.attemptIds?.[item.id] });
+                    reasonCode:req.body.reasonCodes?.[item.id] || req.body.reasonCode,note:effectiveReason,attemptId:req.body.attemptIds?.[item.id],
+                    reportedValueSelection:req.body.reportedValueSelections?.[item.id] });
                 results.push({ workItemId: item.id, status, decision: decisionVerdict });
                 pendingNotifications.push(...notifications);
             } catch (error) {
-                if (error.code !== 'ITEM_NOT_SUBMITTED') throw error;
-                errors.push({ workItemId: item.id, code: error.code });
+                if (error.code !== 'ITEM_NOT_SUBMITTED' && !error.code?.startsWith('REPORTED_VALUE_') && error.code !== 'RESULT_POLICY_UNRESOLVED') throw error;
+                errors.push({ workItemId: item.id, code: error.code, ...(error.details || {}) });
             }
         }
         });

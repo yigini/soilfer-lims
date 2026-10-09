@@ -8,7 +8,7 @@ const { loadSelectionContext } = require('../../services/reportedValueSelectionC
 const owned = [];
 afterEach(async () => { for (const f of owned.splice(0)) await f.close(); });
 async function fixture({ criteria = {}, install = true } = {}) {
-    const f = await qcGateFixture({ status: 'ACCEPTED', criteria }); owned.push(f);
+    const f = await qcGateFixture({ status: 'ACCEPTED', criteria, installSelectionEvidence: install }); owned.push(f);
     if (install) installReportedValueSelections({ dbPath: f.file, apply: true });
     f.row = await f.result(f.items[0]);
     f.choose = (choice, options) => rules.inTransaction(f.db, tx => selection.appendReportedSelection(tx, f.items[0], f.actor, choice, options));

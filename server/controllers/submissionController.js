@@ -357,12 +357,13 @@ exports.reviewSubmission = async (req, res) => {
                     }
                     return rows;
                 }, id, { reason, reasonCode:decision.reasonCode, attemptId:decision.attemptId, qcAcknowledgement: req.body.qcAcknowledgement,
+                    reportedValueSelection:decision.reportedValueSelection,
                     action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',
                     details: `${user.username} ${verdict.toLowerCase()}ed ${analysisName}` });
                 results.push({ workItemId, status: newStatus, decision: verdict });
             } catch (error) {
-                if (!['ITEM_NOT_SUBMITTED', 'ITEM_NOT_IN_SUBMISSION'].includes(error.code)) throw error;
-                errors.push({ workItemId, code: error.code });
+                if (!['ITEM_NOT_SUBMITTED', 'ITEM_NOT_IN_SUBMISSION'].includes(error.code) && !error.code?.startsWith('REPORTED_VALUE_') && error.code !== 'RESULT_POLICY_UNRESOLVED') throw error;
+                errors.push({ workItemId, code: error.code, ...(error.details || {}) });
             }
         }
         });

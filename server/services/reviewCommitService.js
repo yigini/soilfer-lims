@@ -2,6 +2,25 @@ const { randomUUID } = require('crypto');
 const workflow = require('../workflowContract');
 const { transitionWorkItem } = require('./workItemStateService');
 
+// Bulk/submission review already holds one transaction. Keep each accepted row
+// atomic when its reported-value choice is refused, while preserving that
+// outer transaction and the existing request-wide attempt preflight.
+async function inReviewRow(prisma, execute) {
+    return require('./workflowStateRules').inTransaction(prisma, async tx => {
+        const name = 'review_row_' + randomUUID().replace(/-/g, '');
+        await tx.$executeRawUnsafe('SAVEPOINT "' + name + '"');
+        try {
+            const result = await execute(tx);
+            await tx.$executeRawUnsafe('RELEASE SAVEPOINT "' + name + '"');
+            return result;
+        } catch (error) {
+            await tx.$executeRawUnsafe('ROLLBACK TO SAVEPOINT "' + name + '"');
+            await tx.$executeRawUnsafe('RELEASE SAVEPOINT "' + name + '"');
+            throw error;
+        }
+    });
+}
+
 function itemStateError(item) {
     return Object.assign(new Error(`Work item ${item.id} is no longer eligible for this review. Only submitted work items can be reviewed.`), {
         statusCode: 409, code: 'ITEM_NOT_SUBMITTED', workItemId: item.id
@@ -27,7 +46,7 @@ function assertReviewable(item, status, sample = item.sample) {
 async function commitReview(prisma, item, status, user, data, operations, submissionId, audit = {}) {
     status = workflow.normalizeWorkItemState(status);
     try {
-        return await require('./workflowStateRules').inTransaction(prisma,async tx => {
+        return await inReviewRow(prisma,async tx => {
             const current = await tx.workItem.findUnique({ where: { id: item.id } });
             if (submissionId && current?.submissionId !== submissionId) throw Object.assign(itemStateError(item), { code: 'ITEM_NOT_IN_SUBMISSION' });
             if (!current || current.status !== item.status || current.version !== item.version) throw itemStateError(item);
@@ -45,6 +64,9 @@ async function commitReview(prisma, item, status, user, data, operations, submis
             }
             const qcGate = require('./qcGateService');
             const qcRows = status === 'ACCEPTED' ? await qcGate.requireAcceptance([{ ...current, sample }], audit.qcAcknowledgement, tx) : [];
+            if (status === 'ACCEPTED' && measured) {
+                await require('./reportedValueSelectionService').preflightReportedSelection(tx,current,audit.reportedValueSelection);
+            }
             const history = typeof data.history === 'string' ? JSON.parse(data.history) : data.history;
             const reason = audit.reason || data.reanalysisReason || data.waiveReason || history?.at(-1)?.reason || history?.at(-1)?.note || null;
             if (qcRows.some(row => qcGate.decision(row.gate).acknowledgementRequired)) {
@@ -69,6 +91,7 @@ async function commitReview(prisma, item, status, user, data, operations, submis
                 const selected=(Array.isArray(decisions)?decisions:[decisions]).find(row=>row?.workItemId===current.id && row.decision==='ACCEPT');
                 if(!selected?.attemptId)throw Object.assign(new Error('Acceptance must identify its ReviewDecision attempt.'),{statusCode:409,code:'REVIEW_DECISION_REQUIRED'});
                 await require('./workAttemptEventService').transitionAttempt(tx,current,selected.attemptId,'ACCEPTED',user,{reviewDecisionId:selected.id});
+                await require('./reportedValueSelectionService').appendReportedSelection(tx,current,user,audit.reportedValueSelection);
             }
             if (returned && sample.status === 'SUBMITTED_FULL') {
                 const decision = (Array.isArray(decisions) ? decisions : [decisions]).find(row =>
