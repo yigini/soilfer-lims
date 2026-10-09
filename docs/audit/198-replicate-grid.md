@@ -36,6 +36,8 @@ Existing test changes, all under that pin:
 | #191 repeat command fixture | Explicit required count2 through policyService; the three-reading parent is recorded by the actual writer as a failing pair then its third reading | All original command, authority, completeness, event, rollback, supersession and submission assertions |
 | Retained parent3 replacement | Current count becomes1 before the child fills, proving parent-set authority wins | Every original missing-parent, Result preservation, supersession and submission assertion |
 | Extra child3 with parent2 | Strengthened to409 REPLICATE_NOT_REQUIRED plus zero-write snapshot; counts exclude refused row | Every original missing-parent2 refusal and eventual append/supersession/submission assertion |
+| #190 two-reading execution | Explicit required count2 for AT190 through policyService | All original shared-attempt, immutable evidence, repeat ownership and preservation assertions |
+| #192 separate-fraction mean setup | Explicit method-scoped required count2 for its two SAND readings through policyService | All original four-source lineage, derived texture, malformed-proof SQL and reader/refusal assertions |
 
 No factory/writer exemption or scanner change. Migration/backfill counts0.
 No changes to analytical/QC/audit data or the native QC evaluator. Production
