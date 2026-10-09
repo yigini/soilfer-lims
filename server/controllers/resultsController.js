@@ -14,6 +14,10 @@ const { governsResult } = require('../services/reportResultGovernance');
 
 async function assertResultSaveReadiness(db, sample, user, measurements) {
     stateRules.assertScope(user, sample);
+    // An approval is single-use even when the recorded attempt now refuses a second save.
+    for (const measurement of (Array.isArray(measurements) ? measurements : []).filter(row => row?.overrideRequestId)) {
+        await require('../services/resultOverrideService').available(db, measurement.overrideRequestId, user);
+    }
     resultEvidence.assertAmendable(sample);
     if (!['PROCESSING', 'SUBMITTED_PARTIAL'].includes(sample.status)) {
         if(sample.status==='SUBMITTED_FULL')await require('../services/resultWriteService').assertRecordedResultSave(db,sample,measurements);
