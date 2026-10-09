@@ -36,6 +36,11 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         loaderSha256: '93326b3aaa9ffa9de1a296d52535d70736505ff0962c614d2ce52afa39eeb675',
         directory: '20261009000400_calculation_templates', sqlSha256: 'cdae7f98f7bafa069e3276e29572ded88e9e656ae187c16f622589bcce3843ca',
         boundary: '-- Contract guards' }),
+    // #272 pin6087372517: inspect only the unchanged rawInput additive DDL.
+    Object.freeze({ functionName: 'loadResultRawInputMigrationSource', loader: 'services/resultRawInputMigrationSource.js',
+        loaderSha256: '9b421ca380840aad87482d52f1f681c861ee0d536016e21a755d488cca090b56',
+        directory: '20261004064500_add_result_raw_input',
+        sqlSha256: '850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc', wholeSql: true }),
     // Inspect the exact #192 additive DDL; this grants no writer exception.
     Object.freeze({functionName:'loadReportedValueMigrationSource',loader:'services/reportedValueMigrationSource.js',
         loaderSha256:'4a8776908a58c7f07b858f8a80e0e1b182a6409cf2c2b8171704fea8792bb2ec',
@@ -138,6 +143,14 @@ const CALCULATION_FIXTURE = Object.freeze({
     ddl: 'tests/helpers/fixtures/pre199_full_application_schema.sql',
     ddlSha256: '33f558c18a0b47c806989e6b83eca2ce15923df9c27caf5036cbe11c4420b114',
     caller: 'tests/contracts/audit_4_6_calculation_install.test.js'
+ });
+// #272 pin6087435363: one closed, no-argument baseline factory and caller.
+const RAW_INPUT_FIXTURE = Object.freeze({
+    file: 'tests/helpers/rawInputHistoricalFixture.js', exportName: 'createRawInputSupportedBaselineFixture',
+    sha256: '2d2e926605ee61d8bf62c8714feea483b3cf7b69368f53b04a8e727c99f2c2b7',
+    ddl: 'tests/helpers/fixtures/raw_input_supported_baseline.sql',
+    ddlSha256: '6fce034bc43633d55431423ccad8a0e1e81dcdc98ba9b4174c112bef3e672983',
+    caller: 'tests/contracts/audit_1_5_raw_input_install.test.js'
 });
 
 function scanSource(source, filename, exceptions = []) {
@@ -151,6 +164,14 @@ function scanSource(source, filename, exceptions = []) {
                 createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', CALCULATION_FIXTURE.ddl))).digest('hex') === CALCULATION_FIXTURE.ddlSha256;
         } catch { validCalculationFixture = false; }
         if (!validCalculationFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pinned #199 factory or pre-199 DDL digest differs.');
+    }
+    let validRawInputFixture = false;
+    if (filename === RAW_INPUT_FIXTURE.file) {
+        try {
+            validRawInputFixture = createHash('sha256').update(source).digest('hex') === RAW_INPUT_FIXTURE.sha256 &&
+                createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', RAW_INPUT_FIXTURE.ddl))).digest('hex') === RAW_INPUT_FIXTURE.ddlSha256;
+        } catch { validRawInputFixture = false; }
+        if (!validRawInputFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pinned #272 factory or supported-baseline DDL digest differs.');
     }
     if (filename === ATTEMPT_FIXTURE.file) {
         try {
@@ -595,6 +616,7 @@ function scanSource(source, filename, exceptions = []) {
         if (!exportedNames.has(name)) return false;
         if (validCalculationFixture && name === CALCULATION_FIXTURE.exportName) return true;
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName) return true;
+        if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName) return true;
         const removal = ['delete', 'deleteMany'].includes(operation);
         if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample', 'writeSampleHoldCompatibility'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
         if (filename === 'services/workItemStateService.js' && (['createWorkItem', 'transitionWorkItem'].includes(name) || removal && name === 'removeUnstartedWorkItems') && entities.every(entity => entity === 'WorkItem')) return true;
@@ -605,6 +627,7 @@ function scanSource(source, filename, exceptions = []) {
         const name = owner(p);
         if (validCalculationFixture && name === CALCULATION_FIXTURE.exportName && exportedNames.has(name)) return true;
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName && exportedNames.has(name)) return true;
+        if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName && exportedNames.has(name)) return true;
         return exportedNames.has(name) && exceptions.some(entry => entry.file === filename && entry.exportName === name);
     }
     function pinnedCorruptProjectConnection(p, sql) {
@@ -668,6 +691,9 @@ function scanSource(source, filename, exceptions = []) {
             }
             if (resolved === CALCULATION_FIXTURE.file.replace(/\.js$/, '') && filename !== CALCULATION_FIXTURE.caller)
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+            if (resolved === RAW_INPUT_FIXTURE.file.replace(/\.js$/, '') && filename !== RAW_INPUT_FIXTURE.caller) {
+                report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+            }
             if (filename.startsWith('tests/')) continue;
             if (exceptions.some(entry => resolved === entry.file.replace(/\.js$/, '')) || (rehearsalLauncher && resolved.startsWith('tests/'))) {
                 report(p.node, 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);

@@ -54,3 +54,7 @@ server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-table
 server/services/calculationTemplateMigrationSource.js text eol=lf
 server/tests/helpers/calculationHistoricalFixture.js text eol=lf
 server/tests/helpers/fixtures/pre199_full_application_schema.sql -text
+server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql text eol=lf
+server/services/resultRawInputMigrationSource.js text eol=lf
+server/tests/helpers/fixtures/raw_input_supported_baseline.sql -text
+server/tests/helpers/rawInputHistoricalFixture.js text eol=lf
