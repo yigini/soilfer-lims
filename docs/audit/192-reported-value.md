@@ -6,6 +6,12 @@ deletion. Reports, SIS v1, WET_CHEM and the reported grid consume these saved
 outcomes. Raw SIS v2 observations and spectral references retain their Result
 ids and row contract. V2 observations disclose a nullable
 `reportedValueSelectionId` for a current, non-stale source membership.
+When a raw source belongs to both a fraction and a derived class, v2 prefers
+the owning test's own selection, regardless of work-item query order.
+Bulk readers omit only missing/stale tests and disclose their sample, test and
+refusal code; other tests and samples remain available. Single-sample reports
+and publication still refuse409. A missing selection refuses before resolving
+historical layout, so an unselected ambiguous TEXTURE cannot fail a bulk feed.
 
 Every mean uses complete chosen attempts and the recorded or frozen rule's
 repeatability limit, exact controlled units and method. Missing or incompatible
@@ -24,6 +30,8 @@ proofs. It writes no analytical Result. A missing/changed fraction selection or
 recalculation refuses the saved TEXTURE as stale. Composite four-output groups
 keep their original ownership. Mixed, unresolved or incomplete layouts refuse
 with zero writes; classes are never averaged or voted on.
+An explicit reviewer NOT_REPORTABLE choice with a reason preserves all three
+current fraction proofs even when censoring or closure prevents a class.
 
 ## Installation and historical back-fill
 

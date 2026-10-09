@@ -92,6 +92,8 @@ async function appendReportedSelection(tx, item, actor, explicit, options = {}) 
 }
 async function readReportedSelection(tx, item) {
     const rows = await currentRows(tx, item.id);
+    if(!rows.length) throw new rules.TransitionError('Choose a reported value before reporting this test.',409,
+        'REPORTED_VALUE_SELECTION_REQUIRED',{workItemId:item.id});
     let context;
     try {context=await loadSelectionEvidence(tx,item);}
     catch(error) {

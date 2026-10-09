@@ -86,6 +86,16 @@ test.each(['en','es','es-419','fr','pt'])('SIS v1 receives the requesting user l
     expect(response.body.data[0].analyticalResults[f.analysisCode].value)
         .toBe(require('../../locales/'+locale+'.json').reportedValue.notReportable+': Missing worksheet');
 });
+test('an unselected unresolved historical TEXTURE test is disclosed without resolving its layout or hiding the selected scalar',async()=>{
+    const f=await fixture();await f.choose();
+    const item=await require('../helpers/workflowFixtures').createWorkItemFixture(f.db,{data:{sampleId:f.items[0].sampleId,
+        analysis:'TEXTURE',assignedLab:f.labId,status:'ACCEPTED'}});
+    const before=await f.snapshot(),response=await invoke(f,'dataResultsController','getAnalyticalResults');
+    expect(response.status).toBe(200);expect(response.body.data[0][f.analysisCode]).toBe(Number(f.row.value));
+    expect(response.body.reportedValueErrors).toEqual([expect.objectContaining({workItemId:item.id,analysisCode:'TEXTURE',code:'REPORTED_VALUE_SELECTION_REQUIRED'})]);
+    await expect(assembleReport(item.sampleId,f.actor,{db:f.db})).rejects.toMatchObject({statusCode:409,code:'REPORTED_VALUE_SELECTION_REQUIRED'});
+    expect(await f.snapshot()).toEqual(before);
+});
 test.each(['ATTEMPT','NOT_REPORTABLE'])('WET_CHEM, reported grid and every SIS v1 surface match the persisted %s outcome',async mode=>{
     const f=await fixture(), reason='Reference worksheet incomplete';
     const saved=await f.choose(mode==='NOT_REPORTABLE'?{mode,reason}:{mode,attemptIds:[f.row.attemptId]});
