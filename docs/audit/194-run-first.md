@@ -23,5 +23,27 @@ default method, readiness supplies instruments, and policy supplies capacity;
 40 is only the acceptance fixture. Keep existing mismatched-method and
 ineligible-instrument refusals, and test every committed Result's instrument.
 
-Notes parked and pushed while #192 CI completes and #193 resumes after its
-clarification. Production remains under the #162 demo freeze.
+Further confirmed authorities at this base:
+
+- `qcNativeRunService.instrumentFor` checks registration, IN_SERVICE and lab
+  scope. It does not choose instruments or independently evaluate method
+  eligibility/calibration. Preserve it and the first-start freeze; the new
+  run-start command must evaluate each actual selected work item with
+  `workbenchReadinessService` inside the same transaction before starting.
+- `eligibleEquipmentForItem` obtains the method/analysis eligibility mapping
+  and the policy requirement, then obtains qualification views. It is the
+  picker authority; neither an unfiltered equipment list nor a typed name
+  supplies a registered instrument identity.
+- `batchSequenceService` already resolves and enforces `maxBatchSize` from
+  policy. Keep that authority; the legacy Batch.maxCapacity default is not a
+  wizard limit.
+- Native commands nest into `withQcAudit`'s existing transaction collector.
+  A run-first command can build and start through those authorities atomically,
+  retaining their source evidence and audit pairs if every step succeeds.
+- Reagent links must be included in retained run evidence, not hidden inside
+  notes or QC JSON. Append link/withdrawal events in the same command
+  transaction; never change inventory quantity or a retained link row.
+
+Implementation and UI verification are still pending. These are source checks
+and an implementation boundary, not a completed acceptance or test claim.
+Production remains under the #162 demo freeze.
