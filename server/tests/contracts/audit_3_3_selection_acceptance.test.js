@@ -153,6 +153,22 @@ test('actual RETURN, repeat recording and accept retain a questioned original, r
     expect(await f.all()).toBe(retained);
 });
 
+test('submission review preserves the explicit selection and its reason through request normalization',async()=>{
+    const f=await fixture(),item=f.items[0],path='/api/submissions/'+f.submissions[0].submission.id+'/review';
+    await f.setPolicy([{key:'results.reportedValueRule',value:'REVIEWER_PICKS'}]);
+    const before=await f.all();
+    const missing=await f.http(path,{decisions:[{workItemId:item.id,decision:'ACCEPT'}]});
+    expect(missing).toMatchObject({status:409,body:{errors:[{workItemId:item.id,code:'REPORTED_VALUE_SELECTION_REQUIRED'}]}});
+    expect(await f.all()).toBe(before);
+    const reason='Reviewer verified the complete worksheet determination';
+    const chosen=await f.http(path,{decisions:[{workItemId:item.id,decision:'ACCEPT',
+        reportedValueSelection:{mode:'ATTEMPT',attemptIds:[f.rows[0].attemptId],reason}}]});
+    expect(chosen).toMatchObject({status:200,body:{results:[{workItemId:item.id,status:'ACCEPTED',decision:'ACCEPT'}],errors:[]}});
+    expect(await f.db.reportedValueSelection.findFirst()).toMatchObject({rule:'REVIEWER',reason});
+    expect(await f.db.reviewDecision.findFirst({where:{workItemId:item.id,decision:'ACCEPT'}})).toMatchObject({reason});
+    expect(await f.db.result.findUnique({where:{id:f.rows[0].id}})).toEqual(f.rows[0]);
+});
+
 test.each([{r:1,allowed:true},{r:0.5,allowed:false}])('actual questioned12.0/repeat12.6 uses recorded r$r and complete retained evidence',async({r,allowed})=>{
     const f=await fixture(1,{repeatabilityLimit:r},12), item=f.items[0];
     const returned=await f.http('/api/work/'+item.id+'/review',{decision:'RETURN',attemptId:f.rows[0].attemptId,

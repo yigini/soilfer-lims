@@ -216,7 +216,8 @@ exports.reviewSubmission = async (req, res) => {
             }
             const reason = (decision.reason || decision.note || '').trim();
             if (verdict !== 'ACCEPT' && !reason) return res.status(400).json({ error: 'RETURN and WAIVE require a reason.', code: 'REVIEW_REASON_REQUIRED' });
-            validated.push({ workItemId: decision.workItemId, decision: verdict, reason: reason || 'Item accepted',attemptId:decision.attemptId,reasonCode:decision.reasonCode });
+            validated.push({ workItemId: decision.workItemId, decision: verdict, reason: reason || 'Item accepted',
+                attemptId:decision.attemptId,reasonCode:decision.reasonCode,reportedValueSelection:decision.reportedValueSelection });
         }
         normalizedDecisions = validated;
 
