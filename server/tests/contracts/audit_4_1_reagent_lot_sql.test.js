@@ -9,7 +9,8 @@ function fixture() {
         CREATE TABLE InventoryLot(id TEXT PRIMARY KEY,labId TEXT,currentQuantity REAL,status TEXT,expiryDate DATETIME);
         INSERT INTO Lab VALUES('owned-lab');
         INSERT INTO Batch VALUES('owned-run','owned-lab','owned-instrument','Retained run context');
-        INSERT INTO InventoryLot VALUES('owned-lot','owned-lab',17.25,'AVAILABLE',NULL);`);
+        INSERT INTO InventoryLot VALUES('owned-lot','owned-lab',17.25,'AVAILABLE',NULL);
+        INSERT INTO InventoryLot VALUES('owned-other-lot','owned-lab',9.5,'AVAILABLE',NULL);`);
     const source = loadBatchReagentLotMigrationSource();
     db.exec(source.sql);
     db.prepare('INSERT INTO BatchReagentLot(id,batchId,labId,inventoryLotId,role,linkedBy,linkedAt) VALUES(?,?,?,?,?,?,?)')
@@ -40,7 +41,9 @@ test('source uniqueness and restrictive foreign keys retain the exact link and i
     expect(()=>db.prepare('DELETE FROM Lab').run()).toThrow(/FOREIGN KEY/);
     expect(()=>db.prepare('DELETE FROM InventoryLot').run()).toThrow(/FOREIGN KEY/);
     for(const missing of [1,2,3]) {
-        const values=['missing-link','owned-run','owned-lab','owned-lot','owned-analyst'];values[missing]='not-found';
+        // Use an unlinked lot so FK probes cannot hit the already-covered
+        // unique(batch,lot) refusal before their missing-parent boundary.
+        const values=['missing-link','owned-run','owned-lab','owned-other-lot','owned-analyst'];values[missing]='not-found';
         expect(()=>insert.run(...values)).toThrow(/FOREIGN KEY/);
     }
     expect(snapshot(db)).toEqual(before);
