@@ -296,7 +296,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
     async function prepareTextureReview(actor) {
         for(const analysisCode of ['SAND','SILT','CLAY']) {
             const existing=await prisma.qcRule.findFirst({where:{labId,analysisCode,methodologyId:null},orderBy:{version:'desc'}});
-            if(existing && JSON.parse(existing.criteria).repeatabilityLimit===0)continue;
+            if(existing?.repeatabilityLimit===0)continue;
             await require('../../services/qcRuleService').change(actor,{
                 labId,analysisCode,methodologyId:null,expectedVersion:existing?.version || 0,reason:'Owned equal-replicate texture selection fixture',
                 criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0,repeatabilityLimit:0}},{db:prisma});
