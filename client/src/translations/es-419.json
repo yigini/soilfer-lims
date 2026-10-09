@@ -2489,6 +2489,7 @@
       "qc_controlMaxRecovery": "Recuperación máxima del control",
       "qc_duplicateNearLoqMultiplier": "Umbral de duplicados cerca del límite de cuantificación",
       "qc_duplicateMaxRpd": "Diferencia porcentual relativa máxima de duplicados",
+      "results_replicatesRequired": "Réplicas de muestra requeridas",
       "results_reportedValueRule": "Regla de selección del valor informado",
       "results_betweenLodLoq": "Valores entre los límites de detección y cuantificación",
       "results_phMin": "pH mínimo",

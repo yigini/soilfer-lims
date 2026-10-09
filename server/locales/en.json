@@ -902,6 +902,7 @@
       "qc_controlMaxRecovery": "Maximum control recovery",
       "qc_duplicateNearLoqMultiplier": "Duplicate near-LOQ threshold",
       "qc_duplicateMaxRpd": "Maximum duplicate RPD",
+      "results_replicatesRequired": "Required sample replicates",
       "results_reportedValueRule": "Reported-value selection rule",
       "results_betweenLodLoq": "Values between detection and quantification limits",
       "results_phMin": "Minimum pH",
