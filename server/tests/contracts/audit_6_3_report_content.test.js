@@ -181,6 +181,30 @@ test.each(golden)('golden PDF %s preserves censoring, uncertainty, QC and public
  if(process.env.AUDIT_212_PDF_OUTPUT){const directory=path.resolve(process.env.AUDIT_212_PDF_OUTPUT);fs.mkdirSync(directory,{recursive:true});
   fs.writeFileSync(path.join(directory,row.name+'.pdf'),pdf);}
 });
+test.each(['en','es','es-419','fr','pt'])('wrapped approval and issuer evidence stays readable in %s',async locale=>{
+ const labels=require('../../locales/'+locale+'.json').resultReports;
+ const name='María Fernanda de la Concepción Fernández Rodríguez',issuer='Jean-Baptiste Étienne de la Roche Martin';
+ const approvedAt='2026-10-09T10:00:00.000Z',issuedAt='2026-10-09T12:00:00.000Z';
+ const expected=[name,`${labels.approvalRole}: LAB_MANAGER`,`${labels.approvedAt}: ${approvedAt}`,
+  `${labels.issuedBy}: ${issuer}`,`${labels.issuerRole}: LAB_MANAGER`,`${labels.issuedAt}: ${issuedAt}`];
+ const calls=[],original=PDFDocument.prototype.text;
+ jest.spyOn(PDFDocument.prototype,'text').mockImplementation(function(value,x,y,options){
+  if(expected.includes(String(value)))calls.push({text:String(value),y,
+   end:y+this.heightOfString(String(value),options),page:this.page});
+  return original.call(this,value,x,y,options);
+ });
+ const pdf=await generateReportPdfBuffer({meta:{locale},reportNumber:'OWNED-LAYOUT-212',
+  sample:{id:'OWNED-LAYOUT-212'},lab:{name:'Owned layout laboratory',code:'OWNED'},resultGroups:[],
+  qcStatement:'QC: recorded decisions',signedBy:{name,username:'owned-approver',title:'LAB_MANAGER',date:approvedAt},
+  publication:{status:'PUBLISHED',publishedAt:issuedAt,issuer:{name:issuer,username:'owned-issuer',role:'LAB_MANAGER'}}});
+ expect(pdf.subarray(0,5).toString()).toBe('%PDF-');expect(calls.map(row=>row.text)).toEqual(expected);
+ expect(calls[0].end-calls[0].y).toBeGreaterThan(15);
+ for(let index=1;index<calls.length;index++){
+  expect(calls[index].page).toBe(calls[0].page);expect(calls[index].y).toBeGreaterThan(calls[index-1].end);
+ }
+ expect(calls.at(-1).end).toBeLessThan(770);
+});
+
 test.each(['en','es','es-419','fr','pt'])('all report and uncertainty policy labels exist in %s',locale=>{
  const labels=require('../../locales/'+locale+'.json').resultReports;
  for(const key of ['notStated','expandedUncertainty','conditionOnReceipt','intakeNonconformities','analysisDates','sampling','issuedAt','approvalNotRecorded'])expect(labels[key]).toEqual(expect.any(String));

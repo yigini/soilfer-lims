@@ -384,7 +384,23 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
 
             doc.font('Helvetica').fontSize(7.5);
             const qcHeight = doc.heightOfString(qcStatement, { width: 320 });
-            const endorseHeight = Math.max(120, qcHeight + 66);
+            const signedBy = reportContent.signedBy || {};
+            const issuer = reportContent.publication?.issuer || {};
+            const signatureRows = [
+                { text: signedBy.username && signedBy.date ? signedBy.name || signedBy.username : labels.approvalNotRecorded, font: 'Helvetica-Bold', size: 9 },
+                { text: `${labels.approvalRole}: ${signedBy.title || labels.notRecorded}`, font: 'Helvetica', size: 7.5 },
+                { text: `${labels.approvedAt}: ${iso(signedBy.date) || labels.notRecorded}`, font: 'Helvetica', size: 7.5 },
+                { text: `${labels.issuedBy}: ${issuer.name || issuer.username || labels.notRecorded}`, font: 'Helvetica-Bold', size: 8, gapBefore: 10 },
+                { text: `${labels.issuerRole}: ${issuer.role || labels.notRecorded}`, font: 'Helvetica', size: 7.5 },
+                { text: `${labels.issuedAt}: ${iso(issuedAt) || labels.notRecorded}`, font: 'Helvetica', size: 7.5 }
+            ];
+            let signatureEnd = 24;
+            for (const row of signatureRows) {
+                signatureEnd += row.gapBefore || 0;
+                row.offset = signatureEnd;
+                signatureEnd += doc.font(row.font).fontSize(row.size).heightOfString(row.text, { width: 160 }) + 4;
+            }
+            const endorseHeight = Math.max(120, qcHeight + 66, signatureEnd + 8);
             if (currentY + endorseHeight > 770) { doc.addPage(); currentY = 40; }
             doc.rect(startX, currentY, pageWidth, endorseHeight).fillAndStroke(cLightBg, cBorder);
 
@@ -402,20 +418,10 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             doc.fillColor(cPrimary).font('Helvetica-Bold').fontSize(8.5)
                 .text('ELECTRONIC APPROVAL RECORD', sigX, currentY + 8);
 
-            const signedBy = reportContent.signedBy || {};
-            doc.font('Helvetica-Bold').fontSize(9).fillColor(cDark)
-                .text(signedBy.username && signedBy.date ? signedBy.name || signedBy.username : labels.approvalNotRecorded,
-                    sigX, currentY + 24, { width: 160 });
-
-            doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                .text(`${labels.approvalRole}: ${signedBy.title || labels.notRecorded}`, sigX, currentY + 38, { width: 160 })
-                .text(`${labels.approvedAt}: ${iso(signedBy.date) || labels.notRecorded}`, sigX, currentY + 51, { width: 160 });
-            const issuer = reportContent.publication?.issuer || {};
-            doc.font('Helvetica-Bold').fontSize(8).fillColor(cDark)
-                .text(`${labels.issuedBy}: ${issuer.name || issuer.username || labels.notRecorded}`, sigX, currentY + 78, { width: 160 });
-            doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                .text(`${labels.issuerRole}: ${issuer.role || labels.notRecorded}`, sigX, currentY + 92, { width: 160 })
-                .text(`${labels.issuedAt}: ${iso(issuedAt) || labels.notRecorded}`, sigX, currentY + 105, { width: 160 });
+            for (const row of signatureRows) {
+                doc.font(row.font).fontSize(row.size).fillColor(row.font === 'Helvetica-Bold' ? cDark : cGray)
+                    .text(row.text, sigX, currentY + row.offset, { width: 160 });
+            }
 
             currentY += endorseHeight + 14;
 
