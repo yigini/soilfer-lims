@@ -30,7 +30,9 @@ async function readSampleReportedValues(db,sample,{partial=false}={}) {
                 }
             } catch(error) {
                 error.details={...error.details,workItemId:item.id};
-                if(!partial || !['REPORTED_VALUE_SELECTION_REQUIRED','REPORTED_VALUE_STALE'].includes(error.code)) throw error;
+                const testRefusal=typeof error.code==='string' && error.code.startsWith('REPORTED_VALUE_') &&
+                    error.statusCode>=400 && error.statusCode<500;
+                if(!partial || !testRefusal) throw error;
                 errors.push({sampleId:sample.id,workItemId:item.id,analysisCode:item.analysis,code:error.code,error:error.message});
             }
         }

@@ -80,6 +80,65 @@ test.each([false,true])('bulk views disclose only a missing test and retain good
         else expect(good[action==='getGeoJson'?f.analysisCode.toLowerCase():f.analysisCode]).toBe(Number(f.row.value));
     }
 });
+
+test('later persisted QC failure isolates the blocked accepted test in every bulk surface and preserves good values and history',async()=>{
+    const f=await qcGateFixture({count:2,criteria:{blankPerBatch:1,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0}});
+    owned.push(f);await f.setPolicy([{key:'qc.mode',value:'REQUIRED_WARN'}]);
+    const native=require('../../services/qcNativeRunService'),measurements=require('../../services/qcNativeMeasurementService');
+    const runs=[],results=[];
+    for(const item of f.items) {
+        const run=await native.startNativeRun(f.db,(await native.buildNativeRun(f.db,f.actor,{...f.input,workItemIds:[item.id]})).id,f.actor);
+        runs.push(run);await measurements.writeNativeMeasurements(f.db,run.id,f.actor,{measurements:[{positionId:run.positions.find(row=>row.kind==='BLANK').id,value:0}]});
+        const actual=await f.db.workItem.findUnique({where:{id:item.id}});results.push(await f.result(actual));
+        await require('../../services/workItemStateService').transitionWorkItem(item.id,'COMPLETED',f.actor,'Owned passing source ready for review',{},f.db);
+        await require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,sampleId:item.sampleId,type:'FULL',workItemIds:[item.id]});
+        await require('../helpers/qcRunHttpHarness').withQcRunHttp(f.db,f.actor,async(app,token)=>{
+            const response=await require('supertest')(app).post('/api/work/'+item.id+'/review').set('Authorization','Bearer '+token).send({decision:'ACCEPT'});
+            expect(response.status).toBe(200);
+        },{reviews:true});
+        await f.db.sample.update({where:{id:item.sampleId},data:{latitude:1,longitude:2}});
+    }
+    const bad=f.items[1],run=runs[1],beforeLateResults=await f.db.reportedValueSelection.findMany({orderBy:{id:'asc'}});
+    await require('../../services/qcNativeLifecycleService').reopenNativeRun(f.db,run.id,f.actor,'Investigate later blank observation');
+    await measurements.writeNativeMeasurements(f.db,run.id,f.actor,{reason:'Later blank failed its frozen limit',
+        corrections:[{positionId:run.positions.find(row=>row.kind==='BLANK').id,value:10}]},{correction:true});
+    expect(await f.db.reportedValueSelection.findMany({orderBy:{id:'asc'}})).toEqual(beforeLateResults);
+    const sample=await f.db.sample.findUnique({where:{id:bad.sampleId}}),error={sampleId:bad.sampleId,workItemId:bad.id,
+        analysisCode:bad.analysis,code:'REPORTED_VALUE_SOURCE_QC_BLOCKED'};
+    await expect(readSampleReportedValues(f.db,sample)).rejects.toMatchObject({code:error.code,statusCode:409,details:{workItemId:bad.id}});
+    const before=await f.snapshot(),attempts=await f.db.workAttempt.findMany({orderBy:{id:'asc'}}),
+        qc=await Promise.all([f.db.qcEvaluation.findMany({orderBy:{id:'asc'}}),f.db.qcMeasurement.findMany({orderBy:{id:'asc'}})]);
+    const grid=await invoke(f,'dataResultsController','getAnalyticalResults');expect(grid.status).toBe(200);
+    expect(grid.body.reportedValueErrors).toEqual([expect.objectContaining(error)]);
+    expect(grid.body.data.find(row=>row.sampleId===f.items[0].sampleId)[f.analysisCode]).toBe(Number(results[0].value));
+    const exported=await invoke(f,'exportController','getExportData',{body:{type:'WET_CHEM',includeUnapproved:true}});
+    expect(exported.status).toBe(200);expect(exported.body.meta.reportedValueErrors).toEqual([expect.objectContaining(error)]);
+    const goodSample=await f.db.sample.findUnique({where:{id:f.items[0].sampleId}});
+    expect(exported.body.data.find(row=>row['Sample ID']===goodSample.originalId)[f.analysisCode]).toBe(Number(results[0].value));
+    expect(exported.body.data.find(row=>row['Sample ID']===sample.originalId)[bad.analysis]).toBeUndefined();
+    for(const action of ['getSamples','getGeoJson','getResultsMatrix','syncDelta']) {
+        const response=await invoke(f,'sisController',action,{query:{updatedSince:'2020-01-01T00:00:00Z'}});expect(response.status).toBe(200);
+        const rows=action==='getGeoJson'?response.body.features.map(row=>row.properties):action==='syncDelta'?response.body.samples:response.body.data;
+        expect(rows.flatMap(row=>row.reportedValueErrors)).toEqual([expect.objectContaining(error)]);
+        const good=rows.find(row=>row.analyticalResults?.[f.analysisCode] || row[action==='getGeoJson'?f.analysisCode.toLowerCase():f.analysisCode]!==undefined);
+        if(action==='getSamples'||action==='syncDelta')expect(good.analyticalResults[f.analysisCode].value).toBe(Number(results[0].value));
+        else expect(good[action==='getGeoJson'?f.analysisCode.toLowerCase():f.analysisCode]).toBe(Number(results[0].value));
+    }
+    const pdf=await invoke(f,'reportController','getSampleReportPdf',{params:{sampleId:bad.sampleId}});
+    expect(pdf).toMatchObject({status:409,body:{code:error.code,workItemId:bad.id}});
+    const detail=await invoke(f,'sisController','getSampleById',{params:{id:bad.sampleId}});
+    expect(detail).toMatchObject({status:409,body:{code:error.code}});
+    const after=await f.snapshot();
+    // Only the normal export audit is appended; analytical/QC/review/workflow
+    // history and every retained audit row remain unchanged by these reads.
+    before.forEach((rows,index)=>{
+        if(index!==5)expect(after[index]).toEqual(rows);
+        else expect(after[index]).toEqual(expect.arrayContaining(rows));
+    });
+    expect(after[5].filter(row=>!before[5].some(old=>old.id===row.id)).every(row=>row.action==='EXPORT')).toBe(true);
+    expect(await f.db.workAttempt.findMany({orderBy:{id:'asc'}})).toEqual(attempts);
+    expect(await Promise.all([f.db.qcEvaluation.findMany({orderBy:{id:'asc'}}),f.db.qcMeasurement.findMany({orderBy:{id:'asc'}})])).toEqual(qc);
+});
 test.each(['en','es','es-419','fr','pt'])('SIS v1 receives the requesting user locale for a not-reportable value (%s)',async locale=>{
     const f=await fixture();f.actor.language=locale;await f.choose({mode:'NOT_REPORTABLE',reason:'Missing worksheet'});
     const response=await invoke(f,'sisController','getSamples');expect(response.status).toBe(200);
