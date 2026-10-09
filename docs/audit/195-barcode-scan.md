@@ -36,9 +36,13 @@ backfill, label regeneration, analytical/QC/audit-row mutation or new workflow
 writer is introduced. A jsdom development dependency supports real DOM tests
 of the actual worksheet, scanner and input editors.
 
-Validation in progress: focused real DOM/HTTP and existing worksheet/number
-contracts67/67 passed before additional boundary coverage. Client build
-14.83s passed; lint0errors/14existing warnings. Full suite and final CI will
-be recorded in the PR after completion. Tests run on an owned validation copy,
+Validation in progress: focused real DOM/HTTP and existing worksheet/number/QC
+contracts101/101 passed in8 complete suites (10.393s), including the two existing
+callback fixtures updated to resolve the real new modules. Their assertions are
+unchanged. The initial full run found those missing imports and the disposable
+checkout's missing client/dist prerequisite; the final run builds that client
+first. Client build14.83s passed; lint0errors/14existing warnings. These counts
+precede the clean rebase onto merged #191/main96f9ec4; the new full suite and
+final CI will be recorded in the PR. Tests run on an owned validation copy,
 with a published113-article test-only help baseline and disposable databases.
 No production action; the #162 demo freeze remains in force.
