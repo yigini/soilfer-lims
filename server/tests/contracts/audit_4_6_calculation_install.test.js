@@ -109,7 +109,7 @@ async function correctionSqlFixture({ resultField, calculationField, noWitness =
             methodologyId: curve.methodologyId, assignedTo: manager.username, status: 'IN_PROGRESS', history: '[]' } });
         const reporting = await db.unit.findUnique({ where: { code: 'mg/kg' } });
         const inputs = { absorbance: 1, blankConcentration: 0, extractVolume: 20, dilutionFactor: 1, sampleMass: 1, moistureCorrectionFactor: 1 };
-        const computed = calculate(template, inputs, { numberFormat: { decimalSeparator: '.', thousandsSeparator: ',' },
+        const computed = calculate(template, inputs, { numberFormat: { decimal: '.', thousands: ',' },
             curve: { ...curve, calibrationMax: 1 }, units: { native: reporting, reporting } });
         const targetId = randomUUID();
         const original = await createExecutionResultFixture(db, { data: { id: randomUUID(), sampleId: sample.id, param: 'P_OLSEN',
