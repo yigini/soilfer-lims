@@ -15,7 +15,7 @@ async function fixture({mean=false}={}) {
     f.textureItems={};f.fractions=[];
     for(const analysis of ['SAND','SILT','CLAY','TEXTURE']) {
         await f.db.analysis.create({data:{code:analysis,name:analysis,units:analysis==='TEXTURE'?'USDA_12_CLASS':'%',validation:'{}'}});
-        const method=await f.db.methodology.create({data:{analysisCode:analysis,name:analysis+' owned method',unit:analysis==='TEXTURE'?'USDA_12_CLASS':'%'}});
+        const method=await f.db.methodology.create({data:{analysisCode:analysis,name:analysis+' owned method'}});
         await require('../../services/qcRuleService').change(f.actor,{labId:f.labId,analysisCode:analysis,methodologyId:method.id,
             expectedVersion:0,reason:'Owned texture selection case',criteria:{blankPerBatch:0,lrmPerBatch:0,
                 duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0,repeatabilityLimit:2}},{db:f.db});

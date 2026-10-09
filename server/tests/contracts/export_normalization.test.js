@@ -2,7 +2,7 @@ const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
-const { getAuthToken } = require('../setup');
+const { getAuthToken,ensureTestLab } = require('../setup');
 const { samplesDb } = require('../../db');
 const prisma = require('../../prisma');
 
@@ -15,6 +15,7 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
         // #179 pin 5991651044: this scientific normalization probe owns its
         // lab scope, independently of other suites' conflicting profile rows.
         const fixtureLab = 'LAB-EXPNORM-' + require('node:crypto').randomUUID();
+        await ensureTestLab(fixtureLab,'GTM');
         await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(prisma,superAdminToken,fixtureLab);
 
         testSample = await createSampleFixture(prisma, { data: { id: `SMP-EXP-${Date.now()}`,

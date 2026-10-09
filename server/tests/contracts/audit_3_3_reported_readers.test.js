@@ -39,7 +39,10 @@ test.each(['en','es','es-419','fr','pt'])('not-reportable assembly displays its 
     const f=await fixture();await f.choose({mode:'NOT_REPORTABLE',reason:'Reference worksheet incomplete'});
     const sample=await f.db.sample.findUnique({where:{id:f.items[0].sampleId},include:{workItems:true,results:true}});
     const proof=await readSampleReportedValues(f.db,sample), before=await f.snapshot();
-    expect(canPublish({...sample,status:'APPROVED'},null,f.actor,{reportedSelectionProof:proof})).toMatchObject({allowed:true});
+    const originalQc=await require('../../services/qcGateService').resolveForSample(sample,[],f.db);
+    const options={...originalQc,qcModes:Object.fromEntries(Object.entries(originalQc.qcGates).map(([id,gate])=>[id,gate.mode])),
+        reportedSelectionProof:proof};
+    expect(canPublish({...sample,status:'APPROVED'},null,f.actor,options)).toMatchObject({allowed:true});
     const report=await assembleReport(sample.id,{...f.actor,language:locale},{db:f.db,reportedSelectionProof:proof});
     expect(report.content.resultGroups[0].items[0]).toMatchObject({reportedMode:'NOT_REPORTABLE',
         value:require('../../locales/'+locale+'.json').reportedValue.notReportable+': Reference worksheet incomplete',unit:''});

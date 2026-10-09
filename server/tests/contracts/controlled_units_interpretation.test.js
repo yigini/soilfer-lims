@@ -2,7 +2,7 @@ const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
-const { getAuthToken } = require('../setup');
+const { getAuthToken,ensureTestLab } = require('../setup');
 const { samplesDb } = require('../../db');
 const prisma = require('../../prisma');
 const {
@@ -16,6 +16,7 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
     let mgrToken, sampleId;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-INTERP','GTM');
         mgrToken = await getAuthToken('LAB_MANAGER', 'LAB-INTERP', ['GTM'], ['INTERP-PROJ']);
         await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(prisma,mgrToken,'LAB-INTERP');
 
