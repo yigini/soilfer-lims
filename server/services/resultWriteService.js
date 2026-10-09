@@ -1,4 +1,4 @@
-const { randomUUID } = require('node:crypto');
+const { randomUUID, createHash } = require('node:crypto');
 const rules = require('./workflowStateRules');
 const { hasPermission } = require('../config/roles');
 const { isNonMeasurement } = require('./resultEntryPolicy');
@@ -289,17 +289,42 @@ async function appendAttemptCorrection(tx, { item, sample, attempt, target, acto
     return row;
 }
 
-async function numericValues(tx, ctx, measurement, parsedValue=null, numberFormat=null) {
-    const format = numberFormat || await getNumberFormat(ctx.labId, { db: tx, analysisCode: ctx.analysis.code, methodologyId: ctx.methodId });
-    let validationRules = { ...parseJson(ctx.analysis.validation, {}),
-        ...(ctx.method?.loq != null && { loq: ctx.method.loq }), ...(ctx.method?.lod != null && { lod: ctx.method.lod }) };
-    // Existing pH policies apply to each lab and method; no local limits are invented.
-    if (['PH_H2O', 'PH_CACL2', 'PH_KCL', 'pH', 'WATER_PH'].includes(ctx.analysis.code)) {
-        const policy = require('./policyService'), scope = { db: tx, analysisCode: ctx.analysis.code, methodologyId: ctx.methodId };
-        validationRules.min = await policy.get(ctx.labId, 'results.phMin', scope);
-        validationRules.max = await policy.get(ctx.labId, 'results.phMax', scope);
+function numericReportingUnit(ctx, measurement) {
+    const fraction = FRACTIONS.includes(measurement.param) && TEXTURE_ANALYSES.has(ctx.analysis.code);
+    const unit = fraction ? '%' : measurement.unit || ctx.method?.unit || ctx.analysis.units || ctx.analysis.unitCode || null;
+    if (!fraction && measurement.unit && ctx.analysis.units && ![ctx.analysis.units, ctx.analysis.unitCode].includes(measurement.unit)) {
+        throw new TransitionError('Use the configured reporting unit.', 409, 'RESULT_UNIT_MISMATCH');
     }
-    const validation = validateNumericMethod(measurement.value, validationRules, format,parsedValue);
+    return unit;
+}
+
+async function numericValidationContext(tx, ctx, measurement, parsedValue = null, numberFormat = null) {
+    const unit = numericReportingUnit(ctx, measurement);
+    const resolved = await require('./resultValueRulesService').resolveNumericValueRules(tx, {
+        labId: ctx.labId, analysis: ctx.analysis, method: ctx.method, unit });
+    const format = numberFormat || resolved.numberFormat;
+    const validation = validateNumericMethod(measurement.value, resolved.rules, format, parsedValue);
+    // Fixed rule keys and sorted flags give a stable hash of the actual
+    // authoritative criteria. Unrelated policy edits do not invent a mismatch.
+    const rulesSha256 = createHash('sha256').update(JSON.stringify({ rules: resolved.rules,
+        numberFormat: format, flags: [...validation.flags].sort() })).digest('hex');
+    return { ...resolved, numberFormat: format, unit, validation, rulesSha256 };
+}
+
+// Requests use the same scoped method/instrument/readiness/ownership context
+// as the writer. The transaction performs reads only until a command writes.
+async function resolveResultValidationContext(tx, options) {
+    const selected = writeOptions(options), ctx = await context(tx, { ...selected, allowRecordedReplicates: true });
+    ctx.actor = selected.actor;
+    if (ctx.recordedResults.some(row => row.replicateNo === ctx.replicateNo)) {
+        throw new TransitionError('Use the correction route for a recorded cell.', 409, 'ATTEMPT_CORRECTION_REQUIRED');
+    }
+    await validateExecutionReadiness(tx, ctx);
+    return { ctx, ...await numericValidationContext(tx, ctx, selected.measurement) };
+}
+
+async function numericValues(tx, ctx, measurement, parsedValue=null, numberFormat=null) {
+    const { validation, unit } = await numericValidationContext(tx, ctx, measurement, parsedValue, numberFormat);
     const importing = ctx.source === 'legacy-import';
     if (!importing && validation.nonOverridable) {
         throw new TransitionError('A censoring limit must not be below the method LOQ.', 422, 'CENSOR_LIMIT_BELOW_LOQ', { flags: validation.flags });
@@ -309,11 +334,6 @@ async function numericValues(tx, ctx, measurement, parsedValue=null, numberForma
     }
     if (!importing && !validation.isValid && (!measurement.overrideReason?.trim() || !hasPermission(ctx.actor, 'APPROVE_RESULTS'))) {
         throw new TransitionError('Result is outside the configured limits; a manager override reason is required.', 422, 'OUT_OF_RANGE', { flags: validation.flags });
-    }
-    const fraction = FRACTIONS.includes(measurement.param) && TEXTURE_ANALYSES.has(ctx.analysis.code);
-    const unit = fraction ? '%' : measurement.unit || ctx.method?.unit || ctx.analysis.units || ctx.analysis.unitCode || null;
-    if (!fraction && measurement.unit && ctx.analysis.units && ![ctx.analysis.units, ctx.analysis.unitCode].includes(measurement.unit)) {
-        throw new TransitionError('Use the configured reporting unit.', 409, 'RESULT_UNIT_MISMATCH');
     }
     const overridden = !importing && !validation.isValid && Boolean(measurement.overrideReason?.trim()) && hasPermission(ctx.actor, 'APPROVE_RESULTS');
     const flags = [...new Set([...validation.flags, ...(measurement.flags || []),
@@ -589,4 +609,4 @@ function createRawResultFixture(db, data) {
 
 module.exports = { writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
     writeResultsExecution, appendAttemptCorrection, recordedExecution, assertRecordedResultSave,
-    createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError, resolveResultRunContext };
+    createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError, resolveResultRunContext, resolveResultValidationContext };
