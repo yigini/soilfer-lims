@@ -79,7 +79,9 @@ async function assertRecordedResultSave(db,sample,measurements) {
             }
             const methodId=item.methodologyId || measurement.methodologyId || null;
             const equipmentId=measurement.equipmentId || item.equipmentId || null;
-            if(recorded.results.some(row=>row.methodologyId!==methodId || row.equipmentId!==equipmentId) ||
+            const batchId=item.batchId ?? null;
+            if(recorded.attempt.qcBatchId!==batchId || recorded.results.some(row=>row.batchId!==batchId) ||
+                recorded.results.some(row=>row.methodologyId!==methodId || row.equipmentId!==equipmentId) ||
                 recorded.attempt.instrumentId!==equipmentId || measurement.methodologyId && measurement.methodologyId!==methodId) {
                 throw new TransitionError('Use the frozen method and instrument for an absent replicate.',409,'ATTEMPT_CONTEXT_MISMATCH');
             }
@@ -123,6 +125,10 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
             recordedAttempt=recorded.attempt;recordedResults=recorded.results;
             if (attemptId && attemptId !== recordedAttempt.id) throw new TransitionError('Choose the current recorded execution.',409,'ATTEMPT_CONTEXT_MISMATCH');
         }
+    }
+    if (recordedAttempt && (recordedAttempt.qcBatchId !== (item?.batchId ?? null) ||
+        recordedResults.some(row => row.batchId !== recordedAttempt.qcBatchId))) {
+        throw new TransitionError('Use the batch frozen on the recorded attempt.',409,'ATTEMPT_CONTEXT_MISMATCH');
     }
     if (attempt?.qcBatchId && item?.batchId && attempt.qcBatchId !== item.batchId) {
         throw new TransitionError('Attempt and work item batches disagree.', 409, 'RESULT_BATCH_CONFLICT');
@@ -448,7 +454,7 @@ async function deriveTextureResult(tx, { sampleId, replicateNo = 1, actor, now =
         if(oldRows.length!==3 || oldSources.some(row=>!row))throw new TransitionError('Previous derived source links are ambiguous.',409,'WORK_ATTEMPT_EVIDENCE_MISMATCH');
         const changed=fractions.filter((row,index)=>row.id!==oldSources[index].id);
         const events=require('./workAttemptEventService').attemptEventsInTransaction(tx).filter(event=>
-            event.sampleId===sampleId && ['CORRECTED','FIRST_FILL'].includes(event.action) &&
+            event.sampleId===sampleId && ['CORRECTED','FIRST_FILL','REPLICATE_ADDED'].includes(event.action) &&
             changed.some(row=>row.attemptId===event.entityId && parseJson(event.details,{}).newResultIds?.includes(row.id)));
         const stored=await tx.auditLog.findMany({where:{id:{in:events.map(event=>event.id)},entity:'WORK_ATTEMPT',sampleId}});
         if(!changed.length || !events.length || stored.length!==events.length || events.some(event=>

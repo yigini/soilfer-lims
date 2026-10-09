@@ -232,12 +232,13 @@ WHEN ((NEW.batchId IS NOT OLD.batchId OR NEW.rackPosition IS NOT OLD.rackPositio
   )) OR (EXISTS (SELECT 1 FROM "Batch" b WHERE b.id=NEW.batchId AND b.startedAt IS NOT NULL)
   OR EXISTS (SELECT 1 FROM "BatchAnalyte" a WHERE a.batchId=NEW.batchId AND a.legacyMembershipFrozen=1)
   OR EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.batchId=NEW.batchId)))) AND NOT (NEW.batchId IS NULL AND NEW.rackPosition IS NULL AND OLD.batchId IS NOT NULL
- AND NEW.status = 'REPEAT_REQUIRED' AND OLD.status NOT IN ('ACCEPTED','WAIVED','CANCELLED')
+ AND NEW.status = 'REPEAT_REQUIRED' AND OLD.status NOT IN ('REPEAT_REQUIRED','ACCEPTED','WAIVED','CANCELLED')
  AND EXISTS (
     SELECT 1 FROM "WorkAttempt" child JOIN "WorkAttempt" parent ON parent.id=child.parentAttemptId
     JOIN "AuditLog" event ON event.entity='WORK_ATTEMPT' AND event.entityId=child.id AND event.action='CREATED'
     WHERE child.workItemId=OLD.id AND parent.workItemId=OLD.id AND child.attemptNo>parent.attemptNo
       AND child.status='OPEN' AND parent.status IN ('QUESTIONED','INVALIDATED')
+      AND parent.evidenceHash IS NOT NULL AND parent.batchId IS OLD.batchId AND parent.qcBatchId IS OLD.batchId
       AND child.reason IN ('QC_BATCH_FAIL','REVIEW_OUTLIER','DUPLICATE_DISAGREEMENT','ABOVE_RANGE_DILUTION','INSTRUMENT_FAULT','PREP_ERROR','CONFIRMATION','OTHER')
       AND child.requestedBy IS NOT NULL AND child.requestedAt IS NOT NULL AND event.performedBy=child.requestedBy
       AND (child.reason<>'OTHER' OR COALESCE(length(trim(child.note)),0)>0)
@@ -250,7 +251,25 @@ WHEN ((NEW.batchId IS NOT OLD.batchId OR NEW.rackPosition IS NOT OLD.rackPositio
     JOIN "BatchAnalyte" analyte ON analyte.batchId=position.batchId AND (analyte.analysisCode=membership.analysisCode
       OR (json_valid(position.legacySource) AND json_extract(position.legacySource,'$.textureAlias')=1
         AND analyte.analysisCode=json_extract(position.legacySource,'$.batchAnalysis')))
-    WHERE membership.workItemId=OLD.id AND position.batchId=OLD.batchId AND analyte.status IN ('QC_PASS','QC_WARN')
+    WHERE membership.workItemId=OLD.id AND position.batchId=OLD.batchId
+      AND (analyte.analysisCode=OLD.analysis OR (json_valid(position.legacySource)
+        AND json_extract(position.legacySource,'$.textureAlias')=1
+        AND OLD.analysis IN ('TEXTURE','SOIL_PSD_TEXTURE','SOIL_TEXTURE','PSA','pSA','Particle Size Analysis')
+        AND analyte.analysisCode=json_extract(position.legacySource,'$.batchAnalysis')))
+      AND analyte.status IN ('QC_PASS','QC_WARN','ACCEPTED_WITH_DEVIATION')
+ )
+ AND NOT EXISTS (
+    SELECT 1 FROM "BatchPositionWorkItem" membership JOIN "BatchPosition" position ON position.id=membership.positionId
+    LEFT JOIN "BatchAnalyte" analyte ON analyte.batchId=position.batchId
+      AND (analyte.analysisCode=membership.analysisCode OR (json_valid(position.legacySource)
+        AND json_extract(position.legacySource,'$.textureAlias')=1
+        AND analyte.analysisCode=json_extract(position.legacySource,'$.batchAnalysis')))
+      AND (analyte.analysisCode=OLD.analysis OR (json_valid(position.legacySource)
+        AND json_extract(position.legacySource,'$.textureAlias')=1
+        AND OLD.analysis IN ('TEXTURE','SOIL_PSD_TEXTURE','SOIL_TEXTURE','PSA','pSA','Particle Size Analysis')
+        AND analyte.analysisCode=json_extract(position.legacySource,'$.batchAnalysis')))
+    WHERE membership.workItemId=OLD.id AND position.batchId=OLD.batchId
+      AND (analyte.analysisCode IS NULL OR analyte.status NOT IN ('QC_PASS','QC_WARN','ACCEPTED_WITH_DEVIATION'))
  ))
 BEGIN
   SELECT RAISE(ABORT, 'BATCH_MEMBERSHIP_FROZEN');

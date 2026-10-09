@@ -21,7 +21,7 @@ async function assertRepeatSourceReleased(db,item) {
     const code=batch && runAnalyteCode(batch,item.analysis);
     const member=batch?.positions.some(position=>position.workItems.some(link=>link.workItemId===item.id && runAnalyteCode(batch,link.analysisCode)===code));
     const analyte=batch?.analytes.find(row=>row.analysisCode===code);
-    if(member && ['QC_PASS','QC_WARN'].includes(analyte?.status))return;
+    if(member && ['QC_PASS','QC_WARN','ACCEPTED_WITH_DEVIATION'].includes(analyte?.status))return;
     if(member) {
         // The existing #187 disposition authority remains the only way out
         // of failed, pending or otherwise unaccepted run evidence.

@@ -318,6 +318,22 @@ test('the ordinary save appends an absent replicate to the same frozen RECORDED 
     expect(await f.all()).toEqual(before);
 });
 
+test('an unbatched recorded execution cannot append a replica after the completed WorkItem joins an open run',async()=>{
+    const f=await fixture(),manager=await reviewer(f);
+    expect(f.attempt.qcBatchId).toBeNull();expect(f.results[0].batchId).toBeNull();
+    await require('../../services/workItemStateService').transitionWorkItem(f.items[0].id,'COMPLETED',f.actor,'First reading complete',{},f.db);
+    const run=await require('../../services/qcNativeRunService').buildNativeRun(f.db,manager,f.input);
+    const before=await f.all(),response=await f.save([{param:f.analysisCode,value:'7.1',replicateNo:2,equipmentId:f.instrument.id}]);
+    expect({status:response.status,code:response.body.code}).toEqual({status:409,code:'ATTEMPT_CONTEXT_MISMATCH'});
+    expect(await f.all()).toEqual(before);
+    await expect(inTransaction(f.db,tx=>require('../../services/resultWriteService').writeResultsExecution(tx,{
+        sampleId:f.items[0].sampleId,workItemId:f.items[0].id,actor:f.actor,
+        measurements:[{param:f.analysisCode,value:'7.1',replicateNo:2,equipmentId:f.instrument.id}]})))
+        .rejects.toMatchObject({code:'ATTEMPT_CONTEXT_MISMATCH'});
+    expect(await f.all()).toEqual(before);
+    expect((await f.db.workItem.findUnique({where:{id:f.items[0].id}})).batchId).toBe(run.id);
+});
+
 test.each(['instrument','method'])('an incremental replicate refuses a changed frozen %s with zero writes',async kind=>{
     const f=await fixture(),measurement={param:f.analysisCode,value:'7.1',replicateNo:2,equipmentId:f.instrument.id};
     if(kind==='instrument')measurement.equipmentId=(await f.db.equipmentAsset.create({data:{id:randomUUID(),labId:f.labId,
@@ -435,9 +451,13 @@ test.each([{started:false,blankValue:null},{started:true,blankValue:null}])('an 
 
 test.each([
     {status:'QC_PASS',blankValue:0},
-    {status:'QC_WARN',blankValue:9.123456789,criteria:{failAction:{BLANK:'WARN',DUPLICATE:'WARN',LRM:'FAIL_BATCH',CRM:'WARN'}}}
+    {status:'QC_WARN',blankValue:9.123456789,criteria:{failAction:{BLANK:'WARN',DUPLICATE:'WARN',LRM:'FAIL_BATCH',CRM:'WARN'}}},
+    {status:'ACCEPTED_WITH_DEVIATION',blankValue:9.123456789,disposition:true}
 ])('RETURN from an accepted native run (%s) hands off one WorkItem and preserves all original membership and QC evidence byte for byte',async options=>{
-    const f=await nativeFixture(options);expect(f.run.analytes[0].status).toBe(options.status);
+    const f=await nativeFixture(options);
+    if(options.disposition)await require('../../services/qcDispositionStateService').dispositionBatch(f.run.id,
+        'ACCEPT_WITH_DEVIATION','Reviewed blank deviation retained for this run',f.manager,f.db);
+    expect((await f.runEvidence()).analytes[0].status).toBe(options.status);
     await f.submit();const run=await f.runEvidence(),parent=await f.db.workAttempt.findUnique({where:{id:f.attempt.id}});
     await f.http(f.manager,async(app,token)=>{
         const response=await request(app).post('/api/work/'+f.items[0].id+'/review').set('Authorization','Bearer '+token)

@@ -1,7 +1,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const { createHash } = require('node:crypto');
 const DIRECTORY = '20261008000200_repeat_correction_contract';
-const SHA256 = '09fd801c9ad5e28ba0d05a099270846adfe311e1a0c6c00ca3aed121c1f0c4d3';
+const SHA256 = '12ae827d5a30017c4379bd5ab9a8de563d514ba88caa8006ffc3a7ae2fc40375';
 function loadWorkRepeatMigrationSource() {
     const root = path.resolve(__dirname, '..', fs.existsSync('/.dockerenv') ? '.migrations-backup/191' : 'prisma/migrations', DIRECTORY);
     let bytes;
