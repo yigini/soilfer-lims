@@ -23,8 +23,28 @@ approval byte for byte. The additive table, immutable SQL edges/context, active
 cell partial uniqueness and dry-default preservation installer are implemented.
 The unchanged historical DDL completeness check declares only this exact new
 table as absent; its equality assertion and all prior gaps remain unchanged.
-SQL/installer proof is running. Request/manager commands, transactional Result
-consumption/read link, both approval UI roles and full validation remain.
+At pre-rebase6c0bc04a, actual HTTP/SQL/installer/UI/context/classification and
+barcode contracts passed7 suites/85 tests,zero skips,31.621s. Rebased onto
+merged #196 at6093198e while preserving decimal acknowledgement, Escape and
+keyboard navigation. Fixed the new editor's LanguageContext import to the
+actual existing context path.
+
+Scoped technician requests/cancellation and manager approval/rejection use the
+new table. Existing Result transactions consume exactly matching approvals
+once, audit request/approver/Result ids and expose approval in current/history
+read views. The desktop/touch actions select only a server request id; the
+existing completion preview carries it through confirmation and commit. No
+draft JSON acts as an approval. Below-LOQ censoring remains non-overridable.
+The manager queue has a reason and refuses self approval.
+
+Dilution eligibility is a read-only projection through #191's actual preflight,
+only for a retained ABOVE_RANGE reading. Unrecorded drafts say to record first;
+the prompt calls the existing repeat command without an automatic record or
+repeat chain. Docker preserves exact DDL outside the Prisma volume, startup
+installs then gates read-only, and owned setup/rehearsal uses the real installer.
+The scanner inspects both new byte-bound sources; no writer exemption.
+Fresh approval, completion, dilution, startup/full validation is in progress.
 No production migration/backfill count or full-suite pass is claimed.
 199's future run-curve calibration maximum is deferred and will take precedence.
-Production freeze and195 release hold remain; no production-host action.
+Production freeze remains; #195's #196-merge prerequisite is now met.
+No production-host action.

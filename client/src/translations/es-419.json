@@ -3269,5 +3269,26 @@
       "INVALID_NUMBER": "Formato numérico no válido",
       "NUMBER_FORMAT_POLICY_INVALID": "La política de formato numérico no es válida"
     }
+  },
+  "overrideRequests": {
+    "reason": "Motivo",
+    "request": "Solicitar excepción",
+    "useApproval": "Usar esta aprobación",
+    "cancel": "Cancelar solicitud",
+    "recordFirst": "Registre primero esta lectura y luego solicite una repetición con dilución.",
+    "diluteRepeat": "¿Diluir y repetir?",
+    "inbox": "Solicitudes de excepción",
+    "empty": "No hay solicitudes de excepción.",
+    "replicate": "Réplica {number}",
+    "decisionReason": "Motivo de la decisión",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "status": {
+      "REQUESTED": "Solicitada",
+      "APPROVED": "Aprobada",
+      "REJECTED": "Rechazada",
+      "CANCELLED": "Cancelada",
+      "CONSUMED": "Usada para el registro"
+    }
   }
 }

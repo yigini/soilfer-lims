@@ -19,7 +19,7 @@ async function fixture(){
     f.input={value:'65',unit:'fixture-unit',equipmentId:f.instrument.id,reason:'Original worksheet confirms an extreme reading'};
     f.http=async(actor,method,url,body)=>{let response;await withQcRunHttp(f.db,actor,async(app,token)=>{
         response=await request(app)[method](url).set('Authorization','Bearer '+token).send(body);
-    },{overrides:true,repeatCommands:true});return response;};
+    },{overrides:true,repeatCommands:true,workbench:true});return response;};
     f.ask=async(actor=f.tech,input={})=>f.http(actor,'post','/api/result-overrides/work-items/'+f.items[0].id,{...f.input,...input});
     f.approve=async(id,actor=f.manager)=>f.http(actor,'post','/api/result-overrides/'+id+'/decision',{status:'APPROVED',reason:'Checked the retained worksheet and instrument record'});
     f.record=(id,extra={})=>f.http(f.tech,'post','/api/results/'+f.items[0].sampleId,{measurements:[{
@@ -101,4 +101,47 @@ test('scoped list exposes the requester own history and manager queue without fo
     const f=await fixture(),asked=await f.ask();expect(asked.status).toBe(201);
     const rows=await service.list(f.db,f.tech);expect(rows.map(row=>row.id)).toEqual([asked.body.id]);
     expect((await service.list(f.db,f.manager)).map(row=>row.id)).toEqual([asked.body.id]);
+});
+
+test('actual workbench preview and commit keep the approved id, consume it once and expose history approval',async()=>{
+    const f=await fixture(),approved=await approval(f),item=await f.db.workItem.findUnique({where:{id:f.items[0].id}});
+    const entry={workItemId:item.id,value:'65',replicateNo:1,basis:'AIR_DRY',equipmentId:f.instrument.id,
+        unit:'fixture-unit',version:item.version,overrideRequestId:approved.id};
+    const before=await f.state(),preview=await f.http(f.tech,'post','/api/workbench/v2/completion/preview',{entries:[entry]});
+    expect({status:preview.status,body:preview.body}).toMatchObject({status:200,body:{included:[{overrideRequestId:approved.id,unit:'fixture-unit'}],excluded:[]}});
+    expect(await f.state()).toEqual(before);
+    const committed=await f.http(f.tech,'post','/api/workbench/v2/completion/commit',{entries:preview.body.included});
+    expect({status:committed.status,body:committed.body}).toMatchObject({status:200,body:{saved:1,errors:[]}});
+    const result=await f.db.result.findFirst();expect(JSON.parse(result.flags)).toContain('OVERRIDE_APPROVED');
+    expect(await f.db.resultOverrideRequest.findUnique({where:{id:approved.id}})).toMatchObject({status:'CONSUMED',consumedResultId:result.id});
+    const history=await f.http(f.tech,'get','/api/results/'+item.sampleId+'/history');
+    expect(history.status).toBe(200);expect(history.body.history[0].overrideApproval.approverId).toBe(f.manager.id);
+});
+
+test('workbench preview uses method LOQ and cannot approve a below-LOQ censor limit',async()=>{
+    const f=await fixture(),item=await f.db.workItem.findUnique({where:{id:f.items[0].id}}),before=await f.state();
+    const preview=await f.http(f.manager,'post','/api/workbench/v2/completion/preview',{entries:[{workItemId:item.id,
+        value:'<0.001',equipmentId:f.instrument.id,overrideReason:'Cannot authorize a physically misleading qualifier'}]});
+    expect(preview.status).toBe(200);expect(preview.body.included).toEqual([]);
+    expect(preview.body.excluded[0].blockers).toContain('CENSOR_LIMIT_BELOW_LOQ');expect(await f.state()).toEqual(before);
+});
+
+test('dilution opportunity reads the recorded source and unchanged repeat authority without writing',async()=>{
+    const f=await fixture(),service=require('../../services/workbenchValueValidationService');
+    await f.setPolicy([{key:'results.calibrationMax',value:10,analysisCode:f.analysisCode},
+        {key:'repeats.technicianSelfRepeatBeforeSubmit',value:true,analysisCode:f.analysisCode}]);
+    let item=await f.db.workItem.findUnique({where:{id:f.items[0].id},include:{sample:true}}),before=await f.state();
+    expect(await service.dilutionOpportunity(f.db,item,f.tech)).toEqual({eligible:false});expect(await f.state()).toEqual(before);
+    expect((await f.record(undefined,{value:'12'})).status).toBe(200);
+    const result=await f.db.result.findFirst();expect(JSON.parse(result.flags)).toContain('ABOVE_RANGE');
+    item=await f.db.workItem.findUnique({where:{id:item.id},include:{sample:true}});before=await f.state();
+    const opportunity=await service.dilutionOpportunity(f.db,item,f.tech);
+    expect(opportunity).toEqual({eligible:true,attemptId:result.attemptId});expect(await f.state()).toEqual(before);
+    await f.setPolicy([{key:'repeats.technicianSelfRepeatBeforeSubmit',value:false,analysisCode:f.analysisCode}]);
+    before=await f.state();expect(await service.dilutionOpportunity(f.db,item,f.tech)).toEqual({eligible:false,code:'WORK_REPEAT_FORBIDDEN'});
+    expect(await f.state()).toEqual(before);
+    await f.setPolicy([{key:'repeats.technicianSelfRepeatBeforeSubmit',value:true,analysisCode:f.analysisCode}]);
+    const repeat=await f.http(f.tech,'post','/api/work-items/'+item.id+'/repeats',{reason:'ABOVE_RANGE_DILUTION',note:'Dilute the retained aliquot'});
+    expect(repeat.status).toBe(201);expect(repeat.body.attempt).toMatchObject({parentAttemptId:result.attemptId,reason:'ABOVE_RANGE_DILUTION',status:'OPEN'});
+    expect(await f.db.result.count()).toBe(1);
 });

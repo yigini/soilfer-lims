@@ -1660,5 +1660,26 @@
       "INVALID_NUMBER": "Invalid number format",
       "NUMBER_FORMAT_POLICY_INVALID": "Number format policy is invalid"
     }
+  },
+  "overrideRequests": {
+    "reason": "Reason",
+    "request": "Request override",
+    "useApproval": "Use this approval",
+    "cancel": "Cancel request",
+    "recordFirst": "Record this reading first, then request a dilution repeat.",
+    "diluteRepeat": "Dilute and repeat?",
+    "inbox": "Override requests",
+    "empty": "No override requests.",
+    "replicate": "Replicate {number}",
+    "decisionReason": "Decision reason",
+    "approve": "Approve",
+    "reject": "Reject",
+    "status": {
+      "REQUESTED": "Requested",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "CANCELLED": "Cancelled",
+      "CONSUMED": "Used for recording"
+    }
   }
 }

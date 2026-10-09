@@ -114,7 +114,8 @@ exports.getResultHistory = async (req, res) => {
             orderBy: { createdAt: 'desc' }
         });
 
-        res.json({ history });
+        const approvals = await require('../services/resultOverrideService').resultApprovals(prisma,history);
+        res.json({ history: history.map(row => ({ ...row, overrideApproval: approvals.get(row.id) || null })) });
     } catch (error) {
         console.error('[getResultHistory] Error:', error);
         res.status(500).json({ error: 'Failed to fetch result history' });

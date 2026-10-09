@@ -1,4 +1,5 @@
 import numberParse from '@lims/number-parse';
+import { classifyResultValue } from '@lims/result-value-validation';
 import { calculateUsdaTexture } from '../../utils/soilCalculations';
 import { isEntryReady } from './entryReadiness';
 
@@ -26,5 +27,7 @@ export function isResultDraftReady(item, group, canEnter) {
         return values.some((value, index) => parsedKey(value) !== parsedKey(oldValues[index]));
     }
     const value = numberParse.parseNumber(item.draft.value, item.numberFormat);
+    const validation = classifyResultValue(item.draft.value, item.valueRules, item.numberFormat);
+    if (validation.severity === 'RED' && !(validation.canOverride && item.overrideRequestId)) return false;
     return value.valid && parsedKey(value) !== parsedKey(numberParse.parseNumber(current, item.numberFormat));
 }

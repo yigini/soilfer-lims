@@ -1660,5 +1660,26 @@
       "INVALID_NUMBER": "Format numérique invalide",
       "NUMBER_FORMAT_POLICY_INVALID": "Le format numérique configuré est invalide"
     }
+  },
+  "overrideRequests": {
+    "reason": "Motif",
+    "request": "Demander une dérogation",
+    "useApproval": "Utiliser cette approbation",
+    "cancel": "Annuler la demande",
+    "recordFirst": "Enregistrez cette lecture avant de demander une répétition avec dilution.",
+    "diluteRepeat": "Diluer et répéter ?",
+    "inbox": "Demandes de dérogation",
+    "empty": "Aucune demande de dérogation.",
+    "replicate": "Répétition {number}",
+    "decisionReason": "Motif de la décision",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "status": {
+      "REQUESTED": "Demandée",
+      "APPROVED": "Approuvée",
+      "REJECTED": "Rejetée",
+      "CANCELLED": "Annulée",
+      "CONSUMED": "Utilisée pour l’enregistrement"
+    }
   }
 }
