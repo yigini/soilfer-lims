@@ -1108,6 +1108,60 @@ async function runSuite() {
     if(!selectionProof.retainedRowsPreserved)throw Error('192 rehearsal retained-data proof missing');
     console.log('  ✓ Owned #191 COMPLETE → #192 PRE_192 dry-run → COMPLETE; retained history unchanged, new selections 0, NO_OP writes 0');
 
+    // #199 pin6090475511: this copy still has no calculation tables. Exercise
+    // the shipped default entrypoint, rather than preinstalling its successor.
+    const calculationBeforeOutput = cp.execFileSync('docker', ['run', '--rm',
+        '-v', `${repeatProofVolume}:/owned-199`, IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-199/dev.db',before=crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const dry=require('./scripts/install_calculation_templates').installCalculationTemplates({dbPath});
+         if(dry.classification!=='PRE_199'||dry.totalChanges!==0||dry.backfillCount!==0||
+           crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex')!==before)throw Error('199 entrypoint predecessor differs');
+         const db=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
+           console.log(JSON.stringify({dry,rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`
+    ], { encoding: 'utf8' }).trim();
+    const calculationBefore = JSON.parse(calculationBeforeOutput);
+    const calculationContainer = registerContainer(`lims_199_entrypoint_${TS}`), calculationPort = await getFreePort();
+    cp.execFileSync('docker', ['run', '-d', '--name', calculationContainer,
+        '-p', `127.0.0.1:${calculationPort}:3000`, '-v', `${repeatProofVolume}:/app/server/prisma`,
+        '-e', 'DEPLOYMENT_MODE=global', '-e', 'PORT=3000', '-e', 'NODE_ENV=production',
+        '-e', 'ALLOW_PRISMA_DB_PUSH=false', '-e', 'ALLOW_AUTO_SEED=false', '-e', 'DISABLE_BACKGROUND_JOBS=true', IMAGE_TAG]);
+    await waitForHealth(calculationPort, calculationContainer);
+    cp.execFileSync('docker', ['stop', calculationContainer]);
+    const calculationStartupLog = cp.execFileSync('docker', ['logs', calculationContainer], { encoding: 'utf8' });
+    if (!calculationStartupLog.includes('Installing inactive calculation references and evidence guards') ||
+        !calculationStartupLog.includes('"previousClassification": "PRE_199"') ||
+        !calculationStartupLog.includes('CALCULATION_STARTUP_READY')) throw Error('199 default-entrypoint installation proof missing');
+    fs.writeFileSync(path.join(tmpDir, '199-default-entrypoint.log'), calculationStartupLog);
+    const calculationAfterOutput = cp.execFileSync('docker', ['run', '--rm',
+        '-v', `${repeatProofVolume}:/owned-199`, IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-199/dev.db',installer=require('./scripts/install_calculation_templates');
+         const ready=installer.assertCalculationStartupReady(dbPath),before=crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const again=installer.installCalculationTemplates({dbPath,apply:true});
+         if(ready.classification!=='COMPLETE'||ready.totalChanges!==0||again.mode!=='NO_OP'||again.totalChanges!==0||
+           crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex')!==before)throw Error('199 repeat changed bytes');
+         const db=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
+           if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw Error('199 integrity differs');
+           for(const table of ['CalcTemplateActivation','CalibrationCurve','CalibrationPoint','ResultCalculation'])
+             if(db.prepare('SELECT count(*) n FROM "'+table+'"').get().n!==0)throw Error('199 startup activated or backfilled calculations');
+           console.log(JSON.stringify({ready,again,noOpBytesPreserved:true,
+             rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`
+    ], { encoding: 'utf8' }).trim();
+    const calculationAfter = JSON.parse(calculationAfterOutput);
+    if (JSON.stringify(calculationAfter.rows) !== JSON.stringify(calculationBefore.rows) ||
+        calculationBefore.receipts.some(before => !calculationAfter.receipts.some(after => JSON.stringify(after) === JSON.stringify(before))))
+        throw Error('199 default entrypoint changed retained analytical, audit or receipt rows');
+    console.log('  ✓ PRE_199 → shipped default docker-entrypoint.sh → COMPLETE; inactive references 11, activations/backfill 0; retained evidence preserved; repeat NO_OP writes 0');
+    console.log(JSON.stringify({calculationEntrypointProof:{dry:calculationBefore.dry,ready:calculationAfter.ready,
+        again:calculationAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:calculationAfter.noOpBytesPreserved}}));
+
     // 7. Upgrade: Run target image on the populated baseline volume
     const upgTargetContainer = registerContainer(`lims_c_upg_${TS}`);
     const upgTargetPort = await getFreePort();
