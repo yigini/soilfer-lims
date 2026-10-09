@@ -17,8 +17,26 @@ required pair fails. The fourth refuses. Submitted work retains the existing
 reviewer repeat authority. Third-entry values/range require review; no automatic
 n=3 decision. Texture is deferred. No migration or backfill is planned.
 
-Initial WIP adds the bounded policy definition and pure read projection with
-behavioral edge tests. Queue/context/writer/UI integration, all locale labels
-and owned validation remain to implement. No validation pass is claimed.
+Pushed WIP9b8ea7e2 adds the bounded policy definition, all ten policy locale
+labels, pure read projection and frozen/current resolver. Owned validation:
+two suites,50 tests PASS,zero skips,21.651s, including real DB policy/freeze,
+historical missing-count, foreign-scope and malformed-evidence zero-write cases.
+
+[Parent-set pin6080751135](https://github.com/yigini/soilfer-lims/issues/198#issuecomment-6080751135)
+keeps all retained parent replica numbers under #191 completeness/replacement
+rules, regardless of the current count or pair verdict. A genuinely new number
+above the count requires a recorded FAIL pair and number3; a new fourth refuses.
+The central Result writer now checks this before any evidence write. Validation
+of this new guard is pending. Queue/UI integration remains to implement.
+
+Existing test changes, all under that pin:
+
+| Test | Setup/expectation change | Assertions retained |
+| --- | --- | --- |
+| #191 repeat command fixture | Explicit required count2 through policyService; the three-reading parent is recorded by the actual writer as a failing pair then its third reading | All original command, authority, completeness, event, rollback, supersession and submission assertions |
+| Retained parent3 replacement | Current count becomes1 before the child fills, proving parent-set authority wins | Every original missing-parent, Result preservation, supersession and submission assertion |
+| Extra child3 with parent2 | Strengthened to409 REPLICATE_NOT_REQUIRED plus zero-write snapshot; counts exclude refused row | Every original missing-parent2 refusal and eventual append/supersession/submission assertion |
+
+No factory/writer exemption or scanner change. Migration/backfill counts0.
 No changes to analytical/QC/audit data or the native QC evaluator. Production
 freeze and195 release hold remain in force.

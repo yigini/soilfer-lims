@@ -51,4 +51,31 @@ async function resolveSampleReplicateRules(db, { labId, analysisCode, methodolog
     return { requiredCount, countSource: countFrozen ? 'FROZEN' : 'CURRENT', source: frozen ? 'FROZEN' : 'CURRENT', policy };
 }
 
-module.exports = { resolveSampleReplicateRules };
+// Pin6080751135: retained parent replica numbers remain governed by #191.
+// All genuinely new numbers pass this check before any execution/Result write.
+async function assertSampleReplicateNumbers(db, ctx, measurements, allocation) {
+    const numbers = measurements.map(row => Number(row.replicateNo ?? 1));
+    if (!ctx.item || numbers.every(number => number === 1)) return;
+    const attempt = ctx.recordedAttempt || (allocation?.existing
+        ? await db.workAttempt.findUnique({ where: { id: allocation.id } }) : null);
+    const parentRows = attempt?.parentAttemptId ? await db.result.findMany({ where: {
+        attemptId: attempt.parentAttemptId, sampleId: ctx.sample.id, param: measurements[0].param
+    }, select: { replicateNo: true } }) : [];
+    const parentNumbers = new Set(parentRows.map(row => row.replicateNo));
+    const newNumbers = numbers.filter(number => !parentNumbers.has(number));
+    if (!newNumbers.length) return;
+    if (newNumbers.some(number => number > 3)) {
+        throw new TransitionError('A new sample execution may contain at most three readings.', 409, 'REPLICATE_LIMIT');
+    }
+    const rules = await resolveSampleReplicateRules(db, { labId: ctx.labId, analysisCode: ctx.item.analysis,
+        methodologyId: ctx.methodId, batchId: ctx.batchId });
+    const extra = newNumbers.filter(number => number > rules.requiredCount);
+    if (!extra.length) return;
+    const pair = require('./sampleReplicateView').sampleReplicatePairView(ctx.recordedResults, rules);
+    if (extra.some(number => number !== 3) || !ctx.recordedAttempt ||
+        ctx.recordedAttempt.status !== 'RECORDED' || pair.status !== 'FAIL') {
+        throw new TransitionError('Record a failing required pair before adding a third reading.', 409, 'REPLICATE_NOT_REQUIRED');
+    }
+}
+
+module.exports = { resolveSampleReplicateRules, assertSampleReplicateNumbers };

@@ -357,6 +357,7 @@ async function writeResultsExecution(tx, options) {
         throw new TransitionError('Use the transcription correction route or request a repeat to change a recorded cell.',409,'ATTEMPT_CORRECTION_REQUIRED');
     }
     const allocation=ctx.recordedAttempt ? {id:ctx.recordedAttempt.id,existing:true,status:'RECORDED'} : await allocateExecution(tx,ctx,options);
+    await require('./sampleReplicatePolicyService').assertSampleReplicateNumbers(tx,ctx,prepared,allocation);
     await validateExecutionReadiness(tx,ctx);
     if(ctx.recordedAttempt) {
         const snapshot=ctx.recordedResults[0].equipmentReadiness;
