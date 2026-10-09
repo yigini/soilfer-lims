@@ -5,7 +5,7 @@ const {installResultOverrideRequests,assertResultOverrideRequestsStartupReady}=r
 const owned=[];
 afterEach(async()=>{for(const f of owned.splice(0))await f.close();});
 test.each([false,true])('actual installer dry-runs/applies/no-ops empty pre/fresh schema, fresh=%s, retaining every row',async fresh=>{
-    const f=await qcGateFixture();owned.push(f);const before=await f.snapshot(),db=new Database(f.file);
+    const f=await qcGateFixture({installOverrideRequests:false});owned.push(f);const before=await f.snapshot(),db=new Database(f.file);
     try{if(fresh)db.exec(loadResultOverrideMigrationSource().schemaSql);}finally{db.close();}
     const dry=installResultOverrideRequests({dbPath:f.file});
     expect(()=>assertResultOverrideRequestsStartupReady(f.file)).toThrow('Install the reviewed override-request schema before startup.');

@@ -43,7 +43,15 @@ the prompt calls the existing repeat command without an automatic record or
 repeat chain. Docker preserves exact DDL outside the Prisma volume, startup
 installs then gates read-only, and owned setup/rehearsal uses the real installer.
 The scanner inspects both new byte-bound sources; no writer exemption.
-Fresh approval, completion, dilution, startup/full validation is in progress.
+Integrated proof at187c8ba8:11 suites/135 tests PASS,zero skips,33.626s,
+including actual HTTP completion preview/commit, history approver, unchanged
+repeat preflight/command, both approval roles, all prior barcode and keyboard
+assertions and security wiring. Existing success responses omit an empty
+errors field; the new completion test checks normalized absence of errors.
+Owned QC fixtures install the actual additive approval prerequisite by default;
+only this issue's pre-install tests explicitly use the predecessor schema.
+No prior assertion, SQL guard or Result writer is bypassed. Full validation
+remains in progress.
 No production migration/backfill count or full-suite pass is claimed.
 199's future run-curve calibration maximum is deferred and will take precedence.
 Production freeze remains; #195's #196-merge prerequisite is now met.
