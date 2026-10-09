@@ -124,7 +124,7 @@ describe('Audit 4.6 shared, source-derived arithmetic', () => {
         [{ standardConcentration: 1, response: 1 }],
         [{ standardConcentration: 1, response: 1 }, { standardConcentration: 1, response: 2 }],
         [{ standardConcentration: 0, response: 1 }, { standardConcentration: 1, response: 1 }]
-    ])('degenerate standards have no usable fit, rather than invented coefficients', points => {
+    ].map(points => [points]))('degenerate standards have no usable fit, rather than invented coefficients', points => {
         expect(fitCurve(points)).toMatchObject({ usable: false, slope: null, intercept: null, r: null, rSquared: null });
     });
 });
