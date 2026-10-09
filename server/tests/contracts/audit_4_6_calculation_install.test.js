@@ -1,0 +1,165 @@
+const fs = require('node:fs'), path = require('node:path');
+const { randomUUID, createHash } = require('node:crypto');
+const Database = require('better-sqlite3');
+const { PrismaClient } = require('../../prisma_client');
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
+const { installWorkflowStateGuards } = require('../../scripts/install_workflow_state_guards');
+const { installCalculationTemplates, assertCalculationStartupReady, parseArguments } = require('../../scripts/install_calculation_templates');
+const { loadCalculationTemplateMigrationSource } = require('../../services/calculationTemplateMigrationSource');
+const { installCalculationUnit } = require('../../services/calculationReferenceUnit');
+const { installCalculationReferences } = require('../../services/calculationReferenceInstall');
+const { referenceRows } = require('../../services/calculationReferenceLibrary');
+const { UNITS } = require('../../seeds/units');
+const catalogue = require('../../seeds/data/catalogue.json');
+const files = [];
+const hash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+function raw(file, execute) {
+    const db = new Database(assertOwnedTestDatabase(file, 'system:fixture'));
+    try { db.pragma('foreign_keys=ON'); return execute(db); } finally { db.close(); }
+}
+function snapshot(file) {
+    return raw(file, db => ({ objects: db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").all(),
+        rows: Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all()
+            .map(({ name }) => [name, db.prepare(`SELECT * FROM "${name}" ORDER BY rowid`).all()])) }));
+}
+async function freshFixture() {
+    const directory = path.resolve(__dirname, '../.tmp'); fs.mkdirSync(directory, { recursive: true });
+    const file = assertOwnedTestDatabase(path.join(directory, `audit_legacy_calc_install_${randomUUID()}.db`), 'system:fixture'); files.push(file);
+    // The existing owned CREATE_PRISMA authority executes the real current schema.
+    beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'CREATE_PRISMA' });
+    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    try {
+        for (const row of UNITS.filter(unit => unit.code !== 'pct_mass')) await db.unit.create({ data: { ...row,
+            createdAt: new Date('2026-09-01T00:00:00.123Z'), updatedAt: new Date('2026-09-02T00:00:00.456Z') } });
+        const codes = new Set(referenceRows().map(row => row.analysisCode));
+        for (const row of catalogue.analyses.filter(value => codes.has(value.code))) await db.analysis.create({ data: {
+            code: row.code, name: `Retained local ${row.name}`, unitCode: row.unitCode, units: row.units,
+            version: 17, decimalPlaces: 5, description: 'Historical local metadata', validation: '{"local":true}' } });
+    } finally { await db.$disconnect(); }
+    // A real prior installer creates its own verified ledger; no synthetic receipt.
+    installWorkflowStateGuards({ dbPath: file, apply: true });
+    return file;
+}
+async function curveContext(file) {
+    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    try {
+        const lab = await db.lab.create({ data: { id: randomUUID(), code: randomUUID(), name: 'Owned curve lab', country: 'ZZ' } });
+        const user = await db.user.create({ data: { id: randomUUID(), username: randomUUID(), email: `${randomUUID()}@example.invalid`,
+            password: 'synthetic-unusable', role: 'LAB_MANAGER', labId: lab.id } });
+        const method = await db.methodology.create({ data: { id: randomUUID(), analysisCode: 'P_OLSEN', name: 'Owned Olsen', version: 1 } });
+        const batch = await db.batch.create({ data: { id: randomUUID(), labId: lab.id, analysis: 'P_OLSEN', status: 'RUNNING',
+            startedAt: new Date(), createdBy: user.username, analystUsername: user.username } });
+        const methodRevision = JSON.stringify({ id: method.id, version: method.version });
+        const analyte = await db.batchAnalyte.create({ data: { id: randomUUID(), batchId: batch.id, labId: lab.id,
+            analysisCode: 'P_OLSEN', methodologyId: method.id, criteriaSnapshot: JSON.stringify({ methodRevision: JSON.parse(methodRevision) }),
+            status: 'RUNNING', provenance: 'NATIVE' } });
+        const template = referenceRows().find(row => row.analysisCode === 'P_OLSEN');
+        return { id: randomUUID(), labId: lab.id, batchId: batch.id, batchAnalyteId: analyte.id, methodologyId: method.id,
+            executedMethodRevision: methodRevision, templateId: template.id, templateVersion: 1, revision: 1, supersedesId: null,
+            slope: 2, intercept: 0, r: 1, rSquared: 1, pointCount: 2, levelCount: 2, minPointsApplied: 2, minRApplied: 0.9,
+            thresholdSource: '{"fixture":"explicit synthetic criterion"}', status: 'PASS', failReason: null, recordedBy: user.username, reason: null };
+    } finally { await db.$disconnect(); }
+}
+function insertCurve(db, row) {
+    const keys = Object.keys(row);
+    return db.prepare(`INSERT INTO "CalibrationCurve" (${keys.map(key => `"${key}"`).join(',')}) VALUES (${keys.map(() => '?').join(',')})`)
+        .run(...keys.map(key => row[key]));
+}
+afterAll(() => { for (const file of files) fs.rmSync(assertOwnedTestDatabase(file, 'system:fixture'), { force: true }); });
+
+test('real fresh schema dry-run, additive install and repeated no-op preserve all original rows and schema objects', async () => {
+    const file = await freshFixture(), before = snapshot(file), digest = hash(file);
+    expect(installCalculationTemplates({ dbPath: file })).toMatchObject({ classification: 'FRESH_PRISMA', mode: 'DRY_RUN',
+        plannedUnitInsertCount: 1, plannedReferenceInsertCount: 11, totalChanges: 0, backfillCount: 0, activationInsertCount: 0 });
+    expect(() => assertCalculationStartupReady(file)).toThrow(expect.objectContaining({ code: 'CALC_NOT_INSTALLED' }));
+    expect(hash(file)).toBe(digest); expect(snapshot(file)).toEqual(before);
+    expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ previousClassification: 'FRESH_PRISMA',
+        classification: 'COMPLETE', mode: 'APPLIED', unitInsertCount: 1, referenceInsertCount: 11, activationInsertCount: 0, backfillCount: 0 });
+    const after = snapshot(file);
+    for (const object of before.objects) expect(after.objects).toContainEqual(object);
+    for (const [table, rows] of Object.entries(before.rows)) {
+        if (table === 'CalcTemplate') expect(after.rows[table]).toEqual(referenceRows());
+        else if (table === 'Unit') expect(after.rows[table].filter(row => row.code !== 'pct_mass')).toEqual(rows);
+        else if (table === '_schema_migrations') expect(after.rows[table].filter(row => row.id !== '199_calculation_templates')).toEqual(rows);
+        else expect(after.rows[table]).toEqual(rows);
+    }
+    expect(after.rows.CalcTemplateActivation).toEqual([]);
+    const installed = hash(file);
+    expect(assertCalculationStartupReady(file).classification).toBe('COMPLETE');
+    expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
+    expect(snapshot(file)).toEqual(after); expect(hash(file)).toBe(installed);
+});
+
+test('receipt refusal rolls every new guard, unit and reference back atomically', async () => {
+    const file = await freshFixture();
+    raw(file, db => db.exec("CREATE TRIGGER owned_calc_receipt_failure BEFORE INSERT ON _schema_migrations WHEN NEW.id='199_calculation_templates' BEGIN SELECT RAISE(ABORT,'OWNED_CALC_RECEIPT_FAILURE'); END;"));
+    const before = snapshot(file), digest = hash(file);
+    expect(() => installCalculationTemplates({ dbPath: file, apply: true })).toThrow('OWNED_CALC_RECEIPT_FAILURE');
+    expect(snapshot(file)).toEqual(before); expect(hash(file)).toBe(digest);
+});
+
+test.each(['partial-guard', 'changed-column', 'wrong-unit', 'wrong-reference'])('refuses %s with unchanged bytes before any installation writes', async variant => {
+    const file = await freshFixture();
+    raw(file, db => {
+        if (variant === 'partial-guard') db.exec(loadCalculationTemplateMigrationSource().guardsSql.match(/^CREATE TRIGGER[\s\S]*?^END;/m)[0]);
+        else if (variant === 'changed-column') db.exec('ALTER TABLE "CalibrationPoint" ADD COLUMN unexpected TEXT');
+        else if (variant === 'wrong-unit') db.prepare('INSERT INTO Unit(code,display,quantityKind,factorToBase,synonyms,updatedAt) VALUES(?,?,?,?,?,?)')
+            .run('pct_mass', '%', 'RATIO', 1, '[]', Date.now());
+        else {
+            installCalculationUnit(db, { apply: true });
+            const row = { ...referenceRows()[0], variant: 'Different existing reference' }, keys = Object.keys(row);
+            db.prepare(`INSERT INTO CalcTemplate (${keys.map(key => `"${key}"`).join(',')}) VALUES (${keys.map(() => '?').join(',')})`).run(...keys.map(key => row[key]));
+        }
+    });
+    const before = snapshot(file), digest = hash(file);
+    for (const apply of [false, true]) expect(() => installCalculationTemplates({ dbPath: file, apply }))
+        .toThrow(expect.objectContaining({ statusCode: 409, code: variant === 'wrong-unit' ? 'UNIT_CATALOGUE_CONFLICT' : variant === 'wrong-reference' ? 'CALC_REFERENCE_CONFLICT' : 'CALC_SCHEMA_MISMATCH' }));
+    expect(snapshot(file)).toEqual(before); expect(hash(file)).toBe(digest);
+});
+
+test.each([{ slope: null }, { intercept: null }, { r: null }, { rSquared: null }, { slope: 0 },
+    { slope: Infinity }, { intercept: -Infinity }, { r: Infinity }, { rSquared: Infinity }])(
+    'the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: %j', async change => {
+        const file = await freshFixture();
+        raw(file, db => { installCalculationUnit(db, { apply: true }); installCalculationReferences(db, { apply: true }); });
+        const row = { ...await curveContext(file), ...change };
+        raw(file, db => insertCurve(db, row)); // Populate before guards; never disable an installed guard.
+        const before = snapshot(file), digest = hash(file);
+        expect(() => installCalculationTemplates({ dbPath: file, apply: true }))
+            .toThrow(expect.objectContaining({ code: 'CALIBRATION_CURVE_PASS_COEFFICIENTS', differences: [row.id] }));
+        expect(snapshot(file)).toEqual(before); expect(hash(file)).toBe(digest);
+    });
+
+test('the installed fresh PASS guard rejects null, nonfinite and zero slope, while a degenerate FAIL stores all-null coefficients', async () => {
+    const file = await freshFixture(); installCalculationTemplates({ dbPath: file, apply: true });
+    const row = await curveContext(file);
+    raw(file, db => {
+        for (const change of [{ slope: null }, { intercept: null }, { r: null }, { rSquared: null }, { slope: 0 },
+            { slope: Infinity }, { intercept: -Infinity }, { r: Infinity }, { rSquared: Infinity }]) {
+            expect(() => insertCurve(db, { ...row, ...change })).toThrow('CALIBRATION_CURVE_PASS_COEFFICIENTS');
+            expect(db.prepare('SELECT count(*) n FROM CalibrationCurve').get().n).toBe(0);
+        }
+        insertCurve(db, { ...row, status: 'FAIL', failReason: 'DEGENERATE_FIT', slope: null, intercept: null, r: null, rSquared: null });
+        expect(db.prepare('SELECT status,slope,intercept,r,rSquared FROM CalibrationCurve WHERE id=?').get(row.id))
+            .toEqual({ status: 'FAIL', slope: null, intercept: null, r: null, rSquared: null });
+        expect(() => db.prepare('UPDATE CalibrationCurve SET slope=2 WHERE id=?').run(row.id)).toThrow('CALIBRATION_CURVE_IMMUTABLE');
+        expect(() => db.prepare('DELETE FROM CalibrationCurve WHERE id=?').run(row.id)).toThrow('CALIBRATION_CURVE_IMMUTABLE');
+        expect(db.pragma('integrity_check', { simple: true })).toBe('ok'); expect(db.pragma('foreign_key_check')).toEqual([]);
+    });
+});
+
+test('every managed table is byte-identical to its independently emitted fresh Prisma oracle, with guards separate', () => {
+    const source = loadCalculationTemplateMigrationSource();
+    for (const [table, sql] of Object.entries(source.freshTables)) expect(source.schemaSql.match(new RegExp(`CREATE TABLE "${table}" \\([\\s\\S]*?\\n\\);`))[0]).toBe(sql);
+    expect(source.schemaSql).not.toMatch(/CHECK|TRIGGER|DROP|ALTER/);
+    expect(source.guardsSql.match(/CREATE TRIGGER/g)).toHaveLength(16);
+});
+
+test('CLI requires an explicit existing database and an unambiguous mode', () => {
+    expect(parseArguments(['--db', 'owned.db'])).toEqual({ dbPath: 'owned.db', apply: false });
+    for (const args of [[], ['--db'], ['--db', 'owned.db', '--unknown'], ['--db', 'owned.db', '--apply', '--dry-run'], ['--db', 'owned.db', '--apply', '--apply']])
+        expect(() => parseArguments(args)).toThrow(expect.objectContaining({ code: 'CALC_ARGUMENT_INVALID' }));
+    expect(() => installCalculationTemplates()).toThrow(expect.objectContaining({ code: 'CALC_DATABASE_REQUIRED' }));
+});
