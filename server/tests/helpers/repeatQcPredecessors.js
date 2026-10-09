@@ -1,4 +1,5 @@
 const {assertOwnedTestDatabase}=require('./testOwnedDatabase');
+const {installCalculationReleasePrerequisites}=require('./calculationReleasePrerequisites');
 function installRepeatQcPredecessors(file) {
     assertOwnedTestDatabase(file,'system:fixture');
     const {installQcRuns}=require('../../scripts/install_qc_runs');
@@ -6,5 +7,6 @@ function installRepeatQcPredecessors(file) {
     installQcRuns({dbPath:file,apply:true,planSha256:plan.backfillFingerprint});
     require('../../scripts/install_qc_gate_scope').installQcGateScope({dbPath:file,apply:true});
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({dbPath:file,apply:true});
+    installCalculationReleasePrerequisites(file);
 }
 module.exports={installRepeatQcPredecessors};

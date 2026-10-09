@@ -214,3 +214,17 @@ test('actual authenticated HTTP entry retains permission, canonical scope, activ
         expect(await f.snapshot()).toEqual(before);
     });
 });
+
+test('the pinned prerequisite helper has exactly the three approved owned successors and no runtime writer exemption', () => {
+    const { scanSource } = require('../helpers/workflowWriteScanner');
+    const source = fs.readFileSync(path.resolve(__dirname,'../helpers/calculationReleasePrerequisites.js'),'utf8');
+    expect(scanSource(source,'tests/helpers/calculationReleasePrerequisites.js')).toEqual([]);
+    expect(scanSource(`${source}\n// changed helper\n`,'tests/helpers/calculationReleasePrerequisites.js'))
+        .toContainEqual(expect.objectContaining({code:'HISTORICAL_FIXTURE_SOURCE_MISMATCH'}));
+    const probe = "const {installCalculationReleasePrerequisites}=require('./calculationReleasePrerequisites');installCalculationReleasePrerequisites(file);";
+    for (const file of ['qcGateFixture','normalizedQcFixture','repeatQcPredecessors'])
+        expect(scanSource(probe,`tests/helpers/${file}.js`)).toEqual([]);
+    expect(scanSource(probe,'tests/helpers/fourthCaller.js')).toContainEqual(expect.objectContaining({code:'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED'}));
+    const runtime = "const {installCalculationReleasePrerequisites}=require('../tests/helpers/calculationReleasePrerequisites');installCalculationReleasePrerequisites(file);";
+    expect(scanSource(runtime,'services/fourthCaller.js')).toContainEqual(expect.objectContaining({code:'TEST_HELPER_IMPORTED_BY_RUNTIME'}));
+});

@@ -1,6 +1,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const Database = require('better-sqlite3');
 const { inventoryLegacyQcRuns } = require('../../services/qcRunBackfillPlan');
+const { installCalculationReleasePrerequisites } = require('./calculationReleasePrerequisites');
 
 // Retained contracts seed historical Batch JSON before exercising the routes.
 // Translate that fixture through the actual reviewed importer plan, on the
@@ -21,6 +22,7 @@ async function normalizeLegacyQcFixture(client, batchId) {
         const reviewed = installQcRuns({ dbPath: file });
         installQcRuns({ dbPath: file, apply: true, planSha256: reviewed.backfillFingerprint });
         require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: file, apply: true });
+        installCalculationReleasePrerequisites(file);
         return;
     }
     const db = new Database(file, { readonly: true, fileMustExist: true });
@@ -46,5 +48,6 @@ async function normalizeLegacyQcFixture(client, batchId) {
             await tx.$executeRawUnsafe(`INSERT INTO "${table}" (${keys.map(key => `"${key}"`).join(',')}) VALUES (${keys.map(() => '?').join(',')})`, ...keys.map(key => row[key]));
         }
     });
+    installCalculationReleasePrerequisites(file);
 }
 module.exports = { normalizeLegacyQcFixture };
