@@ -40,15 +40,18 @@ async function curveChain(db, context) {
         include: { points: { orderBy: { ordinal: 'asc' } } }, orderBy: { revision: 'asc' } });
     let parent = null;
     for (const row of rows) {
+        let executed;
+        try { executed = JSON.parse(row.executedMethodRevision); } catch { /* Refuse retained malformed evidence below. */ }
         if (row.revision !== (parent?.revision || 0) + 1 || row.supersedesId !== (parent?.id || null) || row.labId !== context.lab.id ||
-            row.methodologyId !== context.analyte.methodologyId || JSON.stringify(JSON.parse(row.executedMethodRevision)) !== JSON.stringify(context.methodRevision))
+            row.methodologyId !== context.analyte.methodologyId || JSON.stringify(executed) !== JSON.stringify(context.methodRevision))
             throw fail(409, 'CALIBRATION_CURVE_VERSION_CHANGED', 'The retained curve chain needs review.');
         parent = row;
     }
     return { rows, latest: parent };
 }
 function completeCurve(row) {
-    if (!row || row.points.length !== row.pointCount || row.points.some((point, i) => point.ordinal !== i + 1) ||
+    if (!row || !Number.isSafeInteger(row.pointCount) || row.pointCount < 1 || !Array.isArray(row.points) ||
+        row.points.length !== row.pointCount || row.points.some((point, i) => point.ordinal !== i + 1) ||
         new Set(row.points.map(point => point.standardConcentration)).size !== row.levelCount)
         throw fail(409, 'CALIBRATION_CURVE_INCOMPLETE', 'The curve does not retain every declared calibration point.');
     return row;
