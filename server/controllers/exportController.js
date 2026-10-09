@@ -216,6 +216,7 @@ exports.getExportData = async (req, res) => {
                             row[`${pLower}_n`] = r.sourceResultIds.length;
                             row[`${pLower}_flag`] = r.mode==='NOT_REPORTABLE'?'NOT_REPORTABLE':r.rule;
                             row[`${pLower}_selection_id`] = r.selectionId;
+                            if(r.numericValue!==null && r.sourceResultIds.length>1)asMeasured='';
                             if(r.mode==='NOT_REPORTABLE') { asMeasured=reportedValueText(r,user.language);normalized=asMeasured;controlledUnit='';measuredUnit=''; }
                             headerNotes.add('Reported values: saved reviewer selection with its recorded source evidence and policy version.');
                         }
