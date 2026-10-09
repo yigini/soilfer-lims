@@ -84,7 +84,19 @@
     "qcNotRequired": "CQ non requis",
     "qcEvidenceIncomplete": "L’acceptation historique du CQ dispose de preuves enregistrées incomplètes",
     "qcAcknowledgedBy": "Accepté par",
-    "qcCalibrationBracketRepeatInfo": "Un intervalle d’étalonnage est répété ; ce résultat est hors du périmètre concerné"
+    "qcCalibrationBracketRepeatInfo": "Un intervalle d’étalonnage est répété ; ce résultat est hors du périmètre concerné",
+    "loq": "LOQ",
+    "basis": "Base",
+    "airDry": "Séché à l’air",
+    "ovenDry": "Séché à l’étuve",
+    "fieldMoist": "Humidité au champ",
+    "qcFlags": "Indicateurs de CQ enregistrés",
+    "methodNotRecorded": "Méthode non enregistrée",
+    "methodReferences": "MÉTHODES ET RÉFÉRENCES",
+    "approvalRole": "Rôle d’approbation",
+    "approvedAt": "Approuvé le",
+    "issuedBy": "Émis par",
+    "issuerRole": "Rôle de l’émetteur"
   },
   "common": {
     "save": "Enregistrer",

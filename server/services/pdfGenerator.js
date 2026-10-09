@@ -6,7 +6,7 @@
  */
 
 const PDFDocument = require('pdfkit');
-const { formatReportedValue } = require('../../shared/reportedValueFormat');
+const { displayResult, resultNotes } = require('./reportContentDisplay');
 const { calculateUsdaTexture, evaluateCnRatio, evaluateCecAndBases } = require('../utils/soilCalculations');
 const { interpretParameter, normalizeUnit } = require('./interpretationService');
 const { describeReportEvidence } = require('./reportTruthfulnessService');
@@ -249,11 +249,10 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
 
                 (group.items || []).forEach(item => {
                     const notReportable=item.reportedMode==='NOT_REPORTABLE';
-                    const valueText=notReportable ? require('../locales/'+locale+'.json').reportedValue.notReportable :
-                        item.reportedValueSelectionId ? formatReportedValue(item) : String(item.value ?? '—');
+                    const valueText=notReportable ? require('../locales/'+locale+'.json').reportedValue.notReportable : displayResult(item, labels);
                     const valueHeight=doc.font('Helvetica-Bold').fontSize(8).heightOfString(valueText,{width:60});
                     const rowHeight=Math.max(16,valueHeight+8);
-                    const noteText=notReportable ? String(item.value ?? '') : '';
+                    const noteText=resultNotes(item, labels);
                     const noteHeight=noteText ? doc.font('Helvetica').fontSize(7.5).heightOfString(noteText,{width:pageWidth-12})+8 : 0;
                     // Keep short explanations with their row. Long explanations
                     // flow across pages, reserving the publication footer.
@@ -275,13 +274,13 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     if (paramUpper === 'SOC') socVal = Number(item.value);
                     if (paramUpper === 'TN') tnVal = Number(item.value);
 
-                    const interp = notReportable ? '' : getInterpretation(item.param, item.value);
+                    const interp = notReportable || item.censoring && item.censoring !== 'NONE' ? '' : getInterpretation(item.param, item.value);
 
                     doc.fillColor(cDark).font('Helvetica-Bold').fontSize(7.5)
                         .text(item.name || item.param, col1 + 6, currentY + 4, { width: 145, ellipsis: true });
 
                     doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                        .text(item.method || item.standard || 'SoilFER SOP', col2 + 4, currentY + 4, { width: 120, ellipsis: true });
+                        .text(item.method || item.standard || labels.methodNotRecorded, col2 + 4, currentY + 4, { width: 120, ellipsis: true });
 
                     doc.font('Helvetica-Bold').fontSize(8).fillColor(cDark)
                         .text(valueText,col3+4,currentY+4,{width:60,align:'right'});
@@ -313,6 +312,21 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             }
 
             currentY += 10;
+
+            // Display only the actual methods frozen into this report payload.
+            if (reportContent.methodologies?.length) {
+                const methodText = reportContent.methodologies.map(method => `${method.param}: ${method.method || labels.methodNotRecorded}` +
+                    `${method.methodVersion != null ? ` · v${method.methodVersion}` : ''}` +
+                    `${method.standard ? ` · ${method.standard}` : ''}` +
+                    `${method.reference?.citation ? ` · ${method.reference.citation}` : ''}`).join('\n');
+                const height = doc.font('Helvetica').fontSize(7.5).heightOfString(methodText, { width: pageWidth });
+                if (currentY + Math.min(height + 24, 710) > 750) { doc.addPage(); currentY = 40; }
+                doc.font('Helvetica-Bold').fontSize(8).fillColor(cPrimary).text(labels.methodReferences, startX, currentY);
+                const bottomMargin = doc.page.margins.bottom;
+                doc.page.margins.bottom = 92;
+                doc.font('Helvetica').fontSize(7.5).fillColor(cGray).text(methodText, startX, doc.y + 4, { width: pageWidth });
+                currentY = doc.y + 12; doc.page.margins.bottom = bottomMargin;
+            }
 
             // =========================================================================
             // 6. SOIL METROLOGY & SCIENTIFIC EVALUATION (USDA Texture & Stoichiometry)
@@ -358,7 +372,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
 
             doc.font('Helvetica').fontSize(7.5);
             const qcHeight = doc.heightOfString(qcStatement, { width: 320 });
-            const endorseHeight = Math.max(84, qcHeight + 66);
+            const endorseHeight = Math.max(120, qcHeight + 66);
             if (currentY + endorseHeight > 770) { doc.addPage(); currentY = 40; }
             doc.rect(startX, currentY, pageWidth, endorseHeight).fillAndStroke(cLightBg, cBorder);
 
@@ -378,12 +392,16 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
 
             const signedBy = reportContent.signedBy || {};
             doc.font('Helvetica-Bold').fontSize(9).fillColor(cDark)
-                .text(signedBy.name || 'Laboratory Director', sigX, currentY + 24);
+                .text(signedBy.name || labels.notRecorded, sigX, currentY + 24, { width: 160 });
 
             doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                .text(signedBy.title || 'Laboratory Quality Manager', sigX, currentY + 36)
-                .text(`Signed: ${signedBy.date ? String(signedBy.date).split('T')[0] : new Date().toISOString().split('T')[0]}`, sigX, currentY + 48)
-                .text(`Approval Record: RECORDED IN AUDIT LOG`, sigX, currentY + 60, { width: 140 });
+                .text(`${labels.approvalRole}: ${signedBy.title || labels.notRecorded}`, sigX, currentY + 38, { width: 160 })
+                .text(`${labels.approvedAt}: ${signedBy.date ? String(signedBy.date) : labels.notRecorded}`, sigX, currentY + 51, { width: 160 });
+            const issuer = reportContent.generated || {};
+            doc.font('Helvetica-Bold').fontSize(8).fillColor(cDark)
+                .text(`${labels.issuedBy}: ${issuer.byName || issuer.by || labels.notRecorded}`, sigX, currentY + 78, { width: 160 });
+            doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
+                .text(`${labels.issuerRole}: ${issuer.role || labels.notRecorded}`, sigX, currentY + 92, { width: 160 });
 
             currentY += endorseHeight + 14;
 

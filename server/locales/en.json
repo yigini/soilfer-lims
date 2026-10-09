@@ -84,7 +84,19 @@
     "qcNotRequired": "QC not required",
     "qcEvidenceIncomplete": "Historical QC acceptance has incomplete recorded evidence",
     "qcAcknowledgedBy": "Acknowledged by",
-    "qcCalibrationBracketRepeatInfo": "A calibration bracket is being repeated; this result is outside the affected scope"
+    "qcCalibrationBracketRepeatInfo": "A calibration bracket is being repeated; this result is outside the affected scope",
+    "loq": "LOQ",
+    "basis": "Basis",
+    "airDry": "Air-dry",
+    "ovenDry": "Oven-dry",
+    "fieldMoist": "Field-moist",
+    "qcFlags": "Recorded QC flags",
+    "methodNotRecorded": "Method not recorded",
+    "methodReferences": "METHODS AND REFERENCES",
+    "approvalRole": "Approval role",
+    "approvedAt": "Approved at",
+    "issuedBy": "Issued by",
+    "issuerRole": "Issuer role"
   },
   "common": {
     "save": "Save",

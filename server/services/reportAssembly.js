@@ -58,29 +58,13 @@ async function assembleReport(sampleId, user, options = {}) {
         });
     }
 
-    // 3. Fetch lab manager for auto-signature
-    let labManager = null;
-    if (lab) {
-        labManager = await db.user.findFirst({
-            where: {
-                labId: lab.id,
-                role: 'LAB_MANAGER',
-                isActive: true
-            },
-            select: { name: true, username: true, email: true }
-        });
-        // Fallback: try matching by lab code
-        if (!labManager) {
-            labManager = await db.user.findFirst({
-                where: {
-                    labId: lab.code,
-                    role: 'LAB_MANAGER',
-                    isActive: true
-                },
-                select: { name: true, username: true, email: true }
-            });
-        }
-    }
+    // Approval is the recorded sample actor and time. A directory lookup may
+    // supply its display name; it must never select another laboratory manager.
+    const approvers = sample.approvedBy ? await db.user.findMany({
+        where: { OR: [{ username: sample.approvedBy }, { id: sample.approvedBy }] },
+        select: { name: true, username: true }
+    }) : [];
+    const approver = approvers.length === 1 ? approvers[0] : null;
 
     // 4. Parse metadata
     const metadata = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
@@ -90,29 +74,17 @@ async function assembleReport(sampleId, user, options = {}) {
     // 5. Extract client/farmer info for search keys
     const clientInfo = extractClientInfo(metadata, fieldMeta, receptionData, sample);
 
-    // 6. Fetch all analyses and their default methodologies
+    // 6. Fetch analyses and the methods named by the saved reported values.
     const analyses = await db.analysis.findMany();
     const analysisMap = new Map(analyses.map(a => [a.code, a]));
 
-    // Fetch default methodologies for all analysis codes in results, and exact methodologies where assigned
-    const resultParams = reportableResults.map(r => r.param);
     const resultMethodIds = [...new Set(reportableResults.map(r => r.methodologyId).filter(Boolean))];
-    let methodologies = [];
     let specificMethodologies = [];
     try {
-        [methodologies, specificMethodologies] = await Promise.all([
-            db.methodology.findMany({
-                where: {
-                    analysisCode: { in: resultParams },
-                    isDefault: true
-                }
-            }),
-            resultMethodIds.length > 0 ? db.methodology.findMany({
-                where: { id: { in: resultMethodIds } }
-            }) : []
-        ]);
+        specificMethodologies = resultMethodIds.length > 0 ? await db.methodology.findMany({
+            where: { id: { in: resultMethodIds } }, include: { reference: true }
+        }) : [];
     } catch (e) { /* methodologies table may be empty */ }
-    const methodMap = new Map(methodologies.map(m => [m.analysisCode, m]));
     const specificMethodMap = new Map(specificMethodologies.map(m => [m.id, m]));
 
     // 7. Group results by category and apply controlled units & agronomic interpretation
@@ -127,8 +99,9 @@ async function assembleReport(sampleId, user, options = {}) {
             };
         }
 
-        const flags = typeof result.flags === 'string' ? JSON.parse(result.flags) : (result.flags || []);
-        const methodology = (result.methodologyId && specificMethodMap.get(result.methodologyId)) || methodMap.get(result.param);
+        const sources = reportedSelectionProof.sourceResults.filter(row => result.sourceResultIds.includes(row.id));
+        const flags = [...new Set(sources.flatMap(row => typeof row.flags === 'string' ? JSON.parse(row.flags) : row.flags || []))];
+        const methodology = result.methodologyId ? specificMethodMap.get(result.methodologyId) : null;
         const rawUnit = result.unit || analysis?.units || '';
         const notReportable = result.mode==='NOT_REPORTABLE';
         const interp = notReportable ? {unit:'',rating:null,label:null,advisory:null} : interpretParameter(result.param, result.value, rawUnit);
@@ -149,6 +122,11 @@ async function assembleReport(sampleId, user, options = {}) {
             selectionPolicyVersion: result.policyVersion,
             method: methodology?.name || null,
             standard: methodology?.standard || null,
+            methodologyId: methodology?.id || result.methodologyId || null,
+            methodVersion: methodology?.version ?? null,
+            methodReference: methodology?.reference ? { id: methodology.reference.id, authority: methodology.reference.authority,
+                citation: methodology.reference.citation, title: methodology.reference.title, year: methodology.reference.year,
+                url: methodology.reference.url } : null,
             interpretation: {
                 rating: interp.rating,
                 label: interp.label,
@@ -157,7 +135,7 @@ async function assembleReport(sampleId, user, options = {}) {
             flags,
             isValid: result.isValid,
             provenance: result.provenance || 'MEASURED',
-            basis: result.basis || 'AIR_DRY',
+            basis: result.basis || null,
             replicateNo: result.replicateNo || 1,
             censoring: result.censoring || 'NONE'
         });
@@ -199,16 +177,14 @@ async function assembleReport(sampleId, user, options = {}) {
     // 11. Build unique methodologies list for footnotes
     const usedMethods = [];
     const seenMethods = new Set();
-    for (const m of methodologies) {
-        const key = m.analysisCode;
+    for (const item of Object.values(groupedResults).flatMap(group => group.items)) {
+        const key = JSON.stringify([item.param, item.methodologyId, item.methodVersion]);
         if (!seenMethods.has(key)) {
             seenMethods.add(key);
-            const analysis = analysisMap.get(m.analysisCode);
             usedMethods.push({
-                param: m.analysisCode,
-                paramName: analysis?.name || m.analysisCode,
-                method: m.name,
-                standard: m.standard || null
+                param: item.param, paramName: item.name, methodologyId: item.methodologyId,
+                methodVersion: item.methodVersion, method: item.method, standard: item.standard,
+                reference: item.methodReference
             });
         }
     }
@@ -217,11 +193,11 @@ async function assembleReport(sampleId, user, options = {}) {
     const locationData = extractLocationData(fieldMeta, receptionData, sample);
 
     // 14. Build signedBy block
-    const signedByName = labManager?.name || labManager?.username || user?.name || user?.username || 'Laboratory Manager';
     const signedBy = {
-        name: signedByName,
-        title: 'Laboratory Manager',
-        date: new Date().toISOString()
+        name: approver?.name || sample.approvedBy || null,
+        username: sample.approvedBy || null,
+        title: null, // Approval-time role is not recorded by the current model.
+        date: sample.approvedAt || null
     };
 
     // SD-17: Compute analytical episodes for reopened samples
@@ -270,6 +246,8 @@ async function assembleReport(sampleId, user, options = {}) {
     evidence.qcModes=sourceModes.flatMap(proof=>proof.qcModeEvidence);
     evidence.reportedValueSelections = reportedSelectionProof.groups;
     const evidenceText = describeReportEvidence(evidence, warningLocale);
+    for (const item of Object.values(groupedResults).flatMap(group => group.items)) item.qcNotes = evidence.qc.deviations
+        .filter(row => row.analysisCode === item.param).map(row => [row.qcStatus, row.dispositionReason, row.acknowledgementReason].filter(Boolean).join(' · '));
     const reportContent = {
         meta: {
             reportId: null, // assigned when saved
@@ -343,7 +321,8 @@ async function assembleReport(sampleId, user, options = {}) {
         generated: {
             at: new Date().toISOString(),
             by: user?.username || 'system',
-            byName: user?.name || user?.username || 'System'
+            byName: user?.name || user?.username || 'System',
+            role: user?.role || null
         }
     };
 

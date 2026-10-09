@@ -84,7 +84,19 @@
     "qcNotRequired": "CQ não obrigatório",
     "qcEvidenceIncomplete": "A aceitação histórica do CQ tem evidência registrada incompleta",
     "qcAcknowledgedBy": "Aceito por",
-    "qcCalibrationBracketRepeatInfo": "Um intervalo de calibração está sendo repetido; este resultado está fora do escopo afetado"
+    "qcCalibrationBracketRepeatInfo": "Um intervalo de calibração está sendo repetido; este resultado está fora do escopo afetado",
+    "loq": "LOQ",
+    "basis": "Base",
+    "airDry": "Seco ao ar",
+    "ovenDry": "Seco em estufa",
+    "fieldMoist": "Umidade de campo",
+    "qcFlags": "Indicadores de CQ registrados",
+    "methodNotRecorded": "Método não registrado",
+    "methodReferences": "MÉTODOS E REFERÊNCIAS",
+    "approvalRole": "Função de aprovação",
+    "approvedAt": "Aprovado em",
+    "issuedBy": "Emitido por",
+    "issuerRole": "Função do emissor"
   },
   "common": {
     "save": "Salvar",
