@@ -14,6 +14,8 @@ const activations = require('../../services/calculationActivationService');
 const policy = require('../../services/policyService');
 const { PRESETS } = require('../../config/policyRegistry');
 const { calculate } = require('../../../shared/soilCalculation');
+const request = require('supertest');
+const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const files = [];
 let context;
 async function fixture() {
@@ -167,5 +169,50 @@ test('parameter edits retain dimensional units and bounds, and require positive 
         .rejects.toMatchObject({ code: 'CALC_TEMPLATE_PARAMETER_INVALID', statusCode: 422 });
     await expect(templates.clone(db, managerA, source.id, cloneBody(source, labA, method, { parameters: params.map(value => ({ key: value.key, value: 0 })) })))
         .rejects.toMatchObject({ code: 'CALC_TEMPLATE_INVALID', statusCode: 422 });
+    expect(await evidence(db)).toEqual(before);
+});
+
+test('actual authenticated HTTP routes list, clone, version and activate with exact scope and stable validation codes', async () => {
+    const { db, labA, managerA, nitrogenMethod } = context, source = row('kjeldahl-nitrogen');
+    await withQcRunHttp(db, managerA, async (app, token) => {
+        const auth = `Bearer ${token}`;
+        const listed = await request(app).get('/api/calculation-templates').query({ labId: labA.code, analysisCode: 'TN' }).set('Authorization', auth);
+        expect(listed.status).toBe(200); expect(listed.body.data).toHaveLength(1);
+        expect(listed.body.data[0].sourceCitation.sourceRule.pdfPage).toBe(14);
+        const missingPrecision = await request(app).post(`/api/calculation-templates/${source.id}/activation`).set('Authorization', auth)
+            .send(activationBody(source, { labId: labA.id, methodologyId: nitrogenMethod.id }));
+        expect(missingPrecision.status).toBe(422); expect(missingPrecision.body.code).toBe('CALC_TEMPLATE_PRECISION_REQUIRED');
+        const cloned = await request(app).post(`/api/calculation-templates/${source.id}/clone`).set('Authorization', auth)
+            .send(cloneBody(source, labA, nitrogenMethod, { outputDecimals: 3 }));
+        expect(cloned.status).toBe(201);
+        const versioned = await request(app).post(`/api/calculation-templates/${cloned.body.data.id}/versions`).set('Authorization', auth)
+            .send(cloneBody(cloned.body.data, labA, nitrogenMethod, { outputDecimals: 4 }));
+        expect(versioned.status).toBe(201); expect(versioned.body.data.version).toBe(2);
+        const activation = await request(app).post(`/api/calculation-templates/${versioned.body.data.id}/activation`).set('Authorization', auth)
+            .send(activationBody(versioned.body.data));
+        expect(activation.status).toBe(201);
+        const stale = await request(app).post(`/api/calculation-templates/${versioned.body.data.id}/activation`).set('Authorization', auth)
+            .send(activationBody(versioned.body.data));
+        expect(stale.status).toBe(409); expect(stale.body.code).toBe('CALC_TEMPLATE_VERSION_CHANGED');
+        const state = await request(app).get('/api/calculation-templates/activation').set('Authorization', auth)
+            .query({ labId: labA.id, analysisCode: 'TN', methodologyId: nitrogenMethod.id });
+        expect(state.status).toBe(200); expect(state.body.data.active.activationId).toBe(activation.body.data.id);
+        const invalidScope = await request(app).get('/api/calculation-templates/activation').set('Authorization', auth)
+            .query({ labId: labA.id, analysisCode: 'TN' });
+        expect(invalidScope.status).toBe(422); expect(invalidScope.body.code).toBe('CALC_TEMPLATE_SCOPE_INVALID');
+    }, { calculations: true });
+});
+
+test('actual HTTP rejects an unauthenticated reader, technician management and another laboratory without writes', async () => {
+    const { db, labA, labB, technician, managerA, method } = context, source = row('walkley-black-130'), before = await evidence(db);
+    await withQcRunHttp(db, technician, async (app, token) => {
+        expect((await request(app).get('/api/calculation-templates')).status).toBe(401);
+        expect((await request(app).post(`/api/calculation-templates/${source.id}/clone`).set('Authorization', `Bearer ${token}`)
+            .send(cloneBody(source, labA, method))).status).toBe(403);
+    }, { calculations: true });
+    await withQcRunHttp(db, managerA, async (app, token) => {
+        const response = await request(app).get('/api/calculation-templates').set('Authorization', `Bearer ${token}`).query({ labId: labB.id });
+        expect(response.status).toBe(403); expect(response.body.code).toBe('CALC_TEMPLATE_SCOPE_DENIED');
+    }, { calculations: true });
     expect(await evidence(db)).toEqual(before);
 });
