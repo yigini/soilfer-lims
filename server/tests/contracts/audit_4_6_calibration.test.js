@@ -134,6 +134,24 @@ test.each([[5.002,true],[4.998,false]])('response %s compares extract mg/L with 
     expect(result.numericValue).toBeGreaterThan(intermediate.calibrationMax);
 });
 
+test('a future failed curve blocks stored completion without changing an earlier Result or its frozen calculation', async () => {
+    const f = context; await f.start(); const first = await curves.recordCurve(f.db,f.run.id,f.analyst,f.input);
+    const writer = require('../../services/resultWriteService'), inputs = {absorbance:3,blankConcentration:0,extractVolume:20,dilutionFactor:2,sampleMass:1,moistureCorrectionFactor:1};
+    const preview = await writer.previewResultCalculation(f.db,{sampleId:f.sample.id,workItemId:f.item.id,actor:f.analyst,inputs});
+    const result = await f.db.$transaction(tx => writer.writeResult(tx,{sampleId:f.sample.id,workItemId:f.item.id,actor:f.analyst,
+        measurement:{param:'P_OLSEN',value:40,calculation:{...preview.active,curveId:first.id,inputs}}}));
+    const frozen = await f.db.resultCalculation.findUnique({where:{resultId:result.id}});
+    await curves.recordCurve(f.db,f.run.id,f.analyst,{...f.input,expectedCurveId:first.id,reason:'Retain the failed recalibration',
+        points:[{standardConcentration:1,response:2}]});
+    const before = await f.snapshot(), item = await f.db.workItem.findUnique({where:{id:f.item.id}});
+    const readiness = await require('../../services/storedResultCompletenessService').checkStoredCompletion(f.db,f.sample,item,[result],f.analyst);
+    expect(readiness).toMatchObject({ready:false,code:'CALIBRATION_CURVE_FAILED'});
+    expect(await f.snapshot()).toEqual(before);
+    expect(await f.db.result.findUnique({where:{id:result.id}})).toEqual(result);
+    expect(await f.db.resultCalculation.findUnique({where:{resultId:result.id}})).toEqual(frozen);
+    await expect(curves.assertRunCalibration(f.db,f.run.id,f.manager,'P_OLSEN')).rejects.toMatchObject({statusCode:409,code:'CALIBRATION_CURVE_FAILED'});
+});
+
 test('every replicate participates in the unweighted fit; zero counts and repeated standards add no distinct levels', async () => {
     const f = context; await f.start();
     const points = [{ standardConcentration: 0, response: 0 }, { standardConcentration: 1, response: 1 }, { standardConcentration: 1, response: 3 }];

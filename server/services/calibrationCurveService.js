@@ -137,4 +137,11 @@ async function listCurves(db, batchId, actor, analysisCode) {
             requiresCurve: active.template.curve !== null } : null };
     });
 }
-module.exports = { recordCurve, listCurves, executionContext, activeTemplate, requireLatestCurve, completeCurve, pointNumbers };
+async function assertRunCalibration(db, batchId, actor, analysisCode) {
+    const batch = await readQcRun(db,batchId,actor), analyte = batch.analytes.find(row => row.analysisCode === analysisCode);
+    if (!analyte) throw fail(409,'CALIBRATION_CURVE_CONTEXT_MISMATCH','The run analyte is unavailable.');
+    const lab = await policyService.resolveLab(batch.labId,db), active = await activeTemplate(db,{lab,analyte});
+    if (!active?.template.curve) return null;
+    return requireLatestCurve(db,await executionContext(db,batchId,actor,analysisCode),active);
+}
+module.exports = { recordCurve, listCurves, executionContext, activeTemplate, requireLatestCurve, completeCurve, pointNumbers, assertRunCalibration };

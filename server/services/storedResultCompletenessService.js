@@ -11,6 +11,13 @@ async function checkStoredCompletion(db, sample, item, results, actor) {
     if (!current.length || current.some(result => result.isValid === false)) return { ready: false, code: 'CURRENT_RESULT_REQUIRED' };
     const method = await db.analysis.findUnique({ where: { code: item.analysis } });
     if (!method || configurationIssues(method).length) return { ready: false, code: 'ANALYSIS_CONFIGURATION_REQUIRED' };
+    try {
+        await require('./resultCalculationService').selection(db,{labId:sample.assignedLab || sample.labId,
+            analysis:method,methodId:item.methodologyId,batchId:item.batchId,actor});
+    } catch (error) {
+        if (error.statusCode) return {ready:false,code:error.code};
+        throw error;
+    }
     const policy = await policyService.snapshot(sample.assignedLab || sample.labId, { db, analysisCode: item.analysis, methodologyId: item.methodologyId });
     const format = await getNumberFormat(sample.assignedLab || sample.labId, { snapshot: policy });
     const methodRules = parseJson(method.validation);
