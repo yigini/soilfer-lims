@@ -415,8 +415,12 @@ exports.getQueue = async (req, res) => {
         const analysisCodes = [...new Set(items.map(i => i.analysis))];
         const analyses = await prisma.analysis.findMany({
             where: { code: { in: analysisCodes } },
-            select: { code: true, name: true, units: true, validation: true, categoryId: true }
+            select: { code: true, name: true, units: true, unitCode: true, validation: true, categoryId: true }
         });
+        const valueAnalyses = new Map(analyses.map(row => [row.code, row]));
+        const valueMethods = new Map((await prisma.methodology.findMany({ where: {
+            id: { in: [...new Set(items.map(row => row.methodologyId).filter(Boolean))] }
+        } })).map(row => [row.id, row]));
         const analysisMap = {};
         analyses.forEach(a => {
             let validationRules = null;
@@ -524,6 +528,13 @@ exports.getQueue = async (req, res) => {
             const modality = (code === 'SPEC_MIR' || code === 'SPEC_FTIR') ? 'MIR' : 'NIR';
             const scans = isSpectral ? (spectralMap[`${item.sampleId}::${modality}`] || []) : [];
             const latestScan = scans.length > 0 ? scans[0] : null;
+            const editorKind = isSpectral ? 'SPECTRAL'
+                : (['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(code)
+                    ? 'TEXTURE' : (groupsMap[code].category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC'));
+            const valueContext = editorKind === 'NUMERIC' && valueAnalyses.has(code)
+                ? await require('../services/resultValueRulesService').resolveNumericValueRules(prisma, {
+                    labId, analysis: valueAnalyses.get(code), method: valueMethods.get(item.methodologyId) || null
+                }) : null;
 
             groupsMap[code].items.push({
                 id: item.id,
@@ -533,7 +544,8 @@ exports.getQueue = async (req, res) => {
                 labId: item.sample?.labId || item.labId,
                 originalId: item.sample?.originalId || null,
                 laboratoryId: item.sample?.assignedLab || item.assignedLab || item.labId || null,
-                numberFormat: numberFormats.get(labId),
+                numberFormat: valueContext?.numberFormat || numberFormats.get(labId),
+                valueRules: valueContext?.rules || null,
                 projectCode: item.sample?.projectCode || null,
                 analysis: code,
                 analysisCode: code,
@@ -542,9 +554,7 @@ exports.getQueue = async (req, res) => {
                 methodologyName: item.methodology?.name || null,
                 methodologyStandard: item.methodology?.standard || null,
                 methodRevision: item.methodRevision || 'rev1',
-                editorKind: isSpectral
-                    ? 'SPECTRAL'
-                    : (['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(code) ? 'TEXTURE' : (groupsMap[code].category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC')),
+                editorKind,
                 status: item.status,
                 priority: item.priority,
                 currentResult: resultMap[resultKey]?.value ?? (operationalChecklists[code] ? item.result : null),
