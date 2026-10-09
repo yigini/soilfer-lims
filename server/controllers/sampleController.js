@@ -60,8 +60,9 @@ exports.lookupSample = async (req, res) => {
             let failureCode = 'SAMPLE_NOT_FOUND';
             // Diagnose only a failed lookup. Issued labels and original IDs
             // above remain valid independently of today's numbering policy.
-            const labReference = scopeGuard.getLabScope(req.user) ||
-                (typeof req.query.scanLabId === 'string' ? req.query.scanLabId : null);
+            const labReference = scopeGuard.hasGlobalAccess(req.user)
+                ? (typeof req.query.scanLabId === 'string' ? req.query.scanLabId : null)
+                : req.user.labId ? scopeGuard.getLabScope(req.user) : null;
             if (labReference) {
                 try {
                     const lab = await policyService.resolveLab(labReference, prisma);

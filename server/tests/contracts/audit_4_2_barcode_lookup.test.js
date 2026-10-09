@@ -90,4 +90,13 @@ describe('Audit 4.2: stored exact identifiers and scoped failed-scan diagnostics
         expect((await request(app).get('/api/samples/lookup').query({ code: wrong })).status).toBe(401);
         expect(await retained()).toEqual(before);
     });
+    test('a project-scoped operator without a lab keeps its authorized exact lookup and ordinary 404', async () => {
+        const projectCode = 'PROJECT-' + id(), token = await getAuthToken('PROJECT_MANAGER', null, [], [projectCode]);
+        const row = await sample({ projectCode, originalId: 'PROJECT-FIELD-' + id() });
+        const before = await retained(), spy = jest.spyOn(policy, 'get');
+        expect((await lookup(row.originalId, {}, token)).body.id).toBe(row.id);
+        const missing = await lookup(wrong, { scanLabId: lab.id }, token);
+        expect(missing.status).toBe(404); expect(missing.body).toEqual({ code: 'SAMPLE_NOT_FOUND', error: 'Sample not found.' });
+        expect(spy).not.toHaveBeenCalled(); expect(await retained()).toEqual(before);
+    });
 });
