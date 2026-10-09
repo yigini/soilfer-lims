@@ -176,6 +176,9 @@ node scripts/install_batch_reagent_lots.js --db "${DATABASE_PATH:-$DB_FILE}" --a
 echo "📦 Installing inactive calculation references and evidence guards..."
 node scripts/install_calculation_templates.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
+echo "📦 Installing immutable result override requests..."
+node scripts/install_result_override_requests.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js

@@ -387,6 +387,7 @@ test('a complete guarded database passes the read-only gate, listens and answers
     require('../../scripts/install_reported_value_selections').installReportedValueSelections({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: fixture.file, apply: true });
+    require('../../scripts/install_result_override_requests').installResultOverrideRequests({ dbPath: fixture.file, apply: true });
     installCalculationReleasePrerequisites(fixture.file);
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
@@ -405,6 +406,9 @@ test('a complete guarded database passes the read-only gate, listens and answers
     const attemptsReady = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"WORK_ATTEMPT_STARTUP_READY"')));
     expect(attemptsReady).toMatchObject({ classification: 'COMPLETE', totalChanges: 0 });
     expect(child.stdout.indexOf('WORK_ATTEMPT_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
+    const overridesReady = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"RESULT_OVERRIDE_STARTUP_READY"')));
+    expect(overridesReady).toMatchObject({ classification: 'COMPLETE_197', totalChanges: 0 });
+    expect(child.stdout.indexOf('RESULT_OVERRIDE_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
 });
 
 test.each([

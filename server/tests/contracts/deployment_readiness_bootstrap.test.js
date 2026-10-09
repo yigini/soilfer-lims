@@ -355,6 +355,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_reported_value_selections').installReportedValueSelections({ dbPath: targetDb, apply: true });
         require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: targetDb, apply: true });
         require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: targetDb, apply: true });
+        require('../../scripts/install_result_override_requests').installResultOverrideRequests({ dbPath: targetDb, apply: true });
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
@@ -394,6 +395,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_reported_value_selections.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_batch_reagent_lots.js',
                 `node "${path.join(serverDir, 'scripts/install_batch_reagent_lots.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_result_override_requests.js',
+                `node "${path.join(serverDir, 'scripts/install_result_override_requests.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_calculation_templates.js',
                 `node "${path.join(serverDir, 'scripts/install_calculation_templates.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_raw_input.js',

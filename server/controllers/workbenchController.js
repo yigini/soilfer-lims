@@ -418,8 +418,12 @@ exports.getQueue = async (req, res) => {
         const analysisCodes = [...new Set(items.map(i => i.analysis))];
         const analyses = await prisma.analysis.findMany({
             where: { code: { in: analysisCodes } },
-            select: { code: true, name: true, units: true, validation: true, categoryId: true }
+            select: { code: true, name: true, units: true, unitCode: true, validation: true, categoryId: true }
         });
+        const valueAnalyses = new Map(analyses.map(row => [row.code, row]));
+        const valueMethods = new Map((await prisma.methodology.findMany({ where: {
+            id: { in: [...new Set(items.map(row => row.methodologyId).filter(Boolean))] }
+        } })).map(row => [row.id, row]));
         const analysisMap = {};
         analyses.forEach(a => {
             let validationRules = null;
@@ -533,6 +537,13 @@ exports.getQueue = async (req, res) => {
             const modality = (code === 'SPEC_MIR' || code === 'SPEC_FTIR') ? 'MIR' : 'NIR';
             const scans = isSpectral ? (spectralMap[`${item.sampleId}::${modality}`] || []) : [];
             const latestScan = scans.length > 0 ? scans[0] : null;
+            const editorKind = isSpectral ? 'SPECTRAL'
+                : (['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(code)
+                    ? 'TEXTURE' : (groupsMap[code].category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC'));
+            const valueContext = editorKind === 'NUMERIC' && valueAnalyses.has(code)
+                ? await require('../services/resultValueRulesService').resolveNumericValueRules(prisma, {
+                    labId, analysis: valueAnalyses.get(code), method: valueMethods.get(item.methodologyId) || null
+                }) : null;
 
             const calculationScope = JSON.stringify([labId,code,item.methodologyId || null]);
             if (!calculationSelections.has(calculationScope)) calculationSelections.set(calculationScope,
@@ -546,7 +557,10 @@ exports.getQueue = async (req, res) => {
                 labId: item.sample?.labId || item.labId,
                 originalId: item.sample?.originalId || null,
                 laboratoryId: item.sample?.assignedLab || item.assignedLab || item.labId || null,
-                numberFormat: numberFormats.get(labId),
+                numberFormat: valueContext?.numberFormat || numberFormats.get(labId),
+                valueRules: valueContext?.rules || null,
+                dilutionOpportunity: editorKind === 'NUMERIC'
+                    ? await require('../services/workbenchValueValidationService').dilutionOpportunity(prisma,item,user) : null,
                 calculationTemplate: calculationSelections.get(calculationScope),
                 projectCode: item.sample?.projectCode || null,
                 analysis: code,
@@ -556,9 +570,7 @@ exports.getQueue = async (req, res) => {
                 methodologyName: item.methodology?.name || null,
                 methodologyStandard: item.methodology?.standard || null,
                 methodRevision: item.methodRevision || 'rev1',
-                editorKind: isSpectral
-                    ? 'SPECTRAL'
-                    : (['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(code) ? 'TEXTURE' : (groupsMap[code].category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC')),
+                editorKind,
                 status: item.status,
                 priority: item.priority,
                 currentResult: resultMap[resultKey]?.value ?? (operationalChecklists[code] ? item.result : null),
@@ -896,8 +908,14 @@ exports.batchSave = async (req, res) => {
                     validation = { valid: textVal.isValid, flags: textVal.flags || [], className: textVal.className, code: textVal.code, closureError: textVal.closureError };
                 }
             } else if (!isOperationalTask && value !== null && value !== undefined && value !== '') {
-                const checked = validationService.validateNumericMethod(value, methodMap[item.analysis]?.validation, numberFormat);
+                let checked;
+                try { checked = await require('../services/workbenchValueValidationService').validateNumericEntry(prisma,item,user,entry,{approval:!draft}); }
+                catch (error) { errors.push({workItemId:item.id,error:error.message,code:error.code}); continue; }
                 validation = { ...checked, valid: checked.isValid };
+                if (!draft && checked.nonOverridable) {
+                    errors.push({workItemId:item.id,error:'A censoring limit must not be below the method LOQ.',code:'CENSOR_LIMIT_BELOW_LOQ',flags:checked.flags});
+                    continue;
+                }
                 if (!draft && ['AMBIGUOUS_NUMBER', 'INVALID_NUMBER'].includes(checked.code)) {
                     errors.push({ workItemId: item.id, code: checked.code, error: checked.code === 'AMBIGUOUS_NUMBER' ? 'Clarify the decimal or thousands separator.' : 'Invalid number format.' });
                     continue;
@@ -1093,6 +1111,8 @@ exports.batchSave = async (req, res) => {
                         basis: entry.basis, methodologyId: item.methodologyId, equipmentId: entry.equipmentId,
                         overrideReason: entry.overrideReason,
                         calculation:entry.calculation ?? entry.values?.calculation,
+                        overrideRequestId: entry.overrideRequestId,
+                        ...(Object.hasOwn(entry,'unit') && {unit:entry.unit}),
                         ...(Object.hasOwn(entry, 'batchId') && { batchId: entry.batchId }) };
                     if (isTextureTask && textureClassification) {
                         await writeTextureDetermination(tx, { sampleId: item.sampleId, workItemId: item.id,
@@ -1486,6 +1506,7 @@ exports.previewCompletion = async (req, res) => {
 
             // 2. Validation check
             let validation = { isValid: true, flags: [] };
+            let approvalError = null;
             const isSpectralAnalysis = SPECTRAL_ACQUISITION_CODES.includes(item.analysis);
             const isTextureAnalysis = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(item.analysis) ||
                 (entry.values != null && !Object.hasOwn(entry.values,'calculation'));
@@ -1498,8 +1519,8 @@ exports.previewCompletion = async (req, res) => {
             } else if (item.category === 'Operational Gates') {
                 validation = validationService.validateOperationalTask(entry.checks, operationalChecklists[item.analysis]?.steps.length || 3);
             } else {
-                const method = methodMap[item.analysis];
-                validation = validationService.validateNumericMethod(entry.value, method?.validation, await getNumberFormat(labId));
+                try { validation = await require('../services/workbenchValueValidationService').validateNumericEntry(prisma,item,user,entry); }
+                catch (error) { approvalError=error;validation={isValid:false,flags:[]}; }
             }
 
             // Version check
@@ -1528,6 +1549,8 @@ exports.previewCompletion = async (req, res) => {
                     }
                 }
             }
+            if (approvalError) { blockers.push(approvalError.code);reasons.push(approvalError.message); }
+            if (validation.nonOverridable) { blockers.push('CENSOR_LIMIT_BELOW_LOQ');reasons.push('A censoring limit must not be below the method LOQ.'); }
 
             if (isSpectralAnalysis) {
                 blockers.push('SPECTRAL_SCAN_REQUIRED');
@@ -1545,7 +1568,7 @@ exports.previewCompletion = async (req, res) => {
                     reasons.push('Value format is invalid');
                 }
                 if (validation.flags?.includes('BELOW_MIN') || validation.flags?.includes('ABOVE_MAX')) {
-                    if (!entry.overrideReason) {
+                    if (!entry.overrideReason && !entry.overrideRequestId) {
                         blockers.push('OUT_OF_RANGE');
                         reasons.push(`Value out of range (${validation.flags.join(', ')}). Override reason required.`);
                     }
@@ -1601,6 +1624,8 @@ exports.previewCompletion = async (req, res) => {
                     checks: entry.checks,
                     basis: entry.basis || 'AIR_DRY',
                     replicateNo: entry.replicateNo || 1,
+                    ...(entry.overrideRequestId && {overrideRequestId:entry.overrideRequestId}),
+                    ...(Object.hasOwn(entry,'unit') && {unit:entry.unit}),
                     equipmentId: (await require('../services/resultWriteService').resolveResultRunContext(prisma, item, { equipmentId: entry.equipmentId })).equipmentId,
                     version: item.version,
                     validation,

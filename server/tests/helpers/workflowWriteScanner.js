@@ -31,6 +31,11 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // Inspect both exact #197 assets. Existing writer restrictions are unchanged.
+    Object.freeze({functionName:'loadResultOverrideMigrationSource',loader:'services/resultOverrideMigrationSource.js',
+        loaderSha256:'f59d8614213b1949216d172fd32589da7f1c733c2a63ae2b23a18f41f8365026',
+        directory:'20261009000300_result_override_requests',sqlSha256:'35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9',
+        boundary:'-- Contract guards'}),
     // #199: inspect the exact additive source; no runtime writer exemption.
     Object.freeze({ functionName: 'loadCalculationTemplateMigrationSource', loader: 'services/calculationTemplateMigrationSource.js',
         loaderSha256: '09cdd6d652373a82ff5f84d687ad8e7806aabd8178da4e3224298e830e058787',

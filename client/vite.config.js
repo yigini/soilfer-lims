@@ -14,7 +14,7 @@ export default defineConfig({
         __BUILD_DATE__: JSON.stringify(buildDate),
     },
     build: {
-        commonjsOptions: { include: [/node_modules/, /shared[\\/](?:numberParse|reportedValueFormat|nonconformityContract|soilCalculation)\.js$/] },
+        commonjsOptions: { include: [/node_modules/, /shared[\\/](?:numberParse|reportedValueFormat|nonconformityContract|soilCalculation|resultValueValidation)\.js$/] },
         rollupOptions: {
             output: {
                 manualChunks: {
@@ -30,10 +30,11 @@ export default defineConfig({
         chunkSizeWarningLimit: 1000
     },
     resolve: { alias: { '@lims/soil-calculation': fileURLToPath(new URL('../shared/soilCalculation.js', import.meta.url)),
+        '@lims/result-value-validation': fileURLToPath(new URL('../shared/resultValueValidation.js', import.meta.url)),
         '@lims/number-parse': fileURLToPath(new URL('../shared/numberParse.js', import.meta.url)),
         '@lims/reported-value-format': fileURLToPath(new URL('../shared/reportedValueFormat.js', import.meta.url)),
         '@lims/nonconformity': fileURLToPath(new URL('../shared/nonconformityContract.js', import.meta.url)) } },
-    optimizeDeps: { include: ['@lims/number-parse', '@lims/reported-value-format', '@lims/nonconformity', '@lims/soil-calculation'] },
+    optimizeDeps: { include: ['@lims/number-parse', '@lims/reported-value-format', '@lims/nonconformity', '@lims/soil-calculation', '@lims/result-value-validation'] },
     server: {
         proxy: {
             '/api': {

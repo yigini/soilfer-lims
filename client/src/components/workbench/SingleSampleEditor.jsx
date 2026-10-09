@@ -21,6 +21,7 @@ import clsx from 'clsx';
 import { useLanguage } from '../../context/LanguageContext';
 import { canSelectInstrument, isEntryReady } from './entryReadiness';
 import PreviousResultHint from './PreviousResultHint';
+import ResultValueActions from './ResultValueActions';
 
 /**
  * SingleSampleEditor
@@ -36,6 +37,8 @@ export default function SingleSampleEditor({
     onDraftChange,
     onUpdateItemMeta,
     onReviewRecord,
+    onChooseApproval,
+    onChanged,
     onConfirmOperation,
     onOpenSpectralIntake,
     onBarcodeRejected = null,
@@ -249,6 +252,7 @@ export default function SingleSampleEditor({
                             onBarcodeRejected={onBarcodeRejected}
                             inputRef={node => onInputRef?.(currentItem.workItemId, node)}
                             numberFormat={currentItem.numberFormat}
+                            validation={currentItem.valueRules}
                             value={draft?.value ?? ''}
                             unit={activeGroup?.unit}
                             onChange={value => onDraftChange(currentItem.workItemId, value)}
@@ -258,6 +262,8 @@ export default function SingleSampleEditor({
                     </div>
                     )}</CalculationEntry>)}
                 {!isOperationalGate && <PreviousResultHint result={currentItem.previousResult} />}
+                {!isOperationalGate && !isTexture && !isSpectral && currentItem.valueRules && <ResultValueActions item={currentItem}
+                    onChooseApproval={onChooseApproval} onChanged={onChanged} />}
                 {!isOperationalGate && equipment.length > 0 && (
                     <label className="block text-xs text-sf-muted">
                         {t('workbench.selectInstrument', 'Select instrument')}
