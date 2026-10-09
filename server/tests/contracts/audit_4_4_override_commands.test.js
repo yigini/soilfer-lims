@@ -90,6 +90,12 @@ test('consumed and rejected requests cannot be cancelled',async()=>{
     const f=await fixture(),approved=await approval(f);expect((await f.record(approved.id)).status).toBe(200);
     const before=await f.state(),cancelled=await f.http(f.tech,'post','/api/result-overrides/'+approved.id+'/cancel',{reason:'Late cancel'});
     expect({status:cancelled.status,code:cancelled.body.code}).toEqual({status:409,code:'OVERRIDE_REQUEST_CLOSED'});expect(await f.state()).toEqual(before);
+    const rejectedFixture=await fixture(),asked=await rejectedFixture.ask();expect(asked.status).toBe(201);
+    const rejected=await rejectedFixture.http(rejectedFixture.manager,'post','/api/result-overrides/'+asked.body.id+'/decision',{status:'REJECTED',reason:'Original worksheet does not support the extreme value'});
+    expect(rejected.status).toBe(200);const retained=await rejectedFixture.state();
+    const cancelRejected=await rejectedFixture.http(rejectedFixture.tech,'post','/api/result-overrides/'+asked.body.id+'/cancel',{reason:'Late cancel'});
+    expect({status:cancelRejected.status,code:cancelRejected.body.code}).toEqual({status:409,code:'OVERRIDE_REQUEST_CLOSED'});
+    expect(await rejectedFixture.state()).toEqual(retained);
 });
 test('scoped list exposes the requester own history and manager queue without foreign requests',async()=>{
     const f=await fixture(),asked=await f.ask();expect(asked.status).toBe(201);
