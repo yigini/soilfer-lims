@@ -1,5 +1,26 @@
 # Repeat and correction commands (#191)
 
+Audit6071516042 failed the earlier candidate; its validation is historical.
+The follow-up fixes accept the actual same-transaction REPLICATE_ADDED cause
+for texture derivation, test two separate Workbench replica saves, and freeze
+the attempt/Result batch context during append. Only a proven absent replica
+uses the existing COMPLETED same-state authority, with writer rechecks.
+
+Revised SQL probe scope6071874424 supersedes6071801483 section1: the new
+closed cases prove the exact committed membership trigger in owned scratch
+databases, without installers, classifiers, receipts or historical factories.
+Existing real installer-chain tests remain separate. The SQL handoff binds
+both parent run fields, non-NULL evidence, becoming REPEAT_REQUIRED and every
+membership's accepted analyte, including the documented texture alias.
+
+The disposable Docker release rehearsal now copies the stopped genuine
+baseline before candidate startup, installs the actual predecessors, checks
+#191 dry-run/apply/no-op, both COMPLETE receipts and every original row/field.
+The release inventory reports submitted/accepted work with RECORDED current
+owners without changing it; that count must be zero before release. The demo
+freeze remains in effect. Partial-repeat replacement after instrument failure
+is deferred to issue #261, per6071801483 section2.
+
 #190 is merged at a919ad679e7c381c5428cbaaed561295785691a5. #253 is merged
 at 0b5428405f577aab2e6d90634209f8b154bba373 and incorporated here.
 Branch: audit/3.2-repeat-correction. Review: PR #260. This document records
