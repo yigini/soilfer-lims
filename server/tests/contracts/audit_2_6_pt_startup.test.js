@@ -5,7 +5,7 @@ const { createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
-const { installProficiencyEvidence } = require('../../scripts/install_proficiency_evidence');
+const { bootstrapPtNonconformity } = require('../../scripts/bootstrap_pt_nonconformity');
 const owned = [];
 const hash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 function fixture({ scope = true } = {}) {
@@ -26,11 +26,11 @@ function startup(file) {
 afterAll(() => { for (const file of owned) for (const suffix of ['', '-wal', '-shm']) {
     fs.rmSync(assertOwnedTestDatabase(file, 'system:fixture') + suffix, { force: true });
 } });
-test('direct startup refuses an uninstalled PT schema before app/writers load, without changing the database', () => {
+test('direct startup refuses a fresh Prisma PT/NCR successor without guards or receipts before app/writers load, without changing the database', () => {
     const file = fixture(), before = hash(file), result = startup(file);
     expect(result.status).toBe(1);
     expect(result.stdout).toContain('QC_RUN_STARTUP_READY');
-    expect(result.stderr).toContain('PT_NOT_INSTALLED');
+    expect(result.stderr).toContain('PT_SCHEMA_MISMATCH');
     expect(result.stderr).toContain('docs/audit/2.6-qc-audit-pt-equipment.md');
     expect(result.stdout).not.toMatch(/Enterprise Server|SCHEDULER/);
     expect(hash(file)).toBe(before);
@@ -38,7 +38,7 @@ test('direct startup refuses an uninstalled PT schema before app/writers load, w
 
 test('direct startup checks #187 before otherwise complete #189 evidence and makes no writes', () => {
     const file = fixture({ scope: false });
-    installProficiencyEvidence({ dbPath: file, apply: true });
+    bootstrapPtNonconformity({ dbPath: file, apply: true });
     require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: file, apply: true });
     const before = hash(file), result = startup(file);
     expect(result.status).toBe(1); expect(result.stdout).toContain('QC_RUN_STARTUP_READY');
@@ -47,7 +47,7 @@ test('direct startup checks #187 before otherwise complete #189 evidence and mak
     expect(hash(file)).toBe(before);
 });
 test('direct startup refuses a corrupted PT receipt without repairing it or loading the application', () => {
-    const file = fixture(); installProficiencyEvidence({ dbPath: file, apply: true });
+    const file = fixture(); bootstrapPtNonconformity({ dbPath: file, apply: true });
     const db = new Database(file);
     db.prepare('UPDATE "_schema_migrations" SET details=? WHERE id=?').run('{}', '189_proficiency_evidence'); db.close();
     const before = hash(file), result = startup(file);
@@ -58,7 +58,7 @@ test('direct startup refuses a corrupted PT receipt without repairing it or load
     expect(hash(file)).toBe(before);
 });
 test('direct startup refuses missing Result equipment guards before any application writer starts', () => {
-    const file = fixture(); installProficiencyEvidence({ dbPath: file, apply: true });
+    const file = fixture(); bootstrapPtNonconformity({ dbPath: file, apply: true });
     require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: file, apply: true });
     const before = hash(file), result = startup(file);
     expect(result.status).toBe(1); expect(result.stdout).toContain('PT_STARTUP_READY');

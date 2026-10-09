@@ -379,7 +379,7 @@ test('a complete guarded database passes the read-only gate, listens and answers
     require('../../scripts/install_qc_rules').installQcRules({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_qc_runs').installQcRuns({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: fixture.file, apply: true });
-    require('../../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: fixture.file, apply: true });
+    require('../../scripts/bootstrap_pt_nonconformity').bootstrapPtNonconformity({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_work_attempt_contract').installWorkAttemptContract({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({ dbPath: fixture.file, apply: true });

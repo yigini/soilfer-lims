@@ -58,6 +58,7 @@ Applied by precedent:
 | `audit_253_reviewed_qc_correction.test.js` retained fixture | Predecessor installs omit #193. | Add #193 after #189; author/mode/criteria refusals and retained historical observations remain unchanged (6075820954). |
 | `audit_1_2_guard_installer.test.js` positive startup | Installs all prior gates, then expects the listener. | Also install #193; retain read-only byte checks and actual listening/health checks. No production host is involved (6076453701). |
 | `audit_2_6_pt_startup.test.js` missing equipment gate | Complete #189 is the last predecessor before equipment. | Install #193 as well before testing the next missing equipment gate; negative #189 checks remain unchanged (6076453701). |
+| `audit_2_6_pt_startup.test.js` generated fresh schema and predecessor setup | An unguarded pushed schema returns PT_NOT_INSTALLED; #189 alone installs the PT guards. | The exact pushed #193 extension without guards/receipts returns PT_SCHEMA_MISMATCH under the strict #189 verifier. Successful fixture setup uses the atomic #189/#193 bootstrap; corrupted #189 receipts and missing #187/#195 gates still refuse with zero writes before application loading (6076453701). |
 | `deployment_readiness_bootstrap.test.js` populated startup rehearsal | Uses only predecessor installers and adapts the old PT entrypoint command. | Install #193 and resolve its actual bootstrap command in the owned rehearsal. Keep every existing preservation/readiness assertion (6076453701). |
 | `audit_2_6_pt_http.test.js` UNSAT create | Returns PENDING with only PT audit facts. | Return RAISED with a real same-lab PT NCR and source identity; retain exact z, limits and original classification audit assertions (6076135661). |
 | `audit_2_6_pt_http.test.js` UNSAT→SAT correction | Retains PENDING and old/new classification audits. | Retain RAISED and the exact original NCR/link while recording both outcomes; no auto-close (6076135661). |
@@ -65,3 +66,17 @@ Applied by precedent:
 | `audit_2_6_pt_http.test.js` cleanup and zero-write snapshots | Deletes owned rows from the shared test database. | Use one explicitly owned disposable database and remove it through the existing owned-file helper. Never delete immutable NCRs or their retained source/audit rows; include NCRs in every zero-write snapshot. PT controllers explicitly pass their actual Prisma connection to the same service for writes, matching their read connection. |
 
 Production remains under the #162 demo freeze.
+
+Current implementation includes the dry-default, fingerprinted PT PENDING
+backfill, actual persisted QC triggers, manager repeat override with
+APPROVE_RESULTS, two scoped lifecycle HTTP commands, and QA read list with
+VIEW_AUDIT, status/source filters and all five locales. Foundation suites
+passed61/61; repeat/API/old-repeat/wiring group passed79/79 at a75c518.
+Client build7.65s and lint0errors/14existingwarnings passed at that head.
+The first full run is collecting predecessor fixture/setup failures; these
+are being repaired without disabling guards or bypassing source workflows.
+No full-suite pass or production migration/backfill is claimed.
+
+The workflow scanner inspects the independently byte-bound NCR DDL/loader,
+including schema and guard sections, while retaining all writer restrictions.
+No new test-factory caller or writer exemption is added.
