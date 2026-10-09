@@ -100,16 +100,18 @@ test.each(['no-batch', 'unstarted', 'legacy-null'])('real HTTP keeps the existin
         const sampleId = randomUUID(), workItemId = randomUUID(), batchId = randomUUID();
         await createSampleFixture(f.db, { data: { id: sampleId, originalId: randomUUID(), assignedLab: f.labId,
             status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE' } });
+        // Historical first-start metadata is unknown, as in the reviewed
+        // compatibility importer. Do not invent a start or bypass membership.
         await f.db.batch.create({ data: { id: batchId, labId: f.labId, analysis: f.analysisCode, instrumentId: null,
-            startedAt: new Date(), status: 'OPEN', createdBy: f.actor.username, profile: 'RACK_40',
+            status: 'OPEN', createdBy: f.actor.username, profile: 'RACK_40',
             qcResults: '{}', history: '[]', workItemIds: JSON.stringify([workItemId]) } });
-        console.log('OWNED_194_FK_DIAGNOSTIC', await f.db.$queryRawUnsafe('PRAGMA foreign_key_list("WorkItem")'),
-            await f.db.sample.count({where:{id:sampleId}}), await f.db.batch.count({where:{id:batchId}}), await f.db.methodology.count({where:{id:f.method.id}}));
         item = await createWorkItemFixture(f.db, { data: { id: workItemId, sampleId, labId: f.labId,
             analysis: f.analysisCode, methodologyId: f.method.id, status: 'IN_PROGRESS', batchId } });
         for (const analysis of ['DRYING', 'PREPARATION']) await createWorkItemFixture(f.db, { data: {
             id: randomUUID(), sampleId, labId: f.labId, analysis, status: 'COMPLETED', history: '[]' } });
         await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(f.db, batchId);
+        expect((await apiRunView(f.db, await readQcRun(f.db, batchId, f.actor))).analytes[0])
+            .toMatchObject({ methodRevision: null, methodRevisionSource: 'UNKNOWN' });
     }
     await f.db.workItem.update({ where: { id: item.id }, data: { equipmentId: f.instrument.id } });
     await f.db.methodology.update({ where: { id: f.method.id }, data: { version: 8 } });
