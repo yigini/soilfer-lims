@@ -20,6 +20,13 @@ test.each([
     expect(sourceValidity({isCurrent:false,isValid:valid,flags:typeof flags==='string'?flags:JSON.stringify(flags)}, {rule},mode)).toBe(allowed);
 });
 
+test.each(['REQUIRED_BLOCKING','REQUIRED_WARN','ADVISORY','OFF'])('a QC override cannot make independently invalid source evidence reportable (%s)',mode=>{
+    const result={isCurrent:true,isValid:false,flags:'["QC_WARNING_OVERRIDDEN"]'};
+    expect(sourceValidity(result,{rule:'AUTO_SINGLE'},mode)).toBe(false);
+    expect(sourceValidity(result,{rule:'REVIEWER'},mode)).toBe(false);
+    expect(sourceValidity({...result,isValid:true},{rule:'AUTO_SINGLE'},mode)).toBe(true);
+});
+
 test('required QC on the selected source refuses append with zero writes',async () => {
     const f=await qcGateFixture({status:'ACCEPTED'}); owned.push(f); await f.result(f.items[0]);
     const before=await f.snapshot();
