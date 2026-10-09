@@ -101,6 +101,31 @@ async function get(reference, key, context = {}) {
 }
 async function snapshot(reference, context = {}) { return snapshotFromState(await state(reference, context), context); }
 
+// #199 pin6083312978: this exact-scope append chain is the sole template
+// selection authority. Neither a preset/profile nor a policy change creates an
+// activation, and methodology-null is a distinct scope with no fallback.
+async function calcTemplate(reference, { analysisCode, methodologyId = null } = {}, context = {}) {
+    const db = context.db || require('../prisma');
+    if (!context.db) return db.$transaction(tx => calcTemplate(reference, { analysisCode, methodologyId }, { ...context, db: tx }));
+    const lab = await resolveLab(reference, db);
+    if (!lab || typeof analysisCode !== 'string' || !analysisCode) return null;
+    const rows = await db.calcTemplateActivation.findMany({ where: { labId: lab.id, analysisCode, methodologyId },
+        select: { id: true, templateId: true, templateVersion: true, action: true, supersedesId: true } });
+    if (!rows.length) return null;
+    const superseded = new Set(rows.map(row => row.supersedesId).filter(Boolean));
+    const heads = rows.filter(row => !superseded.has(row.id));
+    const roots = rows.filter(row => row.supersedesId === null);
+    const byId = new Map(rows.map(row => [row.id, row])), visited = new Set();
+    let cursor = heads[0];
+    while (cursor && !visited.has(cursor.id)) { visited.add(cursor.id); cursor = byId.get(cursor.supersedesId); }
+    if (heads.length !== 1 || roots.length !== 1 || visited.size !== rows.length ||
+        rows.some(row => row.supersedesId && !byId.has(row.supersedesId))) {
+        throw error(409, 'CALC_ACTIVATION_CONFLICT', 'The calculation activation chain is ambiguous.');
+    }
+    const row = heads[0];
+    return row.action === 'ACTIVATE' ? { activationId: row.id, templateId: row.templateId, templateVersion: row.templateVersion } : null;
+}
+
 function validatePairs(values, status = 400, code = 'POLICY_VALUE_INVALID') {
     if (!require('../../shared/numberParse').validateNumberFormat({ decimal: values['numbers.decimalSeparator'], thousands: values['numbers.thousandsSeparator'] })) {
         throw error(status, code, 'Decimal and thousands separators must differ.');
@@ -208,4 +233,4 @@ async function change(actor, reference, request, options = {}) {
         throw e;
     }
 }
-module.exports = { get, resolve, snapshot, getStrict, getStrictNumberFormat, resolveLab, loadProfile, assertScope, change, mutateInTransaction, validatePairs };
+module.exports = { get, resolve, snapshot, calcTemplate, getStrict, getStrictNumberFormat, resolveLab, loadProfile, assertScope, change, mutateInTransaction, validatePairs };
