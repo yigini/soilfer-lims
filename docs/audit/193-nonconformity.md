@@ -1,10 +1,12 @@
-# Audit3.4 — nonconformity reports (#193), WIP
+# Audit 3.4 — nonconformity reports (#193)
 
 Prepared after PR260/#191 merged, refreshed to maind2b69b8. The requested NCR model is
 absent in that base; unsatisfactory PT recorded PENDING and the repeat contract
 refused NCR strings. The branch now adds the NCR model/SQL guards, scoped
-lifecycle authority and atomic PT classification links. Installer/backfill,
-QC/repeat integrations and the QA list are still being implemented.
+lifecycle authority, atomic PT classification links, a dry-default installer
+and fingerprinted backfill, actual QC triggers, a separate manager repeat
+override command and the QA list. Local full validation passes; the PR still
+requires green CI and Claude's audit of its current head before merge.
 
 Authoritative pins:
 - [6071242717](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6071242717): source identity and explicit one-use manager override.
@@ -43,8 +45,23 @@ forward moves and zero-write refusals (skip, reopen, CLOSED edit, blank text,
 DELETE); and CRM missing-mode refusal to create an NCR. Earlier pinned tests
 remain required.
 
-Validation: the additive SQL boundary suite passes25/25. Actual PT/lifecycle
-runtime validation is in progress; no claim of full-suite success yet.
+Validation: `cd server && npm test` passes 277/277 suites and 4,105/4,105 tests,
+zero skipped, in 701.464s. This includes the actual PT/lifecycle, QC, repeat,
+HTTP, SQL guard, installer/backfill, security/wiring and predecessor suites.
+`cd client && npm run build` passes in 17.79s; `npm run lint` passes with zero
+errors and 14 existing warnings. These receipts are from the owned Windows
+validation clone at runtime head243786a; the follow-up changes only this
+validation document. The full suite uses the existing 8 GiB CI heap setting.
+The clone's owned dependency fallback supplies locked jsdom26.1.0, missing
+from the primary checkout's installed dependencies; no primary dependency,
+generated client or database was regenerated.
+
+Owned migration/backfill counts: installer adds the schema and guards, zero
+NCRs and zero backfilled PT links, retaining all original fields and receipts.
+The backfill fixture lists two PENDING rounds and one NULL round in its dry
+run (zero writes); apply creates two NCRs, two links and four audit rows;
+repetition is byte-identical with zero writes. Historical CRM backfill and
+NULL PT rounds are explicitly deferred. No production counts are claimed.
 
 Applied by precedent:
 
@@ -73,9 +90,11 @@ APPROVE_RESULTS, two scoped lifecycle HTTP commands, and QA read list with
 VIEW_AUDIT, status/source filters and all five locales. Foundation suites
 passed61/61; repeat/API/old-repeat/wiring group passed79/79 at a75c518.
 Client build7.65s and lint0errors/14existingwarnings passed at that head.
-The first full run is collecting predecessor fixture/setup failures; these
-are being repaired without disabling guards or bypassing source workflows.
-No full-suite pass or production migration/backfill is claimed.
+The first full run identified predecessor fixture/setup failures, repaired
+as documented above without disabling guards or bypassing source workflows.
+The current focused PT HTTP/scanner/SQL/installer group passes163/163 at
+243786a; the full rerun and current client receipts are recorded above.
+No production migration/backfill is claimed.
 
 The workflow scanner inspects the independently byte-bound NCR DDL/loader,
 including schema and guard sections, while retaining all writer restrictions.
