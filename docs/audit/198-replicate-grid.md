@@ -26,8 +26,11 @@ historical missing-count, foreign-scope and malformed-evidence zero-write cases.
 keeps all retained parent replica numbers under #191 completeness/replacement
 rules, regardless of the current count or pair verdict. A genuinely new number
 above the count requires a recorded FAIL pair and number3; a new fourth refuses.
-The central Result writer now checks this before any evidence write. Validation
-of this new guard is pending. Queue/UI integration remains to implement.
+The central Result writer now checks this before any evidence write. The
+authorized queue projects retained readings and pair verdicts without writes.
+Desktop and touch editors share the replicate grid and existing durable draft,
+preview, confirmation and commit path. A failing pair offers a third reading;
+retained cells and derived mean/RPD/range remain read-only.
 
 Existing test changes, all under that pin:
 
@@ -38,6 +41,7 @@ Existing test changes, all under that pin:
 | Extra child3 with parent2 | Strengthened to409 REPLICATE_NOT_REQUIRED plus zero-write snapshot; counts exclude refused row | Every original missing-parent2 refusal and eventual append/supersession/submission assertion |
 | #190 two-reading execution | Explicit required count2 for AT190 through policyService | All original shared-attempt, immutable evidence, repeat ownership and preservation assertions |
 | #192 separate-fraction mean setup | Explicit method-scoped required count2 for its two SAND readings through policyService | All original four-source lineage, derived texture, malformed-proof SQL and reader/refusal assertions |
+| Retained provenance and draft-integrity two-reading cases | Explicit required count2 through policyService before the second reading | All original immutable determination, replicate value, report provenance and draft lifecycle assertions |
 
 No factory/writer exemption or scanner change. Migration/backfill counts0.
 No changes to analytical/QC/audit data or the native QC evaluator. Production
