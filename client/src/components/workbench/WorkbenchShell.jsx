@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 
 import WorkbenchQueue from './WorkbenchQueue';
+import MyRunsPanel from './MyRunsPanel';
 import WorksheetArea from './WorksheetArea';
 import ReviewCompletionView from './ReviewCompletionView';
 import ReviewSubmissionView from './ReviewSubmissionView';
@@ -58,7 +59,7 @@ export default function WorkbenchShell({
     const [activeTab, setActiveTab] = useState(() => {
         if (initialQueue === 'bench.toSubmit') return 'review';
         if (initialAnalysis || initialSampleId || initialRunId || initialWorkItemId) return 'worksheet';
-        return 'queue';
+        return initialQueue ? 'queue' : 'runs';
     });
     const [reviewSubView, setReviewSubView] = useState(() => {
         if (initialQueue === 'bench.toSubmit') return 'submission';
@@ -67,6 +68,8 @@ export default function WorkbenchShell({
     const [groups, setGroups] = useState([]);
     const [stats, setStats] = useState({});
     const [activeAnalysis, setActiveAnalysis] = useState(initialAnalysis);
+    const [openedRun, setOpenedRun] = useState(null);
+    const [activeRunId, setActiveRunId] = useState(initialRunId);
     const [activeSampleId, setActiveSampleId] = useState(initialSampleId);
     const [isLoading, setIsLoading] = useState(true);
     const [queueSearchQuery, setQueueSearchQuery] = useState('');
@@ -652,7 +655,11 @@ export default function WorkbenchShell({
     };
 
     // Active Group
-    const currentGroup = groups.find(g => g.analysis === activeAnalysis) || groups[0] || null;
+    const currentGroup = groups.find(g => g.analysis === activeAnalysis) || (openedRun && openedRun.analysis === activeAnalysis ? {
+        analysis: openedRun.analysis, analysisName: openedRun.analysis,
+        items: (openedRun.workItems || []).map(item => ({ ...item, workItemId: item.id, sampleDisplayId: item.sample?.originalId || item.sampleId,
+            originalId: item.sample?.originalId, readiness: { isReady: false, blockers: [] } }))
+    } : groups[0] || null);
 
     return (
         <div className="flex flex-col gap-4 max-w-7xl mx-auto px-4 py-6 font-sans">
@@ -708,6 +715,7 @@ export default function WorkbenchShell({
             {/* Navigation Tabs */}
             <nav className="flex items-center gap-1.5 border-b border-sf-divider text-xs font-semibold" aria-label="Workbench navigation">
                 {[
+                    { id: 'runs', label: t('runFirst.myRuns') },
                     { id: 'queue', label: `My Work (${stats.myWorkCount ?? stats.totalItems ?? 0})` },
                     { id: 'worksheet', label: `Worksheet (${currentGroup?.items?.length || 0})` },
                     { id: 'review', label: `Ready to Submit (${stats.readyToSubmitCount ?? 0})` },
@@ -742,6 +750,9 @@ export default function WorkbenchShell({
 
             {/* Tab Views */}
             <div className="pt-2">
+                {activeTab === 'runs' && <MyRunsPanel groups={groups} onStarted={() => fetchQueue(queueView)} onOpenRun={run => {
+                    setOpenedRun(run); setActiveRunId(run.id); setActiveAnalysis(run.analysis); setActiveSampleId(null); setActiveTab('worksheet');
+                }} />}
                 {(activeTab === 'queue' || activeTab === 'completed') && (
                     <WorkbenchQueue
                         groups={groups}
@@ -765,6 +776,7 @@ export default function WorkbenchShell({
                         allGroups={groups}
                         initialSampleId={activeSampleId || initialSampleId}
                         initialWorkItemId={initialWorkItemId}
+                        initialRunId={activeRunId}
                         onSelectGroup={(analysis) => setActiveAnalysis(analysis)}
                         onDraftChange={handleDraftChange}
                         onUpdateItemMeta={handleUpdateItemMeta}

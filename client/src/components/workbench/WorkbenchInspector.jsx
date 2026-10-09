@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import ConflictComparePanel from './ConflictComparePanel';
 import { canSelectInstrument } from './entryReadiness';
+import RunHeader from './RunHeader';
 
 /**
  * WorkbenchInspector
@@ -18,6 +19,7 @@ import { canSelectInstrument } from './entryReadiness';
  */
 export default function WorkbenchInspector({
     selectedItem,
+    runBatch = null,
     methodDefinition,
     eligibleEquipment: groupEquipment = [],
     onUpdateMeta,
@@ -62,6 +64,7 @@ export default function WorkbenchInspector({
 
     return (
         <aside className="w-full lg:w-64 p-4 rounded-xl border border-sf-divider bg-sf-surface flex flex-col gap-4 text-xs shadow-sm">
+            {runBatch && <RunHeader batch={runBatch} analysisCode={selectedItem.analysis} />}
             {/* Header / Identity */}
             <div>
                 <span className="sf-kicker block mb-1">
@@ -192,8 +195,8 @@ export default function WorkbenchInspector({
                             Instrument Qualification
                         </label>
                         <select
-                            disabled={!canSelectInstrument(selectedItem) || eligibleEquipment.length === 0}
-                            value={selectedEquipId}
+                            disabled={Boolean(runBatch) || !canSelectInstrument(selectedItem) || eligibleEquipment.length === 0}
+                            value={runBatch?.instrumentId || selectedEquipId}
                             onChange={(e) => onUpdateMeta(workItemId, 'instrumentId', e.target.value)}
                             className="w-full px-2 py-1 text-xs rounded border border-sf-divider bg-sf-canvas text-sf-text focus:outline-none focus:ring-1 focus:ring-sf-primary focus:border-sf-primary"
                         >

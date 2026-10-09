@@ -69,7 +69,7 @@ test.each(['ineligible', 'overdue', 'method-mismatch', 'held', 'capacity', 'curv
     }
     if (kind === 'held') {
         await f.db.$transaction(tx => require('../../services/sampleHoldService').raiseHold(tx,
-            { sampleId: f.items[0].sampleId, actor: f.actor, type: 'OTHER', reason: 'Explicit held-run refusal' })); code = 'QC_RUN_NOT_READY';
+            { sampleId: f.items[0].sampleId, actor: f.actor, type: 'OTHER', reason: 'Explicit held-run refusal' })); code = 'SAMPLE_HELD';
     }
     if (kind === 'capacity') {
         await require('../../services/qcRuleService').change(f.actor, { labId: f.labId, analysisCode: f.analysisCode, methodologyId: f.method.id,

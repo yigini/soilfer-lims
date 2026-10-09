@@ -79,5 +79,12 @@ async function withdrawReagentLot(tx, batchId, actor, input = {}) {
         payload: JSON.stringify({ linkId: link.id, inventoryLotId: link.inventoryLotId, reason: input.reason.trim(), withdrawnAt: now }) } });
     return { event, created: true };
 }
+async function availableReagentLots(db, batchId, actor) {
+    permission(actor);
+    const batch = await readQcRun(db, batchId, actor), lab = await policyService.resolveLab(batch.labId, db);
+    if (!lab) throw failure(400, 'QC_RUN_LAB_REQUIRED', 'Select a registered run laboratory.');
+    return db.inventoryLot.findMany({ where: { labId: lab.id, status: 'AVAILABLE', OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }] },
+        select: { id: true, lotNumber: true, expiryDate: true, item: { select: { name: true } } }, orderBy: [{ lotNumber: 'asc' }, { id: 'asc' }] });
+}
 module.exports = { linkReagentLot: auditRunCommand(linkReagentLot, 'REAGENT_LOT_LINK'),
-    withdrawReagentLot: auditRunCommand(withdrawReagentLot, 'REAGENT_LOT_WITHDRAW') };
+    withdrawReagentLot: auditRunCommand(withdrawReagentLot, 'REAGENT_LOT_WITHDRAW'), availableReagentLots };

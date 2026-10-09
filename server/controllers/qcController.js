@@ -9,7 +9,7 @@ const { resolveRunProfile } = require('../services/qcRunProfileService');
 const { changeRunMembers } = require('../services/qcRunMembershipService');
 const { reorderNativeRun } = require('../services/qcRunOrderService');
 const qcGate = require('../services/qcGateService');
-const { linkReagentLot, withdrawReagentLot } = require('../services/batchReagentLotService');
+const { linkReagentLot, withdrawReagentLot, availableReagentLots } = require('../services/batchReagentLotService');
 const { runOptions, startWorkbenchRun } = require('../services/workbenchRunService');
 const { normalizeBatchState } = require('../workflowContract');
 function respondError(res, error, fallback) {
@@ -42,6 +42,10 @@ exports.startWorkbenchRun = async (req, res) => {
 exports.withdrawReagentLot = async (req, res) => {
     try { return res.json(await withdrawReagentLot(prisma, req.params.id, req.user, { ...req.body, inventoryLotId: req.params.lotId })); }
     catch (error) { return respondError(res, error, 'Failed to withdraw reagent lot'); }
+};
+exports.availableReagentLots = async (req, res) => {
+    try { return res.json({ data: await availableReagentLots(prisma, req.params.id, req.user) }); }
+    catch (error) { return respondError(res, error, 'Failed to load reagent lots'); }
 };
 exports.getBatches = async (req, res) => {
     try {

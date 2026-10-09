@@ -48,6 +48,7 @@ async function startWorkbenchRun(db, actor, input = {}) {
             instrumentId, analysisCode: input.analysisCode, analyses: [{ analysisCode: input.analysisCode, methodologyId: options.methodologyId }] });
         const items = await tx.workItem.findMany({ where: { id: { in: input.workItemIds } }, include: { sample: true } });
         for (const item of items) {
+            await require('./sampleHoldService').assertNotHeld(tx, item.sample);
             const readiness = await evaluateExecutionReadiness(tx, { ...item, methodologyId: item.methodologyId || options.methodologyId }, actor, { selectedEquipmentId: instrumentId });
             if (!readiness.isReady) throw failure(409, 'QC_RUN_NOT_READY', 'The selected sample is not ready for this run.', { workItemId: item.id, blockers: readiness.blockers, reasons: readiness.reasons });
         }
