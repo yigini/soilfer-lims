@@ -63,7 +63,9 @@ test('read-only PRE_190 dry-run plans one attempt and one link, without changing
 });
 
 test.each(['SUBMITTED','ACCEPTED'])('191 release inventory reports %s work owned by RECORDED evidence without repairing it',status=>{
-    const file=fixture({status,extra:{WorkAttempt:[{id:'recorded-owner',workItemId:'measured',attemptNo:1,
+    // Keep the unrelated legacy run explicitly OPEN: a COMPLETED run without
+    // QC evidence correctly refuses #186 and is a separate release defect.
+    const file=fixture({status,batchStatus:'OPEN',extra:{WorkAttempt:[{id:'recorded-owner',workItemId:'measured',attemptNo:1,
         status:'RECORDED',evidenceHash:'retained-hash',evidenceData:'retained-evidence',createdAt:timestamp,updatedAt:timestamp}]}});
     installWorkAttemptContract({dbPath:file,apply:true});
     require('../helpers/repeatQcPredecessors').installRepeatQcPredecessors(file);
