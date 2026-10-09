@@ -18,13 +18,16 @@ export default function StartRunForm({ groups = [], onStarted, onCancel }) {
         let current = true; setOptions(null); setError(null);
         if (!choice) { setLoading(false); return () => { current = false; }; }
         setLoading(true);
-        axios.get('/api/qc/run-options', { params: { analysisCode: choice.analysisCode, labId: choice.labId, ...(methodId && { methodologyId: methodId }) } })
+        axios.get('/api/qc/run-options', { params: { analysisCode: choice.analysisCode, labId: choice.labId,
+            workItemIds: JSON.stringify(choice.items.map(item => item.workItemId || item.id)), ...(methodId && { methodologyId: methodId }) } })
             .then(response => { if (current) { setOptions(response.data); if (!methodId) setMethodId(response.data.methodologyId || ''); } })
             .catch(failure => { if (current) setError(t(`runFirst.errors.${failure.response?.data?.code}`, failure.response?.data?.error || t('runFirst.optionsFailed'))); })
             .finally(() => { if (current) setLoading(false); });
         return () => { current = false; };
     }, [choiceKey, choice?.analysisCode, choice?.labId, methodId, t]);
-    const candidates = (choice?.items || []).filter(item => canSelectInstrument(item) && !item.batchId && (!item.methodologyId || item.methodologyId === methodId));
+    const candidates = (choice?.items || []).filter(item => canSelectInstrument(item) &&
+        (options?.eligibleWorkItemIds ? options.eligibleWorkItemIds.includes(item.workItemId || item.id) : !item.batchId) &&
+        (!item.methodologyId || item.methodologyId === methodId));
     const capacity = options?.maxBatchSize ?? Infinity;
     const ready = !loading && options?.methodologyId === methodId && methodId &&
         (!options.equipmentRequired || instrumentId) && (!instrumentId || options.eligibleEquipment.some(asset => asset.id === instrumentId));

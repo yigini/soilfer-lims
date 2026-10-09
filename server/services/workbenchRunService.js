@@ -21,8 +21,28 @@ async function runOptions(db, actor, input = {}) {
     const methodId = input.methodologyId || defaultSelection?.method?.id;
     if (input.methodologyId && !methods.some(method => method.id === input.methodologyId)) throw failure(422, 'QC_BATCH_METHOD_AMBIGUOUS', 'Select a method in this analysis and laboratory.');
     const selected = methodId && methods.find(method => method.id === methodId);
+    let eligibleWorkItemIds;
+    if (typeof input.workItemIds === 'string') {
+        let ids;
+        try { ids = JSON.parse(input.workItemIds); } catch { /* Refuse malformed picker requests. */ }
+        if (!Array.isArray(ids) || ids.some(id => typeof id !== 'string' || !id) || new Set(ids).size !== ids.length) {
+            throw failure(400, 'QC_WORK_ITEMS_REQUIRED', 'Select distinct eligible samples.');
+        }
+        eligibleWorkItemIds = [];
+        const items = await db.workItem.findMany({ where: { id: { in: ids } }, include: { sample: true } });
+        for (const item of items) {
+            const itemLab = await policyService.resolveLab(item.assignedLab || item.labId || item.sample?.assignedLab, db);
+            if (itemLab?.id !== lab.id) throw failure(403, 'QC_WORK_ITEM_SCOPE_DENIED', 'Work items must belong to the run laboratory.');
+            if (item.analysis !== input.analysisCode || item.methodologyId && item.methodologyId !== methodId) continue;
+            if (item.batchId) {
+                try { await require('./qcRunRepeatService').repeatSource(db, item, null); }
+                catch (error) { if (error.statusCode >= 400 && error.statusCode < 500) continue; throw error; }
+            }
+            eligibleWorkItemIds.push(item.id);
+        }
+    }
     if (!selected) return { labId: lab.id, methods, defaultMethodologyId: null, defaultError: defaultSelection?.error || null,
-        methodologyId: null, eligibleEquipment: [], equipmentRequired: false, maxBatchSize: null };
+        methodologyId: null, eligibleEquipment: [], equipmentRequired: false, maxBatchSize: null, eligibleWorkItemIds };
     const [equipment, criteria] = await Promise.all([
         eligibleEquipmentForItem(db, { analysis: input.analysisCode, methodologyId: selected.id }, lab.id),
         resolveSequenceCriteria(lab.id, input.analysisCode, selected.id, db)
@@ -30,7 +50,7 @@ async function runOptions(db, actor, input = {}) {
     return { labId: lab.id, methods, defaultMethodologyId: defaultSelection?.method?.id || null, defaultError: defaultSelection?.error || null,
         methodologyId: selected.id, equipmentRequired: equipment.requirement.isRequired,
         eligibleEquipment: equipment.eligibleEquipment.filter(asset => !['BLOCKED', 'NOT_CONFIGURED'].includes(asset.readiness) && !['OVERDUE', 'FAILED'].includes(asset.calibrationStatus)),
-        maxBatchSize: criteria.qcRule.resolved.maxBatchSize.value };
+        maxBatchSize: criteria.qcRule.resolved.maxBatchSize.value, eligibleWorkItemIds };
 }
 async function startWorkbenchRun(db, actor, input = {}) {
     if (!hasPermission(actor, 'CHANGE_STATUS')) throw failure(403, 'QC_RUN_PERMISSION_REQUIRED', 'QC run permission is required.');

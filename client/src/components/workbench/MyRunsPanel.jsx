@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -8,13 +8,14 @@ export default function MyRunsPanel({ groups, onOpenRun, onStarted }) {
     const { t } = useLanguage(), { hasPermission } = useAuth();
     const [view, setView] = useState('my_runs'), [runs, setRuns] = useState([]), [starting, setStarting] = useState(false);
     const [loading, setLoading] = useState(false), [error, setError] = useState(null);
+    const generation = useRef(0);
     const reload = useCallback(async () => {
-        setLoading(true); setError(null);
-        try { const response = await axios.get('/api/qc/batches', { params: { view } }); setRuns(response.data.data || []); }
-        catch (failure) { setError(failure.response?.data?.error || t('runFirst.runsFailed')); }
-        finally { setLoading(false); }
+        const request = ++generation.current; setLoading(true); setError(null);
+        try { const response = await axios.get('/api/qc/batches', { params: { view } }); if (request === generation.current) setRuns(response.data.data || []); }
+        catch (failure) { if (request === generation.current) setError(failure.response?.data?.error || t('runFirst.runsFailed')); }
+        finally { if (request === generation.current) setLoading(false); }
     }, [view, t]);
-    useEffect(() => { reload(); }, [reload]);
+    useEffect(() => { reload(); return () => { generation.current++; }; }, [reload]);
     if (starting) return <StartRunForm groups={groups} onCancel={() => setStarting(false)} onStarted={async batch => {
         setStarting(false); await onStarted?.(batch); await reload(); onOpenRun(batch);
     }} />;
