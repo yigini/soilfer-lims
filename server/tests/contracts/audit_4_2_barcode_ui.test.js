@@ -111,7 +111,7 @@ describe('Audit 4.2: real DOM barcode wedge and value-cell boundaries', () => {
         if (activation === 'F2') await React.act(async () => { key(document.body, 'F2'); });
         await wedge(positive, activation === 'F2' ? query('worksheet-scan') : document.body);
         expect(axios.get).toHaveBeenCalledWith('/api/samples/lookup', { params: { code: positive, scanLabId: 'worksheet-lab' } });
-        expect(document.activeElement.getAttribute('aria-label')).toBe('Numeric determination');
+        expect(document.activeElement.getAttribute('aria-label')).toBe(positive + ' determination');
         expect(document.activeElement.value).toBe('6.42'); expect(scroll).toHaveBeenCalledWith({ block: 'center' });
         expect(audio.playSuccessChime).toHaveBeenCalledTimes(1); expect(audio.playErrorBuzz).not.toHaveBeenCalled();
         expect(props.onDraftChange).not.toHaveBeenCalled(); expect(query('worksheet-scan-error')).toBeNull();
@@ -135,8 +135,21 @@ describe('Audit 4.2: real DOM barcode wedge and value-cell boundaries', () => {
         expect(query('worksheet-scan-error').dataset.scanCode).toBe('SCAN_SAMPLE_NOT_IN_RUN');
         expect(scroll).not.toHaveBeenCalled(); expect(props.onDraftChange).not.toHaveBeenCalled(); expect(audio.playErrorBuzz).toHaveBeenCalledTimes(1);
     });
+    test('lookup IDs and lab identifiers cannot substitute for an exact issued label or original ID', async () => {
+        await worksheet({ match: { id: positive, labSampleCode: 'OTHER-LABEL', originalId: 'OTHER-FIELD-ID' } });
+        await wedge(positive, query('worksheet-scan'));
+        expect(query('worksheet-scan-error').dataset.scanCode).toBe('SAMPLE_NOT_FOUND');
+        expect(scroll).not.toHaveBeenCalled(); expect(props.onDraftChange).not.toHaveBeenCalled();
+    });
+    test('a disabled result cell refuses focus even for an exact in-run sample', async () => {
+        const { item } = await worksheet(); item.status = 'COMPLETED';
+        await render('components/workbench/WorksheetArea.jsx', props); await wedge(positive, query('worksheet-scan'));
+        expect(query('worksheet-scan-error').dataset.scanCode).toBe('SCAN_ROW_UNAVAILABLE');
+        expect(audio.playErrorBuzz).toHaveBeenCalledTimes(1); expect(audio.playSuccessChime).not.toHaveBeenCalled();
+        expect(props.onDraftChange).not.toHaveBeenCalled(); expect(scroll).not.toHaveBeenCalled();
+    });
     test('the same barcode in a real grid value cell is rejected before draft writes or Enter navigation', async () => {
-        await worksheet(); const cell = host.querySelector('input[aria-label="Numeric determination"]');
+        await worksheet(); const cell = host.querySelector(`input[aria-label="${positive} determination"]`);
         await wedge(wrong, cell); await tick(100);
         expect(cell.value).toBe('6.42'); expect(document.activeElement).toBe(cell);
         expect(query('worksheet-scan-error').textContent).toBe(strings.valueCell);
@@ -157,6 +170,36 @@ describe('Audit 4.2: real DOM barcode wedge and value-cell boundaries', () => {
             onChanged: jest.fn(), loading: false, setLoading: jest.fn(), setError: jest.fn(), setSuccessMsg: jest.fn(), onBarcodeRejected: reject });
         axios.post.mockClear(); const cell = query('native-value-blank'); await wedge(wrong, cell); await tick(100);
         expect(cell.value).toBe(''); expect(reject).toHaveBeenCalledTimes(1); expect(axios.post).not.toHaveBeenCalled();
+    });
+    test('the single-sample editor forwards the same zero-draft wedge refusal', async () => {
+        const onDraftChange = jest.fn(), reject = jest.fn();
+        const item = { workItemId: 'wi-123', sampleId: 'sample-123', sampleDisplayId: positive,
+            status: 'PENDING', readiness: { isReady: true }, draft: { value: '6.42' }, numberFormat: { decimal: '.', thousands: null } };
+        await render('components/workbench/SingleSampleEditor.jsx', { items: [item], activeGroup: { analysis: 'A', items: [item] },
+            onDraftChange, onUpdateItemMeta: jest.fn(), onBarcodeRejected: reject });
+        const cell = host.querySelector('input[inputmode="decimal"]'); await wedge(wrong, cell); await tick(100);
+        expect(cell.value).toBe('6.42'); expect(onDraftChange).not.toHaveBeenCalled(); expect(reject).toHaveBeenCalledTimes(1);
+    });
+    test.each([29, 30])('the strict inter-key boundary at %sms preserves ordinary typing and rejects only the fast burst', async gap => {
+        const onChange = jest.fn(), reject = jest.fn();
+        await render('components/workbench/NumericEditor.jsx', { value: '', onChange, onBarcodeRejected: reject,
+            numberFormat: { decimal: '.', thousands: null } });
+        const cell = host.querySelector('input'); await React.act(async () => cell.focus());
+        for (const character of '1234567') {
+            await React.act(async () => { key(cell, character); input(cell, cell.value + character); }); await tick(gap);
+        }
+        await React.act(async () => key(cell, 'Enter')); await tick(100);
+        if (gap === 29) { expect(onChange).not.toHaveBeenCalled(); expect(reject).toHaveBeenCalledTimes(1); expect(cell.value).toBe(''); }
+        else { expect(onChange).toHaveBeenLastCalledWith('1234567'); expect(reject).not.toHaveBeenCalled(); }
+    });
+    test('unmounting a buffered value editor cancels its pending draft write', async () => {
+        const onChange = jest.fn();
+        await render('components/workbench/NumericEditor.jsx', { value: '', onChange, onBarcodeRejected: jest.fn(), numberFormat: { decimal: '.', thousands: null } });
+        const cell = host.querySelector('input'); await React.act(async () => cell.focus());
+        for (const character of '1234567') {
+            await React.act(async () => { key(cell, character); input(cell, cell.value + character); }); await tick(10);
+        }
+        await React.act(async () => reactRoot.render(null)); await tick(100); expect(onChange).not.toHaveBeenCalled();
     });
     test('ordinary slow locale typing and short Enter input still reach the draft callback', async () => {
         const onChange = jest.fn();
