@@ -14,6 +14,7 @@ const curves = require('../../services/calibrationCurveService');
 const native = require('../../services/qcNativeRunService');
 const rules = require('../../services/qcRuleService');
 const files = [];
+const clients = [];
 let context;
 
 async function fixture() {
@@ -21,6 +22,7 @@ async function fixture() {
     const file = assertOwnedTestDatabase(path.join(directory, `audit_legacy_calibration_${randomUUID()}.db`), 'system:fixture'); files.push(file);
     beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'CREATE_PRISMA' });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    clients.push(db);
     for (const row of UNITS.filter(unit => unit.code !== 'pct_mass')) await db.unit.create({ data: row });
     const codes = new Set(referenceRows().map(row => row.analysisCode));
     for (const row of catalogue.analyses.filter(value => codes.has(value.code))) await db.analysis.create({ data: {
@@ -30,7 +32,7 @@ async function fixture() {
         ['install_result_attempt_links', 'installResultAttemptLinks'], ['install_sample_holds', 'installSampleHolds'],
         ['install_reference_materials', 'installReferenceMaterials'], ['install_qc_rules', 'installQcRules'],
         ['install_qc_runs', 'installQcRuns'], ['install_qc_gate_scope', 'installQcGateScope'],
-        ['install_proficiency_evidence', 'installProficiencyEvidence'], ['install_result_equipment_evidence', 'installResultEquipmentEvidence'],
+        ['bootstrap_pt_nonconformity', 'bootstrapPtNonconformity'], ['install_result_equipment_evidence', 'installResultEquipmentEvidence'],
         ['install_work_attempt_contract', 'installWorkAttemptContract'], ['install_work_repeat_contract', 'installWorkRepeatContract'],
         ['install_reported_value_selections', 'installReportedValueSelections'], ['install_batch_reagent_lots', 'installBatchReagentLots'],
         ['install_calculation_templates', 'installCalculationTemplates']]) {
@@ -66,7 +68,7 @@ async function fixture() {
             db.batchEvent.findMany({ orderBy: { id: 'asc' } }), db.result.findMany({ orderBy: { id: 'asc' } })]))) };
 }
 beforeEach(async () => { context = await fixture(); });
-afterEach(async () => { await context?.db.$disconnect(); context = null; jest.restoreAllMocks(); });
+afterEach(async () => { for (const db of clients.splice(0)) await db.$disconnect(); context = null; jest.restoreAllMocks(); });
 afterAll(() => { for (const file of files) fs.rmSync(assertOwnedTestDatabase(file, 'system:fixture'), { force: true }); });
 
 test('only a started native run supplies the real frozen method revision; refusal writes nothing', async () => {
