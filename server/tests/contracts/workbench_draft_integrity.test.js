@@ -267,6 +267,7 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
     });
 
     test('6. Replicate 2 does not overwrite Replicate 1 in Result table', async () => {
+        await require('../setup').ensureTestLab(testUser.labId, 'TEST');
         const manager = await prisma.user.create({ data: {
             id: `draft-policy-manager-${Date.now()}`, username: `draft-policy-manager-${Date.now()}`,
             email: `draft-policy-manager-${Date.now()}@example.test`, password: 'isolated-fixture',
