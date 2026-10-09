@@ -11,6 +11,7 @@ Authoritative pins:
 - [6034830001](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6034830001): retained PT evidence, nullable nonconformityId and idempotent PENDING backfill.
 - [6075820954](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6075820954): exact additive PT successor, no WorkAttempt column, lifecycle commands, retained links and recorded compatibility mode.
 - [6076135661](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6076135661): first UNSATISFACTORY record/correction writes RAISED directly with its NCR in the same transaction. PENDING is historical-only; no NULL-round backfill.
+- [6076453701](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6076453701): exact fresh Prisma bootstrap, both unchanged #189 and new #193 guards/receipts in one transaction; predecessor verifier alone refuses the unguarded successor state. Inconsistent pushed rows refuse with ids and zero writes.
 
 Implementation boundaries:
 - SQL unique(source,refType,refId); retries retain the original NCR.

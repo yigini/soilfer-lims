@@ -2,15 +2,13 @@ const { randomUUID } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { qcGateFixture } = require('../helpers/qcGateFixture');
 const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
-const { loadNonconformityMigrationSource } = require('../../services/nonconformityMigrationSource');
+const { installNonconformityReports } = require('../../scripts/install_nonconformity_reports');
 const ncr = require('../../services/nonconformityService');
 const pt = require('../../services/proficiencyRoundService');
 const owned = [];
 async function fixture() {
     const f = await qcGateFixture(); owned.push(f);
-    const raw = new Database(assertOwnedTestDatabase(f.file, 'system:fixture'));
-    try { raw.pragma('foreign_keys=ON'); raw.transaction(() => raw.exec(loadNonconformityMigrationSource().sql))(); }
-    finally { raw.close(); }
+    installNonconformityReports({dbPath:f.file,apply:true});
     f.ptInput = { labId:f.labId, analysisCode:f.analysisCode, provider:'Owned PT provider', roundRef:'Owned PT round',
         assignedValue:0, labResult:0, uncertainty:1 };
     f.source = { labId:f.labId, source:'OTHER', refType:'OwnedSource', refId:randomUUID(), description:'Recorded owned failure' };
@@ -105,7 +103,9 @@ test('forced NCR failure rolls back first PT correction and new-round classifica
         raw.exec("CREATE TRIGGER owned_ncr_failure BEFORE INSERT ON NonconformityReport BEGIN SELECT RAISE(ABORT,'OWNED_NCR_FAILURE'); END;");
         for(const operation of [()=>pt.update(f.actor,first.id,{labResult:3,uncertainty:1},{db:f.db}),
             ()=>pt.record(f.actor,{...f.ptInput,labResult:3},{db:f.db})]) {
-            const before=await f.snapshot(); await expect(operation()).rejects.toThrow('OWNED_NCR_FAILURE');
+            // The SQLite Prisma adapter exposes trigger ABORT as P2003.
+            // The actual trigger and every retained row prove rollback.
+            const before=await f.snapshot(); await expect(operation()).rejects.toMatchObject({code:'P2003'});
             expect(await f.snapshot()).toEqual(before);
         }
     } finally {raw.exec('DROP TRIGGER owned_ncr_failure');raw.close();}
@@ -116,7 +116,7 @@ test('failed lifecycle audit rolls back the status change', async () => {
     try {
         raw.exec("CREATE TRIGGER owned_ncr_audit_failure BEFORE INSERT ON AuditLog WHEN NEW.entity='NONCONFORMITY_REPORT' BEGIN SELECT RAISE(ABORT,'OWNED_NCR_AUDIT_FAILURE'); END;");
         const before=await f.snapshot();
-        await expect(ncr.transition(f.db,report.id,f.actor,{status:'ACTION',impactAssessment:'Checked scope'})).rejects.toThrow('OWNED_NCR_AUDIT_FAILURE');
+        await expect(ncr.transition(f.db,report.id,f.actor,{status:'ACTION',impactAssessment:'Checked scope'})).rejects.toMatchObject({code:'P2003'});
         expect(await f.snapshot()).toEqual(before);
     } finally {raw.exec('DROP TRIGGER owned_ncr_audit_failure');raw.close();}
 });
