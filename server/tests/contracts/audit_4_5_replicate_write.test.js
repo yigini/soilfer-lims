@@ -11,6 +11,7 @@ async function fixture(requiredCount=2) {
     const f=await qcGateFixture({criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0}});
     owned.push(f);
     await f.setPolicy([{key:'results.replicatesRequired',value:requiredCount},{key:'qc.duplicateMaxRpd',value:10}]);
+    await f.db.workItem.update({where:{id:f.items[0].id},data:{assignedTo:f.actor.username,equipmentId:f.instrument.id}});
     f.measurement=(replicateNo,value)=>({param:f.analysisCode,methodologyId:f.method.id,equipmentId:f.instrument.id,replicateNo,value});
     f.record=measurements=>inTransaction(f.db,tx=>writeResultsExecution(tx,{
         sampleId:f.items[0].sampleId,workItemId:f.items[0].id,actor:f.actor,measurements
@@ -75,4 +76,58 @@ test('three simultaneous first readings cannot manufacture a recorded failing pa
     const response=await f.save([f.measurement(1,'10'),f.measurement(2,'12'),f.measurement(3,'11')]);
     expect({status:response.status,code:response.body.code}).toEqual({status:409,code:'REPLICATE_NOT_REQUIRED'});
     expect(await f.all()).toEqual(before);
+});
+
+test('the actual queue keeps a completed first reading editable for replica2, then exposes the failing-pair third action without writes',async()=>{
+    const f=await fixture();
+    const complete=async(replicateNo,value)=>{
+        const item=await f.db.workItem.findUnique({where:{id:f.items[0].id}});
+        const entries=[{workItemId:item.id,value,replicateNo,equipmentId:f.instrument.id,version:item.version,basis:'AIR_DRY'}];
+        await withQcRunHttp(f.db,f.actor,async(app,token)=>{
+            const headers={'Authorization':'Bearer '+token};
+            const preview=await request(app).post('/api/workbench/v2/completion/preview').set(headers).send({entries});
+            expect({status:preview.status,body:preview.body}).toMatchObject({status:200});
+            expect(preview.body.included).toHaveLength(1);
+            const commit=await request(app).post('/api/workbench/v2/completion/commit').set(headers).send({entries});
+            expect({status:commit.status,body:commit.body}).toMatchObject({status:200,body:{saved:1}});
+            expect(commit.body.errors||[]).toHaveLength(0);
+        },{workbench:true});
+    };
+    await complete(1,'10');
+    const queue=async()=>{
+        let response;
+        await withQcRunHttp(f.db,f.actor,async(app,token)=>{
+            response=await request(app).get('/api/workbench/queue').set('Authorization','Bearer '+token);
+        },{workbench:true});
+        expect({status:response.status,body:response.body}).toMatchObject({status:200});
+        return response.body.groups.flatMap(group=>group.items);
+    };
+    let before=await f.all(),rows=await queue();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({status:'COMPLETED',sampleReplicates:{requiredCount:2,status:'PENDING',canAppend:true,canAddThird:false}});
+    expect(rows[0].sampleReplicates.measurements.map(row=>row.replicateNo)).toEqual([1]);
+    expect(await f.all()).toEqual(before);
+    await complete(2,'12');
+    before=await f.all();rows=await queue();
+    expect(rows[0].sampleReplicates).toMatchObject({status:'FAIL',mean:11,rpd:18.18,canAddThird:true});
+    expect(await f.all()).toEqual(before);
+    await complete(3,'11');
+    before=await f.all();expect(await queue()).toHaveLength(0);
+    expect(await f.all()).toEqual(before);
+});
+
+test('started native sample pairing uses frozen count/limits and leaves native QC positions, measurements and evaluations byte-identical',async()=>{
+    const f=await fixture();
+    const {buildNativeRun,startNativeRun}=require('../../services/qcNativeRunService');
+    const run=await buildNativeRun(f.db,f.actor,f.input);
+    await startNativeRun(f.db,run.id,f.actor);
+    await f.record([f.measurement(1,'10'),f.measurement(2,'12')]);
+    await f.setPolicy([{key:'results.replicatesRequired',value:1},{key:'qc.duplicateMaxRpd',value:99}]);
+    const qc=()=>Promise.all([f.db.batch.findUnique({where:{id:run.id},include:require('../../services/qcRunViewService').QC_RUN_INCLUDE}),
+        f.db.qcEvaluation.findMany(),f.db.batchQcResult.findMany(),f.db.reportedValueSelection.findMany()]);
+    const before=await qc();
+    const rules=await resolveSampleReplicateRules(f.db,{labId:f.labId,analysisCode:f.analysisCode,methodologyId:f.method.id,batchId:run.id});
+    expect(rules).toMatchObject({requiredCount:2,source:'FROZEN',policy:{maxRpd:10}});
+    expect((await f.save([f.measurement(3,'11')])).status).toBe(200);
+    expect(await qc()).toEqual(before);
 });

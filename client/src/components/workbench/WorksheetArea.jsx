@@ -5,6 +5,7 @@ import {
     AlertTriangle, Sparkles, Check, Layers, LayoutList, Table as TableIcon
 } from 'lucide-react';
 import NumericEditor from './NumericEditor';
+import SampleReplicateEntry from './SampleReplicateEntry';
 import { isBarcodeBurst } from './BarcodeSafeInput';
 import { useRunBarcodeScan } from './useRunBarcodeScan';
 import TextureEditor from './TextureEditor';
@@ -353,7 +354,9 @@ export default function WorksheetArea({
                                             {...(position ? nativeControls.positionProps(position) : {})}
                                             onClick={() => setSelectedItemId(item.workItemId)}
                                             className={`cursor-pointer transition-colors ${
-                                                isSelected
+                                                ['FAIL', 'REVIEW_REQUIRED'].includes(item.sampleReplicates?.status)
+                                                    ? 'bg-amber-500/10 border-l-4 border-amber-500'
+                                                    : isSelected
                                                     ? 'bg-[var(--sf-selected)] shadow-[inset_3px_0_0_var(--sf-primary)]'
                                                     : 'hover:bg-sf-hover/60'
                                             }`}
@@ -463,6 +466,13 @@ export default function WorksheetArea({
                                                             </div>
                                                         )}
                                                     </div>
+                                                ) : item.sampleReplicates?.requiredCount === 2 ? (
+                                                    <SampleReplicateEntry item={item} unit={activeGroup?.unit || ''}
+                                                        disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
+                                                        onDraftChange={onDraftChange}
+                                                        onBarcodeRejected={scanner.rejectValueBurst}
+                                                        onEnterNext={() => handleEnterNext(idx)}
+                                                        inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)} />
                                                 ) : (
                                                     <NumericEditor
                                                         onBarcodeRejected={scanner.rejectValueBurst}

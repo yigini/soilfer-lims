@@ -13,7 +13,8 @@ export function canSelectInstrument(item) {
 }
 
 export function isEntryReady(item, equipment = []) {
-    if (!item || SEALED.includes(item.status)) return false;
+    if (!item || SEALED.includes(item.status) && !(item.status === 'COMPLETED' &&
+        item.sampleReplicates?.requiredCount === 2 && item.sampleReplicates?.canAppend === true)) return false;
     const selectedId = entryInstrumentId(item);
     const asset = (item.eligibleEquipment || equipment).find(candidate => candidate.id === selectedId);
     if (asset && (asset.status !== 'IN_SERVICE' || ['BLOCKED', 'NOT_CONFIGURED'].includes(asset.readiness) ||
