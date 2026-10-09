@@ -1,4 +1,3 @@
--- Audit #199: additive tables only. No activation or analytical back-fill.
 CREATE TABLE "CalcTemplate" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "templateKey" TEXT NOT NULL,
@@ -13,7 +12,8 @@ CREATE TABLE "CalcTemplate" (
     "curve" TEXT,
     "formulaModule" TEXT NOT NULL,
     "outputUnit" TEXT NOT NULL,
-    "outputDecimals" INTEGER NOT NULL,
+    "outputDecimals" INTEGER,
+    "precisionSource" TEXT,
     "status" TEXT NOT NULL,
     "sourceCitation" TEXT NOT NULL,
     "createdBy" TEXT NOT NULL,
@@ -62,11 +62,13 @@ CREATE TABLE "CalibrationCurve" (
     "intercept" REAL,
     "r" REAL,
     "rSquared" REAL,
+    "pointCount" INTEGER NOT NULL,
     "levelCount" INTEGER NOT NULL,
     "minPointsApplied" INTEGER NOT NULL,
     "minRApplied" REAL NOT NULL,
     "thresholdSource" TEXT NOT NULL,
     "status" TEXT NOT NULL,
+    "failReason" TEXT,
     "recordedBy" TEXT NOT NULL,
     "recordedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "reason" TEXT,
@@ -76,7 +78,15 @@ CREATE TABLE "CalibrationCurve" (
     CONSTRAINT "CalibrationCurve_methodologyId_fkey" FOREIGN KEY ("methodologyId") REFERENCES "Methodology" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "CalibrationCurve_templateId_fkey" FOREIGN KEY ("templateId") REFERENCES "CalcTemplate" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "CalibrationCurve_recordedBy_fkey" FOREIGN KEY ("recordedBy") REFERENCES "User" ("username") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "CalibrationCurve_supersedesId_fkey" FOREIGN KEY ("supersedesId") REFERENCES "CalibrationCurve" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "CalibrationCurve_supersedesId_fkey" FOREIGN KEY ("supersedesId") REFERENCES "CalibrationCurve" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "CalibrationCurve_pass_coefficients_check" CHECK (
+      "status" <> 'PASS' OR (
+        "slope" IS NOT NULL AND "slope" <> 0 AND abs("slope") <= 1.7976931348623157e308
+        AND "intercept" IS NOT NULL AND abs("intercept") <= 1.7976931348623157e308
+        AND "r" IS NOT NULL AND "r" BETWEEN -1 AND 1
+        AND "rSquared" IS NOT NULL AND "rSquared" BETWEEN 0 AND 1
+      )
+    )
 );
 
 CREATE TABLE "CalibrationPoint" (
@@ -98,6 +108,11 @@ CREATE TABLE "ResultCalculation" (
     "inputs" TEXT NOT NULL,
     "parameters" TEXT NOT NULL,
     "intermediate" TEXT NOT NULL,
+    "nativeValue" REAL NOT NULL,
+    "nativeUnit" TEXT NOT NULL,
+    "conversionFactor" REAL NOT NULL,
+    "unitConversion" TEXT NOT NULL,
+    "unroundedOutput" REAL NOT NULL,
     "output" REAL NOT NULL,
     "outputUnit" TEXT NOT NULL,
     "curveId" TEXT,
@@ -109,6 +124,7 @@ CREATE TABLE "ResultCalculation" (
     CONSTRAINT "ResultCalculation_activationId_fkey" FOREIGN KEY ("activationId") REFERENCES "CalcTemplateActivation" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "ResultCalculation_curveId_fkey" FOREIGN KEY ("curveId") REFERENCES "CalibrationCurve" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "ResultCalculation_outputUnit_fkey" FOREIGN KEY ("outputUnit") REFERENCES "Unit" ("code") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "ResultCalculation_nativeUnit_fkey" FOREIGN KEY ("nativeUnit") REFERENCES "Unit" ("code") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "ResultCalculation_computedBy_fkey" FOREIGN KEY ("computedBy") REFERENCES "User" ("username") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
@@ -127,7 +143,10 @@ BEGIN
   SELECT CASE WHEN NEW.status NOT IN ('REFERENCE','LAB') OR NEW.version < 1
     OR length(trim(NEW.templateKey))=0 OR length(trim(NEW.variant))=0
     OR length(trim(NEW.createdBy))=0 OR length(trim(NEW.reason))=0
-    OR NEW.outputDecimals < 0 OR NEW.outputDecimals > 100
+    OR (NEW.outputDecimals IS NOT NULL AND (typeof(NEW.outputDecimals)<>'integer' OR NEW.outputDecimals < 0 OR NEW.outputDecimals > 6))
+    OR (NEW.outputDecimals IS NULL AND NEW.precisionSource IS NOT NULL)
+    OR (NEW.outputDecimals IS NOT NULL AND (NEW.precisionSource IS NULL OR
+      (CASE WHEN json_valid(NEW.precisionSource) THEN json_type(NEW.precisionSource)<>'object' ELSE 1 END)))
     OR NEW.formulaModule NOT IN ('GRAVIMETRIC_MOISTURE','WALKLEY_BLACK','COLORIMETRIC_PHOSPHORUS','EXCHANGEABLE_CATION','CEC_TITRATION','KJELDAHL')
     OR (CASE WHEN json_valid(NEW.inputs) THEN json_type(NEW.inputs) <> 'array' ELSE 1 END)
     OR (CASE WHEN json_valid(NEW.parameters) THEN json_type(NEW.parameters) <> 'array' ELSE 1 END)
@@ -155,6 +174,16 @@ END;
 
 CREATE TRIGGER "CalcTemplateActivation_insert_contract" BEFORE INSERT ON "CalcTemplateActivation"
 BEGIN
+  SELECT CASE WHEN NEW.action='ACTIVATE' AND EXISTS (
+    SELECT 1 FROM "CalcTemplate" WHERE id=NEW.templateId AND outputDecimals IS NULL
+  ) THEN RAISE(ABORT,'CALC_TEMPLATE_PRECISION_REQUIRED') END;
+  SELECT CASE WHEN NEW.action='ACTIVATE' AND NOT EXISTS (
+    SELECT 1 FROM "CalcTemplate" template JOIN "Unit" native ON native.code=template.outputUnit
+      JOIN "Analysis" analysis ON analysis.code=NEW.analysisCode JOIN "Unit" reporting ON reporting.code=analysis.unitCode
+    WHERE template.id=NEW.templateId AND native.quantityKind=reporting.quantityKind
+      AND native.factorToBase>0 AND reporting.factorToBase>0
+      AND native.factorToBase<=1.7976931348623157e308 AND reporting.factorToBase<=1.7976931348623157e308
+  ) THEN RAISE(ABORT,'CALC_TEMPLATE_UNIT_MISMATCH') END;
   SELECT CASE WHEN NEW.action NOT IN ('ACTIVATE','DEACTIVATE') OR NEW.verifiedAgainstSop<>1
     OR length(trim(NEW.reason))=0 OR NOT EXISTS (
       SELECT 1 FROM "CalcTemplate" template WHERE template.id=NEW.templateId AND template.version=NEW.templateVersion
@@ -179,12 +208,15 @@ END;
 CREATE TRIGGER "CalibrationCurve_insert_contract" BEFORE INSERT ON "CalibrationCurve"
 BEGIN
   SELECT CASE WHEN NEW.status NOT IN ('PASS','FAIL') OR NEW.revision<1 OR NEW.levelCount<1 OR NEW.minPointsApplied<1
+    OR typeof(NEW.pointCount)<>'integer' OR NEW.pointCount<1 OR NEW.levelCount>NEW.pointCount
     OR NEW.minRApplied<0 OR NEW.minRApplied>1
     OR (CASE WHEN json_valid(NEW.executedMethodRevision) THEN json_type(NEW.executedMethodRevision)<>'object' ELSE 1 END)
     OR (CASE WHEN json_valid(NEW.thresholdSource) THEN json_type(NEW.thresholdSource)<>'object' ELSE 1 END)
     OR (NEW.r IS NOT NULL AND (NEW.r < -1 OR NEW.r > 1)) OR (NEW.rSquared IS NOT NULL AND (NEW.rSquared<0 OR NEW.rSquared>1))
     OR (NEW.status='PASS' AND (NEW.slope IS NULL OR NEW.slope=0 OR NEW.intercept IS NULL OR NEW.r IS NULL OR NEW.rSquared IS NULL
-      OR NEW.levelCount<NEW.minPointsApplied OR NEW.r<NEW.minRApplied))
+      OR NEW.levelCount<NEW.minPointsApplied OR NEW.r<NEW.minRApplied OR NEW.failReason IS NOT NULL))
+    OR (NEW.status='FAIL' AND (NEW.failReason IS NULL OR length(trim(NEW.failReason))=0))
+    OR (NEW.failReason='DEGENERATE_FIT' AND (NEW.status<>'FAIL' OR NEW.slope IS NOT NULL OR NEW.intercept IS NOT NULL OR NEW.r IS NOT NULL OR NEW.rSquared IS NOT NULL))
     OR (NEW.revision>1 AND (NEW.reason IS NULL OR length(trim(NEW.reason))=0))
     THEN RAISE(ABORT,'CALIBRATION_CURVE_INVALID') END;
   SELECT CASE WHEN NOT EXISTS (
@@ -210,8 +242,11 @@ END;
 
 CREATE TRIGGER "CalibrationPoint_insert_contract" BEFORE INSERT ON "CalibrationPoint"
 BEGIN
-  SELECT CASE WHEN NEW.ordinal<1 OR NEW.standardConcentration<0 OR NOT EXISTS (
+  SELECT CASE WHEN typeof(NEW.ordinal)<>'integer' OR NEW.ordinal<1 OR NEW.standardConcentration<0
+    OR abs(NEW.standardConcentration)>1.7976931348623157e308 OR abs(NEW.response)>1.7976931348623157e308 OR NOT EXISTS (
     SELECT 1 FROM "CalibrationCurve" curve WHERE curve.id=NEW.curveId
+      AND NEW.ordinal<=curve.pointCount
+      AND (SELECT count(*) FROM "CalibrationPoint" WHERE curveId=curve.id)<curve.pointCount
       AND NOT EXISTS (SELECT 1 FROM "CalibrationCurve" child WHERE child.supersedesId=curve.id)
       AND NOT EXISTS (SELECT 1 FROM "ResultCalculation" calculation WHERE calculation.curveId=curve.id)
   ) THEN RAISE(ABORT,'CALIBRATION_POINT_INVALID') END;
@@ -219,21 +254,41 @@ END;
 
 CREATE TRIGGER "ResultCalculation_insert_contract" BEFORE INSERT ON "ResultCalculation"
 BEGIN
+  SELECT CASE WHEN NEW.curveId IS NOT NULL AND EXISTS (
+    SELECT 1 FROM "CalibrationCurve" WHERE id=NEW.curveId AND status<>'PASS'
+  ) THEN RAISE(ABORT,'CALIBRATION_CURVE_FAILED') END;
+  SELECT CASE WHEN NEW.curveId IS NOT NULL AND EXISTS (
+    SELECT 1 FROM "CalibrationCurve" curve WHERE curve.id=NEW.curveId AND (
+      (SELECT count(*) FROM "CalibrationPoint" WHERE curveId=curve.id)<>curve.pointCount OR
+      (SELECT count(DISTINCT standardConcentration) FROM "CalibrationPoint" WHERE curveId=curve.id)<>curve.levelCount
+    )
+  ) THEN RAISE(ABORT,'CALIBRATION_CURVE_INCOMPLETE') END;
   SELECT CASE WHEN length(trim(NEW.engineVersion))=0
+    OR abs(NEW.nativeValue)>1.7976931348623157e308 OR NEW.conversionFactor<=0 OR NEW.conversionFactor>1.7976931348623157e308
+    OR abs(NEW.unroundedOutput)>1.7976931348623157e308 OR abs(NEW.output)>1.7976931348623157e308
+    OR NEW.unroundedOutput IS NOT (NEW.nativeValue*NEW.conversionFactor)
     OR (CASE WHEN json_valid(NEW.inputs) THEN json_type(NEW.inputs)<>'object' ELSE 1 END)
     OR (CASE WHEN json_valid(NEW.parameters) THEN json_type(NEW.parameters)<>'array' ELSE 1 END)
     OR (CASE WHEN json_valid(NEW.intermediate) THEN json_type(NEW.intermediate)<>'object' ELSE 1 END)
+    OR (CASE WHEN json_valid(NEW.unitConversion) THEN json_type(NEW.unitConversion)<>'object' ELSE 1 END)
     OR NOT EXISTS (
       SELECT 1 FROM "Result" result JOIN "Sample" sample ON sample.id=result.sampleId
         JOIN "Lab" lab ON lab.id=sample.assignedLab OR lab.code=sample.assignedLab
         JOIN "CalcTemplateActivation" activation ON activation.id=NEW.activationId
         JOIN "CalcTemplate" template ON template.id=NEW.templateId
+        JOIN "Analysis" analysis ON analysis.code=result.param
+        JOIN "Unit" native ON native.code=NEW.nativeUnit JOIN "Unit" reporting ON reporting.code=NEW.outputUnit
       WHERE result.id=NEW.resultId AND result.numericValue IS NEW.output AND result.unit=NEW.outputUnit
         AND result.enteredBy=NEW.computedBy AND activation.labId=lab.id AND activation.action='ACTIVATE'
         AND activation.templateId=NEW.templateId AND activation.templateVersion=NEW.templateVersion
         AND activation.analysisCode=result.param AND activation.methodologyId IS result.methodologyId
         AND NOT EXISTS (SELECT 1 FROM "CalcTemplateActivation" child WHERE child.supersedesId=activation.id)
-        AND template.version=NEW.templateVersion AND template.outputUnit=NEW.outputUnit AND template.parameters=NEW.parameters
+        AND template.version=NEW.templateVersion AND template.outputUnit=NEW.nativeUnit AND template.parameters=NEW.parameters
+        AND analysis.unitCode=NEW.outputUnit AND native.quantityKind=reporting.quantityKind
+        AND native.factorToBase>0 AND reporting.factorToBase>0 AND NEW.conversionFactor IS (native.factorToBase/reporting.factorToBase)
+        AND json_extract(NEW.unitConversion,'$.native.code')=NEW.nativeUnit AND json_extract(NEW.unitConversion,'$.reporting.code')=NEW.outputUnit
+        AND json_extract(NEW.unitConversion,'$.native.factorToBase') IS native.factorToBase
+        AND json_extract(NEW.unitConversion,'$.reporting.factorToBase') IS reporting.factorToBase
         AND ((template.curve IS NULL AND NEW.curveId IS NULL) OR (template.curve IS NOT NULL AND EXISTS (
           SELECT 1 FROM "CalibrationCurve" curve JOIN "BatchAnalyte" analyte ON analyte.id=curve.batchAnalyteId
           WHERE curve.id=NEW.curveId AND curve.batchId=result.batchId AND curve.labId=lab.id

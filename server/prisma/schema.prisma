@@ -1249,7 +1249,8 @@ model Unit {
   analyses     Analysis[]
   referenceValues ReferenceValue[]
   calcTemplates   CalcTemplate[]
-  resultCalculations ResultCalculation[]
+  resultCalculations ResultCalculation[] @relation("ResultReportingUnit")
+  nativeCalculations ResultCalculation[] @relation("ResultNativeUnit")
 }
 
 model MethodReference {
@@ -1383,7 +1384,8 @@ model CalcTemplate {
   curve            String?
   formulaModule    String
   outputUnit       String
-  outputDecimals   Int
+  outputDecimals   Int?
+  precisionSource  String?
   status           String
   sourceCitation   String
   createdBy        String
@@ -1443,11 +1445,13 @@ model CalibrationCurve {
   intercept              Float?
   r                      Float?
   rSquared               Float?
+  pointCount             Int
   levelCount             Int
   minPointsApplied       Int
   minRApplied            Float
   thresholdSource        String
   status                 String
+  failReason             String?
   recordedBy             String
   recordedAt             DateTime @default(now())
   reason                 String?
@@ -1485,6 +1489,11 @@ model ResultCalculation {
   inputs          String
   parameters      String
   intermediate    String
+  nativeValue     Float
+  nativeUnit      String
+  conversionFactor Float
+  unitConversion  String
+  unroundedOutput Float
   output          Float
   outputUnit      String
   curveId         String?
@@ -1495,7 +1504,8 @@ model ResultCalculation {
   template        CalcTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
   activation      CalcTemplateActivation @relation(fields: [activationId], references: [id], onDelete: Restrict)
   curve           CalibrationCurve? @relation(fields: [curveId], references: [id], onDelete: Restrict)
-  reportingUnit   Unit @relation(fields: [outputUnit], references: [code], onDelete: Restrict)
+  reportingUnit   Unit @relation("ResultReportingUnit", fields: [outputUnit], references: [code], onDelete: Restrict)
+  nativeUnitCatalogue Unit @relation("ResultNativeUnit", fields: [nativeUnit], references: [code], onDelete: Restrict)
   actor           User @relation(fields: [computedBy], references: [username], onDelete: Restrict)
 }
 

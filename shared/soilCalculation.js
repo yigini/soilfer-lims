@@ -24,7 +24,7 @@ function validateTemplate(template) {
     const names = INPUTS[template?.formulaModule], parameters = PARAMETERS[template?.formulaModule];
     if (!names || !Array.isArray(template.inputs) || !Array.isArray(template.parameters) ||
         template.inputs.length !== names.length || template.parameters.length !== parameters.length ||
-        !Number.isInteger(template.outputDecimals) || template.outputDecimals < 0 || template.outputDecimals > 100 ||
+        (template.outputDecimals !== null && (!Number.isInteger(template.outputDecimals) || template.outputDecimals < 0 || template.outputDecimals > 6)) ||
         typeof template.outputUnit !== 'string' || !template.outputUnit.trim()) {
         throw error('CALC_TEMPLATE_INVALID', 'The calculation template is incomplete.');
     }
@@ -51,6 +51,7 @@ function validateTemplate(template) {
 }
 function roundOutput(value, decimals) {
     if (!Number.isFinite(value)) throw error('CALC_INPUT_INVALID', 'The calculation must produce a finite number.');
+    if (!Number.isInteger(decimals) || decimals < 0 || decimals > 6) throw error('CALC_TEMPLATE_PRECISION_REQUIRED', 'Verify the reporting precision against the laboratory SOP.');
     // The template controls precision; no preset or locale changes rounding.
     return Number(value.toFixed(decimals));
 }
@@ -58,8 +59,15 @@ function positive(value, key) {
     if (!(value > 0)) throw error('CALC_INPUT_INVALID', 'A denominator or scale must be positive.', { input: key });
     return value;
 }
-function calculate(template, rawInputs, { numberFormat, curve = null } = {}) {
+function calculate(template, rawInputs, { numberFormat, curve = null, units } = {}) {
     validateTemplate(template);
+    if (template.outputDecimals === null) throw error('CALC_TEMPLATE_PRECISION_REQUIRED', 'Verify the reporting precision against the laboratory SOP.');
+    const native = units?.native, reporting = units?.reporting;
+    if (!native || !reporting || native.code !== template.outputUnit || typeof reporting.code !== 'string' || !reporting.code.trim() ||
+        typeof native.quantityKind !== 'string' || !native.quantityKind.trim() || native.quantityKind !== reporting.quantityKind ||
+        !Number.isFinite(native.factorToBase) || native.factorToBase <= 0 || !Number.isFinite(reporting.factorToBase) || reporting.factorToBase <= 0) {
+        throw error('CALC_TEMPLATE_UNIT_MISMATCH', 'Use compatible controlled native and reporting units.');
+    }
     if (!rawInputs || typeof rawInputs !== 'object' || Array.isArray(rawInputs)) {
         throw error('CALC_INPUT_REQUIRED', 'Enter the required raw measurements.');
     }
@@ -133,9 +141,15 @@ function calculate(template, rawInputs, { numberFormat, curve = null } = {}) {
         break;
     }
     }
-    const roundedOutput = roundOutput(output, template.outputDecimals);
-    return { inputs, parameters: params, intermediate: { ...intermediate, unroundedOutput: output },
-        output: roundedOutput, outputUnit: template.outputUnit, engineVersion: ENGINE_VERSION };
+    const conversionFactor = native.factorToBase / reporting.factorToBase;
+    const unroundedOutput = output * conversionFactor;
+    const roundedOutput = roundOutput(unroundedOutput, template.outputDecimals);
+    // Pin6085050251: retain native precision, convert, then round exactly once
+    // in the analysis reporting unit. All conversion evidence is caller-frozen.
+    return { inputs, parameters: params, intermediate: { ...intermediate, unroundedOutput },
+        nativeValue: output, nativeUnit: native.code, conversionFactor, unroundedOutput,
+        unitConversion: { native: { ...native }, reporting: { ...reporting } },
+        output: roundedOutput, outputUnit: reporting.code, outputDecimals: template.outputDecimals, engineVersion: ENGINE_VERSION };
 }
 
 function fitCurve(points) {
@@ -156,7 +170,7 @@ function fitCurve(points) {
     const r = xx > 0 && yy > 0 ? Math.max(-1, Math.min(1, xy / Math.sqrt(xx * yy))) : null;
     const usable = [slope, intercept, r].every(Number.isFinite) && slope !== 0;
     return { slope: usable ? slope : null, intercept: usable ? intercept : null,
-        r: usable ? r : null, rSquared: usable ? r * r : null, levelCount,
-        calibrationMax: Math.max(...points.map(point => point.standardConcentration)), usable };
+        r: usable ? r : null, rSquared: usable ? r * r : null, pointCount: count, levelCount,
+        calibrationMax: Math.max(...points.map(point => point.standardConcentration)), usable, failReason: usable ? null : 'DEGENERATE_FIT' };
 }
 module.exports = { ENGINE_VERSION, INPUTS, PARAMETERS, validateTemplate, calculate, roundOutput, fitCurve };

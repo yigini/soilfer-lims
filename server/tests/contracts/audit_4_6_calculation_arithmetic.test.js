@@ -1,5 +1,11 @@
-const { calculate, validateTemplate, fitCurve, INPUTS, PARAMETERS } = require('../../../shared/soilCalculation');
+const { calculate: calculateAuthoritative, validateTemplate, fitCurve, INPUTS, PARAMETERS } = require('../../../shared/soilCalculation');
 const format = { decimal: '.', thousands: ',' };
+// Identity units are explicit synthetic controlled-unit context for each pure
+// equation fixture; actual catalogue compatibility is a separate DB contract.
+function calculate(template, rawInputs, context = {}) {
+    const native = { code: template.outputUnit, quantityKind: 'FIXTURE_QUANTITY', factorToBase: 1 };
+    return calculateAuthoritative(template, rawInputs, { units: { native, reporting: { ...native } }, ...context });
+}
 // These are derived arithmetic examples, not claimed SOP worked examples.
 // Reference metadata/precision and persisted lab activation are separate #199
 // contracts. Every scalar below has an explicit unit and source equation.
@@ -85,6 +91,46 @@ describe('Audit 4.6 shared, source-derived arithmetic', () => {
         }, { numberFormat: { decimal: ',', thousands: '.' } });
         expect(result.output).toBe(0.28); expect(result.inputs.sampleTitre).toBe('10,5');
     });
+    test('WB converts full native precision to reporting g/kg before the sole rounding: 1.596% becomes15.96g/kg', () => {
+        const selected = template('WALKLEY_BLACK', { ferrousNormality: 0.5, carbonGramsPerMilliEquivalent: 0.003, recoveryFactor: 1.33 }, 'fixture_native_percent', 2);
+        const units = { native: { code: 'fixture_native_percent', quantityKind: 'MASS_FRACTION', factorToBase: 10 },
+            reporting: { code: 'g/kg', quantityKind: 'MASS_FRACTION', factorToBase: 1 } };
+        const result = calculate(selected, { blankTitre: 20, sampleTitre: 12, sampleMass: 1, moistureCorrectionFactor: 1 }, { numberFormat: format, units });
+        expect(result.nativeValue).toBeCloseTo(1.596, 14);
+        expect(result).toMatchObject({ nativeUnit: 'fixture_native_percent', conversionFactor: 10, output: 15.96, outputUnit: 'g/kg', outputDecimals: 2 });
+        expect(result.unroundedOutput).toBeCloseTo(15.96, 13);
+        expect(result.output).not.toBe(16); // Rounding the native1.596 to1.60 first would give16.
+        expect(result.unitConversion).toEqual(units);
+        units.native.factorToBase = 99;
+        expect(result.unitConversion.native.factorToBase).toBe(10);
+    });
+    test('Kjeldahl native0.280134% remains unrounded and reporting2.80134g/kg rounds once to2.801', () => {
+        const selected = template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }, 'fixture_native_percent', 3);
+        const result = calculate(selected, { sampleTitre: 10.5, blankTitre: 0.5, sampleMass: 1 }, { numberFormat: format,
+            units: { native: { code: 'fixture_native_percent', quantityKind: 'MASS_FRACTION', factorToBase: 10 },
+                reporting: { code: 'g/kg', quantityKind: 'MASS_FRACTION', factorToBase: 1 } } });
+        expect(result.nativeValue).toBeCloseTo(0.280134, 14);
+        expect(result.unroundedOutput).toBeCloseTo(2.80134, 13);
+        expect(result.output).toBe(2.801); expect(result.intermediate.unroundedOutput).toBe(result.unroundedOutput);
+    });
+    test('an inactive reference can have null precision, but calculation requires verified explicit0–6 precision', () => {
+        const selected = { ...template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }), outputDecimals: null, precisionSource: null };
+        expect(validateTemplate(selected)).toBe(selected);
+        expect(() => calculate(selected, { sampleTitre: 10, blankTitre: 0, sampleMass: 1 }, { numberFormat: format }))
+            .toThrow(expect.objectContaining({ code: 'CALC_TEMPLATE_PRECISION_REQUIRED', statusCode: 422 }));
+        expect(() => validateTemplate({ ...selected, outputDecimals: 7 })).toThrow(expect.objectContaining({ code: 'CALC_TEMPLATE_INVALID' }));
+        expect(validateTemplate({ ...selected, outputDecimals: 0 }).outputDecimals).toBe(0);
+        expect(validateTemplate({ ...selected, outputDecimals: 6 }).outputDecimals).toBe(6);
+    });
+    test.each([undefined,
+        { native: { code: '%', quantityKind: 'RATIO', factorToBase: 10 }, reporting: { code: 'g/kg', quantityKind: 'MASS_FRACTION', factorToBase: 1 } },
+        { native: { code: '%', quantityKind: 'RATIO', factorToBase: 0 }, reporting: { code: '%', quantityKind: 'RATIO', factorToBase: 10 } },
+        { native: { code: '%', quantityKind: 'RATIO', factorToBase: 10 }, reporting: { code: '%', quantityKind: 'RATIO', factorToBase: Infinity } }
+    ])('missing or incompatible controlled units are refused instead of assuming a conversion', units => {
+        expect(() => calculateAuthoritative(template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }),
+            { sampleTitre: 10, blankTitre: 0, sampleMass: 1 }, { numberFormat: format, units }))
+            .toThrow(expect.objectContaining({ code: 'CALC_TEMPLATE_UNIT_MISMATCH', statusCode: 422 }));
+    });
     test.each([null, {}, { sampleTitre: '', blankTitre: 0, sampleMass: 1 }])('missing raw input refuses with the pinned code', inputs => {
         expect(() => calculate(template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }), inputs, { numberFormat: format }))
             .toThrow(expect.objectContaining({ code: 'CALC_INPUT_REQUIRED', statusCode: 422 }));
@@ -111,7 +157,7 @@ describe('Audit 4.6 shared, source-derived arithmetic', () => {
     test('OLS is unweighted, free-intercept; a zero standard counts and replicate standards do not inflate distinct levels', () => {
         const points = [0, 1, 1, 2, 3, 4].map(x => ({ standardConcentration: x, response: 0.05 + x * 0.25 }));
         const result = fitCurve(points);
-        expect(result).toMatchObject({ levelCount: 5, calibrationMax: 4, usable: true });
+        expect(result).toMatchObject({ pointCount: 6, levelCount: 5, calibrationMax: 4, usable: true, failReason: null });
         expect(result.slope).toBeCloseTo(0.25, 14); expect(result.intercept).toBeCloseTo(0.05, 14);
         expect(result.r).toBeCloseTo(1, 14); expect(result.rSquared).toBeCloseTo(1, 14);
         expect(points).toHaveLength(6);
@@ -125,6 +171,6 @@ describe('Audit 4.6 shared, source-derived arithmetic', () => {
         [{ standardConcentration: 1, response: 1 }, { standardConcentration: 1, response: 2 }],
         [{ standardConcentration: 0, response: 1 }, { standardConcentration: 1, response: 1 }]
     ].map(points => [points]))('degenerate standards have no usable fit, rather than invented coefficients', points => {
-        expect(fitCurve(points)).toMatchObject({ usable: false, slope: null, intercept: null, r: null, rSquared: null });
+        expect(fitCurve(points)).toMatchObject({ pointCount: points.length, usable: false, failReason: 'DEGENERATE_FIT', slope: null, intercept: null, r: null, rSquared: null });
     });
 });
