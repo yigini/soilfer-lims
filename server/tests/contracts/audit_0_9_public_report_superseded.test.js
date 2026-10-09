@@ -23,9 +23,10 @@ describe('Audit 0.9: superseded public links', () => {
         const sampleId = id('SMP-09');
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId,
             assignedLab: labId, status: 'APPROVED' } });
-        await createWorkItemFixture(prisma, { data: { id: id('WI-09'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED' } });
+        const item=await createWorkItemFixture(prisma, { data: { id: id('WI-09'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED' } });
         await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: id('R-09'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true } });
+        await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,item.id,token);
         return sampleId;
     }
     async function publish(sampleId) {

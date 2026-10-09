@@ -99,6 +99,27 @@ test('non-measurement review remains eligible without a selection, and unauthori
     const denied = mount({ canReview: false }); await denied.render(); expect(denied.axios.get).not.toHaveBeenCalled();
 });
 
+test('separate texture offers fraction-derived confirmation and no categorical mean',async()=>{
+    const response={...data(),layout:'SEPARATE',derived:{allowed:true,requiresReason:true,
+        choice:{mode:'DERIVED',outputs:[{analysisCode:'TEXTURE',valueText:'Sandy Loam'}]}}};
+    const view=mount({},response);await view.render();
+    expect(view.find('reported-choose-mean')).toBeUndefined();
+    view.find('reported-choose-derived').props.onChange();await view.render();
+    expect(view.props.onChoice).toHaveBeenLastCalledWith({selection:{mode:'DERIVED'},ready:false});
+    view.find('reported-choice-reason').props.onChange({target:{value:'Fraction choices verified'}});await view.render();
+    expect(view.props.onChoice).toHaveBeenLastCalledWith({selection:{mode:'DERIVED',reason:'Fraction choices verified'},ready:true});
+    expect(view.text()).toContain('Sandy Loam');
+});
+
+test('separate texture displays propagated not-reportable reason from the translated key',async()=>{
+    const response={...data({automatic:true}),layout:'SEPARATE',derived:{allowed:false,code:'REPORTED_VALUE_SELECTION_REQUIRED'}};
+    response.automatic.choice={mode:'NOT_REPORTABLE',reason:JSON.stringify({code:'FRACTION_NOT_REPORTABLE',
+        fractions:[{analysisCode:'SAND',selectionId:'sand-choice'}]}),outputs:[{analysisCode:'TEXTURE',valueText:''}]};
+    const view=mount({},response);await view.render();
+    expect(view.text()).toContain('SAND is not reportable (selection sand-choice).');
+    expect(view.text()).not.toContain('FRACTION_NOT_REPORTABLE');
+});
+
 test.each(['en','es','es-419','fr','pt'])('reported-value labels, statuses and refusals match both %s catalogues', locale => {
     const client = require(`../../../client/src/translations/${locale}.json`).reportedValue, server = require(`../../locales/${locale}.json`).reportedValue;
     expect(client).toEqual(server); expect(Object.keys(client).sort()).toEqual(Object.keys(english.reportedValue).sort());

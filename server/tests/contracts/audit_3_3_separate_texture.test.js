@@ -14,7 +14,7 @@ async function fixture({mean=false}={}) {
     await f.db.unit.create({data:{code:'%',display:'%',quantityKind:'MASS_FRACTION',factorToBase:1}});
     f.textureItems={};f.fractions=[];
     for(const analysis of ['SAND','SILT','CLAY','TEXTURE']) {
-        await f.db.analysis.create({data:{code:analysis,name:analysis,units:analysis==='TEXTURE'?'USDA_12_CLASS':'%',validation:'{}'}});
+        await f.db.analysis.create({data:{code:analysis,name:'Owned '+analysis.toLowerCase()+' measurement',units:analysis==='TEXTURE'?'USDA_12_CLASS':'%',validation:'{}'}});
         const method=await f.db.methodology.create({data:{analysisCode:analysis,name:analysis+' owned method'}});
         await require('../../services/qcRuleService').change(f.actor,{labId:f.labId,analysisCode:analysis,methodologyId:method.id,
             expectedVersion:0,reason:'Owned texture selection case',criteria:{blankPerBatch:0,lrmPerBatch:0,
@@ -95,6 +95,50 @@ test('a replacement fraction selection makes retained TEXTURE stale without chan
         selection:{mode:'ATTEMPT',attemptIds:JSON.parse(current.rows[0].attemptIds),reason:'Fraction selection re-confirmed'}});
     await expect(f.read()).rejects.toMatchObject({code:'REPORTED_VALUE_STALE'});
     expect(await f.db.reportedValueSelection.findUnique({where:{id:first.id}})).toEqual(first);
+});
+
+test('another canonical fraction owner refuses actual texture acceptance with involved ids and zero writes',async()=>{
+    const f=await fixture();await f.acceptFractions();
+    const duplicate=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:f.sample.id,analysis:'SAND',
+        assignedLab:f.labId,status:'WAIVED'}});
+    const before=await f.all(),response=await f.review('TEXTURE');
+    expect(response).toMatchObject({status:409,body:{code:'REPORTED_VALUE_LAYOUT_UNSUPPORTED'}});
+    expect(response.body.workItemIds).toEqual(expect.arrayContaining([duplicate.id,f.textureItems.SAND.id,f.textureItems.TEXTURE.id]));
+    expect(await f.all()).toBe(before);
+});
+
+test.each(['partial','mixed','unresolved'])('texture layout validator refuses %s retained facts and makes zero writes',async kind=>{
+    const f=await fixture(),before=await f.all();
+    await expect(rules.inTransaction(f.db,async tx=>{
+        const item=f.textureItems.TEXTURE,attempts=await tx.workAttempt.findMany({where:{workItemId:item.id}}),
+            results=await tx.result.findMany({where:{attemptId:{in:attempts.map(row=>row.id)}}});
+        const lineage=require('../../services/reportedValueSelectionLineage').buildSelectionLineage(attempts,results);
+        const candidate=lineage.eligible[0];
+        if(kind==='partial')candidate.results=[{...candidate.results[0],param:'SAND'}];
+        if(kind==='mixed')candidate.results=[...candidate.results,{...candidate.results[0],id:'retained-partial-fraction',param:'SAND'}];
+        if(kind==='unresolved')candidate.results=[{...candidate.results[0],flags:JSON.stringify(['SOURCE_SAND_missing','SOURCE_SILT_missing','SOURCE_CLAY_missing'])}];
+        return require('../../services/reportedValueTextureService').textureLayout(tx,item,{sample:f.sample,lineage});
+    })).rejects.toMatchObject({statusCode:409,code:'REPORTED_VALUE_LAYOUT_UNSUPPORTED'});
+    expect(await f.all()).toBe(before);
+});
+
+test('a complete composite execution still saves one atomic four-output selection group',async()=>{
+    const f=await fixture(),sample=await createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,
+        status:'PROCESSING',dryingStatus:'DONE',preparationStatus:'DONE',requiredAnalyses:'["TEXTURE"]'}});
+    const item=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:sample.id,assignedLab:f.labId,analysis:'TEXTURE',
+        methodologyId:f.textureItems.TEXTURE.methodologyId,status:'IN_PROGRESS'}});
+    await rules.inTransaction(f.db,tx=>require('../../services/resultWriteService').writeTextureDetermination(tx,{sampleId:sample.id,
+        workItemId:item.id,actor:f.actor,measurement:{param:'TEXTURE',equipmentId:f.instrument.id},fractions:{sand:60,silt:25,clay:15}}));
+    await require('../../services/workItemStateService').transitionWorkItem(item.id,'COMPLETED',f.actor,'Composite comparison',{},f.db);
+    await require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,sampleId:sample.id,type:'FULL',workItemIds:[item.id]});
+    const retained=await f.db.result.findMany({orderBy:{id:'asc'}});
+    await withQcRunHttp(f.db,f.actor,async(app,token)=>{
+        expect(await request(app).post('/api/work/'+item.id+'/review').set('Authorization','Bearer '+token).send({decision:'ACCEPT'})).toMatchObject({status:200});
+    },{reviews:true});
+    const saved=await rules.inTransaction(f.db,tx=>selections.readReportedSelection(tx,item));
+    expect(saved.rows.map(row=>row.analysisCode).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
+    expect(new Set(saved.rows.map(row=>row.selectionGroupId)).size).toBe(1);
+    expect(await f.db.result.findMany({orderBy:{id:'asc'}})).toEqual(retained);
 });
 test.each(['attempt','tooFew','duplicateResult','missingProof','duplicateProof'])('SQL refuses malformed DERIVED %s shape with zero writes',async shape=>{
     const f=await fixture({mean:true});await f.acceptFractions();expect(await f.review('TEXTURE')).toMatchObject({status:200});
