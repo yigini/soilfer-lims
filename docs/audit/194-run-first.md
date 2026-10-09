@@ -49,7 +49,8 @@ restrictive foreign keys, unique(batch,lot), and unconditional SQL UPDATE/
 DELETE refusal. The independently digest-bound source is inspected by the
 existing workflow scanner without new writer or fixture exemptions. Native
 SQL tests cover immutable context, duplicate identity, retained parents and
-unchanged inventory quantity; their first run is pending.
+unchanged inventory quantity. The SQL/scanner group passes105/105 at4a9e790
+(11.706s), including all102 existing scanner tests, with no new exemption.
 
 The only captured-schema expectation change is the exact absence of this
 new table. All literal old DDL and every other completeness check stay intact.
@@ -60,6 +61,11 @@ batch, locked analyte or current disposition, and at least one IN_RUN or
 QC_PENDING analyte. State checks precede lot validation. Identical active
 links and prior withdrawals are no-ops; changed role conflicts, withdrawn
 lots never reactivate, and a concurrent unique conflict must reread the
-retained link. The runtime commands, installer/bootstrap, UI and whole-suite
-verification remain pending; no completed acceptance is claimed.
+retained link. A dry-default installer now checks exact PRE/fresh/complete
+states, columns, restrictive foreign keys, indexes, guards and source-bound
+receipts; it refuses populated unmarked tables, mixed objects and tampering.
+Its atomic apply retains all pre-existing rows, creates no links/backfill,
+and repeated complete applies make no writes. Its owned historical-fixture
+tests are pending. Runtime commands, bootstrap/startup wiring, UI and
+whole-suite verification remain pending; no completed acceptance is claimed.
 Production remains under the #162 demo freeze.
