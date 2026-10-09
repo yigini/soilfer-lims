@@ -3,6 +3,8 @@ const policyService = require('./policyService');
 const assessment = require('./proficiencyAssessmentService');
 const scopeGuard = require('../utils/scopeGuard');
 const { hasPermission } = require('../config/roles');
+const rules = require('./workflowStateRules');
+const nonconformity = require('./nonconformityService');
 const fail = (statusCode, code, message) => Object.assign(new Error(message), { statusCode, code });
 const owns = (row, key) => Object.hasOwn(row, key);
 
@@ -35,8 +37,14 @@ async function classify(input, identity, tx) {
     const limits = await policyService.get(identity.labId, 'pt.zScoreLimits', { analysisCode: identity.analysisCode, db: tx });
     const evaluated = assessment.evaluateProficiency(input.assignedValue, input.labResult, input.uncertainty, limits);
     return { assignedValue: Number(input.assignedValue), labResult: Number(input.labResult), uncertainty: Number(input.uncertainty),
-        zScore: evaluated.zScore, outcome: evaluated.outcome, ncrStatus: evaluated.ncrStatus,
+        zScore: evaluated.zScore, outcome: evaluated.outcome,
         classificationLimits: JSON.stringify(evaluated.classificationLimits) };
+}
+async function raiseUnsatisfactory(tx, actor, round) {
+    const raised = await nonconformity.raise(tx, actor, { labId: round.labId, source: 'PT',
+        refType: 'ProficiencyRound', refId: round.id,
+        description: `Unsatisfactory PT round ${round.roundRef} (${round.provider}), analysis ${round.analysisCode}, z=${round.zScore}.` });
+    return { ncrStatus: 'RAISED', nonconformityId: raised.report.id };
 }
 async function audit(tx, actor, action, before, after, reason = null) {
     const row = after || before;
@@ -52,13 +60,15 @@ async function record(actor, input, { db = require('../prisma') } = {}) {
     if (!identity.labId) throw fail(400, 'PT_LAB_REQUIRED', 'A laboratory is required.');
     if (typeof identity.labId !== 'string') throw fail(400, 'PT_INPUT_INVALID', 'PT laboratory must be an id or code string.');
     authorize(actor, 'ENTER_RESULTS', identity);
-    return db.$transaction(async tx => {
+    return rules.inTransaction(db, async tx => {
         const lab = await policyService.resolveLab(identity.labId, tx);
         if (!lab) throw fail(400, 'PT_LAB_INVALID', 'PT laboratory was not found.');
         identity.labId = lab.id;
         authorize(actor, 'ENTER_RESULTS', identity);
         const values = await classify(input, identity, tx);
-        const round = await tx.proficiencyRound.create({ data: { id: randomUUID(), ...identity, ...metadata(input, true), ...values } });
+        const data = { id: randomUUID(), ...identity, ...metadata(input, true), ...values };
+        if (values.outcome === 'UNSATISFACTORY') Object.assign(data, await raiseUnsatisfactory(tx, actor, data));
+        const round = await tx.proficiencyRound.create({ data });
         await audit(tx, actor, 'RECORD_PT', null, round);
         if (round.outcome === 'UNSATISFACTORY') await audit(tx, actor, 'PT_UNSATISFACTORY', null, round);
         return round;
@@ -66,7 +76,7 @@ async function record(actor, input, { db = require('../prisma') } = {}) {
 }
 
 async function update(actor, id, input, { db = require('../prisma') } = {}) {
-    return db.$transaction(async tx => {
+    return rules.inTransaction(db, async tx => {
         const before = await tx.proficiencyRound.findUnique({ where: { id: String(id) } });
         if (!before) throw fail(404, 'PT_ROUND_NOT_FOUND', 'PT round was not found.');
         authorize(actor, 'ENTER_RESULTS', before);
@@ -80,7 +90,11 @@ async function update(actor, id, input, { db = require('../prisma') } = {}) {
             if (!owns(input, 'uncertainty')) throw fail(400, 'PT_SIGMA_REQUIRED', 'Explicit proficiency-assessment sigma is required for a correction.');
             data = { ...data, ...await classify({ assignedValue: before.assignedValue, labResult: before.labResult, ...input }, before, tx),
                 legacyScoreFlag: null, legacyFlaggedAt: null };
-            if (before.ncrStatus === 'PENDING') data.ncrStatus = 'PENDING';
+            // Classification never clears retained NCR evidence. Only a first
+            // unsatisfactory result creates the link, directly to RAISED.
+            if (data.outcome === 'UNSATISFACTORY' && before.ncrStatus !== 'RAISED') {
+                Object.assign(data, await raiseUnsatisfactory(tx, actor, { ...before, ...data }));
+            }
         }
         if (!Object.keys(data).length) throw fail(400, 'PT_INPUT_INVALID', 'A PT update must change a supported field.');
         const after = await tx.proficiencyRound.update({ where: { id: before.id }, data });

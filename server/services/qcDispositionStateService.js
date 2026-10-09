@@ -94,9 +94,12 @@ async function dispositionBatch(batchId, decision, reason, actor, db = null, { a
         const histories = new Map(legacyDecision === 'PROCEED_WITH_WARNING' ? [] : mutable.map(item => [item.id, historyOf(item.history)]));
         const analyteStatus = ['ACCEPT_WITH_DEVIATION', 'REPEAT_BRACKET'].includes(canonical) ? 'ACCEPTED_WITH_DEVIATION' : canonical === 'REJECT' ? 'REJECTED' : 'REPEAT_ORDERED';
         for (const row of selected) {
-            await tx.batchDisposition.create({ data: { id: randomUUID(), batchId: batch.id, analysisCode: row.analysisCode,
+            const retainedDisposition = await tx.batchDisposition.create({ data: { id: randomUUID(), batchId: batch.id, analysisCode: row.analysisCode,
                 decision: canonical, reason: trimmedReason, decidedBy: performedBy, decidedAt: now,
                 ...(scopes.has(row.analysisCode) && { scope: JSON.stringify(scopes.get(row.analysisCode)) }) } });
+            if (canonical === 'REJECT') await require('./nonconformityService').raise(tx, actor, {labId:batch.labId,
+                source:'QC',refType:'QcDisposition',refId:retainedDisposition.id,
+                description:`Batch ${batch.id}, analysis ${row.analysisCode}: REJECT. ${trimmedReason}`});
             await tx.batchAnalyte.update({ where: { id: row.id }, data: { status: analyteStatus } });
             row.status = analyteStatus;
         }

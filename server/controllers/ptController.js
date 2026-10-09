@@ -20,7 +20,7 @@ async function roundView(req, round) {
  */
 exports.recordRound = async (req, res) => {
     try {
-        const round = await rounds.record(req.user, req.body);
+        const round = await rounds.record(req.user, req.body, { db: prisma });
         res.status(201).json({ success: true, data: await roundView(req, round) });
     } catch (error) {
         respondError(res, error, 'Failed to record proficiency round');
@@ -28,7 +28,7 @@ exports.recordRound = async (req, res) => {
 };
 
 exports.updateRound = async (req, res) => {
-    try { res.json({ success: true, data: await roundView(req, await rounds.update(req.user, req.params.id, req.body)) }); }
+    try { res.json({ success: true, data: await roundView(req, await rounds.update(req.user, req.params.id, req.body, { db: prisma })) }); }
     catch (error) { respondError(res, error, 'Failed to update proficiency round'); }
 };
 
@@ -139,7 +139,7 @@ exports.getSummary = async (req, res) => {
  */
 exports.deleteRound = async (req, res) => {
     try {
-        const round = await rounds.softDelete(req.user, req.params.id, req.body?.reason);
+        const round = await rounds.softDelete(req.user, req.params.id, req.body?.reason, { db: prisma });
         res.json({ success: true, data: await roundView(req, round) });
     } catch (error) {
         respondError(res, error, 'Failed to delete round');

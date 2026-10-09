@@ -2,12 +2,19 @@ const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const { randomUUID } = require('node:crypto');
 const Database = require('better-sqlite3');
-const path = require('node:path');
-const app = require('../../app');
-const prisma = require('../../prisma');
+let app, prisma, ownedDatabase;
 const { JWT_SECRET } = require('../../config/auth');
 const policyService = require('../../services/policyService');
 const owned = [];
+beforeAll(async () => {
+    ownedDatabase = await require('../helpers/qcGateFixture').qcGateFixture();
+    prisma = ownedDatabase.db;
+    // Keep the owned connection installed while actual requests execute:
+    // authentication loads session validation lazily at request time.
+    jest.doMock('../../prisma', () => prisma);
+    app = require('../../app');
+});
+afterAll(async () => { try { if (ownedDatabase) await ownedDatabase.close(); } finally { jest.dontMock('../../prisma'); } });
 
 test.each([null, 0, true, false, '', 'invalid-date'])('explicit invalid PT date %s refuses create and update with zero writes', async date => {
     const f = await fixture(), before = await f.snapshot(), created = await f.post({ ...f.body, date });
@@ -26,13 +33,16 @@ test('PT create resolves a known lab code and rejects an unknown lab id with a s
     expect(created.status).toBe(201); expect(created.body.data.labId).toBe(f.labId);
 });
 
-test('correction away from UNSATISFACTORY keeps pending NCR evidence and audits the old/new outcomes', async () => {
+test('correction away from UNSATISFACTORY retains its RAISED NCR link and audits the old/new outcomes', async () => {
     const f = await fixture(), round = (await f.post(f.body)).body.data;
+    const report = await prisma.nonconformityReport.findUnique({ where: { id: round.nonconformityId } });
+    expect(report).toMatchObject({ source: 'PT', refType: 'ProficiencyRound', refId: round.id, labId: f.labId });
     const updated = await request(app).patch(`/api/pt/rounds/${round.id}`).set('Authorization', f.auth).send({ labResult: 0, uncertainty: 1 });
-    expect(updated.status).toBe(200); expect(updated.body.data).toMatchObject({ outcome: 'SATISFACTORY', zScore: 0, ncrStatus: 'PENDING' });
+    expect(updated.status).toBe(200); expect(updated.body.data).toMatchObject({ outcome: 'SATISFACTORY', zScore: 0, ncrStatus: 'RAISED', nonconformityId: report.id });
     const audit = await prisma.auditLog.findFirst({ where: { entityId: round.id, action: 'UPDATE_PT' } });
-    expect(JSON.parse(audit.before)).toMatchObject({ outcome: 'UNSATISFACTORY', ncrStatus: 'PENDING' });
-    expect(JSON.parse(audit.after)).toMatchObject({ outcome: 'SATISFACTORY', ncrStatus: 'PENDING' });
+    expect(JSON.parse(audit.before)).toMatchObject({ outcome: 'UNSATISFACTORY', ncrStatus: 'RAISED', nonconformityId: report.id });
+    expect(JSON.parse(audit.after)).toMatchObject({ outcome: 'SATISFACTORY', ncrStatus: 'RAISED', nonconformityId: report.id });
+    expect(await prisma.nonconformityReport.findUnique({ where: { id: report.id } })).toEqual(report);
     expect(await prisma.auditLog.count({ where: { entityId: round.id, action: 'PT_UNSATISFACTORY' } })).toBe(1);
 });
 
@@ -50,32 +60,23 @@ async function fixture() {
     f.post = body => request(app).post('/api/pt/rounds').set('Authorization', f.auth).send(body);
     f.snapshot = async () => JSON.parse(JSON.stringify(await Promise.all([
         prisma.proficiencyRound.findMany({ where: { labId: id }, orderBy: { id: 'asc' } }),
-        prisma.auditLog.findMany({ where: { labId: id }, orderBy: { id: 'asc' } })])));
+        prisma.auditLog.findMany({ where: { labId: id }, orderBy: { id: 'asc' } }),
+        prisma.nonconformityReport.findMany({ where: { labId: id }, orderBy: { id: 'asc' } })])));
     f.legacy = data => prisma.proficiencyRound.create({ data: { id: randomUUID(), ...f.body, zScore: 3,
         outcome: 'QUESTIONABLE', date: new Date(), classificationLimits: null, ...data } });
     owned.push(f); return f;
 }
-afterAll(async () => {
-    const labs = owned.map(f => f.labId);
-    await prisma.proficiencyRound.deleteMany({ where: { labId: { in: labs } } });
-    await prisma.auditLog.deleteMany({ where: { labId: { in: labs } } });
-    await prisma.labPolicyOverride.deleteMany({ where: { labId: { in: labs } } });
-    await prisma.labPolicy.deleteMany({ where: { labId: { in: labs } } });
-    await prisma.analysis.deleteMany({ where: { code: { in: owned.map(f => f.analysisCode) } } });
-    await prisma.user.deleteMany({ where: { id: { in: owned.flatMap(f => f.users) } } });
-    await prisma.lab.deleteMany({ where: { id: { in: labs } } });
-    await prisma.unit.deleteMany({ where: { code: { in: owned.map(f => f.unitCode) } } });
-});
-
 test('actual PT create preserves catalogue case, classifies z=3 as unsatisfactory, freezes lab/analysis policy and queues NCR evidence', async () => {
     const f = await fixture(), first = await f.post(f.body);
     expect(first.status).toBe(201);
-    expect(first.body.data).toMatchObject({ analysisCode: f.analysisCode, zScore: 3, outcome: 'UNSATISFACTORY', ncrStatus: 'PENDING' });
+    expect(first.body.data).toMatchObject({ analysisCode: f.analysisCode, zScore: 3, outcome: 'UNSATISFACTORY', ncrStatus: 'RAISED' });
+    expect(await prisma.nonconformityReport.findUnique({ where: { id: first.body.data.nonconformityId } })).toMatchObject({
+        source: 'PT', refType: 'ProficiencyRound', refId: first.body.data.id, labId: f.labId, status: 'OPEN' });
     expect(JSON.parse(first.body.data.classificationLimits)).toEqual({ questionable: 2, unsatisfactory: 3 });
     const audit = await prisma.auditLog.findFirst({ where: { entityId: first.body.data.id, action: 'PT_UNSATISFACTORY' } });
     expect(JSON.parse(audit.details)).toMatchObject({ roundId: first.body.data.id, zScore: 3, limits: { questionable: 2, unsatisfactory: 3 } });
     await policyService.change(f.actor, f.labId, { reason: 'Reviewed PT analysis override', changes: [
-        { key: 'pt.zScoreLimits', analysisCode: f.analysisCode, value: { questionable: 2.5, unsatisfactory: 4 } }] });
+        { key: 'pt.zScoreLimits', analysisCode: f.analysisCode, value: { questionable: 2.5, unsatisfactory: 4 } }] }, { db: prisma });
     const second = await f.post(f.body);
     expect(second.status).toBe(201); expect(second.body.data.outcome).toBe('QUESTIONABLE');
     expect(JSON.parse(second.body.data.classificationLimits)).toEqual({ questionable: 2.5, unsatisfactory: 4 });
@@ -104,7 +105,9 @@ test('legacy flags carry a French warning; explicit sigma correction reclassifie
     expect(list.body.data[0].outcome).toBe('QUESTIONABLE'); expect(list.body.data[0].classificationLimits).toBeNull();
     const corrected = await request(app).patch(`/api/pt/rounds/${old.id}`).set('Authorization', f.auth).send({ uncertainty: 1 });
     expect(corrected.status).toBe(200); expect(corrected.body.data).toMatchObject({ zScore: 3, outcome: 'UNSATISFACTORY',
-        ncrStatus: 'PENDING', legacyScoreFlag: null, legacyFlaggedAt: null });
+        ncrStatus: 'RAISED', legacyScoreFlag: null, legacyFlaggedAt: null });
+    expect(await prisma.nonconformityReport.findUnique({ where: { id: corrected.body.data.nonconformityId } })).toMatchObject({
+        source: 'PT', refType: 'ProficiencyRound', refId: old.id, labId: f.labId, status: 'OPEN' });
     const audit = await prisma.auditLog.findFirst({ where: { entityId: old.id, action: 'UPDATE_PT' } });
     expect(JSON.parse(audit.before)).toMatchObject({ zScore: 3, outcome: 'QUESTIONABLE', uncertainty: null, legacyScoreFlag: 'SIGMA_MISSING' });
     expect(JSON.parse(audit.after)).toMatchObject({ outcome: 'UNSATISFACTORY', uncertainty: 1, legacyScoreFlag: null });
@@ -137,10 +140,7 @@ test('manager deletion requires a reason, hides rather than erases, is idempoten
 });
 
 test('actual PT write rolls the round back if its audit cannot be stored', async () => {
-    const f = await fixture(), target = path.resolve(process.env.DATABASE_PATH);
-    if (process.env.NODE_ENV !== 'test' || path.dirname(target) !== path.resolve(__dirname, '../.tmp') || !path.basename(target).startsWith('test_')) {
-        throw Error('Audit fault requires the disposable global-setup database.');
-    }
+    const f = await fixture(), target = require('../helpers/testOwnedDatabase').assertOwnedTestDatabase(ownedDatabase.file, 'system:fixture');
     const raw = new Database(target, { fileMustExist: true });
     try {
         raw.exec(`CREATE TRIGGER owned_pt_api_audit_fault BEFORE INSERT ON "AuditLog" WHEN NEW.labId='${f.labId}'

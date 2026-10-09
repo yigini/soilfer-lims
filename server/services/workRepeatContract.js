@@ -15,10 +15,6 @@ function repeatRequest(input = {}) {
     if (!input || typeof input !== 'object' || Array.isArray(input)) {
         throw new TransitionError('The repeat request must be an object.', 400, 'REPEAT_FIELDS_INVALID');
     }
-    if (Object.hasOwn(input, 'override') || Object.hasOwn(input, 'ncrId')) {
-        throw new TransitionError('NCR overrides are not available until the reviewed NCR workflow is installed.',
-            409, 'ATTEMPT_LIMIT_NCR_UNAVAILABLE');
-    }
     if (Object.keys(input).some(key => !['reason', 'note', 'sameBatchAllowed'].includes(key)) ||
         input.sameBatchAllowed !== undefined && input.sameBatchAllowed !== false) {
         throw new TransitionError('A repeat cannot authorize reuse of failed QC or change execution facts.', 400, 'REPEAT_FIELDS_INVALID');
@@ -37,4 +33,17 @@ function repeatRequest(input = {}) {
     return { reason: input.reason, note, sameBatchAllowed: false, previousStatus: RETURN_REASON_STATUS[input.reason] };
 }
 
-module.exports = { SELF_REPEAT_REASONS, RETURN_REASON_STATUS, repeatRequest };
+function repeatLimitOverrideRequest(input = {}) {
+    if (!input || typeof input !== 'object' || Array.isArray(input) ||
+        Object.keys(input).some(key => !['reason', 'note', 'description', 'impactAssessment'].includes(key))) {
+        throw new TransitionError('The repeat-limit command accepts its reason, description and impact assessment.', 400, 'REPEAT_FIELDS_INVALID');
+    }
+    const request = repeatRequest({ reason: input.reason, note: input.note });
+    if (typeof input.description !== 'string' || !input.description.trim() ||
+        typeof input.impactAssessment !== 'string' || !input.impactAssessment.trim()) {
+        throw new TransitionError('Describe the nonconformity and assess its impact.', 409, 'NCR_ASSESSMENT_REQUIRED');
+    }
+    return { ...request, limitOverride: { description: input.description.trim(), impactAssessment: input.impactAssessment.trim() } };
+}
+
+module.exports = { SELF_REPEAT_REASONS, RETURN_REASON_STATUS, repeatRequest, repeatLimitOverrideRequest };

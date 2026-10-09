@@ -1521,6 +1521,47 @@
     "reportDerived": "Rapporter la classe des fractions sélectionnées",
     "fractionNotReportable": "{{fraction}} ne peut pas être rapportée (sélection {{selectionId}})."
   },
+  "nonconformity": {
+    "title": "Non-conformités",
+    "status": "Statut",
+    "source": "Origine",
+    "allStatuses": "Tous les statuts",
+    "allSources": "Toutes les origines",
+    "loading": "Chargement des non-conformités…",
+    "empty": "Aucune non-conformité ne correspond à ces filtres.",
+    "description": "Description",
+    "raisedBy": "Enregistrée par",
+    "impactAssessment": "Évaluation de l’impact",
+    "correctiveAction": "Action corrective",
+    "statuses": {
+      "OPEN": "Ouverte",
+      "ACTION": "En cours d’action",
+      "CLOSED": "Clôturée"
+    },
+    "sources": {
+      "QC": "Contrôle qualité",
+      "PT": "Essai d’aptitude",
+      "REPEAT_LIMIT": "Limite de répétitions",
+      "CUSTOMER": "Client",
+      "INTAKE": "Réception",
+      "OTHER": "Autre"
+    },
+    "errors": {
+      "NCR_FAILED": "Impossible de charger les non-conformités.",
+      "NCR_READ_FORBIDDEN": "Une autorisation de lecture qualité est requise.",
+      "NCR_SCOPE_DENIED": "Cet enregistrement est hors du périmètre de votre laboratoire.",
+      "NCR_FILTER_INVALID": "Choisissez un statut ou une origine valide.",
+      "NCR_MANAGEMENT_FORBIDDEN": "Une autorisation de révision est requise.",
+      "NCR_ASSESSMENT_REQUIRED": "Enregistrez une description et une évaluation de l’impact.",
+      "NCR_ACTION_REQUIRED": "Enregistrez l’action corrective.",
+      "NCR_TRANSITION_REFUSED": "Passez d’ouverte à action, puis à clôturée.",
+      "NCR_INPUT_INVALID": "Choisissez une commande de non-conformité valide.",
+      "NCR_NOT_FOUND": "Non-conformité introuvable.",
+      "NCR_STATE_CHANGED": "Cet enregistrement a changé. Rechargez avant de réessayer.",
+      "NCR_SOURCE_SCOPE_MISMATCH": "L’origine doit correspondre à cet enregistrement et à ce laboratoire.",
+      "ATTEMPT_LIMIT_OVERRIDE_NOT_NEEDED": "Le travail n’a pas atteint sa limite de répétitions."
+    }
+  },
   "runFirst": {
     "myRuns": "Mes séries",
     "allRuns": "Toutes les séries",

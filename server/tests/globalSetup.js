@@ -66,7 +66,7 @@ module.exports = async function globalSetup() {
         const reviewed = installQcRuns({ dbPath: testDbPath, apply: false });
         installQcRuns({ dbPath: testDbPath, apply: true, planSha256: reviewed.backfillFingerprint });
         require('../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: testDbPath, apply: true });
-        require('../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: testDbPath, apply: true });
+        require('../scripts/bootstrap_pt_nonconformity').bootstrapPtNonconformity({ dbPath: testDbPath, apply: true });
         require('../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: testDbPath, apply: true });
         require('../scripts/install_workitem_uniqueness').installWorkItemUniqueness({ dbPath: testDbPath, apply: true });
         require('../scripts/install_work_attempt_contract').installWorkAttemptContract({dbPath:testDbPath,apply:true});

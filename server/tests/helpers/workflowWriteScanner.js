@@ -36,6 +36,10 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         loaderSha256:'4a8776908a58c7f07b858f8a80e0e1b182a6409cf2c2b8171704fea8792bb2ec',
         directory:'20261009000100_reported_value_selection',sqlSha256:'52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7',
         boundary:'-- INSTALLER_GUARDS_AFTER_SCHEMA'}),
+    // #193 pin6075820954: inspect the exact additive source; no writer exemption.
+    Object.freeze({ functionName: 'loadNonconformityMigrationSource', loader: 'services/nonconformityMigrationSource.js',
+        loaderSha256: '0270b9f62a0c9d92d5b6cbe718c5856956f44efcfcc6f6fd11dab608675fdc32',
+        directory: '20261009000100_nonconformity_reports', sqlSha256: '3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47' }),
     // #194 pin6072013517: inspect the exact additive link DDL; no writer exemption.
     Object.freeze({ functionName: 'loadBatchReagentLotMigrationSource', loader: 'services/batchReagentLotMigrationSource.js',
         loaderSha256: '1b2a0ebf0e253063e9c3c7c923132c269f6c276aa40977e83fa1ec96212c66db',

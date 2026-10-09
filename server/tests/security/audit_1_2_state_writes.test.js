@@ -85,6 +85,13 @@ test('the previous #191 release digest is refused; only the exact current loader
     finally {spy.mockRestore();}
 });
 
+test.each(['sql','schemaSql','guardsSql'])('the #193 source resolver inspects byte-bound %s without granting workflow writer authority',field=>{
+    const source=`const {loadNonconformityMigrationSource}=require('../services/nonconformityMigrationSource'); const release=loadNonconformityMigrationSource(); db.exec(release.${field});`;
+    expect(scanSource(source,'scripts/probe.js',exceptions)).toEqual([]);
+    expect(scanSource(source+'db.exec("UPDATE Sample SET status=\\\'APPROVED\\\'");','scripts/probe.js',exceptions)).toEqual([
+        expect.objectContaining({code:'RAW_WORKFLOW_SQL'})]);
+});
+
 test('legacy CLI launchers cannot import any fixture or test module', () => {
     for (const filename of ['scripts/run_manager_dashboard_tasklist_side_by_side.cjs', 'scripts/verify_issue149_probe.cjs', 'scripts/run_test_rehearsal.cjs']) {
         for (const specifier of ['../tests/helpers/workflowFixtures', '../tests/helpers/legacyWorkflowDatabase', '../tests/rehearsals/scenario.cjs']) {

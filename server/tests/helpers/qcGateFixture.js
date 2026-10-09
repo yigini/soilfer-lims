@@ -23,7 +23,8 @@ async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS',
         ['install_qc_gate_scope', 'installQcGateScope'], ['install_proficiency_evidence', 'installProficiencyEvidence'],
         ['install_result_equipment_evidence', 'installResultEquipmentEvidence'],
         ['install_work_attempt_contract','installWorkAttemptContract'],
-        ['install_work_repeat_contract','installWorkRepeatContract']]) require(`../../scripts/${script}`)[method]({ dbPath: file, apply: true });
+        ['install_work_repeat_contract','installWorkRepeatContract'],
+        ['install_nonconformity_reports','installNonconformityReports']]) require(`../../scripts/${script}`)[method]({ dbPath: file, apply: true });
     if (installSelectionEvidence) require('../../scripts/install_reported_value_selections').installReportedValueSelections({ dbPath: file, apply: true });
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
