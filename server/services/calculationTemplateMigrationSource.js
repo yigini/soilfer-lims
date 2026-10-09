@@ -2,7 +2,7 @@ const fs = require('node:fs'), path = require('node:path');
 const { createHash } = require('node:crypto');
 const { referenceRows } = require('./calculationReferenceLibrary');
 const DIRECTORY = '20261009000400_calculation_templates';
-const SHA256 = '9b81a48c07f038f3e78d7065fa7803864fc6e1fe4240855ccdaa659edef02623';
+const SHA256 = '48f27dbe5921dd73e4241a7fc0c16faa3560ccbc7630a57a53b77dec96cba093';
 const ORACLE_SHA256 = '684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d';
 const REFERENCE_SHA256 = 'c8a9d21fbbac293807d41c66034b14be3773977fd47e1ee8975f9f6a1a226140';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');

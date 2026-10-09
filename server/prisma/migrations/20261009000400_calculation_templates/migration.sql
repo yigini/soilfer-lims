@@ -276,7 +276,7 @@ BEGIN
         AND activation.analysisCode=result.param AND activation.methodologyId IS result.methodologyId
         AND (NOT EXISTS (SELECT 1 FROM "CalcTemplateActivation" child WHERE child.supersedesId=activation.id)
           OR EXISTS (
-            -- Pins6089591961/6089821987: only an existing #191 supersession
+            -- Pins6089591961/6089821987/6089971610: only an existing #191 supersession
             -- witness may retain a historical activation for a correction.
             SELECT 1 FROM "Result" original JOIN "ResultCalculation" bound ON bound.resultId=original.id
             WHERE original.isCurrent=0 AND original.supersededBy=NEW.resultId
@@ -288,7 +288,8 @@ BEGIN
               AND original.basis IS result.basis AND original.provenance IS result.provenance
               AND bound.templateId=NEW.templateId AND bound.templateVersion=NEW.templateVersion
               AND bound.activationId=NEW.activationId AND bound.curveId IS NEW.curveId
-              AND bound.parameters=NEW.parameters AND bound.unitConversion=NEW.unitConversion
+              AND bound.parameters=NEW.parameters AND bound.conversionFactor IS NEW.conversionFactor
+              AND bound.unitConversion=NEW.unitConversion
           ))
         AND template.version=NEW.templateVersion AND template.outputUnit=NEW.nativeUnit AND template.parameters=NEW.parameters
         AND analysis.unitCode=NEW.outputUnit AND native.quantityKind=reporting.quantityKind

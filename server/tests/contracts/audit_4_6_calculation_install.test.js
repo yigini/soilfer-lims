@@ -15,6 +15,12 @@ const { UNITS } = require('../../seeds/units');
 const catalogue = require('../../seeds/data/catalogue.json');
 const { createPre199CalculationFixture } = require('../helpers/calculationHistoricalFixture');
 const { scanSource } = require('../helpers/workflowWriteScanner');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createResultFixture } = require('../../services/resultWriteService');
+const templates = require('../../services/calculationTemplateService');
+const activations = require('../../services/calculationActivationService');
+const { calculate } = require('../../../shared/soilCalculation');
 const files = [];
 const hash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 function raw(file, execute) {
@@ -69,7 +75,119 @@ function insertCurve(db, row) {
     return db.prepare(`INSERT INTO "CalibrationCurve" (${keys.map(key => `"${key}"`).join(',')}) VALUES (${keys.map(() => '?').join(',')})`)
         .run(...keys.map(key => row[key]));
 }
+
+function insertCalculation(db, row) {
+    const keys = Object.keys(row);
+    return db.prepare(`INSERT INTO "ResultCalculation" (${keys.map(key => `"${key}"`).join(',')}) VALUES (${keys.map(() => '?').join(',')})`)
+        .run(...keys.map(key => row[key]));
+}
+
+// Pin6089971610: exercise the actual new trigger on an owned, generated Prisma
+// database. Only the real #179/#199 installers run here; no installed guard is
+// dropped or disabled. Existing execution/Result fixture authorities supply the
+// explicit rows. The full #191 service cases separately exercise every prior guard.
+async function correctionSqlFixture({ resultField, calculationField, noWitness = false, revisedCurve = false } = {}) {
+    const file = await freshFixture(); installCalculationTemplates({ dbPath: file, apply: true });
+    const curve = await curveContext(file);
+    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    try {
+        const manager = await db.user.findUnique({ where: { username: curve.recordedBy } });
+        const source = referenceRows().find(row => row.analysisCode === 'P_OLSEN');
+        const template = await templates.clone(db, manager, source.id, { labId: curve.labId, methodologyId: curve.methodologyId,
+            expectedVersion: source.version, outputDecimals: 2, reason: 'Owned correction SQL contract', sopCitation: 'Synthetic SQL SOP, two decimals' });
+        const activation = await activations.change(db, manager, template.id, { labId: curve.labId, analysisCode: 'P_OLSEN',
+            methodologyId: curve.methodologyId, expectedVersion: template.version, expectedActivationId: null,
+            action: 'ACTIVATE', verifiedAgainstSop: true, reason: 'Explicit synthetic SQL fixture' });
+        Object.assign(curve, { templateId: template.id, templateVersion: template.version });
+        raw(file, sqlite => {
+            insertCurve(sqlite, curve);
+            for (const point of [[1, 0, 0], [2, 1, 2]]) sqlite.prepare('INSERT INTO CalibrationPoint(curveId,ordinal,standardConcentration,response) VALUES(?,?,?,?)').run(curve.id, ...point);
+        });
+        const sample = await createSampleFixture(db, { data: { id: randomUUID(), originalId: randomUUID(), status: 'PROCESSING', assignedLab: curve.labId,
+            dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date() } });
+        const item = await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: sample.id, labId: curve.labId, analysis: 'P_OLSEN',
+            methodologyId: curve.methodologyId, assignedTo: manager.username, status: 'IN_PROGRESS', history: '[]' } });
+        const reporting = await db.unit.findUnique({ where: { code: 'mg/kg' } });
+        const inputs = { absorbance: 1, blankConcentration: 0, extractVolume: 20, dilutionFactor: 1, sampleMass: 1, moistureCorrectionFactor: 1 };
+        const computed = calculate(template, inputs, { numberFormat: { decimalSeparator: '.', thousandsSeparator: ',' },
+            curve: { ...curve, calibrationMax: 1 }, units: { native: reporting, reporting } });
+        const targetId = randomUUID();
+        const original = await createExecutionResultFixture(db, { data: { id: randomUUID(), sampleId: sample.id, param: 'P_OLSEN',
+            value: String(computed.output), numericValue: computed.output, unit: computed.outputUnit, enteredBy: manager.username,
+            batchId: curve.batchId, methodologyId: curve.methodologyId, isCurrent: false, supersededBy: noWitness ? null : targetId,
+            equipmentId: 'owned-sql-equipment', equipmentReadiness: '{"equipmentId":"owned-sql-equipment","fixture":true}',
+            basis: 'AIR_DRY', provenance: 'MEASURED' } });
+        const originalCalculation = { id: randomUUID(), resultId: original.id, templateId: template.id, templateVersion: template.version,
+            activationId: activation.id, inputs: JSON.stringify(computed.inputs), parameters: JSON.stringify(template.parameters),
+            intermediate: JSON.stringify(computed.intermediate), nativeValue: computed.nativeValue, nativeUnit: computed.nativeUnit,
+            conversionFactor: computed.conversionFactor, unitConversion: JSON.stringify(computed.unitConversion),
+            unroundedOutput: computed.unroundedOutput, output: computed.output, outputUnit: computed.outputUnit,
+            curveId: curve.id, engineVersion: computed.engineVersion, computedBy: manager.username, computedAt: '2026-10-09T00:00:00.123Z' };
+        raw(file, sqlite => insertCalculation(sqlite, originalCalculation));
+        const target = { id: targetId, sampleId: original.sampleId, param: original.param, value: original.value, numericValue: original.numericValue,
+            unit: original.unit, enteredBy: original.enteredBy, attemptId: original.attemptId, replicateNo: original.replicateNo,
+            methodologyId: original.methodologyId, batchId: original.batchId, equipmentId: original.equipmentId,
+            equipmentReadiness: original.equipmentReadiness, basis: original.basis, provenance: original.provenance };
+        if (resultField === 'sampleId') target.sampleId = (await createSampleFixture(db, { data: { id: randomUUID(), originalId: randomUUID(),
+            status: 'PROCESSING', assignedLab: curve.labId, receptionDate: new Date() } })).id;
+        else if (resultField === 'attemptId') {
+            const otherSample = await createSampleFixture(db, { data: { id: randomUUID(), originalId: randomUUID(), status: 'PROCESSING',
+                assignedLab: curve.labId, receptionDate: new Date() } });
+            await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: otherSample.id, labId: curve.labId, analysis: 'P_OLSEN',
+                assignedTo: manager.username, status: 'IN_PROGRESS', history: '[]' } });
+            target.attemptId = (await createExecutionResultFixture(db, { data: { id: randomUUID(), sampleId: otherSample.id,
+                param: 'P_OLSEN', value: original.value, numericValue: original.numericValue, unit: original.unit } })).attemptId;
+        } else if (resultField === 'methodologyId') target.methodologyId = (await db.methodology.create({ data: { id: randomUUID(),
+            analysisCode: 'P_OLSEN', name: 'Other owned SQL method' } })).id;
+        else if (resultField === 'batchId') target.batchId = (await db.batch.create({ data: { id: randomUUID(), labId: curve.labId,
+            analysis: 'P_OLSEN', status: 'RUNNING', startedAt: new Date(), createdBy: manager.username } })).id;
+        else if (resultField) target[resultField] = { param: 'P_BRAY', replicateNo: 2, equipmentId: 'different-owned-equipment',
+            equipmentReadiness: '{"equipmentId":"owned-sql-equipment","fixture":"different"}', basis: 'OVEN_DRY', provenance: 'IMPORTED' }[resultField];
+        const appended = await createResultFixture(db, { data: target });
+        const resultFields = ['sampleId', 'param', 'attemptId', 'replicateNo', 'methodologyId', 'batchId', 'equipmentId', 'equipmentReadiness', 'basis', 'provenance'];
+        expect(resultFields.filter(key => original[key] !== appended[key])).toEqual(resultField ? [resultField] : []);
+        const deactivation = await activations.change(db, manager, template.id, { labId: curve.labId, analysisCode: 'P_OLSEN',
+            methodologyId: curve.methodologyId, expectedVersion: template.version, expectedActivationId: activation.id,
+            action: 'DEACTIVATE', verifiedAgainstSop: true, reason: 'Later SOP decision retains the original evidence' });
+        const pending = { ...originalCalculation, id: randomUUID(), resultId: appended.id };
+        if (calculationField) pending[calculationField] = { templateId: source.id, templateVersion: 2, activationId: deactivation.id,
+            curveId: null, parameters: '[]', conversionFactor: 2, unitConversion: JSON.stringify({ ...computed.unitConversion, extra: 'changed frozen evidence' }) }[calculationField];
+        const calculationFields = ['templateId', 'templateVersion', 'activationId', 'curveId', 'parameters', 'conversionFactor', 'unitConversion'];
+        expect(calculationFields.filter(key => originalCalculation[key] !== pending[key])).toEqual(calculationField ? [calculationField] : []);
+        if (revisedCurve) raw(file, sqlite => {
+            const revised = { ...curve, id: randomUUID(), revision: 2, supersedesId: curve.id, reason: 'Explicit retained curve revision' };
+            insertCurve(sqlite, revised);
+            for (const point of [[1, 0, 0], [2, 1, 2]]) sqlite.prepare('INSERT INTO CalibrationPoint(curveId,ordinal,standardConcentration,response) VALUES(?,?,?,?)').run(revised.id, ...point);
+        });
+        expect(item.sampleId).toBe(original.sampleId);
+        return { file, original, originalCalculation, pending };
+    } finally { await db.$disconnect(); }
+}
 afterAll(() => { for (const file of files) fs.rmSync(assertOwnedTestDatabase(file, 'system:fixture'), { force: true }); });
+
+test('SQL permits a deactivated original basis only through the complete existing correction witness', async () => {
+    const f = await correctionSqlFixture(), before = snapshot(f.file);
+    raw(f.file, db => {
+        insertCalculation(db, f.pending);
+        expect(db.prepare('SELECT * FROM ResultCalculation WHERE resultId=?').get(f.original.id)).toEqual(before.rows.ResultCalculation[0]);
+        expect(db.prepare('SELECT * FROM Result ORDER BY rowid').all()).toEqual(before.rows.Result);
+        expect(db.pragma('foreign_key_check')).toEqual([]); expect(db.pragma('integrity_check', { simple: true })).toBe('ok');
+    });
+    expect(snapshot(f.file).rows.ResultCalculation).toHaveLength(2);
+});
+
+test.each([
+    ['no witness', { noWitness: true }],
+    ...['sampleId', 'param', 'attemptId', 'replicateNo', 'methodologyId', 'batchId', 'equipmentId', 'equipmentReadiness', 'basis', 'provenance']
+        .map(resultField => [`Result.${resultField}`, { resultField }]),
+    ...['templateId', 'templateVersion', 'activationId', 'curveId', 'parameters', 'conversionFactor', 'unitConversion']
+        .map(calculationField => [`ResultCalculation.${calculationField}`, { calculationField }]),
+    ['revised curve', { revisedCurve: true }]
+])('SQL refuses a historical activation with %s, preserving all owned rows and objects byte for byte', async (_label, options) => {
+    const f = await correctionSqlFixture(options), before = snapshot(f.file), digest = hash(f.file);
+    expect(() => raw(f.file, db => insertCalculation(db, f.pending))).toThrow('RESULT_CALCULATION_CONTEXT_MISMATCH');
+    expect(snapshot(f.file)).toEqual(before); expect(hash(f.file)).toBe(digest);
+});
 
 test('PRE_199 actual populated baseline retains every old row, column, foreign key, index, trigger and receipt', () => {
     const { file } = createPre199CalculationFixture(); files.push(file);
