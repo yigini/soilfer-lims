@@ -1,5 +1,5 @@
 'use strict';
-const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createExecutionResultFixture,createExecutionResultsFixture } = require('../helpers/workAttemptFixtures');
 const { cleanupWorkflowFixtures } = require('../helpers/workflowFixtures');
 
 /**
@@ -395,8 +395,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${activeSample.id}-PH`, sampleId: activeSample.id,
             analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
-        const resWithManualInvalid = await createExecutionResultFixture(prisma, {
-            data: {
+        const manualInvalidData = {
                 id: `res-manual-inv-${Date.now()}`,
                 sampleId: activeSample.id,
                 param: 'PH',
@@ -406,8 +405,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
                 isValid: false,
                 isCurrent: true,
                 flags: JSON.stringify(['QC_BATCH_FAILED', 'MANUAL_INVALID'])
-            }
-        });
+        };
 
         // Sample fixture in canonical APPROVED status
         const releasedSample = await createSampleFixture(prisma, {
@@ -439,8 +437,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result 3: Superseded historical result (must be immutable)
-        const resSuperseded = await createExecutionResultFixture(prisma, {
-            data: {
+        const [resWithManualInvalid,resSuperseded]=await createExecutionResultsFixture(prisma,{data:[manualInvalidData,{
                 id: `res-super-${Date.now()}`,
                 sampleId: activeSample.id,
                 param: 'PH',
@@ -451,8 +448,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
                 isCurrent: false,
                 supersededBy: 'res-replacement-id',
                 flags: JSON.stringify(['QC_BATCH_FAILED'])
-            }
-        });
+        }]});
 
         // Execute manager disposition override: PROCEED_WITH_WARNING
         await normalizeLegacyQcFixture(prisma, testBatchId);

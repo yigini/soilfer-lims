@@ -165,6 +165,8 @@ node scripts/install_workitem_uniqueness.js --db "${DATABASE_PATH:-$DB_FILE}" --
 
 echo "📦 Installing WorkAttempt execution evidence..."
 node scripts/install_work_attempt_contract.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing repeat and correction evidence..."
+node scripts/install_work_repeat_contract.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."

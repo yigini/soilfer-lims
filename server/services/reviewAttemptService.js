@@ -1,6 +1,7 @@
 const rules = require('./workflowStateRules');
 const { hasPermission } = require('../config/roles');
 const { isNonMeasurement } = require('./workItemKinds');
+const transactionDecisions=new WeakMap();
 
 // Pin6055535948: a review identifies measured evidence, never a latest row.
 async function resolveReviewAttempt(tx,item,decision,requestedAttemptId) {
@@ -42,6 +43,11 @@ async function preflightReviewAttempts(tx,selections,actor) {
         const item=await scopedItem(tx,selection.workItemId,actor);
         try {
             resolved.set(item.id,await resolveReviewAttempt(tx,item,selection.decision,selection.attemptId));
+            if(selection.decision==='RETURN' && !isNonMeasurement(item)) {
+                const request=require('./workRepeatContract').repeatRequest({reason:selection.reasonCode,note:selection.note || selection.reason});
+                const sample=await tx.sample.findUnique({where:{id:item.sampleId}});
+                await require('./workRepeatService').preflightRepeat(tx,item,sample,actor,request,resolved.get(item.id));
+            }
         } catch (error) {
             if (!['REVIEW_ATTEMPT_REQUIRED','REVIEW_ATTEMPT_INVALID'].includes(error.code)) throw error;
             failures.push({workItemId:item.id,code:error.code});
@@ -59,8 +65,15 @@ async function createReviewDecision(tx,data,actor) {
         throw new rules.TransitionError('Review and work item must share a sample.',409,'REVIEW_ATTEMPT_INVALID',{workItemIds:[item.id]});
     }
     const attemptId=await resolveReviewAttempt(tx,item,data.decision,data.attemptId);
-    return tx.reviewDecision.create({data:{...data,attemptId}});
+    if(data.decision==='RETURN' && !isNonMeasurement(item)) {
+        require('./workRepeatContract').repeatRequest({reason:data.reasonCode,note:data.reason});
+    }
+    const decision=await tx.reviewDecision.create({data:{...data,attemptId}});
+    const ids=transactionDecisions.get(tx) || new Set();ids.add(decision.id);transactionDecisions.set(tx,ids);
+    return decision;
 }
+
+function reviewDecisionCreatedInTransaction(tx,id) {rules.requireTransaction(tx);return transactionDecisions.get(tx)?.has(id)===true;}
 
 async function inReviewTransaction(db,selections,actor,execute) {
     return rules.inTransaction(db,async tx=>{
@@ -69,4 +82,4 @@ async function inReviewTransaction(db,selections,actor,execute) {
     });
 }
 
-module.exports={resolveReviewAttempt,preflightReviewAttempts,createReviewDecision,inReviewTransaction};
+module.exports={resolveReviewAttempt,preflightReviewAttempts,createReviewDecision,inReviewTransaction,reviewDecisionCreatedInTransaction};

@@ -4,6 +4,7 @@ const { QC_RUN_INCLUDE } = require('./qcRunViewService');
 // The current pointer may move after repeat/reject disposition. The old join,
 // observations and verdicts remain the old run's immutable membership history.
 async function repeatSource(db, item, targetBatchId) {
+    await require('./workRepeatBatchService').assertRepeatBatchAllowed(db, item, targetBatchId);
     if (!item.batchId || item.batchId === targetBatchId) return null;
     const old = await db.batch.findUnique({ where: { id: item.batchId }, include: QC_RUN_INCLUDE });
     const member = old?.positions.some(position => position.workItems.some(link => link.workItemId === item.id));

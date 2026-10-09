@@ -31,6 +31,12 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // #191 pin6067875897: inspect the independently byte-bound successor DDL.
+    // Existing sources and writer restrictions retain their exact behaviour.
+    Object.freeze({ functionName: 'loadWorkRepeatMigrationSource', loader: 'services/workRepeatMigrationSource.js',
+        loaderSha256: '65ee6f9f42e45adbd2e66ae34cf04bcba09a40bc251dd411b3c948ab9a7d7e23',
+        directory: '20261008000200_repeat_correction_contract', sqlSha256: '600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd',
+        boundary: '-- INSTALLER_GUARDS_AFTER_SCHEMA' }),
     Object.freeze({ functionName: 'loadProficiencyMigrationSource', loader: 'services/proficiencyMigrationSource.js',
         loaderSha256: 'e4210caee7aa209d3fdc438b268d72e0728eb6b3a7a2ab102e4b9c8eedfdea0f',
         directory: '20261007000300_proficiency_evidence', sqlSha256: 'bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a' }),
@@ -76,6 +82,20 @@ const COMPOSITE_FIXTURE = Object.freeze({
     tests: Object.freeze([
         'composite texture governs sand, silt, clay and texture without duplicating values',
         'RETURN of composite texture invalidates all four current parameters'
+    ])
+});
+// #191 pin6069938801: explicit result sets use one owned execution. Only
+// these inventoried tests may import this export; no writer is exempted.
+const RESULT_SET_FIXTURE = Object.freeze({
+    exportName: 'createExecutionResultsFixture',
+    callers: Object.freeze([
+        'tests/contracts/audit_0_10_current_result_views.test.js',
+        'tests/contracts/audit_0_11_workbench_queue.test.js',
+        'tests/contracts/audit_1_4_uuid_transactions.test.js',
+        'tests/contracts/audit_1_5_result_writes.test.js',
+        'tests/contracts/audit_3_2_repeat_commands.test.js',
+        'tests/contracts/nsis_v2_exchange.test.js',
+        'tests/contracts/qc_disposition_release_gate.test.js'
     ])
 });
 // #190 pin6057064901: one byte-bound export, four exact callers. This is a
@@ -575,6 +595,7 @@ function scanSource(source, filename, exceptions = []) {
                 if (!filename.startsWith('tests/')) {
                     report(p.node, 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
                 } else {
+                    const resultSetImport = name => name === RESULT_SET_FIXTURE.exportName && RESULT_SET_FIXTURE.callers.includes(filename);
                     const inNamedTest = reference => filename === COMPOSITE_FIXTURE.caller && Boolean(reference.findParent(parent =>
                         parent.isCallExpression() && parent.get('callee').isIdentifier({ name: 'test' }) &&
                         parent.get('arguments.0').isStringLiteral() && COMPOSITE_FIXTURE.tests.includes(parent.node.arguments[0].value)));
@@ -587,17 +608,17 @@ function scanSource(source, filename, exceptions = []) {
                         allowed = declaration.get('id.properties').every(property => {
                             if (!property.isObjectProperty() || property.node.computed || !property.get('value').isIdentifier()) return false;
                             const name = property.node.key.name || property.node.key.value;
-                            if (name === 'createExecutionResultFixture') return true;
+                            if (name === 'createExecutionResultFixture' || resultSetImport(name)) return true;
                             return name === COMPOSITE_FIXTURE.exportName && inNamedTest(p) &&
                                 directCallsOnly(declaration.scope.getBinding(property.node.value.name));
                         });
                     } else if (p.isImportDeclaration()) {
                         allowed = p.get('specifiers').every(property => property.isImportSpecifier() &&
-                            (property.node.imported.name === 'createExecutionResultFixture' ||
+                            (property.node.imported.name === 'createExecutionResultFixture' || resultSetImport(property.node.imported.name) ||
                             property.node.imported.name === COMPOSITE_FIXTURE.exportName &&
                             directCallsOnly(p.scope.getBinding(property.node.local.name))));
                     } else if (declaration.isMemberExpression() && !declaration.node.computed &&
-                        declaration.node.property.name === 'createExecutionResultFixture') allowed = true;
+                        (declaration.node.property.name === 'createExecutionResultFixture' || resultSetImport(declaration.node.property.name))) allowed = true;
                     if (!allowed) report(p.node, 'POSITIVE_FIXTURE_CALLER_NOT_ALLOWED', specifier);
                 }
             }

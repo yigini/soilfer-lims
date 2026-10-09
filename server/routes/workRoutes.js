@@ -23,6 +23,7 @@ router.put('/:id/status', checkPermission('CHANGE_STATUS'), workItemController.u
 
 // Technician starts work (SD-05)
 router.post('/:id/start', checkPermission('CHANGE_STATUS'), workItemController.startWork);
+router.post('/:id/repeats', checkPermission('MANAGE_WORK_ATTEMPTS'), require('../controllers/workRepeatController').requestRepeat);
 
 // Manager Reviews (Bulk)
 router.post('/review/bulk', checkPermission('APPROVE_RESULTS'), workItemController.reviewWorkItemsBulk);

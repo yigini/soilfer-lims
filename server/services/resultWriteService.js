@@ -41,7 +41,55 @@ function mapResultWriteError(error) {
     return code ? new TransitionError('The database refused an invalid result attempt link.', 409, code) : rules.mapStateError(error);
 }
 
-async function context(tx, { sampleId, workItemId, attemptId = null, actor, measurement, source = 'measurement' }) {
+async function recordedExecution(db, item, param) {
+    if (await db.workAttempt.count({where:{workItemId:item.id,status:'OPEN'}}))return null;
+    const attempts=await db.workAttempt.findMany({where:{workItemId:item.id}});
+    const results=await db.result.findMany({where:{sampleId:item.sampleId,param,isCurrent:true,supersededBy:null,
+        attemptId:{in:attempts.map(row=>row.id)}}});
+    if(!results.length)return null;
+    const ids=new Set(results.map(row=>row.attemptId));
+    let attempt=ids.size===1 ? attempts.find(row=>row.id===results[0].attemptId) : null;
+    if (!attempt && ids.size === 2) {
+        // Pin6070797814: a partially filled replacement may finish its
+        // parent's replica set. Prove the exact parent/child relationship;
+        // do not select a latest attempt or filter review/report candidates.
+        const replacements = attempts.filter(child => ids.has(child.id) && child.status === 'RECORDED' &&
+            child.parentAttemptId && ids.has(child.parentAttemptId) && attempts.some(parent =>
+                parent.id === child.parentAttemptId && ['QUESTIONED', 'INVALIDATED'].includes(parent.status)));
+        if (replacements.length === 1) attempt = replacements[0];
+    }
+    if(!attempt || attempt.status!=='RECORDED' || ['SUBMITTED','ACCEPTED'].includes(item.status)) {
+        throw new TransitionError('Use the correction route or request a reasoned repeat.',409,'ATTEMPT_CORRECTION_REQUIRED');
+    }
+    return {attempt,results:results.filter(row=>row.attemptId===attempt.id)};
+}
+
+// The HTTP preflight and the transactional writer use the same ownership
+// rule. The transaction rechecks it; this read-only preflight grants no write.
+async function assertRecordedResultSave(db,sample,measurements) {
+    if(!Array.isArray(measurements))return;
+    for(const measurement of measurements) {
+        if(!measurement || typeof measurement.param!=='string')continue;
+        const items=await db.workItem.findMany({where:canonicalWorkItemWhere(sample.id,measurement.param)});
+        for(const item of items) {
+            const recorded=await recordedExecution(db,item,measurement.param);
+            if(!recorded)continue;
+            if(recorded.results.some(row=>row.replicateNo===Number(measurement.replicateNo ?? 1))) {
+                throw new TransitionError('Use the correction route or request a reasoned repeat.',409,'ATTEMPT_CORRECTION_REQUIRED');
+            }
+            const methodId=item.methodologyId || measurement.methodologyId || null;
+            const equipmentId=measurement.equipmentId || item.equipmentId || null;
+            const batchId=item.batchId ?? null;
+            if(recorded.attempt.qcBatchId!==batchId || recorded.results.some(row=>row.batchId!==batchId) ||
+                recorded.results.some(row=>row.methodologyId!==methodId || row.equipmentId!==equipmentId) ||
+                recorded.attempt.instrumentId!==equipmentId || measurement.methodologyId && measurement.methodologyId!==methodId) {
+                throw new TransitionError('Use the frozen method and instrument for an absent replicate.',409,'ATTEMPT_CONTEXT_MISMATCH');
+            }
+        }
+    }
+}
+
+async function context(tx, { sampleId, workItemId, attemptId = null, actor, measurement, source = 'measurement', allowRecordedReplicates = false }) {
     rules.requireTransaction(tx);
     if (!measurement || typeof measurement.param !== 'string' || !measurement.param) throw new TransitionError('Choose a parameter.', 400, 'RESULT_PARAMETER_REQUIRED');
     if (measurement.flags != null && !Array.isArray(measurement.flags)) throw new TransitionError('Result flags must be an array.', 400, 'RESULT_FLAGS_INVALID');
@@ -51,7 +99,8 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
     rules.assertScope(actor, sample);
     const importing = source === 'legacy-import';
-    if (!hasPermission(actor, importing ? 'RECEIVE_SAMPLE' : 'ENTER_RESULTS')) {
+    if (!hasPermission(actor, importing ? 'RECEIVE_SAMPLE' : 'ENTER_RESULTS') &&
+        !(source==='derived' && hasPermission(actor,'APPROVE_RESULTS'))) {
         throw new TransitionError('Result recording is not authorized.', 403, 'RESULT_WRITE_FORBIDDEN');
     }
     const attempt = attemptId ? await tx.workAttempt.findUnique({ where: { id: attemptId }, include: { workItem: true } }) : null;
@@ -66,6 +115,21 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (item && isNonMeasurement(item) || isNonMeasurement({ analysis: measurement.param })) {
         throw new TransitionError('Use the non-measurement evidence workflow.', 409, 'OPERATIONAL_SCALAR_FORBIDDEN');
     }
+    // Pin6069938801: only a single current RECORDED execution may receive
+    // an absent replicate. An OPEN reasoned repeat takes its normal first fill.
+    let recordedAttempt = null, recordedResults = [];
+    if (allowRecordedReplicates && item && source !== 'legacy-import' &&
+        source !== 'derived') {
+        const recorded=await recordedExecution(tx,item,measurement.param);
+        if(recorded) {
+            recordedAttempt=recorded.attempt;recordedResults=recorded.results;
+            if (attemptId && attemptId !== recordedAttempt.id) throw new TransitionError('Choose the current recorded execution.',409,'ATTEMPT_CONTEXT_MISMATCH');
+        }
+    }
+    if (recordedAttempt && (recordedAttempt.qcBatchId !== (item?.batchId ?? null) ||
+        recordedResults.some(row => row.batchId !== recordedAttempt.qcBatchId))) {
+        throw new TransitionError('Use the batch frozen on the recorded attempt.',409,'ATTEMPT_CONTEXT_MISMATCH');
+    }
     if (attempt?.qcBatchId && item?.batchId && attempt.qcBatchId !== item.batchId) {
         throw new TransitionError('Attempt and work item batches disagree.', 409, 'RESULT_BATCH_CONFLICT');
     }
@@ -77,6 +141,11 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (!Number.isInteger(replicateNo) || replicateNo < 1) throw new TransitionError('Replicate number must be a positive integer.', 400, 'RESULT_REPLICATE_INVALID');
     const labId = sample.assignedLab || item?.assignedLab || sample.labId;
     const methodId = item?.methodologyId || measurement.methodologyId || null;
+    const equipmentId = measurement.equipmentId || item?.equipmentId || null;
+    if (recordedAttempt && (recordedResults.some(row => row.methodologyId !== methodId || row.equipmentId !== equipmentId) ||
+        recordedAttempt.instrumentId !== equipmentId || measurement.methodologyId && measurement.methodologyId !== methodId)) {
+        throw new TransitionError('Use the instrument and method frozen on the recorded attempt.',409,'ATTEMPT_CONTEXT_MISMATCH');
+    }
     if (item?.methodologyId && measurement.methodologyId && measurement.methodologyId !== item.methodologyId) {
         throw new TransitionError('Use the assigned method.', 409, 'RESULT_METHOD_MISMATCH');
     }
@@ -87,12 +156,16 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (issues.length) throw new TransitionError(issues.join(' '), 409, 'RESULT_CONFIGURATION_INVALID');
     const method = methodId ? await tx.methodology.findUnique({ where: { id: methodId } }) : null;
     if (methodId && !isAvailable(method, analysisCode, labId)) throw new TransitionError('Method belongs to another parameter or laboratory.', 409, 'RESULT_METHOD_MISMATCH');
+    if (recordedAttempt && recordedAttempt.executedMethodRevision !== (method?.version == null ? null : String(method.version))) {
+        throw new TransitionError('The recorded method revision differs; request a repeat.',409,'ATTEMPT_CONTEXT_MISMATCH');
+    }
     // #182 pin 6005018712: historical imports have no work to execute. An
     // existing canonical item must satisfy the same commit rules as every path.
     if (!importing || item) {
         require('./resultEvidenceService').assertAmendable(sample);
         if (item) {
-            if (['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED', 'AWAITING_VERIFICATION'].includes(item.status) && source !== 'derived') {
+            if (['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED', 'AWAITING_VERIFICATION'].includes(item.status) && source !== 'derived' &&
+                !(recordedAttempt && item.status === 'COMPLETED')) {
                 throw new TransitionError('Recorded or sealed work requires its correction workflow.', 409, 'RESULT_WORKITEM_SEALED');
             }
             item = { ...item, sample, equipmentId: measurement.equipmentId || item.equipmentId };
@@ -100,7 +173,7 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     }
     return { sample, item, attemptId, batchId, replicateNo, performedBy, labId, methodId, analysis, method, source,
         basis: ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(measurement.basis) ? measurement.basis : 'AIR_DRY',
-        equipmentId: measurement.equipmentId || item?.equipmentId || null, equipmentReadiness:null,equipmentReadinessText:null };
+        equipmentId, equipmentReadiness:null,equipmentReadinessText:null, recordedAttempt, recordedResults };
 }
 
 async function validateExecutionReadiness(tx,ctx) {
@@ -114,8 +187,23 @@ async function validateExecutionReadiness(tx,ctx) {
 
 async function appendResult(tx, ctx, measurement, values, now) {
     const id = measurement.id || randomUUID();
-    await tx.result.updateMany({ where: { sampleId: ctx.sample.id, param: measurement.param, replicateNo: ctx.replicateNo, isCurrent: true },
-        data: { isCurrent: false, supersededBy: id } });
+    let targetId = ctx.correctionTargetId, targetUpdatedAt = ctx.correctionOriginalUpdatedAt;
+    if (!targetId && ctx.attemptId) {
+        const child = await tx.workAttempt.findUnique({ where: { id: ctx.attemptId }, select: { parentAttemptId: true } });
+        if (child?.parentAttemptId) {
+            const current = await tx.result.findMany({ where: { sampleId: ctx.sample.id, param: measurement.param,
+                replicateNo: ctx.replicateNo, isCurrent: true } });
+            if (current.length > 1 || current.some(row => row.attemptId !== child.parentAttemptId)) {
+                throw new TransitionError('The replacement replica does not belong to its parent.',409,'ATTEMPT_CONTEXT_MISMATCH');
+            }
+            if (current.length === 1) { targetId = current[0].id; targetUpdatedAt = current[0].updatedAt; }
+        }
+    }
+    const superseded=await tx.result.updateMany({ where: { sampleId: ctx.sample.id, param: measurement.param, replicateNo: ctx.replicateNo, isCurrent: true,
+        ...(targetId && { id: targetId }), ...(ctx.correctionTargetId && { attemptId: ctx.attemptId }) },
+        data: { isCurrent: false, supersededBy: id, ...(targetId && {updatedAt:targetUpdatedAt}) } });
+    if(targetId && superseded.count!==1)throw new TransitionError('The superseded Result changed; reload before retrying.',409,
+        ctx.correctionTargetId?'ATTEMPT_CORRECTION_TARGET_INVALID':'ATTEMPT_CONTEXT_MISMATCH');
     let row;
     try {
         row = await tx.result.create({ data: { id, sampleId: ctx.sample.id, param: measurement.param,
@@ -135,6 +223,47 @@ async function cacheResult(tx, item, text) {
     if (!item) return;
     // State/version changes still belong to workItemStateService, in this same transaction.
     await tx.workItem.update({ where: { id: item.id }, data: { result: text } });
+}
+
+// #191: a correction appends within the actual recorded attempt. Neither its
+// execution/readiness evidence nor another replicate is replaced or refilled.
+async function appendAttemptCorrection(tx, { item, sample, attempt, target, actor, value }) {
+    rules.requireTransaction(tx);
+    const original = await tx.result.findFirst({ where: { id: target.id, attemptId: attempt.id, isCurrent: true, supersededBy: null } });
+    const owner = await tx.workAttempt.findUnique({ where: { id: attempt.id }, include: { workItem: { include: { sample: true } } } });
+    if (!original || !owner || owner.workItemId !== item.id || owner.workItem.sampleId !== sample.id || original.sampleId !== sample.id) {
+        throw new TransitionError('Choose a current Result on this attempt.', 409, 'ATTEMPT_CORRECTION_TARGET_INVALID');
+    }
+    item = owner.workItem; sample = item.sample; attempt = owner;
+    rules.assertScope(actor, sample);
+    const reviewer = hasPermission(actor, 'APPROVE_RESULTS');
+    if (!reviewer && (!hasPermission(actor, 'ENTER_RESULTS') || item.assignedTo !== rules.actorName(actor) || attempt.status !== 'RECORDED') ||
+        attempt.status === 'SUBMITTED' && !reviewer) {
+        throw new TransitionError('This correction requires a reviewer.', 403, 'ATTEMPT_CORRECTION_FORBIDDEN');
+    }
+    if (!['RECORDED','SUBMITTED'].includes(attempt.status) || !['IN_PROGRESS','COMPLETED','SUBMITTED'].includes(item.status)) {
+        throw new TransitionError('This attempt is no longer eligible for correction.',409,'ATTEMPT_CORRECTION_STATE_REFUSED');
+    }
+    require('./resultEvidenceService').assertAmendable(sample);
+    await require('./sampleHoldService').assertNotHeld(tx,sample);
+    await require('./resultEvidenceService').assertNoPreparationRevert(tx,sample.id);
+    const labId = sample.assignedLab || item.labId, analysis = await tx.analysis.findUnique({ where: { code: item.analysis } });
+    if (!analysis || analysis.labId && analysis.labId !== labId || configurationIssues(analysis).length) {
+        throw new TransitionError('The correction parameter configuration is unavailable.',409,'RESULT_CONFIGURATION_INVALID');
+    }
+    const method = original.methodologyId ? await tx.methodology.findUnique({ where: { id: original.methodologyId } }) : null;
+    if (original.methodologyId && !isAvailable(method,item.analysis,labId)) throw new TransitionError('The original method is unavailable in this laboratory.',409,'RESULT_METHOD_MISMATCH');
+    let equipmentReadiness;
+    try { equipmentReadiness = original.equipmentReadiness == null ? null : JSON.parse(original.equipmentReadiness); }
+    catch (_) { throw new TransitionError('The recorded correction evidence is unavailable.',409,'ATTEMPT_CORRECTION_EVIDENCE_UNAVAILABLE'); }
+    const ctx = { sample,item,attemptId:attempt.id,correctionTargetId:original.id,correctionOriginalUpdatedAt:original.updatedAt,actor,performedBy:rules.actorName(actor),labId,
+        analysis,method,methodId:original.methodologyId,batchId:original.batchId,replicateNo:original.replicateNo,
+        basis:original.basis,equipmentId:original.equipmentId,equipmentReadiness,equipmentReadinessText:original.equipmentReadiness,source:'measurement' };
+    const measurement = { param:original.param,value,unit:original.unit,replicateNo:original.replicateNo }, now = new Date();
+    const values = await numericValues(tx,ctx,measurement);
+    const row = await appendResult(tx,ctx,measurement,{...values,provenance:original.provenance},now);
+    if (row.param === item.analysis) await cacheResult(tx,item,row.value);
+    return row;
 }
 
 async function numericValues(tx, ctx, measurement, parsedValue=null, numberFormat=null) {
@@ -179,7 +308,7 @@ async function writeResultsExecution(tx, options) {
     if (!measurements.length) throw new TransitionError('Choose a parameter.',400,'RESULT_PARAMETER_REQUIRED');
     options = writeOptions({...options,measurement:measurements[0]});
     measurements[0]=options.measurement;
-    const ctx = await context(tx, options);
+    const ctx = await context(tx, {...options,allowRecordedReplicates:true});
     ctx.actor = options.actor;
     if (options.measurement.param !== ctx.item?.analysis && ctx.item &&
         !(TEXTURE_ANALYSES.has(ctx.item.analysis) && FRACTIONS.includes(options.measurement.param))) {
@@ -195,14 +324,26 @@ async function writeResultsExecution(tx, options) {
             throw new TransitionError('Use a distinct positive replicate number.',400,'RESULT_REPLICATE_INVALID');
         }
         seenReplicates.add(replicateNo);
-        if(measurement.methodologyId && measurement.methodologyId!==ctx.methodId)throw new TransitionError('Use the assigned method.',409,'RESULT_METHOD_MISMATCH');
+        if(measurement.methodologyId && measurement.methodologyId!==ctx.methodId)throw new TransitionError('Use the assigned method.',409,ctx.recordedAttempt?'ATTEMPT_CONTEXT_MISMATCH':'RESULT_METHOD_MISMATCH');
         if(Object.hasOwn(measurement,'batchId') && measurement.batchId!==ctx.batchId)throw new TransitionError('Supplied result batch differs from the server batch.',409,'RESULT_BATCH_MISMATCH');
         if(measurement.equipmentId && measurement.equipmentId!==ctx.equipmentId || measurement.basis && measurement.basis!==ctx.basis) {
-            throw new TransitionError('Replicates must share their execution context.',409,'RESULT_EXECUTION_CONTEXT_MISMATCH');
+            throw new TransitionError('Replicates must share their execution context.',409,ctx.recordedAttempt?'ATTEMPT_CONTEXT_MISMATCH':'RESULT_EXECUTION_CONTEXT_MISMATCH');
         }
     }
-    const allocation=await allocateExecution(tx,ctx,options);
+    if (ctx.recordedAttempt && prepared.some(row=>ctx.recordedResults.some(old=>old.replicateNo===Number(row.replicateNo ?? 1)))) {
+        throw new TransitionError('Use the transcription correction route or request a repeat to change a recorded cell.',409,'ATTEMPT_CORRECTION_REQUIRED');
+    }
+    const allocation=ctx.recordedAttempt ? {id:ctx.recordedAttempt.id,existing:true,status:'RECORDED'} : await allocateExecution(tx,ctx,options);
     await validateExecutionReadiness(tx,ctx);
+    if(ctx.recordedAttempt) {
+        const snapshot=ctx.recordedResults[0].equipmentReadiness;
+        if(ctx.recordedResults.some(row=>row.equipmentReadiness!==snapshot))throw new TransitionError('Recorded execution snapshots differ.',409,'ATTEMPT_CONTEXT_MISMATCH');
+        let evidence;
+        try { evidence=JSON.parse(ctx.recordedAttempt.evidenceData); }
+        catch (_) { throw new TransitionError('Recorded execution evidence is unavailable.',409,'ATTEMPT_CONTEXT_MISMATCH'); }
+        if(JSON.stringify(evidence.equipmentReadiness ?? null)!==(snapshot || 'null'))throw new TransitionError('Recorded execution snapshots differ.',409,'ATTEMPT_CONTEXT_MISMATCH');
+        ctx.attemptId=ctx.recordedAttempt.id;ctx.equipmentReadiness=evidence.equipmentReadiness ?? null;ctx.equipmentReadinessText=snapshot;
+    }
     const format=await getNumberFormat(ctx.labId,{db:tx,analysisCode:ctx.analysis.code,methodologyId:ctx.methodId});
     const values=[];
     for(const measurement of prepared)values.push(await numericValues(tx,ctx,measurement,null,format));
@@ -210,9 +351,11 @@ async function writeResultsExecution(tx, options) {
         qualifier:values[0].censoring==='NONE'?null:values[0].censoring,recordedAt:now.toISOString(),resultId:prepared[0].id,
         sourceResultIds:prepared.map(row=>row.id),measurements:prepared.map((row,index)=>({resultId:row.id,replicateNo:Number(row.replicateNo ?? 1),
             rawValue:values[index].rawInput,normalizedValue:values[index].numericValue,censoring:values[index].censoring}))};
-    await insertExecution(tx,ctx,allocation,evidence,now,options.attemptMetadata);
+    if(!ctx.recordedAttempt)await insertExecution(tx,ctx,allocation,evidence,now,options.attemptMetadata);
     const rows=[];
     for(const [index,measurement] of prepared.entries())rows.push(await appendResult(tx,{...ctx,replicateNo:Number(measurement.replicateNo ?? 1)},measurement,values[index],now));
+    if(ctx.recordedAttempt)await require('./workAttemptEventService').appendAttemptEvent(tx,ctx.item,ctx.recordedAttempt.id,ctx.actor,
+        {action:'REPLICATE_ADDED',from:'RECORDED',to:'RECORDED',newResultIds:rows.map(row=>row.id)});
     if (!options.deferCache) await cacheResult(tx, ctx.item, rows.at(-1).value);
     return rows;
 }
@@ -291,11 +434,45 @@ async function deriveTextureResult(tx, { sampleId, replicateNo = 1, actor, now =
     const sharedAttemptId=fractions.every(row=>row.attemptId && row.attemptId===fractions[0].attemptId)?fractions[0].attemptId:null;
     const sharedAttempt=sharedAttemptId?await tx.workAttempt.findUnique({where:{id:sharedAttemptId}}):null;
     const reusing=sharedAttempt?.workItemId===item.id;
-    const existing = await tx.result.findFirst({ where: { sampleId, replicateNo, param: 'TEXTURE',
-        ...(reusing?{attemptId:sharedAttemptId}:{isCurrent:true}) } });
+    const existingRows=await tx.result.findMany({where:{sampleId,replicateNo,param:'TEXTURE',isCurrent:true,supersededBy:null}});
+    if(existingRows.length>1)throw new TransitionError('Resolve ambiguous current derived evidence.',409,'WORK_ATTEMPT_EVIDENCE_MISMATCH');
+    const existing=existingRows[0];
     if (existing && existing.flags === JSON.stringify(flags)) return existing;
-    const measurement={id:randomUUID(),param:'TEXTURE'},allocation=await allocateExecution(tx,ctx,reusing?{attemptId:sharedAttemptId}:{});
-    if (reusing) {
+    const previousAttempt=existing?.attemptId ? await tx.workAttempt.findUnique({where:{id:existing.attemptId}}) : null;
+    if(existing && (!previousAttempt || previousAttempt.workItemId!==item.id || !['RECORDED','SUBMITTED','ACCEPTED'].includes(previousAttempt.status))) {
+        throw new TransitionError('The derived Result requires its canonical execution.',409,'WORK_ATTEMPT_EVIDENCE_MISMATCH');
+    }
+    let oldSources,sourceEventIds;
+    if(existing) {
+        const previousFlags=parseJson(existing.flags,[]),evidence=parseJson(previousAttempt.evidenceData,{});
+        const explicit=evidence.measurements?.find(row=>row.resultId===existing.id)?.sourceResultIds;
+        const sourceIds=FRACTIONS.map(param=>previousFlags.find(flag=>typeof flag==='string' && flag.startsWith(`SOURCE_${param}_`))?.slice(`SOURCE_${param}_`.length));
+        const oldIds=sourceIds.every(Boolean)?sourceIds:explicit || evidence.sourceResultIds;
+        if(!Array.isArray(oldIds))throw new TransitionError('Previous derived source links are unavailable.',409,'WORK_ATTEMPT_EVIDENCE_MISMATCH');
+        const oldRows=await tx.result.findMany({where:{id:{in:oldIds},sampleId,param:{in:FRACTIONS},replicateNo}});
+        oldSources=FRACTIONS.map(param=>oldRows.find(row=>row.param===param));
+        if(oldRows.length!==3 || oldSources.some(row=>!row))throw new TransitionError('Previous derived source links are ambiguous.',409,'WORK_ATTEMPT_EVIDENCE_MISMATCH');
+        const changed=fractions.filter((row,index)=>row.id!==oldSources[index].id);
+        const events=require('./workAttemptEventService').attemptEventsInTransaction(tx).filter(event=>
+            event.sampleId===sampleId && ['CORRECTED','FIRST_FILL','REPLICATE_ADDED'].includes(event.action) &&
+            changed.some(row=>row.attemptId===event.entityId && parseJson(event.details,{}).newResultIds?.includes(row.id)));
+        const stored=await tx.auditLog.findMany({where:{id:{in:events.map(event=>event.id)},entity:'WORK_ATTEMPT',sampleId}});
+        if(!changed.length || !events.length || stored.length!==events.length || events.some(event=>
+            !stored.some(row=>row.id===event.id && row.entityId===event.entityId && row.action===event.action && row.details===event.details)) ||
+            changed.some(row=>!events.some(event=>event.entityId===row.attemptId && parseJson(event.details,{}).newResultIds?.includes(row.id)))) {
+            throw new TransitionError('Changed source fractions require their events in this transaction.',409,'WORK_ATTEMPT_EVENT_INVALID');
+        }
+        sourceEventIds=events.sort((a,b)=>a.timestamp.getTime()-b.timestamp.getTime() || a.id.localeCompare(b.id)).map(row=>row.id);
+    }
+    const measurement={id:randomUUID(),param:'TEXTURE'},allocation=existing
+        ? {id:previousAttempt.id,existing:true,status:previousAttempt.status}
+        : await allocateExecution(tx,ctx,reusing?{attemptId:sharedAttemptId}:{});
+    if(existing) {
+        ctx.attemptId=previousAttempt.id;ctx.equipmentReadinessText=existing.equipmentReadiness;
+        ctx.equipmentReadiness=parseJson(existing.equipmentReadiness,null);ctx.equipmentId=existing.equipmentId;
+        ctx.methodId=existing.methodologyId;ctx.batchId=existing.batchId;ctx.basis=existing.basis;
+        ctx.correctionTargetId=existing.id;ctx.correctionOriginalUpdatedAt=existing.updatedAt;
+    } else if (reusing) {
         const snapshot=fractions[0].equipmentReadiness;
         const recorded=parseJson(sharedAttempt.evidenceData,{})?.equipmentReadiness || null;
         if (fractions.some(row=>row.equipmentReadiness!==snapshot) || JSON.stringify(recorded)!==(snapshot || 'null')) {
@@ -311,9 +488,17 @@ async function deriveTextureResult(tx, { sampleId, replicateNo = 1, actor, now =
     await insertExecution(tx,ctx,allocation,{source:'derived',fractions:Object.fromEntries(fractions.map(row=>[row.param.toLowerCase(),row.numericValue])),
         className:classification.className,closureError:classification.closureError,
         sourceResultIds:fractions.map(row=>row.id),sourceAttemptIds:fractions.map(row=>row.attemptId)},now);
-    return appendResult(tx, ctx, measurement, { value: classification.className,
+    const result=await appendResult(tx, ctx, measurement, { value: classification.className,
         rawInput: JSON.stringify(Object.fromEntries(fractions.map(row => [row.param.toLowerCase(), row.rawInput]))),
         numericValue: null, unit: 'USDA_12_CLASS', flags: JSON.stringify(flags), isValid: true, censoring: 'NONE', provenance: 'DERIVED' }, now);
+    if(existing) {
+        const event=await require('./workAttemptEventService').appendAttemptEvent(tx,ctx.item,previousAttempt.id,actor,
+            {action:'DERIVED_RECALCULATED',from:previousAttempt.status,to:previousAttempt.status,oldResultIds:[existing.id],newResultIds:[result.id],
+                oldSourceResultIds:oldSources.map(row=>row.id),newSourceResultIds:fractions.map(row=>row.id),sourceEventIds});
+        await require('./derivedResultReviewService').resetDerivedReview(tx,ctx.item,previousAttempt,event,result,actor);
+    }
+    await cacheResult(tx,ctx.item,result.value);
+    return result;
 }
 
 async function writeNonMeasurementSummary(tx, expectedItem, { kind, text, actor }) {
@@ -377,5 +562,5 @@ function createRawResultFixture(db, data) {
 }
 
 module.exports = { writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
-    writeResultsExecution,
+    writeResultsExecution, appendAttemptCorrection, recordedExecution, assertRecordedResultSave,
     createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError };

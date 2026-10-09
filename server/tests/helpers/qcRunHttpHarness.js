@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 // Inject only the owned SQLite connection. Routes, token validation, scope,
 // permissions and every QC service remain the actual application code.
-async function withQcRunHttp(db, actor, exercise, { reports = false, reviews = false, samples = false } = {}) {
+async function withQcRunHttp(db, actor, exercise, { reports = false, reviews = false, samples = false, repeatCommands = false } = {}) {
     const previousSecret = process.env.JWT_SECRET;
     process.env.JWT_SECRET = 'qc-run-owned-http-contract-secret';
     try {
@@ -13,6 +13,11 @@ async function withQcRunHttp(db, actor, exercise, { reports = false, reviews = f
             app.use(express.json());
             app.use('/api/qc', require('../../routes/qcRoutes'));
             if (samples) app.use('/api/samples', require('../../middleware/authMiddleware').verifyToken, require('../../routes/sampleRoutes'));
+            if (repeatCommands) {
+                app.use('/api/work-items', require('../../routes/workRepeatRoutes'));
+                app.use('/api/attempts', require('../../routes/workAttemptRoutes'));
+                app.use('/api/results', require('../../routes/resultsRoutes'));
+            }
             if (reports) app.use('/api/reports', require('../../routes/reportRoutes'));
             if (reviews) {
                 app.use('/api/work', require('../../routes/workRoutes'));

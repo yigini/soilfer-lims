@@ -896,9 +896,16 @@ exports.batchSave = async (req, res) => {
 
             // For completion from ASSIGNED, we allow the jump (implicit IN_PROGRESS step)
             const isCompletionFromAssigned = !draft && item.status === 'ASSIGNED';
+            // #191: completing the first replica does not seal its RECORDED
+            // execution. The writer rechecks frozen context and ownership in
+            // the transaction before appending an explicitly absent replica.
+            const recordedAppend = !draft && !isOperationalTask && item.status === 'COMPLETED'
+                ? await require('../services/resultWriteService').recordedExecution(prisma,item,item.analysis) : null;
+            const isAbsentReplicateAppend = recordedAppend &&
+                !recordedAppend.results.some(row=>row.replicateNo===Number(entry.replicateNo ?? 1));
 
             if (!draft) {
-                if (!isCompletionFromAssigned && !workflow.isValidWorkItemTransition(item.status, targetStatus)) {
+                if (!isCompletionFromAssigned && !isAbsentReplicateAppend && !workflow.isValidWorkItemTransition(item.status, targetStatus)) {
                     errors.push({
                         workItemId: entry.workItemId,
                         error: `Cannot transition from ${item.status} to ${targetStatus}. ` +
@@ -1787,12 +1794,15 @@ exports.commitSubmissions = async (req, res) => {
                         workItemCount: itemIds.length
                     }
                 });
-                for (const item of items) await transitionWorkItem(item.id, 'SUBMITTED', user, 'Workbench submission', {
+                for (const item of items) {
+                    await transitionWorkItem(item.id, 'SUBMITTED', user, 'Workbench submission', {
                         submissionId: subId,
                         submittedAt: now,
                         history: JSON.stringify([...stateRules.requireHistory(item.history), { status: 'SUBMITTED', action: 'SUBMITTED',
                             submissionId: subId, timestamp: now.toISOString(), changedBy: user.username }])
-                }, tx, { expected: { status: item.status, version: item.version }, audit: { action: 'WORKITEM_SUBMITTED' } });
+                    }, tx, { expected: { status: item.status, version: item.version }, audit: { action: 'WORKITEM_SUBMITTED' } });
+                    await require('../services/workAttemptEventService').submitRecordedAttempt(tx,item,user);
+                }
                 const derived = await deriveSubmissionLifecycle(tx, sampleId);
                 await tx.submission.update({ where: { id: subId }, data: { type: derived.type } });
                 await transitionSample(sampleId, derived.sampleStatus, user, 'Workbench submission', {

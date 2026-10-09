@@ -1423,5 +1423,39 @@
     "replacement": "Avaliação substituta",
     "reviewer": "Revisor",
     "authors": "Autores das observações originais"
+  },
+  "repeatCommands": {
+    "returnTitle": "Devolver para repetir a análise",
+    "returnHelp": "Selecione o motivo e explique o pedido de repetição. A execução e a revisão originais permanecem no histórico de auditoria.",
+    "reasonLabel": "Motivo da repetição",
+    "chooseReason": "Selecione um motivo",
+    "noteLabel": "Nota de revisão",
+    "notePlaceholder": "Explique as evidências e o que precisa ser verificado.",
+    "confirmReturn": "Confirmar devolução",
+    "reasons": {
+      "REVIEW_OUTLIER": "Valor atípico na revisão",
+      "DUPLICATE_DISAGREEMENT": "Divergência entre duplicatas",
+      "CONFIRMATION": "Confirmação",
+      "QC_BATCH_FAIL": "Falha no controle de qualidade do lote",
+      "ABOVE_RANGE_DILUTION": "Acima da faixa: requer diluição",
+      "INSTRUMENT_FAULT": "Falha do instrumento",
+      "PREP_ERROR": "Erro de preparação",
+      "OTHER": "Outro"
+    },
+    "errors": {
+      "WORK_ATTEMPT_REASON_REQUIRED": "Selecione um motivo de repetição.",
+      "WORK_ATTEMPT_REASON_INVALID": "Selecione um motivo de repetição válido.",
+      "REPEAT_NOTE_REQUIRED": "Explique o motivo em uma nota.",
+      "ATTEMPT_REPLICATE_SET_INCOMPLETE": "Registre todas as réplicas da tentativa anterior antes de enviar.",
+      "ATTEMPT_LIMIT": "O limite de tentativas configurado para este laboratório foi atingido.",
+      "ATTEMPT_LIMIT_NCR_UNAVAILABLE": "As exceções vinculadas a uma não conformidade ainda não estão disponíveis.",
+      "WORK_REPEAT_ALREADY_OPEN": "Já existe uma repetição aguardando registro.",
+      "REPEAT_FAILED_BATCH": "Use um novo lote para esta repetição; a falha anterior no controle de qualidade é mantida.",
+      "ATTEMPT_CORRECTION_REQUIRED": "Use uma correção de transcrição para um erro de digitação.",
+      "AMENDMENT_WORKFLOW_REQUIRED": "Uma repetição solicitada pelo cliente requer o fluxo de alterações.",
+      "ATTEMPT_CONTEXT_MISMATCH": "Use o instrumento e o método registrados para esta tentativa.",
+      "WORK_ATTEMPT_FORBIDDEN": "Sua função não permite solicitar repetições nem corrigir tentativas.",
+      "ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED": "Este lote requer uma decisão sobre o controle de qualidade antes de solicitar uma repetição."
+    }
   }
 }

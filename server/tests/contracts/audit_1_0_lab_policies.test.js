@@ -1,4 +1,5 @@
 const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { correctAndApproveReportedValue } = require('../helpers/reportedValueReviewFixture');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -188,11 +189,13 @@ describe('Audit 1.0: persistent lab policies', () => {
     test('reported-value export stores the exact resolved version and selection rule without changing old selections', async () => {
         const sampleId = id('POL-EXPORT'), project = id('POL-PROJECT');
         await edit([{ key: 'results.reportedValueRule', value: 'LATEST_VALID' }]);
-        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: labId, projectCode: project, status: 'APPROVED', requiredAnalyses: '["SOC"]' } });
-        await createWorkItemFixture(prisma, { data: { id: id('POL-EXPORT-WI'), sampleId, assignedLab: labId, analysis: 'SOC', status: 'ACCEPTED', result: '9999' } });
-        for (const value of [10, 20]) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
-            data: { id: id('POL-EXPORT-RES'), sampleId, param: 'SOC', value: String(value), unit: 'g/kg', isValid: true, isCurrent: true,
-            createdAt: new Date(`2026-10-0${value / 10}T12:00:00Z`) } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: labId, projectCode: project,
+            status: 'PROCESSING', receptionDate: new Date(), preparationStatus: 'DONE', dryingStatus: 'DONE', requiredAnalyses: '["SOC"]' } });
+        const item = await createWorkItemFixture(prisma, { data: { id: id('POL-EXPORT-WI'), sampleId, assignedLab: labId,
+            assignedTo: actor.username, analysis: 'SOC', status: 'IN_PROGRESS', result: '9999' } });
+        const old = await createExecutionResultFixture(prisma, { data: { id: id('POL-EXPORT-RES'), sampleId, param: 'SOC',
+            value: '10', unit: 'g/kg', isValid: true, isCurrent: true, createdAt: new Date('2026-10-01T12:00:00Z') } });
+        await correctAndApproveReportedValue(prisma, { app, token: manager, labId, item, original: old, value: 20 });
         const response = await request(app).post('/api/exports/data').set('Authorization', `Bearer ${manager}`).send({ type: 'WET_CHEM', project });
         expect(response.status).toBe(200); expect(response.body.data[0].SOC).toBe(20);
         expect(response.body.meta.selectionPolicies).toEqual([expect.objectContaining({ labId, version: 1, rule: 'LATEST_VALID', source: 'LAB_OVERRIDE' })]);

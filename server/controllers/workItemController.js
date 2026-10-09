@@ -936,6 +936,7 @@ exports.reviewWorkItem = async (req, res) => {
                 sampleId: String(item.sampleId),
                 workItemId: id,
                 attemptId:req.body.attemptId,
+                reasonCode:req.body.reasonCode ?? null,
                 submissionItemId: item.submissionId || null,
                 decision: decisionVerdict,
                 reason: effectiveReason || note || 'Manager Review',
@@ -1018,7 +1019,7 @@ exports.reviewWorkItem = async (req, res) => {
                 await invalidateReturnedResults(tx, item, user, effectiveReason);
             }
             return rows;
-        }, undefined, { qcAcknowledgement: req.body.qcAcknowledgement });
+        }, undefined, { qcAcknowledgement: req.body.qcAcknowledgement, reasonCode:req.body.reasonCode, note:effectiveReason, attemptId:req.body.attemptId });
         const result = { workItemId: id, status, decision: decisionVerdict };
         if (item.submissionId) await reconcileSubmission(prisma, item.submissionId, user, [result]);
         for (const notify of notifications) await notify();
@@ -1165,7 +1166,8 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         const pendingNotifications=[];
         const decisionForStatus=status==='ACCEPTED'?'ACCEPT':status==='REPEAT_REQUIRED'?'RETURN':'OMIT';
         await inReviewTransaction(prisma,items.filter(item=>item.status==='SUBMITTED').map(item=>({
-            workItemId:item.id,decision:decisionForStatus,attemptId:req.body.attemptIds?.[item.id]
+            workItemId:item.id,decision:decisionForStatus,attemptId:req.body.attemptIds?.[item.id],
+            reasonCode:req.body.reasonCodes?.[item.id] || req.body.reasonCode,note:effectiveReason
         })),user,async reviewDb=>{
         for (const item of items) {
             try { assertReviewable(item, status); }
@@ -1227,6 +1229,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                     sampleId: String(item.sampleId),
                     workItemId: item.id,
                     attemptId:req.body.attemptIds?.[item.id],
+                    reasonCode:req.body.reasonCodes?.[item.id] || req.body.reasonCode || null,
                     submissionItemId: item.submissionId || null,
                     decision: decisionVerdict,
                     reason: effectiveReason || note || 'Bulk Manager Review',
@@ -1303,7 +1306,8 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                         await invalidateReturnedResults(tx, item, user, effectiveReason);
                     }
                     return rows;
-                }, undefined, { qcAcknowledgement: req.body.qcAcknowledgement });
+                }, undefined, { qcAcknowledgement: req.body.qcAcknowledgement,
+                    reasonCode:req.body.reasonCodes?.[item.id] || req.body.reasonCode,note:effectiveReason,attemptId:req.body.attemptIds?.[item.id] });
                 results.push({ workItemId: item.id, status, decision: decisionVerdict });
                 pendingNotifications.push(...notifications);
             } catch (error) {

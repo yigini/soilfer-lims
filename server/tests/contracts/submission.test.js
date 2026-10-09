@@ -157,7 +157,7 @@ describe('8.1 Section D: Submission Rules', () => {
         // by the canonical workbench rather than overwritten through status.
         const returned = await request(app).post(`/api/work/${condItemId}/review`)
             .set('Authorization', `Bearer ${mgrToken}`)
-            .send({ status: 'REANALYSIS_REQUIRED', reason: 'Repeat conductivity before final submission' });
+            .send({ status: 'REANALYSIS_REQUIRED', reasonCode:'CONFIRMATION', reason: 'Repeat conductivity before final submission' });
         expect(returned.status).toBe(200);
         const prior = await prisma.result.findFirst({ where: { sampleId, param: 'EC', isCurrent: true } });
         expect(prior.value).toBe('5.0');
@@ -187,7 +187,7 @@ describe('8.1 Section D: Submission Rules', () => {
             .post(`/api/submissions/${subId}/review`)
             .set('Authorization', `Bearer ${mgrToken}`)
             .send({
-                decisions: [{ workItemId: condItemId, decision: 'REJECT_REANALYSIS', reason: 'Value too high' }]
+                decisions: [{ workItemId: condItemId, decision: 'REJECT_REANALYSIS', reasonCode:'REVIEW_OUTLIER', reason: 'Value too high' }]
             });
 
         expect(reviewRes.status).toBe(200);

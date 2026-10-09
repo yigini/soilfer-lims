@@ -18,6 +18,8 @@ const MOUNTED_ROUTERS = [
     { prefix: '/api/spectral', file: 'spectralRoutes.js' },
     { prefix: '/api/reception', file: 'receptionRoutes.js' },
     { prefix: '/api/work', file: 'workRoutes.js' },
+    { prefix: '/api/work-items', file: 'workRepeatRoutes.js' },
+    { prefix: '/api/attempts', file: 'workAttemptRoutes.js' },
     { prefix: '/api/workbench', file: 'workbenchRoutes.js' },
     { prefix: '/api/labs', file: 'labRoutes.js' },
     { prefix: '/api/exports', file: 'exportRoutes.js' },

@@ -1021,6 +1021,69 @@ async function runSuite() {
     }
     console.log('  ✓ Live volume verified intact after corrupt staging abort');
 
+    // #191 audit6071516042: use a separate copy of the quiesced, genuine
+    // baseline, before candidate startup can install the successor. This is
+    // a disposable local/CI volume, never a production connection.
+    const repeatProofVolume = registerVolume(`lims_191_release_copy_${TS}`);
+    cp.execFileSync('docker', ['volume', 'create', repeatProofVolume], { stdio: 'pipe' });
+    cp.execFileSync('docker', ['run', '--rm', '-v', `${upgDataVol}:/source:ro`,
+        '-v', `${repeatProofVolume}:/owned`, 'alpine', 'cp', '/source/dev.db', '/owned/dev.db']);
+    const repeatProofOutput = cp.execFileSync('docker', ['run', '--rm',
+        '-v', `${repeatProofVolume}:/owned-191`, IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-191/dev.db';
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const fail=message=>{throw new Error(message)};
+         // Same shipped release order, with no backfill approval synthesized
+         // from a dry-run. The real #186 installer refuses unreviewed evidence.
+         for(const [moduleName,method] of [
+           ['workflow_state_guards','installWorkflowStateGuards'],['result_attempt_links','installResultAttemptLinks'],
+           ['sample_holds','installSampleHolds'],['reference_materials','installReferenceMaterials'],
+           ['qc_rules','installQcRules'],['qc_runs','installQcRuns'],['qc_gate_scope','installQcGateScope'],
+           ['proficiency_evidence','installProficiencyEvidence'],['result_equipment_evidence','installResultEquipmentEvidence'],
+           ['workitem_uniqueness','installWorkItemUniqueness'],['work_attempt_contract','installWorkAttemptContract']
+         ])require('./scripts/install_'+moduleName)[method]({dbPath,apply:true});
+         const predecessor=require('./scripts/install_work_attempt_contract');
+         const successor=require('./scripts/install_work_repeat_contract');
+         const before190=predecessor.assertWorkAttemptStartupReady(dbPath);
+         if(before190.classification!=='COMPLETE'||before190.totalChanges!==0)fail('190 prerequisite incomplete');
+         const reader=new Database(dbPath,{readonly:true,fileMustExist:true});
+         const names=reader.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(r=>r.name);
+         const quote=name=>'"'+name.replaceAll('"','""')+'"';
+         const columns=Object.fromEntries(names.map(name=>[name,reader.prepare('PRAGMA table_info('+quote(name)+')').all().map(c=>c.name)]));
+         const snapshot=db=>Object.fromEntries(names.map(name=>[name,db.prepare('SELECT '+columns[name].map(quote).join(',')+' FROM '+quote(name)).all()
+           .filter(row=>name!=='_schema_migrations'||row.id!=='191_repeat_correction_contract')
+           .sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)))]));
+         const beforeRows=snapshot(reader);
+         const original190=reader.prepare("SELECT details FROM _schema_migrations WHERE id='190_work_attempt_contract'").get().details;
+         const receiptCount=reader.prepare('SELECT count(*) n FROM _schema_migrations').get().n;
+         reader.close();
+         const beforeBytes=hash(),dry=successor.installWorkRepeatContract({dbPath});
+         if(dry.classification!=='PRE_191'||dry.mode!=='DRY_RUN'||dry.totalChanges!==0||hash()!==beforeBytes)fail('191 dry-run changed bytes or was not PRE_191');
+         if(dry.plan.backfilledCount!==0||!dry.plan.originalReasonFieldsPreserved)fail('191 reason plan changed history');
+         if(dry.releaseInventory.blockedWorkItemCount!==0)fail('191 release blocked: submitted/accepted work has RECORDED current owners');
+         const applied=successor.installWorkRepeatContract({dbPath,apply:true});
+         const after190=predecessor.assertWorkAttemptStartupReady(dbPath),after191=successor.assertWorkRepeatStartupReady(dbPath);
+         if(applied.mode!=='APPLIED'||applied.previousClassification!=='PRE_191'||applied.classification!=='COMPLETE'||
+           applied.backfilledCount!==0||applied.newAttemptCount!==0||applied.linkedResultCount!==0||
+           after190.classification!=='COMPLETE'||after191.classification!=='COMPLETE'||
+           after190.totalChanges!==0||after191.totalChanges!==0)fail('191 apply/startup proof differs');
+         const after=new Database(dbPath,{readonly:true,fileMustExist:true});
+         if(JSON.stringify(snapshot(after))!==JSON.stringify(beforeRows))fail('191 changed a retained original row or field');
+         const receipt190=after.prepare("SELECT details FROM _schema_migrations WHERE id='190_work_attempt_contract'").get().details;
+         const receipt191=after.prepare("SELECT details FROM _schema_migrations WHERE id='191_repeat_correction_contract'").get().details;
+         if(receipt190!==original190||after.prepare('SELECT count(*) n FROM _schema_migrations').get().n!==receiptCount+1)fail('191 changed predecessor receipts');
+         if(after.pragma('integrity_check',{simple:true})!=='ok'||after.pragma('foreign_key_check').length)fail('191 integrity differs');
+         after.close();
+         const installedBytes=hash(),again=successor.installWorkRepeatContract({dbPath,apply:true});
+         if(again.mode!=='NO_OP'||again.totalChanges!==0||hash()!==installedBytes)fail('191 repeat apply changed bytes');
+         console.log(JSON.stringify({dry,applied,after190,after191,receipts:{original190:JSON.parse(receipt190),successor191:JSON.parse(receipt191)},
+           retainedCounts:Object.fromEntries(names.map(name=>[name,beforeRows[name].length])),allOriginalRowsAndFieldsPreserved:true,
+           predecessorReceiptBytesPreserved:true,dryRunBytesPreserved:true,noOpBytesPreserved:true}));`
+    ], { encoding: 'utf8' }).trim();
+    const repeatProof = JSON.parse(repeatProofOutput);
+    console.log(`  ✓ Owned baseline → #190 COMPLETE → #191 PRE_191 dry-run → COMPLETE; NULL reasons ${repeatProof.dry.plan.reasonNotRecordedCount}, backfill 0, blocked RECORDED owners ${repeatProof.dry.releaseInventory.blockedWorkItemCount}; all retained rows and both receipts verified; NO_OP writes 0`);
+
     // 7. Upgrade: Run target image on the populated baseline volume
     const upgTargetContainer = registerContainer(`lims_c_upg_${TS}`);
     const upgTargetPort = await getFreePort();

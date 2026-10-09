@@ -26,7 +26,7 @@ describe('Audit 0.5: legacy review delegates to the guarded authority', () => {
             qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-05'), sampleId, analysis: 'PH_H2O', assignedLab, status,
             result: evidence ? '6.2' : null, batchId: batch?.id } });
-        const result = evidence ? await createExecutionResultFixture(prisma, { ...(status === 'ACCEPTED' && { attemptStatus: 'ACCEPTED' }),
+        const result = evidence ? await createExecutionResultFixture(prisma, { ...(['ACCEPTED','SUBMITTED'].includes(status) && { attemptStatus: status }),
             data: { id: id('R-05'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, flags: JSON.stringify(['METHOD_NOTE']), batchId: batch?.id } }) : null;
         if (batch) {
@@ -80,7 +80,7 @@ describe('Audit 0.5: legacy review delegates to the guarded authority', () => {
     });
     test('legacy REJECT preserves scalar values and invokes canonical RETURN invalidation', async () => {
         const f = await fixture();
-        const response = await review(f, { decision: 'REJECT', reason: 'Check drift' });
+        const response = await review(f, { decision: 'REJECT', reasonCode:'REVIEW_OUTLIER', reason: 'Check drift' });
         expect(response.status).toBe(200); expect(response.body.item.status).toBe('REPEAT_REQUIRED');
         const after = await state(f);
         expect(after.results[0].value).toBe('6.2'); expect(after.results[0].numericValue).toBe(6.2);

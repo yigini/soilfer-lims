@@ -194,7 +194,8 @@ exports.reviewSubmission = async (req, res) => {
         const workItemIds = typeof submission.workItemIds === 'string' ? JSON.parse(submission.workItemIds) : (submission.workItemIds || []);
         const isShorthand = (!Array.isArray(decisions) || !decisions.length) && Boolean(req.body.status || req.body.decision);
         let normalizedDecisions = isShorthand
-            ? workItemIds.map(workItemId => ({ workItemId, decision: req.body.decision || req.body.status, reason: req.body.reason || req.body.note }))
+            ? workItemIds.map(workItemId => ({ workItemId, decision: req.body.decision || req.body.status, reason: req.body.reason || req.body.note,
+                reasonCode:req.body.reasonCodes?.[workItemId] || req.body.reasonCode }))
             : decisions;
         if (!Array.isArray(normalizedDecisions) || !normalizedDecisions.length) {
             return res.status(400).json({ error: 'decisions array required', code: 'INVALID_REVIEW_DECISION' });
@@ -215,7 +216,7 @@ exports.reviewSubmission = async (req, res) => {
             }
             const reason = (decision.reason || decision.note || '').trim();
             if (verdict !== 'ACCEPT' && !reason) return res.status(400).json({ error: 'RETURN and WAIVE require a reason.', code: 'REVIEW_REASON_REQUIRED' });
-            validated.push({ workItemId: decision.workItemId, decision: verdict, reason: reason || 'Item accepted',attemptId:decision.attemptId });
+            validated.push({ workItemId: decision.workItemId, decision: verdict, reason: reason || 'Item accepted',attemptId:decision.attemptId,reasonCode:decision.reasonCode });
         }
         normalizedDecisions = validated;
 
@@ -328,6 +329,7 @@ exports.reviewSubmission = async (req, res) => {
                     sampleId: String(submission.sampleId),
                     workItemId,
                     attemptId:decision.attemptId,
+                    reasonCode:decision.reasonCode ?? null,
                     submissionItemId: submission.id,
                     decision: verdict === 'ACCEPT' ? 'ACCEPT' : (verdict === 'REJECT_REANALYSIS' ? 'RETURN' : 'OMIT'),
                     reason: reason || null,
@@ -354,7 +356,7 @@ exports.reviewSubmission = async (req, res) => {
                         await invalidateReturnedResults(tx, item, user, reason);
                     }
                     return rows;
-                }, id, { reason, qcAcknowledgement: req.body.qcAcknowledgement,
+                }, id, { reason, reasonCode:decision.reasonCode, attemptId:decision.attemptId, qcAcknowledgement: req.body.qcAcknowledgement,
                     action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',
                     details: `${user.username} ${verdict.toLowerCase()}ed ${analysisName}` });
                 results.push({ workItemId, status: newStatus, decision: verdict });

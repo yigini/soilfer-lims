@@ -9,6 +9,7 @@ const { assembleReport } = require('../../services/reportAssembly');
 describe('WP-31: Result Provenance Tracking', () => {
     let testSampleId;
     let createdResultIds = [];
+    let repeatReviewer;
     const analyst = { username: 'test_analyst', role: 'LAB_TECHNICIAN', labId: 'LAB-DEFAULT' };
     async function reviewFixture(analyses) {
         for (const analysis of analyses) for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
@@ -22,6 +23,9 @@ describe('WP-31: Result Provenance Tracking', () => {
             id: analyst.username, username: analyst.username, role: analyst.role, labId: analyst.labId,
             email: `${analyst.username}@example.test`, password: 'isolated-fixture'
         } });
+        const reviewer=await prisma.user.create({data:{id:`provenance-reviewer-${Date.now()}`,username:`provenance-reviewer-${Date.now()}`,
+            role:'LAB_MANAGER',labId:analyst.labId,email:`provenance-reviewer-${Date.now()}@example.test`,password:'isolated-fixture'}});
+        repeatReviewer={id:reviewer.id,username:reviewer.username,role:reviewer.role,labId:reviewer.labId};
         for (const [code, name, units] of [['EC', 'Electrical conductivity', 'dS/m'], ['CLAY_PRED', 'Predicted clay fraction', '%'], ['SOC', 'Soil organic carbon', 'g/kg'], ['TOTAL_N', 'Total nitrogen', 'g/kg']]) {
             await prisma.analysis.upsert({ where: { code }, create: { code, name, units, status: 'active', validation: '{}' },
                 update: { name, units, labId: null, validation: '{}' } });
@@ -91,6 +95,9 @@ describe('WP-31: Result Provenance Tracking', () => {
 
         const typedClay = await prisma.result.findFirst({ where: { sampleId: testSampleId, param: 'CLAY_PRED', isCurrent: true } });
         expect(typedClay.provenance).toBe('MEASURED');
+        // Pin6069938801: a second execution uses the actual reasoned command.
+        await require('../../services/workRepeatService').requestRepeat(prisma,`entry-${testSampleId}-CLAY_PRED`,repeatReviewer,
+            {reason:'CONFIRMATION',note:'Independent spectral confirmation of the typed measurement'});
         await prisma.$transaction(tx => writeSpectralPrediction(tx, { sampleId: testSampleId, actor: analyst,
             measurement: { param: 'CLAY_PRED', value: '28.5', unit: '%' } }));
         const clayRes = await prisma.result.findFirst({ where: { sampleId: testSampleId, param: 'CLAY_PRED', isCurrent: true } });

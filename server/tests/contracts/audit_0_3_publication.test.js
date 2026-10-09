@@ -55,7 +55,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         const resultData = { id: resultId, sampleId, param, value: '7.2', numericValue: 7.2, isCurrent: true,
             isValid: valid, flags: JSON.stringify(flags), batchId: batch?.id };
         const result = recordResult ? await createExecutionResultFixture(prisma, {
-            ...(itemStatus === 'ACCEPTED' && { attemptStatus: 'ACCEPTED' }), data: resultData }) : null;
+            ...(['ACCEPTED','SUBMITTED'].includes(itemStatus) && { attemptStatus: itemStatus }), data: resultData }) : null;
         await setFixtureQcRequirement(prisma, token, labId, batch ? 'REQUIRED' : 'NOT_REQUIRED');
         if (batch) await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batch.id);
         return { sampleId, item, result, batch, resultData };
@@ -102,10 +102,13 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test.each(['SPEC_GRS', 'SPEC_XRF'])('%s continues to require and record scalar Results', async analysis => {
         const f = await fixture({ param: analysis });
-        expect((await generate(f)).status).toBe(200);
+        const response=await generate(f);
+        expect({status:response.status,body:response.body}).toMatchObject({status:200});
         const techToken = await getAuthToken('LAB_TECHNICIAN', labId);
         const acquisition = await fixture({ status: 'PROCESSING', itemStatus: 'IN_PROGRESS', param: analysis });
         await prisma.workItem.update({ where: { id: acquisition.item.id }, data: { assignedTo: jwt.decode(techToken).username } });
+        await require('../../services/workRepeatService').requestRepeat(prisma,acquisition.item.id,jwt.decode(token),
+            {reason:'CONFIRMATION',note:'Independent scalar determination confirms the original recorded acquisition'});
         const saved = await request(app).post('/api/workbench/batch-save').set('Authorization', `Bearer ${techToken}`)
             .send({ draft: false, entries: [{ workItemId: acquisition.item.id, value: '12' }] });
         expect(saved.status).toBe(200);
@@ -133,9 +136,9 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         return f;
     }
     const returnItem = (path, f) => path === 'individual'
-        ? call(`/api/work/${f.item.id}/review`, { status: 'REANALYSIS_REQUIRED', reason: 'Recheck drift' })
-        : path === 'bulk' ? call('/api/work/review/bulk', { workItemIds: [f.item.id], status: 'REANALYSIS_REQUIRED', reason: 'Recheck drift' })
-            : call(`/api/submissions/${f.submission.id}/review`, { decisions: [{ workItemId: f.item.id, decision: 'REJECT_REANALYSIS', reason: 'Recheck drift' }] });
+        ? call(`/api/work/${f.item.id}/review`, { status: 'REANALYSIS_REQUIRED', reasonCode:'REVIEW_OUTLIER', reason: 'Recheck drift' })
+        : path === 'bulk' ? call('/api/work/review/bulk', { workItemIds: [f.item.id], status: 'REANALYSIS_REQUIRED', reasonCode:'REVIEW_OUTLIER', reason: 'Recheck drift' })
+            : call(`/api/submissions/${f.submission.id}/review`, { decisions: [{ workItemId: f.item.id, decision: 'REJECT_REANALYSIS', reasonCode:'REVIEW_OUTLIER', reason: 'Recheck drift' }] });
 
     test.each(['COMPLETED', 'SUBMITTED_FULL', 'PROCESSING'])('%s sample cannot publish', async status => {
         const res = await generate(await fixture({ status }));
@@ -304,7 +307,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     test('RETURN of composite texture invalidates all four current parameters', async () => {
         const { createCompositeTextureExecutionFixture } = require('../helpers/workAttemptFixtures');
         const f = await fixture({ status: 'PROCESSING', itemStatus: 'SUBMITTED', param: 'TEXTURE', recordResult: false });
-        const recorded = await createCompositeTextureExecutionFixture(prisma, { data: [f.resultData,
+        const recorded = await createCompositeTextureExecutionFixture(prisma, { attemptStatus:'SUBMITTED', data: [f.resultData,
             ...['SAND', 'SILT', 'CLAY'].map(param => ({ id: id('TEXT-RETURN-03'), sampleId: f.sampleId,
                 param, value: '25', isCurrent: true, isValid: true, flags: '["METHOD_NOTE"]' }))] });
         f.result = recorded.find(row => row.param === 'TEXTURE');

@@ -6,6 +6,7 @@ const {PrismaBetterSqlite3}=require('@prisma/adapter-better-sqlite3');
 const {beforeGuards}=require('../helpers/legacyWorkflowDatabase');
 const {createSampleFixture,createWorkItemFixture}=require('../helpers/workflowFixtures');
 const {installWorkAttemptContract}=require('../../scripts/install_work_attempt_contract');
+const {requestRepeat}=require('../../services/workRepeatService');
 const writer=require('../../services/resultWriteService');
 const {validateResultEntries}=require('../../services/resultEntryPolicy');
 const request=require('supertest'),jwt=require('jsonwebtoken'),express=require('express');
@@ -14,8 +15,11 @@ const labId='LAB-190-EXECUTION',actor={username:'attempt-executor',role:'LAB_MAN
 let client;
 beforeAll(async()=>{
     fs.mkdirSync(directory,{recursive:true});beforeGuards({actor:'system:fixture',file,qcBootstrap:'CREATE_PRISMA'});
-    const db=new Database(file);db.exec('CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT NOT NULL)');db.close();
-    installWorkAttemptContract({dbPath:file,apply:true});client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
+    const db=new Database(file);db.exec('CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,appliedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,details TEXT NOT NULL)');db.close();
+    installWorkAttemptContract({dbPath:file,apply:true});
+    require('../helpers/repeatQcPredecessors').installRepeatQcPredecessors(file);
+    require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({dbPath:file,apply:true});
+    client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
     await client.lab.create({data:{id:labId,code:labId,name:'Attempt execution laboratory',country:'TEST'}});
     await client.unit.create({data:{code:'%',display:'%',quantityKind:'MASS_FRACTION',factorToBase:1}});
     for(const code of ['AT190','TEXTURE','SAND','SILT','CLAY'])await client.analysis.create({data:{code,name:'Controlled '+code+' measurand',
@@ -87,12 +91,13 @@ async function all(f) {return {attempts:await client.workAttempt.findMany({where
     results:await client.result.findMany({where:{sampleId:f.sample.id},orderBy:{id:'asc'}}),items:await client.workItem.findMany({where:{sampleId:f.sample.id},orderBy:{id:'asc'}}),
     audits:await client.auditLog.findMany({where:{sampleId:f.sample.id},orderBy:{id:'asc'}})};}
 
-test('ordinary executions allocate max+1 and preserve every old attempt field and final evidence',async()=>{
+test('a reasoned repeat allocates max+1 and preserves every old field except its legitimate QUESTIONED transition',async()=>{
     const f=await fixture(),first=await client.$transaction(tx=>writer.writeResult(tx,options(f)));
     const original=await client.workAttempt.findUnique({where:{id:first.attemptId}});
+    await requestRepeat(client,f.items[0].id,actor,{reason:'CONFIRMATION',note:'Explicit confirmation repeat'});
     const second=await client.$transaction(tx=>writer.writeResult(tx,options(f,'AT190','6.43')));
-    expect(await client.workAttempt.findUnique({where:{id:first.attemptId}})).toEqual(original);
-    expect(await client.workAttempt.findUnique({where:{id:second.attemptId}})).toMatchObject({attemptNo:2,reason:null,status:'RECORDED'});
+    expect(await client.workAttempt.findUnique({where:{id:first.attemptId}})).toEqual({...original,status:'QUESTIONED'});
+    expect(await client.workAttempt.findUnique({where:{id:second.attemptId}})).toMatchObject({attemptNo:2,reason:'CONFIRMATION',status:'RECORDED'});
     expect(JSON.parse(original.evidenceData)).toMatchObject({source:'measurement',rawValue:'6.42',resultId:first.id,sourceResultIds:[first.id],equipmentReadiness:null});
     expect(first.equipmentReadiness).toBeNull();
 });
@@ -104,10 +109,11 @@ test('all replicates in one submitted execution share one attempt; later executi
     const attempt=await client.workAttempt.findUnique({where:{id:rows[0].attemptId}});
     expect(attempt.attemptNo).toBe(1);expect(JSON.parse(attempt.evidenceData).sourceResultIds).toEqual(rows.map(row=>row.id));
     expect(await client.workAttempt.count({where:{workItemId:f.items[0].id}})).toBe(1);
+    await requestRepeat(client,f.items[0].id,actor,{reason:'CONFIRMATION',note:'Explicit replicate confirmation repeat'});
     await client.$transaction(tx=>writer.writeResult(tx,options(f)));
-    expect(await client.workAttempt.findUnique({where:{id:attempt.id}})).toEqual(attempt);
+    expect(await client.workAttempt.findUnique({where:{id:attempt.id}})).toEqual({...attempt,status:'QUESTIONED'});
 });
-test('one texture execution records all four Results on its final attempt and a repeat gets number2 with null reason',async()=>{
+test('one texture execution records all four Results and an explicitly reasoned repeat gets number2',async()=>{
     const f=await fixture(['TEXTURE']);
     const texture={sampleId:f.sample.id,workItemId:f.items[0].id,actor,measurement:{param:'TEXTURE'},fractions:{sand:'40',silt:'40',clay:'20'}};
     const first=await client.$transaction(tx=>writer.writeTextureDetermination(tx,texture));
@@ -116,9 +122,10 @@ test('one texture execution records all four Results on its final attempt and a 
     expect(rows.map(row=>row.param).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
     expect(JSON.parse(original.evidenceData)).toMatchObject({fractions:{sand:40,silt:40,clay:20},className:first.value,closureError:0,
         sourceResultIds:expect.arrayContaining(rows.map(row=>row.id)),equipmentReadiness:null});
+    await requestRepeat(client,f.items[0].id,actor,{reason:'CONFIRMATION',note:'Explicit texture confirmation repeat'});
     const second=await client.$transaction(tx=>writer.writeTextureDetermination(tx,texture));
-    expect(await client.workAttempt.findUnique({where:{id:second.attemptId}})).toMatchObject({attemptNo:2,reason:null});
-    expect(await client.workAttempt.findUnique({where:{id:first.attemptId}})).toEqual(original);
+    expect(await client.workAttempt.findUnique({where:{id:second.attemptId}})).toMatchObject({attemptNo:2,reason:'CONFIRMATION'});
+    expect(await client.workAttempt.findUnique({where:{id:first.attemptId}})).toEqual({...original,status:'QUESTIONED'});
 });
 test('invalid texture or noncanonical reason refuses without attempt, result, cache or audit writes',async()=>{
     const f=await fixture(['TEXTURE']),before=await all(f);

@@ -41,3 +41,5 @@ server/services/workAttemptMigrationSource.js text eol=lf
 server/tests/helpers/fixtures/pre190_full_application_schema.sql -text
 server/tests/helpers/workAttemptHistoricalFixtures.js text eol=lf
 server/services/workItemUniquenessMigrationSource.js text eol=lf
+server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql text eol=lf
+server/services/workRepeatMigrationSource.js text eol=lf

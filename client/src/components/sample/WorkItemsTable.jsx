@@ -746,10 +746,7 @@ const WorkItemsTable = ({
                                                                         </button>
                                                                         <button
                                                                             type="button"
-                                                                            onClick={() => {
-                                                                                const reason = prompt("Reason for rejection?");
-                                                                                if (reason) onReview && onReview(item.id, 'REANALYSIS_REQUIRED', reason);
-                                                                            }}
+                                                                            onClick={() => onReview && onReview(item.id, 'REANALYSIS_REQUIRED')}
                                                                             title="Reject (Request Reanalysis)"
                                                                             className="p-1 rounded text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors"
                                                                         >

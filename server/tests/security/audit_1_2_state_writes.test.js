@@ -55,6 +55,25 @@ const exceptions = [
 ];
 const serverRoot = path.resolve(__dirname, '../..');
 
+test('the previous #191 release digest is refused; only the exact current loader and DDL are inspected',()=>{
+    const probe="const {loadWorkRepeatMigrationSource}=require('../services/workRepeatMigrationSource'); const source=loadWorkRepeatMigrationSource(); db.exec(source.guardsSql);";
+    expect(scanSource(probe,'scripts/probe.js',exceptions)).toEqual([]);
+    const loader=path.join(serverRoot,'services/workRepeatMigrationSource.js'),read=fs.readFileSync;
+    const current=read(loader,'utf8'),digest=current.match(/const SHA256 = '([a-f0-9]{64})';/)[1];
+    const previous='09fd801c9ad5e28ba0d05a099270846adfe311e1a0c6c00ca3aed121c1f0c4d3';
+    expect(digest).not.toBe(previous);
+    const spy=jest.spyOn(fs,'readFileSync').mockImplementation((file,...args)=>{
+        if(path.resolve(String(file))===loader) {
+            const rejected=current.replace(digest,previous);
+            return typeof args[0]==='string'?rejected:Buffer.from(rejected);
+        }
+        return read(file,...args);
+    });
+    try { expect(scanSource(probe,'scripts/probe.js',exceptions)).toEqual([
+        expect.objectContaining({code:'UNRESOLVED_WORKFLOW_SQL'})]); }
+    finally {spy.mockRestore();}
+});
+
 test('legacy CLI launchers cannot import any fixture or test module', () => {
     for (const filename of ['scripts/run_manager_dashboard_tasklist_side_by_side.cjs', 'scripts/verify_issue149_probe.cjs', 'scripts/run_test_rehearsal.cjs']) {
         for (const specifier of ['../tests/helpers/workflowFixtures', '../tests/helpers/legacyWorkflowDatabase', '../tests/rehearsals/scenario.cjs']) {
@@ -110,6 +129,22 @@ test('the #190 factory import allowlist is exact, including the named spectral r
     expect(scanSource(named.replace('a literal pre-190 measured orphan refuses the installer and COMPLETE startup without writes','another route test'),
         'tests/contracts/audit_1_2_spectral_state.test.js', exceptions)).toEqual([
         expect.objectContaining({ code: 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' })]);
+});
+
+test('the #191 owned result-set export is confined to seven inventoried test files without writer exemptions', () => {
+    const source = "const {createExecutionResultsFixture}=require('../helpers/workAttemptFixtures');await createExecutionResultsFixture(db,{data:rows});";
+    for (const filename of ['audit_0_10_current_result_views', 'audit_0_11_workbench_queue', 'audit_1_4_uuid_transactions', 'audit_1_5_result_writes',
+        'audit_3_2_repeat_commands', 'nsis_v2_exchange', 'qc_disposition_release_gate']) {
+        expect(scanSource(source, `tests/contracts/${filename}.test.js`, exceptions)).toEqual([]);
+        expect(scanSource(source + 'prisma.result.create({data:{}});', `tests/contracts/${filename}.test.js`, exceptions))
+            .toEqual([expect.objectContaining({ code: 'RESULT_CREATE_OUTSIDE_AUTHORITY' })]);
+    }
+    for (const sourceText of [source,
+        "const fixtures=require('../helpers/workAttemptFixtures');fixtures.createExecutionResultsFixture(db,{data:rows});",
+        "require('../helpers/workAttemptFixtures')[name](db,{data:rows});"]) {
+        expect(scanSource(sourceText, 'tests/contracts/unlisted_result_set.test.js', exceptions))
+            .toEqual([expect.objectContaining({ code: 'POSITIVE_FIXTURE_CALLER_NOT_ALLOWED' })]);
+    }
 });
 
 test('the #190 composite positive fixture has exactly two named publication callers', () => {

@@ -1,5 +1,5 @@
 const { createResultFixture } = require('../../services/resultWriteService');
-const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createExecutionResultsFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture, createSamplesFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -134,7 +134,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         });
     }
 
-    async function textureFixture() {
+    async function textureFixture({repeatFractions=['SAND','SILT','CLAY']}={}) {
         const sampleId = id();
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: `CODE-${sampleId}`, labId, assignedLab: labId,
             status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date(),
@@ -145,25 +145,25 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
             items[analysis] = await createWorkItemFixture(prisma, { data: { id: id(), sampleId, assignedLab: labId,
                 labId, analysis, status: 'ASSIGNED', assignedTo: username, version: 0 } });
         }
-        const rows = [];
-        for (const replicateNo of [1, 2]) {
-            const fractions = [];
-            for (const [param, value] of [['SAND', '20'], ['SILT', '20'], ['CLAY', '60']]) {
-                const row = await createExecutionResultFixture(prisma, { data: { id: id(), sampleId, param, value,
-                    numericValue: Number(value), replicateNo, unit: '%', isCurrent: true, isValid: true } });
-                rows.push(row); fractions.push(row);
-            }
-            const texture = await createExecutionResultFixture(prisma, { textureSourceResultIds: fractions.map(row => row.id),
-                data: { id: id(), sampleId, param: 'TEXTURE', value: 'Old class', numericValue: null,
-                    replicateNo, unit: '%', isCurrent: true, isValid: true } });
-            rows.push(texture);
-            const attempt = await prisma.workAttempt.findUnique({ where: { id: texture.attemptId } });
-            expect(attempt).toMatchObject({ workItemId: items.TEXTURE.id, status: 'RECORDED', attemptNo: replicateNo });
-            expect(JSON.parse(attempt.evidenceData)).toMatchObject({ sourceResultIds: fractions.map(row => row.id),
-                sourceAttemptIds: fractions.map(row => row.attemptId) });
-            for (const fraction of fractions) expect(await prisma.workAttempt.findUnique({ where: { id: fraction.attemptId } }))
-                .toMatchObject({ workItemId: items[fraction.param].id, status: 'RECORDED', attemptNo: replicateNo });
+        const rows=[];
+        for(const [param,value] of [['SAND','20'],['SILT','20'],['CLAY','60']])rows.push(...await createExecutionResultsFixture(prisma,{data:[1,2].map(replicateNo=>({
+            id:id(),sampleId,param,value,numericValue:Number(value),replicateNo,unit:'%',isCurrent:true,isValid:true}))}));
+        const sourceGroups=[1,2].map(replicateNo=>['SAND','SILT','CLAY'].map(param=>rows.find(row=>row.param===param && row.replicateNo===replicateNo)));
+        const textures=await createExecutionResultsFixture(prisma,{textureSourceResultIds:sourceGroups.map(group=>group.map(row=>row.id)),
+            data:[1,2].map(replicateNo=>({id:id(),sampleId,param:'TEXTURE',value:'Old class',numericValue:null,replicateNo,unit:'%',isCurrent:true,isValid:true}))});
+        rows.push(...textures);
+        for(const [index,texture] of textures.entries()) {
+            const attempt=await prisma.workAttempt.findUnique({where:{id:texture.attemptId}});
+            expect(attempt).toMatchObject({workItemId:items.TEXTURE.id,status:'RECORDED',attemptNo:1});
+            expect(JSON.parse(attempt.evidenceData).measurements.find(row=>row.resultId===texture.id)).toMatchObject({
+                sourceResultIds:sourceGroups[index].map(row=>row.id),sourceAttemptIds:sourceGroups[index].map(row=>row.attemptId)});
+            for(const fraction of sourceGroups[index])expect(await prisma.workAttempt.findUnique({where:{id:fraction.attemptId}}))
+                .toMatchObject({workItemId:items[fraction.param].id,status:'RECORDED',attemptNo:1});
         }
+        // Pin6069938801: retain the old determinations and request the actual
+        // new fraction executions before the original save/rollback exercise.
+        for(const param of repeatFractions)await require('../../services/workRepeatService').requestRepeat(prisma,items[param].id,jwt.decode(token),
+            {reason:'CONFIRMATION',note:'Confirm retained fraction determinations with a new execution'});
         for (const analysis of Object.keys(items)) items[analysis] = await prisma.workItem.findUnique({ where: { id: items[analysis].id } });
         return { sampleId, rows, items };
     }
@@ -229,6 +229,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
 
     test('sample result save derives texture within the matching replicate and retains all old values', async () => {
         const f = await textureFixture();
+        const parent=await prisma.workAttempt.findUnique({where:{id:f.rows.find(row=>row.param==='TEXTURE').attemptId}});
         const response = await sampleSave(f, measurements(2));
         expect(response.status).toBe(200);
         const after = await prisma.result.findMany({ where: { sampleId: f.sampleId } });
@@ -242,6 +243,18 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         expect(texture.value).toBe(calculateUsdaTexture(50, 35, 15).className);
         expect(texture.id).toMatch(uuid);
         expect(after.filter(row => row.replicateNo === 2 && row.isCurrent)).toHaveLength(4);
+        expect(await prisma.workAttempt.findUnique({where:{id:parent.id}})).toEqual(parent);
+        expect(await prisma.workAttempt.count({where:{workItemId:f.items.TEXTURE.id}})).toBe(1);
+        const event=await prisma.auditLog.findFirst({where:{entity:'WORK_ATTEMPT',entityId:parent.id,action:'DERIVED_RECALCULATED'}});
+        const sources=after.filter(row=>['SAND','SILT','CLAY'].includes(row.param) && row.replicateNo===2 && row.isCurrent);
+        const causes=await prisma.auditLog.findMany({where:{entity:'WORK_ATTEMPT',action:'FIRST_FILL',entityId:{in:sources.map(row=>row.attemptId)}},
+            orderBy:[{timestamp:'asc'},{id:'asc'}]});
+        expect(causes).toHaveLength(3);
+        expect(JSON.parse(event.details)).toMatchObject({oldResultIds:[f.rows.find(row=>row.param==='TEXTURE' && row.replicateNo===2).id],
+            newResultIds:[texture.id],sourceEventIds:causes.map(row=>row.id),
+            oldSourceResultIds:['SAND','SILT','CLAY'].map(param=>f.rows.find(row=>row.param===param && row.replicateNo===2).id),
+            newSourceResultIds:['SAND','SILT','CLAY'].map(param=>sources.find(row=>row.param===param).id)});
+        expect(JSON.parse(event.details)).not.toHaveProperty('sourceEventId');
     });
 
     test('sample result save rolls back fractions, texture supersession and audit when texture storage fails', async () => {
@@ -255,7 +268,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
     });
 
     test.each([false, true])('workbench fraction save is atomic with derived texture (storage failure: %s)', async fail => {
-        const f = await textureFixture();
+        const f = await textureFixture({repeatFractions:['SAND']});
         const item = f.items.SAND;
         const audits = await prisma.auditLog.count();
         if (fail) failCreate('result', row => row.sampleId === f.sampleId && row.param === 'TEXTURE');
@@ -275,7 +288,79 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
             for (const old of f.rows.filter(row => row.replicateNo === 1)) expect(rows.find(row => row.id === old.id)).toEqual(old);
             const audit = await prisma.auditLog.findFirst({ where: { entityId: item.id, action: 'WORKBENCH_COMPLETE' } });
             expect(audit.id).toMatch(uuid);
+            const event=await prisma.auditLog.findFirst({where:{sampleId:f.sampleId,entity:'WORK_ATTEMPT',action:'DERIVED_RECALCULATED'}});
+            expect(JSON.parse(event.details).sourceEventIds).toHaveLength(1);
         }
+    });
+
+    test('workbench appends the second replica of a repeated fraction and recalculates texture from its actual REPLICATE_ADDED event',async()=>{
+        const f=await textureFixture({repeatFractions:['SAND']}),actor=jwt.decode(token);
+        const parent=await prisma.workAttempt.findUnique({where:{id:f.rows.find(row=>row.param==='SAND').attemptId}});
+        const save=replicateNo=>request(app).post('/api/workbench/batch-save').set('Authorization',`Bearer ${token}`)
+            .send({draft:false,entries:[{workItemId:f.items.SAND.id,value:'20',replicateNo}]});
+        expect((await save(1)).status).toBe(200);
+        const appended=await save(2);
+        expect({status:appended.status,body:appended.body}).toMatchObject({status:200,body:{saved:1}});
+        const child=await prisma.workAttempt.findFirst({where:{workItemId:f.items.SAND.id,parentAttemptId:parent.id}});
+        expect(child).toMatchObject({status:'RECORDED',reason:'CONFIRMATION'});
+        const rows=await prisma.result.findMany({where:{sampleId:f.sampleId}});
+        for(const old of f.rows.filter(row=>row.param==='SAND')){
+            const replacement=rows.find(row=>row.param==='SAND' && row.replicateNo===old.replicateNo && row.isCurrent);
+            expect(replacement.attemptId).toBe(child.id);
+            expect(rows.find(row=>row.id===old.id)).toEqual({...old,isCurrent:false,supersededBy:replacement.id});
+        }
+        const texture=rows.find(row=>row.param==='TEXTURE' && row.replicateNo===2 && row.isCurrent);
+        expect(texture.value).toBe(calculateUsdaTexture(20,20,60).className);
+        const cause=await prisma.auditLog.findFirst({where:{entity:'WORK_ATTEMPT',entityId:child.id,action:'REPLICATE_ADDED'}});
+        const recalculation=await prisma.auditLog.findFirst({where:{entity:'WORK_ATTEMPT',action:'DERIVED_RECALCULATED',
+            details:{contains:texture.id}}});
+        expect(JSON.parse(recalculation.details).sourceEventIds).toEqual([cause.id]);
+        expect(JSON.parse(cause.details).newResultIds).toEqual([rows.find(row=>row.param==='SAND' && row.replicateNo===2 && row.isCurrent).id]);
+        await require('../../services/submissionStateService').createSubmissionForItems({db:prisma,actor,sampleId:f.sampleId,
+            type:'PARTIAL',workItemIds:[f.items.SAND.id]});
+        expect((await prisma.workAttempt.findUnique({where:{id:child.id}})).status).toBe('SUBMITTED');
+        expect(await prisma.workAttempt.findUnique({where:{id:parent.id}})).toEqual(parent);
+    });
+
+    test('derived recalculation refuses a source event from an earlier transaction with zero writes',async()=>{
+        const f=await textureFixture({repeatFractions:['SAND']});
+        await prisma.$transaction(tx=>require('../../services/resultWriteService').writeResult(tx,{sampleId:f.sampleId,workItemId:f.items.SAND.id,
+            actor:jwt.decode(token),measurement:{param:'SAND',value:'20',unit:'%',replicateNo:2}}));
+        const before=await Promise.all([prisma.result.findMany({orderBy:{id:'asc'}}),prisma.workAttempt.findMany({orderBy:{id:'asc'}}),
+            prisma.workItem.findMany({orderBy:{id:'asc'}}),prisma.auditLog.findMany({orderBy:{id:'asc'}})]);
+        await expect(prisma.$transaction(tx=>require('../../services/resultWriteService').deriveTextureResult(tx,
+            {sampleId:f.sampleId,replicateNo:2,actor:jwt.decode(token)}))).rejects.toMatchObject({code:'WORK_ATTEMPT_EVENT_INVALID'});
+        expect(await Promise.all([prisma.result.findMany({orderBy:{id:'asc'}}),prisma.workAttempt.findMany({orderBy:{id:'asc'}}),
+            prisma.workItem.findMany({orderBy:{id:'asc'}}),prisma.auditLog.findMany({orderBy:{id:'asc'}})])).toEqual(before);
+    });
+
+    test('an accepted derived attempt stays frozen while a recalculated Result requires a new real review',async()=>{
+        const f=await textureFixture({repeatFractions:[]}),actor=jwt.decode(token),texture=f.rows.find(row=>row.param==='TEXTURE' && row.replicateNo===2);
+        await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(prisma,actor,labId);
+        await require('../../services/workItemStateService').transitionWorkItem(f.items.TEXTURE.id,'COMPLETED',actor,'Derived fixture ready for review',{},prisma);
+        await require('../../services/submissionStateService').createSubmissionForItems({db:prisma,actor,sampleId:f.sampleId,type:'PARTIAL',workItemIds:[f.items.TEXTURE.id]});
+        expect((await request(app).post(`/api/work/${f.items.TEXTURE.id}/review`).set('Authorization',`Bearer ${token}`)
+            .send({decision:'ACCEPT',attemptId:texture.attemptId,note:'Reviewed original derived value'})).status).toBe(200);
+        const frozen=await prisma.workAttempt.findUnique({where:{id:texture.attemptId}});expect(frozen.status).toBe('ACCEPTED');
+        const repeat=await require('../../services/workRepeatService').requestRepeat(prisma,f.items.SAND.id,actor,{reason:'CONFIRMATION',note:'Confirm sand determination'});
+        const changed=await request(app).post('/api/workbench/batch-save').set('Authorization',`Bearer ${token}`)
+            .send({draft:false,entries:[{workItemId:f.items.SAND.id,value:'20',replicateNo:2,version:repeat.workItem.version}]});
+        expect(changed.status).toBe(200);
+        const item=await prisma.workItem.findUnique({where:{id:f.items.TEXTURE.id}}),current=await prisma.result.findFirst({where:{sampleId:f.sampleId,param:'TEXTURE',replicateNo:2,isCurrent:true}});
+        expect(item).toMatchObject({status:'SUBMITTED',reviewedBy:null,reviewedAt:null,reviewDecision:null});
+        expect(await prisma.workAttempt.findUnique({where:{id:frozen.id}})).toEqual(frozen);
+        expect(require('../../services/reportResultGovernance').isReviewedReportResult(current,[item],'OFF')).toBe(false);
+        expect(await prisma.reviewDecision.count({where:{workItemId:item.id}})).toBe(1);
+        expect((await request(app).post(`/api/work/${item.id}/review`).set('Authorization',`Bearer ${token}`)
+            .send({decision:'ACCEPT',attemptId:frozen.id,note:'Reviewed recalculation and new source evidence'})).status).toBe(200);
+        expect(await prisma.workAttempt.findUnique({where:{id:frozen.id}})).toEqual(frozen);
+        expect(await prisma.reviewDecision.count({where:{workItemId:item.id}})).toBe(2);
+        const events=await prisma.auditLog.findMany({where:{entity:'WORK_ATTEMPT',entityId:frozen.id,action:'ACCEPTED'}});
+        expect(events).toHaveLength(2);expect(events.some(event=>JSON.parse(event.details).newResultIds.includes(current.id))).toBe(true);
+        const before=await prisma.auditLog.count();
+        await expect(prisma.$transaction(tx=>require('../../services/workAttemptEventService').transitionAttempt(tx,item,frozen.id,'ACCEPTED',actor)))
+            .rejects.toMatchObject({code:'WORK_ATTEMPT_TRANSITION_REFUSED'});
+        expect(await prisma.auditLog.count()).toBe(before);
     });
 
     async function importFixture() {

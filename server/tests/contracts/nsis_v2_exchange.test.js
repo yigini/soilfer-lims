@@ -1,4 +1,4 @@
-const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createExecutionResultsFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -40,10 +40,10 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
                 })
             }
         });
-        // Pin6060286651: explicit accepted owners and one final attempt per original row.
+        // Pin6069938801: the two original replicas form one explicit accepted execution.
         await createWorkItemFixture(prisma, { data: { id: `${sample1.id}-PH_H2O`, sampleId: sample1.id,
             analysis: 'PH_H2O', assignedLab: sample1.assignedLab, status: 'ACCEPTED' } });
-        for (const data of [
+        await createExecutionResultsFixture(prisma, { attemptStatus: 'ACCEPTED', data: [
                         {
                             id: `res-v2-1-${timestamp}`,
                             param: 'PH_H2O',
@@ -66,12 +66,12 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
                             censoring: 'NONE',
                             isCurrent: true
                         }
-                    ].map(result => ({ ...result, sampleId: sample1.id }))) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
+                    ].map(result => ({ ...result, sampleId: sample1.id })) });
         const attempts = await prisma.workAttempt.findMany({ where: { workItemId: `${sample1.id}-PH_H2O` }, orderBy: { attemptNo: 'asc' } });
-        expect(attempts).toHaveLength(2);
-        expect(attempts.map(attempt => attempt.attemptNo)).toEqual([1, 2]);
+        expect(attempts).toHaveLength(1);
+        expect(attempts.map(attempt => attempt.attemptNo)).toEqual([1]);
         const results = await prisma.result.findMany({ where: { sampleId: sample1.id }, orderBy: { replicateNo: 'asc' } });
-        expect(results.map(result => result.attemptId)).toEqual(attempts.map(attempt => attempt.id));
+        expect(results.map(result => result.attemptId)).toEqual([attempts[0].id, attempts[0].id]);
         expect(results.map(result => ({ value: result.value, replicateNo: result.replicateNo })))
             .toEqual([{ value: '6.4', replicateNo: 1 }, { value: '6.5', replicateNo: 2 }]);
 

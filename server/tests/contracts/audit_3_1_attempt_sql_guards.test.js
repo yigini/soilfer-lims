@@ -9,12 +9,13 @@ const {createRawResultFixture}=require('../../services/resultWriteService');
 const {installWorkflowStateGuards}=require('../../scripts/install_workflow_state_guards');
 const {installResultAttemptLinks}=require('../../scripts/install_result_attempt_links');
 const {installWorkAttemptContract}=require('../../scripts/install_work_attempt_contract');
+const {loadWorkRepeatMigrationSource}=require('../../services/workRepeatMigrationSource');
 const {WORK_ATTEMPT_STATUS_LIST,LEGACY_WORK_ATTEMPT_STATUS_LIST,REPEAT_REASON_LIST,assertRepeatReason,canonicalWorkItemWhere}=require('../../services/workAttemptContract');
 const directory=path.resolve(__dirname,'../.tmp'),timestamp=Date.parse('2026-10-01T12:00:00Z');
 let db,client,file;
 const itemRow=(id,analysis='P')=>({id,sampleId:'sample',analysis,status:'COMPLETED',updatedAt:timestamp});
 const historicalAttempt=(id,workItemId='item',options={})=>({id,workItemId,attemptNo:1,status:'RECORDED',createdAt:timestamp,updatedAt:timestamp,...options});
-async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('another','R'),itemRow('new','S'),itemRow('different','T')],attempts=[],batches=[],assignedLab=null}={}){
+async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('another','R'),itemRow('new','S'),itemRow('different','T')],attempts=[],batches=[],assignedLab=null,successor=false}={}){
     fs.mkdirSync(directory,{recursive:true});file=path.join(directory,`audit_legacy_190_sql-${randomUUID()}.db`);
     createPre190AttemptFixture({actor:'system:fixture',file,rows:{Sample:['sample','other-sample'].map(id=>({id,originalId:id,status:'PROCESSING',assignedLab,updatedAt:timestamp})),WorkItem:items,WorkAttempt:attempts,Batch:batches}});
     // Actual complete release chain: no copied trigger subset or simplified FK.
@@ -22,6 +23,17 @@ async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('ano
     expect(installWorkflowStateGuards({dbPath:file}).classification).toBe('COMPLETE');
     expect(installResultAttemptLinks({dbPath:file,apply:true}).classification).toBe('COMPLETE');
     expect(installWorkAttemptContract({dbPath:file,apply:true}).classification).toBe('COMPLETE');
+    // The predecessor guard suite intentionally remains pre-191 (including
+    // its historical nullable-reason case). Add only the nullable model
+    // columns so the current generated client can read its literal old rows.
+    if(successor) {
+        require('../helpers/repeatQcPredecessors').installRepeatQcPredecessors(file);
+        expect(require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({dbPath:file,apply:true}).classification).toBe('COMPLETE');
+    }
+    else {
+        const modelColumns=loadWorkRepeatMigrationSource();
+        const shape=new Database(file);shape.exec(modelColumns.schemaSql);shape.close();
+    }
     db=new Database(file);db.pragma('foreign_keys=ON');client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
 }
 afterEach(async()=>{
@@ -37,6 +49,104 @@ function result(id,{sampleId='sample',param='P',replicateNo=1,attemptId=null,isC
 }
 function probe(statement,parameters,expectedGuardCode,expectedConstraint){return rejectedGuardWrite({actor:'system:fixture',file,statement,parameters,expectedGuardCode,...(expectedConstraint&&{expectedConstraint})});}
 const attemptInsert='INSERT INTO WorkAttempt (id,workItemId,attemptNo,status,batchId,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?)';
+
+// Pins6071874424/6072132694: only the exact trigger is probed. The existing
+// raw-write helper builds its own scratch, rolls back every case and deletes it.
+function handoffTriggerProbe(fixtureCase, extra={}) {
+    fs.mkdirSync(directory,{recursive:true});file=path.join(directory,`audit_legacy_190_sql-${randomUUID()}.db`);
+    return rejectedGuardWrite({actor:'system:fixture',file,case:'WorkItem_191_handoff_trigger',fixtureCase,...extra});
+}
+describe('#191 membership trigger SQL defence in depth (not installer or receipt evidence)',()=>{
+    test.each(['old-repeat-required','parent-null-hash','parent-wrong-batch','parent-wrong-qc-batch','wrong-analyte',
+        'mixed-failed-membership','mixed-accepted-wrong-membership','qc-fail','qc-pending','open-unstarted'])
+        ('%s refuses a direct repeat pointer clear with exact zero writes',fixtureCase=>{
+            expect(handoffTriggerProbe(fixtureCase)).toEqual({fixtureCase,expected:'REFUSED',probeChanges:0,
+                committedChanges:0,rolledBack:true,scratchRemoved:true,callerFileUntouched:true,evidencePreserved:true});
+            expect(fs.existsSync(file)).toBe(false);
+        });
+    test.each(['accepted-pass','accepted-warn','accepted-deviation','accepted-texture-alias'])
+        ('%s permits the proven SQL handoff and retains all old execution/QC evidence',fixtureCase=>{
+            expect(handoffTriggerProbe(fixtureCase)).toEqual({fixtureCase,expected:'HANDOFF',probeChanges:1,
+                committedChanges:0,rolledBack:true,scratchRemoved:true,callerFileUntouched:true,evidencePreserved:true});
+            expect(fs.existsSync(file)).toBe(false);
+        });
+    // The original fifteenth probe was unknown-name refusal, not a fixed
+    // fixture case. It remains and now covers unknown options/callers too.
+    test.each(['name','option','caller'])('unknown %s refuses before opening a scratch or caller database',kind=>{
+        if(kind==='caller')jest.spyOn(globalThis.expect,'getState').mockReturnValue({
+            ...globalThis.expect.getState(),testPath:path.join(directory,'unlisted.test.js')});
+        const extra=kind==='option'?{statement:'unreviewed SQL'}:{};
+        expect(()=>handoffTriggerProbe(kind==='name'?'unreviewed-case':'accepted-pass',extra)).toThrow(/closed handoff trigger/i);
+        expect(fs.existsSync(file)).toBe(false);
+    });
+});
+
+describe('all #190 refusals remain effective after the receipt-verified #191 successor installation',()=>{
+    test.each(['evidenceData','evidenceHash','instrumentId'])('creating-transaction evidence %s still refuses and rolls back',async field=>{
+        await guarded({successor:true});const evidenceData='{"final":"recorded before the attempted edit"}';
+        rejectedGuardWrite({actor:'system:fixture',file,case:'WorkAttempt_evidence_immutable_same_transaction',values:{id:'new',workItemId:'item',
+            evidenceData,evidenceHash:createHash('sha256').update(evidenceData).digest('hex'),field,replacement:'changed'}});
+        expect(db.prepare('SELECT count(*) n FROM WorkAttempt').get().n).toBe(0);
+    });
+    test.each(['id','workItemId','orderLineId','attemptNo','executedMethodRevision','author','authorName','materialAliquot','qcBatchId','version',
+        'createdAt','updatedAt','reason','requestedBy','requestedAt','rawData','calcVersion','dilutionFactor','aliquotId'])('recorded identity %s remains frozen',async field=>{
+        await guarded({successor:true,attempts:[historicalAttempt('recorded')]});
+        const value=field==='reason'?'CONFIRMATION':['attemptNo','version','dilutionFactor'].includes(field)?2:'changed';
+        probe(`UPDATE WorkAttempt SET "${field}"=? WHERE id=?`,[value,'recorded'],'WORK_ATTEMPT_IDENTITY_IMMUTABLE');
+    });
+    test.each([...LEGACY_WORK_ATTEMPT_STATUS_LIST,'unknown'])('invalid status %s still refuses insertion and update',async status=>{
+        await guarded({successor:true,attempts:[historicalAttempt('recorded')]});
+        probe(attemptInsert,['invalid-status','other',1,status,null,timestamp,timestamp],'WORK_ATTEMPT_STATUS_INVALID');
+        probe('UPDATE WorkAttempt SET status=? WHERE id=?',[status,'recorded'],'WORK_ATTEMPT_STATUS_INVALID');
+    });
+    test('canonical reasons, positive numbers, conflict flags and both unique indexes retain their original refusals',async()=>{
+        await guarded({successor:true,attempts:[historicalAttempt('first'),historicalAttempt('flagged','another'),historicalAttempt('flagged-peer','another')]});
+        probe(attemptInsert,['collision','item',1,'RECORDED',null,timestamp,timestamp],'SQLITE_CONSTRAINT_UNIQUE','WorkAttempt_workItemId_attemptNo_unique');
+        // Supply a canonical reason so the independent #191 mandatory-reason
+        // check does not mask #190's fractional-number refusal.
+        for(const number of [0,-1,1.5])probe('INSERT INTO WorkAttempt (id,workItemId,attemptNo,status,reason,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?)',
+            ['bad-number','other',number,'RECORDED','CONFIRMATION',timestamp,timestamp],'WORK_ATTEMPT_NUMBER_INVALID');
+        for(const reason of ['free text','',1])probe('INSERT INTO WorkAttempt (id,workItemId,attemptNo,status,reason,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?)',
+            ['invalid-reason','other',1,'RECORDED',reason,timestamp,timestamp],'WORK_ATTEMPT_REASON_INVALID');
+        probe('UPDATE WorkAttempt SET reason=? WHERE id=?',['free text','first'],'WORK_ATTEMPT_IDENTITY_IMMUTABLE');
+        for(const [id,value] of [['first','flag'],['first',null],['flagged',null],['flagged','same']])
+            probe('UPDATE WorkAttempt SET legacyAttemptNoConflict=? WHERE id=?',[value,id],'WORK_ATTEMPT_CONFLICT_FLAG_IMMUTABLE');
+        probe('INSERT INTO WorkAttempt (id,workItemId,attemptNo,status,legacyAttemptNoConflict,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?)',
+            ['new-flagged','new',1,'RECORDED','pretended-migration',timestamp,timestamp],'WORK_ATTEMPT_CONFLICT_FLAG_FORBIDDEN');
+        result('current',{attemptId:'first'});
+        probe('INSERT INTO Result (id,sampleId,param,value,replicateNo,attemptId,isCurrent,provenance,updatedAt) VALUES (?,?,?,?,?,?,?,?,?)',
+            ['collision-result','sample','P','retained',1,'first',1,'MEASURED',timestamp],'SQLITE_CONSTRAINT_UNIQUE','result_one_current');
+    });
+    test('batch FK, write-once batch and deletion refusals survive the successor chain',async()=>{
+        const batch=id=>({id,analysis:'P',status:'OPEN',createdBy:'system:fixture'});
+        await guarded({successor:true,batches:[batch('batch'),batch('other-batch')],attempts:[historicalAttempt('historical','item',{qcBatchId:'batch'})]});
+        for(const value of [null,'other-batch'])probe('UPDATE WorkAttempt SET batchId=? WHERE id=?',[value,'historical'],'WORK_ATTEMPT_BATCH_IMMUTABLE');
+        probe(attemptInsert,['dangling','other',1,'RECORDED','missing',timestamp,timestamp],'SQLITE_CONSTRAINT_FOREIGNKEY','WorkAttempt_batchId_foreign_key');
+        probe('DELETE FROM Batch WHERE id=?',['batch'],'SQLITE_CONSTRAINT_TRIGGER','Batch_WorkAttempt_restrict');
+        probe('DELETE FROM WorkAttempt WHERE id=?',['historical'],'WORK_ATTEMPT_DELETE_REFUSED');
+    });
+    test('Result required and immutable-link guards keep all #190 import and provenance refusal cases',async()=>{
+        await guarded({successor:true});await insert('current');await insert('other-attempt',{attemptNo:2,reason:'CONFIRMATION'});
+        result('linked',{attemptId:'current'});
+        for(const attemptId of [null,'other-attempt'])probe('UPDATE Result SET attemptId=? WHERE id=?',[attemptId,'linked'],'RESULT_ATTEMPT_IMMUTABLE');
+        const statement='INSERT INTO Result (id,sampleId,param,value,replicateNo,attemptId,isCurrent,provenance,updatedAt) VALUES (?,?,?,?,?,?,?,?,?)';
+        for(const provenance of ['MEASURED','PREDICTED','DERIVED',null])probe(statement,['refused','other-sample','P','retained',1,null,1,provenance,timestamp],'RESULT_ATTEMPT_REQUIRED');
+        probe(statement,['canonical-import','sample','P','retained',2,null,1,'IMPORTED',timestamp],'RESULT_ATTEMPT_REQUIRED');
+    });
+    test('ReviewDecision required, ownership, current-evidence and immutable-attempt guards keep every #190 refusal',async()=>{
+        await guarded({successor:true});await insert('current');await insert('historical',{attemptNo:2,reason:'CONFIRMATION'});await insert('wrong-item',{workItemId:'other'});
+        result('current-result',{attemptId:'current'});result('old-result',{attemptId:'historical',isCurrent:0});result('other-result',{param:'Q',attemptId:'wrong-item'});
+        const statement='INSERT INTO ReviewDecision (id,workItemId,sampleId,attemptId,decision,reviewerId) VALUES (?,?,?,?,?,?)';
+        for(const [attemptId,sampleId,code] of [[null,'sample','REVIEW_ATTEMPT_REQUIRED'],['historical','sample','REVIEW_ATTEMPT_INVALID'],
+            ['wrong-item','sample','REVIEW_ATTEMPT_INVALID'],['current','other-sample','REVIEW_ATTEMPT_INVALID'],['missing','sample','REVIEW_ATTEMPT_INVALID']])
+            probe(statement,['invalid','item',sampleId,attemptId,'ACCEPT','system:fixture'],code);
+        db.prepare(statement).run('accepted','item','sample','current','ACCEPT','system:fixture');
+        probe('UPDATE ReviewDecision SET attemptId=? WHERE id=?',[null,'accepted'],'REVIEW_DECISION_IMMUTABLE');
+        const withoutAttempt='INSERT INTO ReviewDecision (id,workItemId,sampleId,decision,reviewerId) VALUES (?,?,?,?,?)';
+        probe(withoutAttempt,['unexecuted-accept','new','sample','ACCEPT','system:fixture'],'REVIEW_ATTEMPT_REQUIRED');
+        probe(withoutAttempt,['executed-waiver','item','sample','OMIT','system:fixture'],'REVIEW_ATTEMPT_REQUIRED');
+    });
+});
 
 test('every lab installs partial attempt uniqueness and current-result uniqueness with all guards',async()=>{
     await guarded();await insert('first');

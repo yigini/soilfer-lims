@@ -61,6 +61,33 @@ function assertActionEdge(item, sample, nextStatus, actor, reason, options) {
         require('./resultEvidenceService').assertAmendable(sample);
         return true;
     }
+    if (action === 'REPEAT_REQUESTED') {
+        rules.requireReason(reason);
+        require('./resultEvidenceService').assertAmendable(sample);
+        if (operational || nextStatus !== 'REPEAT_REQUIRED' || !['ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'REPEAT_REQUIRED'].includes(current) ||
+            !hasPermission(actor, 'ENTER_RESULTS') && !hasPermission(actor, 'APPROVE_RESULTS')) {
+            throw new TransitionError('Work item is not eligible for this repeat command.', 409, 'WORK_REPEAT_STATE_REFUSED');
+        }
+        return true;
+    }
+    if (action === 'ATTEMPT_CORRECTED') {
+        rules.requireReason(reason);
+        require('./resultEvidenceService').assertAmendable(sample);
+        if (operational || nextStatus !== current || !['IN_PROGRESS','COMPLETED','SUBMITTED'].includes(current) ||
+            !hasPermission(actor,'APPROVE_RESULTS') && (!hasPermission(actor,'ENTER_RESULTS') || current === 'SUBMITTED' || item.assignedTo !== rules.actorName(actor))) {
+            throw new TransitionError('The work item is not eligible for this correction.',409,'ATTEMPT_CORRECTION_FORBIDDEN');
+        }
+        return true;
+    }
+    if(action==='DERIVED_RECALCULATED') {
+        rules.requireReason(reason);
+        require('./resultEvidenceService').assertAmendable(sample);
+        if(item.analysis!=='TEXTURE' || nextStatus!=='SUBMITTED' || !['SUBMITTED','ACCEPTED'].includes(current) ||
+            !hasPermission(actor,'ENTER_RESULTS') && !hasPermission(actor,'APPROVE_RESULTS')) {
+            throw new TransitionError('The derived work is not eligible for fresh review.',409,'WORK_ATTEMPT_TRANSITION_REFUSED');
+        }
+        return true;
+    }
     if (action === 'GATE_REVERTED') {
         rules.requireReason(reason);
         require('./resultEvidenceService').assertAmendable(sample);
@@ -109,6 +136,10 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
         const sample = await client.sample.findUnique({ where: { id: item.sampleId } });
         if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
         rules.assertScope(actor, sample);
+        if(options.action==='DERIVED_RECALCULATED') {
+            await require('./sampleHoldService').assertNotHeld(client,sample);
+            await require('./derivedResultReviewService').assertPendingDerivedEvent(client,item,options.derivedEventId,options.derivedResultId);
+        }
         let provenance = {};
         let gateAudit = {};
         if (migrating) {
@@ -169,7 +200,7 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
         const isRepeatHistory = ['REANALYZE_BATCH', 'REJECT_BATCH'].includes(options.action) &&
             workflow.normalizeWorkItemState(item.status) === 'REPEAT_REQUIRED';
         const writeStatus = isRepeatHistory ? item.status : nextStatus;
-        const reviewData = !migrating && !isRepeatHistory && ['ACCEPTED', 'REPEAT_REQUIRED', 'WAIVED'].includes(nextStatus)
+        const reviewData = !migrating && !isRepeatHistory && options.action !== 'REPEAT_REQUESTED' && ['ACCEPTED', 'REPEAT_REQUIRED', 'WAIVED'].includes(nextStatus)
             ? { reviewedBy: performedBy, reviewedAt: data.reviewedAt || new Date() } : {};
         const { result: _cache, ...changes } = { ...data, ...provenance, ...reviewData, status: writeStatus, updatedAt: new Date(),
             version: data.version ?? (item.version === null ? 1 : { increment: 1 }) };

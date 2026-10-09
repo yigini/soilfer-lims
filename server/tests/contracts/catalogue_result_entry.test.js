@@ -58,7 +58,19 @@ describe('Catalogue rules also govern the sample results endpoint', () => {
     test('Completed or submitted work cannot be edited through the sample results endpoint', async () => {
         for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
             await transitionWorkItem(workItem.id, status, user, 'Reviewed fixture determination');
-            expect((await save([{ param, value: '6', methodologyId: method.id }])).code).toBe(400);
+            const snapshot=async()=>({sample:await prisma.sample.findUnique({where:{id:sampleId}}),
+                item:await prisma.workItem.findUnique({where:{id:workItem.id}}),
+                results:await prisma.result.findMany({where:{sampleId},orderBy:{id:'asc'}}),
+                attempts:await prisma.workAttempt.findMany({where:{workItemId:workItem.id},orderBy:{id:'asc'}}),
+                audits:await prisma.auditLog.findMany({where:{sampleId},orderBy:{id:'asc'}}),
+                submissions:await prisma.submission.findMany({where:{sampleId},orderBy:{id:'asc'}}),
+                decisions:await prisma.reviewDecision.findMany({where:{sampleId},orderBy:{id:'asc'}})});
+            const before=await snapshot(),response=await save([{ param, value: '6', methodologyId: method.id }]);
+            // #191 pin6069938801 replaces the generic sealed-work status with
+            // the explicit correction requirement; the original value stays.
+            expect(response.code).toBe(409);
+            expect(response.body.code).toBe('ATTEMPT_CORRECTION_REQUIRED');
+            expect(await snapshot()).toEqual(before);
         }
         expect((await prisma.result.findFirst({ where: { sampleId, isCurrent: true } })).value).toBe('5');
     });

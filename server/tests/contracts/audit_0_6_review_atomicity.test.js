@@ -43,7 +43,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
             qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-06'), sampleId, analysis, assignedLab: labId,
             status, result: '6.2', history: '[]', batchId: batch?.id } });
-        const result = await createExecutionResultFixture(prisma, { ...(status === 'ACCEPTED' && { attemptStatus: 'ACCEPTED' }),
+        const result = await createExecutionResultFixture(prisma, { ...(['ACCEPTED','SUBMITTED'].includes(status) && { attemptStatus: status }),
             data: { id: id('R-06'), sampleId, param: analysis, value: '6.2',
             numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
         if (batch) await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batch.id);
@@ -80,7 +80,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
     test.each(['ACCEPTED', 'WAIVED', 'COMPLETED', 'IN_PROGRESS'])('RETURN and WAIVE cannot alter analytical %s work or its approved sample', async status => {
         const f = await fixture({ status, sampleStatus: 'APPROVED' }), before = await snapshot(f);
         for (const verdict of ['REANALYSIS_REQUIRED', 'WAIVED']) {
-            const res = await post(`/api/work/${f.item.id}/review`, { status: verdict, reason: 'Review reason' });
+            const res = await post(`/api/work/${f.item.id}/review`, { status: verdict, reasonCode:'REVIEW_OUTLIER', reason: 'Review reason' });
             expect(res.status).toBe(409);
             expect(res.body.code).toBe(verdict === 'REANALYSIS_REQUIRED' ? 'AMENDMENT_WORKFLOW_REQUIRED' : 'ITEM_NOT_SUBMITTED');
             expect(await snapshot(f)).toEqual(before);
@@ -112,7 +112,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
     });
     test.each(['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'])('bulk %s commits eligible rows and refuses already accepted rows', async status => {
         const valid = await fixture(), refused = await fixture({ status: 'ACCEPTED' }), before = await snapshot(refused);
-        const response = await post('/api/work/review/bulk', { workItemIds: [valid.item.id, refused.item.id], status, reason: 'Bulk reason' });
+        const response = await post('/api/work/review/bulk', { workItemIds: [valid.item.id, refused.item.id], status, reasonCode:'REVIEW_OUTLIER', reason: 'Bulk reason' });
         expect(response.status).toBe(200); expect(response.body.count).toBe(1);
         expect(response.body.results).toEqual([expect.objectContaining({ workItemId: valid.item.id, status: workflow.normalizeWorkItemState(status) })]);
         expect(response.body.errors).toEqual([{ workItemId: refused.item.id, code: 'ITEM_NOT_SUBMITTED' }]);
@@ -176,7 +176,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         const f = await packageFixture(['SUBMITTED', 'SUBMITTED', 'ACCEPTED']);
         const accepted = await prisma.workItem.findUnique({ where: { id: f.items[2].id } });
         const response = await post(`/api/submissions/${f.submission.id}/review`, { decisions: [
-            { workItemId: f.item.id, decision: 'REJECT_REANALYSIS', reason: 'Repeat required' },
+            { workItemId: f.item.id, decision: 'REJECT_REANALYSIS', reasonCode:'REVIEW_OUTLIER', reason: 'Repeat required' },
             { workItemId: f.items[2].id, decision: 'WAIVE', reason: 'Already decided' }
         ] });
         expect(response.status).toBe(200); expect(response.body.results).toHaveLength(1); expect(response.body.errors).toHaveLength(1);
@@ -233,7 +233,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         expect((await prisma.sample.findUnique({ where: { id: f.sampleId } })).status).toBe('ARCHIVED');
         const before = await snapshot(f);
         for (const status of ['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED']) {
-            const response = await post(`/api/work/${f.item.id}/review`, { status, reason: 'Review again' });
+            const response = await post(`/api/work/${f.item.id}/review`, { status, reasonCode:'REVIEW_OUTLIER', reason: 'Review again' });
             expect(response.status).toBe(409); expect(response.body.code).toBe('ITEM_NOT_SUBMITTED');
             expect(await snapshot(f)).toEqual(before);
         }

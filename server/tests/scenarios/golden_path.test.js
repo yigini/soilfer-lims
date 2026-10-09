@@ -159,7 +159,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         await request(app)
             .post(`/api/submissions/${sub1Id}/review`)
             .set('Authorization', `Bearer ${mgrToken}`)
-            .send({ decisions: [{ workItemId: phItem.id, decision: 'REJECT_REANALYSIS', reason: 'Outlier detected' }] });
+            .send({ decisions: [{ workItemId: phItem.id, decision: 'REJECT_REANALYSIS', reasonCode:'REVIEW_OUTLIER', reason: 'Outlier detected' }] });
 
         const phItemReload = workItemsDb.findById(phItem.id);
         expect(phItemReload.status).toBe('REPEAT_REQUIRED'); // Sent back to technician

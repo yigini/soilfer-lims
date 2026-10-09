@@ -1,4 +1,4 @@
-const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createExecutionResultsFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -44,10 +44,12 @@ describe('Audit 0.11: queue evidence and instrument readiness', () => {
     });
     test('current invalid measurement is a hint; superseded rows and WorkItem.result cannot supply the input', async () => {
         const f = await fixture();
-        const prior = await createExecutionResultFixture(prisma, { data: { id: id('RES11'), sampleId: f.sampleId, param: f.analysis, value: '0',
-            isCurrent: true, isValid: false, flags: '["REVIEW_RETURNED"]', createdAt: new Date('2026-01-01') } });
-        await createExecutionResultFixture(prisma, { data: { id: id('RES11-OLD'), sampleId: f.sampleId, param: f.analysis, value: '99',
-            isCurrent: false, isValid: true, createdAt: new Date('2026-02-01') } });
+        const [prior] = await createExecutionResultsFixture(prisma, { data: [
+            { id: id('RES11'), sampleId: f.sampleId, param: f.analysis, value: '0',
+                isCurrent: true, isValid: false, flags: '["REVIEW_RETURNED"]', createdAt: new Date('2026-01-01') },
+            { id: id('RES11-OLD'), sampleId: f.sampleId, param: f.analysis, value: '99',
+                isCurrent: false, isValid: true, createdAt: new Date('2026-02-01') }
+        ] });
         let res = await queue(f);
         expect(res.body.groups[0].items[0].previousResult).toEqual({ value: '0', unit: null, isValid: false });
         expect(res.body.groups[0].items[0].draft).toBeNull();

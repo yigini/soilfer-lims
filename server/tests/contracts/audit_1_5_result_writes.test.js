@@ -106,18 +106,11 @@ test('unbatched measurement gets an attempt; the orphan historical import remain
 
 // #190 pin6058155230: runtime import exemptions use the authenticated route on
 // the actual COMPLETE schema; the historical factory remains out of this suite.
-test.each(['orphan', 'canonical', 'duplicate-child'])('#190 real import route preserves the %s contract and unrelated rows', async kind => {
+test.each(['orphan', 'duplicate-child'])('#190 real import route preserves the %s contract and unrelated rows', async kind => {
     expect(require('../../scripts/install_work_attempt_contract')
         .assertWorkAttemptStartupReady(process.env.DATABASE_PATH).classification).toBe('COMPLETE');
     let sample, canonical = null;
-    if (kind === 'canonical') {
-        const f = await fixture({ batch: null }); sample = f.sample; canonical = f.item;
-        for (const attemptNo of [4, 9]) {
-            const evidenceData = JSON.stringify({ retained: 'pre-existing execution', attemptNo });
-            await prisma.workAttempt.create({ data: { id: randomUUID(), workItemId: canonical.id, attemptNo,
-                status: 'RECORDED', evidenceData, evidenceHash: createHash('sha256').update(evidenceData).digest('hex') } });
-        }
-    } else {
+    {
         const sampleId = randomUUID();
         sample = await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId,
             assignedLab: labId, status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE',
@@ -178,6 +171,16 @@ test.each(['orphan', 'canonical', 'duplicate-child'])('#190 real import route pr
         performedBy: actor.username, details: 'Imported 0 historical samples and 1 results with provenance IMPORTED' });
     const stableTables = tables => tables.filter(table => !['WorkAttempt', 'Result', 'WorkItem', 'AuditLog'].includes(table.name));
     expect(stableTables(snapshot())).toEqual(stableTables(before.tables));
+});
+
+// Pin6070309684 deliberately replaces #190's automatic canonical attempt10
+// success. The first execution is real; no unreasoned historical row is seeded.
+test('a reasonless canonical historical import refuses and preserves every table exactly',async()=>{
+    const f=await fixture({batch:null});
+    expect((await apiSave(f.sample.id,[measurement()])).status).toBe(200);
+    const before=snapshot(),response=await importSave(f.sample.id);
+    expect(response).toMatchObject({status:409,body:{code:'WORK_ATTEMPT_REASON_REQUIRED'}});
+    expect(snapshot()).toEqual(before);
 });
 
 test.each(['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED'])('import refuses sealed %s work with all-table zero changes', async itemStatus => {
@@ -290,11 +293,16 @@ test.each([
     const f = await fixture();
     expect((await apiSave(f.sample.id, [measurement()])).status).toBe(200);
     const previous = await prisma.result.findFirst({ where: { sampleId: f.sample.id } });
-    const response = await apiSave(f.sample.id, [measurement({ [field]: field === 'id' ? previous.id : value, value: '7,42' })]);
-    expect(response.status).toBe(200);
+    const injected=field==='id' ? previous.id : value;
+    // Pins6069938801 /6070309684: retain the injected input, changing only
+    // the second save to its explicit same-attempt correction command.
+    const response=await request(app).post(`/api/attempts/${previous.attemptId}/corrections`).set('Authorization',`Bearer ${token}`)
+        .send({value:'7,42',reason:'TRANSCRIPTION_ERROR',note:'Compared with the instrument record',[field]:injected});
+    expect(response.status).toBe(201);
     const current = await prisma.result.findFirst({ where: { sampleId: f.sample.id, isCurrent: true } });
     expect(current).toMatchObject({ value: '7.42', rawInput: '7,42', numericValue: 7.42, flags: '[]', provenance: 'MEASURED', isValid: true });
     expect(current.id).not.toBe(previous.id);
+    expect(current[field]).not.toEqual(injected);
     expect(await prisma.result.findUnique({ where: { id: previous.id } }))
         .toEqual({ ...previous, isCurrent: false, supersededBy: current.id, updatedAt: expect.any(Date) });
     expect(await prisma.result.count({ where: { sampleId: f.sample.id } })).toBe(2);
@@ -328,12 +336,15 @@ test('historical import retains invalid text and out-of-range pH while importing
 test('offline texture supersedes legacy non-numeric PSA classes, preserves numeric rows, and replays without writes', async () => {
     await prisma.analysis.upsert({ where: { code: 'PSA' }, update: {},
         create: { code: 'PSA', name: 'Legacy particle size analysis', units: '%', validation: '{"type":"texture","tolerance":2}' } });
-    const f = await fixture({ analysis: 'PSA' });
-    const oldClass = await require('../helpers/workAttemptFixtures').createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
-        param: 'PSA', value: 'Sandy clay', numericValue: null, rawInput: 'historical class', flags: '["HISTORICAL"]' } });
-    const numeric = await require('../helpers/workAttemptFixtures').createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
-        param: 'PSA', value: '50', numericValue: 50 } });
-    const operation = { operationId: randomUUID(), type: 'COMPLETE_WORK', target: { workItemId: f.item.id }, baseVersion: 0,
+    // The retained PSA rows are unbatched; the unrelated OPEN default batch
+    // is not QC authorization for this historical class fixture.
+    const f = await fixture({ analysis: 'PSA', batch:null });
+    const [oldClass,numeric]=await require('../helpers/workAttemptFixtures').createExecutionResultsFixture(prisma,{data:[
+        {id:randomUUID(),sampleId:f.sample.id,param:'PSA',value:'Sandy clay',numericValue:null,rawInput:'historical class',flags:'["HISTORICAL"]',replicateNo:1},
+        {id:randomUUID(),sampleId:f.sample.id,param:'PSA',value:'50',numericValue:50,replicateNo:2}]});
+    const repeat=await require('../../services/workRepeatService').requestRepeat(prisma,f.item.id,actor,
+        {reason:'CONFIRMATION',note:'New fraction execution confirms the retained class'});
+    const operation = { operationId: randomUUID(), type: 'COMPLETE_WORK', target: { workItemId: f.item.id }, baseVersion: repeat.workItem.version,
         payload: { values: { sand: '50', silt: '35', clay: '15' }, flags: ['OFFLINE_CAPTURE'] } };
     expect((await sync.applySyncOperations(actor, [operation])).receipts[0]).toMatchObject({ status: 'APPLIED' });
     const texture = await prisma.result.findFirstOrThrow({ where: { sampleId: f.sample.id, param: 'TEXTURE', isCurrent: true } });
@@ -378,9 +389,9 @@ test('measurement cache-only summary and operational scalar writes are refused w
 });
 
 test('attempt insert/update and delete guards preserve every table and map stable 409s', async () => {
-    const f = await fixture(), other = await fixture(), attemptId = randomUUID();
-    await prisma.workAttempt.create({ data: { id: attemptId, workItemId: f.item.id, author: actor.username } });
-    const row = await prisma.$transaction(tx => writer.writeResult(tx, { sampleId: f.sample.id, workItemId: f.item.id, attemptId, actor, measurement: measurement() }));
+    const f = await fixture(), other = await fixture();
+    const row = await prisma.$transaction(tx => writer.writeResult(tx, { sampleId: f.sample.id, workItemId: f.item.id, actor, measurement: measurement() }));
+    const attemptId=row.attemptId;
     const otherRow = await prisma.$transaction(tx => writer.writeResult(tx,
         { sampleId: other.sample.id, workItemId: other.item.id, actor, measurement: measurement() }));
     const file = path.resolve(__dirname, '../.tmp', `audit_result_link_${randomUUID()}.db`);

@@ -7,6 +7,7 @@ const {beforeGuards}=require('../helpers/legacyWorkflowDatabase');
 const {createSampleFixture,createWorkItemFixture}=require('../helpers/workflowFixtures');
 const {createResultFixture}=require('../../services/resultWriteService');
 const {installWorkAttemptContract}=require('../../scripts/install_work_attempt_contract');
+const {loadWorkRepeatMigrationSource}=require('../../services/workRepeatMigrationSource');
 const {resolveReviewAttempt,createReviewDecision,inReviewTransaction}=require('../../services/reviewAttemptService');
 const directory=path.resolve(__dirname,'../.tmp');
 const file=path.join(directory,'audit_legacy_190_review-attempt-'+randomUUID()+'.db');
@@ -17,6 +18,12 @@ beforeAll(async()=>{
     fs.mkdirSync(directory,{recursive:true});beforeGuards({actor:'system:fixture',file,qcBootstrap:'CREATE_PRISMA'});
     const db=new Database(file);db.exec('CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT NOT NULL)');db.close();
     installWorkAttemptContract({dbPath:file,apply:true});
+    const modelColumns=loadWorkRepeatMigrationSource();
+    const shape=new Database(file);
+    const added=shape.prepare('PRAGMA table_info("WorkAttempt")').all().filter(row=>['parentAttemptId','note'].includes(row.name));
+    if(added.length===0)shape.exec(modelColumns.schemaSql);
+    else if(added.length!==2 || added.some(row=>row.type!=='TEXT' || row.notnull || row.dflt_value!==null))throw Error('Unexpected nullable repeat model columns.');
+    shape.close();
     client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
 },60000);
 afterAll(async()=>{

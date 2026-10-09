@@ -12,10 +12,11 @@ const { checkStoredCompletion } = require('../services/storedResultCompletenessS
 const { transitionWorkItem } = require('../services/workItemStateService');
 const { governsResult } = require('../services/reportResultGovernance');
 
-async function assertResultSaveReadiness(db, sample, user) {
+async function assertResultSaveReadiness(db, sample, user, measurements) {
     stateRules.assertScope(user, sample);
     resultEvidence.assertAmendable(sample);
     if (!['PROCESSING', 'SUBMITTED_PARTIAL'].includes(sample.status)) {
+        if(sample.status==='SUBMITTED_FULL')await require('../services/resultWriteService').assertRecordedResultSave(db,sample,measurements);
         throw new stateRules.TransitionError(`Sample is not in Processing phase (current: ${sample.status})`, 400, 'SAMPLE_NOT_PROCESSING');
     }
     const report = await gateEvidence.loadGateEvidence(db, sample);
@@ -23,6 +24,7 @@ async function assertResultSaveReadiness(db, sample, user) {
     for (const [gate, message] of [['PREPARATION', 'Sample preparation has not been completed'], ['DRYING', 'Sample drying has not been completed']]) {
         if (report.blocked.some(blocked => blocked.analysis === gate)) throw Object.assign(new Error(message), { statusCode: 412 });
     }
+    await require('../services/resultWriteService').assertRecordedResultSave(db,sample,measurements);
     return report;
 }
 
@@ -123,11 +125,11 @@ exports.saveResults = async (req, res) => {
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
         const performedBy = stateRules.actorName(user);
-        await assertResultSaveReadiness(prisma, sample, user);
+        await assertResultSaveReadiness(prisma, sample, user, measurements);
         const outcome = await stateRules.inTransaction(prisma, async tx => {
             const current = await tx.sample.findUnique({ where: { id: sampleId } });
             if (!current) throw new stateRules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
-            const gateReport = await assertResultSaveReadiness(tx, current, user);
+            const gateReport = await assertResultSaveReadiness(tx, current, user, measurements);
             if (current.status !== sample.status) throw new stateRules.TransitionError('Sample readiness changed. Refresh before saving.', 409, 'SAMPLE_STATE_CHANGED');
             const entryError = await validateResultEntries(tx, current, measurements, user);
             if (entryError) throw Object.assign(new Error(entryError), { statusCode: 400, code: 'RESULT_ENTRY_INVALID' });

@@ -30,7 +30,7 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
             status: 'PENDING_REVIEW', type: 'PARTIAL', workItemCount: 1, workItemIds: JSON.stringify([itemId]) } });
         const item = await createWorkItemFixture(prisma, { data: { id: itemId, sampleId, analysis, assignedLab: labId, assignedTo: username,
             status: itemStatus, result: '6.2', submissionId, batchId: batch?.id, history: JSON.stringify([{ action: 'SUBMITTED', submissionId }]) } });
-        const result = await createExecutionResultFixture(prisma, { ...(itemStatus === 'ACCEPTED' && { attemptStatus: 'ACCEPTED' }),
+        const result = await createExecutionResultFixture(prisma, { ...(['ACCEPTED','SUBMITTED'].includes(itemStatus) && { attemptStatus: itemStatus }),
             data: { id: id('R-07'), sampleId, param: analysis, value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
         return { sampleId, analysis, item, submission, result, batch };
@@ -38,9 +38,9 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
     const post = (path, body, token = manager) => request(app).post(path).set('Authorization', `Bearer ${token}`).send(body);
     const reason = 'Repeat after drift review';
     const returned = (route, f) => route === 'individual'
-        ? post(`/api/work/${f.item.id}/review`, { status: 'REANALYSIS_REQUIRED', reason })
-        : route === 'bulk' ? post('/api/work/review/bulk', { workItemIds: [f.item.id], status: 'REANALYSIS_REQUIRED', reason })
-            : post(`/api/submissions/${f.submission.id}/review`, { decisions: [{ workItemId: f.item.id, decision: 'REJECT_REANALYSIS', reason }] });
+        ? post(`/api/work/${f.item.id}/review`, { status: 'REANALYSIS_REQUIRED', reasonCode:'REVIEW_OUTLIER', reason })
+        : route === 'bulk' ? post('/api/work/review/bulk', { workItemIds: [f.item.id], status: 'REANALYSIS_REQUIRED', reasonCode:'REVIEW_OUTLIER', reason })
+            : post(`/api/submissions/${f.submission.id}/review`, { decisions: [{ workItemId: f.item.id, decision: 'REJECT_REANALYSIS', reasonCode:'REVIEW_OUTLIER', reason }] });
     test.each(['individual', 'bulk', 'submission'])('%s RETURN preserves the old link in history and re-recorded work appears in queue and preview', async route => {
         const f = await fixture(), response = await returned(route, f);
         expect(response.status).toBe(200);
@@ -146,6 +146,9 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
         const f = await fixture({ batchStatus: 'QC_FAIL' });
         await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, f.batch.id);
         expect((await post(`/api/qc/batches/${f.batch.id}/disposition`, { decision: 'REANALYZE_BATCH', reason })).status).toBe(200);
+        // The whole-run disposition releases failed QC; the new per-item
+        // execution still needs its actual canonical repeat request.
+        expect((await post(`/api/work-items/${f.item.id}/repeats`,{reason:'QC_BATCH_FAIL',note:reason})).status).toBe(201);
         expect((await post('/api/workbench/batch-save', { draft: false, entries: [{ workItemId: f.item.id, value: '6.4' }] }, technician)).body.saved).toBe(1);
         const submitted = await post('/api/workbench/v2/submissions/commit', { sampleIds: [f.sampleId], workItemIds: [f.item.id] }, technician);
         expect(submitted.status).toBe(200);

@@ -43,6 +43,7 @@ async function createSubmissionForItems({ db, actor, sampleId, type, workItemIds
                 submissionId, submittedAt: now, history: JSON.stringify(history)
             }, tx, { expected: { status: item.status, version: item.version }, audit: {
                 action: 'WORKITEM_SUBMITTED', details: `${performedBy} submitted ${await getAnalysisName(item.analysis, tx)}` } });
+            await require('./workAttemptEventService').submitRecordedAttempt(tx,item,actor);
         }
         const derived = await deriveSubmissionLifecycle(tx, sample.id);
         assertRequestedType(type, derived);

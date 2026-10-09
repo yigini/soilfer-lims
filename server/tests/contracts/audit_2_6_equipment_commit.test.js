@@ -164,7 +164,10 @@ test('a superseding Result gets a fresh snapshot and leaves the original equipme
     const { writeResult } = require('../../services/resultWriteService');
     const write = equipmentId => prisma.$transaction(tx => writeResult(tx, { sampleId: item.sampleId, workItemId: item.workItemId,
         actor: f.actor, measurement: { param: f.analysis, value: '6.2', equipmentId } }));
-    const first = await write(firstAsset.id), next = await write(nextAsset.id);
+    const first=await write(firstAsset.id);
+    await require('../../services/workRepeatService').requestRepeat(prisma,item.workItemId,f.actor,
+        {reason:'CONFIRMATION',note:'Independent determination on the second qualified instrument'});
+    const next=await write(nextAsset.id);
     const old = await prisma.result.findUnique({ where: { id: first.id } });
     expect(old).toMatchObject({ isCurrent: false, supersededBy: next.id, equipmentReadiness: first.equipmentReadiness });
     expect(JSON.parse(first.equipmentReadiness).equipmentId).toBe(firstAsset.id);

@@ -110,6 +110,12 @@ async function snapshot(sampleIds) {
         attempts: await prisma.workAttempt.findMany({ where: { workItem: { sampleId: { in: sampleIds } } }, orderBy: { id: 'asc' } })
     };
 }
+async function seedSubmissionAttempt(row,item=row.item) {
+    // Apply6061487810's final-execution fixture precedent to the named
+    // submission tests: cached display values cannot identify an attempt.
+    await createExecutionResultFixture(prisma,{attemptStatus:'RECORDED',data:{id:randomUUID(),sampleId:row.sample.id,
+        param:item.analysis,value:item.result,isCurrent:true,provenance:'MEASURED'}});
+}
 async function call(handler, body, params = {}, user = technician) {
     const res = { statusCode: 200, status(code) { this.statusCode = code; return this; }, json(value) { this.body = value; return this; } };
     await handler({ user, body, params }, res);
@@ -194,13 +200,14 @@ test.each(paths.flatMap(([name, handler, body]) => ['APPROVED', 'ARCHIVED', 'DIS
         expect(await snapshot([row.sample.id])).toEqual(before);
     });
 test.each(paths)('%s submission rolls back sample/work/submit/audit after a later audit failure', async (name, handler, body) => {
-    const row = await fixture(), before = await snapshot([row.sample.id]);
+    const row = await fixture();await seedSubmissionAttempt(row);const before = await snapshot([row.sample.id]);
     failAudit(name === 'legacy' ? 'SUBMISSION_CREATED' : 'WORKBENCH_SUBMIT');
     expect((await call(handler, body(row))).statusCode).toBe(500);
     expect(await snapshot([row.sample.id])).toEqual(before);
 });
 test('one preparation-blocked sample rolls back the whole workbench submission batch', async () => {
     const first = await fixture(), second = await fixture(), ids = [first.sample.id, second.sample.id];
+    await seedSubmissionAttempt(first);
     await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: second.sample.id, param: 'PH', value: '6.25', isCurrent: true } });
     await prisma.$transaction(tx => evidence.recordPreparationRevert(tx, second.sample, 'PREPARATION', 'Reprepare specimen', manager));
     const before = await snapshot(ids);
@@ -237,7 +244,7 @@ const submissionMatrix = [
 ];
 test.each(paths.flatMap(([name, handler, body]) => submissionMatrix.map(([status, type]) => [name, status, type, handler, body])))
     ('%s submission derives %s companion work as %s after selected work is submitted', async (_, status, type, handler, body) => {
-        const row = await fixture();
+        const row = await fixture();await seedSubmissionAttempt(row);
         await additionalItem(row, status);
         const response = await call(handler, body(row));
         expect(response.statusCode).toBeLessThan(300);
@@ -265,7 +272,7 @@ test('FULL derivation excludes duplicates, gates and every closure alias', async
 
 test.each(['COMPLETED', 'ON_HOLD', 'REPEAT_REQUIRED', 'AWAITING_VERIFICATION', 'NOT_ASSIGNED', 'ASSIGNED', 'IN_PROGRESS'])
     ('an explicit FULL request lists its %s blocker and rolls back every write', async status => {
-        const row = await fixture(), other = await additionalItem(row, status), before = await snapshot([row.sample.id]);
+        const row = await fixture(), other = await additionalItem(row, status);await seedSubmissionAttempt(row);const before = await snapshot([row.sample.id]);
         expect(await call(submissions.createSubmission, { sampleId: row.sample.id, workItemIds: [row.item.id], type: 'FULL' }))
             .toMatchObject({ statusCode: 409, body: { code: 'SUBMISSION_NOT_FULL', details: {
                 blocking: [{ workItemId: other.id, analysis: other.analysis, status }]
@@ -274,7 +281,7 @@ test.each(['COMPLETED', 'ON_HOLD', 'REPEAT_REQUIRED', 'AWAITING_VERIFICATION', '
     });
 
 test('requested PARTIAL is preserved in the audit when the derived lifecycle becomes FULL', async () => {
-    const row = await fixture();
+    const row = await fixture();await seedSubmissionAttempt(row);
     expect((await call(submissions.createSubmission, { sampleId: row.sample.id, workItemIds: [row.item.id], type: 'PARTIAL' })).statusCode).toBe(201);
     const audit = await prisma.auditLog.findFirst({ where: { sampleId: row.sample.id, action: 'SUBMISSION_CREATED' } });
     expect(JSON.parse(audit.after)).toMatchObject({ requestedType: 'PARTIAL', derivedType: 'FULL', sampleStatus: 'SUBMITTED_FULL' });
@@ -287,7 +294,8 @@ test('a counted set containing only waived/cancelled work does not create a full
 });
 
 test('submission preview projects only selected items and reads leave every fixture row unchanged', async () => {
-    const row = await fixture(), other = await additionalItem(row, 'COMPLETED'), before = await snapshot([row.sample.id]);
+    const row = await fixture(), other = await additionalItem(row, 'COMPLETED');
+    await seedSubmissionAttempt(row);await seedSubmissionAttempt(row,other);const before = await snapshot([row.sample.id]);
     const preview = await call(workbench.previewSubmissions, { sampleIds: [row.sample.id], workItemIds: [row.item.id] });
     expect(preview).toMatchObject({ statusCode: 200, body: { eligibleSamples: [{ submissionType: 'PARTIAL', totalCount: 2, completedCount: 1 }] } });
     expect(await snapshot([row.sample.id])).toEqual(before);
@@ -306,10 +314,10 @@ test.each(paths)('%s empty submission selection is refused without writes', asyn
 });
 
 const reviewPaths = [
-    ['single', workController.reviewWorkItem, (row, status) => [{ status, reason: 'Repeat review reason' }, { id: row.item.id }]],
-    ['bulk', workController.reviewWorkItemsBulk, (row, status) => [{ status, reason: 'Repeat review reason', workItemIds: [row.item.id] }, {}]],
+    ['single', workController.reviewWorkItem, (row, status) => [{ status, reason: 'Repeat review reason',reasonCode:'REVIEW_OUTLIER' }, { id: row.item.id }]],
+    ['bulk', workController.reviewWorkItemsBulk, (row, status) => [{ status, reason: 'Repeat review reason',reasonCode:'REVIEW_OUTLIER', workItemIds: [row.item.id] }, {}]],
     ['submission', submissions.reviewSubmission, (row, status) => [{ decisions: [{ workItemId: row.item.id,
-        decision: status === 'REPEAT_REQUIRED' ? 'RETURN' : status === 'WAIVED' ? 'OMIT' : 'ACCEPT', reason: 'Repeat review reason' }] },
+        decision: status === 'REPEAT_REQUIRED' ? 'RETURN' : status === 'WAIVED' ? 'OMIT' : 'ACCEPT', reason: 'Repeat review reason',reasonCode:'REVIEW_OUTLIER' }] },
     { id: row.item.submissionId }]]
 ];
 async function submittedFixture(sampleStatus = 'SUBMITTED_FULL', { seedCachedEvidence = false } = {}) {
@@ -327,11 +335,15 @@ async function submittedFixture(sampleStatus = 'SUBMITTED_FULL', { seedCachedEvi
     }
     return row;
 }
-async function assertReturnedAttemptUnchanged(row) {
+async function assertReasonedReturn(row) {
     const attempt = await prisma.workAttempt.findUnique({ where: { id: row.result.attemptId } });
-    // Pin6059793372: reason-coded RETURN status changes are deferred to #191.
-    expect(attempt.status).toBe('SUBMITTED');
-    expect(attempt).toEqual(row.attempt);
+    // #191 pins6059796291/6067488471 deliberately change these six
+    // RETURN assertions; every original execution field stays unchanged.
+    expect(attempt.status).toBe('QUESTIONED');
+    expect({...attempt,status:row.attempt.status}).toEqual(row.attempt);
+    const repeat=await prisma.workAttempt.findFirst({where:{workItemId:row.item.id,status:'OPEN'}});
+    expect(repeat).toMatchObject({attemptNo:row.attempt.attemptNo+1,parentAttemptId:attempt.id,reason:'REVIEW_OUTLIER',
+        note:'Repeat review reason',evidenceData:null,evidenceHash:null,requestedBy:manager.username});
 }
 test.each(reviewPaths)('%s review RETURN reopens FULL atomically and records its decision in Sample history/audit', async (_, handler, payload) => {
     const row = await submittedFixture('SUBMITTED_FULL', { seedCachedEvidence: true }), [body, params] = payload(row, 'REPEAT_REQUIRED');
@@ -344,7 +356,7 @@ test.each(reviewPaths)('%s review RETURN reopens FULL atomically and records its
     expect(JSON.parse(audit.after)).toMatchObject({ status: 'PROCESSING', reviewDecisionId: decision.id, reason: decision.reason });
     expect(await prisma.auditLog.count({ where: { sampleId: row.sample.id, entity: 'RESULT', entityId: row.result.id,
         action: 'REVIEW_RETURNED' } })).toBe(1);
-    await assertReturnedAttemptUnchanged(row);
+    await assertReasonedReturn(row);
     expect(await prisma.workItem.findUnique({ where: { id: row.item.id } })).toMatchObject({ status: 'REPEAT_REQUIRED', result: row.item.result });
 });
 test.each(reviewPaths)('%s review RETURN retains a partial lifecycle', async (_, handler, payload) => {
@@ -354,7 +366,7 @@ test.each(reviewPaths)('%s review RETURN retains a partial lifecycle', async (_,
     expect(await prisma.auditLog.count({ where: { sampleId: row.sample.id, entity: 'SAMPLE', action: 'REVIEW_RETURNED' } })).toBe(0);
     expect(await prisma.auditLog.count({ where: { sampleId: row.sample.id, entity: 'RESULT', entityId: row.result.id,
         action: 'REVIEW_RETURNED' } })).toBe(1);
-    await assertReturnedAttemptUnchanged(row);
+    await assertReasonedReturn(row);
 });
 test.each(reviewPaths.flatMap(([name, handler, payload]) => ['ACCEPTED', 'WAIVED'].map(status => [name, status, handler, payload])))
     ('%s review %s leaves FULL lifecycle unchanged', async (_, status, handler, payload) => {
@@ -373,16 +385,16 @@ test('a Sample status change during FULL review rolls back its decision and Work
     await expect(commitReview(prisma, row.item, 'REPEAT_REQUIRED', manager, { reanalysisReason: 'Repeat review reason' }, async tx => {
         const decision = await tx.reviewDecision.create({ data: { id: randomUUID(), sampleId: row.sample.id, workItemId: row.item.id,
             decision: 'RETURN', reviewerId: manager.username, reviewerName: manager.username, reason: 'Repeat review reason',
-            attemptId: row.result.attemptId } });
+            attemptId: row.result.attemptId,reasonCode:'REVIEW_OUTLIER' } });
         await samples.transitionSample(row.sample.id, 'ON_HOLD', manager, 'Concurrent manager hold', {}, tx);
         return [decision];
-    })).rejects.toMatchObject({ statusCode: 409, code: 'SAMPLE_STATE_CHANGED' });
+    },undefined,{reasonCode:'REVIEW_OUTLIER',note:'Repeat review reason'})).rejects.toMatchObject({ statusCode: 409, code: 'SAMPLE_STATE_CHANGED' });
     expect(await snapshot([row.sample.id])).toEqual(before);
 });
 test('a failed FULL review lifecycle audit rolls back its decision, history and WorkItem', async () => {
     const row = await submittedFixture('SUBMITTED_FULL', { seedCachedEvidence: true }), before = await snapshot([row.sample.id]);
     failAudit('REVIEW_RETURNED');
-    expect((await call(workController.reviewWorkItem, { status: 'REPEAT_REQUIRED', reason: 'Repeat review reason' }, { id: row.item.id }, manager)).statusCode).toBe(500);
+    expect((await call(workController.reviewWorkItem, { status: 'REPEAT_REQUIRED', reason: 'Repeat review reason',reasonCode:'REVIEW_OUTLIER' }, { id: row.item.id }, manager)).statusCode).toBe(500);
     expect(await snapshot([row.sample.id])).toEqual(before);
 });
 
