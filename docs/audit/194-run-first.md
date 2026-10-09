@@ -1,7 +1,8 @@
 # Audit4.1 — run-first workbench (#194), WIP
 
 Branch audit/4.1-run-first starts from maind2b69b8 after #186, #190 and
-PR260/#191 merged. No runtime/schema change or test claim yet.
+PR260/#191 merged. It adds the run-first workbench, immutable reagent-lot
+links and first-start method-revision evidence described below.
 
 Confirmed remaining scope: WorkbenchShell.jsx still defaults to the individual
 my_work queue (lines53–61), and BatchModal.jsx still uses an instrument text
@@ -101,6 +102,8 @@ run fixtures, reviewed-correction and preview fixtures, direct startup and
 entrypoint readiness fixtures. All original assertions, literal captured
 DDL and every workflow writer restriction remain. The only schema-gap
 expectation added is the exact new table; no factory or writer exemption.
+The #190 authenticated workspace fixture also installs the actual reagent
+link schema; its predecessor attempt guards and every assertion remain.
 
 Merged193/main663c9664 is now integrated, retaining both startup/bootstrap
 gates, both schema relations and both digest-bound sources. All ten locale
