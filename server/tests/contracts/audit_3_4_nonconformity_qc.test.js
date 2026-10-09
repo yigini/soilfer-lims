@@ -35,9 +35,10 @@ async function reviewers(f) {
     await f.setPolicy([{key:'qc.reviewedTranscriptionCorrectionEnabled',value:true}]);
 }
 async function nativeCrm(f) {
-    const {lot}=await crm(f),built=await buildNativeRun(f.db,f.actor,{...f.input,analyses:[{analysisCode:f.analysisCode,
+    const actor=f.author||f.actor;
+    const {lot}=await crm(f),built=await buildNativeRun(f.db,actor,{...f.input,analyses:[{analysisCode:f.analysisCode,
         references:[{positionKind:'CRM',referenceMaterialLotId:lot.id}]}]});
-    return startNativeRun(f.db,built.id,f.actor);
+    return startNativeRun(f.db,built.id,actor);
 }
 afterAll(async()=>{for(const f of owned)await f.close();});
 test('multi-analyte REJECT raises one NCR per actual disposition and a retry preserves both original NCRs',async()=>{
@@ -96,10 +97,12 @@ test('compatibility writes retain actual mode; repeated correction of the same f
     expect(await f.db.nonconformityReport.findUnique({where:{id:report.id}})).toEqual(report);
 });
 test('a persisted CRM failure with no stored mode does not infer NCR eligibility from live policy',async()=>{
-    const f=await fixture({criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:1}});
-    await f.setPolicy([{key:'qc.mode',value:'ADVISORY'}]);const run=await nativeCrm(f),position=run.positions.find(row=>row.kind==='CRM');
-    await writeNativeMeasurements(f.db,run.id,f.actor,{measurements:[{positionId:position.id,value:25}]});
+    const f=await fixture({criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0}}),{lot}=await crm(f);
+    await f.setPolicy([{key:'qc.mode',value:'ADVISORY'}]);
+    const run=await createStoredProfileRunFixture(f.db,{actor:f.actor,input:{analysis:f.analysisCode}});
+    await writeCompatibilityMeasurements(f.db,run.id,f.actor,{controls:[{referenceMaterialId:lot.id,referenceUse:'CRM',measured:25}]});
     const original=await f.db.qcEvaluation.findFirst({where:{batchId:run.id}}),details=JSON.parse(original.details);
+    expect(details.evaluation.controls[0].status).toBe('FAIL');
     delete details.mode;delete details.criteriaSnapshot;
     await f.setPolicy([{key:'qc.mode',value:'REQUIRED_BLOCKING'}]);
     await f.db.$transaction(async tx=>{
