@@ -1487,7 +1487,8 @@ exports.previewCompletion = async (req, res) => {
             // 2. Validation check
             let validation = { isValid: true, flags: [] };
             const isSpectralAnalysis = SPECTRAL_ACQUISITION_CODES.includes(item.analysis);
-            const isTextureAnalysis = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(item.analysis) || (entry.values != null);
+            const isTextureAnalysis = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(item.analysis) ||
+                (entry.values != null && !Object.hasOwn(entry.values,'calculation'));
             if (isSpectralAnalysis) {
                 validation = { isValid: false, flags: ['SPECTRAL_SCAN_REQUIRED'] };
             } else if (isTextureAnalysis) {
@@ -1509,6 +1510,24 @@ exports.previewCompletion = async (req, res) => {
 
             const blockers = [...readiness.blockers];
             const reasons = [...readiness.reasons];
+            let calculationPreview=null;
+            if (readiness.isReady && !isSpectralAnalysis && !isTextureAnalysis && item.category !== 'Operational Gates') {
+                const calculation=entry.calculation ?? entry.values?.calculation;
+                if(calculation != null || await require('../services/policyService').calcTemplate(labId,
+                    {analysisCode:item.analysis,methodologyId:item.methodologyId || null},{db:prisma})) {
+                    try {
+                        calculationPreview=await require('../services/resultWriteService').previewResultCalculation(prisma,
+                            {sampleId:item.sampleId,workItemId:item.id,actor:user,
+                                measurement:{param:item.analysis,value:entry.value,calculation,equipmentId:entry.equipmentId,
+                                    replicateNo:entry.replicateNo,basis:entry.basis}});
+                        if(calculationPreview.calculation?.intermediate.aboveRange)
+                            validation.flags=[...new Set([...validation.flags,'ABOVE_RANGE'])];
+                    } catch(error) {
+                        if(!error.statusCode)throw error;
+                        blockers.push(error.code);reasons.push(error.message);
+                    }
+                }
+            }
 
             if (isSpectralAnalysis) {
                 blockers.push('SPECTRAL_SCAN_REQUIRED');
@@ -1577,6 +1596,8 @@ exports.previewCompletion = async (req, res) => {
                     analysis: item.analysis,
                     value: entry.value,
                     values: entry.values,
+                    ...(entry.calculation != null && {calculation:entry.calculation}),
+                    ...(calculationPreview?.calculationEvidence && {calculationEvidence:calculationPreview.calculationEvidence}),
                     checks: entry.checks,
                     basis: entry.basis || 'AIR_DRY',
                     replicateNo: entry.replicateNo || 1,

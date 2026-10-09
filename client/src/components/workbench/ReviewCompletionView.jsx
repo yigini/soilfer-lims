@@ -1,5 +1,7 @@
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React, { useState } from 'react';
+import CalculationEvidence from '../sample/CalculationEvidence';
+import { useLanguage } from '../../context/LanguageContext';
 import {
     ArrowLeft, CheckCircle2, AlertTriangle, ShieldCheck,
     Check, ArrowRight
@@ -18,6 +20,7 @@ export default function ReviewCompletionView({
     isSubmitting = false
 }) {
     const getAnalysisDisplayName = useAnalysisNames();
+    const { t } = useLanguage();
     const [confirmed, setConfirmed] = useState(false);
 
     const included = previewData?.included || [];
@@ -96,6 +99,7 @@ export default function ReviewCompletionView({
                                 <span className="text-sf-muted text-[11px] ml-2">
                                     (Basis: {item.basis || 'Air-dry'}, Rep: {item.replicateNo || 1})
                                 </span>
+                                <CalculationEvidence evidence={item.calculationEvidence} t={t} />
                             </div>
                             <div className="flex items-center gap-3">
                                 <span className="text-sm font-mono font-bold text-emerald-700 dark:text-emerald-400">

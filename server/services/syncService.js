@@ -703,6 +703,7 @@ class SyncService {
                             replicateNo: repNo, basis: validBasis, equipmentId: op.payload?.equipmentId,
                             methodologyId: item.methodologyId,
                             unit: op.payload?.unit, overrideReason: op.payload?.overrideReason,
+                            calculation: op.payload?.calculation ?? op.payload?.values?.calculation,
                             ...(Object.hasOwn(op.payload || {}, 'batchId') && { batchId: op.payload.batchId }) };
                         const writer = require('./resultWriteService');
                         const resultOptions = { sampleId: item.sampleId, workItemId: item.id, actor: user, measurement, now,

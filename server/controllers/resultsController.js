@@ -69,12 +69,15 @@ exports.getResults = async (req, res) => {
         const analysisMap = {};
         analyses.forEach(a => analysisMap[a.code] = a);
 
-        const enriched = await Promise.all(results.map(async r => ({
+        const enriched = await Promise.all(results.map(async r => {
+            const calculation=await require('../services/resultCalculationService').retained(prisma,r.id);
+            return {
             ...r,
+            ...(calculation && {calculation}),
             paramName: await require('../services/analysisService').getAnalysisName(r.param),
             decimalPlaces: analysisMap[r.param]?.decimalPlaces ?? 2,
             flags: typeof r.flags === 'string' ? JSON.parse(r.flags) : (r.flags || {})
-        })));
+        }; }));
 
         res.json(enriched);
     } catch (error) {
@@ -108,7 +111,11 @@ exports.getResultHistory = async (req, res) => {
             orderBy: { createdAt: 'desc' }
         });
 
-        res.json({ history });
+        const retainedHistory = await Promise.all(history.map(async row => {
+            const calculation=await require('../services/resultCalculationService').retained(prisma,row.id);
+            return calculation ? {...row,calculation} : row;
+        }));
+        res.json({ history:retainedHistory });
     } catch (error) {
         console.error('[getResultHistory] Error:', error);
         res.status(500).json({ error: 'Failed to fetch result history' });

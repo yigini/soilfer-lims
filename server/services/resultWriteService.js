@@ -396,13 +396,23 @@ async function writeResultsExecution(tx, options) {
     return rows;
 }
 
-async function previewResultCalculation(db, { sampleId, workItemId, actor, inputs }) {
+async function previewResultCalculation(db, { sampleId, workItemId, actor, inputs, measurement }) {
     return rules.inTransaction(db, async tx => {
         const item = await tx.workItem.findUnique({ where: { id: workItemId } });
         if (!item || item.sampleId !== sampleId) throw new TransitionError('Choose the sample work item.',409,'RESULT_WORKITEM_REQUIRED');
-        const ctx = await context(tx,{sampleId,workItemId,actor,measurement:{param:item.analysis},allowRecordedReplicates:true});
+        const ctx = await context(tx,{sampleId,workItemId,actor,measurement:{...selectMeasurement(measurement),param:item.analysis},allowRecordedReplicates:true});
         ctx.actor = actor;
         await validateExecutionReadiness(tx,ctx);
+        if (measurement) {
+            const numberFormat=await getNumberFormat(ctx.labId,{db:tx,analysisCode:ctx.analysis.code,methodologyId:ctx.methodId});
+            const evidence=await calculationService.prepare(tx,ctx,measurement,numberFormat);
+            if(!evidence)return {active:null,template:null,calculation:null};
+            const {selected,calculated}=evidence;
+            return {active:{activationId:selected.activationId,templateId:selected.templateId,templateVersion:selected.templateVersion},
+                template:selected.template,curve:selected.curve,numberFormat,units:selected.units,calculation:calculated,
+                calculationEvidence:{...calculated,template:selected.template,templateId:selected.templateId,templateVersion:selected.templateVersion,
+                    activationId:selected.activationId,parameters:selected.template.parameters,curveId:selected.curve?.id || null,curve:selected.curve}};
+        }
         return calculationService.preview(tx,ctx,inputs);
     });
 }
