@@ -307,6 +307,7 @@ model WorkItem {
   workAttempts    WorkAttempt[]
   reviewDecisions ReviewDecision[]
   batchPositions  BatchPositionWorkItem[]
+  reportedValueSelections ReportedValueSelection[]
 }
 
 model SampleHold {
@@ -1553,6 +1554,40 @@ model WorkAttempt {
   @@index([workItemId, attemptNo])
   @@index([batchId])
   @@index([orderLineId])
+}
+
+// #192: values are retained per output; one choice supersedes its whole group.
+model ReportedValueSelection {
+  id               String @id
+  workItemId       String
+  workItem         WorkItem @relation(fields: [workItemId], references: [id], onDelete: Restrict)
+  analysisCode     String
+  selectionGroupId String
+  mode             String
+  attemptIds       String
+  resultIds        String
+  value            Float?
+  valueText        String
+  unit             String?
+  censoring        String
+  methodologyId    String?
+  rule             String
+  policyKey        String
+  policyVersion    Int
+  policyRule       String
+  qcRuleSnapshot   String
+  evidenceSnapshot String
+  lineageSnapshot  String
+  outputParams     String
+  derivation       String?
+  reason           String?
+  selectedBy       String
+  selectedAt       DateTime
+  supersedesId     String? @unique
+  backfill         Boolean @default(false)
+
+  @@unique([selectionGroupId, analysisCode])
+  @@index([workItemId, analysisCode])
 }
 
 model ReviewDecision {

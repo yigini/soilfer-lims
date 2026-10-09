@@ -4,7 +4,7 @@
  */
 const prisma = require('../prisma');
 const { normalizeUnit, interpretParameter, evaluateSoilProfile } = require('./interpretationService');
-const { isReviewedReportResult, isCurrentValidAnalyticalResult, matchingItems, governingItems,
+const { isCurrentValidAnalyticalResult, matchingItems, governingItems,
     getReportingMode, reportingQc, linkedBatchIds, resolveReportingModes } = require('./reportResultGovernance');
 const { freezeReportEvidence, describeReportEvidence } = require('./reportTruthfulnessService');
 
@@ -37,9 +37,13 @@ async function assembleReport(sampleId, user, options = {}) {
         ? options : await resolveReportingModes(sample, qcBatches, { db });
     const { qcGates, qcAcknowledgements } = options.qcGates && options.qcAcknowledgements ? options
         : await require('./qcGateService').resolveForSample(sample, qcBatches, db);
-    const reportOptions = { qcModes, qcBatches, qcGates, qcAcknowledgements };
-    const reportableResults = sample.results.filter(result =>
-        isReviewedReportResult(result, sample.workItems, getReportingMode(sample, result, reportOptions)));
+    const reportedSelectionProof = options.reportedSelectionProof || await require('./reportedValueReadService').readSampleReportedValues(db,sample);
+    Object.assign(qcGates,reportedSelectionProof.qcGates); Object.assign(qcAcknowledgements,reportedSelectionProof.qcAcknowledgements);
+    for(const [id,gate] of Object.entries(reportedSelectionProof.qcGates)) qcModes[id]=gate.mode;
+    const evidenceBatches = [...new Map([...qcBatches,...reportedSelectionProof.qcBatches].map(row=>[row.id,row])).values()];
+    const reportOptions = { qcModes, qcBatches:evidenceBatches, qcGates, qcAcknowledgements, reportedSelectionProof };
+    const reportableResults = reportedSelectionProof.values;
+    const reportLocale = user?.language || 'en';
     const omittedByDisposition = sample.results.filter(result =>
         isCurrentValidAnalyticalResult(result, getReportingMode(sample, result, reportOptions)) &&
         matchingItems(result, sample.workItems).length > 0 && governingItems(result, sample.workItems).length === 0)
@@ -126,13 +130,23 @@ async function assembleReport(sampleId, user, options = {}) {
         const flags = typeof result.flags === 'string' ? JSON.parse(result.flags) : (result.flags || []);
         const methodology = (result.methodologyId && specificMethodMap.get(result.methodologyId)) || methodMap.get(result.param);
         const rawUnit = result.unit || analysis?.units || '';
-        const interp = interpretParameter(result.param, result.value, rawUnit);
+        const notReportable = result.mode==='NOT_REPORTABLE';
+        const interp = notReportable ? {unit:'',rating:null,label:null,advisory:null} : interpretParameter(result.param, result.value, rawUnit);
 
         groupedResults[category].items.push({
             param: result.param,
             name: analysis?.name || result.param,
-            value: result.value,
-            unit: interp.unit || rawUnit,
+            value: require('./reportedValueReadService').reportedValueText(result,reportLocale),
+            unit: notReportable ? '' : interp.unit || rawUnit,
+            decimalPlaces: methodology?.decimalPlaces ?? null,
+            reportedValueSelectionId: result.selectionId,
+            selectionGroupId: result.selectionGroupId,
+            reportedMode: result.mode,
+            selectionReason: result.reason,
+            sourceResultIds: result.sourceResultIds,
+            attemptIds: result.attemptIds,
+            selectionRule: result.rule,
+            selectionPolicyVersion: result.policyVersion,
             method: methodology?.name || null,
             standard: methodology?.standard || null,
             interpretation: {
@@ -160,7 +174,7 @@ async function assembleReport(sampleId, user, options = {}) {
     }
 
     // 8b. Compute comprehensive multi-parameter soil diagnostics
-    const soilDiagnostics = evaluateSoilProfile(reportableResults.map(r => ({
+    const soilDiagnostics = evaluateSoilProfile(reportableResults.filter(r=>r.mode!=='NOT_REPORTABLE').map(r => ({
         param: r.param,
         value: r.value,
         unit: r.unit || analysisMap.get(r.param)?.units
@@ -170,8 +184,8 @@ async function assembleReport(sampleId, user, options = {}) {
     const workItemSummary = sample.workItems.map(wi => ({
         analysis: wi.analysis,
         status: wi.status,
-        result: wi.status === 'ACCEPTED' && reportableResults.some(result =>
-            isReviewedReportResult(result, [wi], getReportingMode(sample, result, reportOptions))) ? wi.result : null,
+        result: wi.status === 'ACCEPTED' ? reportableResults.filter(result=>result.workItemId===wi.id)
+            .map(result=>require('./reportedValueReadService').reportedValueText(result,reportLocale)).join('; ') || null : null,
         completedAt: wi.completedAt,
         assignedTo: wi.assignedTo
     }));
@@ -246,13 +260,15 @@ async function assembleReport(sampleId, user, options = {}) {
     }
 
     // 15. Assemble the final structured report payload
-    const reportLocale = (user && user.language) ? user.language : 'en';
     const qcWarnings = reportingQc(sample, reportOptions).warnings;
     const warningLocale = ['en', 'es', 'es-419', 'fr', 'pt'].includes(reportLocale) ? reportLocale : 'en';
     const qcWarningStatement = qcWarnings.length
         ? require(`../locales/${warningLocale}.json`).resultReports.qcWarningStatement : null;
-    const evidence = freezeReportEvidence(reportableResults, sample.workItems, qcBatches, reportOptions);
-    evidence.qcModes = qcModeEvidence;
+    const evidence = freezeReportEvidence(reportedSelectionProof.sourceResults, sample.workItems, evidenceBatches, reportOptions);
+    const sourceModes=await Promise.all(reportedSelectionProof.sourceResults.map(result=>resolveReportingModes(
+        {...sample,results:[result],workItems:reportedSelectionProof.workItemsByResult[result.id]},evidenceBatches,{db})));
+    evidence.qcModes=sourceModes.flatMap(proof=>proof.qcModeEvidence);
+    evidence.reportedValueSelections = reportedSelectionProof.groups;
     const evidenceText = describeReportEvidence(evidence, warningLocale);
     const reportContent = {
         meta: {

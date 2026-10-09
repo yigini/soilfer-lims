@@ -167,6 +167,8 @@ echo "📦 Installing WorkAttempt execution evidence..."
 node scripts/install_work_attempt_contract.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 echo "📦 Installing repeat and correction evidence..."
 node scripts/install_work_repeat_contract.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing reported-value selection evidence..."
+node scripts/install_reported_value_selections.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."

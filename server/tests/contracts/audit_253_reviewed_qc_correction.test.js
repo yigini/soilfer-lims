@@ -167,7 +167,13 @@ test('all preset defaults keep reviewed corrections off and missing recorded cri
 test('later generated report and PDF disclose the original failed evaluation and reviewed replacement in every locale', async () => {
     const f = await failedFixture(true); expect((await f.submit(f.reviewer)).status).toBe(200);
     const item = await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } }); await f.result(item);
-    for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) await require('../../services/workItemStateService').transitionWorkItem(item.id, status, f.actor, 'Reviewed report fixture', {}, f.db);
+    await require('../../services/workItemStateService').transitionWorkItem(item.id,'COMPLETED',f.actor,'Reviewed report fixture',{},f.db);
+    await require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,
+        sampleId:item.sampleId,type:'FULL',workItemIds:[item.id]});
+    await withQcRunHttp(f.db,f.reviewer,async(app,token)=>{
+        const reviewed=await request(app).post('/api/work/'+item.id+'/review').set('Authorization','Bearer '+token).send({decision:'ACCEPT'});
+        expect(reviewed).toMatchObject({status:200});
+    },{reviews:true});
     const PDFDocument = require('pdfkit'), text = jest.spyOn(PDFDocument.prototype, 'text');
     try {
         for (const locale of ['en', 'es', 'es-419', 'fr', 'pt']) {

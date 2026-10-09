@@ -138,7 +138,9 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
         const item = await prisma.workItem.findUnique({ where: { id: workItemId } });
         await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED', data: {
             id: `RES-QC2-${workItemId}`, sampleId, param: item.analysis, value: item.result,
-            numericValue: 6.8, provenance: 'MEASURED', batchId, isCurrent: true } });
+            // This positive QC-disposition case starts with a valid measurement;
+            // an independent invalid result must remain blocked under #192.
+            numericValue: 6.8, provenance: 'MEASURED', batchId, isCurrent: true, isValid: true } });
         // Manager dispositions the failed batch
         const dispRes = await request(app)
             .post(`/api/qc/batches/${batchId}/disposition`)

@@ -31,7 +31,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     afterEach(() => jest.restoreAllMocks());
     afterAll(async () => { for (const database of ownedDatabases) await database.close(); });
     const call = (path, body) => request(app).post(path).set('Authorization', `Bearer ${token}`).send(body);
-    async function fixture({ status = 'APPROVED', itemStatus = 'ACCEPTED', param = 'PH_H2O', batchStatus, flags = [], valid = true, linkItemBatch = true, recordResult = true } = {}) {
+    async function fixture({ status = 'APPROVED', itemStatus = 'ACCEPTED', param = 'PH_H2O', batchStatus, flags = [], valid = true, linkItemBatch = true, recordResult = true,select=true } = {}) {
         const sampleId = id('SMP-03'), workItemId = id('WI-03'), resultId = id('RES-03');
         const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-03'), analysis: param, status: batchStatus, labId, createdBy: 'review-test',
             qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
@@ -58,6 +58,9 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
             ...(['ACCEPTED','SUBMITTED'].includes(itemStatus) && { attemptStatus: itemStatus }), data: resultData }) : null;
         await setFixtureQcRequirement(prisma, token, labId, batch ? 'REQUIRED' : 'NOT_REQUIRED');
         if (batch) await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batch.id);
+        if(select && itemStatus==='ACCEPTED' && result && valid && (!batchStatus || batchStatus==='QC_PASS')) {
+            await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,item.id,token);
+        }
         return { sampleId, item, result, batch, resultData };
     }
     const generate = f => call(`/api/reports/generate/${f.sampleId}`, {});
@@ -170,7 +173,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test('unresolved policy mode fails closed', async () => {
         mockQcMode('UNKNOWN');
-        const res = await generate(await fixture());
+        const res = await generate(await fixture({select:false}));
         expect(res.status).toBe(409); expect(res.body.code).toBe('QC_POLICY_UNRESOLVED');
     });
     test('legacy accepted no-batch work with an explicit lab waiver can publish', async () => expect((await generate(await fixture())).status).toBe(200));
@@ -191,7 +194,8 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     test('an accepted item without a current valid result blocks', async () => {
         const f = await fixture({ valid: false, flags: ['REVIEW_RETURNED'] });
         const res = await generate(f);
-        expect(res.status).toBe(409); expect(res.body.code).toBe('ACCEPTED_ITEM_WITHOUT_VALID_RESULT'); expect(res.body.workItemIds).toEqual([f.item.id]);
+        expect(res.status).toBe(409); expect(res.body.code).toBe('REPORTED_VALUE_SELECTION_REQUIRED');
+        expect(res.body.workItemId).toBe(f.item.id);
     });
     test.each(['WAIVED', 'CANCELLED'])('%s work neither blocks nor prints a value', async itemStatus => {
         const f = await fixture({ itemStatus, valid: true, batchStatus: 'QC_FAIL', flags: ['METHOD_NOTE'] });
@@ -218,6 +222,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
             data: [f.resultData, ...['SAND', 'SILT', 'CLAY'].map(param => ({ id: id('TEXT-03'),
                 sampleId: f.sampleId, param, value: '25', isCurrent: true }))] });
         f.result = results.find(row => row.param === 'TEXTURE');
+        await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,f.item.id,token);
         expect(new Set(results.map(row => row.attemptId))).toEqual(new Set([f.result.attemptId]));
         expect(await prisma.workAttempt.findUnique({ where: { id: f.result.attemptId } })).toMatchObject({ workItemId: f.item.id });
         expect((await reportValues(f)).values.map(row => row.param).sort()).toEqual(['CLAY', 'SAND', 'SILT', 'TEXTURE']);
@@ -248,6 +253,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
             expect(review.status).toBe(200);
             await require('../../services/sampleStateService').transitionSample(f.sampleId, 'APPROVED', jwt.decode(token), 'Reviewed warning fixture');
         }
+        if(['ADVISORY','OFF'].includes(mode)) await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,f.item.id,token);
         const before = await reviewedState(f);
         const res = await generate(f);
         expect(policy).toHaveBeenCalledWith(labId, 'qc.mode', { analysisCode: 'PH_H2O', methodologyId: null,
@@ -279,7 +285,9 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         mockQcMode(mode);
         const f = await fixture({ batchStatus: 'QC_FAIL', valid: false, flags: ['QC_BATCH_FAILED', flag] });
         const before = await reviewedState(f);
-        expect((await reportValues(f)).values).toHaveLength(0);
+        await expect(reportValues(f)).rejects.toMatchObject({code:'REPORTED_VALUE_SELECTION_REQUIRED'});
+        await expect(require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,f.item.id,token))
+            .rejects.toMatchObject({code:flag==='REVIEW_RETURNED'?'REPORTED_VALUE_SELECTION_REQUIRED':'REPORTED_VALUE_SOURCE_INVALID'});
         expect((await reviewedState(f)).result).toEqual(before.result);
         expect((await generate(f)).status).toBe(409);
     });
@@ -288,7 +296,9 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test.each(['en', 'es', 'es-419', 'fr', 'pt'])('QC caveat is frozen in %s', async language => {
         mockQcMode('REQUIRED_WARN');
-        const f = await fixture({ batchStatus: 'QC_FAIL', valid: false, flags: ['QC_BATCH_FAILED'] });
+        const f = await fixture({status:'PROCESSING',itemStatus:'SUBMITTED',batchStatus: 'QC_FAIL', valid: false, flags: ['QC_BATCH_FAILED'] });
+        expect(await call(`/api/work/${f.item.id}/review`,{status:'ACCEPTED',qcAcknowledgement:{reason:'Localized warning reviewed'}})).toMatchObject({status:200});
+        await require('../../services/sampleStateService').transitionSample(f.sampleId,'APPROVED',jwt.decode(token),'Reviewed localized warning fixture');
         expect((await reportValues(f, language)).content.qcWarningStatement).toBe(require(`../../locales/${language}.json`).resultReports.qcWarningStatement);
     });
     test.each(['individual', 'bulk', 'submission'])('%s RETURN preserves values, merges flags and prevents assembly', async path => {

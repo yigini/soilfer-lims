@@ -56,8 +56,10 @@ async function getAnalysisMap() {
 }
 
 // Helper to format a sample into harmonized SIS JSON structure (SOSA/SSN & GloSIS compliant)
-function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } = {}, options = {}) {
-    return formatSampleV1(sample, { analysisMap, methodMap }, options);
+async function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } = {}, options = {}) {
+    const proof=await require('../services/reportedValueReadService').readSampleReportedValues(prisma,sample,{partial:options.partial===true});
+    return {...formatSampleV1(sample, { analysisMap, methodMap }, {...options,reportedValues:proof.values}),
+        reportedValueErrors:proof.errors};
 }
 
 // ─── 1. GET /api/v1/sis/samples (Paginated Registry) ───
@@ -89,7 +91,7 @@ exports.getSamples = async (req, res, next) => {
         if (typeof req.endPhase === 'function') req.endPhase('list');
 
         if (typeof req.startPhase === 'function') req.startPhase('mapping');
-        const formatted = samples.map(s => formatSampleForSis(s, maps, { auth: req.sisAuth }));
+        const formatted = await Promise.all(samples.map(s => formatSampleForSis(s, maps, { auth: req.sisAuth,partial:true,locale:req.user?.language || req.sisAuth?.language })));
         if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         res.json({
@@ -161,7 +163,7 @@ exports.getSampleById = async (req, res, next) => {
             }
         });
 
-        const formatted = formatSampleForSis(sample, maps, { auth: req.sisAuth });
+        const formatted = await formatSampleForSis(sample, maps, { auth: req.sisAuth,locale:req.user?.language || req.sisAuth?.language });
         formatted.spectralRecords = spectra;
         if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
@@ -196,9 +198,10 @@ exports.getGeoJson = async (req, res, next) => {
 
         if (typeof req.startPhase === 'function') req.startPhase('mapping');
         const features = [];
+        const formattedSamples=await Promise.all(samples.map(s=>formatSampleForSis(s,maps,{auth:req.sisAuth,partial:true,locale:req.user?.language || req.sisAuth?.language})));
 
-        samples.forEach(s => {
-            const formatted = formatSampleForSis(s, maps, { auth: req.sisAuth });
+        samples.forEach((s,index) => {
+            const formatted = formattedSamples[index];
             const coords = formatted.provenance.coordinates;
 
             if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number') {
@@ -220,7 +223,8 @@ exports.getGeoJson = async (req, res, next) => {
                     collectionDate: formatted.provenance.collectionDate,
                     depth: formatted.provenance.depthHorizon.depthRange,
                     landUse: formatted.provenance.site.landUse,
-                    crop: formatted.provenance.site.currentCrop
+                    crop: formatted.provenance.site.currentCrop,
+                    reportedValueErrors:formatted.reportedValueErrors
                 };
 
                 // Add analytical keys (WP-22 dual export schema)
@@ -276,8 +280,8 @@ exports.getResultsMatrix = async (req, res, next) => {
         if (typeof req.endPhase === 'function') req.endPhase('list');
 
         if (typeof req.startPhase === 'function') req.startPhase('mapping');
-        const rows = samples.map(s => {
-            const formatted = formatSampleForSis(s, {}, { auth: req.sisAuth });
+        const rows = await Promise.all(samples.map(async s => {
+            const formatted = await formatSampleForSis(s, {}, { auth: req.sisAuth,partial:true,locale:req.user?.language || req.sisAuth?.language });
             const row = {
                 sample_id: formatted.id,
                 lab_id: formatted.labId,
@@ -289,7 +293,8 @@ exports.getResultsMatrix = async (req, res, next) => {
                 depth: formatted.provenance.depthHorizon.depthRange,
                 collection_date: formatted.provenance.collectionDate,
                 land_use: formatted.provenance.site.landUse,
-                crop: formatted.provenance.site.currentCrop
+                crop: formatted.provenance.site.currentCrop,
+                reportedValueErrors:formatted.reportedValueErrors
             };
 
             Object.entries(formatted.analyticalResults).forEach(([param, obj]) => {
@@ -297,7 +302,7 @@ exports.getResultsMatrix = async (req, res, next) => {
             });
 
             return row;
-        });
+        }));
         if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         res.json({
@@ -639,7 +644,7 @@ exports.syncDelta = async (req, res, next) => {
             samplesCount: samples.length,
             spectraCount: authorizedSpectra.length,
             hasMore: hasMoreSamples || hasMoreSpectra,
-            samples: samples.map(s => formatSampleForSis(s, maps, { auth: req.sisAuth })),
+            samples: await Promise.all(samples.map(s => formatSampleForSis(s, maps, { auth: req.sisAuth,partial:true,locale:req.user?.language || req.sisAuth?.language }))),
             spectra: authorizedSpectra.map(s => ({
                 id: s.id,
                 sampleId: s.sampleId,

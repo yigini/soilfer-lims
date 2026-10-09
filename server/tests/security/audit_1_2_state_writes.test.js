@@ -55,6 +55,17 @@ const exceptions = [
 ];
 const serverRoot = path.resolve(__dirname, '../..');
 
+test('the #192 loader is independently byte-bound; a changed loader remains unresolved',()=>{
+    const probe="const {loadReportedValueMigrationSource}=require('../services/reportedValueMigrationSource'); const source=loadReportedValueMigrationSource(); db.exec(source.guardsSql);";
+    expect(scanSource(probe,'scripts/probe.js',exceptions)).toEqual([]);
+    const loader=path.join(serverRoot,'services/reportedValueMigrationSource.js'),read=fs.readFileSync;
+    const spy=jest.spyOn(fs,'readFileSync').mockImplementation((file,...args)=>{
+        const value=read(file,...args);return path.resolve(file)===loader ? String(value)+'\n// changed loader\n' : value;
+    });
+    try {expect(scanSource(probe,'scripts/probe.js',exceptions)).toEqual([expect.objectContaining({code:'UNRESOLVED_WORKFLOW_SQL'})]);}
+    finally {spy.mockRestore();}
+});
+
 test('the previous #191 release digest is refused; only the exact current loader and DDL are inspected',()=>{
     const probe="const {loadWorkRepeatMigrationSource}=require('../services/workRepeatMigrationSource'); const source=loadWorkRepeatMigrationSource(); db.exec(source.guardsSql);";
     expect(scanSource(probe,'scripts/probe.js',exceptions)).toEqual([]);

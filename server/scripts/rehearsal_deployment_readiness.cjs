@@ -1084,6 +1084,30 @@ async function runSuite() {
     const repeatProof = JSON.parse(repeatProofOutput);
     console.log(`  ✓ Owned baseline → #190 COMPLETE → #191 PRE_191 dry-run → COMPLETE; NULL reasons ${repeatProof.dry.plan.reasonNotRecordedCount}, backfill 0, blocked RECORDED owners ${repeatProof.dry.releaseInventory.blockedWorkItemCount}; all retained rows and both receipts verified; NO_OP writes 0`);
 
+    // The same disposable copy now supplies #192's real predecessor receipts.
+    // Installation creates no analytical choices and never repairs history.
+    const selectionProofOutput=cp.execFileSync('docker',['run','--rm','-v',`${repeatProofVolume}:/owned-192`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const installer=require('./scripts/install_reported_value_selections'),dbPath='/owned-192/dev.db';
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const fail=message=>{throw Error(message)};
+         const snapshot=()=>{const db=new Database(dbPath,{readonly:true,fileMustExist:true});try{
+           const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name<>'ReportedValueSelection' ORDER BY name").all();
+           return Object.fromEntries(names.map(({name})=>[name,db.prepare('SELECT * FROM "'+name.replaceAll('"','""')+'" ORDER BY rowid').all()
+             .filter(row=>name!=='_schema_migrations'||row.id!=='192_reported_value_selection')]));
+         }finally{db.close()}};
+         const before=hash(),retained=JSON.stringify(snapshot()),dry=installer.installReportedValueSelections({dbPath});
+         if(dry.classification!=='PRE_192'||dry.totalChanges!==0||hash()!==before)fail('192 dry-run differs');
+         const applied=installer.installReportedValueSelections({dbPath,apply:true}),ready=installer.assertReportedValueStartupReady(dbPath);
+         if(applied.classification!=='COMPLETE'||applied.newSelectionCount!==0||ready.totalChanges!==0||JSON.stringify(snapshot())!==retained)fail('192 retained history differs');
+         const installed=hash(),again=installer.installReportedValueSelections({dbPath,apply:true});
+         if(again.mode!=='NO_OP'||again.totalChanges!==0||hash()!==installed)fail('192 repeat installation changed bytes');
+         console.log(JSON.stringify({dry,applied,ready,retainedRowsPreserved:true,dryRunBytesPreserved:true,noOpBytesPreserved:true}));`
+    ],{encoding:'utf8'}).trim();
+    const selectionProof=JSON.parse(selectionProofOutput);
+    if(!selectionProof.retainedRowsPreserved)throw Error('192 rehearsal retained-data proof missing');
+    console.log('  ✓ Owned #191 COMPLETE → #192 PRE_192 dry-run → COMPLETE; retained history unchanged, new selections 0, NO_OP writes 0');
+
     // 7. Upgrade: Run target image on the populated baseline volume
     const upgTargetContainer = registerContainer(`lims_c_upg_${TS}`);
     const upgTargetPort = await getFreePort();

@@ -56,7 +56,7 @@ key('qc.curveMinR', 'number', 0.995, undefined, undefined, { min: 0, max: 1 });
 key('qc.repeatabilityLimit', 'number', null, null, null, { min: 0, nullable: true, unit: 'method unit' });
 key('qc.blankCorrection', 'enum', 'NONE', undefined, undefined, { allowedValues: ['NONE', 'SUBTRACT_MEAN_BLANK'], unsupportedValues: ['SUBTRACT_MEAN_BLANK'] });
 key('qc.failAction', 'qcFailAction', { BLANK: 'FAIL_BATCH', DUPLICATE: 'FAIL_BATCH', LRM: 'FAIL_BATCH', CRM: 'FAIL_BATCH' });
-key('results.reportedValueRule', 'enum', 'MEAN_IF_WITHIN_R', 'MEAN_IF_WITHIN_R', 'LATEST_VALID', { allowedValues: ['MEAN_IF_WITHIN_R', 'LATEST_VALID'] });
+key('results.reportedValueRule', 'enum', 'MEAN_IF_WITHIN_R', 'MEAN_IF_WITHIN_R', 'LATEST_VALID', { allowedValues: ['MEAN_IF_WITHIN_R', 'LATEST_VALID', 'REVIEWER_PICKS'] });
 key('results.betweenLodLoq', 'enum', 'REPORT_LT_LOQ', 'REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED', { allowedValues: ['REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED'] });
 key('results.phMin', 'number', 2, 2, 2, { min: 0, unit: 'pH' });
 key('results.phMax', 'number', 14, 14, 14, { min: 0, unit: 'pH' });

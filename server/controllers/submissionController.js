@@ -216,7 +216,8 @@ exports.reviewSubmission = async (req, res) => {
             }
             const reason = (decision.reason || decision.note || '').trim();
             if (verdict !== 'ACCEPT' && !reason) return res.status(400).json({ error: 'RETURN and WAIVE require a reason.', code: 'REVIEW_REASON_REQUIRED' });
-            validated.push({ workItemId: decision.workItemId, decision: verdict, reason: reason || 'Item accepted',attemptId:decision.attemptId,reasonCode:decision.reasonCode });
+            validated.push({ workItemId: decision.workItemId, decision: verdict, reason: reason || 'Item accepted',
+                attemptId:decision.attemptId,reasonCode:decision.reasonCode,reportedValueSelection:decision.reportedValueSelection });
         }
         normalizedDecisions = validated;
 
@@ -332,7 +333,7 @@ exports.reviewSubmission = async (req, res) => {
                     reasonCode:decision.reasonCode ?? null,
                     submissionItemId: submission.id,
                     decision: verdict === 'ACCEPT' ? 'ACCEPT' : (verdict === 'REJECT_REANALYSIS' ? 'RETURN' : 'OMIT'),
-                    reason: reason || null,
+                    reason: verdict==='ACCEPT' && decision.reportedValueSelection?.reason?.trim() || reason || null,
                     reviewerId: user.id || user.username,
                     reviewerName: user.username,
                     authorization: user.role,
@@ -357,12 +358,13 @@ exports.reviewSubmission = async (req, res) => {
                     }
                     return rows;
                 }, id, { reason, reasonCode:decision.reasonCode, attemptId:decision.attemptId, qcAcknowledgement: req.body.qcAcknowledgement,
+                    reportedValueSelection:decision.reportedValueSelection,
                     action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',
                     details: `${user.username} ${verdict.toLowerCase()}ed ${analysisName}` });
                 results.push({ workItemId, status: newStatus, decision: verdict });
             } catch (error) {
-                if (!['ITEM_NOT_SUBMITTED', 'ITEM_NOT_IN_SUBMISSION'].includes(error.code)) throw error;
-                errors.push({ workItemId, code: error.code });
+                if (!['ITEM_NOT_SUBMITTED', 'ITEM_NOT_IN_SUBMISSION'].includes(error.code) && !error.code?.startsWith('REPORTED_VALUE_') && error.code !== 'RESULT_POLICY_UNRESOLVED') throw error;
+                errors.push({ workItemId, code: error.code, ...(error.details || {}) });
             }
         }
         });

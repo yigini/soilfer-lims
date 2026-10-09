@@ -17,6 +17,7 @@
  *  9. Disclaimer & footer
  */
 import React from 'react';
+import { formatReportedValue } from '@lims/reported-value-format';
 import './ReportContent.css';
 
 // Visual indicator for agronomic rating tiers returned by server
@@ -281,7 +282,7 @@ const ReportContent = ({ data }) => {
                                                 </td>
                                                 <td className="param-method">{toScalar(item.standard || item.method, 'Standard Laboratory Method')}</td>
                                                 <td className="param-value">
-                                                    {formatResultValue(item.value, item.decimalPlaces, item.param)}
+                                                    {item.reportedValueSelectionId ? formatReportedValue(item) : formatResultValue(item.value, item.decimalPlaces, item.param)}
                                                 </td>
                                                 <td className="param-unit">{toScalar(item.unit, '—')}</td>
                                             </tr>

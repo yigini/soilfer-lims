@@ -13,10 +13,11 @@ function freezeReportEvidence(results, workItems, batches, options = {}) {
     const acknowledgements = [], calibrationBracketRepeats = [];
     const corrections = new Map();
     for (const result of results) {
+        const sourceItems = options.reportedSelectionProof?.workItemsByResult[result.id] || workItems;
         const gate = options.qcGates?.[result.id];
-        for (const batchId of new Set([...(gate?.batchIds || []), ...linkedBatchIds(result, workItems)])) {
+        for (const batchId of new Set([...(gate?.batchIds || []), ...linkedBatchIds(result, sourceItems)])) {
             const source = batches.find(row => row.id === batchId);
-            const analysisCode = governingItems(result, workItems).find(item => item.batchId === batchId)?.analysis || result.param;
+            const analysisCode = governingItems(result, sourceItems).find(item => item.batchId === batchId)?.analysis || result.param;
             for (const correction of reviewedCorrections(source, analysisCode)) corrections.set(correction.id, correction);
         }
         if (gate) {
@@ -35,11 +36,11 @@ function freezeReportEvidence(results, workItems, batches, options = {}) {
                     acknowledgementReason: acknowledgement.reason, acknowledgementAuditLogId: acknowledgement.auditLogId }) });
             continue;
         }
-        const ids = linkedBatchIds(result, workItems);
+        const ids = linkedBatchIds(result, sourceItems);
         if (!ids.length) deviations.push({ analysisCode: result.param, batchId: null, qcStatus: 'NOT_RECORDED', dispositionReason: null });
         for (const batchId of ids) {
             const source = batches.find(candidate => candidate.id === batchId);
-            const analysisCode = governingItems(result, workItems).find(item => item.batchId === batchId)?.analysis || result.param;
+            const analysisCode = governingItems(result, sourceItems).find(item => item.batchId === batchId)?.analysis || result.param;
             const batch = analyteGateView(source, analysisCode);
             if (batch?.result === 'PASS' && ['QC_PASS', 'CLOSED'].includes(batch.analyteStatus) && !batch.disposition ||
                 !Array.isArray(source?.analytes) && batch?.status === 'QC_PASS') continue;

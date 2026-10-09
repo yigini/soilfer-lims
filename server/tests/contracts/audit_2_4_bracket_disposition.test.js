@@ -120,16 +120,25 @@ test('actual CCV 25 repeat preserves sealed evidence, repeats only its bracket a
     expect(f.run.positions.filter(row => row.kind === 'CCV').map(row => row.position)).toEqual([13, 25, 37]);
     const affectedPositions = f.run.positions.filter(row => row.kind === 'SAMPLE' && row.position > 13 && row.position < 25);
     const sealed = f.items.find(item => item.rackPosition === 20), outside = f.items.find(item => item.rackPosition === 4);
+    await writeNativeMeasurements(f.db,f.run.id,f.actor,{measurements:f.readings([])});
     for (const item of [sealed, outside]) {
-        for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) await require('../../services/workItemStateService')
-            .transitionWorkItem(item.id, status, f.actor, 'Previously reviewed fixture', {}, f.db);
+        await require('../../services/workItemStateService').transitionWorkItem(item.id,'COMPLETED',f.actor,'Previously reviewed fixture',{},f.db);
+        await require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,
+            sampleId:item.sampleId,type:'FULL',workItemIds:[item.id]});
+        await withQcRunHttp(f.db,f.actor,async(app,token)=>{
+            expect(await request(app).post('/api/work/'+item.id+'/review').set('Authorization','Bearer '+token)
+                .send({decision:'ACCEPT'})).toMatchObject({status:200});
+        },{reviews:true});
         if (item.id === sealed.id) await require('../../services/sampleStateService').transitionSample(item.sampleId, 'APPROVED', f.actor, 'Prior approval', {}, f.db);
     }
     const sealedBefore = await f.db.workItem.findUnique({ where: { id: sealed.id } });
     const oldReport = await f.db.report.create({ data: { id: randomUUID(), sampleId: sealed.sampleId, labId: f.labId,
         status: 'PUBLISHED', generatedBy: f.actor.username, publishedAt: new Date(), content: JSON.stringify({ original: true,
             result: f.results.find(row => row.sampleId === sealed.sampleId) }) } });
-    const evaluation = await writeNativeMeasurements(f.db, f.run.id, f.actor, { measurements: f.readings([25]) });
+    await require('../../services/qcNativeLifecycleService').reopenNativeRun(f.db,f.run.id,f.actor,
+        'Owned sequence: investigate a later continuing-calibration observation');
+    const evaluation = await writeNativeMeasurements(f.db, f.run.id, f.actor,
+        {corrections:f.readings([25]),reason:'Owned sequence: record the later failed continuing calibration'}, {correction:true});
     expect(evaluation.analytes[0].result).toBe('FAIL');
     expect(await f.db.workItem.findUnique({ where: { id: sealed.id } })).toEqual(sealedBefore);
     const oldChecks = await f.db.qcEvaluation.findMany(), oldMeasurements = await f.db.qcMeasurement.findMany();

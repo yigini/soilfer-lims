@@ -44,6 +44,10 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
                             isCurrent: true
                         }
                     ].map(result => ({ ...result, sampleId: sampleApprovedGtm.id }))) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
+        await require('../setup').ensureTestLab(sampleApprovedGtm.assignedLab,'GTM');
+        const reviewer=await require('../setup').getAuthToken('LAB_MANAGER',sampleApprovedGtm.assignedLab);
+        await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(prisma,reviewer,sampleApprovedGtm.assignedLab);
+        await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,sampleApprovedGtm.id+'-PH_H2O',reviewer);
 
         // 2. Pending / Unapproved GTM Sample
         samplePendingGtm = await createSampleFixture(prisma, {

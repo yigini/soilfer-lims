@@ -111,7 +111,9 @@ exports.getCapabilities = (req, res) => {
             losslessObservations: true,
             strictProfileFiltering: true,
             deliveryReceipts: true
-        }
+        },
+        observationFields:{reportedValueSelectionId:{nullable:true,
+            description:'Saved current non-stale reported selection using this raw Result as a source; null otherwise. Raw observation rows, cursors and counts are unchanged.'}}
     });
 };
 
@@ -417,6 +419,7 @@ exports.getObservations = async (req, res, next) => {
         }
 
         if (typeof req.startPhase === 'function') req.startPhase('mapping');
+        const reportedSelectionIds=await require('../services/reportedValueReadService').rawSelectionIds(prisma,pageItems);
         const observations = pageItems.map(r => {
             const s = r.sample;
             const aMeta = maps.analysisMap[r.param] || {};
@@ -449,6 +452,7 @@ exports.getObservations = async (req, res, next) => {
 
             return {
                 observationId: r.id,
+                reportedValueSelectionId:reportedSelectionIds[r.id] || null,
                 specimenId: s.id,
                 fieldSampleId: s.originalId,
                 labSampleId: s.labId || null,

@@ -32,8 +32,11 @@ async function currentEvents(tx, sampleId) {
     return tx.resultEvidenceEvent.findMany({ where: { sampleId: String(sampleId), result: { isCurrent: true } } });
 }
 
-async function assertNoPreparationRevert(tx, sampleId) {
-    const blocked = unclearedEvents(await currentEvents(tx, sampleId));
+async function assertNoPreparationRevert(tx, sampleId, resultIds = null) {
+    const events = resultIds === null ? await currentEvents(tx, sampleId) : await tx.resultEvidenceEvent.findMany({
+        where: { sampleId: String(sampleId), resultId: { in: resultIds } }
+    });
+    const blocked = unclearedEvents(events);
     if (blocked.length) throw new TransitionError('Preparation was reverted for current results. Re-enter them or obtain a manager clearance.',
         409, 'PREP_REVERTED_RESULTS', { resultIds: [...new Set(blocked.map(event => event.resultId))] });
 }

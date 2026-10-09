@@ -1,8 +1,8 @@
 const prisma = require('../prisma');
 const scopeGuard = require('../utils/scopeGuard');
 const { hasPermission } = require('../config/roles');
-const { CURRENT_VALID_RESULTS, measuredValue } = require('../services/reportedValueService');
-const { governingItems } = require('../services/reportResultGovernance');
+const { measuredValue } = require('../services/reportedValueService');
+const { readSampleReportedValues, reportedValueText } = require('../services/reportedValueReadService');
 
 const EXCLUDED_ANALYSES = new Set(['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL', 'ARCH', 'DISP', 'DISPOSAL_PENDING']);
 const SPECTRAL_ANALYSES = new Set(['SPEC_VIS_NIR', 'SPEC_MIR', 'Vis-NIR Soil Spectra', 'MIR Soil Spectra']);
@@ -27,7 +27,7 @@ exports.getAnalyticalResults = async (req, res) => {
         }
         const samples = await prisma.sample.findMany({
             where: scopeGuard.buildScopedWhere(req.user, filters, { labField: 'labId', altLabField: 'assignedLab' }),
-            include: { workItems: true, results: { where: CURRENT_VALID_RESULTS, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] } },
+            include: { workItems: true },
             orderBy: { receptionDate: 'desc' }, take: 500
         });
         const spectralIndex = await prisma.spectralData.findMany({
@@ -45,18 +45,24 @@ exports.getAnalyticalResults = async (req, res) => {
             return code === analysisType;
         };
         const analysisKeys = new Set();
+        const reportedBySample = new Map();
+        for(const sample of samples) reportedBySample.set(sample.id,await readSampleReportedValues(prisma,sample,{partial:true}));
         const data = samples.flatMap(sample => {
+            const reported = reportedBySample.get(sample.id).values;
             const codes = [...new Set([...(parseJson(sample.requiredAnalyses) || []),
-                ...sample.workItems.map(item => item.analysis), ...sample.results.map(result => result.param)])].filter(included);
+                ...sample.workItems.map(item => item.analysis), ...reported.map(result => result.param)])].filter(included);
             codes.forEach(code => analysisKeys.add(code));
             const base = {
                 id: sample.id, sampleId: sample.id, labId: sample.labId || sample.originalId || 'N/A', originalId: sample.originalId,
                 project: sample.projectCode, country: sample.countryName, status: sample.status,
                 submitter: sample.submitter || parseJson(sample.metadata)?.submitterName || '',
-                collectionDate: sample.collectionDate, receptionDate: sample.receptionDate, latitude: '', longitude: ''
+                collectionDate: sample.collectionDate, receptionDate: sample.receptionDate, latitude: '', longitude: '',
+                reportedValueErrors:reportedBySample.get(sample.id).errors.filter(error=>included(error.analysisCode))
             };
             const pending = {};
             for (const code of codes) {
+                const refusal=base.reportedValueErrors.find(error=>error.analysisCode===code);
+                if(refusal) {pending[code]={status:'UNAVAILABLE',code:refusal.code,workItemId:refusal.workItemId};continue;}
                 const items = sample.workItems.filter(item => item.analysis === code);
                 const item = items[0];
                 const modality = ['SPEC_MIR', 'MIR Soil Spectra'].includes(code) ? 'MIR' : 'NIR';
@@ -67,21 +73,18 @@ exports.getAnalyticalResults = async (req, res) => {
                 else pending[code] = { status: 'PENDING', assignedTo: item?.assignedTo || 'Pending Intake', lastUpdated: item?.updatedAt,
                     ...(spectralExists ? { note: 'Spectrum uploaded, awaiting review' } : {}) };
             }
-            const results = sample.results.filter(result => included(result.param));
+            const results = reported.filter(result => included(result.param));
             if (!results.length) return [{ ...base, ...pending }];
             return results.map(result => {
                 const value = measuredValue(result, defMap[result.param]?.units || '');
                 const pLower = result.param.toLowerCase();
-                const items = governingItems(result, sample.workItems);
-                const reviewed = items.length > 0 && items.every(item => ['ACCEPTED', 'APPROVED'].includes(item.status));
-                const row = { ...base, id: `${sample.id}:${result.id}`, resultId: result.id, replicateNo: result.replicateNo,
+                const notReportable=result.mode==='NOT_REPORTABLE', text=reportedValueText(result,req.user.language);
+                const row = { ...base, id: `${sample.id}:${result.selectionId}`, reportedValueSelectionId:result.selectionId,
+                    sourceResultIds:result.sourceResultIds, attemptIds:result.attemptIds,
                     methodologyId: result.methodologyId,
-                    [result.param]: reviewed ? value.value : { status: items.some(item => item.status === 'IN_PROGRESS') ? 'DRAFT' : 'SUBMITTED', value: value.value,
-                        assignedTo: items.map(item => item.assignedTo).filter(Boolean).join(', ') || 'Unknown' },
-                    [`${pLower}_as_measured`]: value.asMeasured, [`${pLower}_unit`]: value.unit,
-                    [`${pLower}_normalized`]: value.normalizedValue, [`${pLower}_controlled_unit`]: value.controlledUnit };
-                // A result row represents one recorded replicate. Other measured
-                // analytes are blank; spectral presence still links to the sample.
+                    [result.param]:notReportable?text:value.value,
+                    [`${pLower}_as_measured`]:notReportable?text:value.asMeasured, [`${pLower}_unit`]:notReportable?'':value.unit,
+                    [`${pLower}_normalized`]:notReportable?text:value.normalizedValue, [`${pLower}_controlled_unit`]:notReportable?'':value.controlledUnit };
                 for (const code of codes.filter(code => SPECTRAL_ANALYSES.has(code))) row[code] = pending[code];
                 return row;
             });
@@ -92,13 +95,14 @@ exports.getAnalyticalResults = async (req, res) => {
             return { key: code, label: `${name}${definition?.units ? ` (${definition.units})` : ''}`,
                 shortLabel: name, unit: definition?.units || null, isResult: true };
         }));
-        res.json({ data, columns: [
+        res.json({ data, reportedValueErrors:[...reportedBySample.values()].flatMap(proof=>proof.errors).filter(error=>included(error.analysisCode)), columns: [
             { key: 'labId', label: 'Lab ID', frozen: true }, { key: 'originalId', label: 'Original ID' },
             { key: 'project', label: 'Project' }, { key: 'country', label: 'Country' }, { key: 'status', label: 'Status' },
-            { key: 'replicateNo', label: 'Replicate' }, { key: 'collectionDate', label: 'Collected' }, { key: 'receptionDate', label: 'Received' },
+            { key: 'collectionDate', label: 'Collected' }, { key: 'receptionDate', label: 'Received' },
             ...resultColumns
         ] });
     } catch (error) {
+        if(error.statusCode) return res.status(error.statusCode).json({error:error.message,code:error.code});
         console.error('Data Results Error:', error);
         res.status(500).json({ error: 'Failed to load analytical results.' });
     }

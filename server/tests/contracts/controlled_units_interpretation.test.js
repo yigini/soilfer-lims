@@ -2,7 +2,7 @@ const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
-const { getAuthToken } = require('../setup');
+const { getAuthToken,ensureTestLab } = require('../setup');
 const { samplesDb } = require('../../db');
 const prisma = require('../../prisma');
 const {
@@ -16,7 +16,9 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
     let mgrToken, sampleId;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-INTERP','GTM');
         mgrToken = await getAuthToken('LAB_MANAGER', 'LAB-INTERP', ['GTM'], ['INTERP-PROJ']);
+        await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(prisma,mgrToken,'LAB-INTERP');
 
         // Create sample
         const s = await createSampleFixture(prisma, { data: { id: `SMP-INTERP-${Date.now()}`,
@@ -55,6 +57,9 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
                 { id: `RES-I10-${Date.now()}`, sampleId: s.id, param: 'SILT', value: '230', unit: 'g/kg', isValid: true, createdAt: now, updatedAt: now }, // Should convert to 23.0%
                 { id: `RES-I11-${Date.now()}`, sampleId: s.id, param: 'CLAY', value: '150', unit: 'g/kg', isValid: true, createdAt: now, updatedAt: now }  // Should convert to 15.0%
             ]) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
+        for (const item of await prisma.workItem.findMany({where:{sampleId,status:'ACCEPTED'}})) {
+            await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,item.id,mgrToken);
+        }
     });
 
     test('1. Normalizes synonym units and applies scientific conversion factors', () => {

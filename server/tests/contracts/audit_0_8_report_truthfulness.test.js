@@ -38,6 +38,9 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
             data: { id: id('R-08'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, batchId: batch.id } });
         await normalizeLegacyQcFixture(prisma, batch.id);
+        if(!reviewNeeded && (batchStatus==='QC_PASS' || ['ACCEPT_WITH_DEVIATION','PROCEED_WITH_WARNING'].includes(disposition?.decision))) {
+            await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,item.id,token);
+        }
         return { sampleId, batch, item };
     }
     async function generate(f) {

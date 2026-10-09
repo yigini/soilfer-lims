@@ -31,4 +31,9 @@ router.post('/review/bulk', checkPermission('APPROVE_RESULTS'), workItemControll
 // Manager Reviews (Approve/Reject)
 router.post('/:id/review', checkPermission('APPROVE_RESULTS'), workItemController.reviewWorkItem);
 
+const reportedValues = require('../controllers/reportedValueController');
+router.get('/:id/reported-value', checkPermission('APPROVE_RESULTS'), reportedValues.inspect);
+router.post('/:id/reported-value/preview', checkPermission('APPROVE_RESULTS'), reportedValues.preview);
+router.post('/:id/reported-value', checkPermission('APPROVE_RESULTS'), reportedValues.select);
+
 module.exports = router;

@@ -541,6 +541,18 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
     return observations;
 }
 
+// V1 communicates a reported outcome. V2 continues to call extractObservations
+// directly and retains its raw Result ids, replicas, order and numeric fields.
+function extractReportedObservations(sample,values,maps={},locale='en') {
+    const rows=values.map(row=>({...row,value:require('./reportedValueReadService').reportedValueText(row,locale)}));
+    return extractObservations({...sample,results:rows},maps).map(observation=>{
+        const row=rows.find(value=>value.id===observation.observationId);
+        if(row.mode==='NOT_REPORTABLE') {observation.asMeasured.value=row.value;observation.normalized.value=row.value;}
+        return {...observation,reportedValueSelectionId:row.selectionId,reportedMode:row.mode,selectionReason:row.reason,
+            sourceResultIds:row.sourceResultIds,attemptIds:row.attemptIds};
+    });
+}
+
 /**
  * Builds legacy analyticalResults map for backward compatibility (v1).
  */
@@ -567,6 +579,8 @@ function buildLegacyAnalyticalResultsMap(observations = []) {
             analysedAt: obs.analysedAt,
             updatedAt: obs.updatedAt
         };
+        if(obs.reportedValueSelectionId) Object.assign(map[obs.parameter],{reportedValueSelectionId:obs.reportedValueSelectionId,
+            reportedMode:obs.reportedMode,selectionReason:obs.selectionReason,sourceResultIds:obs.sourceResultIds});
     });
     return map;
 }
@@ -601,7 +615,7 @@ function formatSampleV1(sample, maps = {}, options = {}) {
     const depths = extractDepths(sample, field, reception);
     const dates = extractDates(sample, field, reception);
     const profile = extractProfileReference(sample, field, meta);
-    const observations = extractObservations(sample, maps);
+    const observations = extractReportedObservations(sample,options.reportedValues || [],maps,options.locale);
     const analyticalResults = buildLegacyAnalyticalResultsMap(observations);
     const qualityIssues = evaluateQualityIssues(sample, coords, depths, dates, profile);
 
@@ -800,6 +814,7 @@ module.exports = {
     extractProfileReference,
     extractLegacyProfileReference,
     extractObservations,
+    extractReportedObservations,
     buildLegacyAnalyticalResultsMap,
     evaluateQualityIssues,
     formatSampleV1,

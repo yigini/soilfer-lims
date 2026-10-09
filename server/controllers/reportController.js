@@ -135,7 +135,15 @@ async function generateReport(req, res) {
             const spectralScans = spectralItemIds.length ? await tx.spectralData.findMany({ where: {
                 sampleId, workItemId: { in: spectralItemIds }, isCurrent: true, status: 'APPROVED'
             } }) : [];
-            const publishCheck = canPublish(currentSample, null, req.user, { qcBatches, qcModes, qcGates, qcAcknowledgements, spectralScans });
+            const originalCheck=canPublish(currentSample,null,req.user,{qcBatches,qcModes,qcGates,qcAcknowledgements,spectralScans});
+            if(!originalCheck.allowed && originalCheck.code!=='ACCEPTED_ITEM_WITHOUT_VALID_RESULT') {
+                throw Object.assign(new Error(originalCheck.reason),{statusCode:originalCheck.code==='PERMISSION_DENIED'?403:409,
+                    publishCheck:originalCheck,qcModeEvidence});
+            }
+            const reportedSelectionProof = await require('../services/reportedValueReadService').readSampleReportedValues(tx,currentSample);
+            Object.assign(qcGates,reportedSelectionProof.qcGates); Object.assign(qcAcknowledgements,reportedSelectionProof.qcAcknowledgements);
+            for(const [id,gate] of Object.entries(reportedSelectionProof.qcGates)) qcModes[id]=gate.mode;
+            const publishCheck = canPublish(currentSample, null, req.user, { qcBatches, qcModes, qcGates, qcAcknowledgements, spectralScans, reportedSelectionProof });
             if (!publishCheck.allowed) {
                 const statusCode = publishCheck.code === 'PERMISSION_DENIED' ? 403 : 409;
                 throw Object.assign(new Error(publishCheck.reason), { statusCode, publishCheck, qcModeEvidence });
@@ -148,7 +156,7 @@ async function generateReport(req, res) {
             const identity = await allocateReportIdentity(tx, { sampleId, lab, publishedAt,
                 resolveFormat: () => policyService.get(lab.id, 'report.numberFormat', { db: tx }) });
             const policySnapshot = await policyService.snapshot(lab.id, { db: tx });
-            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes, qcModeEvidence, qcGates, qcAcknowledgements });
+            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes, qcModeEvidence, qcGates, qcAcknowledgements, reportedSelectionProof });
             content.policy = { version: policySnapshot.version, presetCode: policySnapshot.presetCode,
                 reportNumberFormat: policySnapshot.values['report.numberFormat'], qcModes, qcModeEvidence };
             content.reportNumber = displayNumber(identity.reportNumberBase, identity.revision);
@@ -209,7 +217,7 @@ async function generateReport(req, res) {
         }
         if (err.statusCode) {
             const { code, workItemIds, params, gate, acknowledgementRequired } = err.publishCheck || {};
-            return res.status(err.statusCode).json({ error: err.message, code: code || err.code, workItemIds, params, gate, acknowledgementRequired,
+            return res.status(err.statusCode).json({ error: err.message, ...err.details, code: code || err.code, workItemIds, params, gate, acknowledgementRequired,
                 ...(err.qcModeEvidence && { qcModeEvidence: err.qcModeEvidence }) });
         }
         console.error('[Report] Generate error:', err);
@@ -876,6 +884,7 @@ async function getSampleReportPdf(req, res) {
         return res.send(pdfBuffer);
     } catch (err) {
         console.error('[Report] Sample PDF error:', err);
+        if(err.statusCode) return res.status(err.statusCode).json({error:err.message,code:err.code,...err.details});
         return res.status(500).json({ error: err.message || 'Failed to generate PDF' });
     }
 }

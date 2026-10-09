@@ -10,10 +10,21 @@ describe('WP-31: Result Provenance Tracking', () => {
     let testSampleId;
     let createdResultIds = [];
     let repeatReviewer;
+    let reviewerToken;
     const analyst = { username: 'test_analyst', role: 'LAB_TECHNICIAN', labId: 'LAB-DEFAULT' };
     async function reviewFixture(analyses) {
-        for (const analysis of analyses) for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
-            await transitionWorkItem(`entry-${testSampleId}-${analysis}`, status, 'system:fixture', 'Reviewed provenance fixture');
+        for (const analysis of analyses) {
+            const item=await prisma.workItem.findUnique({where:{id:`entry-${testSampleId}-${analysis}`}});
+            if(item.status==='ACCEPTED')continue;
+            await transitionWorkItem(item.id,'COMPLETED',repeatReviewer,'Reviewed provenance fixture');
+            await require('../../services/submissionStateService').createSubmissionForItems({db:prisma,actor:repeatReviewer,
+                sampleId:testSampleId,type:'PARTIAL',workItemIds:[item.id]});
+            const current=await prisma.result.findFirst({where:{sampleId:testSampleId,param:analysis,isCurrent:true}});
+            const reviewed=await require('supertest')(require('../../app')).post('/api/work/'+item.id+'/review')
+                .set('Authorization','Bearer '+reviewerToken).send({decision:'ACCEPT',
+                    reportedValueSelection:{mode:'ATTEMPT',attemptIds:[current.attemptId]}});
+            if(reviewed.status!==200)throw Error('Provenance review refused: '+JSON.stringify(reviewed.body));
+            expect(reviewed.status).toBe(200);
         }
     }
 
@@ -26,6 +37,9 @@ describe('WP-31: Result Provenance Tracking', () => {
         const reviewer=await prisma.user.create({data:{id:`provenance-reviewer-${Date.now()}`,username:`provenance-reviewer-${Date.now()}`,
             role:'LAB_MANAGER',labId:analyst.labId,email:`provenance-reviewer-${Date.now()}@example.test`,password:'isolated-fixture'}});
         repeatReviewer={id:reviewer.id,username:reviewer.username,role:reviewer.role,labId:reviewer.labId};
+        reviewerToken=require('../setup').generateToken(repeatReviewer);
+        await require('../setup').ensureTestLab(analyst.labId,'TEST');
+        await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(prisma,repeatReviewer,analyst.labId);
         for (const [code, name, units] of [['EC', 'Electrical conductivity', 'dS/m'], ['CLAY_PRED', 'Predicted clay fraction', '%'], ['SOC', 'Soil organic carbon', 'g/kg'], ['TOTAL_N', 'Total nitrogen', 'g/kg']]) {
             await prisma.analysis.upsert({ where: { code }, create: { code, name, units, status: 'active', validation: '{}' },
                 update: { name, units, labId: null, validation: '{}' } });
@@ -46,6 +60,9 @@ describe('WP-31: Result Provenance Tracking', () => {
             id: `entry-${testSampleId}-${analysis}`, sampleId: testSampleId, analysis,
             assignedLab: analyst.labId, assignedTo: analyst.username, status: 'IN_PROGRESS'
         })) });
+        await require('../../services/qcRuleService').change(repeatReviewer,{labId:analyst.labId,analysisCode:'TOTAL_N',
+            methodologyId:null,expectedVersion:0,reason:'Owned replicate provenance selection fixture',
+            criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0,repeatabilityLimit:0.1}},{db:prisma});
     });
 
     // Pin6059445324: immutable execution parents remain until owned database teardown.
@@ -108,19 +125,13 @@ describe('WP-31: Result Provenance Tracking', () => {
 
     test('3. assembleReport includes provenance for each result item', async () => {
         await reviewFixture(['EC', 'CLAY_PRED', 'PH']);
-        await createWorkItemFixture(prisma, { data: { id: `reviewed-${testSampleId}-TEXTURE`, sampleId: testSampleId,
-            analysis: 'TEXTURE', status: 'ACCEPTED', assignedLab: analyst.labId } });
-        // Also add the unchanged DERIVED result after its explicit accepted owner.
-        const derivedRes = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
-            data: {
-                id: `RES-DER-${Date.now()}`,
-                sampleId: testSampleId,
-                param: 'TEXTURE',
-                value: 'Clay Loam',
-                provenance: 'DERIVED',
-                isCurrent: true
-            }
-        });
+        const owner=await createWorkItemFixture(prisma,{data:{id:`entry-${testSampleId}-TEXTURE`,sampleId:testSampleId,
+            analysis:'TEXTURE',status:'IN_PROGRESS',assignedLab:analyst.labId,assignedTo:analyst.username}});
+        // A categorical report outcome retains its actual complete composite execution.
+        const derivedRes=await require('../../services/workflowStateRules').inTransaction(prisma,tx=>
+            require('../../services/resultWriteService').writeTextureDetermination(tx,{sampleId:testSampleId,workItemId:owner.id,
+                actor:analyst,measurement:{param:'TEXTURE'},fractions:{sand:35,silt:35,clay:30}}));
+        await reviewFixture(['TEXTURE']);
         createdResultIds.push(derivedRes.id);
 
         const { content } = await assembleReport(testSampleId, { username: 'admin' });
