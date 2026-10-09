@@ -118,6 +118,14 @@ function calculate(template, rawInputs, { numberFormat, curve = null, units } = 
         const concentration = (n.absorbance - curve.intercept) / curve.slope;
         const correctedConcentration = concentration - n.blankConcentration;
         Object.assign(intermediate, { concentration, correctedConcentration, curveSlope: curve.slope, curveIntercept: curve.intercept });
+        // #199 pin6089156077: compare in the curve's mg/L before any
+        // blank, volume, dilution, mass, moisture or reporting-unit conversion.
+        if (Object.hasOwn(curve, 'calibrationMax')) {
+            if (!Number.isFinite(curve.calibrationMax) || curve.calibrationMax < 0) throw error('CALC_CURVE_INVALID', 'The retained highest standard is invalid.');
+            Object.assign(intermediate, { extractConcentration: concentration, calibrationMax: curve.calibrationMax,
+                calibrationUnit: template.curve.xUnit, curveId: curve.id ?? null, curveRevision: curve.revision ?? null,
+                aboveRange: concentration > curve.calibrationMax });
+        }
         output = correctedConcentration * n.extractVolume * n.dilutionFactor * n.moistureCorrectionFactor / n.sampleMass;
         break;
     }

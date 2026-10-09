@@ -10,29 +10,36 @@ const { fail } = templates;
 
 // The writer supplies the scoped, server-derived execution context. Request
 // payloads cannot select another laboratory, analysis, method or run.
-async function selection(db, ctx) {
+async function selection(db, ctx, { metadata = false } = {}) {
     const lab = await policy.resolveLab(ctx.labId, db);
     if (!lab) throw fail(409, 'CALC_TEMPLATE_SCOPE_INVALID', 'The result laboratory is unavailable.');
     const analyte = { analysisCode: ctx.analysis.code, methodologyId: ctx.methodId || null };
     const active = await curves.activeTemplate(db, { lab, analyte });
     if (!active) return null;
-    let curve = null;
+    let curve = null, curveBlocker = null;
     if (active.template.curve) {
-        if (!ctx.batchId) throw fail(409, 'CALIBRATION_CURVE_REQUIRED', 'A colorimetric result needs its started native run.');
-        const execution = await curves.executionContext(db, ctx.batchId, ctx.actor, analyte.analysisCode);
-        if (execution.lab.id !== lab.id || execution.analyte.methodologyId !== analyte.methodologyId)
-            throw fail(409, 'CALIBRATION_CURVE_CONTEXT_MISMATCH', 'The result differs from the frozen run method.');
-        curve = await curves.requireLatestCurve(db, execution, active);
+        try {
+            if (!ctx.batchId) throw fail(409, 'CALIBRATION_CURVE_REQUIRED', 'A colorimetric result needs its started native run.');
+            const execution = await curves.executionContext(db, ctx.batchId, ctx.actor, analyte.analysisCode);
+            if (execution.lab.id !== lab.id || execution.analyte.methodologyId !== analyte.methodologyId)
+                throw fail(409, 'CALIBRATION_CURVE_CONTEXT_MISMATCH', 'The result differs from the frozen run method.');
+            curve = await curves.requireLatestCurve(db, execution, active);
+        } catch (error) {
+            if (!metadata || !['CALIBRATION_CURVE_REQUIRED','CALIBRATION_CURVE_FAILED','CALIBRATION_CURVE_INCOMPLETE'].includes(error.code)) throw error;
+            curveBlocker = { code: error.code, error: error.message };
+        }
     }
-    return { ...active, curve, units: await activations.compatibleUnits(db, active.template, ctx.analysis) };
+    return { ...active, curve, curveBlocker, units: await activations.compatibleUnits(db, active.template, ctx.analysis) };
 }
 async function preview(db, ctx, rawInputs) {
-    const selected = await selection(db, ctx);
+    // Metadata can disclose the selected raw-input form and an explicit curve
+    // blocker. Supplying inputs, recording and completion always use strict selection.
+    const selected = await selection(db, ctx, { metadata: rawInputs === undefined });
     if (!selected) return { active: null, template: null, calculation: null };
     const numberFormat = await getNumberFormat(ctx.labId, { db, analysisCode: ctx.analysis.code, methodologyId: ctx.methodId });
     const calculated = rawInputs === undefined ? null : calculate(selected.template, rawInputs, { numberFormat, curve: selected.curve, units: selected.units });
     return { active: { activationId: selected.activationId, templateId: selected.templateId, templateVersion: selected.templateVersion },
-        template: selected.template, curve: selected.curve, numberFormat, units: selected.units, calculation: calculated };
+        template: selected.template, curve: selected.curve, curveBlocker: selected.curveBlocker, numberFormat, units: selected.units, calculation: calculated };
 }
 async function prepare(db, ctx, measurement, numberFormat) {
     // Historical imports and spectral predictions retain their authorized input

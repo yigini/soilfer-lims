@@ -119,6 +119,21 @@ test('the actual Result writer recomputes every reading, refuses tampering and a
     expect(await f.db.result.findUnique({where:{id:result.id}})).toEqual(result);
 });
 
+test.each([[5.002,true],[4.998,false]])('response %s compares extract mg/L with the highest standard and retains an amber flag=%s after mg/kg conversion', async (response,aboveRange) => {
+    const f = context; await f.start(); const curve = await curves.recordCurve(f.db,f.run.id,f.analyst,f.input);
+    const writer = require('../../services/resultWriteService'), inputs = { absorbance:response,blankConcentration:0,extractVolume:20,dilutionFactor:2,sampleMass:1,moistureCorrectionFactor:1 };
+    const preview = await writer.previewResultCalculation(f.db,{sampleId:f.sample.id,workItemId:f.item.id,actor:f.analyst,inputs});
+    const [result] = await f.db.$transaction(tx => writer.writeResultsExecution(tx,{sampleId:f.sample.id,workItemId:f.item.id,actor:f.analyst,
+        measurements:[{param:'P_OLSEN',value:preview.calculation.output,calculation:{...preview.active,curveId:curve.id,inputs}}]}));
+    const frozen = await f.db.resultCalculation.findUnique({where:{resultId:result.id}}), intermediate = JSON.parse(frozen.intermediate);
+    expect(result.isValid).toBe(true);
+    expect(JSON.parse(result.flags).includes('ABOVE_RANGE')).toBe(aboveRange);
+    expect(intermediate).toMatchObject({calibrationMax:2,calibrationUnit:'mg/L',curveId:curve.id,curveRevision:1,aboveRange});
+    expect(intermediate.extractConcentration).toBeCloseTo((response-1)/2,12);
+    expect(result.numericValue).toBe(preview.calculation.output);
+    expect(result.numericValue).toBeGreaterThan(intermediate.calibrationMax);
+});
+
 test('every replicate participates in the unweighted fit; zero counts and repeated standards add no distinct levels', async () => {
     const f = context; await f.start();
     const points = [{ standardConcentration: 0, response: 0 }, { standardConcentration: 1, response: 1 }, { standardConcentration: 1, response: 3 }];

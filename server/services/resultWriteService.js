@@ -374,7 +374,10 @@ async function writeResultsExecution(tx, options) {
     for(const measurement of prepared) {
         const calculated = await calculationService.prepare(tx,ctx,measurement,format);
         calculations.push(calculated);
-        values.push(await numericValues(tx,ctx,calculated ? {...measurement,unit:calculated.calculated.outputUnit} : measurement,null,format));
+        const value = await numericValues(tx,ctx,calculated ? {...measurement,unit:calculated.calculated.outputUnit} : measurement,null,format);
+        if (calculated?.selected.curve && calculated.calculated.intermediate.aboveRange)
+            value.flags = JSON.stringify([...new Set([...JSON.parse(value.flags),'ABOVE_RANGE'])]);
+        values.push(value);
     }
     const evidence={source:ctx.source,param:prepared[0].param,rawValue:values[0].rawInput,normalizedValue:values[0].numericValue,
         qualifier:values[0].censoring==='NONE'?null:values[0].censoring,recordedAt:now.toISOString(),resultId:prepared[0].id,
