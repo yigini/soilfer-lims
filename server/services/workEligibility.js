@@ -349,6 +349,9 @@ function canPublish(sample, report, user, options = {}) {
     }
     const missing = analyticalItems.filter(item => item.status === 'ACCEPTED' &&
         !SPECTRAL_ACQUISITION_CODES.includes(item.analysis) &&
+        // IO supplies this proof only after checking current selection lineage
+        // and every retained source gate. NOT_REPORTABLE is a reviewed outcome.
+        !options.reportedSelectionProof?.groups.some(group => group.workItemId === item.id) &&
         !validResults.some(result => governsResult(item, result)));
     if (missing.length) {
         return { allowed: false, code: 'ACCEPTED_ITEM_WITHOUT_VALID_RESULT', reason: 'Accepted analytical work lacks a current valid result.',

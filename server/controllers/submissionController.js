@@ -332,7 +332,7 @@ exports.reviewSubmission = async (req, res) => {
                     reasonCode:decision.reasonCode ?? null,
                     submissionItemId: submission.id,
                     decision: verdict === 'ACCEPT' ? 'ACCEPT' : (verdict === 'REJECT_REANALYSIS' ? 'RETURN' : 'OMIT'),
-                    reason: reason || null,
+                    reason: verdict==='ACCEPT' && decision.reportedValueSelection?.reason?.trim() || reason || null,
                     reviewerId: user.id || user.username,
                     reviewerName: user.username,
                     authorization: user.role,

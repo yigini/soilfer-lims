@@ -129,13 +129,16 @@ async function generateReport(req, res) {
                 include: require('../services/qcRunViewService').QC_RUN_INCLUDE }) : [];
             const { qcModes, qcModeEvidence } = await resolveReportingModes(currentSample, qcBatches, { db: tx });
             const { qcGates, qcAcknowledgements } = await require('../services/qcGateService').resolveForSample(currentSample, qcBatches, tx);
+            const reportedSelectionProof = await require('../services/reportedValueReadService').readSampleReportedValues(tx,currentSample);
+            Object.assign(qcGates,reportedSelectionProof.qcGates); Object.assign(qcAcknowledgements,reportedSelectionProof.qcAcknowledgements);
+            for(const [id,gate] of Object.entries(reportedSelectionProof.qcGates)) qcModes[id]=gate.mode;
             const { canPublish } = require('../services/workEligibility');
             const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
             const spectralItemIds = currentSample.workItems.filter(item => SPECTRAL_ACQUISITION_CODES.includes(item.analysis)).map(item => item.id);
             const spectralScans = spectralItemIds.length ? await tx.spectralData.findMany({ where: {
                 sampleId, workItemId: { in: spectralItemIds }, isCurrent: true, status: 'APPROVED'
             } }) : [];
-            const publishCheck = canPublish(currentSample, null, req.user, { qcBatches, qcModes, qcGates, qcAcknowledgements, spectralScans });
+            const publishCheck = canPublish(currentSample, null, req.user, { qcBatches, qcModes, qcGates, qcAcknowledgements, spectralScans, reportedSelectionProof });
             if (!publishCheck.allowed) {
                 const statusCode = publishCheck.code === 'PERMISSION_DENIED' ? 403 : 409;
                 throw Object.assign(new Error(publishCheck.reason), { statusCode, publishCheck, qcModeEvidence });
@@ -148,7 +151,7 @@ async function generateReport(req, res) {
             const identity = await allocateReportIdentity(tx, { sampleId, lab, publishedAt,
                 resolveFormat: () => policyService.get(lab.id, 'report.numberFormat', { db: tx }) });
             const policySnapshot = await policyService.snapshot(lab.id, { db: tx });
-            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes, qcModeEvidence, qcGates, qcAcknowledgements });
+            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes, qcModeEvidence, qcGates, qcAcknowledgements, reportedSelectionProof });
             content.policy = { version: policySnapshot.version, presetCode: policySnapshot.presetCode,
                 reportNumberFormat: policySnapshot.values['report.numberFormat'], qcModes, qcModeEvidence };
             content.reportNumber = displayNumber(identity.reportNumberBase, identity.revision);

@@ -55,6 +55,13 @@ async function plan(tx, by) {
             if (error.code !== 'REPORTED_VALUE_SELECTION_REQUIRED') throw error;
         }
         const automatic = automaticReportedChoice(item,context.lineage,context.policy.value,context.limits);
+        if (automatic.choice) {
+            try { await require('../services/reportedValueSourceService').validateReportedSources(tx,item,context,automatic.choice); }
+            catch (error) {
+                if (!(error instanceof rules.TransitionError)) throw error;
+                automatic.choice = null; automatic.reasons = [error.code];
+            }
+        }
         const row = { workItemId:item.id, analysisCode:item.analysis, outcome:automatic.choice?.rule || 'AMBIGUOUS',
             reasons:automatic.reasons, choice:automatic.choice, ...evidence };
         tests.push(row); if (automatic.choice) changes.push(item);

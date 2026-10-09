@@ -101,17 +101,18 @@ async function resolveReportingModes(sample, batches, options = {}) {
 
 function reportingQc(sample, options = {}) {
     const items = options.workItems || sample.workItems || [];
-    const results = options.results || sample.results || [];
+    const results = options.reportedSelectionProof?.sourceResults || options.results || sample.results || [];
     const batches = options.qcBatches || [];
     const warnings = [], gates = [];
     let blocker = null;
     const qcGate = require('./qcGateService');
-    for (const result of results.filter(row => row.isCurrent &&
+    for (const result of results.filter(row => (options.reportedSelectionProof || row.isCurrent) &&
         !require('./resultEntryPolicy').isNonMeasurement({ analysis: row.param }))) {
-        const governing = governingItems(result, items);
+        const sourceItems = options.reportedSelectionProof?.workItemsByResult[result.id] || items;
+        const governing = governingItems(result, sourceItems);
         if (!governing.length || !governing.every(item => item.status === 'ACCEPTED')) continue;
         const mode = getReportingMode(sample, result, options);
-        const gate = options.qcGates?.[result.id] || qcGate.gateFromEvidence(result, items, batches, { mode });
+        const gate = options.qcGates?.[result.id] || qcGate.gateFromEvidence(result, sourceItems, batches, { mode });
         const acknowledgement = options.qcAcknowledgements?.[result.id];
         const check = qcGate.decision(gate, { acknowledgement, publication: true });
         gates.push({ resultId: result.id, gate, ...check });
@@ -124,7 +125,7 @@ function reportingQc(sample, options = {}) {
     }
     // Existing batch-only callers have no result identity. Preserve their
     // fail-closed check until the IO caller supplies result-level gate evidence.
-    if (!results.length) {
+    if (!results.length && !options.reportedSelectionProof) {
         const batch = batches.find(row => !checkBatchDisposition(row).allowed);
         if (batch) blocker = { batch, gate: checkBatchDisposition(batch) };
     }

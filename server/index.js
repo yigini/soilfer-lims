@@ -42,9 +42,12 @@ try {
     const repeatsReady=require('./scripts/install_work_repeat_contract').assertWorkRepeatStartupReady(dbPath);
     console.log(JSON.stringify({event:'WORK_REPEAT_STARTUP_READY',classification:repeatsReady.classification,
         sources:repeatsReady.sources,totalChanges:repeatsReady.totalChanges}));
+    const selectionsReady=require('./scripts/install_reported_value_selections').assertReportedValueStartupReady(dbPath);
+    console.log(JSON.stringify({event:'REPORTED_VALUE_STARTUP_READY',...selectionsReady}));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('QC_GATE_SCOPE_') ? 'Keep the lab stopped and follow docs/audit/2.4-qc-gate.md.'
+            : error.code?.startsWith('REPORTED_VALUE_') ? 'Keep the lab stopped and follow docs/audit/192-reported-value.md.'
             : error.code?.startsWith('WORK_REPEAT_') ? 'Keep the lab stopped and follow docs/audit/191-repeat-correction.md.'
             : error.code?.startsWith('WORK_ATTEMPT_') ? 'Keep the lab stopped and follow docs/audit/3.1-work-attempts.md.'
             : error.code?.startsWith('PT_') || error.code?.startsWith('RESULT_EQUIPMENT_') ? 'Keep the lab stopped and follow docs/audit/2.6-qc-audit-pt-equipment.md.'

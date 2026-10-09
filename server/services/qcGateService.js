@@ -161,14 +161,15 @@ function evidenceKey(gate) {
             evaluationId: row.evaluationId, dispositionId: row.dispositionId })).sort((a, b) => a.batchId.localeCompare(b.batchId)) });
 }
 
-async function resolveForSample(sample, batches, db) {
+async function resolveForSample(sample, batches, db, options = {}) {
     const qcGates = {}, qcAcknowledgements = {};
-    const results = (sample.results || []).filter(row => row.isCurrent &&
+    const results = (options.results || sample.results || []).filter(row => (options.results || row.isCurrent) &&
         !isNonMeasurement({ analysis: row.param }));
     const audits = results.length ? await db.auditLog.findMany({ where: { entity: 'RESULT',
         entityId: { in: results.map(row => row.id) }, action: 'QC_GATE_ACKNOWLEDGED' }, orderBy: { timestamp: 'desc' } }) : [];
     for (const result of results) {
-        const gate = await forResult(result, { sample, qcBatches: batches, workItems: sample.workItems || [], db });
+        const gate = await forResult(result, { sample, qcBatches: batches,
+            workItems: options.workItemsByResult?.[result.id] || sample.workItems || [], db });
         qcGates[result.id] = gate;
         for (const audit of audits.filter(row => row.entityId === result.id)) {
             let record;

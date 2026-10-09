@@ -6,6 +6,7 @@
  */
 
 const PDFDocument = require('pdfkit');
+const { formatReportedValue } = require('../../shared/reportedValueFormat');
 const { calculateUsdaTexture, evaluateCnRatio, evaluateCecAndBases } = require('../utils/soilCalculations');
 const { interpretParameter, normalizeUnit } = require('./interpretationService');
 const { describeReportEvidence } = require('./reportTruthfulnessService');
@@ -272,7 +273,8 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                         .text(item.method || item.standard || 'SoilFER SOP', col2 + 4, currentY + 4, { width: 120, ellipsis: true });
 
                     doc.font('Helvetica-Bold').fontSize(8).fillColor(cDark)
-                        .text(String(item.value !== undefined && item.value !== null ? item.value : '—'), col3 + 4, currentY + 4, { width: 60, align: 'right' });
+                        .text(item.reportedValueSelectionId ? formatReportedValue(item) : String(item.value !== undefined && item.value !== null ? item.value : '—'),
+                            col3 + 4, currentY + 4, { width:60,align:'right' });
 
                     doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
                         .text(item.unit || '', col4 + 4, currentY + 4);

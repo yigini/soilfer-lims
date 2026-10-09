@@ -38,6 +38,7 @@ async function appendReportedSelection(tx, item, actor, explicit, options = {}) 
     if (!scopedSample) throw new rules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
     rules.assertScope(actor, scopedSample);
     const { context, choice } = await preflightReportedSelection(tx, freshItem, explicit);
+    await require('./reportedValueSourceService').validateReportedSources(tx,freshItem,context,choice);
     const previous = await currentRows(tx, item.id), params = selectionOutputs(freshItem);
     if (previous.length) assertSelectionGroupStructure(previous, params);
     const previousGroup = previous[0]?.selectionGroupId || null;

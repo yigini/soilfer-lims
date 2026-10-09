@@ -140,5 +140,13 @@ test('actual RETURN, repeat recording and accept retain a questioned original, r
     expect({status:chosen.status,body:chosen.body}).toMatchObject({status:200});
     const saved=await f.db.reportedValueSelection.findFirst();
     expect(saved).toMatchObject({rule:'REVIEWER',valueText:f.rows[0].value,reason:'Retained original agrees with the reference worksheet'});
+    expect(await f.db.reviewDecision.findFirst({where:{workItemId:item.id,decision:'ACCEPT'}}))
+        .toMatchObject({reason:'Retained original agrees with the reference worksheet'});
     expect(await f.db.result.findUnique({where:{id:f.rows[0].id}})).toMatchObject({isCurrent:false,isValid:false});
+    const retained = await f.all(), sample = await f.db.sample.findUnique({where:{id:item.sampleId}});
+    const reported = await require('../../services/reportedValueReadService').readSampleReportedValues(f.db,sample);
+    expect(reported.values).toHaveLength(1);
+    expect(reported.values[0]).toMatchObject({value:f.rows[0].value,sourceResultIds:[f.rows[0].id]});
+    expect(reported.sourceResults[0]).toMatchObject({id:f.rows[0].id,isCurrent:false,isValid:false});
+    expect(await f.all()).toBe(retained);
 });

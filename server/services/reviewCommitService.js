@@ -63,9 +63,12 @@ async function commitReview(prisma, item, status, user, data, operations, submis
                 data={...data,submissionId:null,batchId:null,rackPosition:null,submittedAt:null,completedAt:null};
             }
             const qcGate = require('./qcGateService');
-            const qcRows = status === 'ACCEPTED' ? await qcGate.requireAcceptance([{ ...current, sample }], audit.qcAcknowledgement, tx) : [];
+            let qcRows = status === 'ACCEPTED' ? await qcGate.requireAcceptance([{ ...current, sample }], audit.qcAcknowledgement, tx) : [];
             if (status === 'ACCEPTED' && measured) {
-                await require('./reportedValueSelectionService').preflightReportedSelection(tx,current,audit.reportedValueSelection);
+                const selected = await require('./reportedValueSelectionService').preflightReportedSelection(tx,current,audit.reportedValueSelection);
+                const sources = await require('./reportedValueSourceService').validateReportedSources(tx,current,selected.context,selected.choice,
+                    {publication:false,acknowledgement:audit.qcAcknowledgement});
+                qcRows = [...new Map([...qcRows,...sources.rows].map(row => [row.resultId || row.workItemId,row])).values()];
             }
             const history = typeof data.history === 'string' ? JSON.parse(data.history) : data.history;
             const reason = audit.reason || data.reanalysisReason || data.waiveReason || history?.at(-1)?.reason || history?.at(-1)?.note || null;
