@@ -107,7 +107,8 @@ test('the actual Result writer recomputes every reading, refuses tampering and a
     const result = await record(measurement), frozen = await calculations.retained(f.db,result.id);
     expect(frozen).toMatchObject({ resultId:result.id,templateId:f.template.id,templateVersion:1,activationId:f.activation.id,
         output:40,nativeValue:40,conversionFactor:1,outputUnit:'mg/kg',curveId:curve.id,computedBy:f.analyst.username });
-    expect(JSON.parse(frozen.inputs).absorbance).toMatchObject({ raw:'3.00',value:3 });
+    expect(JSON.parse(frozen.inputs).absorbance).toBe('3.00');
+    expect(JSON.parse(frozen.intermediate).numericInputs.absorbance).toBe(3);
     expect(frozen.curve.points).toHaveLength(3);
     expect(await f.db.auditLog.count({where:{entity:'RESULT_CALCULATION',entityId:frozen.id}})).toBe(1);
     const attempt = await f.db.workAttempt.findUnique({where:{id:result.attemptId}});
