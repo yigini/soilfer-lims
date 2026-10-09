@@ -65,8 +65,10 @@ test('real Chromium types and records 40 values through the production app with 
                 expect(typed).not.toContain(row); typed.push(row);
                 const rawInput = `6.${String(index + 1).padStart(2, '0')}`;
                 if (index === 0) {
+                    // Playwright's US layout uses Shift for the numeric
+                    // variant of keypad keys (unshifted keys are navigation).
                     for (const key of ['Numpad6', 'NumpadDecimal', 'Numpad0', 'Numpad1']) {
-                        await page.keyboard.press(key); await page.waitForTimeout(45);
+                        await page.keyboard.press(`Shift+${key}`); await page.waitForTimeout(45);
                     }
                 } else await page.keyboard.type(rawInput, { delay: 45 });
                 expect(await page.locator(':focus').inputValue()).toBe(rawInput);
