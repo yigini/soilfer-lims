@@ -171,6 +171,8 @@ echo "📦 Installing reported-value selection evidence..."
 node scripts/install_reported_value_selections.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 echo "📦 Installing retained run reagent links..."
 node scripts/install_batch_reagent_lots.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing inactive calculation references and evidence guards..."
+node scripts/install_calculation_templates.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."

@@ -130,7 +130,7 @@ test('the closed factory binds its bytes and sole caller; changed helper and sec
     expect(scanSource(`${source}\n// changed bytes`, filename).map(row => row.code)).toContain('HISTORICAL_FIXTURE_SOURCE_MISMATCH');
     const code = "const { createPre199CalculationFixture } = require('../helpers/calculationHistoricalFixture'); createPre199CalculationFixture();";
     expect(scanSource(code, 'tests/contracts/unlisted_calculation_caller.test.js').map(row => row.code)).toContain('HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED');
-    expect(scanSource(code, 'services/unlisted_calculation_caller.js').map(row => row.code)).toContain('TEST_HELPER_IMPORTED_BY_RUNTIME');
+    expect(scanSource(code.replace('../helpers/', '../tests/helpers/'), 'services/unlisted_calculation_caller.js').map(row => row.code)).toContain('TEST_HELPER_IMPORTED_BY_RUNTIME');
     expect(scanSource(fs.readFileSync(path.resolve(__dirname, '../../scripts/install_calculation_templates.js'), 'utf8'), 'scripts/install_calculation_templates.js')).toEqual([]);
 });
 

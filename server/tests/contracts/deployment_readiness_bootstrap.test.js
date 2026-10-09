@@ -392,6 +392,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_reported_value_selections.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_batch_reagent_lots.js',
                 `node "${path.join(serverDir, 'scripts/install_batch_reagent_lots.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_calculation_templates.js',
+                `node "${path.join(serverDir, 'scripts/install_calculation_templates.js').replace(/\\/g, '/')}"`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
 
         const entryScript = path.join(testDir, 'entrypoint.sh');
