@@ -385,6 +385,7 @@ test('a complete guarded database passes the read-only gate, listens and answers
     require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_reported_value_selections').installReportedValueSelections({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: fixture.file, apply: true });
+    require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: fixture.file, apply: true });
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const ready = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"WORKFLOW_STARTUP_READY"')));

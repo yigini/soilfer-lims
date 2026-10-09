@@ -66,6 +66,44 @@ states, columns, restrictive foreign keys, indexes, guards and source-bound
 receipts; it refuses populated unmarked tables, mixed objects and tampering.
 Its atomic apply retains all pre-existing rows, creates no links/backfill,
 and repeated complete applies make no writes. Its owned historical-fixture
-tests are pending. Runtime commands, bootstrap/startup wiring, UI and
-whole-suite verification remain pending; no completed acceptance is claimed.
+tests pass:3 suites114 tests0skips12.348s at498139e. Actual lot-command
+contracts also pass, including preserved quantities, OPEN withdrawals,
+post-start additions/refusals, mixed-analyte state, every retained retry,
+a real SQL P2002 reread, and a late-event rollback. The expanded command,
+start/header, native-regression and scanner group passes4 suites184 tests
+0skips65.108s at499a1549. Client build8.75s and lint0errors14existing
+warnings pass on that candidate.
+
+[Pin6078331476](https://github.com/yigini/soilfer-lims/issues/194#issuecomment-6078331476)
+freezes the actual Methodology id/name/standard/version in the existing
+criteriaSnapshot and RUN_STARTED event at first start. Reopen retains it.
+Historical missing revisions display unknown; no backfill or live inference.
+My runs is a server filter for the named analyst plus their own unstarted
+OPEN runs. All runs preserves existing scope/visibility for every existing
+reader, with no new role authority.
+
+The new atomic workbench start invokes the existing build/start, method
+default, policy capacity, eligibility/qualification, operational gate,
+assignment and active-SampleHold authorities. Calibration curves remain
+deferred to199. The inspector keeps instrument/method/analyst/start read-only;
+existing per-attempt fields retain their existing authorities. Picker
+membership reuses the actual repeat-source authority; retained prior runs
+are never overwritten or reactivated.
+
+Actual UI callbacks pass the40-sample/six-interaction fixture, policy capacity,
+scan selection without form submission, method-change clearing, historical
+unknown revision, default My runs/All runs and all five client/server locales.
+The UI/regression/wiring group passes5 suites65 tests0skips3.387s atdf115caa.
+
+Existing owned fixtures install the actual194 additive schema: globalSetup,
+qcGateFixture, normalizedQcFixture, repeatQcPredecessors, native/compatibility
+run fixtures, reviewed-correction and preview fixtures, direct startup and
+entrypoint readiness fixtures. All original assertions, literal captured
+DDL and every workflow writer restriction remain. The only schema-gap
+expectation added is the exact new table; no factory or writer exemption.
+
+Merged193/main663c9664 is now integrated, retaining both startup/bootstrap
+gates, both schema relations and both digest-bound sources. All ten locale
+merges verify every main key and every runFirst key unchanged. Combined
+whole-suite/build/lint and CI verification remain required before a PR audit.
 Production remains under the #162 demo freeze.
