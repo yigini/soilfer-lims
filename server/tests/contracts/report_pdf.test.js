@@ -21,6 +21,8 @@ describe('BLK-3: Report & Certificate PDF Generation Contract', () => {
             originalId: `FLD-PDF-${Date.now()}`,
             assignedLab: 'LAB-PDF',
             status: 'APPROVED',
+            approvedBy: require('jsonwebtoken').decode(mgrToken).username,
+            approvedAt: new Date(),
             dryingStatus: 'DONE',
             preparationStatus: 'DONE',
             requiredAnalyses: JSON.stringify(['PH_H2O', 'SOC', 'SAND', 'SILT', 'CLAY']),

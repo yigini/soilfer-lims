@@ -36,7 +36,8 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-03'), analysis: param, status: batchStatus, labId, createdBy: 'review-test',
             qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
         const sampleData = { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status,
-            receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' };
+            receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE',
+            ...(status === 'APPROVED' ? { approvedBy: jwt.decode(token).username, approvedAt: new Date() } : {}) };
         const itemData = { id: workItemId, sampleId, analysis: param, status: itemStatus, result: '7.2', assignedLab: labId, batchId: linkItemBatch ? batch?.id : null };
         let item;
         if (status === 'COMPLETED' || itemStatus === 'CANCELLED') {

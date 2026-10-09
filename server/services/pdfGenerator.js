@@ -174,7 +174,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 .text('Client / Submitter:', rightX + 8, currentY + 60)
                 .text('Sampling Depth / Horiz:', rightX + 8, currentY + 72)
                 .text('Date Received / Accepted:', rightX + 8, currentY + 84)
-                .text('Date Approved / Issued:', rightX + 8, currentY + 96);
+                .text(labels.approvedAt + ':', rightX + 8, currentY + 96);
 
             doc.font('Helvetica').fontSize(8).fillColor(cDark)
                 .text(sample.labId || sample.id || 'N/A', rightX + 110, currentY + 24)
@@ -183,7 +183,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 .text(`${client.name || sample.clientName || 'General Intake'}`, rightX + 110, currentY + 60, { width: colWidth - 118, ellipsis: true })
                 .text(`${sampleDepth} ${sample.horizon ? `[${sample.horizon}]` : ''}`, rightX + 110, currentY + 72)
                 .text(iso(sample.receptionDate)?.split('T')[0] || labels.notRecorded, rightX + 110, currentY + 84)
-                .text(issuedDate, rightX + 110, currentY + 96);
+                .text(iso(reportContent.signedBy?.date)?.split('T')[0] || labels.notRecorded, rightX + 110, currentY + 96);
 
             currentY += boxHeight + 12;
 

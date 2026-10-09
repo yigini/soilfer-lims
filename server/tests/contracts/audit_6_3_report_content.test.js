@@ -1,10 +1,12 @@
 const fs=require('node:fs'),path=require('node:path');
 const {randomUUID}=require('node:crypto');
+const request=require('supertest');
 const PDFDocument=require('pdfkit');
 const evidence=require('../../services/reportContentEvidence');
 const display=require('../../services/reportContentDisplay');
 const policies=require('../../services/policyService');
 const {qcGateFixture}=require('../helpers/qcGateFixture');
+const {withQcRunHttp}=require('../helpers/qcRunHttpHarness');
 const {appendReportedSelection}=require('../../services/reportedValueSelectionService');
 const rules=require('../../services/workflowStateRules');
 const {assembleReport}=require('../../services/reportAssembly');
@@ -61,7 +63,7 @@ test('assembly discloses missing frozen method and approval instead of selecting
  await f.db.user.create({data:{id:randomUUID(),username:'unrelated-manager',email:'other@example.invalid',password:'unusable',role:'LAB_MANAGER',labId:f.labId,name:'UNRELATED MANAGER'}});
  const before=await f.snapshot(),{content}=await assembleReport(f.items[0].sampleId,{...f.actor,language:'en'},{db:f.db});
  const item=content.resultGroups[0].items[0];
- expect(item).toMatchObject({method:null,methodVersion:null,uncertainty:{state:'NOT_STATED'},basis:null,
+ expect(item).toMatchObject({method:null,methodVersion:null,uncertainty:{state:'NOT_STATED'},basis:f.row.basis,
   sourceResultIds:[f.row.id],decimalPlaces:2});
  expect(content.signedBy).toEqual({name:null,username:null,title:null,date:null});
  expect(JSON.stringify(content)).not.toMatch(/CURRENT METHOD MUST NOT PRINT|UNRELATED MANAGER/);
@@ -85,10 +87,59 @@ test('approval role is matched to retained actor and approval timestamp, never a
  expect(evidence.approvalEvidence(sample,[{...row,performedBy:'other'}])).toMatchObject({name:sample.approvedBy,title:null});
  expect(evidence.approvalEvidence(sample,[{...row,timestamp:'2026-10-08T10:00:00Z'}])).toMatchObject({title:null});
 });
-test.each([{}, {approvedBy:'system:fixture'}, {approvedAt:new Date('2026-10-09T10:00:00Z')}])(
- 'missing approval evidence refuses new issue with stable conflict: %j',async approval=>{
+test.each(['EXPANDED_ABSOLUTE','EXPANDED_RELATIVE_PCT'])('actual execution, acceptance and publication freeze %s uncertainty and approval',async mode=>{
+ const f=await qcGateFixture({criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0}});owned.push(f);
+ await f.db.methodology.update({where:{id:f.method.id},data:{uncertainty:mode==='EXPANDED_ABSOLUTE'?0.25:5,decimalPlaces:2}});
+ await f.setPolicy([{key:'qc.mode',value:'OFF'},{key:'qc.requireBatchQc',value:'NOT_REQUIRED'},
+  {key:'report.uncertaintyMode',value:mode,analysisCode:f.analysisCode,methodologyId:f.method.id},
+  {key:'report.uncertaintyCoverageFactor',value:3,analysisCode:f.analysisCode,methodologyId:f.method.id}]);
+ const [result]=await rules.inTransaction(f.db,tx=>require('../../services/resultWriteService').writeResultsExecution(tx,
+  {sampleId:f.items[0].sampleId,workItemId:f.items[0].id,actor:f.actor,
+   measurements:[{param:f.analysisCode,value:'7.123456789',equipmentId:f.instrument.id}]}));
+ await require('../../services/workItemStateService').transitionWorkItem(f.items[0].id,'COMPLETED',f.actor,'Recorded report evidence',{},f.db);
+ await require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,
+  sampleId:f.items[0].sampleId,type:'FULL',workItemIds:[f.items[0].id]});
+ await withQcRunHttp(f.db,f.actor,async(app,token)=>{
+  const post=(url)=>request(app).post(url).set('Authorization','Bearer '+token);
+  const review=await post('/api/work/'+f.items[0].id+'/review').send({decision:'ACCEPT'});
+  expect({status:review.status,body:review.body}).toMatchObject({status:200});
+  const approval=await post('/api/samples/'+f.items[0].sampleId+'/approve');
+  expect({status:approval.status,body:approval.body}).toMatchObject({status:200});
+  const before=await f.db.result.findMany(),attempts=await f.db.workAttempt.findMany();
+  const issued=await post('/api/reports/generate/'+f.items[0].sampleId);
+  expect({status:issued.status,body:issued.body}).toMatchObject({status:200});
+  const report=await f.db.report.findUnique({where:{id:issued.body.id}}),content=JSON.parse(report.content),item=content.resultGroups[0].items[0];
+  expect(item).toMatchObject({value:result.value,sourceResultIds:[result.id],methodVersion:String(f.method.version),
+   uncertainty:{state:'EXPANDED',mode,coverageFactor:3,value:mode==='EXPANDED_ABSOLUTE'?0.25:Math.abs(result.numericValue)*0.05}});
+  expect(display.displayResult(item,require('../../locales/en.json').resultReports)).toBe('7.12');
+  expect(display.displayUncertainty(item,require('../../locales/en.json').resultReports)).toContain(mode==='EXPANDED_ABSOLUTE'?'± 0.25':'± 0.36');
+  const sample=await f.db.sample.findUnique({where:{id:f.items[0].sampleId}});
+  expect(content.signedBy).toMatchObject({username:f.actor.username,title:f.actor.role,date:sample.approvedAt.toISOString()});
+  expect(content.publication).toMatchObject({publishedAt:report.publishedAt.toISOString(),issuer:{username:f.actor.username,role:f.actor.role}});
+  expect(await f.db.result.findMany()).toEqual(before);expect(await f.db.workAttempt.findMany()).toEqual(attempts);
+ },{reviews:true,samples:true,reports:true});
+});
+test('receipt and analysis dates use recorded intake and selected attempts only',()=>{
+ const sample={receptionDate:'2026-10-01T09:00:00Z',moistureOnArrival:'WET',metadata:JSON.stringify({nonConformance:{reason:'Broken seal'}}),
+  receptionData:JSON.stringify({checklist:{items:{condition:{status:'FAIL',note:'Torn bag'}}}})};
+ const sources=[{attemptId:'selected-a'},{attemptId:'selected-b'},{attemptId:null,analysedAt:'2026-10-04T11:00:00Z'}];
+ const attempts=[{id:'selected-a',evidenceData:JSON.stringify({recordedAt:'2026-10-03T10:00:00Z'})},
+  {id:'selected-b',evidenceData:JSON.stringify({recordedAt:'2026-10-05T12:00:00Z'})},
+  {id:'unselected',evidenceData:JSON.stringify({recordedAt:'2020-01-01T00:00:00Z'})}];
+ expect(evidence.sampleContentEvidence(sample,sources,attempts)).toEqual({receiptDate:'2026-10-01T09:00:00.000Z',
+  conditionOnReceipt:{moisture:'WET',status:'FAIL',note:'Torn bag'},intakeNonconformities:['Broken seal'],
+  analysisStart:'2026-10-03T10:00:00.000Z',analysisEnd:'2026-10-05T12:00:00.000Z',sampling:null});
+ expect(evidence.sampleContentEvidence({},[],[])).toMatchObject({receiptDate:null,analysisStart:null,analysisEnd:null,sampling:null});
+});
+test.each(['issue','revision'].flatMap(kind=>[{}, {approvedBy:'system:fixture'}, {approvedAt:new Date('2026-10-09T10:00:00Z')}].map(approval=>[kind,approval])))(
+ 'missing approval evidence refuses new %s with stable conflict: %j',async(kind,approval)=>{
  const f=await fixture({approved:true,approval});
- const before=await f.snapshot();let response;
+ if(kind==='revision')await f.db.report.create({data:{id:randomUUID(),sampleId:f.items[0].sampleId,labId:f.labId,
+  status:'PUBLISHED',version:1,publishedAt:new Date('2020-01-02T00:00:00Z'),generatedBy:'historical-issuer',
+  content:JSON.stringify({reportNumber:'HISTORICAL-212',sample:{id:f.items[0].sampleId},resultGroups:[]})}});
+ const snapshot=async()=>({rows:await f.snapshot(),sequences:await f.db.reportSequence.findMany(),
+  attempts:await f.db.workAttempt.findMany(),selections:await f.db.reportedValueSelection.findMany()});
+ const before=await snapshot();let response;
  await jest.isolateModulesAsync(async()=>{
   jest.doMock('../../prisma',()=>f.db);
   const res={status(code){this.code=code;return this;},json(body){response={status:this.code||200,body};return this;}};
@@ -96,7 +147,13 @@ test.each([{}, {approvedBy:'system:fixture'}, {approvedAt:new Date('2026-10-09T1
  });jest.dontMock('../../prisma');
  expect(response).toMatchObject({status:409,body:{code:'REPORT_APPROVAL_EVIDENCE_REQUIRED'}});
  expect(()=>evidence.assertApprovalEvidence(approval)).toThrow(expect.objectContaining({code:'REPORT_APPROVAL_EVIDENCE_REQUIRED',statusCode:409}));
- expect(await f.snapshot()).toEqual(before);
+ expect(await snapshot()).toEqual(before);
+ if(kind==='revision')await withQcRunHttp(f.db,f.actor,async(app,token)=>{
+  const report=await f.db.report.findFirst({where:{sampleId:f.items[0].sampleId}});
+  const pdf=await request(app).get('/api/reports/'+report.id+'/pdf').set('Authorization','Bearer '+token);
+  expect(pdf.status).toBe(200);expect(pdf.headers['content-type']).toMatch(/application\/pdf/);
+ },{reports:true});
+ expect(await snapshot()).toEqual(before);
 });
 test('unreadable approval time cannot authorize new issue',()=>{
  expect(()=>evidence.assertApprovalEvidence({approvedBy:'actor',approvedAt:'invalid'}))

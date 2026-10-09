@@ -31,7 +31,8 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
             disposition: disposition ? JSON.stringify(disposition) : null, labId, createdBy: 'report-test',
             qcResults: JSON.stringify({ blanks: [{ value: batchStatus === 'QC_FAIL' ? 100 : 0.01, status: batchStatus === 'QC_FAIL' ? 'FAIL' : 'PASS' }], controls: [], duplicates: [] }) } });
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
-            status: reviewNeeded ? 'PROCESSING' : 'APPROVED', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
+            status: reviewNeeded ? 'PROCESSING' : 'APPROVED', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE',
+            ...(!reviewNeeded ? { approvedBy: require('jsonwebtoken').decode(token).username, approvedAt: new Date() } : {}) } });
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-08'), sampleId, analysis: 'PH_H2O',
             status: reviewNeeded ? 'SUBMITTED' : 'ACCEPTED', result: '6.2', batchId: batch.id } });
         await createExecutionResultFixture(prisma, { attemptStatus: item.status,
@@ -164,7 +165,8 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
             .send({ status: 'ACCEPTED', qcAcknowledgement: { reason: 'Unevaluated evidence reviewed under WARN policy' } });
         expect(review.status).toBe(200);
         await require('../../services/sampleStateService').transitionSample(f.sampleId, 'APPROVED',
-            JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString()), 'Reviewed warning fixture');
+            JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString()), 'Reviewed warning fixture',
+            { approvedBy: require('jsonwebtoken').decode(token).username, approvedAt: new Date() });
         const content = JSON.parse((await generate(f)).content);
         expect(content.qcStatement).toContain('NOT_EVALUATED'); expect(content.evidence.qc.withinLimits).toBe(false);
         expect(content.qcStatement).toContain('Unevaluated evidence reviewed under WARN policy');
