@@ -9,6 +9,8 @@ router.get('/rules', checkPermission('VIEW_LAB_POLICIES'), qcRuleController.list
 router.post('/rules', checkPermission('MANAGE_LAB_POLICIES'), qcRuleController.change);
 
 router.post('/batches', checkPermission('CHANGE_STATUS'), qcController.createBatch);
+router.get('/run-options', checkPermission('CHANGE_STATUS'), qcController.runOptions);
+router.post('/runs/start', checkPermission('CHANGE_STATUS'), qcController.startWorkbenchRun);
 router.get('/batches', qcController.getBatches);
 router.get('/batches/:id', qcController.getBatchById);
 router.put('/batches/:id', checkPermission('CHANGE_STATUS'), qcController.updateBatch);

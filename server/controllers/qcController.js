@@ -10,6 +10,7 @@ const { changeRunMembers } = require('../services/qcRunMembershipService');
 const { reorderNativeRun } = require('../services/qcRunOrderService');
 const qcGate = require('../services/qcGateService');
 const { linkReagentLot, withdrawReagentLot } = require('../services/batchReagentLotService');
+const { runOptions, startWorkbenchRun } = require('../services/workbenchRunService');
 const { normalizeBatchState } = require('../workflowContract');
 function respondError(res, error, fallback) {
     if (!error.statusCode) console.error('[QC run]', error);
@@ -29,6 +30,14 @@ exports.linkReagentLot = async (req, res) => {
         const outcome = await linkReagentLot(prisma, req.params.id, req.user, req.body);
         return res.status(outcome.created ? 201 : 200).json(outcome);
     } catch (error) { return respondError(res, error, 'Failed to link reagent lot'); }
+};
+exports.runOptions = async (req, res) => {
+    try { return res.json(await runOptions(prisma, req.user, req.query)); }
+    catch (error) { return respondError(res, error, 'Failed to load run options'); }
+};
+exports.startWorkbenchRun = async (req, res) => {
+    try { return res.status(201).json({ batch: await startWorkbenchRun(prisma, req.user, req.body) }); }
+    catch (error) { return respondError(res, error, 'Failed to start run'); }
 };
 exports.withdrawReagentLot = async (req, res) => {
     try { return res.json(await withdrawReagentLot(prisma, req.params.id, req.user, { ...req.body, inventoryLotId: req.params.lotId })); }
