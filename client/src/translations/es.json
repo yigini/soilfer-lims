@@ -3234,5 +3234,9 @@
       "RESULT_INSTRUMENT_MISMATCH": "Utilice el instrumento fijado al iniciar esta serie.",
       "RESULT_METHOD_REVISION_CHANGED": "La revisión del método cambió después de iniciar la serie. Utilice una serie nueva."
     }
+  },
+  "keyboardGrid": {
+    "recordAllReady": "Registrar todos los listos ({count})",
+    "readyHint": "{count} listos · Intro pasa a la siguiente fila"
   }
 }

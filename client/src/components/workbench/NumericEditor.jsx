@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { revertWorksheetCell } from './qcWorksheetNavigation';
 import NumberPreview from './NumberPreview';
 import BarcodeSafeInput from './BarcodeSafeInput';
 
@@ -20,10 +21,13 @@ export default function NumericEditor({
     ariaLabel = 'Numeric determination',
     inputRef = null,
     numberFormat,
-    onBarcodeRejected = null
+    onBarcodeRejected = null,
+    onRevertValue = null
 }) {
     const Input = onBarcodeRejected ? BarcodeSafeInput : 'input';
+    const focusValue = useRef(null);
     const handleKeyDown = (e) => {
+        if (revertWorksheetCell(e, focusValue.current, onRevertValue)) return;
         if (e.key === 'Enter') {
             e.preventDefault();
             if (onEnterNext) {
@@ -40,6 +44,7 @@ export default function NumericEditor({
                 inputMode="decimal"
                 value={value ?? ''}
                 onChange={event => onChange(event.target.value)}
+                onFocus={event => { focusValue.current = event.currentTarget.value; }}
                 {...(onBarcodeRejected ? { onBarcodeRejected } : {})}
                 onKeyDown={handleKeyDown}
                 disabled={disabled}

@@ -36,10 +36,10 @@ function mountUi(filename, props = {}, { canEdit = true, responses = {}, axios: 
                 if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
                 if (name.includes('HelpContext')) return { useHelp: () => ({ registerBlockers() {}, clearBlockers() {} }) };
                 if (name === '@lims/number-parse') return require('../../../shared/numberParse');
-                if (['./entryReadiness', './qcWorksheetNavigation', './useRunBarcodeScan', './BarcodeSafeInput',
+                if (['./entryReadiness', './qcWorksheetNavigation', './worksheetReady', '../../utils/soilCalculations', './useRunBarcodeScan', './BarcodeSafeInput',
                     './QcRunHistory', '../qc/BatchInspectionModal', '../../utils/audioCues'].includes(name))
                     return load(path.resolve(path.dirname(file), name +
-                        (/Navigation$|Readiness$|useRunBarcodeScan$|audioCues$/.test(name) ? '.js' : '.jsx')));
+                        (/Navigation$|Readiness$|worksheetReady$|soilCalculations$|useRunBarcodeScan$|audioCues$/.test(name) ? '.js' : '.jsx')));
                 return children[name] || (children[name] = () => null);
             } });
         return cache[file] = module.exports;

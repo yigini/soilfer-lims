@@ -3234,5 +3234,9 @@
       "RESULT_INSTRUMENT_MISMATCH": "Use the instrument frozen on this run.",
       "RESULT_METHOD_REVISION_CHANGED": "The method revision changed after run start. Use a new run."
     }
+  },
+  "keyboardGrid": {
+    "recordAllReady": "Record all ready ({count})",
+    "readyHint": "{count} ready · Enter moves to the next row"
   }
 }

@@ -3,6 +3,7 @@ import { calculateUsdaTexture } from '../../utils/soilCalculations';
 import numberParse from '@lims/number-parse';
 import NumberPreview from './NumberPreview';
 import BarcodeSafeInput from './BarcodeSafeInput';
+import { revertWorksheetCell } from './qcWorksheetNavigation';
 
 /**
  * TextureEditor
@@ -19,7 +20,8 @@ export default function TextureEditor({
     tolerance = null,
     inputRef = null,
     numberFormat,
-    onBarcodeRejected = null
+    onBarcodeRejected = null,
+    onRevertValues = null
 }) {
     const Input = onBarcodeRejected ? BarcodeSafeInput : 'input';
     let sandVal = '';
@@ -39,8 +41,9 @@ export default function TextureEditor({
     const sandRef = useRef(null);
     const siltRef = useRef(null);
     const clayRef = useRef(null);
+    const focusValues = useRef([null, null, null]);
 
-    const updateFraction = (index, val) => {
+    const updateFraction = (index, val, change = onChange) => {
         let nextSand = sandVal;
         let nextSilt = siltVal;
         let nextClay = clayVal;
@@ -53,7 +56,7 @@ export default function TextureEditor({
             silt: nextSilt,
             clay: nextClay
         };
-        onChange(nextObj);
+        change(nextObj);
     };
 
     const parsed = [sandVal, siltVal, clayVal].map(value => numberParse.parseNumber(value, numberFormat));
@@ -86,7 +89,9 @@ export default function TextureEditor({
                         inputMode="decimal"
                         value={sandVal}
                         onChange={(e) => updateFraction(0, e.target.value)}
+                        onFocus={event => { focusValues.current[0] = event.currentTarget.value; }}
                         onKeyDown={(e) => {
+                            if (revertWorksheetCell(e, focusValues.current[0], onRevertValues && (value => updateFraction(0, value, onRevertValues)))) return;
                             if (e.key === 'Enter') {
                                 e.preventDefault();
                                 siltRef.current?.focus();
@@ -110,7 +115,9 @@ export default function TextureEditor({
                         inputMode="decimal"
                         value={siltVal}
                         onChange={(e) => updateFraction(1, e.target.value)}
+                        onFocus={event => { focusValues.current[1] = event.currentTarget.value; }}
                         onKeyDown={(e) => {
+                            if (revertWorksheetCell(e, focusValues.current[1], onRevertValues && (value => updateFraction(1, value, onRevertValues)))) return;
                             if (e.key === 'Enter') {
                                 e.preventDefault();
                                 clayRef.current?.focus();
@@ -134,7 +141,9 @@ export default function TextureEditor({
                         inputMode="decimal"
                         value={clayVal}
                         onChange={(e) => updateFraction(2, e.target.value)}
+                        onFocus={event => { focusValues.current[2] = event.currentTarget.value; }}
                         onKeyDown={(e) => {
+                            if (revertWorksheetCell(e, focusValues.current[2], onRevertValues && (value => updateFraction(2, value, onRevertValues)))) return;
                             if (e.key === 'Enter') {
                                 e.preventDefault();
                                 if (onEnterNext) onEnterNext();

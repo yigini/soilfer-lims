@@ -29,4 +29,11 @@ test in CI and component tests for focus, Escape, readiness/counts, exclusion,
 preview and refused drafts. New strings need all five client locales.
 Pagination, per-keystroke regrouping, new replicate/dilution columns and new
 exception fields are deferred by the scope pin. No schema or backfill planned.
-No runtime changes or test claims yet. Production freeze remains absolute.
+Initial runtime implementation now adds row/column navigation for all Result
+grids, focus-time Escape for numeric/texture/QC cells, automatic eligible Result
+draft readiness and mouse exclusion, plus all five primary-action translations.
+Escape uses a client-only restoration callback and cancels pending draft saves
+and queued draft replay; completion still calls the existing preview/commit.
+New component/real-DOM contracts and retained-refusal assertions are unverified
+WIP. The real40-value Playwright test and CI browser setup remain to implement.
+No green/full-suite claim or PR yet. Production freeze remains absolute.
