@@ -957,6 +957,9 @@
       "results_replicatesRequired": "Réplicas de amostra exigidas",
       "results_reportedValueRule": "Regra de seleção do valor relatado",
       "results_betweenLodLoq": "Valores entre os limites de detecção e quantificação",
+      "results_typicalMin": "Mínimo típico",
+      "results_typicalMax": "Máximo típico",
+      "results_calibrationMax": "Máximo de calibração",
       "results_phMin": "pH mínimo",
       "results_phMax": "pH máximo",
       "repeats_maxAttemptsBeforeNcr": "Tentativas antes da revisão de não conformidade (0: sem limite)",
@@ -1682,5 +1685,55 @@
       "RESULT_INSTRUMENT_MISMATCH": "Use o instrumento fixado no início desta série.",
       "RESULT_METHOD_REVISION_CHANGED": "A revisão do método mudou após o início. Use uma nova série."
     }
+  },
+  "valueValidation": {
+    "hardMin": "Mínimo absoluto",
+    "hardMax": "Máximo absoluto",
+    "typicalMin": "Mínimo habitual",
+    "typicalMax": "Máximo habitual",
+    "loq": "LQ",
+    "lod": "LD",
+    "calibrationMax": "Máximo de calibração",
+    "unit": "Unidade",
+    "notConfigured": "Não configurado",
+    "fillLoq": "Usar LQ do método",
+    "LOQ_NOT_CONFIGURED": "A LQ do método não está configurada",
+    "NUMBER_FORMAT_POLICY_INVALID": "A política de formato numérico é inválida",
+    "flags": {
+      "VALUE_REQUIRED": "Valor obrigatório",
+      "INVALID_FORMAT": "Número inválido",
+      "BELOW_MIN": "Abaixo do mínimo absoluto",
+      "ABOVE_MAX": "Acima do máximo absoluto",
+      "CENSOR_LIMIT_BELOW_LOQ": "Limite censurado abaixo da LQ do método",
+      "BELOW_LOQ": "Abaixo da LQ do método",
+      "BELOW_LOD": "Abaixo da LD do método",
+      "OUTSIDE_TYPICAL_RANGE": "Fora do intervalo habitual",
+      "ABOVE_RANGE": "Acima do intervalo de calibração",
+      "AMBIGUOUS_NUMBER": "Separador decimal ou de milhares ambíguo",
+      "INVALID_NUMBER": "Formato numérico inválido",
+      "NUMBER_FORMAT_POLICY_INVALID": "A política de formato numérico é inválida"
+    }
+  },
+  "overrideRequests": {
+    "reason": "Motivo",
+    "request": "Solicitar exceção",
+    "useApproval": "Usar esta aprovação",
+    "cancel": "Cancelar solicitação",
+    "recordFirst": "Registe primeiro esta leitura e depois solicite uma repetição com diluição.",
+    "diluteRepeat": "Diluir e repetir?",
+    "inbox": "Solicitações de exceção",
+    "empty": "Não há solicitações de exceção.",
+    "replicate": "Réplica {number}",
+    "decisionReason": "Motivo da decisão",
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "status": {
+      "REQUESTED": "Solicitada",
+      "APPROVED": "Aprovada",
+      "REJECTED": "Rejeitada",
+      "CANCELLED": "Cancelada",
+      "CONSUMED": "Usada para o registo"
+    },
+    "loadFailed": "Não foi possível carregar as solicitações de exceção."
   }
 }

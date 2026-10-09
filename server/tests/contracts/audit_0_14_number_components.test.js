@@ -16,6 +16,7 @@ function load(name) {
     vm.runInNewContext(code, { module, exports: module.exports, require: dependency => {
         if (dependency === 'react') return { ...React, useRef: value => ({ current: value }), useMemo: fn => fn() };
         if (dependency === '@lims/number-parse') return numberParse;
+        if (dependency === '@lims/result-value-validation') return require('../../../shared/resultValueValidation');
         if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: (_, fallback) => fallback }) };
         if (dependency === './NumberPreview') return load('NumberPreview');
         if (dependency === './BarcodeSafeInput') return load('BarcodeSafeInput');

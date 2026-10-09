@@ -17,6 +17,7 @@ import SingleSampleEditor from './SingleSampleEditor';
 import { useHelp } from '../../context/HelpContext';
 import { isEntryReady } from './entryReadiness';
 import PreviousResultHint from './PreviousResultHint';
+import ResultValueActions from './ResultValueActions';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -48,6 +49,7 @@ export default function WorksheetArea({
     onDiscardDraft,
     onResolveConflict,
     onReviewRecord,
+    onChooseApproval,
     onConfirmOperation = null,
     onOpenSpectralIntake,
     onBatchUpdated,
@@ -478,6 +480,7 @@ export default function WorksheetArea({
                                                     <NumericEditor
                                                         onBarcodeRejected={scanner.rejectValueBurst}
                                                         numberFormat={item.numberFormat}
+                                                        validation={item.valueRules}
                                                         disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
                                                         value={draft?.value ?? ''}
                                                         onChange={(val) => changeResultDraft(item.workItemId, val)}
@@ -490,6 +493,8 @@ export default function WorksheetArea({
                                                     />
                                                 )}
                                                 {!isOperationalGate && <PreviousResultHint result={item.previousResult} />}
+                                                {!isOperationalGate && !isTexture && !isSpectral && item.valueRules && <ResultValueActions item={item}
+                                                    onChooseApproval={onChooseApproval} onChanged={onBatchUpdated} />}
                                                 {position && nativeControls.renderObservation(position)}
                                             </td>
 
@@ -739,6 +744,8 @@ export default function WorksheetArea({
                     onDraftChange={onDraftChange}
                     onUpdateItemMeta={onUpdateItemMeta}
                     onReviewRecord={onReviewRecord}
+                    onChooseApproval={onChooseApproval}
+                    onChanged={onBatchUpdated}
                     onConfirmOperation={onConfirmOperation}
                     onOpenSpectralIntake={onOpenSpectralIntake}
                 />

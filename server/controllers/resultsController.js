@@ -14,6 +14,10 @@ const { governsResult } = require('../services/reportResultGovernance');
 
 async function assertResultSaveReadiness(db, sample, user, measurements) {
     stateRules.assertScope(user, sample);
+    // An approval is single-use even when the recorded attempt now refuses a second save.
+    for (const measurement of (Array.isArray(measurements) ? measurements : []).filter(row => row?.overrideRequestId)) {
+        await require('../services/resultOverrideService').available(db, measurement.overrideRequestId, user);
+    }
     resultEvidence.assertAmendable(sample);
     if (!['PROCESSING', 'SUBMITTED_PARTIAL'].includes(sample.status)) {
         if(sample.status==='SUBMITTED_FULL')await require('../services/resultWriteService').assertRecordedResultSave(db,sample,measurements);
@@ -69,8 +73,10 @@ exports.getResults = async (req, res) => {
         const analysisMap = {};
         analyses.forEach(a => analysisMap[a.code] = a);
 
+        const approvals = await require('../services/resultOverrideService').resultApprovals(prisma,results);
         const enriched = await Promise.all(results.map(async r => ({
             ...r,
+            overrideApproval: approvals.get(r.id) || null,
             paramName: await require('../services/analysisService').getAnalysisName(r.param),
             decimalPlaces: analysisMap[r.param]?.decimalPlaces ?? 2,
             flags: typeof r.flags === 'string' ? JSON.parse(r.flags) : (r.flags || {})
@@ -108,7 +114,8 @@ exports.getResultHistory = async (req, res) => {
             orderBy: { createdAt: 'desc' }
         });
 
-        res.json({ history });
+        const approvals = await require('../services/resultOverrideService').resultApprovals(prisma,history);
+        res.json({ history: history.map(row => ({ ...row, overrideApproval: approvals.get(row.id) || null })) });
     } catch (error) {
         console.error('[getResultHistory] Error:', error);
         res.status(500).json({ error: 'Failed to fetch result history' });
@@ -129,6 +136,7 @@ exports.saveResults = async (req, res) => {
         const outcome = await stateRules.inTransaction(prisma, async tx => {
             const current = await tx.sample.findUnique({ where: { id: sampleId } });
             if (!current) throw new stateRules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
+            await require('../services/resultOverrideService').preflightApprovedMeasurements(tx,sampleId,user,measurements);
             const gateReport = await assertResultSaveReadiness(tx, current, user, measurements);
             if (current.status !== sample.status) throw new stateRules.TransitionError('Sample readiness changed. Refresh before saving.', 409, 'SAMPLE_STATE_CHANGED');
             const entryError = await validateResultEntries(tx, current, measurements, user);

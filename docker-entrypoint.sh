@@ -174,6 +174,9 @@ node scripts/install_reported_value_selections.js --db "${DATABASE_PATH:-$DB_FIL
 echo "📦 Installing retained run reagent links..."
 node scripts/install_batch_reagent_lots.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
+echo "📦 Installing immutable result override requests..."
+node scripts/install_result_override_requests.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js

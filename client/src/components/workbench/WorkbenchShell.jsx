@@ -11,6 +11,7 @@ import {
 
 import WorkbenchQueue from './WorkbenchQueue';
 import MyRunsPanel from './MyRunsPanel';
+import ResultOverrideInbox from './ResultOverrideInbox';
 import WorksheetArea from './WorksheetArea';
 import { entryInstrumentId } from './entryReadiness';
 import ReviewCompletionView from './ReviewCompletionView';
@@ -36,7 +37,7 @@ export default function WorkbenchShell({
     initialRunId = null,
     initialQueue = null
 }) {
-    const { user } = useAuth();
+    const { user, hasPermission } = useAuth();
     const { t } = useLanguage();
     const { clearBlockers } = useHelp();
     const [toast, setToast] = useState(null);
@@ -547,6 +548,7 @@ export default function WorkbenchShell({
                 basis: i.draft?.basis || 'AIR_DRY',
                 replicateNo: i.draft?.replicateNo || 1,
                 equipmentId: entryInstrumentId(i),
+                ...(i.overrideRequestId && { overrideRequestId: i.overrideRequestId, unit: i.valueRules?.unit }),
                 version: i.version
             }));
 
@@ -593,6 +595,7 @@ export default function WorkbenchShell({
                 basis: i.basis,
                 replicateNo: i.replicateNo,
                 equipmentId: i.equipmentId,
+                ...(i.overrideRequestId && { overrideRequestId: i.overrideRequestId, unit: i.unit }),
                 version: i.version
             }));
 
@@ -729,7 +732,8 @@ export default function WorkbenchShell({
                     { id: 'worksheet', label: `Worksheet (${currentGroup?.items?.length || 0})` },
                     { id: 'review', label: `Ready to Submit (${stats.readyToSubmitCount ?? 0})` },
                     { id: 'completed', label: `Sent & Completed (${(stats.submittedCount || 0) + (stats.completedCount || 0)})` },
-                    { id: 'activity', label: `Activity Receipts (${receipts.length})` }
+                    { id: 'activity', label: `Activity Receipts (${receipts.length})` },
+                    ...(hasPermission?.('APPROVE_RESULTS') ? [{ id: 'overrides', label: t('overrideRequests.inbox') }] : [])
                 ].map(tab => (
                     <button
                         key={tab.id}
@@ -759,6 +763,7 @@ export default function WorkbenchShell({
 
             {/* Tab Views */}
             <div className="pt-2">
+                {activeTab === 'overrides' && <ResultOverrideInbox actorId={user?.id} />}
                 {activeTab === 'runs' && <MyRunsPanel groups={groups} onStarted={() => fetchQueue(queueView)} onOpenRun={run => {
                     setOpenedRun(run); setActiveRunId(run.id); setActiveAnalysis(run.analysis); setActiveSampleId(null); setActiveTab('worksheet');
                 }} />}
@@ -793,6 +798,9 @@ export default function WorkbenchShell({
                         onDiscardDraft={handleDiscardDraft}
                         onResolveConflict={handleResolveConflict}
                         onReviewRecord={handleReviewRecord}
+                        onChooseApproval={(id, requestId) => setGroups(previous => previous.map(group => ({ ...group,
+                            items: group.items.map(item => item.workItemId === id ? { ...item, overrideRequestId: requestId } : item)
+                        })))}
                         onRevertDraft={(id, value, extra) => handleDraftChange(id, value, extra, { localOnly: true })}
                         onConfirmOperation={handleConfirmOperation}
                         onOpenSpectralIntake={(item) => {
