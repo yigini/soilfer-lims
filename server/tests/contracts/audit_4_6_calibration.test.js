@@ -266,6 +266,49 @@ test('the pinned prerequisite helper has only the closed owned successors and no
 });
 
 const correctionInputs={absorbance:'3.00',blankConcentration:'0',extractVolume:'20',dilutionFactor:'2',sampleMass:'1',moistureCorrectionFactor:'1'};
+test.each([
+    {absorbance:'3.00',value:40,extract:1,genericMax:0.1,above:false},
+    {absorbance:'9.00',value:160,extract:4,genericMax:1000,above:true}
+])('the actual curve governs extract $extract despite generic maximum $genericMax, with HTTP preview and immutable flags',async scenario=>{
+    const f=context;
+    await require('../../services/policyService').change(f.manager,f.lab.id,{reason:'Owned curve/generic maximum separation',changes:[
+        {key:'results.calibrationMax',analysisCode:'P_OLSEN',methodologyId:f.method.id,value:scenario.genericMax}]},{db:f.db});
+    await f.start();const curve=await curves.recordCurve(f.db,f.run.id,f.analyst,f.input);
+    const measurement={param:'P_OLSEN',value:String(scenario.value),calculation:{activationId:f.activation.id,
+        templateId:f.template.id,templateVersion:f.template.version,curveId:curve.id,inputs:{...correctionInputs,absorbance:scenario.absorbance}}};
+    await withQcRunHttp(f.db,f.analyst,async(app,token)=>{
+        const preview=await request(app).post('/api/workbench/v2/completion/preview').set('Authorization','Bearer '+token)
+            .send({entries:[{workItemId:f.item.id,...measurement}]});
+        expect(preview.status).toBe(200);expect(preview.body.excluded).toEqual([]);
+        expect(preview.body.included[0].validation.flags.includes('ABOVE_RANGE')).toBe(scenario.above);
+        expect(preview.body.included[0].calculationEvidence.intermediate).toMatchObject({extractConcentration:scenario.extract,
+            calibrationMax:2,calibrationUnit:'mg/L',curveId:curve.id,curveRevision:curve.revision,aboveRange:scenario.above});
+    },{workbench:true});
+    const result=await f.db.$transaction(tx=>require('../../services/resultWriteService').writeResult(tx,
+        {sampleId:f.sample.id,workItemId:f.item.id,actor:f.analyst,measurement}));
+    expect(result).toMatchObject({numericValue:scenario.value,isValid:true});
+    expect(JSON.parse(result.flags).includes('ABOVE_RANGE')).toBe(scenario.above);
+    const frozen=await f.db.resultCalculation.findUnique({where:{resultId:result.id}});
+    expect(JSON.parse(frozen.intermediate)).toMatchObject({extractConcentration:scenario.extract,calibrationMax:2,
+        calibrationUnit:'mg/L',curveId:curve.id,curveRevision:curve.revision,aboveRange:scenario.above});
+    const before=await f.snapshot();
+    const prompt=await require('../../services/workbenchValueValidationService').dilutionOpportunity(f.db,f.item,f.manager);
+    expect(prompt.eligible).toBe(scenario.above);expect(await f.snapshot()).toEqual(before);
+});
+
+test('a method with no active calculation keeps the generic #197 calibration maximum',async()=>{
+    const f=context;
+    await activations.change(f.db,f.manager,f.template.id,{labId:f.lab.id,analysisCode:'P_OLSEN',methodologyId:f.method.id,
+        expectedVersion:f.template.version,action:'DEACTIVATE',expectedActivationId:f.activation.id,reason:'Owned non-calculated method comparison'});
+    await require('../../services/policyService').change(f.manager,f.lab.id,{reason:'Owned generic maximum',changes:[
+        {key:'results.calibrationMax',analysisCode:'P_OLSEN',methodologyId:f.method.id,value:3}]},{db:f.db});
+    await f.start();
+    const result=await f.db.$transaction(tx=>require('../../services/resultWriteService').writeResult(tx,
+        {sampleId:f.sample.id,workItemId:f.item.id,actor:f.analyst,measurement:{param:'P_OLSEN',value:'4'}}));
+    expect(result).toMatchObject({numericValue:4,isValid:true});expect(JSON.parse(result.flags)).toContain('ABOVE_RANGE');
+    expect(await f.db.resultCalculation.findUnique({where:{resultId:result.id}})).toBeNull();
+});
+
 async function correctionReading(f) {
     await f.start(); const curve=await curves.recordCurve(f.db,f.run.id,f.analyst,f.input);
     const result=await f.db.$transaction(tx=>require('../../services/resultWriteService').writeResult(tx,

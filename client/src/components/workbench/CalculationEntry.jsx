@@ -59,6 +59,7 @@ export default function CalculationEntry({ item, disabled, onDraftChange, onBarc
                 onChange={event => change(input.key,event.target.value)} className="p-2 border border-sf-divider rounded bg-sf-canvas" />
         </label>)}
         <p className="text-xs">{t('calculations.preview')}: <output>{calculated?.output ?? '—'}</output> {context.units.reporting.code}</p>
+        {context.curve && <p className="text-xs">{t('calculations.appliedLimits')}: {context.curve.calibrationMax} {context.template.curve.xUnit}</p>}
         {calculated?.intermediate.aboveRange && <p className="text-amber-700 dark:text-amber-300 text-xs">{t('calculations.aboveRange')}</p>}
         {error && <p role="alert" className="text-xs">{error}</p>}
         <button type="button" disabled={disabled || busy || !calculated || !replicateNo || Boolean(context.curveBlocker)}

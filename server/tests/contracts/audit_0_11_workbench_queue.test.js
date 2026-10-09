@@ -11,7 +11,7 @@ const labId = 'LAB-AUDIT-11';
 
 describe('Audit 0.11: queue evidence and instrument readiness', () => {
     let token;
-    beforeAll(async () => { token = await getAuthToken('LAB_TECHNICIAN', labId); });
+    beforeAll(async () => { await require('../setup').ensureTestLab(labId, 'TEST'); token = await getAuthToken('LAB_TECHNICIAN', labId); });
     async function fixture() {
         const analysis = id('AUDIT11'), sampleId = id('SMP11'), workItemId = id('WI11'), equipmentId = id('EQ11');
         await prisma.analysis.create({ data: { code: analysis, name: 'Audit fixture numeric method', units: 'mg/kg', status: 'active' } });

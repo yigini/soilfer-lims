@@ -149,7 +149,7 @@ const CALCULATION_FIXTURE = Object.freeze({
     ddlSha256: '33f558c18a0b47c806989e6b83eca2ce15923df9c27caf5036cbe11c4420b114',
     caller: 'tests/contracts/audit_4_6_calculation_install.test.js'
  });
-// #199 pin6089156077: catalogue prerequisites and the real installer only.
+// #199 pins6089156077/6090475511: catalogue prerequisites and the real installer only.
 const CALCULATION_PREREQUISITES = Object.freeze({
     file: 'tests/helpers/calculationReleasePrerequisites.js', exportName: 'installCalculationReleasePrerequisites',
     sha256: 'bb8d5befaeb4484fd8660ff0e163a32384d731eef6562d4e4fbe9e426ebb9600',

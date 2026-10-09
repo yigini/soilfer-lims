@@ -11,6 +11,7 @@ describe('Scenario H: Scientific Validation', () => {
     let originalValidation;
 
     beforeAll(async () => {
+        await require('../setup').ensureTestLab('LAB-VAL', 'GTM');
         originalValidation = (await prisma.analysis.findUnique({ where: { code: 'PH_H2O' } })).validation;
         await prisma.analysis.update({ where: { code: 'PH_H2O' }, data: { validation: JSON.stringify({ type: 'numeric', min: 2, max: 14 }) } });
         // 1. Setup Tech User

@@ -546,9 +546,14 @@ exports.getQueue = async (req, res) => {
                 }) : null;
 
             const calculationScope = JSON.stringify([labId,code,item.methodologyId || null]);
-            if (!calculationSelections.has(calculationScope)) calculationSelections.set(calculationScope,
-                isSpectral || groupsMap[code].category === 'Operational Gates' ? null :
-                    await require('../services/policyService').calcTemplate(labId,{analysisCode:code,methodologyId:item.methodologyId || null},{db:prisma}));
+            if (!calculationSelections.has(calculationScope)) {
+                const active = isSpectral || groupsMap[code].category === 'Operational Gates' ? null :
+                    await require('../services/policyService').calcTemplate(labId,{analysisCode:code,methodologyId:item.methodologyId || null},{db:prisma});
+                const template = active && await prisma.calcTemplate.findUnique({where:{id:active.templateId}});
+                calculationSelections.set(calculationScope, active ? {...active,
+                    requiresCurve:Boolean(require('../services/calculationTemplateService').decode(template).curve)} : null);
+            }
+            if (valueContext && calculationSelections.get(calculationScope)?.requiresCurve) valueContext.rules.calibrationMax = null;
             groupsMap[code].items.push({
                 id: item.id,
                 workItemId: item.id,
@@ -1541,6 +1546,8 @@ exports.previewCompletion = async (req, res) => {
                             {sampleId:item.sampleId,workItemId:item.id,actor:user,
                                 measurement:{param:item.analysis,value:entry.value,calculation,equipmentId:entry.equipmentId,
                                     replicateNo:entry.replicateNo,basis:entry.basis}});
+                        if (calculationPreview.curve) validation = await require('../services/workbenchValueValidationService')
+                            .validateNumericEntry(prisma,item,user,entry,{calibrationCurve:calculationPreview.curve});
                         if(calculationPreview.calculation?.intermediate.aboveRange)
                             validation.flags=[...new Set([...validation.flags,'ABOVE_RANGE'])];
                     } catch(error) {

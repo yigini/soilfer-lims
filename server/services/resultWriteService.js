@@ -290,7 +290,7 @@ async function appendAttemptCorrection(tx, { item, sample, attempt, target, acto
     const measurement = { param:original.param,value,unit:original.unit,replicateNo:original.replicateNo,calculation }, now = new Date();
     const format = await getNumberFormat(ctx.labId, { db: tx, analysisCode: ctx.analysis.code, methodologyId: ctx.methodId });
     const evidence = await calculationService.prepareCorrection(tx,ctx,original,measurement,format);
-    const values = await numericValues(tx,ctx,measurement,null,format);
+    const values = await numericValues(tx,ctx,measurement,null,format,evidence);
     if (evidence?.selected.curve && evidence.calculated.intermediate.aboveRange)
         values.flags = JSON.stringify([...new Set([...JSON.parse(values.flags || '[]'),'ABOVE_RANGE'])]);
     const row = await appendResult(tx,ctx,measurement,{...values,provenance:original.provenance},now);
@@ -308,10 +308,10 @@ function numericReportingUnit(ctx, measurement) {
     return unit;
 }
 
-async function numericValidationContext(tx, ctx, measurement, parsedValue = null, numberFormat = null) {
+async function numericValidationContext(tx, ctx, measurement, parsedValue = null, numberFormat = null, calculationEvidence = null) {
     const unit = numericReportingUnit(ctx, measurement);
     const resolved = await require('./resultValueRulesService').resolveNumericValueRules(tx, {
-        labId: ctx.labId, analysis: ctx.analysis, method: ctx.method, unit });
+        labId: ctx.labId, analysis: ctx.analysis, method: ctx.method, unit, calibrationCurve: calculationEvidence?.selected.curve });
     const format = numberFormat || resolved.numberFormat;
     const validation = validateNumericMethod(measurement.value, resolved.rules, format, parsedValue);
     // Fixed rule keys and sorted flags give a stable hash of the actual
@@ -330,11 +330,14 @@ async function resolveResultValidationContext(tx, options) {
         throw new TransitionError('Use the correction route for a recorded cell.', 409, 'ATTEMPT_CORRECTION_REQUIRED');
     }
     await validateExecutionReadiness(tx, ctx);
-    return { ctx, ...await numericValidationContext(tx, ctx, selected.measurement) };
+    const calculated = await calculationService.prepareCalculation(tx, ctx, selected.measurement,
+        await getNumberFormat(ctx.labId, { db: tx, analysisCode: ctx.analysis.code, methodologyId: ctx.methodId }));
+    return { ctx, ...await numericValidationContext(tx, ctx, calculated
+        ? {...selected.measurement, unit:calculated.calculated.outputUnit} : selected.measurement, null, null, calculated) };
 }
 
-async function numericValues(tx, ctx, measurement, parsedValue=null, numberFormat=null) {
-    const resolved = await numericValidationContext(tx, ctx, measurement, parsedValue, numberFormat);
+async function numericValues(tx, ctx, measurement, parsedValue=null, numberFormat=null, calculationEvidence=null) {
+    const resolved = await numericValidationContext(tx, ctx, measurement, parsedValue, numberFormat, calculationEvidence);
     const { validation, unit } = resolved;
     const approvedRequest = measurement.overrideRequestId
         ? await require('./resultOverrideService').matchApproval(tx,ctx,measurement,resolved) : null;
@@ -421,7 +424,7 @@ async function writeResultsExecutionChecked(tx, options) {
     for(const measurement of prepared) {
         const calculated = await calculationService.prepareCalculation(tx,ctx,measurement,format);
         calculations.push(calculated);
-        const value = await numericValues(tx,ctx,calculated ? {...measurement,unit:calculated.calculated.outputUnit} : measurement,null,format);
+        const value = await numericValues(tx,ctx,calculated ? {...measurement,unit:calculated.calculated.outputUnit} : measurement,null,format,calculated);
         if (calculated?.selected.curve && calculated.calculated.intermediate.aboveRange)
             value.flags = JSON.stringify([...new Set([...JSON.parse(value.flags),'ABOVE_RANGE'])]);
         values.push(value);

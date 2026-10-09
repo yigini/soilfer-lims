@@ -10,6 +10,7 @@ describe('Workbench Two-Step Record & Submit Pipeline (Phase 4)', () => {
     const testUser = { username: 'tech_marcos_p4', role: 'LAB_TECHNICIAN', labId: 'LAB-DEFAULT' };
 
     beforeAll(async () => {
+        await require('../setup').ensureTestLab(testUser.labId, 'TEST');
         testSampleId = `SMP-P4-${Date.now()}`;
         testWorkItemId1 = `WI-P4-1-${Date.now()}`;
         testWorkItemId2 = `WI-P4-2-${Date.now()}`;

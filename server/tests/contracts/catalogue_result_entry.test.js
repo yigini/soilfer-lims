@@ -18,6 +18,7 @@ async function save(measurements, actor = user) {
 }
 describe('Catalogue rules also govern the sample results endpoint', () => {
     beforeAll(async () => {
+        await require('../setup').ensureTestLab(labId, 'TEST');
         await prisma.user.create({ data: { id: `CAT_USER_${id}`, username: user.username, email: `${user.username}@example.test`, password: 'test-only', role: user.role, labId } });
         await prisma.analysis.create({ data: { code: param, name: 'Configured result test', units: 'mg/kg', status: 'active', validation: JSON.stringify({ min: 1, max: 10 }) } });
         method = await prisma.methodology.create({ data: { analysisCode: param, name: 'Assigned laboratory procedure', labId } });
