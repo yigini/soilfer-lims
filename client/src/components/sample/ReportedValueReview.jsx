@@ -31,9 +31,13 @@ export default function ReportedValueReview({ itemId, itemVersion, itemStatus, t
     const choice = (nextMode = mode, nextReason = reason, nextId = attemptId, nextMean = mean, nextIds = meanIds) => {
         if (nextMode === 'AUTO') return { selection: null, ready: Boolean(data?.automatic?.choice) };
         if (nextMode === 'NOT_REPORTABLE') return { selection: { mode: nextMode, reason: nextReason.trim() }, ready: Boolean(nextReason.trim()) };
-        if (nextMode === 'ATTEMPT') return { selection: { mode: nextMode, attemptIds: [nextId], ...(nextReason.trim() && { reason: nextReason.trim() }) },
-            ready: Boolean(data?.attempts.find(row => row.id === nextId)?.option?.allowed) };
-        return { selection: { mode: 'MEAN', attemptIds: nextIds, ...(nextReason.trim() && { reason: nextReason.trim() }) }, ready: Boolean(nextMean?.allowed) };
+        if (nextMode === 'ATTEMPT') {
+            const option = data?.attempts.find(row => row.id === nextId)?.option;
+            return { selection: { mode: nextMode, attemptIds: [nextId], ...(nextReason.trim() && { reason: nextReason.trim() }) },
+                ready: Boolean(option?.allowed && (!option.requiresReason || nextReason.trim())) };
+        }
+        return { selection: { mode: 'MEAN', attemptIds: nextIds, ...(nextReason.trim() && { reason: nextReason.trim() }) },
+            ready: Boolean(nextMean?.allowed && (!nextMean.requiresReason || nextReason.trim())) };
     };
     const choose = (nextMode, nextId = attemptId) => {
         modeRef.current = nextMode; setMode(nextMode); setAttemptId(nextId);
@@ -96,7 +100,8 @@ export default function ReportedValueReview({ itemId, itemVersion, itemStatus, t
                 <label className="block"><input type="radio" name={`reported-${itemId}`} checked={mode === 'NOT_REPORTABLE'}
                     data-testid="reported-choose-not-reportable" onChange={() => choose('NOT_REPORTABLE')} /> {t('reportedValue.notReportable')}</label>
                 <label className="block">{t('reportedValue.reason')}<textarea className="mt-1 block w-full border border-sf-divider rounded p-2 bg-sf-surface"
-                    value={reason} required={mode === 'NOT_REPORTABLE'} data-testid="reported-choice-reason" onChange={event => {
+                    value={reason} required={mode === 'NOT_REPORTABLE' || mode === 'MEAN' && mean?.requiresReason || mode === 'ATTEMPT' && data.attempts.find(row => row.id === attemptId)?.option.requiresReason}
+                    data-testid="reported-choice-reason" onChange={event => {
                         setReason(event.target.value); choiceCallback.current?.(choice(mode,event.target.value));
                     }} /></label>
             </fieldset>

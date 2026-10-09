@@ -1482,7 +1482,6 @@
     "bulkReceipt": "Acceptés : {accepted}. Refusés : {refused}.",
     "errors": {
       "REPORTED_VALUE_SELECTION_REQUIRED": "Choisir une valeur rapportée avant d’accepter cette analyse.",
-      "REPORTED_VALUE_SELECTION_STALE": "Les preuves ont changé. Examiner les essais et choisir à nouveau.",
       "REPORTED_VALUE_SELECTION_CONFLICT": "Une autre sélection a été enregistrée. Recharger avant de choisir à nouveau.",
       "REPORTED_VALUE_SELECTION_INVALID": "Choisir un essai admissible complet ou une moyenne.",
       "REPORTED_VALUE_LIMIT_MISSING": "La limite de répétabilité enregistrée manque ; la moyenne est indisponible.",
@@ -1496,7 +1495,10 @@
       "QUESTIONED_ORIGINAL": "L’original est contesté ; le réviseur doit choisir.",
       "NO_ELIGIBLE_ATTEMPT": "Aucun essai admissible complet n’est disponible.",
       "RECORDING_TIME_AMBIGUOUS": "Les dates de saisie manquent, sont ambiguës ou identiques ; choisir explicitement un essai.",
-      "MULTIPLE_ELIGIBLE_ATTEMPTS": "Plusieurs essais admissibles sont disponibles ; le réviseur doit choisir."
+      "MULTIPLE_ELIGIBLE_ATTEMPTS": "Plusieurs essais admissibles sont disponibles ; le réviseur doit choisir.",
+      "REPORTED_VALUE_STALE": "Les preuves ont changé. Examiner les essais et choisir à nouveau.",
+      "REPORTED_VALUE_REASON_REQUIRED": "Expliquer pourquoi les preuves contestées sont rapportées.",
+      "REPORTED_VALUE_REVIEW_REQUIRED": "Les preuves conservées non actuelles ou retournées exigent un choix explicite du réviseur."
     },
     "statuses": {
       "OPEN": "Ouvert",

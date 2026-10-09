@@ -1482,7 +1482,6 @@
     "bulkReceipt": "Aceptados: {accepted}. Rechazados: {refused}.",
     "errors": {
       "REPORTED_VALUE_SELECTION_REQUIRED": "Elija un valor informado antes de aceptar este análisis.",
-      "REPORTED_VALUE_SELECTION_STALE": "La evidencia cambió. Revise los intentos y elija de nuevo.",
       "REPORTED_VALUE_SELECTION_CONFLICT": "Se guardó otra selección. Recargue antes de elegir de nuevo.",
       "REPORTED_VALUE_SELECTION_INVALID": "Elija un intento elegible completo o una media.",
       "REPORTED_VALUE_LIMIT_MISSING": "Falta el límite de repetibilidad registrado; la media no está disponible.",
@@ -1496,7 +1495,10 @@
       "QUESTIONED_ORIGINAL": "El original está cuestionado; el revisor debe elegir.",
       "NO_ELIGIBLE_ATTEMPT": "No hay ningún intento elegible completo.",
       "RECORDING_TIME_AMBIGUOUS": "Las fechas de registro faltan, son ambiguas o coinciden; elija un intento explícitamente.",
-      "MULTIPLE_ELIGIBLE_ATTEMPTS": "Hay varios intentos elegibles; el revisor debe elegir."
+      "MULTIPLE_ELIGIBLE_ATTEMPTS": "Hay varios intentos elegibles; el revisor debe elegir.",
+      "REPORTED_VALUE_STALE": "La evidencia cambió. Revise los intentos y elija de nuevo.",
+      "REPORTED_VALUE_REASON_REQUIRED": "Explique por qué se informa la evidencia cuestionada.",
+      "REPORTED_VALUE_REVIEW_REQUIRED": "La evidencia retenida no vigente o devuelta requiere una elección explícita del revisor."
     },
     "statuses": {
       "OPEN": "Abierto",

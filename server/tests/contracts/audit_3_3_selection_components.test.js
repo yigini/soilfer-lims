@@ -58,6 +58,18 @@ test('changing mean membership previews only complete selected attempts and a re
     expect(view.find('reported-choose-mean').props.disabled).toBe(true);
 });
 
+test('choosing questioned evidence alone or in a mean requires a reason before the selection is ready', async () => {
+    const response=data(); response.attempts[0].option.requiresReason=true; response.mean.requiresReason=true;
+    const view=mount({},response); await view.render();
+    view.find('reported-choose-attempt-0').props.onChange(); await view.render();
+    expect(view.props.onChoice).toHaveBeenLastCalledWith({selection:{mode:'ATTEMPT',attemptIds:['attempt-0']},ready:false});
+    expect(view.find('reported-choice-reason').props.required).toBe(true);
+    view.find('reported-choose-mean').props.onChange(); await view.render();
+    expect(view.props.onChoice).toHaveBeenLastCalledWith({selection:{mode:'MEAN',attemptIds:['attempt-0','attempt-1']},ready:false});
+    view.find('reported-choice-reason').props.onChange({target:{value:'Compared both worksheet records'}}); await view.render();
+    expect(view.props.onChoice).toHaveBeenLastCalledWith({selection:{mode:'MEAN',attemptIds:['attempt-0','attempt-1'],reason:'Compared both worksheet records'},ready:true});
+});
+
 test('late evidence after a work-item change cannot enable the new review row', async () => {
     let resolveOld; const axios = { get: jest.fn(url => url.includes('/old/') ? new Promise(resolve => { resolveOld = resolve; }) :
         Promise.resolve({ data: data({ automatic: true }) })), post: jest.fn() };

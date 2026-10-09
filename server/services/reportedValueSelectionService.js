@@ -6,7 +6,13 @@ const { selectionOutputs, automaticReportedChoice, explicitReportedChoice } = re
 const { assertReportedSelectionGroup, assertSelectionGroupStructure } = require('./reportedValueGroupContract');
 
 function choiceFor(item, context, explicit) {
-    if (explicit != null) return explicitReportedChoice(item, context.lineage, explicit, context.limits);
+    if (explicit != null) {
+        const choice = explicitReportedChoice(item, context.lineage, explicit, context.limits);
+        if (!choice.reason && context.lineage.eligible.some(row => row.attempt.status === 'QUESTIONED' && choice.attemptIds.includes(row.attempt.id))) {
+            throw new rules.TransitionError('Explain why the retained questioned evidence is being reported.', 409, 'REPORTED_VALUE_REASON_REQUIRED');
+        }
+        return choice;
+    }
     const automatic = automaticReportedChoice(item, context.lineage, context.policy.value, context.limits);
     if (!automatic.choice) throw new rules.TransitionError('Choose the reported value for this test before accepting it.', 409,
         'REPORTED_VALUE_SELECTION_REQUIRED', { workItemId: item.id, reasons: automatic.reasons,
@@ -88,7 +94,11 @@ async function reviewItem(tx, workItemId, actor) {
 }
 
 function previewChoice(item, context, choice) {
-    try { return { allowed: true, choice: explicitReportedChoice(item, context.lineage, choice, context.limits) }; }
+    try {
+        const preview = explicitReportedChoice(item, context.lineage, choice, context.limits);
+        return { allowed: true, choice: preview, requiresReason: context.lineage.eligible.some(row =>
+            row.attempt.status === 'QUESTIONED' && preview.attemptIds.includes(row.attempt.id)) };
+    }
     catch (error) {
         if (!error.code?.startsWith('REPORTED_VALUE_')) throw error;
         return { allowed: false, code: error.code, error: error.message };
@@ -107,7 +117,7 @@ async function reviewReportedSelection(db, workItemId, actor, explicit) {
         let currentCode = null;
         try { assertReportedSelectionGroup(rows, selectionOutputs(item), context.attempts, context.results); }
         catch (error) {
-            if (!['REPORTED_VALUE_SELECTION_REQUIRED','REPORTED_VALUE_SELECTION_STALE'].includes(error.code)) throw error;
+            if (!['REPORTED_VALUE_SELECTION_REQUIRED','REPORTED_VALUE_STALE'].includes(error.code)) throw error;
             currentCode = error.code;
         }
         const attempts = [];

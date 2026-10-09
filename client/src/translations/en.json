@@ -3087,7 +3087,6 @@
     "bulkReceipt": "Accepted: {accepted}. Refused: {refused}.",
     "errors": {
       "REPORTED_VALUE_SELECTION_REQUIRED": "Choose a reported value before accepting this test.",
-      "REPORTED_VALUE_SELECTION_STALE": "The evidence changed. Review the attempts and choose again.",
       "REPORTED_VALUE_SELECTION_CONFLICT": "Another selection was saved. Reload before choosing again.",
       "REPORTED_VALUE_SELECTION_INVALID": "Choose a complete eligible attempt or mean.",
       "REPORTED_VALUE_LIMIT_MISSING": "The recorded repeatability limit is missing; a mean is unavailable.",
@@ -3101,7 +3100,10 @@
       "QUESTIONED_ORIGINAL": "The original is questioned; a reviewer must choose.",
       "NO_ELIGIBLE_ATTEMPT": "No complete eligible attempt is available.",
       "RECORDING_TIME_AMBIGUOUS": "Recording dates are missing, ambiguous or tied; choose an attempt explicitly.",
-      "MULTIPLE_ELIGIBLE_ATTEMPTS": "Several eligible attempts are available; a reviewer must choose."
+      "MULTIPLE_ELIGIBLE_ATTEMPTS": "Several eligible attempts are available; a reviewer must choose.",
+      "REPORTED_VALUE_STALE": "The evidence changed. Review the attempts and choose again.",
+      "REPORTED_VALUE_REASON_REQUIRED": "Explain why the questioned evidence is being reported.",
+      "REPORTED_VALUE_REVIEW_REQUIRED": "Retained non-current or returned evidence needs an explicit reviewer choice."
     },
     "statuses": {
       "OPEN": "Open",

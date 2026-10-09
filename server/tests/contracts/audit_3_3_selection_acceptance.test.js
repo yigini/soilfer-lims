@@ -120,3 +120,25 @@ test('selection inspection checks lab scope before exposing attempts, values or 
     expect(response.status).toBe(403);
     expect(response.body.attempts).toBeUndefined(); expect(response.body.policy).toBeUndefined();
 });
+
+test('actual RETURN, repeat recording and accept retain a questioned original, requiring its explicit selection reason',async () => {
+    const f=await fixture(), item=f.items[0];
+    const returned=await f.http('/api/work/'+item.id+'/review',{decision:'RETURN',attemptId:f.rows[0].attemptId,
+        reasonCode:'REVIEW_OUTLIER',note:'Compare the original and repeated worksheet measurements'});
+    expect({status:returned.status,body:returned.body}).toMatchObject({status:200});
+    await require('../../services/workflowStateRules').inTransaction(f.db,tx => require('../../services/resultWriteService').writeResultsExecution(tx,{
+        sampleId:item.sampleId,workItemId:item.id,actor:f.actor,
+        measurements:[{param:item.analysis,value:'7.2',equipmentId:f.instrument.id}]
+    }));
+    await require('../../services/workItemStateService').transitionWorkItem(item.id,'COMPLETED',f.actor,'Recorded repeat ready for review',{},f.db);
+    await require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,sampleId:item.sampleId,type:'FULL',workItemIds:[item.id]});
+    const selection={mode:'ATTEMPT',attemptIds:[f.rows[0].attemptId]}, before=await f.all();
+    const missing=await f.http('/api/work/'+item.id+'/review',{decision:'ACCEPT',reportedValueSelection:selection});
+    expect(missing.status).toBe(409); expect(missing.body.code).toBe('REPORTED_VALUE_REASON_REQUIRED'); expect(await f.all()).toBe(before);
+    const preview=await f.get(); expect(preview.body.attempts.find(row=>row.id===f.rows[0].attemptId).option).toMatchObject({allowed:true,requiresReason:true});
+    const chosen=await f.http('/api/work/'+item.id+'/review',{decision:'ACCEPT',reportedValueSelection:{...selection,reason:'Retained original agrees with the reference worksheet'}});
+    expect({status:chosen.status,body:chosen.body}).toMatchObject({status:200});
+    const saved=await f.db.reportedValueSelection.findFirst();
+    expect(saved).toMatchObject({rule:'REVIEWER',valueText:f.rows[0].value,reason:'Retained original agrees with the reference worksheet'});
+    expect(await f.db.result.findUnique({where:{id:f.rows[0].id}})).toMatchObject({isCurrent:false,isValid:false});
+});

@@ -95,6 +95,9 @@ function automaticReportedChoice(item, lineage, policyRule, limits) {
     else if (!reasons.length) reasons.push('MULTIPLE_ELIGIBLE_ATTEMPTS');
     if (selected) {
         try {
+            if (selected.results.some(row => row.isCurrent === false || (() => {
+                try { return JSON.parse(row.flags || '[]').includes('REVIEW_RETURNED'); } catch { return true; }
+            })())) throw failure('REPORTED_VALUE_REVIEW_REQUIRED', 'Retained non-current or returned evidence needs an explicit reviewer selection.');
             const values = selectedOutputValues(item, [selected], limits);
             return { choice: { mode: 'ATTEMPT', attemptIds: [selected.attempt.id], reason: null,
                 rule: rule || (values.averaging ? 'AUTO_DUPLICATE_MEAN' : 'AUTO_SINGLE'), outputs: values.outputs }, reasons: [] };
