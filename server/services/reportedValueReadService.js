@@ -8,26 +8,26 @@ async function readSampleReportedValues(db,sample,{partial=false}={}) {
         const groups = [], values = [], sourceResults = [], errors = [], batches = new Map(), qcGates = {}, qcAcknowledgements = {}, workItemsByResult = {};
         for (const item of items.filter(row => row.status==='ACCEPTED' && !row.duplicateOf && !require('./workItemKinds').isNonMeasurement(row))) {
             try {
-            const saved = await readReportedSelection(tx,item), first = saved.rows[0];
-            const selection = { rule:first.rule,mode:first.mode,attemptIds:JSON.parse(first.attemptIds),reason:first.reason };
-            const proof = await validateReportedSources(tx,item,saved.context,selection);
-            groups.push({workItemId:item.id,selectionGroupId:first.selectionGroupId,mode:first.mode,reason:first.reason,
-                selectedBy:first.selectedBy,selectedAt:first.selectedAt,rule:first.rule,policyVersion:first.policyVersion,rows:saved.rows});
-            sourceResults.push(...proof.sources); proof.batches.forEach(row => batches.set(row.id,row));
-            Object.assign(qcGates,proof.qcGates); Object.assign(qcAcknowledgements,proof.qcAcknowledgements);
-            Object.assign(workItemsByResult,proof.workItemsByResult);
-            for (const row of saved.rows) {
-                const ids = JSON.parse(row.resultIds), sources = proof.sources.filter(source => ids.includes(source.id));
-                const provenance = [...new Set(sources.map(source => source.provenance))];
-                const bases = [...new Set(sources.map(source => source.basis))];
-                values.push({ id:row.id,selectionId:row.id,selectionGroupId:row.selectionGroupId,workItemId:item.id,sampleId:item.sampleId,
-                    param:row.analysisCode,value:row.valueText,numericValue:row.value,unit:row.unit,censoring:row.censoring,
-                    methodologyId:row.methodologyId,mode:row.mode,reason:row.reason,rule:row.rule,policyVersion:row.policyVersion,
-                    policyRule:row.policyRule,policySource:JSON.parse(row.evidenceSnapshot).policy?.source || null,
-                    sourceResultIds:ids,attemptIds:selection.attemptIds,provenance:provenance.length===1 ? provenance[0] : null,
-                    basis:bases.length===1 ? bases[0] : null,flags:[],isValid:true,
-                    ...(row.derivation && {provenance:'DERIVED'}) });
-            }
+                const saved = await readReportedSelection(tx,item), first = saved.rows[0];
+                const selection = { rule:first.rule,mode:first.mode,attemptIds:JSON.parse(first.attemptIds),reason:first.reason };
+                const proof = await validateReportedSources(tx,item,saved.context,selection);
+                groups.push({workItemId:item.id,selectionGroupId:first.selectionGroupId,mode:first.mode,reason:first.reason,
+                    selectedBy:first.selectedBy,selectedAt:first.selectedAt,rule:first.rule,policyVersion:first.policyVersion,rows:saved.rows});
+                sourceResults.push(...proof.sources); proof.batches.forEach(row => batches.set(row.id,row));
+                Object.assign(qcGates,proof.qcGates); Object.assign(qcAcknowledgements,proof.qcAcknowledgements);
+                Object.assign(workItemsByResult,proof.workItemsByResult);
+                for (const row of saved.rows) {
+                    const ids = JSON.parse(row.resultIds), sources = proof.sources.filter(source => ids.includes(source.id));
+                    const provenance = [...new Set(sources.map(source => source.provenance))];
+                    const bases = [...new Set(sources.map(source => source.basis))];
+                    values.push({ id:row.id,selectionId:row.id,selectionGroupId:row.selectionGroupId,workItemId:item.id,sampleId:item.sampleId,
+                        param:row.analysisCode,value:row.valueText,numericValue:row.value,unit:row.unit,censoring:row.censoring,
+                        methodologyId:row.methodologyId,mode:row.mode,reason:row.reason,rule:row.rule,policyVersion:row.policyVersion,
+                        policyRule:row.policyRule,policySource:JSON.parse(row.evidenceSnapshot).policy?.source || null,
+                        sourceResultIds:ids,attemptIds:selection.attemptIds,provenance:provenance.length===1 ? provenance[0] : null,
+                        basis:bases.length===1 ? bases[0] : null,flags:[],isValid:true,
+                        ...(row.derivation && {provenance:'DERIVED'}) });
+                }
             } catch(error) {
                 error.details={...error.details,workItemId:item.id};
                 if(!partial || !['REPORTED_VALUE_SELECTION_REQUIRED','REPORTED_VALUE_STALE'].includes(error.code)) throw error;

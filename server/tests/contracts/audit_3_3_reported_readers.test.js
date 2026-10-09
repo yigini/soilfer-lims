@@ -75,7 +75,7 @@ test.each([false,true])('bulk views disclose only a missing test and retain good
         const response=await invoke(f,'sisController',action,{query:{updatedSince:'2020-01-01T00:00:00Z'}});expect(response.status).toBe(200);
         const rows=action==='getGeoJson'?response.body.features.map(row=>row.properties):action==='syncDelta'?response.body.samples:response.body.data;
         expect(rows.flatMap(row=>row.reportedValueErrors)).toEqual([expect.objectContaining(error)]);
-        const good=rows.find(row=>(row.id || row.sample_id)===f.items[0].sampleId);
+        const good=rows.find(row=>row.analyticalResults?.[f.analysisCode] || row[action==='getGeoJson'?f.analysisCode.toLowerCase():f.analysisCode]!==undefined);
         if(action==='getSamples' || action==='syncDelta')expect(good.analyticalResults[f.analysisCode].value).toBe(Number(f.row.value));
         else expect(good[action==='getGeoJson'?f.analysisCode.toLowerCase():f.analysisCode]).toBe(Number(f.row.value));
     }

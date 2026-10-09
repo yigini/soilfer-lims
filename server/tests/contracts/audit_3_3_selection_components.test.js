@@ -1,9 +1,9 @@
 const { mountUi } = require('../helpers/qcWorksheetUi');
 const english = require('../../../client/src/translations/en.json');
-const fs = require('node:fs'),vm=require('node:vm'),esbuild=require('../../../client/node_modules/esbuild');
+const vm=require('node:vm'),esbuild=require('../../../client/node_modules/esbuild');
 const formatter={exports:{}};
-vm.runInNewContext(esbuild.transformSync(fs.readFileSync(require('node:path').resolve(__dirname,'../../../client/src/utils/messageFormatter.js'),'utf8'),
-    {loader:'js',format:'cjs'}).code,{module:formatter,exports:formatter.exports,require:name=>require('../../../client/node_modules/'+name),console});
+vm.runInNewContext(esbuild.buildSync({entryPoints:[require('node:path').resolve(__dirname,'../../../client/src/utils/messageFormatter.js')],
+    bundle:true,platform:'node',format:'cjs',write:false}).outputFiles[0].text,{module:formatter,exports:formatter.exports,console});
 const translate=locale=>(key,paramsOrFallback)=>{
     const catalogue=require('../../../client/src/translations/'+locale+'.json');
     const pattern=key.split('.').reduce((value,part)=>value?.[part],catalogue);

@@ -64,7 +64,7 @@ describe('Audit 0.10: current results in exports and working grid', () => {
         const refused=await exportData(f.projectCode),refusedGrid=await grid({project:f.projectCode});
         expect(refused).toMatchObject({status:200,body:{meta:{reportedValueErrors:[{workItemId:f.item.id,code:'REPORTED_VALUE_SELECTION_REQUIRED'}]}}});
         expect(refused.body.data[0].SOC).toBeUndefined();
-        expect(refusedGrid).toMatchObject({status:200,body:{reportedValueErrors:[{workItemId:f.item.id,code:'REPORTED_VALUE_SELECTION_REQUIRED'}]}}});
+        expect(refusedGrid).toMatchObject({status:200,body:{reportedValueErrors:[{workItemId:f.item.id,code:'REPORTED_VALUE_SELECTION_REQUIRED'}]}});
         expect(refusedGrid.body.data[0].SOC).toMatchObject({status:'UNAVAILABLE',code:'REPORTED_VALUE_SELECTION_REQUIRED'});
         expect(await prisma.auditLog.count()).toBe(before+1);
         const valid=await fixture(),[first,second]=await resultSet(valid,[{value:10,replicateNo:1},{value:20,replicateNo:2}]);

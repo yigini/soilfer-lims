@@ -154,6 +154,7 @@ test('a stale TEXTURE sample cannot hide a good neighboring sample in the grid; 
     const goodItem=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:goodSample.id,analysis:f.analysisCode,
         methodologyId:f.method.id,assignedLab:f.labId,status:'ACCEPTED'}});
     const goodResult=await f.result(goodItem);
+    await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(f.db,f.actor,f.labId);
     const [goodSelection]=await rules.inTransaction(f.db,tx=>selections.appendReportedSelection(tx,goodItem,f.actor));
     const before=await f.all();let response;
     await jest.isolateModulesAsync(async()=>{
