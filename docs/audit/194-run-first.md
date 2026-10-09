@@ -44,6 +44,22 @@ Further confirmed authorities at this base:
   notes or QC JSON. Append link/withdrawal events in the same command
   transaction; never change inventory quantity or a retained link row.
 
-Implementation and UI verification are still pending. These are source checks
-and an implementation boundary, not a completed acceptance or test claim.
+The branch now adds the pinned BatchReagentLot model and its additive DDL,
+restrictive foreign keys, unique(batch,lot), and unconditional SQL UPDATE/
+DELETE refusal. The independently digest-bound source is inspected by the
+existing workflow scanner without new writer or fixture exemptions. Native
+SQL tests cover immutable context, duplicate identity, retained parents and
+unchanged inventory quantity; their first run is pending.
+
+The only captured-schema expectation change is the exact absence of this
+new table. All literal old DDL and every other completeness check stay intact.
+
+[Pin6077632542](https://github.com/yigini/soilfer-lims/issues/194#issuecomment-6077632542)
+settles the command boundaries: before start only OPEN; after start no CLOSED
+batch, locked analyte or current disposition, and at least one IN_RUN or
+QC_PENDING analyte. State checks precede lot validation. Identical active
+links and prior withdrawals are no-ops; changed role conflicts, withdrawn
+lots never reactivate, and a concurrent unique conflict must reread the
+retained link. The runtime commands, installer/bootstrap, UI and whole-suite
+verification remain pending; no completed acceptance is claimed.
 Production remains under the #162 demo freeze.

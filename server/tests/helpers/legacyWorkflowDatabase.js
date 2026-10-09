@@ -197,6 +197,9 @@ function beforeGuards(options) {
             assert.ok(runModels.length === 0 || runModels.length === runTables.length, 'Generated QC datamodel is partial.');
             if (runModels.length) expected.push({ table: 'Batch', fields: ['instrumentId', 'analystUsername', 'startedAt', 'completedAt'] },
                 ...runTables.map(table => ({ table, missingTable: true })));
+            // #194 pin6072013517: this exact new link table is absent from the
+            // captured pre-audit schema. No historical DDL or other gap changes.
+            expected.push({ table: 'BatchReagentLot', missingTable: true });
             // #189 adds only these seven nullable fields. Keep the captured
             // historical schema literal and continue refusing every other gap.
             expected.push({ table: 'ProficiencyRound', fields: ['ncrStatus', 'classificationLimits',

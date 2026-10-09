@@ -36,6 +36,10 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         loaderSha256:'4a8776908a58c7f07b858f8a80e0e1b182a6409cf2c2b8171704fea8792bb2ec',
         directory:'20261009000100_reported_value_selection',sqlSha256:'52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7',
         boundary:'-- INSTALLER_GUARDS_AFTER_SCHEMA'}),
+    // #194 pin6072013517: inspect the exact additive link DDL; no writer exemption.
+    Object.freeze({ functionName: 'loadBatchReagentLotMigrationSource', loader: 'services/batchReagentLotMigrationSource.js',
+        loaderSha256: '1b2a0ebf0e253063e9c3c7c923132c269f6c276aa40977e83fa1ec96212c66db',
+        directory: '20261009000200_batch_reagent_lots', sqlSha256: '6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580' }),
     // #191 pin6067875897: inspect the independently byte-bound successor DDL.
     // Existing sources and writer restrictions retain their exact behaviour.
     Object.freeze({ functionName: 'loadWorkRepeatMigrationSource', loader: 'services/workRepeatMigrationSource.js',
