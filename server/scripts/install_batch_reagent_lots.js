@@ -15,7 +15,8 @@ const foreignKeys = db => db.prepare('PRAGMA foreign_key_list("BatchReagentLot")
     .sort((a, b) => a.from.localeCompare(b.from));
 const indexes = db => db.prepare("SELECT name,sql FROM sqlite_master WHERE type='index' AND tbl_name='BatchReagentLot' AND sql IS NOT NULL ORDER BY name")
     .all().map(row => ({ name: row.name, sql: normalize(row.sql) }));
-function expectedSchema(source) {
+function expectedSchema() {
+    const source = loadBatchReagentLotMigrationSource();
     const db = new Database(':memory:');
     try {
         db.exec('CREATE TABLE Lab(id TEXT PRIMARY KEY); CREATE TABLE Batch(id TEXT PRIMARY KEY); CREATE TABLE InventoryLot(id TEXT PRIMARY KEY);');
@@ -23,7 +24,8 @@ function expectedSchema(source) {
         return { columns: columns(db, 'BatchReagentLot'), foreignKeys: foreignKeys(db), indexes: indexes(db) };
     } finally { db.close(); }
 }
-function classify(db, source) {
+function classify(db) {
+    const source = loadBatchReagentLotMigrationSource();
     const differences = [];
     for (const [table, required] of [['Lab', ['id']], ['Batch', ['id', 'labId']],
         ['InventoryLot', ['id', 'labId', 'status', 'expiryDate']], ['_schema_migrations', ['id', 'details']]]) {
@@ -42,7 +44,7 @@ function classify(db, source) {
     if (!table && !managedObjects.length && !installed.length && !receiptRow) return { classification: 'PRE_194', sources, linkCount: 0 };
     if (table?.type !== 'table') differences.push('BatchReagentLot table differs');
     if (managedObjects.some(row => row.tbl_name !== 'BatchReagentLot')) differences.push('Managed reagent-link objects belong to a different table');
-    const expected = expectedSchema(source);
+    const expected = expectedSchema();
     if (JSON.stringify(columns(db, 'BatchReagentLot')) !== JSON.stringify(expected.columns)) differences.push('BatchReagentLot columns differ');
     if (JSON.stringify(foreignKeys(db)) !== JSON.stringify(expected.foreignKeys)) differences.push('BatchReagentLot foreign keys differ');
     if (JSON.stringify(indexes(db)) !== JSON.stringify(expected.indexes)) differences.push('BatchReagentLot indexes differ');
@@ -75,13 +77,13 @@ function installBatchReagentLots({ dbPath, apply = false } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('REAGENT_LOT_DATABASE_REQUIRED', 'Provide an explicit database path.');
     const target = path.resolve(dbPath), source = loadBatchReagentLotMigrationSource();
     const reader = new Database(target, { readonly: true, fileMustExist: true }); let reviewed;
-    try { reviewed = reader.transaction(() => classify(reader, source))(); } finally { reader.close(); }
+    try { reviewed = reader.transaction(() => classify(reader))(); } finally { reader.close(); }
     if (!apply || reviewed.classification === 'COMPLETE_194') return { ...reviewed, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0, backfilledCount: 0 };
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
     try {
         require('../services/exchangeDbFunctions').registerDbFunctions(db); db.pragma('foreign_keys=ON');
         return db.transaction(() => {
-            const current = classify(db, source);
+            const current = classify(db);
             if (current.classification === 'COMPLETE_194') return { ...current, mode: 'NO_OP', totalChanges: 0, backfilledCount: 0 };
             const before = fingerprint(retainedRows(db)), ledger = db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all();
             db.exec(current.classification === 'PRE_194' ? source.sql : source.guardsSql);
@@ -95,7 +97,7 @@ function installBatchReagentLots({ dbPath, apply = false } = {}) {
                 db.pragma('integrity_check', { simple: true }) !== 'ok' || db.pragma('foreign_key_check').length) {
                 throw fail('REAGENT_LOT_INTEGRITY_REFUSED', 'Reagent-link installation failed preservation or integrity checks.');
             }
-            return { ...classify(db, source), previousClassification: current.classification, mode: 'APPLIED', newLinkCount: 0,
+            return { ...classify(db), previousClassification: current.classification, mode: 'APPLIED', newLinkCount: 0,
                 backfilledCount: 0, totalChanges: db.prepare('SELECT total_changes() n').get().n };
         }).immediate();
     } finally { db.close(); }

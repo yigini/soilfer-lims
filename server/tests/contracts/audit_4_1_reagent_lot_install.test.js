@@ -40,7 +40,12 @@ test('exact empty fresh schema installs only guards/receipt without rewriting hi
 test.each(['partial-guard', 'changed-column', 'changed-receipt', 'stray-index'])('strict installer refuses %s with byte-identical zero-write evidence', variant => {
     const f = fixture();
     if (variant === 'stray-index') raw(f, db => db.exec('CREATE INDEX BatchReagentLot_labId_batchId_idx ON Batch(labId)'));
-    else if (variant === 'partial-guard') raw(f, db => { db.exec(source.schemaSql); db.exec(source.guardsSql.slice(0, source.guardsSql.indexOf('CREATE TRIGGER "BatchReagentLot_delete_refused"'))); });
+    else if (variant === 'partial-guard') raw(f, db => {
+        db.exec(source.schemaSql);
+        // One exact guard on the otherwise unguarded owned schema is a partial
+        // installation. No installed guard is disabled or changed.
+        db.exec("CREATE TRIGGER \"BatchReagentLot_update_refused\" BEFORE UPDATE ON \"BatchReagentLot\" BEGIN SELECT RAISE(ABORT, 'REAGENT_LOT_LINK_IMMUTABLE'); END;");
+    });
     else {
         installBatchReagentLots({ dbPath: f.file, apply: true });
         raw(f, db => variant === 'changed-column' ? db.exec('ALTER TABLE BatchReagentLot ADD COLUMN unexpected TEXT') :
