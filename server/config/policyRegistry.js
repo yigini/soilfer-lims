@@ -100,7 +100,8 @@ function valid(name, value) {
     case 'enum': return d.allowedValues.includes(value) && !d.unsupportedValues?.includes(value);
     case 'boolean': return typeof value === 'boolean';
     case 'integer': return Number.isSafeInteger(value) && value >= (d.min ?? 0);
-    case 'number': return typeof value === 'number' && Number.isFinite(value) && value >= (d.min ?? 0) && (d.max === undefined || value <= d.max);
+    case 'number': return typeof value === 'number' && Number.isFinite(value) &&
+        (d.min === undefined || value >= d.min) && (d.max === undefined || value <= d.max);
     case 'qcFailAction': return !!value && typeof value === 'object' && !Array.isArray(value) &&
         Object.keys(value).length === 4 && ['BLANK', 'DUPLICATE', 'LRM', 'CRM'].every(type => ['FAIL_BATCH', 'WARN'].includes(value[type]));
     case 'calibrationFailAction': return !!value && typeof value === 'object' && !Array.isArray(value) &&

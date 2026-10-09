@@ -36,4 +36,7 @@ test('null policy defaults are per-lab/method in every preset, with no invented 
         expect(Object.values(registry.definition(key).presets)).toEqual([null,null,null]);
         expect(registry.valid(key,null)).toBe(true);expect(registry.valid(key,-5)).toBe(true);
     }
+    for(const key of ['qc.blankMaxAllowed','qc.duplicateMaxRpd','results.phMin','results.phMax']){
+        expect(registry.valid(key,-5)).toBe(false);
+    }
 });
