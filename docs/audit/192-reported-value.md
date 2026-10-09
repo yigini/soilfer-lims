@@ -8,7 +8,7 @@ ids and row contract. V2 observations disclose a nullable
 `reportedValueSelectionId` for a current, non-stale source membership.
 When a raw source belongs to both a fraction and a derived class, v2 prefers
 the owning test's own selection, regardless of work-item query order.
-Bulk readers omit only missing/stale tests and disclose their sample, test and
+Bulk readers omit each test that returns a `REPORTED_VALUE_*` 4xx refusal and disclose its sample, test and
 refusal code; other tests and samples remain available. Single-sample reports
 and publication still refuse409. A missing selection refuses before resolving
 historical layout, so an unselected ambiguous TEXTURE cannot fail a bulk feed.
