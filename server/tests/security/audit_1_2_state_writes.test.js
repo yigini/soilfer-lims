@@ -55,6 +55,25 @@ const exceptions = [
 ];
 const serverRoot = path.resolve(__dirname, '../..');
 
+test('the previous #191 release digest is refused; only the exact current loader and DDL are inspected',()=>{
+    const probe="const {loadWorkRepeatMigrationSource}=require('../services/workRepeatMigrationSource'); const source=loadWorkRepeatMigrationSource(); db.exec(source.guardsSql);";
+    expect(scanSource(probe,'scripts/probe.js',exceptions)).toEqual([]);
+    const loader=path.join(serverRoot,'services/workRepeatMigrationSource.js'),read=fs.readFileSync;
+    const current=read(loader,'utf8'),digest=current.match(/const SHA256 = '([a-f0-9]{64})';/)[1];
+    const previous='09fd801c9ad5e28ba0d05a099270846adfe311e1a0c6c00ca3aed121c1f0c4d3';
+    expect(digest).not.toBe(previous);
+    const spy=jest.spyOn(fs,'readFileSync').mockImplementation((file,...args)=>{
+        if(path.resolve(String(file))===loader) {
+            const rejected=current.replace(digest,previous);
+            return typeof args[0]==='string'?rejected:Buffer.from(rejected);
+        }
+        return read(file,...args);
+    });
+    try { expect(scanSource(probe,'scripts/probe.js',exceptions)).toEqual([
+        expect.objectContaining({code:'UNRESOLVED_WORKFLOW_SQL'})]); }
+    finally {spy.mockRestore();}
+});
+
 test('legacy CLI launchers cannot import any fixture or test module', () => {
     for (const filename of ['scripts/run_manager_dashboard_tasklist_side_by_side.cjs', 'scripts/verify_issue149_probe.cjs', 'scripts/run_test_rehearsal.cjs']) {
         for (const specifier of ['../tests/helpers/workflowFixtures', '../tests/helpers/legacyWorkflowDatabase', '../tests/rehearsals/scenario.cjs']) {

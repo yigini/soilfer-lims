@@ -34,7 +34,7 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
     // #191 pin6067875897: inspect the independently byte-bound successor DDL.
     // Existing sources and writer restrictions retain their exact behaviour.
     Object.freeze({ functionName: 'loadWorkRepeatMigrationSource', loader: 'services/workRepeatMigrationSource.js',
-        loaderSha256: '6c228cc37678663dc3d06b49581a11765d3c21412f1a5f5facc0e52bed51d50d',
+        loaderSha256: '65ee6f9f42e45adbd2e66ae34cf04bcba09a40bc251dd411b3c948ab9a7d7e23',
         directory: '20261008000200_repeat_correction_contract', sqlSha256: '600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd',
         boundary: '-- INSTALLER_GUARDS_AFTER_SCHEMA' }),
     Object.freeze({ functionName: 'loadProficiencyMigrationSource', loader: 'services/proficiencyMigrationSource.js',
