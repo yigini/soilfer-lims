@@ -53,7 +53,7 @@ async function curveContext(file) {
         const method = await db.methodology.create({ data: { id: randomUUID(), analysisCode: 'P_OLSEN', name: 'Owned Olsen', version: 1 } });
         const batch = await db.batch.create({ data: { id: randomUUID(), labId: lab.id, analysis: 'P_OLSEN', status: 'RUNNING',
             startedAt: new Date(), createdBy: user.username, analystUsername: user.username } });
-        const methodRevision = JSON.stringify({ id: method.id, version: method.version });
+        const methodRevision = JSON.stringify({ methodologyId: method.id, name: method.name, standard: method.standard, version: method.version });
         const analyte = await db.batchAnalyte.create({ data: { id: randomUUID(), batchId: batch.id, labId: lab.id,
             analysisCode: 'P_OLSEN', methodologyId: method.id, criteriaSnapshot: JSON.stringify({ methodRevision: JSON.parse(methodRevision) }),
             status: 'RUNNING', provenance: 'NATIVE' } });

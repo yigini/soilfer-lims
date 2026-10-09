@@ -33,8 +33,8 @@ const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599
 const QC_EVIDENCE_SOURCES = Object.freeze([
     // #199: inspect the exact additive source; no runtime writer exemption.
     Object.freeze({ functionName: 'loadCalculationTemplateMigrationSource', loader: 'services/calculationTemplateMigrationSource.js',
-        loaderSha256: 'e83a55104007a11477b8dc0e0bc9bbd0768f34c74f45ca175c7a9c317bf9b280',
-        directory: '20261009000400_calculation_templates', sqlSha256: '33bfe5084a82b9998ba74703c3fdc36d470189ed082620cebcf518405549408d',
+        loaderSha256: '93326b3aaa9ffa9de1a296d52535d70736505ff0962c614d2ce52afa39eeb675',
+        directory: '20261009000400_calculation_templates', sqlSha256: 'cdae7f98f7bafa069e3276e29572ded88e9e656ae187c16f622589bcce3843ca',
         boundary: '-- Contract guards' }),
     // Inspect the exact #192 additive DDL; this grants no writer exception.
     Object.freeze({functionName:'loadReportedValueMigrationSource',loader:'services/reportedValueMigrationSource.js',
@@ -134,7 +134,7 @@ const ATTEMPT_FIXTURE = Object.freeze({
 // #199 pin6088661994: one digest-bound factory/export, one exact caller.
 const CALCULATION_FIXTURE = Object.freeze({
     file: 'tests/helpers/calculationHistoricalFixture.js', exportName: 'createPre199CalculationFixture',
-    sha256: '109232afd19941b58d7a99c2677b5cdd5e8f014745ee50313985f5e1eb7a1fa4',
+    sha256: '23a15ba76fe1aa5f740fb81a12e5f4e99a89087a99e5e38d8050867cb8d51778',
     ddl: 'tests/helpers/fixtures/pre199_full_application_schema.sql',
     ddlSha256: '33f558c18a0b47c806989e6b83eca2ce15923df9c27caf5036cbe11c4420b114',
     caller: 'tests/contracts/audit_4_6_calculation_install.test.js'

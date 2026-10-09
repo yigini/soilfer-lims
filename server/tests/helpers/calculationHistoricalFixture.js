@@ -31,7 +31,7 @@ function createPre199CalculationFixture() {
             db.exec(bytes.toString('utf8'));
             for (const unit of UNITS.filter(row => row.code !== 'pct_mass')) db.prepare('INSERT INTO Unit(code,display,quantityKind,factorToBase,synonyms,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?)')
                 .run(unit.code, unit.display, unit.quantityKind, unit.factorToBase, unit.synonyms, '2026-09-01T00:00:00.123Z', '2026-09-02T00:00:00.456Z');
-            const codes = ['MOISTURE', 'SOC', 'P_OLSEN', 'P_BRAY1', 'EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA', 'CEC', 'TN'];
+            const codes = ['SOIL_MOISTURE', 'SOC', 'P_OLSEN', 'P_BRAY1', 'EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA', 'CEC', 'TN'];
             for (const row of catalogue.analyses.filter(value => codes.includes(value.code))) db.prepare('INSERT INTO Analysis(code,name,unitCode,units,description,version,decimalPlaces,validation) VALUES(?,?,?,?,?,?,?,?)')
                 .run(row.code, `Retained local ${row.name}`, row.unitCode, row.units, 'Historical catalogue metadata', 17, 5,
                     '{"local":"unchanged"}');

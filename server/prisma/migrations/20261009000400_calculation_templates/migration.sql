@@ -218,8 +218,8 @@ BEGIN
       AND batch.startedAt IS NOT NULL AND analyte.provenance='NATIVE' AND analyte.methodologyId=NEW.methodologyId
       AND template.version=NEW.templateVersion AND template.analysisCode=analyte.analysisCode AND template.curve IS NOT NULL
       AND (template.labId IS NULL OR template.labId=NEW.labId)
-      AND json_extract(analyte.criteriaSnapshot,'$.methodRevision.id')=NEW.methodologyId
-      AND json_extract(NEW.executedMethodRevision,'$.id')=NEW.methodologyId
+      AND json_extract(analyte.criteriaSnapshot,'$.methodRevision.methodologyId')=NEW.methodologyId
+      AND json_extract(NEW.executedMethodRevision,'$.methodologyId')=NEW.methodologyId
       AND json_extract(analyte.criteriaSnapshot,'$.methodRevision.version')=json_extract(NEW.executedMethodRevision,'$.version')
   ) THEN RAISE(ABORT,'CALIBRATION_CURVE_CONTEXT_MISMATCH') END;
   SELECT CASE WHEN (NEW.revision=1 AND (NEW.supersedesId IS NOT NULL OR EXISTS (
