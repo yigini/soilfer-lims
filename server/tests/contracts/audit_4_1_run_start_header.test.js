@@ -83,8 +83,11 @@ test.each(['null', 'same', 'different', 'unready', 'method-changed'])('real HTTP
             expect(response.status).toBe(200);
             expect(await f.db.result.findFirst({ where: { sampleId: f.items[0].sampleId } })).toMatchObject({ equipmentId: f.instrument.id });
         } else {
-            expect(response.status).toBe(409);
-            expect(response.body.code).toBe({ different: 'RESULT_INSTRUMENT_MISMATCH', unready: 'INSTRUMENT_CALIBRATION_OVERDUE', 'method-changed': 'RESULT_METHOD_REVISION_CHANGED' }[kind]);
+            // The existing results-API preflight wraps readiness refusals in
+            // RESULT_ENTRY_INVALID. Keep that authority and its HTTP status.
+            expect(response.status).toBe(kind === 'unready' ? 400 : 409);
+            expect(response.body.code).toBe({ different: 'RESULT_INSTRUMENT_MISMATCH', unready: 'RESULT_ENTRY_INVALID', 'method-changed': 'RESULT_METHOD_REVISION_CHANGED' }[kind]);
+            if (kind === 'unready') expect(response.body.error).toContain('calibration is overdue');
             expect(await snapshot(f)).toEqual(before);
         }
     }, { repeatCommands: true });
@@ -100,6 +103,8 @@ test.each(['no-batch', 'unstarted', 'legacy-null'])('real HTTP keeps the existin
         await f.db.batch.create({ data: { id: batchId, labId: f.labId, analysis: f.analysisCode, instrumentId: null,
             startedAt: new Date(), status: 'OPEN', createdBy: f.actor.username, profile: 'RACK_40',
             qcResults: '{}', history: '[]', workItemIds: JSON.stringify([workItemId]) } });
+        console.log('OWNED_194_FK_DIAGNOSTIC', await f.db.$queryRawUnsafe('PRAGMA foreign_key_list("WorkItem")'),
+            await f.db.sample.count({where:{id:sampleId}}), await f.db.batch.count({where:{id:batchId}}), await f.db.methodology.count({where:{id:f.method.id}}));
         item = await createWorkItemFixture(f.db, { data: { id: workItemId, sampleId, labId: f.labId,
             analysis: f.analysisCode, methodologyId: f.method.id, status: 'IN_PROGRESS', batchId } });
         for (const analysis of ['DRYING', 'PREPARATION']) await createWorkItemFixture(f.db, { data: {
