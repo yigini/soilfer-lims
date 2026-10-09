@@ -78,15 +78,7 @@ CREATE TABLE "CalibrationCurve" (
     CONSTRAINT "CalibrationCurve_methodologyId_fkey" FOREIGN KEY ("methodologyId") REFERENCES "Methodology" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "CalibrationCurve_templateId_fkey" FOREIGN KEY ("templateId") REFERENCES "CalcTemplate" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "CalibrationCurve_recordedBy_fkey" FOREIGN KEY ("recordedBy") REFERENCES "User" ("username") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "CalibrationCurve_supersedesId_fkey" FOREIGN KEY ("supersedesId") REFERENCES "CalibrationCurve" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "CalibrationCurve_pass_coefficients_check" CHECK (
-      "status" <> 'PASS' OR (
-        "slope" IS NOT NULL AND "slope" <> 0 AND abs("slope") <= 1.7976931348623157e308
-        AND "intercept" IS NOT NULL AND abs("intercept") <= 1.7976931348623157e308
-        AND "r" IS NOT NULL AND "r" BETWEEN -1 AND 1
-        AND "rSquared" IS NOT NULL AND "rSquared" BETWEEN 0 AND 1
-      )
-    )
+    CONSTRAINT "CalibrationCurve_supersedesId_fkey" FOREIGN KEY ("supersedesId") REFERENCES "CalibrationCurve" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE "CalibrationPoint" (
@@ -338,4 +330,16 @@ END;
 CREATE TRIGGER "ResultCalculation_delete_immutable" BEFORE DELETE ON "ResultCalculation"
 BEGIN
   SELECT RAISE(ABORT,'RESULT_CALCULATION_IMMUTABLE');
+END;
+
+-- Pin6088166325: the same guard on fresh and managed paths; no table rebuild.
+CREATE TRIGGER "CalibrationCurve_pass_coefficients_guard" BEFORE INSERT ON "CalibrationCurve"
+WHEN NEW.status='PASS'
+BEGIN
+  SELECT CASE WHEN NEW.slope IS NULL OR NEW.intercept IS NULL OR NEW.r IS NULL OR NEW.rSquared IS NULL
+    OR typeof(NEW.slope) NOT IN ('integer','real') OR typeof(NEW.intercept) NOT IN ('integer','real')
+    OR typeof(NEW.r) NOT IN ('integer','real') OR typeof(NEW.rSquared) NOT IN ('integer','real')
+    OR NEW.slope=0 OR abs(NEW.slope)>1.7976931348623157e308 OR abs(NEW.intercept)>1.7976931348623157e308
+    OR abs(NEW.r)>1.7976931348623157e308 OR abs(NEW.rSquared)>1.7976931348623157e308
+    THEN RAISE(ABORT,'CALIBRATION_CURVE_PASS_COEFFICIENTS') END;
 END;

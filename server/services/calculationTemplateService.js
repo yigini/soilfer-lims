@@ -71,7 +71,22 @@ function changeRequest(body, parent) {
         throw fail(422, 'CALC_TEMPLATE_SCOPE_INVALID', 'Select a method or an explicit method-less scope.');
     }
     const outputDecimals = Object.hasOwn(body, 'outputDecimals') ? body.outputDecimals : parent.outputDecimals;
-    const result = { ...parent, parameters: Object.hasOwn(body, 'parameters') ? body.parameters : parent.parameters,
+    let parameters = parent.parameters;
+    if (Object.hasOwn(body, 'parameters')) {
+        if (!Array.isArray(body.parameters) || body.parameters.length !== parent.parameters.length ||
+            new Set(body.parameters.map(value => value?.key)).size !== parent.parameters.length) {
+            throw fail(422, 'CALC_TEMPLATE_PARAMETER_INVALID', 'Supply each defined method parameter once.');
+        }
+        parameters = parent.parameters.map(published => {
+            const supplied = body.parameters.find(value => value?.key === published.key);
+            if (!supplied || Object.keys(supplied).some(key => key !== 'value' && JSON.stringify(supplied[key]) !== JSON.stringify(published[key]))) {
+                throw fail(422, 'CALC_TEMPLATE_PARAMETER_INVALID', 'Parameter units, bounds and scientific metadata are fixed by the source method.');
+            }
+            return { ...published, value: supplied.value, citation: supplied.value === published.value ? published.citation : {
+                kind: 'LOCAL_SOP', citation: sopCitation, originalValue: published.value, parentPublishedSource: published.citation } };
+        });
+    }
+    const result = { ...parent, parameters,
         variant: Object.hasOwn(body, 'variant') ? requiredText(body.variant, 'CALC_TEMPLATE_FIELD_INVALID', 'Name the method variant.') : parent.variant,
         methodologyId, outputDecimals, precisionSource: outputDecimals === null ? null : { kind: 'LOCAL_SOP', citation: sopCitation },
         sourceCitation: { ...parent.sourceCitation, localSopCitation: sopCitation }, reason };
