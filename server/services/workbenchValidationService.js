@@ -16,16 +16,7 @@ const { calculateUsdaTexture } = require('../utils/soilCalculations');
  * @returns {object}
  */
 function parseDeterminationValue(rawInput, numberFormat = require('./policyService').getStrictNumberFormat()) {
-    const parsed = require('../../shared/numberParse').parseNumber(rawInput, numberFormat);
-    const below = parsed.qualifier.startsWith('<');
-    return {
-        isBlank: parsed.blank, isValid: parsed.valid, normalizedValue: parsed.value,
-        raw: parsed.valid ? parsed.canonical : parsed.rawInput.trim(), rawInput: parsed.rawInput,
-        code: parsed.code, isCensored: !!parsed.qualifier,
-        censoring: parsed.qualifier ? (below ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE',
-        ...(parsed.qualifier ? { limitValue: parsed.value } : {}),
-        flags: parsed.valid ? (parsed.qualifier ? [below ? 'BELOW_LOQ' : 'ABOVE_RANGE'] : []) : [parsed.blank ? 'VALUE_REQUIRED' : 'INVALID_FORMAT', parsed.code]
-    };
+    return require('../../shared/resultValueValidation').parseResultValue(rawInput, numberFormat);
 }
 /**
  * Validate numeric value against analysis method specification rules (min, max, loq, lod).
@@ -37,46 +28,7 @@ function parseDeterminationValue(rawInput, numberFormat = require('./policyServi
 function validateNumericMethod(value, rules = null, numberFormat = require('./policyService').getStrictNumberFormat(), parsedValue = null) {
     // Execution validation can reuse the trusted fraction parser output. No
     // request can supply this internal argument through the result authority.
-    const parsed = parsedValue || parseDeterminationValue(value, numberFormat);
-    if (parsed.isBlank) {
-        return {
-            ...parsed,
-            flags: ['VALUE_REQUIRED']
-        };
-    }
-
-    if (!parsed.isValid) {
-        return parsed;
-    }
-
-    const flags = [...parsed.flags];
-    const num = parsed.normalizedValue;
-
-    if (rules) {
-        // Hard limits (block completion without override)
-        if (rules.min !== undefined && rules.min !== null && num < rules.min) {
-            if (!flags.includes('BELOW_MIN')) flags.push('BELOW_MIN');
-        }
-        if (rules.max !== undefined && rules.max !== null && num > rules.max) {
-            if (!flags.includes('ABOVE_MAX')) flags.push('ABOVE_MAX');
-        }
-
-        // Method detection limits (informational warnings)
-        if (rules.loq !== undefined && rules.loq !== null && num < rules.loq && !parsed.isCensored) {
-            if (!flags.includes('BELOW_LOQ')) flags.push('BELOW_LOQ');
-        }
-        if (rules.lod !== undefined && rules.lod !== null && num < rules.lod && !parsed.isCensored) {
-            if (!flags.includes('BELOW_LOD')) flags.push('BELOW_LOD');
-        }
-    }
-
-    const hasHardViolation = flags.some(f => ['INVALID_FORMAT', 'BELOW_MIN', 'ABOVE_MAX', 'VALUE_REQUIRED'].includes(f));
-
-    return {
-        ...parsed,
-        flags,
-        isValid: !hasHardViolation
-    };
+    return require('../../shared/resultValueValidation').classifyResultValue(value, rules, numberFormat, parsedValue);
 }
 
 /**

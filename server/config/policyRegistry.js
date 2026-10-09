@@ -60,6 +60,9 @@ key('results.reportedValueRule', 'enum', 'MEAN_IF_WITHIN_R', 'MEAN_IF_WITHIN_R',
 key('results.betweenLodLoq', 'enum', 'REPORT_LT_LOQ', 'REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED', { allowedValues: ['REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED'] });
 key('results.phMin', 'number', 2, 2, 2, { min: 0, unit: 'pH' });
 key('results.phMax', 'number', 14, 14, 14, { min: 0, unit: 'pH' });
+key('results.typicalMin', 'number', null, null, null, { nullable: true, unit: 'method unit' });
+key('results.typicalMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
+key('results.calibrationMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
 key('repeats.maxAttemptsBeforeNcr', 'integer', 3, 5, 0, integer);
 key('repeats.technicianSelfRepeatBeforeSubmit', 'boolean', true);
 key('review.secondPersonRequired', 'boolean', true, true, false);

@@ -301,6 +301,9 @@ async function numericValues(tx, ctx, measurement, parsedValue=null, numberForma
     }
     const validation = validateNumericMethod(measurement.value, validationRules, format,parsedValue);
     const importing = ctx.source === 'legacy-import';
+    if (!importing && validation.nonOverridable) {
+        throw new TransitionError('A censoring limit must not be below the method LOQ.', 422, 'CENSOR_LIMIT_BELOW_LOQ', { flags: validation.flags });
+    }
     if (!importing && !validation.isValid && (!validation.normalizedValue && validation.normalizedValue !== 0 || validation.flags.includes('INVALID_FORMAT') || validation.isBlank)) {
         throw new TransitionError('Enter a valid numeric value or censoring qualifier.', 400, validation.code || 'INVALID_NUMBER');
     }
