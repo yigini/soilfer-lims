@@ -68,6 +68,10 @@ function calculate(template, rawInputs, { numberFormat, curve = null, units } = 
         !Number.isFinite(native.factorToBase) || native.factorToBase <= 0 || !Number.isFinite(reporting.factorToBase) || reporting.factorToBase <= 0) {
         throw error('CALC_TEMPLATE_UNIT_MISMATCH', 'Use compatible controlled native and reporting units.');
     }
+    const conversionFactor = native.factorToBase / reporting.factorToBase;
+    if (!Number.isFinite(conversionFactor) || conversionFactor <= 0) {
+        throw error('CALC_TEMPLATE_UNIT_MISMATCH', 'The controlled-unit conversion must be finite and positive.');
+    }
     if (!rawInputs || typeof rawInputs !== 'object' || Array.isArray(rawInputs)) {
         throw error('CALC_INPUT_REQUIRED', 'Enter the required raw measurements.');
     }
@@ -141,7 +145,6 @@ function calculate(template, rawInputs, { numberFormat, curve = null, units } = 
         break;
     }
     }
-    const conversionFactor = native.factorToBase / reporting.factorToBase;
     const unroundedOutput = output * conversionFactor;
     const roundedOutput = roundOutput(unroundedOutput, template.outputDecimals);
     // Pin6085050251: retain native precision, convert, then round exactly once

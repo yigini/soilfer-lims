@@ -35,6 +35,15 @@ const UNITS = [
         factorToBase: 10.0,
         synonyms: JSON.stringify(['%', 'percent', 'percentage', 'g/100g', 'wt%', 'mass%'])
     },
+    // #199 pin6087650856: a separate mass-fraction percent, additive only.
+    // Existing free-text percent synonyms continue resolving as RATIO.
+    {
+        code: 'pct_mass',
+        display: '% (m/m)',
+        quantityKind: 'MASS_FRACTION',
+        factorToBase: 10.0,
+        synonyms: '[]'
+    },
     {
         code: 'cmol(+)/kg',
         display: 'cmol(+)/kg',

@@ -1,5 +1,10 @@
 const { calculate: calculateAuthoritative, validateTemplate, fitCurve, INPUTS, PARAMETERS } = require('../../../shared/soilCalculation');
 const format = { decimal: '.', thousands: ',' };
+const { UNITS } = require('../../seeds/units');
+const unitContext = code => {
+    const { quantityKind, factorToBase } = UNITS.find(unit => unit.code === code);
+    return { code, quantityKind, factorToBase };
+};
 // Identity units are explicit synthetic controlled-unit context for each pure
 // equation fixture; actual catalogue compatibility is a separate DB contract.
 function calculate(template, rawInputs, context = {}) {
@@ -92,12 +97,11 @@ describe('Audit 4.6 shared, source-derived arithmetic', () => {
         expect(result.output).toBe(0.28); expect(result.inputs.sampleTitre).toBe('10,5');
     });
     test('WB converts full native precision to reporting g/kg before the sole rounding: 1.596% becomes15.96g/kg', () => {
-        const selected = template('WALKLEY_BLACK', { ferrousNormality: 0.5, carbonGramsPerMilliEquivalent: 0.003, recoveryFactor: 1.33 }, 'fixture_native_percent', 2);
-        const units = { native: { code: 'fixture_native_percent', quantityKind: 'MASS_FRACTION', factorToBase: 10 },
-            reporting: { code: 'g/kg', quantityKind: 'MASS_FRACTION', factorToBase: 1 } };
+        const selected = template('WALKLEY_BLACK', { ferrousNormality: 0.5, carbonGramsPerMilliEquivalent: 0.003, recoveryFactor: 1.33 }, 'pct_mass', 2);
+        const units = { native: unitContext('pct_mass'), reporting: unitContext('g/kg') };
         const result = calculate(selected, { blankTitre: 20, sampleTitre: 12, sampleMass: 1, moistureCorrectionFactor: 1 }, { numberFormat: format, units });
         expect(result.nativeValue).toBeCloseTo(1.596, 14);
-        expect(result).toMatchObject({ nativeUnit: 'fixture_native_percent', conversionFactor: 10, output: 15.96, outputUnit: 'g/kg', outputDecimals: 2 });
+        expect(result).toMatchObject({ nativeUnit: 'pct_mass', conversionFactor: 10, output: 15.96, outputUnit: 'g/kg', outputDecimals: 2 });
         expect(result.unroundedOutput).toBeCloseTo(15.96, 13);
         expect(result.output).not.toBe(16); // Rounding the native1.596 to1.60 first would give16.
         expect(result.unitConversion).toEqual(units);
@@ -105,10 +109,9 @@ describe('Audit 4.6 shared, source-derived arithmetic', () => {
         expect(result.unitConversion.native.factorToBase).toBe(10);
     });
     test('Kjeldahl native0.280134% remains unrounded and reporting2.80134g/kg rounds once to2.801', () => {
-        const selected = template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }, 'fixture_native_percent', 3);
+        const selected = template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }, 'pct_mass', 3);
         const result = calculate(selected, { sampleTitre: 10.5, blankTitre: 0.5, sampleMass: 1 }, { numberFormat: format,
-            units: { native: { code: 'fixture_native_percent', quantityKind: 'MASS_FRACTION', factorToBase: 10 },
-                reporting: { code: 'g/kg', quantityKind: 'MASS_FRACTION', factorToBase: 1 } } });
+            units: { native: unitContext('pct_mass'), reporting: unitContext('g/kg') } });
         expect(result.nativeValue).toBeCloseTo(0.280134, 14);
         expect(result.unroundedOutput).toBeCloseTo(2.80134, 13);
         expect(result.output).toBe(2.801); expect(result.intermediate.unroundedOutput).toBe(result.unroundedOutput);
@@ -121,6 +124,14 @@ describe('Audit 4.6 shared, source-derived arithmetic', () => {
         expect(() => validateTemplate({ ...selected, outputDecimals: 7 })).toThrow(expect.objectContaining({ code: 'CALC_TEMPLATE_INVALID' }));
         expect(validateTemplate({ ...selected, outputDecimals: 0 }).outputDecimals).toBe(0);
         expect(validateTemplate({ ...selected, outputDecimals: 6 }).outputDecimals).toBe(6);
+    });
+    test('the new controlled mass percent is distinct; existing percent and its free-text synonyms remain RATIO', () => {
+        expect(UNITS.find(unit => unit.code === 'pct_mass')).toEqual({ code: 'pct_mass', display: '% (m/m)', quantityKind: 'MASS_FRACTION', factorToBase: 10, synonyms: '[]' });
+        const existing = UNITS.find(unit => unit.code === '%');
+        expect(existing.quantityKind).toBe('RATIO');
+        expect(JSON.parse(existing.synonyms)).toEqual(['%', 'percent', 'percentage', 'g/100g', 'wt%', 'mass%']);
+        const candidates = UNITS.filter(unit => unit.code === '%' || JSON.parse(unit.synonyms || '[]').includes('%'));
+        expect(candidates.map(unit => unit.code)).toEqual(['%']);
     });
     test.each([undefined,
         { native: { code: '%', quantityKind: 'RATIO', factorToBase: 10 }, reporting: { code: 'g/kg', quantityKind: 'MASS_FRACTION', factorToBase: 1 } },
