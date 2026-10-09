@@ -54,3 +54,17 @@ test('all five client and server locales share every new label, source, verdict,
         expect(Object.values(messages.errors).every(value=>typeof value==='string'&&value.trim())).toBe(true);
     }
 });
+
+test.each(['WorksheetArea','SingleSampleEditor'])('%s uses the pair editor only for required-count2, and keeps count1 on the original scalar editor',async name=>{
+    const row=item({sampleReplicates:{requiredCount:2,status:'FAIL',source:'CURRENT',countSource:'CURRENT',measurements:[],canAppend:true}});
+    const activeGroup={analysis:'OWNED-NUMERIC',unit:'mg/kg',items:[row]},onDraftChange=jest.fn();
+    const host=mountUi(`components/workbench/${name}.jsx`,{activeGroup,items:[row],onDraftChange,onIndexChange:jest.fn(),currentIndex:0});
+    await host.render();
+    const pair=host.all().find(node=>node.props?.item===row&&node.props?.onDraftChange===onDraftChange);
+    expect(pair).toBeDefined();expect(pair.props.disabled).toBe(false);
+    expect(onDraftChange).not.toHaveBeenCalled();
+    row.sampleReplicates={...row.sampleReplicates,requiredCount:1,status:'NOT_REQUIRED',canAppend:false};
+    row.status='IN_PROGRESS';await host.render();
+    expect(host.all().some(node=>node.props?.item===row&&node.props?.onDraftChange===onDraftChange)).toBe(false);
+    expect(host.all().some(node=>node.props?.ariaLabel==='Owned sample determination')).toBe(true);
+});
