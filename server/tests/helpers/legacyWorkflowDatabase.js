@@ -217,6 +217,9 @@ function beforeGuards(options) {
             // allowed payload, column list and caller unchanged; the real
             // additive installer creates this empty evidence table later.
             expected.push({ table: 'ReportedValueSelection', missingTable: true });
+            // #197 adds this exact table after the captured historical schema.
+            // Keep the literal DDL and every other expected gap unchanged.
+            expected.push({ table: 'ResultOverrideRequest', missingTable: true });
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }
