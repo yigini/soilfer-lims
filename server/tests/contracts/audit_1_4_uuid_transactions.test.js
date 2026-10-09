@@ -299,7 +299,8 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         const save=replicateNo=>request(app).post('/api/workbench/batch-save').set('Authorization',`Bearer ${token}`)
             .send({draft:false,entries:[{workItemId:f.items.SAND.id,value:'20',replicateNo}]});
         expect((await save(1)).status).toBe(200);
-        expect((await save(2)).status).toBe(200);
+        const appended=await save(2);
+        expect({status:appended.status,body:appended.body}).toMatchObject({status:200,body:{saved:1}});
         const child=await prisma.workAttempt.findFirst({where:{workItemId:f.items.SAND.id,parentAttemptId:parent.id}});
         expect(child).toMatchObject({status:'RECORDED',reason:'CONFIRMATION'});
         const rows=await prisma.result.findMany({where:{sampleId:f.sampleId}});

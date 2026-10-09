@@ -896,9 +896,16 @@ exports.batchSave = async (req, res) => {
 
             // For completion from ASSIGNED, we allow the jump (implicit IN_PROGRESS step)
             const isCompletionFromAssigned = !draft && item.status === 'ASSIGNED';
+            // #191: completing the first replica does not seal its RECORDED
+            // execution. The writer rechecks frozen context and ownership in
+            // the transaction before appending an explicitly absent replica.
+            const recordedAppend = !draft && !isOperationalTask && item.status === 'COMPLETED'
+                ? await require('../services/resultWriteService').recordedExecution(prisma,item,item.analysis) : null;
+            const isAbsentReplicateAppend = recordedAppend &&
+                !recordedAppend.results.some(row=>row.replicateNo===Number(entry.replicateNo ?? 1));
 
             if (!draft) {
-                if (!isCompletionFromAssigned && !workflow.isValidWorkItemTransition(item.status, targetStatus)) {
+                if (!isCompletionFromAssigned && !isAbsentReplicateAppend && !workflow.isValidWorkItemTransition(item.status, targetStatus)) {
                     errors.push({
                         workItemId: entry.workItemId,
                         error: `Cannot transition from ${item.status} to ${targetStatus}. ` +
