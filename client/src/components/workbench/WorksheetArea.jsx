@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import NumericEditor from './NumericEditor';
 import SampleReplicateEntry from './SampleReplicateEntry';
+import CalculationEntry from './CalculationEntry';
 import { isBarcodeBurst } from './BarcodeSafeInput';
 import { useRunBarcodeScan } from './useRunBarcodeScan';
 import TextureEditor from './TextureEditor';
@@ -466,7 +467,11 @@ export default function WorksheetArea({
                                                             </div>
                                                         )}
                                                     </div>
-                                                ) : item.sampleReplicates?.requiredCount === 2 ? (
+                                                ) : (<CalculationEntry item={item} onDraftChange={onDraftChange}
+                                                    disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
+                                                    onBarcodeRejected={scanner.rejectValueBurst}
+                                                    inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)}>
+                                                    {item.sampleReplicates?.requiredCount === 2 ? (
                                                     <SampleReplicateEntry item={item} unit={activeGroup?.unit || ''}
                                                         disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
                                                         onDraftChange={onDraftChange}
@@ -488,7 +493,7 @@ export default function WorksheetArea({
                                                         onEnterNext={() => handleEnterNext(idx)}
                                                         inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)}
                                                     />
-                                                )}
+                                                    )}</CalculationEntry>)}
                                                 {!isOperationalGate && <PreviousResultHint result={item.previousResult} />}
                                                 {position && nativeControls.renderObservation(position)}
                                             </td>

@@ -487,6 +487,7 @@ exports.getQueue = async (req, res) => {
         // Group by analysis
         const groupsMap = {};
         const numberFormats = new Map();
+        const calculationSelections = new Map();
         for (const item of items) {
             const code = item.analysis;
             const labId = item.sample?.assignedLab || item.assignedLab || item.labId;
@@ -533,6 +534,10 @@ exports.getQueue = async (req, res) => {
             const scans = isSpectral ? (spectralMap[`${item.sampleId}::${modality}`] || []) : [];
             const latestScan = scans.length > 0 ? scans[0] : null;
 
+            const calculationScope = JSON.stringify([labId,code,item.methodologyId || null]);
+            if (!calculationSelections.has(calculationScope)) calculationSelections.set(calculationScope,
+                isSpectral || groupsMap[code].category === 'Operational Gates' ? null :
+                    await require('../services/policyService').calcTemplate(labId,{analysisCode:code,methodologyId:item.methodologyId || null},{db:prisma}));
             groupsMap[code].items.push({
                 id: item.id,
                 workItemId: item.id,
@@ -542,6 +547,7 @@ exports.getQueue = async (req, res) => {
                 originalId: item.sample?.originalId || null,
                 laboratoryId: item.sample?.assignedLab || item.assignedLab || item.labId || null,
                 numberFormat: numberFormats.get(labId),
+                calculationTemplate: calculationSelections.get(calculationScope),
                 projectCode: item.sample?.projectCode || null,
                 analysis: code,
                 analysisCode: code,
@@ -1086,7 +1092,7 @@ exports.batchSave = async (req, res) => {
                     const measurement = { param: item.analysis, value: entry.value, replicateNo: entry.replicateNo,
                         basis: entry.basis, methodologyId: item.methodologyId, equipmentId: entry.equipmentId,
                         overrideReason: entry.overrideReason,
-                        ...(Object.hasOwn(entry, 'calculation') && {calculation:entry.calculation}),
+                        calculation:entry.calculation ?? entry.values?.calculation,
                         ...(Object.hasOwn(entry, 'batchId') && { batchId: entry.batchId }) };
                     if (isTextureTask && textureClassification) {
                         await writeTextureDetermination(tx, { sampleId: item.sampleId, workItemId: item.id,

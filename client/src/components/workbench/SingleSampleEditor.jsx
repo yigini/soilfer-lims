@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import NumericEditor from './NumericEditor';
 import SampleReplicateEntry from './SampleReplicateEntry';
+import CalculationEntry from './CalculationEntry';
 import TextureEditor from './TextureEditor';
 import OperationalTaskEditor from './OperationalTaskEditor';
 import clsx from 'clsx';
@@ -236,7 +237,9 @@ export default function SingleSampleEditor({
                             Open Spectral Capture
                         </button>
                     </div>
-                ) : currentItem.sampleReplicates?.requiredCount === 2 ? (
+                ) : (<CalculationEntry item={currentItem} disabled={disabled} onDraftChange={onDraftChange} onBarcodeRejected={onBarcodeRejected}
+                    inputRef={node => onInputRef?.(currentItem.workItemId,node)}>
+                    {currentItem.sampleReplicates?.requiredCount === 2 ? (
                     <SampleReplicateEntry key={currentItem.workItemId} item={currentItem} unit={activeGroup?.unit || ''}
                         disabled={disabled} onDraftChange={onDraftChange} onBarcodeRejected={onBarcodeRejected}
                         inputRef={node => onInputRef?.(currentItem.workItemId, node)} />
@@ -253,7 +256,7 @@ export default function SingleSampleEditor({
                             ariaLabel={`${currentItem.sampleDisplayId || currentItem.sampleId} determination`}
                         />
                     </div>
-                )}
+                    )}</CalculationEntry>)}
                 {!isOperationalGate && <PreviousResultHint result={currentItem.previousResult} />}
                 {!isOperationalGate && equipment.length > 0 && (
                     <label className="block text-xs text-sf-muted">

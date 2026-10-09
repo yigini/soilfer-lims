@@ -27,7 +27,7 @@ async function executionContext(db, batchId, actor, analysisCode) {
 }
 async function activeTemplate(db, context) {
     const { lab, analyte } = context;
-    const active = await policyService.calcTemplate(lab.id, { analysisCode: analyte.analysisCode, methodologyId: analyte.methodologyId }, { db });
+    const active = lab && await policyService.calcTemplate(lab.id, { analysisCode: analyte.analysisCode, methodologyId: analyte.methodologyId }, { db });
     if (!active) return null;
     const row = await db.calcTemplate.findUnique({ where: { id: active.templateId } });
     if (!row || row.version !== active.templateVersion || row.analysisCode !== analyte.analysisCode ||
@@ -133,8 +133,10 @@ async function listCurves(db, batchId, actor, analysisCode) {
     return inTransaction(db, async tx => {
         const context = await executionContext(tx, batchId, actor, analysisCode), active = await activeTemplate(tx, context);
         const chain = await curveChain(tx, context);
+        const rule = active?.template.curve ? await qcRuleService.resolve(context.lab.id,analysisCode,{db:tx,methodologyId:context.analyte.methodologyId}) : null;
         return { ...chain, active: active ? { activationId: active.activationId, templateId: active.templateId, templateVersion: active.templateVersion,
-            requiresCurve: active.template.curve !== null } : null };
+            requiresCurve: active.template.curve !== null } : null,
+            criteria: rule ? {curveMinPoints:rule.resolved.curveMinPoints,curveMinR:rule.resolved.curveMinR} : null };
     });
 }
 async function assertRunCalibration(db, batchId, actor, analysisCode) {
