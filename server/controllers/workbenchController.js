@@ -1086,6 +1086,7 @@ exports.batchSave = async (req, res) => {
                     const measurement = { param: item.analysis, value: entry.value, replicateNo: entry.replicateNo,
                         basis: entry.basis, methodologyId: item.methodologyId, equipmentId: entry.equipmentId,
                         overrideReason: entry.overrideReason,
+                        ...(Object.hasOwn(entry, 'calculation') && {calculation:entry.calculation}),
                         ...(Object.hasOwn(entry, 'batchId') && { batchId: entry.batchId }) };
                     if (isTextureTask && textureClassification) {
                         await writeTextureDetermination(tx, { sampleId: item.sampleId, workItemId: item.id,

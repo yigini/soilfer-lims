@@ -13,6 +13,8 @@ const activations = require('../../services/calculationActivationService');
 const curves = require('../../services/calibrationCurveService');
 const native = require('../../services/qcNativeRunService');
 const rules = require('../../services/qcRuleService');
+const request = require('supertest');
+const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const files = [];
 const clients = [];
 let context;
@@ -158,4 +160,26 @@ test('incomplete retained point sets cannot bind, and a nondeclared AAS/ICP temp
         expect(() => curves.completeCurve(row)).toThrow(expect.objectContaining({ code: 'CALIBRATION_CURVE_INCOMPLETE' }));
     }
     expect(JSON.parse(referenceRows().find(row => row.templateKey === 'exchangeable-ca').curve || 'null')).toBeNull();
+});
+
+test('actual authenticated HTTP entry retains permission, canonical scope, active context and stable refusal codes', async () => {
+    const f = context; await f.start();
+    await withQcRunHttp(f.db, f.analyst, async (app, token) => {
+        const endpoint = `/api/qc/batches/${f.run.id}/calibration-curves`, before = await f.snapshot();
+        expect((await request(app).post(endpoint).send(f.input)).status).toBe(401);
+        const stale = await request(app).post(endpoint).set('Authorization', `Bearer ${token}`).send({ ...f.input, templateVersion: 99 });
+        expect(stale.status).toBe(409); expect(stale.body.code).toBe('CALC_TEMPLATE_VERSION_CHANGED');
+        expect(await f.snapshot()).toEqual(before);
+        const saved = await request(app).post(endpoint).set('Authorization', `Bearer ${token}`).send(f.input);
+        expect(saved.status).toBe(201); expect(saved.body.data).toMatchObject({ status: 'PASS', pointCount: 3 });
+        const listed = await request(app).get(endpoint).query({ analysisCode: 'P_OLSEN' }).set('Authorization', `Bearer ${token}`);
+        expect(listed.status).toBe(200); expect(listed.body.data.latest.id).toBe(saved.body.data.id);
+        expect(listed.body.data.active).toMatchObject({ activationId: f.activation.id, requiresCurve: true });
+    });
+    await withQcRunHttp(f.db, f.outsider, async (app, token) => {
+        const before = await f.snapshot();
+        expect((await request(app).get(`/api/qc/batches/${f.run.id}/calibration-curves`).query({ analysisCode: 'P_OLSEN' })
+            .set('Authorization', `Bearer ${token}`)).status).toBe(403);
+        expect(await f.snapshot()).toEqual(before);
+    });
 });

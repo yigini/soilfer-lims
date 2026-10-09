@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const workbenchController = require('../controllers/workbenchController');
+const calculationController = require('../controllers/calculationTemplateController');
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 
 router.use(verifyToken);
@@ -10,6 +11,7 @@ router.get('/queue', checkPermission('ENTER_RESULTS'), workbenchController.getQu
 
 // Batch save results (draft or complete)
 router.post('/batch-save', checkPermission('ENTER_RESULTS'), workbenchController.batchSave);
+router.post('/calculation-preview', checkPermission('ENTER_RESULTS'), calculationController.previewResult);
 
 // Server-side drafts
 router.get('/drafts', checkPermission('ENTER_RESULTS'), workbenchController.getDrafts);

@@ -10,6 +10,7 @@ const { validateNumericMethod, validateTextureFractions } = require('./workbench
 const { TransitionError } = rules;
 const { canonicalWorkItemWhere } = require('./workAttemptContract');
 const { allocateExecution,insertExecution } = require('./workAttemptWriteService');
+const calculationService = require('./resultCalculationService');
 const TEXTURE_ANALYSES = new Set(['TEXTURE', 'SAND', 'SILT', 'CLAY', 'pSA', 'PSA', 'textureSum']);
 const FRACTIONS = ['SAND', 'SILT', 'CLAY'];
 const ATTEMPT_ERRORS = ['RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMATCH', 'RESULT_ATTEMPT_REFERENCED'];
@@ -18,7 +19,7 @@ const ATTEMPT_ERRORS = ['RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMA
 // batchId is retained only to compare with the server-derived batch in context.
 function selectMeasurement(measurement) {
     if (!measurement || typeof measurement !== 'object') return measurement;
-    return Object.fromEntries(['param', 'value', 'unit', 'methodologyId', 'equipmentId', 'basis', 'overrideReason', 'replicateNo', 'batchId']
+    return Object.fromEntries(['param', 'value', 'unit', 'methodologyId', 'equipmentId', 'basis', 'overrideReason', 'replicateNo', 'batchId', 'calculation']
         .filter(key => Object.hasOwn(measurement, key)).map(key => [key, measurement[key]]));
 }
 
@@ -369,19 +370,38 @@ async function writeResultsExecution(tx, options) {
         ctx.attemptId=ctx.recordedAttempt.id;ctx.equipmentReadiness=evidence.equipmentReadiness ?? null;ctx.equipmentReadinessText=snapshot;
     }
     const format=await getNumberFormat(ctx.labId,{db:tx,analysisCode:ctx.analysis.code,methodologyId:ctx.methodId});
-    const values=[];
-    for(const measurement of prepared)values.push(await numericValues(tx,ctx,measurement,null,format));
+    const values=[], calculations=[];
+    for(const measurement of prepared) {
+        const calculated = await calculationService.prepare(tx,ctx,measurement,format);
+        calculations.push(calculated);
+        values.push(await numericValues(tx,ctx,calculated ? {...measurement,unit:calculated.calculated.outputUnit} : measurement,null,format));
+    }
     const evidence={source:ctx.source,param:prepared[0].param,rawValue:values[0].rawInput,normalizedValue:values[0].numericValue,
         qualifier:values[0].censoring==='NONE'?null:values[0].censoring,recordedAt:now.toISOString(),resultId:prepared[0].id,
         sourceResultIds:prepared.map(row=>row.id),measurements:prepared.map((row,index)=>({resultId:row.id,replicateNo:Number(row.replicateNo ?? 1),
             rawValue:values[index].rawInput,normalizedValue:values[index].numericValue,censoring:values[index].censoring}))};
     if(!ctx.recordedAttempt)await insertExecution(tx,ctx,allocation,evidence,now,options.attemptMetadata);
     const rows=[];
-    for(const [index,measurement] of prepared.entries())rows.push(await appendResult(tx,{...ctx,replicateNo:Number(measurement.replicateNo ?? 1)},measurement,values[index],now));
+    for(const [index,measurement] of prepared.entries()) {
+        const row = await appendResult(tx,{...ctx,replicateNo:Number(measurement.replicateNo ?? 1)},measurement,values[index],now);
+        await calculationService.freeze(tx,ctx,row,calculations[index],now);
+        rows.push(row);
+    }
     if(ctx.recordedAttempt)await require('./workAttemptEventService').appendAttemptEvent(tx,ctx.item,ctx.recordedAttempt.id,ctx.actor,
         {action:'REPLICATE_ADDED',from:'RECORDED',to:'RECORDED',newResultIds:rows.map(row=>row.id)});
     if (!options.deferCache) await cacheResult(tx, ctx.item, rows.at(-1).value);
     return rows;
+}
+
+async function previewResultCalculation(db, { sampleId, workItemId, actor, inputs }) {
+    return rules.inTransaction(db, async tx => {
+        const item = await tx.workItem.findUnique({ where: { id: workItemId } });
+        if (!item || item.sampleId !== sampleId) throw new TransitionError('Choose the sample work item.',409,'RESULT_WORKITEM_REQUIRED');
+        const ctx = await context(tx,{sampleId,workItemId,actor,measurement:{param:item.analysis},allowRecordedReplicates:true});
+        ctx.actor = actor;
+        await validateExecutionReadiness(tx,ctx);
+        return calculationService.preview(tx,ctx,inputs);
+    });
 }
 
 // Internal spectral ingestion uses an explicit option; a typed API measurement
@@ -587,4 +607,4 @@ function createRawResultFixture(db, data) {
 
 module.exports = { writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
     writeResultsExecution, appendAttemptCorrection, recordedExecution, assertRecordedResultSave,
-    createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError, resolveResultRunContext };
+    createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError, resolveResultRunContext, previewResultCalculation };

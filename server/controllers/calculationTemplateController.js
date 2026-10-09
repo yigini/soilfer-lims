@@ -1,6 +1,7 @@
 const prisma = require('../prisma');
 const templates = require('../services/calculationTemplateService');
 const activations = require('../services/calculationActivationService');
+const curves = require('../services/calibrationCurveService');
 function refuse(res, error) {
     if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
     const message = String(error.message || '');
@@ -24,3 +25,13 @@ exports.revise = handle(req => templates.revise(prisma, req.user, req.params.id,
 exports.activation = handle(req => activations.change(prisma, req.user, req.params.id, req.body), 201);
 exports.activationState = handle(req => activations.getState(prisma, req.user, { labId: req.query.labId,
     analysisCode: req.query.analysisCode, methodologyId: req.query.methodologyId === '' || req.query.methodologyId === 'null' ? null : req.query.methodologyId }));
+exports.listCurves = handle(req => curves.listCurves(prisma, req.params.id, req.user, req.query.analysisCode));
+exports.recordCurve = handle(req => curves.recordCurve(prisma, req.params.id, req.user, req.body), 201);
+exports.previewResult = handle(req => {
+    const body = req.body;
+    if (!body || typeof body !== 'object' || Array.isArray(body) ||
+        Object.keys(body).some(key => !['sampleId', 'workItemId', 'inputs'].includes(key)) ||
+        typeof body.sampleId !== 'string' || !body.sampleId || typeof body.workItemId !== 'string' || !body.workItemId)
+        throw templates.fail(422, 'CALC_INPUT_INVALID', 'Select the sample and work item for calculation preview.');
+    return require('../services/resultWriteService').previewResultCalculation(prisma,{...body,actor:req.user});
+});
