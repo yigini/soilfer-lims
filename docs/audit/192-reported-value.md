@@ -58,7 +58,7 @@ they are first run against an owned quiesced database copy.
 The shipped entrypoint installs the pinned additive schema after #191. Direct
 startup requires the complete #192 installation through a read-only gate;
 startup does not choose or back-fill any reported value. SQL SHA-256:
-`6508b8078dc667ba0306f4176cc552d809479b27c8271ed5d3c81eb26f8bbef7`.
+`52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7`.
 
 ## Fixture expectation changes
 
@@ -77,6 +77,11 @@ unchecked mean. Raw observation and spectral-reference expectations remain.
 | `export_normalization.test.js` (WET_CHEM, GeoJSON) | Normalize a raw SOC Result directly. | Save AUTO_SINGLE and preserve exact values and scope checks (6073676241); its unique non-QC lab explicitly waives batch QC through policy. |
 | `sis_adapter_service.test.js` (V1 representation) | V1 formatter consumes `sample.results`. | V1 requires a selection DTO; supplying only raw Results yields no reported values. V2/raw extractor assertions remain unchanged (6073676241). |
 | `audit_1_2_guard_installer.test.js` (complete startup) | Complete through #191. | Install #192 normally before asserting real read-only startup and health (new required startup gate). |
+| `audit_0_3_publication.test.js` (positive measured publication) | Accepted raw Results alone permit publication. | Save a fresh selection through the normal authority; retain the original permission, QC and preparation refusal order (6073676241). |
+| `audit_0_3_publication.test.js` (invalid or incomplete accepted evidence) | An empty report can be emitted after excluding the invalid raw value. | Refuse with `REPORTED_VALUE_SELECTION_REQUIRED` and no report writes; the reviewer must explicitly choose NOT_REPORTABLE or eligible evidence (6073676241). |
+| `audit_0_3_publication.test.js` (REQUIRED_WARN, all five locales) | Accepted status plus a request acknowledgement permits printing. | Make the real review and durable acknowledgement, then preserve the exact translated QC caveat assertions (6073676241). |
+| `audit_0_8_report_truthfulness.test.js`, `audit_0_9_public_report_superseded.test.js` (positive reports) | Raw scalar evidence is sufficient. | Append a normal saved choice; retain number, version, historical content, QC, share and supersession assertions (6073676241). |
+| `audit_0_7_resubmission.test.js` (S1/S2 isolation, individual and bulk RETURN) | Accept the new submission implicitly. | Explicitly choose the repeat while its original remains QUESTIONED; preserve all old-submission isolation and retained-data assertions (6072757161, 6073013502). |
 
 Dry back-fill reports invalid layouts or incomplete lineage per work item as
 AMBIGUOUS, with ids and reason codes. Separate TEXTURE needs persisted fraction

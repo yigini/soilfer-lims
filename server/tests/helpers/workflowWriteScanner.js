@@ -33,8 +33,8 @@ const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599
 const QC_EVIDENCE_SOURCES = Object.freeze([
     // Inspect the exact #192 additive DDL; this grants no writer exception.
     Object.freeze({functionName:'loadReportedValueMigrationSource',loader:'services/reportedValueMigrationSource.js',
-        loaderSha256:'6b140f8959f00ab985300ffcdcdbef00323490383b5bf51183c0754d4c63dab1',
-        directory:'20261009000100_reported_value_selection',sqlSha256:'6508b8078dc667ba0306f4176cc552d809479b27c8271ed5d3c81eb26f8bbef7',
+        loaderSha256:'4a8776908a58c7f07b858f8a80e0e1b182a6409cf2c2b8171704fea8792bb2ec',
+        directory:'20261009000100_reported_value_selection',sqlSha256:'52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7',
         boundary:'-- INSTALLER_GUARDS_AFTER_SCHEMA'}),
     // #191 pin6067875897: inspect the independently byte-bound successor DDL.
     // Existing sources and writer restrictions retain their exact behaviour.

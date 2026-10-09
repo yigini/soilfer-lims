@@ -72,11 +72,12 @@ WHEN NEW."mode" NOT IN ('ATTEMPT','MEAN','DERIVED','NOT_REPORTABLE')
      OR CASE WHEN json_valid(NEW."outputParams") THEN json_array_length(NEW."outputParams") ELSE 0 END<>1
      OR CASE WHEN json_valid(NEW."evidenceSnapshot") THEN json_type(NEW."evidenceSnapshot",'$.fractionSelections') IS NOT 'array' ELSE 1 END
      OR (SELECT count(*) FROM json_each(CASE WHEN json_valid(NEW."evidenceSnapshot") THEN json_extract(NEW."evidenceSnapshot",'$.fractionSelections') ELSE '[]' END))<>3
-     OR (SELECT count(DISTINCT json_extract(value,'$.analysisCode')) FROM json_each(CASE WHEN json_valid(NEW."evidenceSnapshot") THEN json_extract(NEW."evidenceSnapshot",'$.fractionSelections') ELSE '[]' END))<>3
+     OR (SELECT count(DISTINCT json_extract(CASE WHEN type='object' THEN value ELSE '{}' END,'$.analysisCode')) FROM json_each(CASE WHEN json_valid(NEW."evidenceSnapshot") THEN json_extract(NEW."evidenceSnapshot",'$.fractionSelections') ELSE '[]' END))<>3
      OR EXISTS(SELECT 1 FROM json_each(CASE WHEN json_valid(NEW."evidenceSnapshot") THEN json_extract(NEW."evidenceSnapshot",'$.fractionSelections') ELSE '[]' END)
-        WHERE type<>'object' OR json_extract(value,'$.analysisCode') NOT IN ('SAND','SILT','CLAY')
+        WHERE CASE WHEN type<>'object' THEN 1 ELSE
+          json_extract(value,'$.analysisCode') NOT IN ('SAND','SILT','CLAY')
           OR json_type(value,'$.selectionId') IS NOT 'text' OR length(trim(json_extract(value,'$.selectionId')))=0
-          OR json_type(value,'$.resultIds') IS NOT 'array')))
+          OR json_type(value,'$.resultIds') IS NOT 'array' END)))
  OR (NEW."mode"='NOT_REPORTABLE' AND NEW."rule"='AUTO_DERIVED_FROM_FRACTIONS' AND (
      CASE WHEN json_valid(NEW."attemptIds") THEN json_array_length(NEW."attemptIds") ELSE 1 END<>0
      OR CASE WHEN json_valid(NEW."resultIds") THEN json_array_length(NEW."resultIds") ELSE 1 END<>0))

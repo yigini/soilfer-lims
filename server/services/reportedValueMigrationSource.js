@@ -1,7 +1,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const { createHash } = require('node:crypto');
 const DIRECTORY = '20261009000100_reported_value_selection';
-const SHA256 = '6508b8078dc667ba0306f4176cc552d809479b27c8271ed5d3c81eb26f8bbef7';
+const SHA256 = '52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7';
 function loadReportedValueMigrationSource() {
     const root = path.resolve(__dirname, '..', fs.existsSync('/.dockerenv') ? '.migrations-backup/192' : 'prisma/migrations', DIRECTORY);
     const bytes = fs.readFileSync(path.join(root, 'migration.sql'));

@@ -147,7 +147,7 @@ test('a complete composite execution still saves one atomic four-output selectio
     expect(new Set(saved.rows.map(row=>row.selectionGroupId)).size).toBe(1);
     expect(await f.db.result.findMany({orderBy:{id:'asc'}})).toEqual(retained);
 });
-test.each(['attempt','tooFew','duplicateResult','missingProof','duplicateProof'])('SQL refuses malformed DERIVED %s shape with zero writes',async shape=>{
+test.each(['attempt','tooFew','duplicateResult','missingProof','duplicateProof','primitiveProof','nullProof'])('SQL refuses malformed DERIVED %s shape with zero writes',async shape=>{
     const f=await fixture({mean:true});await f.acceptFractions();expect(await f.review('TEXTURE')).toMatchObject({status:200});
     const saved=(await f.read()).rows[0],{workItem:unused,...data}=saved;
     const evidence=JSON.parse(data.evidenceSnapshot),ids=JSON.parse(data.resultIds);
@@ -156,9 +156,24 @@ test.each(['attempt','tooFew','duplicateResult','missingProof','duplicateProof']
     if(shape==='duplicateResult')data.resultIds=JSON.stringify([ids[0],...ids]);
     if(shape==='missingProof')evidence.fractionSelections.pop();
     if(shape==='duplicateProof')evidence.fractionSelections[2]=evidence.fractionSelections[0];
+    if(shape==='primitiveProof')evidence.fractionSelections[1]='unquoted invalid JSON primitive';
+    if(shape==='nullProof')evidence.fractionSelections[1]=null;
     data.evidenceSnapshot=JSON.stringify(evidence);data.id=randomUUID();data.selectionGroupId=randomUUID();data.supersedesId=saved.id;
     const before=await f.all();
     await expect(rules.inTransaction(f.db,tx=>tx.reportedValueSelection.create({data}))).rejects.toMatchObject({code:'REPORTED_VALUE_SELECTION_INVALID'});
     expect(await f.all()).toBe(before);
     expect(unused).toBeUndefined();
+});
+
+test.each(['extra','missing','wrongProof'])('runtime rejects a DERIVED %s source union and makes zero writes',async kind=>{
+    const f=await fixture({mean:true});await f.acceptFractions();expect(await f.review('TEXTURE')).toMatchObject({status:200});
+    const saved=await f.read(),before=await f.all(),row={...saved.rows[0]};
+    const ids=JSON.parse(row.resultIds),evidence=JSON.parse(row.evidenceSnapshot);
+    if(kind==='extra')ids.push(f.texture.id);
+    if(kind==='missing')ids.pop();
+    if(kind==='wrongProof')evidence.fractionSelections[0].resultIds=[f.texture.id];
+    row.resultIds=JSON.stringify(ids);row.evidenceSnapshot=JSON.stringify(evidence);
+    expect(()=>require('../../services/reportedValueTextureService').assertFractionSnapshot(saved.context,[row]))
+        .toThrow(expect.objectContaining({statusCode:409,code:'REPORTED_VALUE_STALE'}));
+    expect(await f.all()).toBe(before);
 });
