@@ -52,3 +52,5 @@ server/services/batchReagentLotMigrationSource.js text eol=lf
 server/prisma/migrations/20261009000400_calculation_templates/migration.sql text eol=lf
 server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json text eol=lf
 server/services/calculationTemplateMigrationSource.js text eol=lf
+server/tests/helpers/calculationHistoricalFixture.js text eol=lf
+server/tests/helpers/fixtures/pre199_full_application_schema.sql -text

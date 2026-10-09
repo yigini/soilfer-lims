@@ -41,10 +41,11 @@ function installCalculationTemplates({ dbPath, apply = false } = {}) {
             const locked = plan(db, source);
             if (locked.classification === 'COMPLETE') return { ...locked, mode: 'NO_OP', totalChanges: 0, unitInsertCount: 0, referenceInsertCount: 0 };
             if (locked.classification !== planned.classification) throw fail('CALC_PLAN_STALE', 'The calculation schema changed after the read-only plan.');
-            if (locked.classification === 'PRE_199') db.exec(source.schemaSql);
+            const releaseSource = loadCalculationTemplateMigrationSource();
+            if (locked.classification === 'PRE_199') db.exec(releaseSource.schemaSql);
             // The same additive guard set protects fresh and managed tables.
             // No existing analytical table is rebuilt or rewritten.
-            db.exec(source.guardsSql);
+            db.exec(releaseSource.guardsSql);
             const unit = installCalculationUnit(db, { apply: true });
             const references = installCalculationReferences(db, { apply: true });
             db.prepare('INSERT INTO "_schema_migrations" (id,details) VALUES (?,?)').run(MARKER, JSON.stringify(locked.receipt));

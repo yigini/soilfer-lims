@@ -13,6 +13,8 @@ const { installCalculationReferences } = require('../../services/calculationRefe
 const { referenceRows } = require('../../services/calculationReferenceLibrary');
 const { UNITS } = require('../../seeds/units');
 const catalogue = require('../../seeds/data/catalogue.json');
+const { createPre199CalculationFixture } = require('../helpers/calculationHistoricalFixture');
+const { scanSource } = require('../helpers/workflowWriteScanner');
 const files = [];
 const hash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 function raw(file, execute) {
@@ -68,6 +70,69 @@ function insertCurve(db, row) {
         .run(...keys.map(key => row[key]));
 }
 afterAll(() => { for (const file of files) fs.rmSync(assertOwnedTestDatabase(file, 'system:fixture'), { force: true }); });
+
+test('PRE_199 actual populated baseline retains every old row, column, foreign key, index, trigger and receipt', () => {
+    const { file } = createPre199CalculationFixture(); files.push(file);
+    const before = snapshot(file), digest = hash(file);
+    const shapes = () => raw(file, db => Object.fromEntries(Object.keys(before.rows).map(table => [table, {
+        columns: db.prepare(`PRAGMA table_xinfo("${table}")`).all(), foreignKeys: db.prepare(`PRAGMA foreign_key_list("${table}")`).all(),
+        indexes: db.prepare(`PRAGMA index_list("${table}")`).all().map(row => ({ ...row, columns: db.prepare(`PRAGMA index_xinfo("${row.name}")`).all() }))
+    }])));
+    const originalShapes = shapes();
+    expect(before.rows.Result).toHaveLength(2); expect(before.rows.AuditLog).toHaveLength(1);
+    expect(before.rows._schema_migrations.map(row => row.id)).toEqual(['179_workflow_state_guards', '182_result_attempt_links']);
+    for (const column of originalShapes.Result.columns) expect(before.rows.Result.some(row => row[column.name] != null &&
+        String(row[column.name]) !== column.dflt_value?.replace(/^'|'$/g, '') && !(column.name === 'isCurrent' && row[column.name] === 1))).toBe(true);
+    expect(installCalculationTemplates({ dbPath: file })).toMatchObject({ classification: 'PRE_199', mode: 'DRY_RUN',
+        plannedUnitInsertCount: 1, plannedReferenceInsertCount: 11, totalChanges: 0, backfillCount: 0 });
+    expect(snapshot(file)).toEqual(before); expect(hash(file)).toBe(digest);
+    expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ previousClassification: 'PRE_199', classification: 'COMPLETE',
+        mode: 'APPLIED', unitInsertCount: 1, referenceInsertCount: 11, activationInsertCount: 0, backfillCount: 0 });
+    const after = snapshot(file);
+    for (const object of before.objects) expect(after.objects).toContainEqual(object);
+    expect(shapes()).toEqual(originalShapes);
+    for (const [table, rows] of Object.entries(before.rows)) expect(table === 'Unit' ? after.rows[table].filter(row => row.code !== 'pct_mass') :
+        table === '_schema_migrations' ? after.rows[table].filter(row => row.id !== '199_calculation_templates') : after.rows[table]).toEqual(rows);
+    expect(after.rows.CalcTemplate).toEqual(referenceRows());
+    for (const table of ['CalcTemplateActivation', 'CalibrationCurve', 'CalibrationPoint', 'ResultCalculation']) expect(after.rows[table]).toEqual([]);
+    const installedHash = hash(file);
+    expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
+    expect(snapshot(file)).toEqual(after); expect(hash(file)).toBe(installedHash);
+});
+
+test('managed creation installs the same PASS guard and preserves historical results after all refused inserts', async () => {
+    const { file } = createPre199CalculationFixture(); files.push(file);
+    const historical = raw(file, db => db.prepare('SELECT * FROM Result ORDER BY id').all());
+    installCalculationTemplates({ dbPath: file, apply: true });
+    const row = await curveContext(file);
+    raw(file, db => {
+        for (const change of [{ slope: null }, { intercept: null }, { r: null }, { rSquared: null }, { slope: 0 }, { slope: Infinity },
+            { intercept: -Infinity }, { r: Infinity }, { rSquared: Infinity }])
+            expect(() => insertCurve(db, { ...row, ...change })).toThrow('CALIBRATION_CURVE_PASS_COEFFICIENTS');
+        insertCurve(db, { ...row, status: 'FAIL', failReason: 'DEGENERATE_FIT', slope: null, intercept: null, r: null, rSquared: null });
+        expect(db.prepare('SELECT * FROM Result ORDER BY id').all()).toEqual(historical);
+        expect(db.pragma('foreign_key_check')).toEqual([]);
+    });
+});
+
+test('managed receipt failure rolls the five new tables, unit and references back while retaining every old object and row', () => {
+    const { file } = createPre199CalculationFixture(); files.push(file);
+    raw(file, db => db.exec("CREATE TRIGGER owned_calc_receipt_failure BEFORE INSERT ON _schema_migrations WHEN NEW.id='199_calculation_templates' BEGIN SELECT RAISE(ABORT,'OWNED_CALC_RECEIPT_FAILURE'); END;"));
+    const before = snapshot(file), digest = hash(file);
+    expect(() => installCalculationTemplates({ dbPath: file, apply: true })).toThrow('OWNED_CALC_RECEIPT_FAILURE');
+    expect(snapshot(file)).toEqual(before); expect(hash(file)).toBe(digest);
+});
+
+test('the closed factory binds its bytes and sole caller; changed helper and second callers remain violations', () => {
+    const filename = 'tests/helpers/calculationHistoricalFixture.js', source = fs.readFileSync(path.resolve(__dirname, '../helpers/calculationHistoricalFixture.js'), 'utf8');
+    expect(() => createPre199CalculationFixture({})).toThrow('accepts no arguments');
+    expect(scanSource(source, filename)).toEqual([]);
+    expect(scanSource(`${source}\n// changed bytes`, filename).map(row => row.code)).toContain('HISTORICAL_FIXTURE_SOURCE_MISMATCH');
+    const code = "const { createPre199CalculationFixture } = require('../helpers/calculationHistoricalFixture'); createPre199CalculationFixture();";
+    expect(scanSource(code, 'tests/contracts/unlisted_calculation_caller.test.js').map(row => row.code)).toContain('HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED');
+    expect(scanSource(code, 'services/unlisted_calculation_caller.js').map(row => row.code)).toContain('TEST_HELPER_IMPORTED_BY_RUNTIME');
+    expect(scanSource(fs.readFileSync(path.resolve(__dirname, '../../scripts/install_calculation_templates.js'), 'utf8'), 'scripts/install_calculation_templates.js')).toEqual([]);
+});
 
 test('real fresh schema dry-run, additive install and repeated no-op preserve all original rows and schema objects', async () => {
     const file = await freshFixture(), before = snapshot(file), digest = hash(file);

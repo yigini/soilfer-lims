@@ -31,6 +31,11 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // #199: inspect the exact additive source; no runtime writer exemption.
+    Object.freeze({ functionName: 'loadCalculationTemplateMigrationSource', loader: 'services/calculationTemplateMigrationSource.js',
+        loaderSha256: 'e83a55104007a11477b8dc0e0bc9bbd0768f34c74f45ca175c7a9c317bf9b280',
+        directory: '20261009000400_calculation_templates', sqlSha256: '33bfe5084a82b9998ba74703c3fdc36d470189ed082620cebcf518405549408d',
+        boundary: '-- Contract guards' }),
     // Inspect the exact #192 additive DDL; this grants no writer exception.
     Object.freeze({functionName:'loadReportedValueMigrationSource',loader:'services/reportedValueMigrationSource.js',
         loaderSha256:'4a8776908a58c7f07b858f8a80e0e1b182a6409cf2c2b8171704fea8792bb2ec',
@@ -126,11 +131,27 @@ const ATTEMPT_FIXTURE = Object.freeze({
     }),
     orphanTest: 'a literal pre-190 measured orphan refuses the installer and COMPLETE startup without writes'
 });
+// #199 pin6088661994: one digest-bound factory/export, one exact caller.
+const CALCULATION_FIXTURE = Object.freeze({
+    file: 'tests/helpers/calculationHistoricalFixture.js', exportName: 'createPre199CalculationFixture',
+    sha256: '879627f34481ff30c9220ea35401b58e598da9903adb53bca74280b9e4ece38d',
+    ddl: 'tests/helpers/fixtures/pre199_full_application_schema.sql',
+    ddlSha256: '33f558c18a0b47c806989e6b83eca2ce15923df9c27caf5036cbe11c4420b114',
+    caller: 'tests/contracts/audit_4_6_calculation_install.test.js'
+});
 
 function scanSource(source, filename, exceptions = []) {
     const violations = [];
     const report = (node, code, detail) => violations.push({ file: filename, line: node?.loc?.start?.line || node?.loc?.line || 1, code, detail });
     let validAttemptFixture = false;
+    let validCalculationFixture = false;
+    if (filename === CALCULATION_FIXTURE.file) {
+        try {
+            validCalculationFixture = createHash('sha256').update(source).digest('hex') === CALCULATION_FIXTURE.sha256 &&
+                createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', CALCULATION_FIXTURE.ddl))).digest('hex') === CALCULATION_FIXTURE.ddlSha256;
+        } catch { validCalculationFixture = false; }
+        if (!validCalculationFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pinned #199 factory or pre-199 DDL digest differs.');
+    }
     if (filename === ATTEMPT_FIXTURE.file) {
         try {
             validAttemptFixture = createHash('sha256').update(source).digest('hex') === ATTEMPT_FIXTURE.sha256 &&
@@ -572,6 +593,7 @@ function scanSource(source, filename, exceptions = []) {
     function authorized(p, entities, operation) {
         const name = owner(p);
         if (!exportedNames.has(name)) return false;
+        if (validCalculationFixture && name === CALCULATION_FIXTURE.exportName) return true;
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName) return true;
         const removal = ['delete', 'deleteMany'].includes(operation);
         if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample', 'writeSampleHoldCompatibility'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
@@ -581,6 +603,7 @@ function scanSource(source, filename, exceptions = []) {
     }
     function resultProbe(p) {
         const name = owner(p);
+        if (validCalculationFixture && name === CALCULATION_FIXTURE.exportName && exportedNames.has(name)) return true;
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName && exportedNames.has(name)) return true;
         return exportedNames.has(name) && exceptions.some(entry => entry.file === filename && entry.exportName === name);
     }
@@ -643,6 +666,8 @@ function scanSource(source, filename, exceptions = []) {
                 if (!callerAllowed || !namedOrphan) report(p.node,
                     filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             }
+            if (resolved === CALCULATION_FIXTURE.file.replace(/\.js$/, '') && filename !== CALCULATION_FIXTURE.caller)
+                report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             if (filename.startsWith('tests/')) continue;
             if (exceptions.some(entry => resolved === entry.file.replace(/\.js$/, '')) || (rehearsalLauncher && resolved.startsWith('tests/'))) {
                 report(p.node, 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
