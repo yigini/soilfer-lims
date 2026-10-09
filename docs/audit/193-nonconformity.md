@@ -5,8 +5,9 @@ absent in that base; unsatisfactory PT recorded PENDING and the repeat contract
 refused NCR strings. The branch now adds the NCR model/SQL guards, scoped
 lifecycle authority, atomic PT classification links, a dry-default installer
 and fingerprinted backfill, actual QC triggers, a separate manager repeat
-override command and the QA list. Local full validation passes; the PR still
-requires green CI and Claude's audit of its current head before merge.
+override command and the QA list. Prior local full validation passes; combined
+validation is rerunning after #192 merged. The PR still requires green CI and
+Claude's audit of its current head before merge.
 
 Authoritative pins:
 - [6071242717](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6071242717): source identity and explicit one-use manager override.
@@ -45,7 +46,7 @@ forward moves and zero-write refusals (skip, reopen, CLOSED edit, blank text,
 DELETE); and CRM missing-mode refusal to create an NCR. Earlier pinned tests
 remain required.
 
-Validation: `cd server && npm test` passes 277/277 suites and 4,105/4,105 tests,
+Prior validation before #192 merged: `cd server && npm test` passes 277/277 suites and 4,105/4,105 tests,
 zero skipped, in 701.464s. This includes the actual PT/lifecycle, QC, repeat,
 HTTP, SQL guard, installer/backfill, security/wiring and predecessor suites.
 `cd client && npm run build` passes in 17.79s; `npm run lint` passes with zero
@@ -95,6 +96,14 @@ as documented above without disabling guards or bypassing source workflows.
 The current focused PT HTTP/scanner/SQL/installer group passes163/163 at
 243786a; the full rerun and current client receipts are recorded above.
 No production migration/backfill is claimed.
+
+After PR265/#192 merged at d751d7b, this branch was rebased onto that main.
+The integration retains both startup gates, both owned-fixture installers,
+both byte-bound scanner DDL entries, all reported-value keys in each of the
+ten locale packs, and both shared client format/contract aliases. The prior
+CI run was cancelled. The combined full suite, build/lint and replacement
+CI receipts will be recorded on PR266 before its exact-head audit request.
+No #193 SQL/loader bytes or predecessor contract changed in the rebase.
 
 The workflow scanner inspects the independently byte-bound NCR DDL/loader,
 including schema and guard sections, while retaining all writer restrictions.
