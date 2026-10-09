@@ -61,9 +61,11 @@ test('real Chromium types and records 40 values through the production app with 
             const typed = [];
             for (let index = 0; index < 40; index++) {
                 expect(await page.locator(':focus').getAttribute('aria-label')).toMatch(/ determination$/);
-                const label = await page.locator(':focus').getAttribute('aria-label');
-                expect(typed).not.toContain(label); typed.push(label);
-                await page.keyboard.type(`6.${String(index + 1).padStart(2, '0')}`, { delay: 45 });
+                const row = await page.locator(':focus').evaluate(input => input.closest('tr').rowIndex);
+                expect(typed).not.toContain(row); typed.push(row);
+                const rawInput = `6.${String(index + 1).padStart(2, '0')}`;
+                await page.keyboard.type(rawInput, { delay: 45 });
+                expect(await page.locator(':focus').inputValue()).toBe(rawInput);
                 await page.keyboard.press(index % 2 ? 'NumpadEnter' : 'Enter');
             }
             expect(await page.locator(':focus').getAttribute('data-testid')).toBe('record-all-ready');

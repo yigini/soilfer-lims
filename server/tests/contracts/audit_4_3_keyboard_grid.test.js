@@ -112,6 +112,32 @@ test('QC Escape restores its focus-time observation without a preview, save or e
     expect(view.axios.post).not.toHaveBeenCalled(); expect(view.axios.put).not.toHaveBeenCalled();
 });
 
+test('texture Escape restores only the focused fraction and recomputes policy-driven readiness', async () => {
+    const restore = jest.fn(), change = jest.fn();
+    const view = mountUi('components/workbench/TextureEditor.jsx', { values: { sand: '40', silt: '40', clay: '20' },
+        tolerance: 0.5, numberFormat: { decimal: '.', thousands: null }, onChange: change, onRevertValues: restore });
+    await view.render(); let inputs = view.all().filter(node => node.type === 'input');
+    inputs[0].props.onFocus({ currentTarget: { value: '40' } });
+    await view.render({ values: { sand: '50', silt: '40', clay: '20' } }); inputs = view.all().filter(node => node.type === 'input');
+    inputs[0].props.onKeyDown({ key: 'Escape', currentTarget: { value: '50' }, preventDefault: jest.fn(), stopPropagation: jest.fn() });
+    expect(restore).toHaveBeenCalledWith({ sand: '40', silt: '40', clay: '20' }); expect(change).not.toHaveBeenCalled();
+    expect(view.axios.post).not.toHaveBeenCalled();
+    const row = item('texture', { editorKind: 'TEXTURE', draft: { values: { sand: '40', silt: '40', clay: '20' } } });
+    const ready = mountUi('components/workbench/WorksheetArea.jsx', { activeGroup: { analysis: 'TEXTURE', validation: { tolerance: 0.5 }, items: [row] }, onReviewRecord: jest.fn() });
+    await ready.render(); expect(ready.find('record-all-ready').props['aria-disabled']).toBe(false);
+    row.draft.values.sand = '50'; await ready.render(); expect(ready.find('record-all-ready').props['aria-disabled']).toBe(true);
+    row.draft.values.sand = ''; await ready.render(); expect(ready.find('record-all-ready').props['aria-disabled']).toBe(true);
+});
+
+test('restoring the committed scalar value immediately removes the Result from the ready count', async () => {
+    const row = item('revert', { currentResult: '6.2', draft: { value: '7' } });
+    const view = mountUi('components/workbench/WorksheetArea.jsx', { activeGroup: { analysis: 'PH_H2O', items: [row] },
+        onRevertDraft: (id, value) => { row.draft.value = value; }, onReviewRecord: jest.fn() });
+    await view.render(); expect(view.find('record-all-ready').props['aria-disabled']).toBe(false);
+    view.all().find(node => node.type === view.children['./NumericEditor']).props.onRevertValue('6.2');
+    await view.render(); expect(view.find('record-all-ready').props['aria-disabled']).toBe(true);
+});
+
 test('locale parsing and all five translated primary actions retain the existing number rules', async () => {
     const row = item('comma', { draft: { value: '6,82' }, numberFormat: { decimal: ',', thousands: null } }), record = jest.fn();
     const view = mountUi('components/workbench/WorksheetArea.jsx', { activeGroup: { analysis: 'PH_H2O', items: [row] }, onReviewRecord: record });
