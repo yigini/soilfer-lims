@@ -6,6 +6,7 @@
  * bulk density, application rates, and physical soil fractions.
  */
 
+const { MASS_FRACTION_PERCENT } = require('../services/calculationReferenceUnit');
 const UNITS = [
     {
         code: 'pH_units',
@@ -37,13 +38,7 @@ const UNITS = [
     },
     // #199 pin6087650856: a separate mass-fraction percent, additive only.
     // Existing free-text percent synonyms continue resolving as RATIO.
-    {
-        code: 'pct_mass',
-        display: '% (m/m)',
-        quantityKind: 'MASS_FRACTION',
-        factorToBase: 10.0,
-        synonyms: '[]'
-    },
+    MASS_FRACTION_PERCENT,
     {
         code: 'cmol(+)/kg',
         display: 'cmol(+)/kg',
