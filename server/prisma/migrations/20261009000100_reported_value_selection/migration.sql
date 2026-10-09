@@ -40,8 +40,8 @@ BEGIN SELECT RAISE(ABORT, 'REPORTED_VALUE_SELECTION_IMMUTABLE'); END;
 CREATE TRIGGER "ReportedValueSelection_delete_refused" BEFORE DELETE ON "ReportedValueSelection"
 BEGIN SELECT RAISE(ABORT, 'REPORTED_VALUE_SELECTION_IMMUTABLE'); END;
 CREATE TRIGGER "ReportedValueSelection_insert_contract" BEFORE INSERT ON "ReportedValueSelection"
-WHEN NEW."mode" NOT IN ('ATTEMPT','MEAN','NOT_REPORTABLE')
- OR NEW."rule" NOT IN ('AUTO_SINGLE','AUTO_DUPLICATE_MEAN','AUTO_LATEST_AFTER_INVALIDATION','AUTO_LATEST_VALID','REVIEWER')
+WHEN NEW."mode" NOT IN ('ATTEMPT','MEAN','DERIVED','NOT_REPORTABLE')
+ OR NEW."rule" NOT IN ('AUTO_SINGLE','AUTO_DUPLICATE_MEAN','AUTO_LATEST_AFTER_INVALIDATION','AUTO_LATEST_VALID','AUTO_DERIVED_FROM_FRACTIONS','REVIEWER')
  OR NEW."policyRule" NOT IN ('MEAN_IF_WITHIN_R','LATEST_VALID','REVIEWER_PICKS')
  OR NEW."policyKey" <> 'results.reportedValueRule'
  OR NEW."policyVersion" < 0
@@ -56,9 +56,30 @@ WHEN NEW."mode" NOT IN ('ATTEMPT','MEAN','NOT_REPORTABLE')
  OR CASE WHEN json_valid(NEW."outputParams") THEN json_type(NEW."outputParams") <> 'array' ELSE 1 END
  OR NOT EXISTS(SELECT 1 FROM json_each(CASE WHEN json_valid(NEW."outputParams") THEN NEW."outputParams" ELSE '[]' END) WHERE value=NEW."analysisCode")
  OR (NEW."mode"='NOT_REPORTABLE' AND (NEW."reason" IS NULL OR length(trim(NEW."reason"))=0 OR NEW."value" IS NOT NULL OR NEW."valueText"<>''))
- OR (NEW."mode"<>'NOT_REPORTABLE' AND (
+ OR (NEW."mode" IN ('ATTEMPT','MEAN') AND (
      CASE WHEN json_valid(NEW."attemptIds") THEN json_array_length(NEW."attemptIds") ELSE 0 END=0
      OR CASE WHEN json_valid(NEW."resultIds") THEN json_array_length(NEW."resultIds") ELSE 0 END=0))
+ OR (NEW."rule"='AUTO_DERIVED_FROM_FRACTIONS' AND NEW."mode" NOT IN ('DERIVED','NOT_REPORTABLE'))
+ OR (NEW."mode"='DERIVED' AND (
+     NEW."rule" NOT IN ('AUTO_DERIVED_FROM_FRACTIONS','REVIEWER')
+     OR CASE WHEN json_valid(NEW."attemptIds") THEN json_array_length(NEW."attemptIds") ELSE 1 END<>0
+     OR CASE WHEN json_valid(NEW."resultIds") THEN json_array_length(NEW."resultIds") ELSE 0 END<3
+     OR (SELECT count(DISTINCT value) FROM json_each(CASE WHEN json_valid(NEW."resultIds") THEN NEW."resultIds" ELSE '[]' END))
+        <> CASE WHEN json_valid(NEW."resultIds") THEN json_array_length(NEW."resultIds") ELSE 0 END
+     OR EXISTS(SELECT 1 FROM json_each(CASE WHEN json_valid(NEW."resultIds") THEN NEW."resultIds" ELSE '[]' END) WHERE type<>'text' OR length(trim(value))=0)))
+ OR ((NEW."mode"='DERIVED' OR NEW."rule"='AUTO_DERIVED_FROM_FRACTIONS') AND (
+     NEW."analysisCode"<>'TEXTURE'
+     OR CASE WHEN json_valid(NEW."outputParams") THEN json_array_length(NEW."outputParams") ELSE 0 END<>1
+     OR CASE WHEN json_valid(NEW."evidenceSnapshot") THEN json_type(NEW."evidenceSnapshot",'$.fractionSelections') IS NOT 'array' ELSE 1 END
+     OR (SELECT count(*) FROM json_each(CASE WHEN json_valid(NEW."evidenceSnapshot") THEN json_extract(NEW."evidenceSnapshot",'$.fractionSelections') ELSE '[]' END))<>3
+     OR (SELECT count(DISTINCT json_extract(value,'$.analysisCode')) FROM json_each(CASE WHEN json_valid(NEW."evidenceSnapshot") THEN json_extract(NEW."evidenceSnapshot",'$.fractionSelections') ELSE '[]' END))<>3
+     OR EXISTS(SELECT 1 FROM json_each(CASE WHEN json_valid(NEW."evidenceSnapshot") THEN json_extract(NEW."evidenceSnapshot",'$.fractionSelections') ELSE '[]' END)
+        WHERE type<>'object' OR json_extract(value,'$.analysisCode') NOT IN ('SAND','SILT','CLAY')
+          OR json_type(value,'$.selectionId') IS NOT 'text' OR length(trim(json_extract(value,'$.selectionId')))=0
+          OR json_type(value,'$.resultIds') IS NOT 'array')))
+ OR (NEW."mode"='NOT_REPORTABLE' AND NEW."rule"='AUTO_DERIVED_FROM_FRACTIONS' AND (
+     CASE WHEN json_valid(NEW."attemptIds") THEN json_array_length(NEW."attemptIds") ELSE 1 END<>0
+     OR CASE WHEN json_valid(NEW."resultIds") THEN json_array_length(NEW."resultIds") ELSE 1 END<>0))
  OR (NEW."supersedesId" IS NOT NULL AND NOT EXISTS(SELECT 1 FROM "ReportedValueSelection" old
      WHERE old."id"=NEW."supersedesId" AND old."workItemId"=NEW."workItemId" AND old."analysisCode"=NEW."analysisCode"
        AND old."selectionGroupId"<>NEW."selectionGroupId"))

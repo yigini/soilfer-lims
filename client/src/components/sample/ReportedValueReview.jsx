@@ -31,6 +31,8 @@ export default function ReportedValueReview({ itemId, itemVersion, itemStatus, t
     const choice = (nextMode = mode, nextReason = reason, nextId = attemptId, nextMean = mean, nextIds = meanIds) => {
         if (nextMode === 'AUTO') return { selection: null, ready: Boolean(data?.automatic?.choice) };
         if (nextMode === 'NOT_REPORTABLE') return { selection: { mode: nextMode, reason: nextReason.trim() }, ready: Boolean(nextReason.trim()) };
+        if (nextMode === 'DERIVED') return {selection:{mode:nextMode,...(nextReason.trim() && {reason:nextReason.trim()})},
+            ready:Boolean(data?.derived?.allowed && (!data.derived.requiresReason || nextReason.trim()))};
         if (nextMode === 'ATTEMPT') {
             const option = data?.attempts.find(row => row.id === nextId)?.option;
             return { selection: { mode: nextMode, attemptIds: [nextId], ...(nextReason.trim() && { reason: nextReason.trim() }) },
@@ -64,7 +66,19 @@ export default function ReportedValueReview({ itemId, itemVersion, itemStatus, t
         finally { if (generation === loadGeneration.current) setSaving(false); }
     };
     if (!canReview || data?.notRequired) return null;
-    const outputText = outputs => (outputs || []).map(row => `${row.analysisCode}: ${row.valueText}${row.unit ? ' '+row.unit : ''}`).join(' · ');
+    const outputText = (outputs, selectedMode, selectedReason) => (outputs || []).map(row => {
+        if((row.mode || selectedMode)==='NOT_REPORTABLE') {
+            let displayed=row.reason || selectedReason || '';
+            try {
+                const stored=JSON.parse(displayed);
+                if(stored.code==='FRACTION_NOT_REPORTABLE') displayed=stored.fractions.map(fraction=>
+                    t('reportedValue.fractionNotReportable').replace('{{fraction}}',fraction.analysisCode)
+                        .replace('{{selectionId}}',fraction.selectionId)).join(' ');
+            } catch { /* Keep the recorded reviewer reason. */ }
+            return `${row.analysisCode}: ${t('reportedValue.notReportable')}: ${displayed}`;
+        }
+        return `${row.analysisCode}: ${row.valueText}${row.unit ? ' '+row.unit : ''}`;
+    }).join(' · ');
     return <section className="w-full space-y-3 border-t border-sf-divider pt-3 text-xs" data-testid={`reported-value-${itemId}`}>
         <h4 className="font-bold">{t('reportedValue.title')}</h4>
         {error && <div role="alert">{error} <button type="button" onClick={() => setReload(value => value + 1)}>{t('reportedValue.reload')}</button></div>}
@@ -83,24 +97,27 @@ export default function ReportedValueReview({ itemId, itemVersion, itemStatus, t
             <fieldset className="space-y-2" disabled={saving}>
                 <legend className="font-semibold">{t('reportedValue.choose')}</legend>
                 {itemStatus !== 'ACCEPTED' && <label className="block"><input type="radio" name={`reported-${itemId}`} checked={mode === 'AUTO'}
-                    disabled={!data.automatic.choice} onChange={() => choose('AUTO')} /> {t('reportedValue.automatic')} {data.automatic.choice && outputText(data.automatic.choice.outputs)}
+                    disabled={!data.automatic.choice} onChange={() => choose('AUTO')} /> {t('reportedValue.automatic')} {data.automatic.choice && outputText(data.automatic.choice.outputs,data.automatic.choice.mode,data.automatic.choice.reason)}
                     {!data.automatic.choice && <span> · {data.automatic.reasons.map(code => t(`reportedValue.errors.${code}`, code)).join(', ')}</span>}</label>}
                 {data.attempts.filter(row => row.eligible).map(row => <label className="block" key={row.id}>
                     <input type="radio" name={`reported-${itemId}`} checked={mode === 'ATTEMPT' && attemptId === row.id} disabled={!row.option.allowed}
                         data-testid={`reported-choose-${row.id}`} onChange={() => choose('ATTEMPT', row.id)} /> {t('reportedValue.reportAttempt')} {row.attemptNo}
                     {!row.option.allowed && <span> · {refusal(row.option)}</span>}
                 </label>)}
-                <div className="space-x-3">{data.attempts.filter(row => row.eligible).map(row => <label key={row.id}>
+                {data.layout==='SEPARATE' && <label className="block"><input type="radio" name={`reported-${itemId}`} checked={mode==='DERIVED'}
+                    disabled={!data.derived?.allowed} data-testid="reported-choose-derived" onChange={()=>choose('DERIVED')} /> {t('reportedValue.reportDerived')}
+                    {data.derived?.allowed ? outputText(data.derived.choice.outputs,data.derived.choice.mode,data.derived.choice.reason) : data.derived && refusal(data.derived)}</label>}
+                {data.layout!=='SEPARATE' && <><div className="space-x-3">{data.attempts.filter(row => row.eligible).map(row => <label key={row.id}>
                     <input type="checkbox" checked={meanIds.includes(row.id)} data-testid={`reported-mean-member-${row.id}`}
                         onChange={event => changeMean(event.target.checked ? [...meanIds,row.id] : meanIds.filter(id => id !== row.id))} /> {t('reportedValue.meanMember')} {row.attemptNo}
                 </label>)}</div>
                 <label className="block"><input type="radio" name={`reported-${itemId}`} checked={mode === 'MEAN'} disabled={!mean?.allowed}
                     data-testid="reported-choose-mean" onChange={() => choose('MEAN')} /> {t('reportedValue.reportMean')} {mean?.allowed && outputText(mean.choice.outputs)}
-                    {!mean?.allowed && <span data-testid="reported-mean-refusal"> · {mean ? refusal(mean) : t('reportedValue.loading')}</span>}</label>
+                    {!mean?.allowed && <span data-testid="reported-mean-refusal"> · {mean ? refusal(mean) : t('reportedValue.loading')}</span>}</label></>}
                 <label className="block"><input type="radio" name={`reported-${itemId}`} checked={mode === 'NOT_REPORTABLE'}
                     data-testid="reported-choose-not-reportable" onChange={() => choose('NOT_REPORTABLE')} /> {t('reportedValue.notReportable')}</label>
                 <label className="block">{t('reportedValue.reason')}<textarea className="mt-1 block w-full border border-sf-divider rounded p-2 bg-sf-surface"
-                    value={reason} required={mode === 'NOT_REPORTABLE' || mode === 'MEAN' && mean?.requiresReason || mode === 'ATTEMPT' && data.attempts.find(row => row.id === attemptId)?.option.requiresReason}
+                    value={reason} required={mode === 'NOT_REPORTABLE' || mode === 'DERIVED' && data.derived?.requiresReason || mode === 'MEAN' && mean?.requiresReason || mode === 'ATTEMPT' && data.attempts.find(row => row.id === attemptId)?.option.requiresReason}
                     data-testid="reported-choice-reason" onChange={event => {
                         setReason(event.target.value); choiceCallback.current?.(choice(mode,event.target.value));
                     }} /></label>

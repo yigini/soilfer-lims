@@ -6,7 +6,7 @@ async function readSampleReportedValues(db,sample) {
     return rules.inTransaction(db,async tx => {
         const items = sample.workItems || await tx.workItem.findMany({where:{sampleId:sample.id},orderBy:{id:'asc'}});
         const groups = [], values = [], sourceResults = [], batches = new Map(), qcGates = {}, qcAcknowledgements = {}, workItemsByResult = {};
-        for (const item of items.filter(row => row.status==='ACCEPTED' && !require('./workItemKinds').isNonMeasurement(row))) {
+        for (const item of items.filter(row => row.status==='ACCEPTED' && !row.duplicateOf && !require('./workItemKinds').isNonMeasurement(row))) {
             const saved = await readReportedSelection(tx,item), first = saved.rows[0];
             const selection = { rule:first.rule,mode:first.mode,attemptIds:JSON.parse(first.attemptIds),reason:first.reason };
             const proof = await validateReportedSources(tx,item,saved.context,selection);
@@ -23,7 +23,8 @@ async function readSampleReportedValues(db,sample) {
                     param:row.analysisCode,value:row.valueText,numericValue:row.value,unit:row.unit,censoring:row.censoring,
                     methodologyId:row.methodologyId,mode:row.mode,reason:row.reason,rule:row.rule,policyVersion:row.policyVersion,
                     sourceResultIds:ids,attemptIds:selection.attemptIds,provenance:provenance.length===1 ? provenance[0] : null,
-                    basis:bases.length===1 ? bases[0] : null,flags:[],isValid:true });
+                    basis:bases.length===1 ? bases[0] : null,flags:[],isValid:true,
+                    ...(row.derivation && {provenance:'DERIVED'}) });
             }
         }
         return {groups,values,sourceResults,qcBatches:[...batches.values()],qcGates,qcAcknowledgements,workItemsByResult};
@@ -32,7 +33,14 @@ async function readSampleReportedValues(db,sample) {
 function reportedValueText(row,locale='en') {
     if(row.mode!=='NOT_REPORTABLE') return row.value;
     const canonical=['en','es','es-419','fr','pt'].includes(locale)?locale:'en';
-    return require('../locales/'+canonical+'.json').reportedValue.notReportable+': '+row.reason;
+    const messages=require('../locales/'+canonical+'.json').reportedValue;
+    let reason=row.reason;
+    try {
+        const stored=JSON.parse(reason);
+        if(stored.code==='FRACTION_NOT_REPORTABLE' && Array.isArray(stored.fractions)) reason=stored.fractions.map(fraction=>
+            messages.fractionNotReportable.replace('{{fraction}}',fraction.analysisCode).replace('{{selectionId}}',fraction.selectionId)).join(' ');
+    } catch { /* Reviewer reasons remain their recorded text. */ }
+    return messages.notReportable+': '+reason;
 }
 // Raw observations disclose membership without changing their row contract or
 // requiring a publishable outcome. Stale or absent selections disclose null.

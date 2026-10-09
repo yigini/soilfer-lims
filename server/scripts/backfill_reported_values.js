@@ -7,8 +7,7 @@ const rules = require('../services/workflowStateRules');
 const { hasPermission } = require('../config/roles');
 const scope = require('../utils/scopeGuard');
 const { loadSelectionContext } = require('../services/reportedValueSelectionContext');
-const { automaticReportedChoice } = require('../services/reportedValueChoiceContract');
-const { readReportedSelection, appendReportedSelection } = require('../services/reportedValueSelectionService');
+const { readReportedSelection, appendReportedSelection, automaticChoiceFor } = require('../services/reportedValueSelectionService');
 const digest = value => createHash('sha256').update(JSON.stringify(value, (_,row) => typeof row === 'bigint' ? { integer: String(row) } : row)).digest('hex');
 const fail = (code,message) => new rules.TransitionError(message,409,code);
 async function retainedRows(tx) {
@@ -37,10 +36,16 @@ async function plan(tx, by) {
         throw fail('REPORTED_VALUE_BACKFILL_ACTOR_REQUIRED','A named active administrator with global approval authority is required.');
     }
     const retained = await retainedRows(tx), items = (await tx.workItem.findMany({ where: { status:'ACCEPTED' }, orderBy: { id:'asc' } }))
-        .filter(item => !require('../services/workItemKinds').isNonMeasurement(item));
+        .filter(item => !item.duplicateOf && !require('../services/workItemKinds').isNonMeasurement(item));
     const tests = [], changes = [];
     for (const item of items) {
-        const context = await loadSelectionContext(tx,item);
+        let context;
+        try {context=await loadSelectionContext(tx,item);}
+        catch(error) {
+            if(!(error instanceof rules.TransitionError)) throw error;
+            tests.push({workItemId:item.id,analysisCode:item.analysis,outcome:'AMBIGUOUS',reasons:[error.code],details:error.details || {}});
+            continue;
+        }
         const evidence = { policy: context.policy, limits: context.limits, lineage: context.lineage.snapshot };
         try {
             const current = await readReportedSelection(tx,item);
@@ -54,7 +59,7 @@ async function plan(tx, by) {
             }
             if (error.code !== 'REPORTED_VALUE_SELECTION_REQUIRED') throw error;
         }
-        const automatic = automaticReportedChoice(item,context.lineage,context.policy.value,context.limits);
+        const automatic = automaticChoiceFor(item,context);
         if (automatic.choice) {
             try { await require('../services/reportedValueSourceService').validateReportedSources(tx,item,context,automatic.choice); }
             catch (error) {
@@ -66,7 +71,7 @@ async function plan(tx, by) {
             reasons:automatic.reasons, choice:automatic.choice, ...evidence };
         tests.push(row); if (automatic.choice) changes.push(item);
     }
-    const counts = Object.fromEntries(['AUTO_SINGLE','AUTO_DUPLICATE_MEAN','AUTO_LATEST_AFTER_INVALIDATION','AUTO_LATEST_VALID',
+    const counts = Object.fromEntries(['AUTO_SINGLE','AUTO_DUPLICATE_MEAN','AUTO_LATEST_AFTER_INVALIDATION','AUTO_LATEST_VALID','AUTO_DERIVED_FROM_FRACTIONS',
         'ALREADY_SELECTED','STALE_SELECTION','AMBIGUOUS'].map(outcome => [outcome,tests.filter(row => row.outcome === outcome).length]));
     return { actor, retained, changes, tests, counts, totalMeasuredAccepted:items.length,
         ambiguousWorkItemIds:tests.filter(row => ['AMBIGUOUS','STALE_SELECTION'].includes(row.outcome)).map(row => row.workItemId),

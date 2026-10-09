@@ -5,8 +5,8 @@ const { TEXTURE_ALIASES } = require('./reportResultGovernance');
 const MODES = new Set(['ATTEMPT', 'MEAN', 'NOT_REPORTABLE']);
 const failure = (code, message, details = {}) => new TransitionError(message, 409, code, details);
 
-function selectionOutputs(item) {
-    return TEXTURE_ALIASES.has(item.analysis) ? ['CLAY', 'SAND', 'SILT', 'TEXTURE'] : [item.analysis];
+function selectionOutputs(item,context) {
+    return context?.layout?.outputParams || (TEXTURE_ALIASES.has(item.analysis) ? ['CLAY', 'SAND', 'SILT', 'TEXTURE'] : [item.analysis]);
 }
 
 function selectedOutputValues(item, candidates, limits) {

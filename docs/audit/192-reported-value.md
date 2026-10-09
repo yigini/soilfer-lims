@@ -15,6 +15,16 @@ uses its frozen Methodology.decimalPlaces. Explicit selection of QUESTIONED
 evidence requires a reason and preserves the source rows' validity, flags and
 currentness. All source QC, disposition, preparation and hold checks remain.
 
+Pins 6074085003, 6074157693 and 6074198390 add the separate TEXTURE layout.
+Exactly one canonical SAND, SILT and CLAY owner must each have a fresh saved
+selection. The categorical owner either selects its exact matching Result or
+derives a class from the saved fractions. DERIVED retains the union of every
+fraction Result id, with empty owner attemptIds and exactly three selection
+proofs. It writes no analytical Result. A missing/changed fraction selection or
+recalculation refuses the saved TEXTURE as stale. Composite four-output groups
+keep their original ownership. Mixed, unresolved or incomplete layouts refuse
+with zero writes; classes are never averaged or voted on.
+
 ## Installation and historical back-fill
 
 Production remains under the #162 demo freeze. These commands describe the
@@ -48,7 +58,7 @@ they are first run against an owned quiesced database copy.
 The shipped entrypoint installs the pinned additive schema after #191. Direct
 startup requires the complete #192 installation through a read-only gate;
 startup does not choose or back-fill any reported value. SQL SHA-256:
-`6fe61f858a4978774c6a799088d9ceaa5dac20429d9ef9ea7d43e8d5827aad3b`.
+`6508b8078dc667ba0306f4176cc552d809479b27c8271ed5d3c81eb26f8bbef7`.
 
 ## Fixture expectation changes
 
@@ -59,3 +69,19 @@ fixtures that formerly printed raw replicas or unchecked means must now save a
 reviewed selection, assert its recorded repeatability rule, and expect one
 reported output. Ambiguous evidence refuses rather than emitting a blank or an
 unchecked mean. Raw observation and spectral-reference expectations remain.
+
+| Fixture | Old expectation | Required expectation / pin |
+| --- | --- | --- |
+| `report_pdf.test.js` (five PDF/share cases) | Accepted raw scalar Results suffice for report generation. | Append AUTO_SINGLE through the actual selection authority; retain every PDF/share/revocation assertion (6073676241). |
+| `controlled_units_interpretation.test.js` (report assembly) | Interpret accepted raw scalar Results directly. | Save each owner's choice and keep the exact normalization/diagnostic assertions (6073676241). Its named non-QC lab explicitly waives batch QC via policy, rather than bypassing the source guard. |
+| `export_normalization.test.js` (WET_CHEM, GeoJSON) | Normalize a raw SOC Result directly. | Save AUTO_SINGLE and preserve exact values and scope checks (6073676241); its unique non-QC lab explicitly waives batch QC through policy. |
+| `sis_adapter_service.test.js` (V1 representation) | V1 formatter consumes `sample.results`. | V1 requires a selection DTO; supplying only raw Results yields no reported values. V2/raw extractor assertions remain unchanged (6073676241). |
+| `audit_1_2_guard_installer.test.js` (complete startup) | Complete through #191. | Install #192 normally before asserting real read-only startup and health (new required startup gate). |
+
+Dry back-fill reports invalid layouts or incomplete lineage per work item as
+AMBIGUOUS, with ids and reason codes. Separate TEXTURE needs persisted fraction
+choices, so an owned historical copy can require a second reviewed dry/apply
+pass after the fraction choices are appended. No dry-run invents provisional
+fraction selections. Duplicate-marker rows have no canonical executions and do
+not emit an additional reported value; existing publication checks still inspect
+all work items.

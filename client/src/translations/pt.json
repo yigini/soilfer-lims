@@ -3103,7 +3103,9 @@
       "MULTIPLE_ELIGIBLE_ATTEMPTS": "Há várias tentativas elegíveis; o revisor deve escolher.",
       "REPORTED_VALUE_STALE": "As evidências mudaram. Revise as tentativas e escolha novamente.",
       "REPORTED_VALUE_REASON_REQUIRED": "Explique por que as evidências questionadas estão sendo reportadas.",
-      "REPORTED_VALUE_REVIEW_REQUIRED": "As evidências retidas não atuais ou devolvidas exigem uma escolha explícita do revisor."
+      "REPORTED_VALUE_REVIEW_REQUIRED": "As evidências retidas não atuais ou devolvidas exigem uma escolha explícita do revisor.",
+      "REPORTED_VALUE_LAYOUT_UNSUPPORTED": "A estrutura da textura está incompleta ou misturada.",
+      "REPORTED_VALUE_SOURCE_SELECTION_REQUIRED": "Aceite e selecione SAND, SILT e CLAY antes de TEXTURE."
     },
     "statuses": {
       "OPEN": "Aberto",
@@ -3117,6 +3119,8 @@
       "CANCELLED": "Cancelado",
       "RETURNED": "Devolvido",
       "REJECTED": "Rejeitado"
-    }
+    },
+    "reportDerived": "Informar a classe das frações selecionadas",
+    "fractionNotReportable": "{{fraction}} não pode ser reportada (seleção {{selectionId}})."
   }
 }

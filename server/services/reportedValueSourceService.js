@@ -43,7 +43,14 @@ async function validateReportedSources(tx,item,context,selection,options = {}) {
             {workItemId:item.id,resultId:source.id,qcCode:check.code,gate});
         rows.push({workItemId:item.id,resultId:source.id,gate});
     }
-    return {sources,rows,batches,workItemsByResult,...proof};
+    const checked={sources,rows,batches,workItemsByResult,...proof};
+    if(context.layout?.kind!=='SEPARATE') return checked;
+    const combined=[checked,...context.fractions.map(row=>row.checked)];
+    return {sources:[...new Map(combined.flatMap(row=>row.sources).map(row=>[row.id,row])).values()],
+        rows:combined.flatMap(row=>row.rows),batches:[...new Map(combined.flatMap(row=>row.batches).map(row=>[row.id,row])).values()],
+        workItemsByResult:Object.assign({},...combined.map(row=>row.workItemsByResult)),
+        qcGates:Object.assign({},...combined.map(row=>row.qcGates)),
+        qcAcknowledgements:Object.assign({},...combined.map(row=>row.qcAcknowledgements))};
 }
 
 module.exports = { sourceValidity, validateReportedSources };

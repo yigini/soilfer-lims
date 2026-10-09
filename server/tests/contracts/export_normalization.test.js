@@ -15,6 +15,7 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
         // #179 pin 5991651044: this scientific normalization probe owns its
         // lab scope, independently of other suites' conflicting profile rows.
         const fixtureLab = 'LAB-EXPNORM-' + require('node:crypto').randomUUID();
+        await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(prisma,superAdminToken,fixtureLab);
 
         testSample = await createSampleFixture(prisma, { data: { id: `SMP-EXP-${Date.now()}`,
             labId: 'LAB-EXP-001',

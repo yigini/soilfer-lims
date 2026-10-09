@@ -17,6 +17,7 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
 
     beforeAll(async () => {
         mgrToken = await getAuthToken('LAB_MANAGER', 'LAB-INTERP', ['GTM'], ['INTERP-PROJ']);
+        await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(prisma,mgrToken,'LAB-INTERP');
 
         // Create sample
         const s = await createSampleFixture(prisma, { data: { id: `SMP-INTERP-${Date.now()}`,

@@ -6,6 +6,7 @@ const { selectionOutputs, automaticReportedChoice, explicitReportedChoice } = re
 const { assertReportedSelectionGroup, assertSelectionGroupStructure } = require('./reportedValueGroupContract');
 
 function choiceFor(item, context, explicit) {
+    if(context.layout?.kind==='SEPARATE') return require('./reportedValueTextureService').separateTextureChoice(context,explicit);
     if (explicit != null) {
         const choice = explicitReportedChoice(item, context.lineage, explicit, context.limits);
         if (!choice.reason && context.lineage.eligible.some(row => row.attempt.status === 'QUESTIONED' && choice.attemptIds.includes(row.attempt.id))) {
@@ -19,6 +20,14 @@ function choiceFor(item, context, explicit) {
             eligibleAttempts: context.lineage.eligible.map(row => ({ attemptId: row.attempt.id, attemptNo: row.attempt.attemptNo,
                 status: row.attempt.status, finalResultIds: row.results.map(result => result.id), limit: context.limits[row.attempt.id] })) });
     return automatic.choice;
+}
+function automaticChoiceFor(item,context) {
+    if(context.layout?.kind!=='SEPARATE') return automaticReportedChoice(item,context.lineage,context.policy.value,context.limits);
+    try {return {choice:choiceFor(item,context),reasons:[]};}
+    catch(error) {
+        if(!(error instanceof rules.TransitionError) || !error.code?.startsWith('REPORTED_VALUE_')) throw error;
+        return {choice:null,reasons:[error.code]};
+    }
 }
 async function currentRows(tx, workItemId) {
     const history = await tx.reportedValueSelection.findMany({ where: { workItemId } });
@@ -39,7 +48,7 @@ async function appendReportedSelection(tx, item, actor, explicit, options = {}) 
     rules.assertScope(actor, scopedSample);
     const { context, choice } = await preflightReportedSelection(tx, freshItem, explicit);
     await require('./reportedValueSourceService').validateReportedSources(tx,freshItem,context,choice);
-    const previous = await currentRows(tx, item.id), params = selectionOutputs(freshItem);
+    const previous = await currentRows(tx, item.id), params = selectionOutputs(freshItem,context);
     if (previous.length) assertSelectionGroupStructure(previous, params);
     const previousGroup = previous[0]?.selectionGroupId || null;
     if (Object.hasOwn(options, 'expectedGroupId') && options.expectedGroupId !== previousGroup) {
@@ -54,6 +63,8 @@ async function appendReportedSelection(tx, item, actor, explicit, options = {}) 
             methodologyId: row.methodologyId ?? null, replicateNo: row.replicateNo, flags: row.flags ?? null,
             provenance: row.provenance, basis: row.basis ?? null })),
         outputs: choice.outputs, policy: { key: 'results.reportedValueRule', ...context.policy },
+        ...(context.layout.kind==='SEPARATE' && {fractionSelections:choice.fractionSelections,
+            derivation:'calculateUsdaTexture',derivedClass:choice.outputs[0].valueText}),
         rule: choice.rule, selectedBy, selectedAt: selectedAt.toISOString(), backfill: options.backfill === true };
     const common = { workItemId: item.id, selectionGroupId, mode: choice.mode, attemptIds: JSON.stringify(choice.attemptIds),
         rule: choice.rule, policyKey: 'results.reportedValueRule', policyVersion: context.policy.version,
@@ -80,8 +91,17 @@ async function appendReportedSelection(tx, item, actor, explicit, options = {}) 
     }
 }
 async function readReportedSelection(tx, item) {
-    const context = await loadSelectionEvidence(tx, item), rows = await currentRows(tx, item.id);
-    assertReportedSelectionGroup(rows, selectionOutputs(item), context.attempts, context.results);
+    const rows = await currentRows(tx, item.id);
+    let context;
+    try {context=await loadSelectionEvidence(tx,item);}
+    catch(error) {
+        if(rows.length && ['REPORTED_VALUE_SOURCE_SELECTION_REQUIRED','REPORTED_VALUE_LAYOUT_UNSUPPORTED','REPORTED_VALUE_LINEAGE_INVALID'].includes(error.code)) {
+            throw new rules.TransitionError('The reported-value selection is stale.',409,'REPORTED_VALUE_STALE');
+        }
+        throw error;
+    }
+    assertReportedSelectionGroup(rows, selectionOutputs(item,context), context.attempts, context.results);
+    require('./reportedValueTextureService').assertFractionSnapshot(context,rows);
     return { rows, context };
 }
 async function reviewItem(tx, workItemId, actor) {
@@ -96,9 +116,10 @@ async function reviewItem(tx, workItemId, actor) {
 
 function previewChoice(item, context, choice) {
     try {
-        const preview = explicitReportedChoice(item, context.lineage, choice, context.limits);
+        const preview = context.layout?.kind==='SEPARATE' ? require('./reportedValueTextureService').separateTextureChoice(context,choice,{allowMissingReason:true}) :
+            explicitReportedChoice(item, context.lineage, choice, context.limits);
         return { allowed: true, choice: preview, requiresReason: context.lineage.eligible.some(row =>
-            row.attempt.status === 'QUESTIONED' && preview.attemptIds.includes(row.attempt.id)) };
+            row.attempt.status === 'QUESTIONED' && (preview.attemptIds.includes(row.attempt.id) || preview.matching?.attempt.id===row.attempt.id)) };
     }
     catch (error) {
         if (!error.code?.startsWith('REPORTED_VALUE_')) throw error;
@@ -116,7 +137,10 @@ async function reviewReportedSelection(db, workItemId, actor, explicit) {
         if (explicit !== undefined) return previewChoice(item, context, explicit);
         const rows = await currentRows(tx, item.id);
         let currentCode = null;
-        try { assertReportedSelectionGroup(rows, selectionOutputs(item), context.attempts, context.results); }
+        try {
+            assertReportedSelectionGroup(rows, selectionOutputs(item,context), context.attempts, context.results);
+            require('./reportedValueTextureService').assertFractionSnapshot(context,rows);
+        }
         catch (error) {
             if (!['REPORTED_VALUE_SELECTION_REQUIRED','REPORTED_VALUE_STALE'].includes(error.code)) throw error;
             currentCode = error.code;
@@ -137,7 +161,8 @@ async function reviewReportedSelection(db, workItemId, actor, explicit) {
                 option: candidate ? previewChoice(item, context, { mode: 'ATTEMPT', attemptIds: [attempt.id] }) : null });
         }
         return { workItemId: item.id, analysisCode: item.analysis, status: item.status, policy: context.policy,
-            automatic: automaticReportedChoice(item, context.lineage, context.policy.value, context.limits), attempts,
+            automatic: automaticChoiceFor(item,context), attempts,
+            layout:context.layout.kind,derived:context.layout.kind==='SEPARATE' ? previewChoice(item,context,{mode:'DERIVED'}) : null,
             mean: previewChoice(item, context, { mode: 'MEAN', attemptIds: context.lineage.eligible.map(row => row.attempt.id) }),
             current: { groupId: rows[0]?.selectionGroupId || null, code: currentCode, rows } };
     });
@@ -158,4 +183,4 @@ async function replaceReportedSelection(db, workItemId, actor, request) {
 }
 
 module.exports = { preflightReportedSelection, appendReportedSelection, readReportedSelection,
-    reviewReportedSelection, replaceReportedSelection };
+    reviewReportedSelection, replaceReportedSelection, automaticChoiceFor };

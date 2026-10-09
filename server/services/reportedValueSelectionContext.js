@@ -52,7 +52,11 @@ async function loadSelectionEvidence(tx, item) {
     const attempts = await tx.workAttempt.findMany({ where: { workItemId: item.id } });
     const ids = attempts.map(row => row.id);
     const results = await tx.result.findMany({ where: { attemptId: { in: ids } } });
-    return { sample, attempts, results, lineage: buildSelectionLineage(attempts, results) };
+    const evidence={ sample, attempts, results, lineage: buildSelectionLineage(attempts, results) };
+    const texture=require('./reportedValueTextureService');
+    evidence.layout=await texture.textureLayout(tx,item,evidence);
+    if(evidence.layout.kind==='SEPARATE') evidence.fractions=await texture.fractionSelections(tx,evidence.layout);
+    return evidence;
 }
 async function loadSelectionContext(tx, item) {
     const evidence = await loadSelectionEvidence(tx, item);

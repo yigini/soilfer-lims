@@ -1498,7 +1498,9 @@
       "MULTIPLE_ELIGIBLE_ATTEMPTS": "Several eligible attempts are available; a reviewer must choose.",
       "REPORTED_VALUE_STALE": "The evidence changed. Review the attempts and choose again.",
       "REPORTED_VALUE_REASON_REQUIRED": "Explain why the questioned evidence is being reported.",
-      "REPORTED_VALUE_REVIEW_REQUIRED": "Retained non-current or returned evidence needs an explicit reviewer choice."
+      "REPORTED_VALUE_REVIEW_REQUIRED": "Retained non-current or returned evidence needs an explicit reviewer choice.",
+      "REPORTED_VALUE_LAYOUT_UNSUPPORTED": "The texture layout is incomplete or mixed.",
+      "REPORTED_VALUE_SOURCE_SELECTION_REQUIRED": "Accept and select SAND, SILT and CLAY before TEXTURE."
     },
     "statuses": {
       "OPEN": "Open",
@@ -1512,6 +1514,8 @@
       "CANCELLED": "Cancelled",
       "RETURNED": "Returned",
       "REJECTED": "Rejected"
-    }
+    },
+    "reportDerived": "Report class from selected fractions",
+    "fractionNotReportable": "{{fraction}} is not reportable (selection {{selectionId}})."
   }
 }
