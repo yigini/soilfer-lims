@@ -135,7 +135,10 @@ test('actual CCV 25 repeat preserves sealed evidence, repeats only its bracket a
     const oldReport = await f.db.report.create({ data: { id: randomUUID(), sampleId: sealed.sampleId, labId: f.labId,
         status: 'PUBLISHED', generatedBy: f.actor.username, publishedAt: new Date(), content: JSON.stringify({ original: true,
             result: f.results.find(row => row.sampleId === sealed.sampleId) }) } });
-    const evaluation = await writeNativeMeasurements(f.db, f.run.id, f.actor, { measurements: f.readings([25]) });
+    await require('../../services/qcNativeLifecycleService').reopenNativeRun(f.db,f.run.id,f.actor,
+        'Owned sequence: investigate a later continuing-calibration observation');
+    const evaluation = await writeNativeMeasurements(f.db, f.run.id, f.actor,
+        {corrections:f.readings([25]),reason:'Owned sequence: record the later failed continuing calibration'}, {correction:true});
     expect(evaluation.analytes[0].result).toBe('FAIL');
     expect(await f.db.workItem.findUnique({ where: { id: sealed.id } })).toEqual(sealedBefore);
     const oldChecks = await f.db.qcEvaluation.findMany(), oldMeasurements = await f.db.qcMeasurement.findMany();

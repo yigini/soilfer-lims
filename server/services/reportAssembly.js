@@ -265,8 +265,9 @@ async function assembleReport(sampleId, user, options = {}) {
     const qcWarningStatement = qcWarnings.length
         ? require(`../locales/${warningLocale}.json`).resultReports.qcWarningStatement : null;
     const evidence = freezeReportEvidence(reportedSelectionProof.sourceResults, sample.workItems, evidenceBatches, reportOptions);
-    evidence.qcModes = Object.entries(reportedSelectionProof.qcGates).map(([resultId,gate])=>({resultId,effectiveMode:gate.mode,
-        source:gate.modeSource,contributingBatchIds:gate.batchIds}));
+    const sourceModes=await Promise.all(reportedSelectionProof.sourceResults.map(result=>resolveReportingModes(
+        {...sample,results:[result],workItems:reportedSelectionProof.workItemsByResult[result.id]},evidenceBatches,{db})));
+    evidence.qcModes=sourceModes.flatMap(proof=>proof.qcModeEvidence);
     evidence.reportedValueSelections = reportedSelectionProof.groups;
     const evidenceText = describeReportEvidence(evidence, warningLocale);
     const reportContent = {
