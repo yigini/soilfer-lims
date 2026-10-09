@@ -16,6 +16,13 @@ function mount(batch) {
         { module, exports: module.exports, require(name) { if (name === 'react') return react; if (name === 'axios') return axios;
             if (name.includes('LanguageContext')) return { useLanguage: () => ({ t: key => key }) };
             if (name === '@lims/number-parse') return require('../../../shared/numberParse'); if (name === './NumberPreview') return () => null;
+            if (name === './qcWorksheetNavigation') {
+                const navigation = { exports: {} };
+                const source = fs.readFileSync(path.resolve(__dirname, '../../../client/src/components/workbench/qcWorksheetNavigation.js'), 'utf8');
+                vm.runInNewContext(esbuild.transformSync(source, { loader: 'js', format: 'cjs' }).code,
+                    { module: navigation, exports: navigation.exports });
+                return navigation.exports;
+            }
             if (name === './BarcodeSafeInput') {
                 const child = { exports: {} };
                 const source = fs.readFileSync(path.resolve(__dirname, '../../../client/src/components/workbench/BarcodeSafeInput.jsx'), 'utf8');

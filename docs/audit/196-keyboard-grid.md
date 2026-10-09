@@ -56,3 +56,11 @@ Current runtime build PASS7.19s. Full validation and CI remain required; no PR.
 Display-code fallback policy, pagination, regrouping and new columns deferred.
 No schema/migration/backfill. Production freeze remains absolute. Claude
 explicitly forbids deploying195 before this196 fix has merged, even after lift.
+
+At396695c8, the strengthened keypad/exact-decimal focused proof passed8 suites
+and93 tests (25.8s); build passed9.46s and lint0errors/14existing warnings.
+The full run passed291 suites/4330 tests and failed2 suites/16 tests
+(293 suites/4346 tests total,1468.215s). Both failures were older explicit
+VM loaders rejecting the new qcWorksheetNavigation import in native/texture
+components. The loaders now execute that actual helper; all original tests
+and assertions remain intact. New full current-head validation is required.
