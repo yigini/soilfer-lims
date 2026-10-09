@@ -64,7 +64,11 @@ test('real Chromium types and records 40 values through the production app with 
                 const row = await page.locator(':focus').evaluate(input => input.closest('tr').rowIndex);
                 expect(typed).not.toContain(row); typed.push(row);
                 const rawInput = `6.${String(index + 1).padStart(2, '0')}`;
-                await page.keyboard.type(rawInput, { delay: 45 });
+                if (index === 0) {
+                    for (const key of ['Numpad6', 'NumpadDecimal', 'Numpad0', 'Numpad1']) {
+                        await page.keyboard.press(key); await page.waitForTimeout(45);
+                    }
+                } else await page.keyboard.type(rawInput, { delay: 45 });
                 expect(await page.locator(':focus').inputValue()).toBe(rawInput);
                 await page.keyboard.press(index % 2 ? 'NumpadEnter' : 'Enter');
             }

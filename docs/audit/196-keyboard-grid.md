@@ -36,4 +36,23 @@ Escape uses a client-only restoration callback and cancels pending draft saves
 and queued draft replay; completion still calls the existing preview/commit.
 New component/real-DOM contracts and retained-refusal assertions are unverified
 WIP. The real40-value Playwright test and CI browser setup remain to implement.
-No green/full-suite claim or PR yet. Production freeze remains absolute.
+Focused navigation/readiness/Escape/regression proof:6 suites84 tests PASS,
+zero skips3.794s. Initial real browser failed on an actual decimal integrity
+defect: slow45ms/key `6.01` became `601`, with no Results committed.
+
+[Pin6079796711](https://github.com/yigini/soilfer-lims/issues/196#issuecomment-6079796711)
+adds that fix here, confined to BarcodeSafeInput: the last emitted string is a
+parent acknowledgement and must leave newer text/pending/timer intact; an
+external supplied value still resets. Gap30ms, >6-character wedge refusal,
+Enter/Tab/Escape/blur flush and deferred blur are unchanged. The existing195
+barcode test file is unmodified. New real React slow-ack tests cover6.01,
+0.125 and12.5 at45/120ms, an external reset and a zero-write wedge refusal.
+Decimal/grid/old barcode proof:3 suites52 tests PASS0skips2.925s.
+Real built App/authenticated app.js/owned SQLite Chromium test PASS19.129s:
+40 exact decimal inputs, preview and confirmation/commit entirely by keyboard,
+40 separate retained Results and attempts, exact stored decimal values and
+zero mouse events. Number-pad-specific first input is being strengthened.
+Current runtime build PASS7.19s. Full validation and CI remain required; no PR.
+Display-code fallback policy, pagination, regrouping and new columns deferred.
+No schema/migration/backfill. Production freeze remains absolute. Claude
+explicitly forbids deploying195 before this196 fix has merged, even after lift.

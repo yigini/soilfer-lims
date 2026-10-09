@@ -26,10 +26,11 @@ describe('Audit 4.3: controlled decimal input acknowledgements', () => {
         function Parent() {
             const [value, setValue] = React.useState(''); parent = { setValue };
             return React.createElement(Input, { value, onBarcodeRejected: rejected, onChange: event => {
-                draft = event.target.value; writes(draft);
+                const emitted = event.target.value;
+                draft = emitted; writes(draft);
                 // The previous flush is acknowledged after the next 45ms key
                 // has begun, while the new input still owns a pending timer.
-                setTimeout(() => setValue(draft), 25);
+                setTimeout(() => setValue(emitted), 25);
             } });
         }
         await React.act(async () => root.render(React.createElement(Parent)));
