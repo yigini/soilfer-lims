@@ -3516,6 +3516,10 @@
     },
     "pendingNotice": "Demande enregistrée. Une autorisation est nécessaire avant d’appliquer les modifications.",
     "authorisedNotice": "Amendement autorisé. Les nouvelles analyses scientifiques doivent suivre la revue et l’approbation habituelles avant l’émission d’un nouveau rapport.",
-    "failed": "L’amendement n’a pas pu être enregistré. Votre saisie est conservée."
+    "failed": "L’amendement n’a pas pu être enregistré. Votre saisie est conservée.",
+    "publicReportNumber": "Rapport {number}.",
+    "publicSuperseded": "Ce rapport a été remplacé par un rapport amendé. Demandez le rapport en vigueur au laboratoire.",
+    "publicReplacedBy": "Remplacé par le rapport {number}.",
+    "revisionRequiresAmendment": "Un rapport amendé nécessite un amendement approuvé. Demandez-le et autorisez-le d’abord."
   }
 }

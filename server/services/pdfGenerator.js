@@ -112,7 +112,18 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     .text(labels.withdrawnPendingAmendment.replace('{{amendmentId}}', publication.withdrawal.amendmentId), startX, currentY, { width: pageWidth });
                 currentY = doc.y + 10;
             }
-            if (reportContent.publication?.replacesReportNumber) {
+            const amendment = reportContent.amendment;
+            if (amendment?.statement) {
+                // #211: the statement, marks and removals were frozen at generation.
+                doc.fillColor('#B45309').font('Helvetica-Bold').fontSize(9)
+                    .text(amendment.statement, startX, currentY, { width: pageWidth });
+                doc.fillColor(cGray).font('Helvetica').fontSize(7.5)
+                    .text(`${labels.amendmentChangedMark} ${labels.amendmentChangedLegend}  ${labels.amendmentAddedMark} ${labels.amendmentAddedLegend}`, startX, doc.y + 2, { width: pageWidth });
+                if (amendment.removed?.length) doc.text(`${labels.amendmentRemoved}: ${amendment.removed.map(row =>
+                    [row.name, row.basis, [row.value, row.unit].filter(Boolean).join(' ')].filter(Boolean).join(' ')).join('; ')}`,
+                startX, doc.y + 2, { width: pageWidth });
+                currentY = doc.y + 10;
+            } else if (reportContent.publication?.replacesReportNumber) {
                 doc.fillColor(cGray).font('Helvetica').fontSize(8)
                     .text(`${labels.replaces} ${reportContent.publication.replacesReportNumber}`, startX, currentY, { width: pageWidth });
                 currentY = doc.y + 10;
@@ -300,7 +311,9 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     if (paramUpper === 'TN') tnVal = Number(item.value);
 
                     doc.fillColor(cDark).font('Helvetica-Bold').fontSize(7.5)
-                        .text(item.name || item.param, col1 + 6, currentY + 4, { width: 145, ellipsis: true });
+                        .text(`${item.amendmentChange === 'CHANGED' ? labels.amendmentChangedMark + ' '
+                            : item.amendmentChange === 'ADDED' ? labels.amendmentAddedMark + ' ' : ''}${item.name || item.param}`,
+                        col1 + 6, currentY + 4, { width: 145, ellipsis: true });
 
                     doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
                         .text(item.method || item.standard || labels.methodNotRecorded, col2 + 4, currentY + 4, { width: 120, ellipsis: true });

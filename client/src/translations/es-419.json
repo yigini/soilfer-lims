@@ -3516,6 +3516,10 @@
     },
     "pendingNotice": "Solicitud guardada. Se requiere autorización antes de aplicar cambios.",
     "authorisedNotice": "Enmienda autorizada. Los reanálisis científicos deben completar la revisión y aprobación habituales antes de emitir otro informe.",
-    "failed": "No se pudo guardar la enmienda. Se conserva su información."
+    "failed": "No se pudo guardar la enmienda. Se conserva su información.",
+    "publicReportNumber": "Informe {number}.",
+    "publicSuperseded": "Este informe fue reemplazado por un informe enmendado. Solicite el informe vigente al laboratorio.",
+    "publicReplacedBy": "Reemplazado por el informe {number}.",
+    "revisionRequiresAmendment": "Un informe enmendado requiere una enmienda aprobada. Solicítela y autorícela primero."
   }
 }

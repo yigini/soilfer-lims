@@ -411,10 +411,20 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
 
     const handleGenerateReport = async () => {
         requestConfirmation('Generate & Release Report', 'Authorize and release an official analysis report? This will create an immutable version snapshot.', async () => {
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            const issue = async (amendmentId) => axios.post(`/api/reports/generate/${id}`, amendmentId ? { amendmentId } : {}, { headers });
             try {
-                const res = await axios.post(`/api/reports/generate/${id}`, {}, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {}
-                });
+                let res;
+                try {
+                    res = await issue();
+                } catch (first) {
+                    // #211: a revised report must name the approved amendment it issues.
+                    if (first.response?.data?.code !== 'REPORT_AMENDMENT_REQUIRED') throw first;
+                    const listed = await axios.get(`/api/samples/${id}/amendments`, { headers });
+                    const amendment = (listed.data?.amendments || []).find(row => row.status === 'APPROVED' && row.version > 1 && !row.revisionReportId);
+                    if (!amendment) throw Object.assign(new Error(t('amendment.revisionRequiresAmendment')), { response: null });
+                    res = await issue(amendment.id);
+                }
                 setExistingReport(res.data);
                 showInfo(t('common.success', 'Success'), `Report v${res.data.version || 1} released successfully!`);
                 fetchWorkspaceData();
@@ -423,7 +433,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                 });
                 setReportModal(full.data);
             } catch (e) {
-                showInfo(t('common.error', 'Error'), e.response?.data?.error || 'Failed to generate report');
+                showInfo(t('common.error', 'Error'), e.response ? e.response.data?.error || 'Failed to generate report' : e.message);
             }
         });
     };

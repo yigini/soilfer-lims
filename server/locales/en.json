@@ -108,7 +108,12 @@
     "approvalNotRecorded": "Approval: not recorded",
     "filterWithdrawn": "Withdrawn",
     "withdrawnPendingAmendment": "Withdrawn pending amendment {{amendmentId}}",
-    "amendedStatement": "Amended report — replaces {replacedNumber} revision {replacedRevision}; reason: {reason}."
+    "amendedStatement": "Amended report — replaces {replacedNumber} revision {replacedRevision}; reason: {reason}.",
+    "amendmentChangedMark": "†",
+    "amendmentChangedLegend": "changed in this amendment",
+    "amendmentAddedMark": "‡",
+    "amendmentAddedLegend": "added in this amendment",
+    "amendmentRemoved": "Removed in this amendment"
   },
   "common": {
     "save": "Save",

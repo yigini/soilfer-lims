@@ -3516,6 +3516,10 @@
     },
     "pendingNotice": "Solicitação salva. É necessária autorização antes de aplicar alterações.",
     "authorisedNotice": "Emenda autorizada. As reanálises científicas devem concluir a revisão e aprovação habituais antes da emissão de outro relatório.",
-    "failed": "Não foi possível salvar a emenda. Os seus dados foram preservados."
+    "failed": "Não foi possível salvar a emenda. Os seus dados foram preservados.",
+    "publicReportNumber": "Relatório {number}.",
+    "publicSuperseded": "Este relatório foi substituído por um relatório emendado. Solicite o relatório vigente ao laboratório.",
+    "publicReplacedBy": "Substituído pelo relatório {number}.",
+    "revisionRequiresAmendment": "Um relatório emendado requer uma emenda aprovada. Solicite-a e autorize-a primeiro."
   }
 }

@@ -108,7 +108,12 @@
     "approvalNotRecorded": "Aprobación: no registrada",
     "filterWithdrawn": "Retirado",
     "withdrawnPendingAmendment": "Retirado pendiente de enmienda {{amendmentId}}",
-    "amendedStatement": "Informe modificado — reemplaza {replacedNumber}, revisión {replacedRevision}; motivo: {reason}."
+    "amendedStatement": "Informe modificado — reemplaza {replacedNumber}, revisión {replacedRevision}; motivo: {reason}.",
+    "amendmentChangedMark": "†",
+    "amendmentChangedLegend": "modificado en esta enmienda",
+    "amendmentAddedMark": "‡",
+    "amendmentAddedLegend": "añadido en esta enmienda",
+    "amendmentRemoved": "Eliminado en esta enmienda"
   },
   "common": {
     "save": "Guardar",

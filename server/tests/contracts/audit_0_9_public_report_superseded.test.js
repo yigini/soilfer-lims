@@ -30,7 +30,11 @@ describe('Audit 0.9: superseded public links', () => {
         return sampleId;
     }
     async function publish(sampleId) {
-        const response = await request(app).post(`/api/reports/generate/${sampleId}`).set('Authorization', `Bearer ${token}`);
+        // #211: every revision after the first is issued by an approved amendment.
+        const amendment = await prisma.report.count({ where: { sampleId } })
+            ? await require('../helpers/reportAmendmentFixture').approvedReportAmendment(prisma, sampleId) : null;
+        const response = await request(app).post(`/api/reports/generate/${sampleId}`).set('Authorization', `Bearer ${token}`)
+            .send(amendment ? { amendmentId: amendment.id } : {});
         expect(response.status).toBe(200);
         return prisma.report.findUnique({ where: { id: response.body.id } });
     }
@@ -120,7 +124,9 @@ describe('Audit 0.9: superseded public links', () => {
         jest.spyOn(prisma, '$transaction').mockImplementation(callback => transaction(async tx => callback({ ...tx,
             report: { ...tx.report, create: async () => { throw new Error('synthetic publication failure'); } }
         })));
-        const response = await request(app).post(`/api/reports/generate/${sampleId}`).set('Authorization', `Bearer ${token}`);
+        const amendment = await require('../helpers/reportAmendmentFixture').approvedReportAmendment(prisma, sampleId);
+        const response = await request(app).post(`/api/reports/generate/${sampleId}`).set('Authorization', `Bearer ${token}`)
+            .send({ amendmentId: amendment.id });
         expect(response.status).toBe(500);
         expect(await prisma.reportShareLink.findUnique({ where: { id: shared.row.id } })).toEqual(shared.row);
         expect(await prisma.report.findUnique({ where: { id: first.id } })).toEqual(first);

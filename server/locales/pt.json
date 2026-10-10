@@ -108,7 +108,12 @@
     "approvalNotRecorded": "Aprovação: não registrada",
     "filterWithdrawn": "Retirado",
     "withdrawnPendingAmendment": "Retirado enquanto aguarda a alteração {{amendmentId}}",
-    "amendedStatement": "Relatório alterado — substitui {replacedNumber}, revisão {replacedRevision}; motivo: {reason}."
+    "amendedStatement": "Relatório alterado — substitui {replacedNumber}, revisão {replacedRevision}; motivo: {reason}.",
+    "amendmentChangedMark": "†",
+    "amendmentChangedLegend": "alterado nesta emenda",
+    "amendmentAddedMark": "‡",
+    "amendmentAddedLegend": "adicionado nesta emenda",
+    "amendmentRemoved": "Removido nesta emenda"
   },
   "common": {
     "save": "Salvar",

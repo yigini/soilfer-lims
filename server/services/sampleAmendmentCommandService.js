@@ -56,7 +56,11 @@ async function command(db,{sampleId,amendmentId,actor,input,headerKey,authorise=
 async function listAmendments(db,sampleId,actor){
  return rules.inTransaction(db,async tx=>{
   const sample=await scopedSample(tx,sampleId,actor);
-  const amendments=await tx.sampleAmendment.findMany({where:{sampleId:sample.id},orderBy:[{createdAt:'desc'},{id:'asc'}]});
+  const rows=await tx.sampleAmendment.findMany({where:{sampleId:sample.id},orderBy:[{createdAt:'desc'},{id:'asc'}]});
+  // #211: one amendment issues one revision; show which ones are already used.
+  const issued=new Map((await tx.report.findMany({where:{sampleId:sample.id,amendmentId:{not:null}},select:{id:true,amendmentId:true}}))
+   .map(row=>[row.amendmentId,row.id]));
+  const amendments=rows.map(row=>({...row,revisionReportId:issued.get(row.id)||null}));
   const requiresSecondPerson=await require('./policyService').get(sample.assignedLab,'report.amendmentRequiresSecondPerson',{db:tx});
   return{amendments,requiresSecondPerson};
  });

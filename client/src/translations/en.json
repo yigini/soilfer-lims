@@ -3516,6 +3516,10 @@
     },
     "pendingNotice": "Request saved. Authorisation is required before changes are applied.",
     "authorisedNotice": "Amendment authorised. Scientific retests must complete the normal review and approval before a report can be reissued.",
-    "failed": "The amendment could not be saved. Your input is preserved."
+    "failed": "The amendment could not be saved. Your input is preserved.",
+    "publicReportNumber": "Report {number}.",
+    "publicSuperseded": "This report has been superseded by an amended report. Ask the laboratory for the current report.",
+    "publicReplacedBy": "Replaced by report {number}.",
+    "revisionRequiresAmendment": "An amended report needs an approved amendment. Request and authorise one first."
   }
 }
