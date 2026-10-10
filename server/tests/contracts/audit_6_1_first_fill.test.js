@@ -10,17 +10,22 @@ const commands=require('../../services/sampleAmendmentCommandService');
 const {writeResultsExecution}=require('../../services/resultWriteService');
 const owned=[];
 afterEach(async()=>{for(const f of owned.splice(0))await f.close();});
-async function fixture(reasonCode='CLIENT_RETEST',originalReplicates=2,analysisCode){
+async function fixture(reasonCode='CLIENT_RETEST',originalReplicates=2,analysisCode,unlinked=false){
  const f=await qcGateFixture(analysisCode?{analysisCode}:undefined);owned.push(f);
  require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:f.file,apply:true});
  await f.setPolicy([{key:'results.replicatesRequired',value:2}]);
  f.sample=await createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,
-  status:'APPROVED',dryingStatus:'DONE',preparationStatus:'DONE',approvedBy:'retained-approver',approvedAt:new Date('2026-09-25T10:00:00Z')}});
+  status:unlinked?'PROCESSING':'APPROVED',dryingStatus:'DONE',preparationStatus:'DONE',approvedBy:'retained-approver',approvedAt:new Date('2026-09-25T10:00:00Z')}});
  f.item=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:f.sample.id,assignedLab:f.labId,labId:f.labId,
-  analysis:f.analysisCode,methodologyId:f.method.id,status:'ACCEPTED',assignedTo:f.actor.username,equipmentId:f.instrument.id}});
- f.originals=await createExecutionResultsFixture(f.db,{attemptStatus:'ACCEPTED',data:Array.from({length:originalReplicates},(_,index)=>index+1).map(replicateNo=>({id:randomUUID(),sampleId:f.sample.id,
+  analysis:f.analysisCode,methodologyId:f.method.id,status:unlinked?'REPEAT_REQUIRED':'ACCEPTED',assignedTo:f.actor.username,equipmentId:f.instrument.id}});
+ f.originals=await createExecutionResultsFixture(f.db,{attemptStatus:unlinked?'RECORDED':'ACCEPTED',data:Array.from({length:originalReplicates},(_,index)=>index+1).map(replicateNo=>({id:randomUUID(),sampleId:f.sample.id,
   param:f.analysisCode,replicateNo,value:String(7+replicateNo/10),numericValue:7+replicateNo/10,unit:'fixture-unit',
   methodologyId:f.method.id,equipmentId:f.instrument.id,isCurrent:true}))});
+ if(unlinked)await inTransaction(f.db,async tx=>{
+  const events=require('../../services/workAttemptEventService');
+  await events.transitionAttempt(tx,f.item,f.originals[0].attemptId,'SUBMITTED',f.actor);
+  await events.transitionAttempt(tx,f.item,f.originals[0].attemptId,'ACCEPTED',f.actor);
+ });
  f.parent=await f.db.workAttempt.findUnique({where:{id:f.originals[0].attemptId}});
  const authoriser=await f.db.user.create({data:{id:randomUUID(),username:'amendment-authoriser-'+randomUUID(),email:randomUUID()+'@example.test',
   password:'owned-http-fixture',role:'LAB_MANAGER',labId:f.labId}});
@@ -87,11 +92,9 @@ test.each(['sample','line','reason'])('the SQL guard prevents a persisted %s lin
  expect(f.all()).toEqual(before);
 });
 async function unlinkedFixture(analysisCode){
- const f=await fixture('CONFIRMATION',2,analysisCode);
+ const f=await fixture('CONFIRMATION',2,analysisCode,true);
  // Historical/invalid OPEN rows are possible without a new amendment link.
  // Retain every guard and the accepted parent; the runtime must refuse reuse.
- await f.db.sample.update({where:{id:f.sample.id},data:{status:'PROCESSING'}});
- f.item=await f.db.workItem.update({where:{id:f.item.id},data:{status:'REPEAT_REQUIRED'}});
  f.child=await f.db.workAttempt.create({data:{id:randomUUID(),workItemId:f.item.id,attemptNo:2,status:'OPEN',parentAttemptId:f.parent.id,
   reason:'CONFIRMATION',requestedBy:f.other.username,requestedAt:new Date()}});
  expect(await f.db.sampleAmendmentAttempt.count()).toBe(0);return f;
