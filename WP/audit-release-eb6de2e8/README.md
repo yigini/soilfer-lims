@@ -3,6 +3,30 @@
 Target application commit: `042c04b54e7b3baa9f8c95e7f8d70b39daed2f91`.
 Last deployed application commit: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
 
+Current release status (October 10, 18:33 UTC): HELD at the required #191
+zero-blocked-owner gate. The complete merged-main fresh-copy rehearsal failed
+before #191 apply. One ACCEPTED WorkItem has a preexisting RECORDED attempt
+and an already published report. Claudio owns the separately reviewed
+resolution design; YY's review choice in his native thread remains pending.
+The deployed #188 app cannot reopen this item before release. No production
+install, backfill, quiesce or review action has occurred.
+
+The failed receipt remains immutable at
+`combined-eb6de2e8-main-042c04b5-retry-20261010T180200Z/rehearsal-receipt.json`,
+SHA256 `ed18a30dcdabd14ddb2052c4d5c8a12fa0d65ddf9a7495de8c1a4eb7c2f36a01`.
+See `191-release-blocker.md` and `191-published-report-triage.md`.
+`191-triage-preservation.json` establishes partial preservation only: all 90
+original tables/fields and 18 receipts retained, the 17/19 approved #190 changes,
+integrity ok/FK0, unchanged pristine copy bytes and original published report
+row. It is not a PASSED complete rehearsal and cannot authorize deployment.
+
+All 24 Linux release guard tests pass. The completed standard Windows server
+run passes 339/339 suites and 5,079/5,079 tests, zero skips, exit 0 (1,746.911s),
+on the byte-identical audited application tree. Client build/lint pass with
+0 errors and 14 existing warnings. `pr-gates-042c04b5-pending.json` retains the
+read-only snapshot of all 20 included PR audit/CI gates; exact merged-main CI
+38073878578 is pending its Docker checks, after passing the server suite.
+
 Claudio requested this kit on #162, comment 6099151121. Pip owns preparation;
 Claudio owns review and post-deployment checks. YY selected "Main now" and
 "Auto after review" on October 10: deployment remains conditional on Claudio's

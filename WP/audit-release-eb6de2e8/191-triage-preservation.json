@@ -1,0 +1,29 @@
+{
+  "status": "PARTIAL_PRESERVATION_ONLY_NOT_PASSED_REHEARSAL",
+  "head": "042c04b54e7b3baa9f8c95e7f8d70b39daed2f91",
+  "preservation": {
+    "originalTableCount": 90,
+    "originalRowsAndFieldsPreserved": true,
+    "approvedNullResultLinks": 19,
+    "createdAttempts": 17,
+    "originalReceiptsPreserved": 18,
+    "additionalReceiptCount": 2,
+    "newTables": [
+      "NonconformityReport"
+    ],
+    "changedSchemaObjects": [
+      "table:ProficiencyRound",
+      "table:ReviewDecision",
+      "table:WorkAttempt",
+      "trigger:ProficiencyRound_ncr_status_insert_guard",
+      "trigger:ProficiencyRound_ncr_status_update_guard"
+    ],
+    "integrity": "ok",
+    "foreignKeyViolations": 0
+  },
+  "publishedReportOriginalRowSha256": "1b1a6ae98f84cf7a66a28f506e26e4cfb60c15382f7152c2a680cb46388b268f",
+  "publishedReportRowPreserved": true,
+  "pristineCopyBytesPreserved": true,
+  "productionExecution": false,
+  "failedRehearsalReceiptSha256": "ed18a30dcdabd14ddb2052c4d5c8a12fa0d65ddf9a7495de8c1a4eb7c2f36a01"
+}
