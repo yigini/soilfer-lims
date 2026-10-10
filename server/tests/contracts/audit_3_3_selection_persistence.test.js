@@ -5,6 +5,8 @@ const rules = require('../../services/workflowStateRules');
 const { installReportedValueSelections } = require('../../scripts/install_reported_value_selections');
 const selection = require('../../services/reportedValueSelectionService');
 const { loadSelectionContext } = require('../../services/reportedValueSelectionContext');
+const Database = require('better-sqlite3');
+const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
 const owned = [];
 afterEach(async () => { for (const f of owned.splice(0)) await f.close(); });
 async function fixture({ criteria = {}, install = true } = {}) {
@@ -25,9 +27,21 @@ test('dry installation makes zero writes; additive apply retains every existing 
     const f = await fixture({ install: false }), retained = await f.snapshot(), attempts = await f.db.workAttempt.findMany();
     const digest = () => createHash('sha256').update(fs.readFileSync(f.file)).digest('hex');
     const before = digest();
+    const original = new Database(assertOwnedTestDatabase(f.file, 'system:fixture'), { readonly: true, fileMustExist: true });
+    let retainedRowsSha256;
+    try {
+        retainedRowsSha256 = createHash('sha256').update(JSON.stringify(Object.fromEntries(original.prepare(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name<>'ReportedValueSelection' ORDER BY name")
+            .all().map(({name}) => [name, original.prepare('SELECT * FROM "'+name.replace(/"/g,'""')+'" ORDER BY rowid').all()])))).digest('hex');
+    } finally { original.close(); }
     expect(installReportedValueSelections({ dbPath: f.file })).toMatchObject({ classification: 'PRE_192', mode: 'DRY_RUN', totalChanges: 0 });
     expect(digest()).toBe(before);
     expect(installReportedValueSelections({ dbPath: f.file, apply: true })).toMatchObject({ classification: 'COMPLETE', mode: 'APPLIED', newSelectionCount: 0 });
+    const installedLedger = new Database(assertOwnedTestDatabase(f.file, 'system:fixture'), { readonly: true, fileMustExist: true });
+    try {
+        expect(JSON.parse(installedLedger.prepare('SELECT details FROM _schema_migrations WHERE id=?')
+            .get('192_reported_value_selection').details).retainedRowsSha256).toBe(retainedRowsSha256);
+    } finally { installedLedger.close(); }
     expect(await f.snapshot()).toEqual(retained); expect(await f.db.workAttempt.findMany()).toEqual(attempts);
     const installed = digest();
     expect(installReportedValueSelections({ dbPath: f.file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
