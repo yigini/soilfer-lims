@@ -1883,5 +1883,10 @@
     "unavailable": {
       "CROSS_CHECK_LAB_REQUIRED": "Verificações cruzadas indisponíveis: a amostra não tem um laboratório registrado"
     }
+  },
+  "amendment": {
+    "pending": "Solicitação salva. É necessária autorização antes de aplicar alterações.",
+    "authorised": "Emenda autorizada. As reanálises científicas devem concluir a revisão e aprovação habituais antes da emissão de outro relatório.",
+    "failed": "Não foi possível salvar a emenda. Os seus dados foram preservados."
   }
 }

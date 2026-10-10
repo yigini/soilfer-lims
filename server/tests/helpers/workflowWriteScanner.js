@@ -133,6 +133,9 @@ const RESULT_SET_FIXTURE = Object.freeze({
         'tests/contracts/audit_1_4_uuid_transactions.test.js',
         'tests/contracts/audit_1_5_result_writes.test.js',
         'tests/contracts/audit_3_2_repeat_commands.test.js',
+        // #210 pin6094281140: the linked accepted-parent replica acceptance
+        // test uses this existing owned execution factory, with no new export.
+        'tests/contracts/audit_6_1_first_fill.test.js',
         'tests/contracts/nsis_v2_exchange.test.js',
         'tests/contracts/qc_disposition_release_gate.test.js'
     ])

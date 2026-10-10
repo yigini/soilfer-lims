@@ -9,7 +9,7 @@ const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 
 describe('Package P6: Review, Reports & Amendments Verification', () => {
     let mgrUser, techUser, crossLabUser;
-    let mgrToken, techToken, crossLabToken;
+    let mgrToken, techToken, crossLabToken, authoriserToken;
     let sampleForReview, sampleDisposed;
 
     beforeAll(async () => {
@@ -21,6 +21,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
             countries: ['P6C']
         });
         mgrToken = generateToken(mgrUser);
+        authoriserToken = generateToken(usersDb.create({username:'authoriser_p6_test',role:'LAB_MANAGER',labId:'LAB-P6',countries:['P6C']}));
         await setFixtureQcRequirement(prisma, mgrToken, 'LAB-P6');
 
         techUser = usersDb.create({
@@ -239,7 +240,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
     });
 
     test('5. Traceable amendment creation preserves history and records audit', async () => {
-        const res = await request(app)
+        const pending = await request(app)
             .post(`/api/samples/${sampleForReview.id}/amendments`)
             .set('Authorization', `Bearer ${mgrToken}`)
             .send({
@@ -248,6 +249,10 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                 impactAssessment: 'Does not affect analytical chemistry findings.'
             });
 
+        expect(pending.status).toBe(200);
+        expect(pending.body.amendment).toMatchObject({status:'PENDING',version:1,authorizedBy:null});
+        const res=await request(app).post(`/api/samples/${sampleForReview.id}/amendments/${pending.body.amendment.id}/authorise`)
+            .set('Authorization',`Bearer ${authoriserToken}`).send({expectedVersion:pending.body.amendment.version});
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
         expect(res.body.amendment.type).toBe('CLERICAL');

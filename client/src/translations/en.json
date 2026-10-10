@@ -3471,5 +3471,42 @@
     "unavailable": {
       "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory"
     }
+  },
+  "amendment": {
+    "title": "Sample amendments",
+    "help": "Request a change, then authorise it under the laboratory policy. Scientific amendments reopen selected work and withdraw the issued report while preserving its content.",
+    "permission": "Approval permission is required.",
+    "secondPerson": "Another authorised person must authorise this request.",
+    "selfAllowed": "This laboratory policy allows the requester to authorise their own request.",
+    "type": "Amendment type",
+    "types": {
+      "CLERICAL": "Clerical correction",
+      "SCIENTIFIC": "Scientific retest",
+      "ORDER": "Order amendment",
+      "REPORT": "Report amendment"
+    },
+    "repeatReason": "Retest reason",
+    "reasons": {
+      "CLIENT_RETEST": "Client retest",
+      "CONFIRMATION": "Confirmation"
+    },
+    "selectedLines": "Selected order lines",
+    "noLines": "No accepted measurement lines are available.",
+    "reason": "Reason for the amendment",
+    "request": "Request amendment",
+    "history": "Amendment history",
+    "empty": "No amendment requests.",
+    "requester": "Requested by",
+    "authoriser": "Authorised by",
+    "authorise": "Authorise request",
+    "awaitOther": "Awaiting another authorised person.",
+    "status": {
+      "PENDING": "Pending authorisation",
+      "APPROVED": "Authorised",
+      "REJECTED": "Rejected"
+    },
+    "pendingNotice": "Request saved. Authorisation is required before changes are applied.",
+    "authorisedNotice": "Amendment authorised. Scientific retests must complete the normal review and approval before a report can be reissued.",
+    "failed": "The amendment could not be saved. Your input is preserved."
   }
 }

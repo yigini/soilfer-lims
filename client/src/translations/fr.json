@@ -3471,5 +3471,42 @@
     "unavailable": {
       "CROSS_CHECK_LAB_REQUIRED": "Vérifications croisées indisponibles : aucun laboratoire enregistré pour cet échantillon"
     }
+  },
+  "amendment": {
+    "title": "Amendements de l’échantillon",
+    "help": "Demandez une modification, puis autorisez-la selon la politique du laboratoire. Les amendements scientifiques rouvrent les travaux sélectionnés et retirent le rapport émis tout en conservant son contenu.",
+    "permission": "Une permission d’approbation est requise.",
+    "secondPerson": "Une autre personne autorisée doit autoriser cette demande.",
+    "selfAllowed": "La politique de ce laboratoire permet au demandeur d’autoriser sa propre demande.",
+    "type": "Type d’amendement",
+    "types": {
+      "CLERICAL": "Correction administrative",
+      "SCIENTIFIC": "Nouvelle analyse scientifique",
+      "ORDER": "Amendement de la commande",
+      "REPORT": "Amendement du rapport"
+    },
+    "repeatReason": "Motif de la nouvelle analyse",
+    "reasons": {
+      "CLIENT_RETEST": "Nouvelle analyse demandée par le client",
+      "CONFIRMATION": "Confirmation"
+    },
+    "selectedLines": "Lignes de commande sélectionnées",
+    "noLines": "Aucune ligne de mesure acceptée n’est disponible.",
+    "reason": "Motif de l’amendement",
+    "request": "Demander un amendement",
+    "history": "Historique des amendements",
+    "empty": "Aucune demande d’amendement.",
+    "requester": "Demandé par",
+    "authoriser": "Autorisé par",
+    "authorise": "Autoriser la demande",
+    "awaitOther": "En attente d’une autre personne autorisée.",
+    "status": {
+      "PENDING": "En attente d’autorisation",
+      "APPROVED": "Autorisé",
+      "REJECTED": "Rejeté"
+    },
+    "pendingNotice": "Demande enregistrée. Une autorisation est nécessaire avant d’appliquer les modifications.",
+    "authorisedNotice": "Amendement autorisé. Les nouvelles analyses scientifiques doivent suivre la revue et l’approbation habituelles avant l’émission d’un nouveau rapport.",
+    "failed": "L’amendement n’a pas pu être enregistré. Votre saisie est conservée."
   }
 }

@@ -1883,5 +1883,10 @@
     "unavailable": {
       "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory"
     }
+  },
+  "amendment": {
+    "pending": "Request saved. Authorisation is required before changes are applied.",
+    "authorised": "Amendment authorised. Scientific retests must complete the normal review and approval before a report can be reissued.",
+    "failed": "The amendment could not be saved. Your input is preserved."
   }
 }

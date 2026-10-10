@@ -3471,5 +3471,42 @@
     "unavailable": {
       "CROSS_CHECK_LAB_REQUIRED": "Comprobaciones cruzadas no disponibles: la muestra no tiene un laboratorio registrado"
     }
+  },
+  "amendment": {
+    "title": "Enmiendas de la muestra",
+    "help": "Solicite un cambio y después autorícelo según la política del laboratorio. Las enmiendas científicas reabren el trabajo seleccionado y retiran el informe emitido, conservando su contenido.",
+    "permission": "Se requiere permiso de aprobación.",
+    "secondPerson": "Otra persona autorizada debe autorizar esta solicitud.",
+    "selfAllowed": "La política de este laboratorio permite que el solicitante autorice su propia solicitud.",
+    "type": "Tipo de enmienda",
+    "types": {
+      "CLERICAL": "Corrección administrativa",
+      "SCIENTIFIC": "Reanálisis científico",
+      "ORDER": "Enmienda de la orden",
+      "REPORT": "Enmienda del informe"
+    },
+    "repeatReason": "Motivo del reanálisis",
+    "reasons": {
+      "CLIENT_RETEST": "Reanálisis solicitado por el cliente",
+      "CONFIRMATION": "Confirmación"
+    },
+    "selectedLines": "Líneas de la orden seleccionadas",
+    "noLines": "No hay líneas de medición aceptadas disponibles.",
+    "reason": "Motivo de la enmienda",
+    "request": "Solicitar enmienda",
+    "history": "Historial de enmiendas",
+    "empty": "No hay solicitudes de enmienda.",
+    "requester": "Solicitada por",
+    "authoriser": "Autorizada por",
+    "authorise": "Autorizar solicitud",
+    "awaitOther": "Pendiente de otra persona autorizada.",
+    "status": {
+      "PENDING": "Pendiente de autorización",
+      "APPROVED": "Autorizada",
+      "REJECTED": "Rechazada"
+    },
+    "pendingNotice": "Solicitud guardada. Se requiere autorización antes de aplicar cambios.",
+    "authorisedNotice": "Enmienda autorizada. Los reanálisis científicos deben completar la revisión y aprobación habituales antes de emitir otro informe.",
+    "failed": "No se pudo guardar la enmienda. Se conserva su información."
   }
 }
