@@ -32,7 +32,9 @@ including both real Docker checks, completed at 18:32:54 UTC. Its SHA256 is
 This read-only snapshot is not deployment authorization.
 
 Claudio pinned the held #191 resolution design and ownership in comment
-6100903042 at 18:40:49 UTC. See `191-resolution-pin.md` and
+6100903042, then revised the transition scope explicitly in 6101762952 at
+20:17:30 UTC. PR #289 head a9e24600 addresses Pip's scope/plan-binding review.
+See `289-review-pending.md`, `191-resolution-pin.md` and
 `yy-191-review-choice-evidence.md`. The fix is not audited or merged yet;
 the failed rehearsal is not retried or relabelled.
 

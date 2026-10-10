@@ -1,7 +1,8 @@
 # Held resolution design for the #191 release blocker
 
-Source: Claudio's comment at 2026-10-10 18:40:49 UTC:
-https://github.com/yigini/soilfer-lims/issues/191#issuecomment-6100903042
+Source: Claudio's revised comment at 2026-10-10 20:17:30 UTC:
+https://github.com/yigini/soilfer-lims/issues/191#issuecomment-6101762952
+This supersedes the transition wording in earlier pin 6100903042.
 
 Pip directly verified YY's "Link recorded accept" selection in the original
 native decision card on October 10 around 20:03 UTC. The card displays
@@ -9,12 +10,18 @@ native decision card on October 10 around 20:03 UTC. The card displays
 `yy-191-review-choice-evidence.md`. Claudio is implementing the fix; no audited
 fix or successful fresh complete rehearsal exists yet. Production stays held.
 
-If YY chooses "Link recorded accept", Claudio writes a separately reviewed,
+YY chose "Link recorded accept"; Claudio writes a separately reviewed,
 additive forward fix between #190 and #191. It ties the existing ACCEPT
-decision `dec-s02-p-acc` to `att-s02-p-2` through the guarded status-only
-transitions RECORDED -> SUBMITTED -> ACCEPTED and adds an immutable
+decision `dec-s02-p-acc` to `att-s02-p-2` through one direct status-only
+RECORDED -> ACCEPTED change under #190's guards before #191 and adds an immutable
 WORK_ATTEMPT event citing that decision. It must be dry-run first, idempotent
-and have exactly one expected item. The published report stays unchanged.
+and have exactly one expected item. It refuses once #191 is installed.
+Walking through SUBMITTED would invent submission evidence that the item
+does not have. No new ReviewDecision or submission is created; the original
+ReviewDecision.attemptId stays NULL. The published report stays unchanged.
+Apply names the exact WorkItem set and reviewed dry-run planSha256, rechecked
+inside the IMMEDIATE transaction. The current proposed delta is one status
+field plus one immutable AuditLog event, totalChanges=2; repeat changes zero.
 
 The alternative "Reopen and amend" requires its own reviewed executable path;
 deployed `283a8bb` cannot perform that reopen.
