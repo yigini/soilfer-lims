@@ -48,8 +48,17 @@ test('the real pre-210 schema upgrades additively while retaining every historic
   expect(installSampleAmendmentAuthorisation({dbPath:file,apply:true})).toMatchObject({classification:'COMPLETE_210',previousClassification:'PRE_210',
    mode:'APPLIED',newAmendmentCount:0,backfilledCount:0,receipt:{originalRowsPreserved:true}});
   const after=snapshot(db),newNames=new Set([...source.guardsSql.matchAll(/^CREATE TRIGGER "([^"]+)"/gm)].map(row=>row[1]));
+  newNames.add('SampleAmendmentAttempt');newNames.add('SampleAmendmentAttempt_childAttemptId_key');
+  expect(after.objects.find(row=>row.name==='SampleAmendmentAttempt')).toMatchObject({type:'table',
+   sql:source.freshTables.SampleAmendmentAttempt.replace(/;$/,'')});
+  expect(after.objects.find(row=>row.name==='SampleAmendmentAttempt_childAttemptId_key')).toMatchObject({type:'index',
+   sql:'CREATE UNIQUE INDEX "SampleAmendmentAttempt_childAttemptId_key" ON "SampleAmendmentAttempt"("childAttemptId")'});
   expect(after.objects.filter(row=>!newNames.has(row.name)&&row.name!=='SampleAmendment')).toEqual(before.objects.filter(row=>row.name!=='SampleAmendment'));
-  expect(Object.keys(after.rows)).toEqual(Object.keys(before.rows));
+  expect(Object.keys(after.rows)).toEqual([...Object.keys(before.rows),'SampleAmendmentAttempt'].sort());
+  expect(after.rows.SampleAmendmentAttempt).toEqual([]);
+  const linkForeignKeys=db.prepare('PRAGMA foreign_key_list("SampleAmendmentAttempt")').all();
+  expect(linkForeignKeys).toHaveLength(4);
+  for(const foreignKey of linkForeignKeys)expect(foreignKey).toMatchObject({on_delete:'RESTRICT',on_update:'RESTRICT'});
   for(const [table,rows]of Object.entries(before.rows)){
    const columnNames=shapes[table].columns.map(row=>row.name);
    const retained=after.rows[table].filter(row=>table!=='_schema_migrations'||row.id!=='210_sample_amendment_authorisation')
@@ -96,7 +105,8 @@ test('only the exact amendment loader and DDL resolve; aliases and changed bytes
  expect(scanSource(header+'db.exec(source.sql)','scripts/probe.js')).toEqual([]);
  expect(scanSource(header+'db.exec(source.guardsSql)','scripts/probe.js')).toEqual([]);
  expect(scanSource(header+'const alias=source;db.exec(alias.sql)','scripts/probe.js')).toEqual([expect.objectContaining({code:'UNRESOLVED_WORKFLOW_SQL'})]);
- for(const file of ['services/sampleAmendmentMigrationSource.js','prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql']){
+ for(const file of ['services/sampleAmendmentMigrationSource.js','prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql',
+  'prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json']){
   const target=path.join(root,file),read=fs.readFileSync,spy=jest.spyOn(fs,'readFileSync').mockImplementation((requested,...args)=>{
    const bytes=read(requested,...args);return path.resolve(String(requested))===target?Buffer.concat([Buffer.from(bytes),Buffer.from('\n')]):bytes;
   });
@@ -118,6 +128,10 @@ test('fresh generated Prisma receives guards with every historical field and pri
   for(const [table,rows]of Object.entries(before.rows))expect(table==='_schema_migrations'?
    after.rows[table].filter(row=>row.id!=='210_sample_amendment_authorisation'):after.rows[table]).toEqual(rows);
   expect(after.rows.SampleAmendment[0]).toMatchObject({requestPayload:null,version:null,priorApprovedBy:null,priorApprovedAt:null,selectedWorkItemIds:null});
+  expect(after.rows.SampleAmendmentAttempt).toEqual([]);
+  expect(db.prepare('PRAGMA foreign_key_list("SampleAmendmentAttempt")').all()).toHaveLength(4);
+  for(const foreignKey of db.prepare('PRAGMA foreign_key_list("SampleAmendmentAttempt")').all())
+   expect(foreignKey).toMatchObject({on_delete:'RESTRICT',on_update:'RESTRICT'});
   expect(db.pragma('integrity_check',{simple:true})).toBe('ok');expect(db.pragma('foreign_key_check')).toEqual([]);
   const completeHash=hash(file);expect(installSampleAmendmentAuthorisation({dbPath:file,apply:true})).toMatchObject({mode:'NO_OP',totalChanges:0});
   expect(snapshot(db)).toEqual(after);expect(hash(file)).toBe(completeHash);
@@ -170,4 +184,11 @@ test('the actual guards preserve immutable request evidence, require one CAS inc
 
 test.each([[],['--db','owned.db','--apply','--dry-run'],['--db','owned.db','--apply','--apply'],['--db','owned.db','--unknown']].map(args=>[args]))('installer arguments require an explicit unambiguous mode: %j',args=>{
  expect(()=>parseArguments(args)).toThrow(expect.objectContaining({code:'AMENDMENT_ARGUMENT_INVALID'}));
+});
+
+test('managed amendment attempt table matches the actual independently emitted fresh Prisma oracle',()=>{
+ const source=loadSampleAmendmentMigrationSource();
+ expect(source.schemaSql.match(/CREATE TABLE "SampleAmendmentAttempt" \([\s\S]*?\n\);/)[0]).toBe(source.freshTables.SampleAmendmentAttempt);
+ expect(source.guardsSql.match(/CREATE TRIGGER/g)).toHaveLength(8);
+ expect(source.freshTables.SampleAmendmentAttempt).not.toMatch(/CHECK|TRIGGER/);
 });

@@ -38,8 +38,9 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         boundary: '-- Contract guards', assets: [{ file: 'fresh-prisma-tables.json', sha256: '97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0' }] }),
     // #210: inspect the two exact additive assets; no workflow writer exception.
     Object.freeze({functionName:'loadSampleAmendmentMigrationSource',loader:'services/sampleAmendmentMigrationSource.js',
-        loaderSha256:'2d6dc01b9b2551d7d309c539f6daac6f1736617765b651b1507f5d600ace3060',
-        directory:'20261010000000_sample_amendment_authorisation',sqlSha256:'27572a538f7d1467049c75bdfc53c4a9862d4c1b6ec1a1970fab4acb51a187b3',
+        loaderSha256:'1878301812dfb2dc528f2b089dda3f6923ea7e5ff1fe0ced4573af60d06841cd',
+        directory:'20261010000000_sample_amendment_authorisation',sqlSha256:'fcf8544bece6aa184e43781bac94cee8c848c6e2659b8b66d43e4d8a249c06df',
+        oracleSha256:'6c3cff214a6f6c3c5397521a7f3e02563313ece9336a485605a8a5cb81ad2e6b',
         boundary:'-- Contract guards'}),
     // Inspect both exact #197 assets. Existing writer restrictions are unchanged.
     Object.freeze({functionName:'loadResultOverrideMigrationSource',loader:'services/resultOverrideMigrationSource.js',
@@ -543,6 +544,8 @@ function scanSource(source, filename, exceptions = []) {
             for (const asset of source.assets || []) {
                 if (createHash('sha256').update(fs.readFileSync(path.join(root, 'prisma/migrations', source.directory, asset.file))).digest('hex') !== asset.sha256) return null;
             }
+            if (source.oracleSha256 && createHash('sha256').update(fs.readFileSync(path.join(root, 'prisma/migrations', source.directory,
+                'fresh-prisma-tables.json'))).digest('hex') !== source.oracleSha256) return null;
             const sql = bytes.toString('utf8');
             if (source.wholeSql) return p.node.property.name === 'sql' ? sql : null;
             const marker = source.boundary || 'CREATE TRIGGER', boundary = sql.indexOf(marker);

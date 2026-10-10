@@ -317,6 +317,7 @@ model WorkItem {
   batchPositions  BatchPositionWorkItem[]
   reportedValueSelections ReportedValueSelection[]
   resultOverrideRequests ResultOverrideRequest[]
+  amendmentAttempts SampleAmendmentAttempt[]
 }
 
 model SampleHold {
@@ -1766,6 +1767,9 @@ model WorkAttempt {
   createdAt              DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
 
+  amendmentParentLinks SampleAmendmentAttempt[] @relation("AmendmentParentAttempt")
+  amendmentChildLink   SampleAmendmentAttempt?  @relation("AmendmentChildAttempt")
+
   @@index([workItemId])
   // Partial uniqueness is installed by the additive #190 SQL in every lab.
   @@index([workItemId, attemptNo])
@@ -1853,7 +1857,25 @@ model SampleAmendment {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
+  attemptLinks SampleAmendmentAttempt[]
+
   @@index([sampleId])
+}
+
+// #210 pin6091749343: immutable authorisation authority, with no backfill.
+model SampleAmendmentAttempt {
+  id              String @id @default(uuid())
+  amendmentId     String
+  workItemId      String
+  parentAttemptId String
+  childAttemptId  String @unique
+  reason          String // CLIENT_RETEST or CONFIRMATION; SQL guards enforce it.
+  createdAt       DateTime @default(now())
+
+  amendment SampleAmendment @relation(fields: [amendmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  workItem  WorkItem @relation(fields: [workItemId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  parent    WorkAttempt @relation("AmendmentParentAttempt", fields: [parentAttemptId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  child     WorkAttempt @relation("AmendmentChildAttempt", fields: [childAttemptId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 }
 
 model CommandReceipt {
