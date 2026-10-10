@@ -17,6 +17,7 @@ const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 const labId = 'LAB-AUDIT-08';
 const snapshot = { sample: { id: 's' }, lab: {}, client: {}, generated: {}, resultGroups: [] };
 const { normalizeLegacyQcFixture } = require('../helpers/normalizedQcFixture');
+const { approvedReportAmendment } = require('../helpers/reportAmendmentFixture');
 
 describe('Audit 0.8: issued identity and truthful report evidence', () => {
     let token, lab;
@@ -44,8 +45,13 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         }
         return { sampleId, batch, item };
     }
+    // #211: a revision of an issued report is authorised by an approved amendment.
+    async function revisionBody(sampleId) {
+        const issued = await prisma.report.count({ where: { sampleId, status: { in: ['PUBLISHED', 'SUPERSEDED', 'WITHDRAWN'] }, publishedAt: { not: null } } });
+        return issued ? { amendmentId: (await approvedReportAmendment(prisma, sampleId)).id } : {};
+    }
     async function generate(f) {
-        const response = await request(app).post(`/api/reports/generate/${f.sampleId}`).set('Authorization', `Bearer ${token}`);
+        const response = await request(app).post(`/api/reports/generate/${f.sampleId}`).set('Authorization', `Bearer ${token}`).send(await revisionBody(f.sampleId));
         expect(response.status).toBe(200);
         return prisma.report.findUnique({ where: { id: response.body.id } });
     }
@@ -100,7 +106,7 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
     test('a historical base shared by another sample fails closed without a substitute or new report', async () => {
         const a = await fixture(), b = await fixture(), number = id('COLLISION');
         await legacy(a, 1, number); await legacy(b, 1, number);
-        const response = await request(app).post(`/api/reports/generate/${a.sampleId}`).set('Authorization', `Bearer ${token}`);
+        const response = await request(app).post(`/api/reports/generate/${a.sampleId}`).set('Authorization', `Bearer ${token}`).send(await revisionBody(a.sampleId));
         expect(response.status).toBe(409); expect(response.body.code).toBe('REPORT_NUMBER_CONFLICT');
         expect(await prisma.report.count({ where: { sampleId: a.sampleId } })).toBe(1);
     });
@@ -108,7 +114,7 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         const a = await fixture(), b = await fixture();
         const first = await generate(a);
         await legacy(b, 1, first.reportNumberBase);
-        const response = await request(app).post(`/api/reports/generate/${b.sampleId}`).set('Authorization', `Bearer ${token}`);
+        const response = await request(app).post(`/api/reports/generate/${b.sampleId}`).set('Authorization', `Bearer ${token}`).send(await revisionBody(b.sampleId));
         expect(response.status).toBe(409); expect(response.body.code).toBe('REPORT_NUMBER_CONFLICT');
     });
     test('failure after counter increment rolls it back; the next successful publication issues that value', async () => {
