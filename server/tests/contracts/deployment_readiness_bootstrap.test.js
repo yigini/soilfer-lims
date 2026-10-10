@@ -360,6 +360,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({ dbPath: targetDb, apply: true });
         expect(require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:targetDb,apply:true}))
             .toMatchObject({classification:'COMPLETE_210',newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0});
+        expect(require('../../scripts/install_report_revisions').installReportRevisions({dbPath:targetDb,apply:true}))
+            .toMatchObject({classification:'COMPLETE_211',backfilledCount:0});
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
@@ -407,6 +409,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_cross_check_evaluations.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_sample_amendment_authorisation.js',
                 `node "${path.join(serverDir, 'scripts/install_sample_amendment_authorisation.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_report_revisions.js',
+                `node "${path.join(serverDir, 'scripts/install_report_revisions.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_raw_input.js',
                 `node "${path.join(serverDir, 'scripts/install_result_raw_input.js').replace(/\\/g, '/')}"`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
