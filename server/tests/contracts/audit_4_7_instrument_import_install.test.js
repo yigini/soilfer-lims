@@ -126,8 +126,8 @@ test('the additional current-main schema-only factory is closed and digest-bound
     expect(() => createPre200After210SchemaFixture('not permitted')).toThrow('accepts no arguments');
     const current = createPre200After210SchemaFixture();
     try {
-        expect(current.prepare('PRAGMA table_info(SampleAmendmentAuthorisation)').all()).toHaveLength(7);
-        expect(current.prepare('PRAGMA table_info(ReportWithdrawal)').all()).toHaveLength(4);
+        expect(current.prepare('PRAGMA table_info(SampleAmendmentAttempt)').all()).toHaveLength(7);
+        expect(current.prepare('PRAGMA table_info(ReportAmendmentWithdrawal)').all()).toHaveLength(4);
         expect(current.prepare('SELECT count(*) n FROM Result').get().n).toBe(0);
         expect(current.prepare('SELECT count(*) n FROM AuditLog').get().n).toBe(0);
     } finally { current.close(); }

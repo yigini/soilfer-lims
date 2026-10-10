@@ -293,3 +293,18 @@ AMBIGUOUS_NUMBER. That fixture now supplies lab-syntax text for its positive
 case, and an additional whole-commit zero-write test retains the ambiguous
 original string. No shared parser or existing assertion is changed; the failed
 log and all three protected database hashes are retained.
+
+At d38fa819 all XLSX/CSV/QC/unit/scanner suites pass. The eight-file group
+passes295/296 tests (47.004s); the additional schema shape probe used incorrect
+table names. It now names the actual main SampleAmendmentAttempt (7 fields)
+and ReportAmendmentWithdrawal (4 fields). All existing installer assertions
+passed against both retained89 and current92-model literals. Logs are retained;
+no installer/source/oracle or existing assertion is weakened.
+
+The full ICP acceptance is added as an actual owned run/preview/commit test:
+40 real samples,160 WorkItems under four independently resolved synthetic
+analyte rules, six native QC positions (two blanks/four LRM) bound to a genuine
+owned lab-assigned lot through existing reference owners, plus one unknown ID.
+It requires160 exact raw drafts/24 pending observations, complete source receipt,
+zero Results/evaluations/NCR/attempt additions and unchanged original workflow,
+reference values and audit rows. It is pending validation; no production counts.
