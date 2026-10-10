@@ -24,4 +24,30 @@ The startup gate now checks the exact complete installer classification read-onl
 
 At 5feeeaa, all thirteen tests in the first-fill file pass (25.340s), using a read-only backup of the empty owned normal-harness database. The new integration case runs actual original recording/submission/review/approval/publication, separate scientific request/authorisation, replacement recording/submission/review/reapproval and report generation through actual mounted routes. It verifies the new revision reserves the old base, the new approval and selected source are frozen, and the withdrawn report content/fields, public link, accepted parent, old reported selections and immutable binding remain unchanged. Public JSON/PDF refuse the withdrawn original, while internal history reads retain its full content and amendment UUID. The first run passed twelve tests and caught a new assertion expecting numbering metadata in the compact generation response; the final assertion reads the actual persisted Report row, with the original endpoint behavior unchanged. Logs and owned backups are retained. These focused counts are separate, not a whole-suite aggregate.
 
-Still unfinished: full server/build/lint/CI, actual Docker readiness, PR and audit. Amendment numbering beyond the full retained UUID remains deferred; public replacement navigation belongs to #211. No PR readiness, merge, deployment or post-deploy claim.
+The frozen normal full Windows run at 75c91ba completed with 317 passing and
+seven failing suites; 4,867 passing and 17 failing tests, 4,884 total, zero skipped
+(2,282.374 s). Its Help-only template digest remained unchanged. Four files
+omitted the real new installer in retained startup/workspace fixtures. Current
+fixtures install it through its actual classified owner, preserving the literal
+historical schemas, factory authority and all existing assertions. The candidate
+release file passes 26/26 tests (8.999 s). The five-file compatibility run passed
+268 tests and caught one bootstrap prerequisite still being installed inside its
+unchanged byte-preserving startup check; the actual installation now precedes
+beforeSha. The complete corrected bootstrap file passes 10/10 (34.596 s).
+
+The full-run owned checkout also lacked client/dist, so reception and actual
+Chromium checks could not load the client. A review test timed out and caused
+later nested-isolation failures. The unchanged review file passes all ten tests
+separately at ef7a463 (10.259 s). The additional focused run passed 14/17 tests:
+the remaining browser and reception 404s came from Express send's default
+dotfile-path handling of the source checkout under .codex. Its client build
+exists, but send refuses that hidden absolute path. The final owned checkout is
+outside .codex and must build its own client before rerunning the unchanged
+tests; no production serving behavior or test timeout is altered. Failed logs,
+browser artifacts and owned copies are retained. Source client build passes
+(19.15 s), and lint passes (zero errors, fourteen existing warnings).
+
+Still unfinished: the corrected complete normal server run, exact-head CI,
+actual Docker readiness, PR and audit. Amendment numbering beyond the full
+retained UUID remains deferred; public replacement navigation belongs to #211.
+No PR readiness, merge, deployment or post-deploy claim.
