@@ -5,7 +5,9 @@ const Database = require('better-sqlite3');
 const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
 const { fingerprintRows, fingerprintRetainedTables } = require('../../services/retainedRowsFingerprint');
 const legacyHash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
-const exclusions = [['NonconformityReport', '_schema_migrations'], ['ReportedValueSelection']];
+const exclusions = [['NonconformityReport', '_schema_migrations'], ['ReportedValueSelection'],
+    ['BatchReagentLot', '_schema_migrations'], ['ResultOverrideRequest', '_schema_migrations'],
+    ['CrossCheckEvaluation', '_schema_migrations']];
 const owned = [];
 
 // The previous installer algorithm is retained only as a test oracle.
@@ -25,6 +27,11 @@ function synthetic(count = 0) {
         + 'CREATE TABLE ProficiencyRound(id TEXT, outcome TEXT);'
         + 'CREATE TABLE NonconformityReport(id TEXT); CREATE TABLE _schema_migrations(id TEXT, details TEXT);'
         + 'CREATE TABLE ReportedValueSelection(id TEXT);');
+    db.exec('CREATE TABLE WorkAttempt(id TEXT, metadata TEXT);'
+        + 'CREATE TABLE BatchReagentLot(id TEXT); CREATE TABLE ResultOverrideRequest(id TEXT);'
+        + 'CREATE TABLE CrossCheckEvaluation(id TEXT);');
+    db.prepare('INSERT INTO WorkAttempt VALUES (?,?)').run('z-last', 'retained');
+    db.prepare('INSERT INTO WorkAttempt VALUES (?,?)').run('a-first', 'retained');
     db.prepare('INSERT INTO "10" VALUES (?,?)').run('numeric property order', 7);
     db.prepare('INSERT INTO ProficiencyRound VALUES (?,?)').run('round-old', 'UNSATISFACTORY');
     db.prepare('INSERT INTO _schema_migrations VALUES (?,?)').run('historical', '{"retained":true}');
@@ -74,7 +81,23 @@ test('PRE_193 virtual NULL column matches the old expected-row hash without chan
             transformRow: (table, row) => table === 'ProficiencyRound' ? { ...row, nonconformityId: null } : row }))
             .toBe(legacyHash(expected));
         expect(legacyRows(db, exclusions[0])).toEqual(before);
-        expect(db.prepare('SELECT total_changes() n').get().n).toBe(5);
+        expect(db.prepare('SELECT total_changes() n').get().n).toBe(7);
+    } finally { db.close(); }
+});
+
+test('repeat installer explicit table/id order and virtual NULL fields match its original bytes', () => {
+    const { db } = synthetic(2);
+    try {
+        const tableNames = ['WorkAttempt', '_schema_migrations', 'ProficiencyRound'];
+        const before = Object.fromEntries(tableNames.map(table => [table,
+            db.prepare('SELECT * FROM "'+table+'" ORDER BY id').all()]));
+        expect(fingerprintRetainedTables(db, { tableNames, orderBy: 'id' })).toBe(legacyHash(before));
+        const expected = { ...before, WorkAttempt: before.WorkAttempt.map(row => ({ ...row, parentAttemptId: null, note: null })) };
+        expect(fingerprintRetainedTables(db, { tableNames, orderBy: 'id',
+            transformRow: (table, row) => table === 'WorkAttempt' ? { ...row, parentAttemptId: null, note: null } : row }))
+            .toBe(legacyHash(expected));
+        expect(Object.fromEntries(tableNames.map(table => [table, db.prepare('SELECT * FROM "'+table+'" ORDER BY id').all()])))
+            .toEqual(before);
     } finally { db.close(); }
 });
 

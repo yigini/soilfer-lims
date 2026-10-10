@@ -6,6 +6,7 @@ const { classifyWorkAttemptContract } = require('./install_work_attempt_contract
 const { MARKER, SUCCESSORS, MEMBERSHIP_SUCCESSOR, repeatReleaseObjects, repeatSources, inspectRepeatColumns,
     assertRepeatInstallationEvidence, normalize, fingerprint } = require('../services/workRepeatInstallationEvidence');
 const { planInterimRepeatReasons, inventorySubmittedRecordedOwners } = require('../services/workRepeatBackfillPlan');
+const { fingerprintRetainedTables } = require('../services/retainedRowsFingerprint');
 const fail = (code, message, details = {}) => Object.assign(new Error(message), { code, totalChanges: 0, ...details });
 function classify(db) {
     const qc=require('../services/qcRunSchemaService').classifyQcRunSchema(db,require('../services/qcRunMigrationSource').loadQcRunMigrationSource());
@@ -36,10 +37,10 @@ function classify(db) {
             receiptSha256: predecessor.receipt.receiptSha256 }, plan: planInterimRepeatReasons(db),
         releaseInventory: inventorySubmittedRecordedOwners(db), bootstrapRebuild: [] };
 }
-function retainedRows(db) {
-    return Object.fromEntries(['WorkAttempt', 'WorkItem', 'Result', 'ReviewDecision', 'AuditLog', '_schema_migrations',
-        'Batch','BatchAnalyte','BatchPosition','BatchPositionWorkItem','BatchPositionReference','QcMeasurement','QcEvaluation','BatchDisposition','BatchEvent']
-        .map(table => [table, db.prepare(`SELECT * FROM "${table}" ORDER BY id`).all()]));
+function retainedRows(db, transformRow) {
+    return fingerprintRetainedTables(db, { tableNames: ['WorkAttempt', 'WorkItem', 'Result', 'ReviewDecision', 'AuditLog', '_schema_migrations',
+        'Batch','BatchAnalyte','BatchPosition','BatchPositionWorkItem','BatchPositionReference','QcMeasurement','QcEvaluation','BatchDisposition','BatchEvent'],
+        orderBy: 'id', transformRow });
 }
 function installWorkRepeatContract({ dbPath, apply = false } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('WORK_REPEAT_DATABASE_REQUIRED', 'An explicit database path is required.');
@@ -57,12 +58,13 @@ function installWorkRepeatContract({ dbPath, apply = false } = {}) {
             const current = classify(db);
             if (current.classification === 'COMPLETE') return { ...current, mode: 'NO_OP', totalChanges: 0 };
             const rows = retainedRows(db);
+            const expected = current.classification === 'PRE_191' ? retainedRows(db, (table, row) =>
+                table === 'WorkAttempt' ? { ...row, parentAttemptId: null, note: null } : row) : rows;
             if (current.classification === 'PRE_191') db.exec(source.schemaSql);
             db.exec(source.guardsSql);
             const afterRows = retainedRows(db);
-            const expected = { ...rows, WorkAttempt: rows.WorkAttempt.map(row => current.classification === 'PRE_191' ? { ...row, parentAttemptId: null, note: null } : row) };
-            if (fingerprint(afterRows) !== fingerprint(expected)) throw fail('WORK_REPEAT_PRESERVATION_REFUSED', 'Repeat installation changed retained evidence.');
-            const receipt = { sources: current.sources, originalRowsSha256: fingerprint(rows),
+            if (afterRows !== expected) throw fail('WORK_REPEAT_PRESERVATION_REFUSED', 'Repeat installation changed retained evidence.');
+            const receipt = { sources: current.sources, originalRowsSha256: rows,
                 ...current.plan, originalRowsAndFieldsPreserved: true, newAttemptCount: 0, linkedResultCount: 0 };
             receipt.receiptSha256 = fingerprint(receipt);
             db.prepare('INSERT INTO "_schema_migrations"(id,details) VALUES (?,?)').run(MARKER, JSON.stringify(receipt));
