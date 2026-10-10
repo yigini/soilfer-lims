@@ -12,6 +12,7 @@ import WorkItemsTable from '../components/sample/WorkItemsTable';
 import RepeatReasonFields from '../components/sample/RepeatReasonFields';
 import ReportedValueReview from '../components/sample/ReportedValueReview';
 import CalculationEvidence from '../components/sample/CalculationEvidence';
+import CrossCheckPanel from '../components/sample/CrossCheckPanel';
 import FieldMetadataCard from '../components/sample/FieldMetadataCard';
 import {ProfileReferenceSummary} from '../components/reception/ProfileReferenceFields';
 import ProfileCorrectionDialog from '../components/sample/ProfileCorrectionDialog';
@@ -1269,6 +1270,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                 )}
                             </div>
                         )}
+                        {hasPermission?.('APPROVE_RESULTS') && <CrossCheckPanel sampleId={id} reviewVersion={workspace}
+                            token={token} t={t} canReview />}
                         {hasPermission?.('APPROVE_RESULTS') && workItems.filter(item => item.status === 'ACCEPTED').map(item =>
                             <div key={item.id} className="bg-sf-surface rounded-xl p-4 border border-sf-divider">
                                 <h3 className="font-bold text-sm">{getAnalysisDisplayName(item.analysis, item.analysisName)}</h3>

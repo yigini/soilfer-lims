@@ -1010,7 +1010,13 @@
       "pt_zScoreLimits": "Limites du score z des essais d’aptitude",
       "qc_reviewedTranscriptionCorrectionEnabled": "Autoriser la correction révisée des erreurs de transcription du CQ échoué sans décision",
       "report_uncertaintyMode": "Rapporter l’incertitude élargie",
-      "report_uncertaintyCoverageFactor": "Facteur de couverture de l’incertitude"
+      "report_uncertaintyCoverageFactor": "Facteur de couverture de l’incertitude",
+      "crossCheck_basesCecFactor": "Facteur maximal des bases échangeables / CEC",
+      "crossCheck_baseSaturationMaxPct": "Saturation maximale en bases (%)",
+      "crossCheck_textureClosureTolerancePct": "Tolérance de fermeture de la texture (%)",
+      "crossCheck_cnMin": "Rapport C:N minimal",
+      "crossCheck_cnMax": "Rapport C:N maximal",
+      "crossCheck_carbonatePhMin": "pH minimal dans l’eau pour les carbonates"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -1806,5 +1812,74 @@
       "CONSUMED": "Utilisée pour l’enregistrement"
     },
     "loadFailed": "Impossible de charger les demandes de dérogation."
+  },
+  "crossCheck": {
+    "title": "Plausibilité entre paramètres",
+    "advisory": "Ces contrôles sont indicatifs. Le contrôle de texture existant est présenté séparément.",
+    "check": "Contrôle",
+    "outcome": "Résultat",
+    "evidence": "Éléments probants",
+    "policyVersion": "Version de politique {{version}}",
+    "sources": "Résultats sources",
+    "selection": "Sélection rapportée",
+    "missingInputs": "Entrées absentes",
+    "current": "Sélections rapportées actuelles",
+    "atSubmission": "Lors de la soumission",
+    "beforeSelection": "Avant la sélection d’une valeur rapportée, les contrôles conservés de la soumission sont affichés.",
+    "noSubmission": "Aucun contrôle de soumission enregistré.",
+    "existingGate": "Contrôle de texture existant sur les observations actuelles",
+    "gateNotEvaluated": "Non évalué",
+    "gateBlocks": "Bloque la soumission",
+    "gatePasses": "Conforme",
+    "lowerBound": "Les bases mesurées forment une borne inférieure ; le sodium est absent.",
+    "reload": "Recharger",
+    "loading": "Chargement des contrôles…",
+    "rules": {
+      "TEXTURE_CLOSURE": "Fermeture de texture",
+      "BASES_CEC": "Bases échangeables / CEC",
+      "BASE_SATURATION": "Saturation en bases",
+      "CN_RATIO": "Rapport C:N",
+      "CACO3_PH": "Carbonate / pH dans l’eau",
+      "PH_KCL_WATER": "pH dans KCl / pH dans l’eau",
+      "PH_CACL2_WATER": "pH dans CaCl₂ / pH dans l’eau"
+    },
+    "outcomes": {
+      "PASS": "Conforme",
+      "FLAGGED": "Signalé",
+      "NOT_EVALUATED": "Non évalué"
+    },
+    "flags": {
+      "TEXTURE_CLOSURE": "La fermeture de texture dépasse la tolérance du laboratoire.",
+      "CROSS_CHECK_BASES_GT_CEC": "Les bases échangeables dépassent le facteur CEC du laboratoire.",
+      "CROSS_CHECK_BASE_SAT_GT_MAX": "La saturation en bases dépasse la limite du laboratoire.",
+      "CROSS_CHECK_CN_OUT_OF_RANGE": "Le rapport C:N est hors des limites du laboratoire.",
+      "CROSS_CHECK_CACO3_LOW_PH": "Le carbonate est positif sous la limite de pH dans l’eau du laboratoire.",
+      "CROSS_CHECK_PH_SALT_GE_WATER": "Le pH dans le sel n’est pas inférieur au pH dans l’eau."
+    },
+    "reasons": {
+      "INPUT_MISSING": "Une entrée est absente.",
+      "INPUT_NOT_REPORTABLE": "Une entrée ne peut pas être rapportée.",
+      "INPUT_NON_NUMERIC": "Une entrée n’a pas de valeur numérique finie.",
+      "INPUT_CENSORED": "Une entrée est censurée.",
+      "MULTIPLE_CANDIDATES": "Une entrée a plusieurs candidats actuels.",
+      "UNIT_MISMATCH": "Une unité est absente, incompatible ou inconnue.",
+      "BASIS_MISMATCH": "Les bases enregistrées sont absentes ou différentes.",
+      "DENOMINATOR_NOT_POSITIVE": "Le dénominateur est nul ou négatif."
+    },
+    "errors": {
+      "CROSS_CHECK_FORBIDDEN": "Vous ne pouvez pas examiner ces contrôles.",
+      "CROSS_CHECK_LAB_REQUIRED": "Le laboratoire de l’échantillon est requis.",
+      "CROSS_CHECK_EVIDENCE_INVALID": "Les éléments probants conservés sont illisibles.",
+      "CROSS_CHECK_EVIDENCE_WRITE_FAILED": "Les éléments probants de soumission n’ont pas pu être conservés.",
+      "CROSS_CHECK_POLICY_REQUIRED": "Des limites valides du laboratoire sont requises.",
+      "CROSS_CHECK_INPUT_INVALID": "Les entrées conservées sont invalides.",
+      "CROSS_CHECK_READ_FAILED": "Impossible de charger les contrôles.",
+      "SAMPLE_NOT_FOUND": "Échantillon introuvable.",
+      "ACCESS_DENIED_LAB": "L’échantillon est hors du périmètre de votre laboratoire.",
+      "CROSS_CHECK_SUBMISSION_REQUIRED": "Les éléments probants nécessitent la soumission correspondante."
+    },
+    "unavailable": {
+      "CROSS_CHECK_LAB_REQUIRED": "Vérifications croisées indisponibles : aucun laboratoire enregistré pour cet échantillon"
+    }
   }
 }

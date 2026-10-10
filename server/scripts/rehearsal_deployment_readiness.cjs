@@ -1240,6 +1240,35 @@ async function runSuite() {
     if(!selectionProof.retainedRowsPreserved)throw Error('192 rehearsal retained-data proof missing');
     console.log('  ✓ Owned #191 COMPLETE → #192 PRE_192 dry-run → COMPLETE; retained history unchanged, new selections 0, NO_OP writes 0');
 
+    // Keep the direct PRE_201 rehearsal before the full target entrypoint,
+    // which itself installs #201. The subsequent #199 scenario still uses
+    // the unmodified default entrypoint and retains this new receipt.
+    // Explicit installer-module rehearsal; command arguments bypass the
+    // default entrypoint. Default entrypoint health is exercised separately.
+    const crossCheckProofOutput=cp.execFileSync('docker',['run','--rm','-v',`${repeatProofVolume}:/owned-201`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const installer=require('./scripts/install_cross_check_evaluations'),dbPath='/owned-201/dev.db';
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const fail=message=>{throw Error(message)};
+         const snapshot=()=>{const db=new Database(dbPath,{readonly:true,fileMustExist:true});try{
+           const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name<>'CrossCheckEvaluation' ORDER BY name").all();
+           return {objects:db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' AND tbl_name<>'CrossCheckEvaluation' ORDER BY type,name").all(),
+             rows:Object.fromEntries(names.map(({name})=>[name,db.prepare('SELECT * FROM "'+name.replaceAll('"','""')+'" ORDER BY rowid').all()
+               .filter(row=>name!=='_schema_migrations'||row.id!=='201_cross_check_evaluations')]))};
+         }finally{db.close()}};
+         const before=hash(),retained=JSON.stringify(snapshot()),dry=installer.installCrossCheckEvaluations({dbPath});
+         if(dry.classification!=='PRE_201'||dry.totalChanges!==0||dry.backfilledCount!==0||hash()!==before)fail('201 dry-run differs');
+         const applied=installer.installCrossCheckEvaluations({dbPath,apply:true}),ready=installer.assertCrossCheckStartupReady(dbPath);
+         if(applied.classification!=='COMPLETE_201'||applied.newEvaluationCount!==0||applied.backfilledCount!==0||ready.totalChanges!==0||JSON.stringify(snapshot())!==retained)fail('201 retained evidence differs');
+         const installed=hash(),again=installer.installCrossCheckEvaluations({dbPath,apply:true});
+         if(again.mode!=='NO_OP'||again.totalChanges!==0||hash()!==installed||JSON.stringify(snapshot())!==retained)fail('201 repeat installation changed evidence or bytes');
+         console.log(JSON.stringify({scenario:'cross-check-installer-pre201',invocation:'DIRECT_INSTALLER_MODULE',dry,applied,ready,again,retainedRowsAndObjectsPreserved:true,dryRunBytesPreserved:true,noOpBytesPreserved:true}));`
+    ],{encoding:'utf8'}).trim();
+    const crossCheckProof=JSON.parse(crossCheckProofOutput);
+    if(!crossCheckProof.retainedRowsAndObjectsPreserved||!crossCheckProof.noOpBytesPreserved)throw Error('201 rehearsal preservation proof missing');
+    console.log('  ✓ cross-check-installer-pre201: direct installer PRE_201 dry-run → COMPLETE_201; retained rows/objects/receipts preserved, evidence/backfill0, repeat NO_OP writes0/bytes preserved');
+    console.log(JSON.stringify({crossCheckInstallerProof:crossCheckProof}));
+
     // The supported baseline predates #272. Use its shipped additive owner
     // before the #199 prerequisite check; never preinstall calculations here.
     const rawInputProofOutput = cp.execFileSync('docker', ['run', '--rm',

@@ -52,9 +52,12 @@ try {
     console.log(JSON.stringify({event:'RESULT_OVERRIDE_STARTUP_READY',...overrideRequestsReady}));
     const calculationsReady=require('./scripts/install_calculation_templates').assertCalculationStartupReady(dbPath);
     console.log(JSON.stringify({event:'CALCULATION_STARTUP_READY',...calculationsReady}));
+    const crossChecksReady=require('./scripts/install_cross_check_evaluations').assertCrossCheckStartupReady(dbPath);
+    console.log(JSON.stringify({event:'CROSS_CHECK_STARTUP_READY',...crossChecksReady}));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('QC_GATE_SCOPE_') ? 'Keep the lab stopped and follow docs/audit/2.4-qc-gate.md.'
+            : error.code?.startsWith('CROSS_CHECK_') ? 'Keep the lab stopped and follow docs/audit/201-cross-parameter-checks.md.'
             : error.code?.startsWith('OVERRIDE_') ? 'Keep the lab stopped and follow docs/audit/197-value-validation.md.'
             : error.code?.startsWith('CALC_') || error.code?.startsWith('CALIBRATION_') || error.code === 'UNIT_CATALOGUE_CONFLICT' ? 'Keep the lab stopped and follow docs/audit/199-calculation-templates.md.'
             : error.code?.startsWith('REAGENT_LOT_') ? 'Keep the lab stopped and follow docs/audit/194-run-first.md.'

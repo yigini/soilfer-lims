@@ -75,6 +75,7 @@ module.exports = async function globalSetup() {
         require('../scripts/install_batch_reagent_lots').installBatchReagentLots({dbPath:testDbPath,apply:true});
         require('../scripts/install_result_override_requests').installResultOverrideRequests({dbPath:testDbPath,apply:true});
         require('../scripts/install_calculation_templates').installCalculationTemplates({dbPath:testDbPath,apply:true});
+        require('../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({dbPath:testDbPath,apply:true});
     }
 
     process.env.DATABASE_PATH = testDbPath;

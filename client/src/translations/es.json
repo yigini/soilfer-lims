@@ -2576,7 +2576,13 @@
       "pt_zScoreLimits": "Límites de puntuación z de aptitud",
       "qc_reviewedTranscriptionCorrectionEnabled": "Permitir la corrección revisada de errores de transcripción en CC fallido sin disposición",
       "report_uncertaintyMode": "Informar incertidumbre expandida",
-      "report_uncertaintyCoverageFactor": "Factor de cobertura de incertidumbre"
+      "report_uncertaintyCoverageFactor": "Factor de cobertura de incertidumbre",
+      "crossCheck_basesCecFactor": "Factor máximo de bases intercambiables / CIC",
+      "crossCheck_baseSaturationMaxPct": "Saturación máxima de bases (%)",
+      "crossCheck_textureClosureTolerancePct": "Tolerancia del cierre de textura (%)",
+      "crossCheck_cnMin": "Relación C:N mínima",
+      "crossCheck_cnMax": "Relación C:N máxima",
+      "crossCheck_carbonatePhMin": "pH mínimo en agua para carbonatos"
     },
     "title": "Políticas",
     "yes": "Sí",
@@ -3394,5 +3400,74 @@
       "CONSUMED": "Usada para el registro"
     },
     "loadFailed": "No se pudieron cargar las solicitudes de excepción."
+  },
+  "crossCheck": {
+    "title": "Plausibilidad entre parámetros",
+    "advisory": "Estas comprobaciones son orientativas. La condición de textura existente se muestra por separado.",
+    "check": "Comprobación",
+    "outcome": "Resultado",
+    "evidence": "Evidencia",
+    "policyVersion": "Versión de política {{version}}",
+    "sources": "Resultados de origen",
+    "selection": "Selección informada",
+    "missingInputs": "Entradas ausentes",
+    "current": "Selecciones informadas actuales",
+    "atSubmission": "En el envío",
+    "beforeSelection": "Antes de seleccionar un valor informado, se muestran las comprobaciones conservadas del envío.",
+    "noSubmission": "No se registraron comprobaciones del envío.",
+    "existingGate": "Condición de textura existente sobre observaciones actuales",
+    "gateNotEvaluated": "No evaluada",
+    "gateBlocks": "Bloquea el envío",
+    "gatePasses": "Cumple",
+    "lowerBound": "Las bases medidas son un límite inferior; falta el sodio.",
+    "reload": "Recargar",
+    "loading": "Cargando comprobaciones…",
+    "rules": {
+      "TEXTURE_CLOSURE": "Cierre de textura",
+      "BASES_CEC": "Bases intercambiables / CIC",
+      "BASE_SATURATION": "Saturación de bases",
+      "CN_RATIO": "Relación C:N",
+      "CACO3_PH": "Carbonato / pH en agua",
+      "PH_KCL_WATER": "pH en KCl / pH en agua",
+      "PH_CACL2_WATER": "pH en CaCl₂ / pH en agua"
+    },
+    "outcomes": {
+      "PASS": "Cumple",
+      "FLAGGED": "Señalado",
+      "NOT_EVALUATED": "No evaluado"
+    },
+    "flags": {
+      "TEXTURE_CLOSURE": "El cierre de textura excede la tolerancia del laboratorio.",
+      "CROSS_CHECK_BASES_GT_CEC": "Las bases intercambiables superan el factor de CIC del laboratorio.",
+      "CROSS_CHECK_BASE_SAT_GT_MAX": "La saturación de bases supera el límite del laboratorio.",
+      "CROSS_CHECK_CN_OUT_OF_RANGE": "La relación C:N está fuera de los límites del laboratorio.",
+      "CROSS_CHECK_CACO3_LOW_PH": "El carbonato es positivo por debajo del límite de pH en agua del laboratorio.",
+      "CROSS_CHECK_PH_SALT_GE_WATER": "El pH en sal no es inferior al pH en agua."
+    },
+    "reasons": {
+      "INPUT_MISSING": "Falta una entrada.",
+      "INPUT_NOT_REPORTABLE": "Una entrada no es informable.",
+      "INPUT_NON_NUMERIC": "Una entrada carece de valor numérico finito.",
+      "INPUT_CENSORED": "Una entrada está censurada.",
+      "MULTIPLE_CANDIDATES": "Una entrada tiene varios candidatos actuales.",
+      "UNIT_MISMATCH": "La unidad de una entrada falta, es incompatible o desconocida.",
+      "BASIS_MISMATCH": "Las bases registradas faltan o difieren.",
+      "DENOMINATOR_NOT_POSITIVE": "El denominador es cero o negativo."
+    },
+    "errors": {
+      "CROSS_CHECK_FORBIDDEN": "No puede revisar estas comprobaciones.",
+      "CROSS_CHECK_LAB_REQUIRED": "Se requiere el laboratorio de la muestra.",
+      "CROSS_CHECK_EVIDENCE_INVALID": "No se pudo leer la evidencia conservada.",
+      "CROSS_CHECK_EVIDENCE_WRITE_FAILED": "No se pudo conservar la evidencia de comprobación del envío.",
+      "CROSS_CHECK_POLICY_REQUIRED": "Se requieren límites válidos del laboratorio.",
+      "CROSS_CHECK_INPUT_INVALID": "Las entradas conservadas no son válidas.",
+      "CROSS_CHECK_READ_FAILED": "No se pudieron cargar las comprobaciones.",
+      "SAMPLE_NOT_FOUND": "Muestra no encontrada.",
+      "ACCESS_DENIED_LAB": "La muestra está fuera del ámbito de su laboratorio.",
+      "CROSS_CHECK_SUBMISSION_REQUIRED": "La evidencia de comprobación requiere el envío correspondiente."
+    },
+    "unavailable": {
+      "CROSS_CHECK_LAB_REQUIRED": "Comprobaciones cruzadas no disponibles: la muestra no tiene un laboratorio registrado"
+    }
   }
 }

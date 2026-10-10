@@ -2576,7 +2576,13 @@
       "pt_zScoreLimits": "Limites do escore z de proficiência",
       "qc_reviewedTranscriptionCorrectionEnabled": "Permitir correção revisada de erros de transcrição em CQ reprovado sem decisão",
       "report_uncertaintyMode": "Informar incerteza expandida",
-      "report_uncertaintyCoverageFactor": "Fator de abrangência da incerteza"
+      "report_uncertaintyCoverageFactor": "Fator de abrangência da incerteza",
+      "crossCheck_basesCecFactor": "Fator máximo de bases trocáveis / CTC",
+      "crossCheck_baseSaturationMaxPct": "Saturação máxima por bases (%)",
+      "crossCheck_textureClosureTolerancePct": "Tolerância do fechamento da textura (%)",
+      "crossCheck_cnMin": "Relação C:N mínima",
+      "crossCheck_cnMax": "Relação C:N máxima",
+      "crossCheck_carbonatePhMin": "pH mínimo em água para carbonatos"
     },
     "title": "Políticas",
     "yes": "Sim",
@@ -3394,5 +3400,74 @@
       "CONSUMED": "Usada para o registo"
     },
     "loadFailed": "Não foi possível carregar as solicitações de exceção."
+  },
+  "crossCheck": {
+    "title": "Plausibilidade entre parâmetros",
+    "advisory": "Estas verificações são consultivas. O controle de textura existente é mostrado separadamente.",
+    "check": "Verificação",
+    "outcome": "Resultado",
+    "evidence": "Evidência",
+    "policyVersion": "Versão da política {{version}}",
+    "sources": "Resultados de origem",
+    "selection": "Seleção reportada",
+    "missingInputs": "Entradas ausentes",
+    "current": "Seleções reportadas atuais",
+    "atSubmission": "No envio",
+    "beforeSelection": "Antes de selecionar um valor reportado, são mostradas as verificações preservadas do envio.",
+    "noSubmission": "Nenhuma verificação do envio foi registrada.",
+    "existingGate": "Controle de textura existente nas observações atuais",
+    "gateNotEvaluated": "Não avaliado",
+    "gateBlocks": "Bloqueia o envio",
+    "gatePasses": "Conforme",
+    "lowerBound": "As bases medidas formam um limite inferior; falta o sódio.",
+    "reload": "Recarregar",
+    "loading": "Carregando verificações…",
+    "rules": {
+      "TEXTURE_CLOSURE": "Fechamento da textura",
+      "BASES_CEC": "Bases trocáveis / CTC",
+      "BASE_SATURATION": "Saturação por bases",
+      "CN_RATIO": "Relação C:N",
+      "CACO3_PH": "Carbonato / pH em água",
+      "PH_KCL_WATER": "pH em KCl / pH em água",
+      "PH_CACL2_WATER": "pH em CaCl₂ / pH em água"
+    },
+    "outcomes": {
+      "PASS": "Conforme",
+      "FLAGGED": "Sinalizado",
+      "NOT_EVALUATED": "Não avaliado"
+    },
+    "flags": {
+      "TEXTURE_CLOSURE": "O fechamento da textura excede a tolerância do laboratório.",
+      "CROSS_CHECK_BASES_GT_CEC": "As bases trocáveis excedem o fator de CTC do laboratório.",
+      "CROSS_CHECK_BASE_SAT_GT_MAX": "A saturação por bases excede o limite do laboratório.",
+      "CROSS_CHECK_CN_OUT_OF_RANGE": "A relação C:N está fora dos limites do laboratório.",
+      "CROSS_CHECK_CACO3_LOW_PH": "O carbonato é positivo abaixo do limite de pH em água do laboratório.",
+      "CROSS_CHECK_PH_SALT_GE_WATER": "O pH em sal não é inferior ao pH em água."
+    },
+    "reasons": {
+      "INPUT_MISSING": "Uma entrada está ausente.",
+      "INPUT_NOT_REPORTABLE": "Uma entrada não é reportável.",
+      "INPUT_NON_NUMERIC": "Uma entrada não tem valor numérico finito.",
+      "INPUT_CENSORED": "Uma entrada é censurada.",
+      "MULTIPLE_CANDIDATES": "Uma entrada tem vários candidatos atuais.",
+      "UNIT_MISMATCH": "Uma unidade está ausente, incompatível ou desconhecida.",
+      "BASIS_MISMATCH": "As bases registradas estão ausentes ou diferem.",
+      "DENOMINATOR_NOT_POSITIVE": "O denominador é zero ou negativo."
+    },
+    "errors": {
+      "CROSS_CHECK_FORBIDDEN": "Você não pode revisar estas verificações.",
+      "CROSS_CHECK_LAB_REQUIRED": "É necessário o laboratório da amostra.",
+      "CROSS_CHECK_EVIDENCE_INVALID": "Não foi possível ler a evidência preservada.",
+      "CROSS_CHECK_EVIDENCE_WRITE_FAILED": "Não foi possível preservar a evidência de verificação do envio.",
+      "CROSS_CHECK_POLICY_REQUIRED": "São necessários limites válidos do laboratório.",
+      "CROSS_CHECK_INPUT_INVALID": "As entradas preservadas são inválidas.",
+      "CROSS_CHECK_READ_FAILED": "Não foi possível carregar as verificações.",
+      "SAMPLE_NOT_FOUND": "Amostra não encontrada.",
+      "ACCESS_DENIED_LAB": "A amostra está fora do âmbito do seu laboratório.",
+      "CROSS_CHECK_SUBMISSION_REQUIRED": "A evidência de verificação requer o envio correspondente."
+    },
+    "unavailable": {
+      "CROSS_CHECK_LAB_REQUIRED": "Verificações cruzadas indisponíveis: a amostra não tem um laboratório registrado"
+    }
   }
 }

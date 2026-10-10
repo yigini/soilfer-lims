@@ -31,6 +31,11 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // #201/6089928620: inspect the exact additive evidence assets, never exempt writes.
+    Object.freeze({ functionName: 'loadCrossCheckMigrationSource', loader: 'services/crossCheckMigrationSource.js',
+        loaderSha256: 'a9cbb4f46ca24569593b0e7d84bf2d9ac999b428b89f9d5c050023982587425a',
+        directory: '20261010000100_cross_check_evaluation', sqlSha256: '7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4',
+        boundary: '-- Contract guards', assets: [{ file: 'fresh-prisma-tables.json', sha256: '97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0' }] }),
     // Inspect both exact #197 assets. Existing writer restrictions are unchanged.
     Object.freeze({functionName:'loadResultOverrideMigrationSource',loader:'services/resultOverrideMigrationSource.js',
         loaderSha256:'f59d8614213b1949216d172fd32589da7f1c733c2a63ae2b23a18f41f8365026',
@@ -165,6 +170,13 @@ const RAW_INPUT_FIXTURE = Object.freeze({
     ddlSha256: '6fce034bc43633d55431423ccad8a0e1e81dcdc98ba9b4174c112bef3e672983',
     caller: 'tests/contracts/audit_1_5_raw_input_install.test.js'
 });
+const CROSS_CHECK_FIXTURE = Object.freeze({
+    file: 'tests/helpers/crossCheckHistoricalFixture.js', exportName: 'createPre201CrossCheckFixture',
+    sha256: '0ff873e55ee7ed52725eb30c5b7a58d2038fac6e6742201f2cc581939b79dbf2',
+    ddl: 'tests/helpers/fixtures/pre201_full_application_schema.sql',
+    ddlSha256: '6ae0cc1d26dc3ba301d435d3f332d432a9765c3d30b7fd0725aa119db6f8f622',
+    caller: 'tests/contracts/audit_4_8_cross_check_install.test.js'
+});
 
 function scanSource(source, filename, exceptions = []) {
     const violations = [];
@@ -181,6 +193,14 @@ function scanSource(source, filename, exceptions = []) {
         if (!validCalculationFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pinned #199 factory or pre-199 DDL digest differs.');
     }
     let validRawInputFixture = false;
+    let validCrossCheckFixture = false;
+    if (filename === CROSS_CHECK_FIXTURE.file) {
+        try {
+            validCrossCheckFixture = createHash('sha256').update(source).digest('hex') === CROSS_CHECK_FIXTURE.sha256 &&
+                createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', CROSS_CHECK_FIXTURE.ddl))).digest('hex') === CROSS_CHECK_FIXTURE.ddlSha256;
+        } catch { validCrossCheckFixture = false; }
+        if (!validCrossCheckFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The closed #201 factory or full pre-201 DDL differs.');
+    }
     if (filename === RAW_INPUT_FIXTURE.file) {
         try {
             validRawInputFixture = createHash('sha256').update(source).digest('hex') === RAW_INPUT_FIXTURE.sha256 &&
@@ -499,6 +519,9 @@ function scanSource(source, filename, exceptions = []) {
             if (createHash('sha256').update(fs.readFileSync(path.join(root, source.loader))).digest('hex') !== source.loaderSha256) return null;
             const bytes = fs.readFileSync(path.join(root, 'prisma/migrations', source.directory, 'migration.sql'));
             if (createHash('sha256').update(bytes).digest('hex') !== source.sqlSha256) return null;
+            for (const asset of source.assets || []) {
+                if (createHash('sha256').update(fs.readFileSync(path.join(root, 'prisma/migrations', source.directory, asset.file))).digest('hex') !== asset.sha256) return null;
+            }
             const sql = bytes.toString('utf8');
             if (source.wholeSql) return p.node.property.name === 'sql' ? sql : null;
             const marker = source.boundary || 'CREATE TRIGGER', boundary = sql.indexOf(marker);
@@ -632,6 +655,7 @@ function scanSource(source, filename, exceptions = []) {
         if (validCalculationFixture && name === CALCULATION_FIXTURE.exportName) return true;
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName) return true;
         if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName) return true;
+        if (validCrossCheckFixture && name === CROSS_CHECK_FIXTURE.exportName) return true;
         const removal = ['delete', 'deleteMany'].includes(operation);
         if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample', 'writeSampleHoldCompatibility'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
         if (filename === 'services/workItemStateService.js' && (['createWorkItem', 'transitionWorkItem'].includes(name) || removal && name === 'removeUnstartedWorkItems') && entities.every(entity => entity === 'WorkItem')) return true;
@@ -643,6 +667,7 @@ function scanSource(source, filename, exceptions = []) {
         if (validCalculationFixture && name === CALCULATION_FIXTURE.exportName && exportedNames.has(name)) return true;
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName && exportedNames.has(name)) return true;
         if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName && exportedNames.has(name)) return true;
+        if (validCrossCheckFixture && name === CROSS_CHECK_FIXTURE.exportName && exportedNames.has(name)) return true;
         return exportedNames.has(name) && exceptions.some(entry => entry.file === filename && entry.exportName === name);
     }
     function pinnedCorruptProjectConnection(p, sql) {
@@ -721,6 +746,9 @@ function scanSource(source, filename, exceptions = []) {
             if (resolved === CALCULATION_FIXTURE.file.replace(/\.js$/, '') && filename !== CALCULATION_FIXTURE.caller)
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             if (resolved === RAW_INPUT_FIXTURE.file.replace(/\.js$/, '') && filename !== RAW_INPUT_FIXTURE.caller) {
+                report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+            }
+            if (resolved === CROSS_CHECK_FIXTURE.file.replace(/\.js$/, '') && filename !== CROSS_CHECK_FIXTURE.caller) {
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             }
             if (filename.startsWith('tests/')) continue;

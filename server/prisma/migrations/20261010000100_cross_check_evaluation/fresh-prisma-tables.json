@@ -1,0 +1,3 @@
+{
+  "CrossCheckEvaluation": "CREATE TABLE \"CrossCheckEvaluation\" (\n    \"id\" TEXT NOT NULL PRIMARY KEY,\n    \"sampleId\" TEXT NOT NULL,\n    \"labId\" TEXT NOT NULL,\n    \"trigger\" TEXT NOT NULL,\n    \"ruleCode\" TEXT NOT NULL,\n    \"outcome\" TEXT NOT NULL,\n    \"reasonCode\" TEXT,\n    \"inputs\" TEXT NOT NULL,\n    \"thresholds\" TEXT NOT NULL,\n    \"evaluatedBy\" TEXT NOT NULL,\n    \"evaluatedAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    CONSTRAINT \"CrossCheckEvaluation_sampleId_fkey\" FOREIGN KEY (\"sampleId\") REFERENCES \"Sample\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"CrossCheckEvaluation_labId_fkey\" FOREIGN KEY (\"labId\") REFERENCES \"Lab\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n);"
+}

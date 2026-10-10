@@ -357,6 +357,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: targetDb, apply: true });
         require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: targetDb, apply: true });
         require('../../scripts/install_result_override_requests').installResultOverrideRequests({ dbPath: targetDb, apply: true });
+        require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({ dbPath: targetDb, apply: true });
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
@@ -400,6 +401,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_result_override_requests.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_calculation_templates.js',
                 `node "${path.join(serverDir, 'scripts/install_calculation_templates.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_cross_check_evaluations.js',
+                `node "${path.join(serverDir, 'scripts/install_cross_check_evaluations.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_raw_input.js',
                 `node "${path.join(serverDir, 'scripts/install_result_raw_input.js').replace(/\\/g, '/')}"`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
