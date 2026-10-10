@@ -315,6 +315,7 @@ app.use('/api/import', require('./routes/importRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes')); // auth handled internally (has public routes)
 app.use('/api/qc', verifyToken, require('./routes/qcRoutes'));
 app.use('/api/reference-materials', require('./routes/referenceMaterialRoutes'));
+app.use('/api/calculation-templates', require('./routes/calculationTemplateRoutes'));
 app.use('/api/pt', require('./routes/ptRoutes'));
 app.use('/api/submissions', verifyToken, require('./routes/submissionRoutes'));
 app.use('/api/reviews', verifyToken, require('./routes/reviewRoutes'));

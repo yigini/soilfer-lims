@@ -92,6 +92,7 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
                 if (!hasPermission(actor, 'APPROVE_RESULTS')) throw failure(403, 'QC_CLOSE_PERMISSION_REQUIRED', 'Only lab managers can close batches.');
                 const closable = targets.every(row => ['QC_PASS', 'QC_WARN', 'ACCEPTED_WITH_DEVIATION', 'CLOSED'].includes(row.status));
                 if (!closable) throw failure(payload ? 409 : 400, payload ? 'QC_BATCH_FAILED' : 'QC_RULE_VIOLATION', 'QC must be passed or accepted before closing.');
+                for (const row of targets) await require('./calibrationCurveService').assertRunCalibration(tx,batchId,actor,row.analysisCode);
                 const now = new Date();
                 for (const row of targets) {
                     if (row.status !== 'CLOSED') await tx.batchAnalyte.update({ where: { id: row.id }, data: { status: 'CLOSED' } });

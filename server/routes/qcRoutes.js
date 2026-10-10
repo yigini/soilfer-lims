@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const qcController = require('../controllers/qcController');
 const qcRuleController = require('../controllers/qcRuleController');
+const calculationController = require('../controllers/calculationTemplateController');
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 
 router.use(verifyToken);
@@ -18,6 +19,8 @@ router.post('/batches/:id/evaluate', checkPermission('CHANGE_STATUS'), qcControl
 router.post('/batches/:id/preview', checkPermission('CHANGE_STATUS'), qcController.previewBatch);
 router.post('/batches/:id/corrections', checkPermission('CHANGE_STATUS'), qcController.correctMeasurements);
 router.post('/batches/:id/start', checkPermission('CHANGE_STATUS'), qcController.startRun);
+router.get('/batches/:id/calibration-curves', checkPermission('VIEW_ANALYTICAL_RESULTS'), calculationController.listCurves);
+router.post('/batches/:id/calibration-curves', checkPermission('ENTER_RESULTS'), calculationController.recordCurve);
 router.post('/batches/:id/reagent-lots', checkPermission('CHANGE_STATUS'), qcController.linkReagentLot);
 router.get('/batches/:id/reagent-lot-options', checkPermission('CHANGE_STATUS'), qcController.availableReagentLots);
 router.post('/batches/:id/reagent-lots/:lotId/withdraw', checkPermission('CHANGE_STATUS'), qcController.withdrawReagentLot);

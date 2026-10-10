@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import NumericEditor from './NumericEditor';
 import SampleReplicateEntry from './SampleReplicateEntry';
+import CalculationEntry from './CalculationEntry';
 import TextureEditor from './TextureEditor';
 import OperationalTaskEditor from './OperationalTaskEditor';
 import clsx from 'clsx';
@@ -82,6 +83,26 @@ export default function SingleSampleEditor({
             onIndexChange(currentIndex + 1);
         }
     };
+
+    const numericEntry = currentItem.sampleReplicates?.requiredCount === 2 ? (
+                    <SampleReplicateEntry key={currentItem.workItemId} item={currentItem} unit={activeGroup?.unit || ''}
+                        disabled={disabled} onDraftChange={onDraftChange} onBarcodeRejected={onBarcodeRejected}
+                        inputRef={node => onInputRef?.(currentItem.workItemId, node)} />
+                ) : (
+                    <div className="space-y-3">
+                        <NumericEditor
+                            onBarcodeRejected={onBarcodeRejected}
+                            inputRef={node => onInputRef?.(currentItem.workItemId, node)}
+                            numberFormat={currentItem.numberFormat}
+                            validation={currentItem.valueRules}
+                            value={draft?.value ?? ''}
+                            unit={activeGroup?.unit}
+                            onChange={value => onDraftChange(currentItem.workItemId, value)}
+                            disabled={disabled}
+                            ariaLabel={`${currentItem.sampleDisplayId || currentItem.sampleId} determination`}
+                        />
+                    </div>
+                    );
 
     return (
         <div className="flex flex-col gap-3 max-w-lg mx-auto w-full">
@@ -239,25 +260,8 @@ export default function SingleSampleEditor({
                             Open Spectral Capture
                         </button>
                     </div>
-                ) : currentItem.sampleReplicates?.requiredCount === 2 ? (
-                    <SampleReplicateEntry key={currentItem.workItemId} item={currentItem} unit={activeGroup?.unit || ''}
-                        disabled={disabled} onDraftChange={onDraftChange} onBarcodeRejected={onBarcodeRejected}
-                        inputRef={node => onInputRef?.(currentItem.workItemId, node)} />
-                ) : (
-                    <div className="space-y-3">
-                        <NumericEditor
-                            onBarcodeRejected={onBarcodeRejected}
-                            inputRef={node => onInputRef?.(currentItem.workItemId, node)}
-                            numberFormat={currentItem.numberFormat}
-                            validation={currentItem.valueRules}
-                            value={draft?.value ?? ''}
-                            unit={activeGroup?.unit}
-                            onChange={value => onDraftChange(currentItem.workItemId, value)}
-                            disabled={disabled}
-                            ariaLabel={`${currentItem.sampleDisplayId || currentItem.sampleId} determination`}
-                        />
-                    </div>
-                )}
+                ) : (currentItem.calculationTemplate ? (<CalculationEntry item={currentItem} disabled={disabled} onDraftChange={onDraftChange} onBarcodeRejected={onBarcodeRejected}
+                    inputRef={node => onInputRef?.(currentItem.workItemId,node)}>{numericEntry}</CalculationEntry>) : numericEntry)}
                 {!isOperationalGate && <PreviousResultHint result={currentItem.previousResult} />}
                 {!isOperationalGate && !isTexture && !isSpectral && currentItem.valueRules && <ResultValueActions item={currentItem}
                     onChooseApproval={onChooseApproval} onChanged={onChanged} />}

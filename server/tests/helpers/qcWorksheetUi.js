@@ -37,6 +37,7 @@ function mountUi(filename, props = {}, { canEdit = true, responses = {}, axios: 
                 if (name.includes('HelpContext')) return { useHelp: () => ({ registerBlockers() {}, clearBlockers() {} }) };
                 if (name === '@lims/number-parse') return require('../../../shared/numberParse');
                 if (name === '@lims/result-value-validation') return require('../../../shared/resultValueValidation');
+                if (name === '@lims/soil-calculation') return require('../../../shared/soilCalculation');
                 if (['./entryReadiness', './qcWorksheetNavigation', './worksheetReady', '../../utils/soilCalculations', './useRunBarcodeScan', './BarcodeSafeInput',
                     './QcRunHistory', '../qc/BatchInspectionModal', '../../utils/audioCues'].includes(name))
                     return load(path.resolve(path.dirname(file), name +

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import CalculationEvidence from './CalculationEvidence';
 
 export default function ReportedValueReview({ itemId, itemVersion, itemStatus, token, t, canReview, onChoice, onSaved }) {
     const [data, setData] = useState(null), [error, setError] = useState('');
@@ -88,7 +89,8 @@ export default function ReportedValueReview({ itemId, itemVersion, itemStatus, t
             </tr></thead><tbody>{data.attempts.map(row => <tr key={row.id} data-testid={`reported-attempt-${row.id}`}>
                 <td className="p-2">{row.attemptNo}</td><td className="p-2">{row.batchId || '—'} <span className="rounded border border-sf-divider px-1">{[...new Set(row.qcGates.map(gate => gate.value))].join(', ') || '—'}</span></td>
                 <td className="p-2">{row.analyst || '—'}</td><td className="p-2">{row.recordedAt ? new Date(row.recordedAt).toLocaleString() : '—'}</td>
-                <td className="p-2">{row.results.map(result => <div key={result.id}>{result.param} #{result.replicateNo}: {result.valueText} {result.unit || ''} {result.censoring !== 'NONE' && result.censoring}</div>)}</td>
+                <td className="p-2">{row.results.map(result => <div key={result.id}>{result.param} #{result.replicateNo}: {result.valueText} {result.unit || ''} {result.censoring !== 'NONE' && result.censoring}
+                    <CalculationEvidence evidence={result.calculation} t={t} /></div>)}</td>
                 <td className="p-2">{row.option?.allowed ? outputText(row.option.choice.outputs) : row.option ? refusal(row.option) : '—'}</td>
                 <td className="p-2">{row.reason && t(`repeatCommands.reasons.${row.reason}`, row.reason)} {row.note}</td><td className="p-2">{t(`reportedValue.statuses.${row.status}`, row.status)}</td>
             </tr>)}</tbody></table></div>

@@ -5,6 +5,7 @@ const { PrismaClient } = require('../../prisma_client');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const Database = require('better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const { installCalculationReleasePrerequisites } = require('../helpers/calculationReleasePrerequisites');
 const { createSampleFixture, createWorkItemFixture, cleanupWorkflowFixtures } = require('../helpers/workflowFixtures');
 const { installReferenceMaterials } = require('../../scripts/install_reference_materials');
 const { installResultAttemptLinks } = require('../../scripts/install_result_attempt_links');
@@ -54,6 +55,7 @@ async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }, recordedAn
     require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: file, apply: true });
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: file, apply: true });
     require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: file, apply: true });
+    installCalculationReleasePrerequisites(file);
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     ownedFile.db = db;
     await db.unit.create({ data: { code: 'fixture-unit', display: 'Fixture unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });

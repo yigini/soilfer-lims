@@ -11,6 +11,7 @@ import { useNotifications } from '../context/NotificationContext';
 import WorkItemsTable from '../components/sample/WorkItemsTable';
 import RepeatReasonFields from '../components/sample/RepeatReasonFields';
 import ReportedValueReview from '../components/sample/ReportedValueReview';
+import CalculationEvidence from '../components/sample/CalculationEvidence';
 import FieldMetadataCard from '../components/sample/FieldMetadataCard';
 import {ProfileReferenceSummary} from '../components/reception/ProfileReferenceFields';
 import ProfileCorrectionDialog from '../components/sample/ProfileCorrectionDialog';
@@ -1498,6 +1499,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                 )}
                                             </div>
                                             <div className="text-gray-500">{event.details || 'Action completed'}</div>
+                                            {event.entity === 'RESULT_CALCULATION' && <CalculationEvidence evidence={event.after} t={t} />}
                                         </div>
                                         <div className="text-gray-400 font-mono text-[11px] sm:text-right">
                                             <div>{event.performedBy || 'System'}</div>

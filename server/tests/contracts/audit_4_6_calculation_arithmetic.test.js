@@ -1,0 +1,187 @@
+const { calculate: calculateAuthoritative, validateTemplate, fitCurve, INPUTS, PARAMETERS } = require('../../../shared/soilCalculation');
+const format = { decimal: '.', thousands: ',' };
+const { UNITS } = require('../../seeds/units');
+const unitContext = code => {
+    const { quantityKind, factorToBase } = UNITS.find(unit => unit.code === code);
+    return { code, quantityKind, factorToBase };
+};
+// Identity units are explicit synthetic controlled-unit context for each pure
+// equation fixture; actual catalogue compatibility is a separate DB contract.
+function calculate(template, rawInputs, context = {}) {
+    const native = { code: template.outputUnit, quantityKind: 'FIXTURE_QUANTITY', factorToBase: 1 };
+    return calculateAuthoritative(template, rawInputs, { units: { native, reporting: { ...native } }, ...context });
+}
+// These are derived arithmetic examples, not claimed SOP worked examples.
+// Reference metadata/precision and persisted lab activation are separate #199
+// contracts. Every scalar below has an explicit unit and source equation.
+function template(formulaModule, values = {}, outputUnit = '%', outputDecimals = 2) {
+    return { formulaModule, inputs: INPUTS[formulaModule].map(key => ({ key, label: key, unit: 'fixture-defined', type: 'number', required: true })),
+        parameters: PARAMETERS[formulaModule].map(key => ({ key, unit: 'fixture-defined', value: values[key], min: null, max: null })),
+        outputUnit, outputDecimals, curve: formulaModule === 'COLORIMETRIC_PHOSPHORUS' ? { xUnit: 'mg/L', yUnit: 'absorbance' } : null };
+}
+const source = id => `https://openknowledge.fao.org/3/${id}/${id}.pdf`;
+describe('Audit 4.6 shared, source-derived arithmetic', () => {
+    test('derived moisture: SOP-20 v1, 24 Jan 2023, p7 §9; (32-30)/(30-10)*100 = 10%', () => {
+        const citation = { url: source('cc4831en'), document: 'GLOSOLAN-SOP-20', version: 1, page: 7, section: '9', kind: 'derived' };
+        expect(citation.page).toBe(7);
+        const result = calculate(template('GRAVIMETRIC_MOISTURE', {}, '%', 1),
+            { tareMass: '10', wetWithTare: '32', dryWithTare: '30' }, { numberFormat: format });
+        expect(result.output).toBe(10);
+        expect(result.intermediate).toMatchObject({ wetMass: 22, dryMass: 20, waterMass: 2, moistureCorrectionFactor: 1.1 });
+        expect(result.intermediate.ovenDryMassFraction).toBeCloseTo(20 / 22, 14);
+        expect(result.inputs.wetWithTare).toBe('32');
+    });
+    test('derived WB 1.30: SOP-02 v1, 28 Oct 2019, pp15–16 §9.1; (20-12)*0.5*0.003*100*1.30/1 = 1.56%', () => {
+        const citation = { url: source('ca7471en'), document: 'GLOSOLAN-SOP-02', version: 1, pages: [15, 16], section: '9.1', kind: 'derived' };
+        expect(citation.pages).toEqual([15, 16]);
+        const result = calculate(template('WALKLEY_BLACK', { ferrousNormality: 0.5, carbonGramsPerMilliEquivalent: 0.003, recoveryFactor: 1.30 }),
+            { blankTitre: '20', sampleTitre: '12', sampleMass: '1', moistureCorrectionFactor: '1' }, { numberFormat: format });
+        expect(result.output).toBe(1.56);
+        expect(result.intermediate).toMatchObject({ titreDifference: 8, carbonMass: 0.012 });
+    });
+    test('WB recovery remains supplied by the immutable template, including the separately published 1.33 variant', () => {
+        // Bierer et al., SSSAJ85 (2021)438–451, doi:10.1002/saj2.20165,
+        // §2.3 establishes 1.33. Arithmetic is derived using SOP-02 §9.1:
+        // 8 * 0.5 * 0.003 * 100 * 1.33 / 1 = 1.596 -> 1.60%.
+        const input = { blankTitre: '20', sampleTitre: '12', sampleMass: '1', moistureCorrectionFactor: '1' };
+        const labA = template('WALKLEY_BLACK', { ferrousNormality: 0.5, carbonGramsPerMilliEquivalent: 0.003, recoveryFactor: 1.30 });
+        const labB = template('WALKLEY_BLACK', { ferrousNormality: 0.5, carbonGramsPerMilliEquivalent: 0.003, recoveryFactor: 1.33 });
+        expect(calculate(labA, input, { numberFormat: format }).output).toBe(1.56);
+        expect(calculate(labB, input, { numberFormat: format }).output).toBe(1.60);
+        expect(calculate(labB, input, { numberFormat: format }).parameters).toEqual(labB.parameters);
+        expect(labA.parameters.find(p => p.key === 'recoveryFactor').value).toBe(1.30);
+    });
+    test.each([
+        ['Olsen', 'cb3644en', 'GLOSOLAN-SOP-10', 7],
+        ['Bray-1', 'cb3460en', 'GLOSOLAN-SOP-09', 8]
+    ])('derived %s P: %s, %s v1, 13 Jan 2021 p%s §9', (_, id, document, page) => {
+        const citation = { url: source(id), document, version: 1, page, section: '9', kind: 'derived' };
+        expect(citation.section).toBe('9');
+        // Free intercept curve gives (0.55-0.05)/0.25 = 2 mg/L;
+        // (2-0.1)*100*2*1.1/5 = 83.6 mg/kg, rounded to 2 decimals.
+        const result = calculate(template('COLORIMETRIC_PHOSPHORUS', {}, 'mg/kg'), {
+            absorbance: '0.55', blankConcentration: '0.1', extractVolume: '100', dilutionFactor: '2', sampleMass: '5', moistureCorrectionFactor: '1.1'
+        }, { numberFormat: format, curve: { slope: 0.25, intercept: 0.05 } });
+        expect(result.output).toBe(83.6);
+        expect(result.intermediate.concentration).toBe(2);
+    });
+    test.each([['Ca', 40.08, 2], ['Mg', 24.31, 2], ['K', 39.098, 1], ['Na', 22.99, 1]])(
+        'derived %s: SOP-17 v1, 26 July 2022 p9 §9.2; (atomicMass/charge)*100/5/(atomicMass/charge*10) = 2 cmol(+)/kg', (_, atomicMass, charge) => {
+            const citation = { url: source('cc1200en'), document: 'GLOSOLAN-SOP-17', version: 1, page: 9, section: '9.2', kind: 'derived' };
+            expect(citation.page).toBe(9);
+            const equivalentWeight = atomicMass / charge;
+            const result = calculate(template('EXCHANGEABLE_CATION', { equivalentWeight }, 'cmol(+)/kg', 6), {
+                reading: equivalentWeight, blankConcentration: '0', extractVolume: '100', dilutionFactor: '1', sampleMass: '5'
+            }, { numberFormat: format });
+            expect(result.output).toBe(2);
+            expect(result.intermediate.mgPerKg).toBeCloseTo(equivalentWeight * 20, 12);
+        });
+    test('derived CEC: SOP-17 v1, 26 July 2022 p9 §9.1; (2.5-0.5)*0.01*100/5*100/50 = 0.8 cmol(+)/kg', () => {
+        const result = calculate(template('CEC_TITRATION', { acidNormality: 0.01 }, 'cmol(+)/kg', 6), {
+            sampleTitre: '2.5', blankTitre: '0.5', sampleMass: '5', extractVolume: '100', aliquotVolume: '50'
+        }, { numberFormat: format });
+        expect(result.output).toBe(0.8);
+        expect(result.intermediate.aliquotFactor).toBe(2);
+    });
+    test('derived Kjeldahl: SOP-14 v1, 18 Jan 2021 pp10–11 §9; (10.5-0.5)*0.02*14.0067/1/10 = 0.280134% -> 0.28%', () => {
+        const result = calculate(template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }), {
+            sampleTitre: '10.5', blankTitre: '0.5', sampleMass: '1'
+        }, { numberFormat: format });
+        expect(result.output).toBe(0.28);
+        expect(result.intermediate.mgPerGram).toBeCloseTo(2.80134, 12);
+    });
+    test('comma decimals use the supplied lab format and preserve exact input strings', () => {
+        const result = calculate(template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }), {
+            sampleTitre: '10,5', blankTitre: '0,5', sampleMass: '1'
+        }, { numberFormat: { decimal: ',', thousands: '.' } });
+        expect(result.output).toBe(0.28); expect(result.inputs.sampleTitre).toBe('10,5');
+    });
+    test('WB converts full native precision to reporting g/kg before the sole rounding: 1.596% becomes15.96g/kg', () => {
+        const selected = template('WALKLEY_BLACK', { ferrousNormality: 0.5, carbonGramsPerMilliEquivalent: 0.003, recoveryFactor: 1.33 }, 'pct_mass', 2);
+        const units = { native: unitContext('pct_mass'), reporting: unitContext('g/kg') };
+        const result = calculate(selected, { blankTitre: 20, sampleTitre: 12, sampleMass: 1, moistureCorrectionFactor: 1 }, { numberFormat: format, units });
+        expect(result.nativeValue).toBeCloseTo(1.596, 14);
+        expect(result).toMatchObject({ nativeUnit: 'pct_mass', conversionFactor: 10, output: 15.96, outputUnit: 'g/kg', outputDecimals: 2 });
+        expect(result.unroundedOutput).toBeCloseTo(15.96, 13);
+        expect(result.output).not.toBe(16); // Rounding the native1.596 to1.60 first would give16.
+        expect(result.unitConversion).toEqual(units);
+        units.native.factorToBase = 99;
+        expect(result.unitConversion.native.factorToBase).toBe(10);
+    });
+    test('Kjeldahl native0.280134% remains unrounded and reporting2.80134g/kg rounds once to2.801', () => {
+        const selected = template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }, 'pct_mass', 3);
+        const result = calculate(selected, { sampleTitre: 10.5, blankTitre: 0.5, sampleMass: 1 }, { numberFormat: format,
+            units: { native: unitContext('pct_mass'), reporting: unitContext('g/kg') } });
+        expect(result.nativeValue).toBeCloseTo(0.280134, 14);
+        expect(result.unroundedOutput).toBeCloseTo(2.80134, 13);
+        expect(result.output).toBe(2.801); expect(result.intermediate.unroundedOutput).toBe(result.unroundedOutput);
+    });
+    test('an inactive reference can have null precision, but calculation requires verified explicit0–6 precision', () => {
+        const selected = { ...template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }), outputDecimals: null, precisionSource: null };
+        expect(validateTemplate(selected)).toBe(selected);
+        expect(() => calculate(selected, { sampleTitre: 10, blankTitre: 0, sampleMass: 1 }, { numberFormat: format }))
+            .toThrow(expect.objectContaining({ code: 'CALC_TEMPLATE_PRECISION_REQUIRED', statusCode: 422 }));
+        expect(() => validateTemplate({ ...selected, outputDecimals: 7 })).toThrow(expect.objectContaining({ code: 'CALC_TEMPLATE_INVALID' }));
+        expect(validateTemplate({ ...selected, outputDecimals: 0 }).outputDecimals).toBe(0);
+        expect(validateTemplate({ ...selected, outputDecimals: 6 }).outputDecimals).toBe(6);
+    });
+    test('the new controlled mass percent is distinct; existing percent and its free-text synonyms remain RATIO', () => {
+        expect(UNITS.find(unit => unit.code === 'pct_mass')).toEqual({ code: 'pct_mass', display: '% (m/m)', quantityKind: 'MASS_FRACTION', factorToBase: 10, synonyms: '[]' });
+        const existing = UNITS.find(unit => unit.code === '%');
+        expect(existing.quantityKind).toBe('RATIO');
+        expect(JSON.parse(existing.synonyms)).toEqual(['%', 'percent', 'percentage', 'g/100g', 'wt%', 'mass%']);
+        const candidates = UNITS.filter(unit => unit.code === '%' || JSON.parse(unit.synonyms || '[]').includes('%'));
+        expect(candidates.map(unit => unit.code)).toEqual(['%']);
+    });
+    test.each([undefined,
+        { native: { code: '%', quantityKind: 'RATIO', factorToBase: 10 }, reporting: { code: 'g/kg', quantityKind: 'MASS_FRACTION', factorToBase: 1 } },
+        { native: { code: '%', quantityKind: 'RATIO', factorToBase: 0 }, reporting: { code: '%', quantityKind: 'RATIO', factorToBase: 10 } },
+        { native: { code: '%', quantityKind: 'RATIO', factorToBase: 10 }, reporting: { code: '%', quantityKind: 'RATIO', factorToBase: Infinity } }
+    ])('missing or incompatible controlled units are refused instead of assuming a conversion', units => {
+        expect(() => calculateAuthoritative(template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }),
+            { sampleTitre: 10, blankTitre: 0, sampleMass: 1 }, { numberFormat: format, units }))
+            .toThrow(expect.objectContaining({ code: 'CALC_TEMPLATE_UNIT_MISMATCH', statusCode: 422 }));
+    });
+    test.each([null, {}, { sampleTitre: '', blankTitre: 0, sampleMass: 1 }])('missing raw input refuses with the pinned code', inputs => {
+        expect(() => calculate(template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }), inputs, { numberFormat: format }))
+            .toThrow(expect.objectContaining({ code: 'CALC_INPUT_REQUIRED', statusCode: 422 }));
+    });
+    test.each(['<1', 'NaN', 'Infinity', '10 mg'])('a qualified or malformed raw input %s cannot pretend to be a reading', sampleMass => {
+        expect(() => calculate(template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }), {
+            sampleTitre: 10, blankTitre: 0, sampleMass
+        }, { numberFormat: format })).toThrow(expect.objectContaining({ code: 'CALC_INPUT_INVALID' }));
+    });
+    test.each([0, -1])('invalid denominator %s refuses rather than clamping or yielding infinity', sampleMass => {
+        expect(() => calculate(template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }), {
+            sampleTitre: 10, blankTitre: 0, sampleMass
+        }, { numberFormat: format })).toThrow(expect.objectContaining({ code: 'CALC_INPUT_INVALID' }));
+    });
+    test('a negative blank-corrected result remains numerical evidence; the engine applies no QC acceptance limits', () => {
+        expect(calculate(template('KJELDAHL', { acidNormality: 0.02, nitrogenMgPerMilliMole: 14.0067 }), {
+            sampleTitre: 0, blankTitre: 1, sampleMass: 1
+        }, { numberFormat: format }).output).toBe(-0.03);
+    });
+    test('templates cannot supply executable formula strings or omit required method constants', () => {
+        expect(() => validateTemplate({ ...template('KJELDAHL'), formulaModule: 'eval(input)' })).toThrow(expect.objectContaining({ code: 'CALC_TEMPLATE_INVALID' }));
+        expect(() => validateTemplate(template('KJELDAHL', { acidNormality: 0 }))).toThrow(expect.objectContaining({ code: 'CALC_TEMPLATE_INVALID' }));
+    });
+    test('OLS is unweighted, free-intercept; a zero standard counts and replicate standards do not inflate distinct levels', () => {
+        const points = [0, 1, 1, 2, 3, 4].map(x => ({ standardConcentration: x, response: 0.05 + x * 0.25 }));
+        const result = fitCurve(points);
+        expect(result).toMatchObject({ pointCount: 6, levelCount: 5, calibrationMax: 4, usable: true, failReason: null });
+        expect(result.slope).toBeCloseTo(0.25, 14); expect(result.intercept).toBeCloseTo(0.05, 14);
+        expect(result.r).toBeCloseTo(1, 14); expect(result.rSquared).toBeCloseTo(1, 14);
+        expect(points).toHaveLength(6);
+    });
+    test('Pearson r retains its sign; r-squared cannot turn a negative slope into a passing positive-correlation curve', () => {
+        const result = fitCurve([0, 1, 2, 3, 4].map(x => ({ standardConcentration: x, response: 5 - x })));
+        expect(result.r).toBe(-1); expect(result.rSquared).toBe(1); expect(result.slope).toBe(-1);
+    });
+    test.each([
+        [{ standardConcentration: 1, response: 1 }],
+        [{ standardConcentration: 1, response: 1 }, { standardConcentration: 1, response: 2 }],
+        [{ standardConcentration: 0, response: 1 }, { standardConcentration: 1, response: 1 }]
+    ].map(points => [points]))('degenerate standards have no usable fit, rather than invented coefficients', points => {
+        expect(fitCurve(points)).toMatchObject({ pointCount: points.length, usable: false, failReason: 'DEGENERATE_FIT', slope: null, intercept: null, r: null, rSquared: null });
+    });
+});

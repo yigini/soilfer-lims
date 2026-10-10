@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import NumericEditor from './NumericEditor';
 import SampleReplicateEntry from './SampleReplicateEntry';
+import CalculationEntry from './CalculationEntry';
 import { isBarcodeBurst } from './BarcodeSafeInput';
 import { useRunBarcodeScan } from './useRunBarcodeScan';
 import TextureEditor from './TextureEditor';
@@ -350,6 +351,31 @@ export default function WorksheetArea({
                                     }
                                     const isEvidenceGap = isOperationalGate && isRecorded && !savedReceipt;
 
+                                    const numericEntry = item.sampleReplicates?.requiredCount === 2 ? (
+                                                    <SampleReplicateEntry item={item} unit={activeGroup?.unit || ''}
+                                                        disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
+                                                        onDraftChange={onDraftChange}
+                                                        onRevertDraft={onRevertDraft}
+                                                        onBarcodeRejected={scanner.rejectValueBurst}
+                                                        onEnterNext={() => handleEnterNext(idx)}
+                                                        inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)} />
+                                                ) : (
+                                                    <NumericEditor
+                                                        onBarcodeRejected={scanner.rejectValueBurst}
+                                                        numberFormat={item.numberFormat}
+                                                        validation={item.valueRules}
+                                                        disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
+                                                        value={draft?.value ?? ''}
+                                                        onChange={(val) => changeResultDraft(item.workItemId, val)}
+                                                        onRevertValue={onRevertDraft && (val => onRevertDraft(item.workItemId, val))}
+                                                        unit={activeGroup?.unit || ''}
+                                                        placeholder="0.00"
+                                                        ariaLabel={`${item.sampleDisplayId || item.sampleId} determination`}
+                                                        onEnterNext={() => handleEnterNext(idx)}
+                                                        inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)}
+                                                    />
+                                                    );
+
                                     return (
                                         <tr
                                             key={position?.id || item.workItemId}
@@ -468,30 +494,10 @@ export default function WorksheetArea({
                                                             </div>
                                                         )}
                                                     </div>
-                                                ) : item.sampleReplicates?.requiredCount === 2 ? (
-                                                    <SampleReplicateEntry item={item} unit={activeGroup?.unit || ''}
-                                                        disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
-                                                        onDraftChange={onDraftChange}
-                                                        onRevertDraft={onRevertDraft}
-                                                        onBarcodeRejected={scanner.rejectValueBurst}
-                                                        onEnterNext={() => handleEnterNext(idx)}
-                                                        inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)} />
-                                                ) : (
-                                                    <NumericEditor
-                                                        onBarcodeRejected={scanner.rejectValueBurst}
-                                                        numberFormat={item.numberFormat}
-                                                        validation={item.valueRules}
-                                                        disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
-                                                        value={draft?.value ?? ''}
-                                                        onChange={(val) => changeResultDraft(item.workItemId, val)}
-                                                        onRevertValue={onRevertDraft && (val => onRevertDraft(item.workItemId, val))}
-                                                        unit={activeGroup?.unit || ''}
-                                                        placeholder="0.00"
-                                                        ariaLabel={`${item.sampleDisplayId || item.sampleId} determination`}
-                                                        onEnterNext={() => handleEnterNext(idx)}
-                                                        inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)}
-                                                    />
-                                                )}
+                                                ) : (item.calculationTemplate ? (<CalculationEntry item={item} onDraftChange={onDraftChange}
+                                                    disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
+                                                    onBarcodeRejected={scanner.rejectValueBurst}
+                                                    inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)}>{numericEntry}</CalculationEntry>) : numericEntry)}
                                                 {!isOperationalGate && <PreviousResultHint result={item.previousResult} />}
                                                 {!isOperationalGate && !isTexture && !isSpectral && item.valueRules && <ResultValueActions item={item}
                                                     onChooseApproval={onChooseApproval} onChanged={onBatchUpdated} />}

@@ -154,12 +154,15 @@ async function reviewReportedSelection(db, workItemId, actor, explicit) {
             const attemptItem = { ...item, batchId: attempt.qcBatchId || attempt.batchId };
             const gates = await Promise.all(results.map(result => require('./qcGateService').forResult(result, {
                 db: tx, sample: context.sample, workItems: [attemptItem] })));
+            const calculationEvidence = new Map(await Promise.all(results.map(async result =>
+                [result.id,await require('./resultCalculationService').retained(tx,result.id)])));
             attempts.push({ id: attempt.id, attemptNo: attempt.attemptNo, status: attempt.status,
                 batchId: attempt.qcBatchId || attempt.batchId, qcGates: gates,
                 analyst: attempt.authorName || attempt.author, recordedAt: context.limits[attempt.id]?.recordedAt || null,
                 reason: attempt.reason, note: attempt.note, eligible: Boolean(candidate), limit: context.limits[attempt.id] || null,
                 results: results.map(row => ({ id: row.id, param: row.param, replicateNo: row.replicateNo,
-                    valueText: row.value, unit: row.unit, censoring: row.censoring ?? 'NONE' })),
+                    valueText: row.value, unit: row.unit, censoring: row.censoring ?? 'NONE',
+                    ...(calculationEvidence.get(row.id) && {calculation:calculationEvidence.get(row.id)}) })),
                 option: candidate ? previewChoice(item, context, { mode: 'ATTEMPT', attemptIds: [attempt.id] }) : null });
         }
         return { workItemId: item.id, analysisCode: item.analysis, status: item.status, policy: context.policy,

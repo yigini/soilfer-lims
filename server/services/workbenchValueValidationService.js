@@ -3,12 +3,12 @@ const { hasPermission } = require('../config/roles');
 const { resolveNumericValueRules } = require('./resultValueRulesService');
 const { validateNumericMethod } = require('./workbenchValidationService');
 
-async function validateNumericEntry(db, item, actor, entry, { approval = true } = {}) {
+async function validateNumericEntry(db, item, actor, entry, { approval = true, calibrationCurve = null } = {}) {
     const analysis = await db.analysis.findUnique({ where: { code: item.analysis } });
     if (!analysis) throw new workflow.TransitionError('Analysis configuration is unavailable.', 409, 'RESULT_ANALYSIS_UNAVAILABLE');
     const method = item.methodologyId ? await db.methodology.findUnique({ where: { id: item.methodologyId } }) : null;
     const resolved = await resolveNumericValueRules(db, { labId: item.sample?.assignedLab || item.assignedLab || item.labId,
-        analysis, method });
+        analysis, method, calibrationCurve });
     const validation = validateNumericMethod(entry.value, resolved.rules, resolved.numberFormat);
     if (!approval || !entry.overrideRequestId) return validation;
     return workflow.inTransaction(db, async tx => {

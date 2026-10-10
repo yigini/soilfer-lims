@@ -74,13 +74,16 @@ exports.getResults = async (req, res) => {
         analyses.forEach(a => analysisMap[a.code] = a);
 
         const approvals = await require('../services/resultOverrideService').resultApprovals(prisma,results);
-        const enriched = await Promise.all(results.map(async r => ({
+        const enriched = await Promise.all(results.map(async r => {
+            const calculation=await require('../services/resultCalculationService').retained(prisma,r.id);
+            return {
             ...r,
+            ...(calculation && {calculation}),
             overrideApproval: approvals.get(r.id) || null,
             paramName: await require('../services/analysisService').getAnalysisName(r.param),
             decimalPlaces: analysisMap[r.param]?.decimalPlaces ?? 2,
             flags: typeof r.flags === 'string' ? JSON.parse(r.flags) : (r.flags || {})
-        })));
+        }; }));
 
         res.json(enriched);
     } catch (error) {
@@ -115,7 +118,11 @@ exports.getResultHistory = async (req, res) => {
         });
 
         const approvals = await require('../services/resultOverrideService').resultApprovals(prisma,history);
-        res.json({ history: history.map(row => ({ ...row, overrideApproval: approvals.get(row.id) || null })) });
+        const retainedHistory = await Promise.all(history.map(async row => {
+            const calculation=await require('../services/resultCalculationService').retained(prisma,row.id);
+            return {...row, ...(calculation && {calculation}), overrideApproval: approvals.get(row.id) || null};
+        }));
+        res.json({ history:retainedHistory });
     } catch (error) {
         console.error('[getResultHistory] Error:', error);
         res.status(500).json({ error: 'Failed to fetch result history' });

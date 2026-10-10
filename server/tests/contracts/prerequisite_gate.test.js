@@ -12,6 +12,7 @@ describe('SD-05: Server-Side Prerequisite Gate Contract', () => {
     const techUsername = 'test_lab_technician_labgtm';
 
     beforeAll(async () => {
+        await require('../setup').ensureTestLab('LAB-GTM', 'GTM');
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
         techGtmToken = await getAuthToken('LAB_TECHNICIAN', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 

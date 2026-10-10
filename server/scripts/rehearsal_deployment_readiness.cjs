@@ -67,6 +67,49 @@ function registerVolume(vol) {
     return vol;
 }
 
+// #199 pins6091161064/6091749172: verify the actual image's shipped
+// installer, including row/source receipts, without pre-seeding startup.
+function inspectCalculationInstallation(volume, expectedInstalled, expectedDeferred) {
+    const output = cp.execFileSync('docker', ['run', '--rm', '-v', `${volume}:/app/server/prisma`,
+        IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const file='/app/server/prisma/dev.db',installer=require('./scripts/install_calculation_templates');
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+         const before=hash(),ready=installer.assertCalculationStartupReady(file),again=installer.installCalculationTemplates({dbPath:file,apply:true});
+         if(!ready.ready||ready.references.installedReferenceCount!==${expectedInstalled}||ready.references.deferredReferenceCount!==${expectedDeferred}||
+           again.mode!=='NO_OP'||again.totalChanges!==0||hash()!==before)throw Error('199 installed/deferred restart proof differs');
+         const db=new Database(file,{readonly:true,fileMustExist:true});try{
+           if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw Error('199 integrity differs');
+           const receipts=db.prepare("SELECT * FROM _schema_migrations WHERE id LIKE '199_calculation_reference:%' ORDER BY id").all();
+           if(receipts.length!==${expectedInstalled})throw Error('199 reference receipts differ');
+           if(${expectedDeferred}===11&&(db.prepare('SELECT count(*) n FROM Analysis').get().n||db.prepare('SELECT count(*) n FROM Unit').get().n))
+             throw Error('199 fresh installer inserted catalogue rows');
+           const excluded=new Set(['CalcTemplate','_schema_migrations']);
+           const tables=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all();
+           console.log(JSON.stringify({ready,again,noOpBytesPreserved:true,referenceReceipts:receipts,
+             schema:db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").all(),
+             rows:Object.fromEntries(tables.filter(r=>!excluded.has(r.name)).map(({name})=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`], { encoding: 'utf8' }).trim();
+    return JSON.parse(output);
+}
+
+function loadEmptyCalculationCatalogue(volume) {
+    const absent = cp.execFileSync('docker', ['run', '--rm', '-v', `${volume}:/app/server/prisma`, IMAGE_TAG, 'node', '-e',
+        `const Database=require('better-sqlite3');const db=new Database('/app/server/prisma/dev.db',{readonly:true,fileMustExist:true});try{
+           if(db.prepare('SELECT count(*) n FROM Analysis').get().n||db.prepare('SELECT count(*) n FROM Unit').get().n)
+             throw Error('Owned catalogue-load proof refuses existing catalogue rows');console.log('CATALOGUE_PREREQUISITES_ABSENT');
+         }finally{db.close();}`], { encoding: 'utf8', timeout: 120000 });
+    if (!absent.includes('CATALOGUE_PREREQUISITES_ABSENT')) throw Error('Empty catalogue proof missing');
+    // Existing authorities run explicitly on the disposable lab database.
+    // The calculation installer does not insert analyses, units or offers.
+    for (const [script, args] of [['units', []], ['references', []], ['catalogue', ['--confirm']]]) {
+        console.log(`  Loading owned catalogue prerequisite through existing ${script} authority`);
+        cp.execFileSync('docker', ['run', '--rm', '-v', `${volume}:/app/server/prisma`,
+            '-e', 'DATABASE_PATH=/app/server/prisma/dev.db', IMAGE_TAG, 'node', `seeds/${script}.js`, ...args], { stdio: 'pipe', timeout: 120000 });
+    }
+}
+
 function extractTokenAndUser(data) {
     const token = data.token || data.data?.token;
     const user = data.user || data.data?.user || {};
@@ -150,6 +193,9 @@ async function runSuite() {
 
     await waitForHealth(localPort, localContainer);
     console.log(`  ✓ Container healthy on port ${localPort}`);
+    const freshCalculations = inspectCalculationInstallation(localVol, 0, 11);
+    fs.writeFileSync(path.join(tmpDir, '199-fresh-deferred-proof.json'), JSON.stringify(freshCalculations));
+    console.log('  ✓ Fresh shipped entrypoint healthy: schema COMPLETE, 11 references deferred, catalogue inserts 0, reference receipts 0, repeat NO_OP/byte-preserved');
 
     // Initial Login
     const loginRes = await fetch(`http://127.0.0.1:${localPort}/api/auth/login`, {
@@ -243,6 +289,12 @@ async function runSuite() {
 
     await waitForHealth(restartPort, restartContainer);
     console.log(`  ✓ Restarted container healthy on port ${restartPort}`);
+    const restartedCalculations = inspectCalculationInstallation(localVol, 0, 11);
+    if (JSON.stringify(restartedCalculations.referenceReceipts) !== JSON.stringify(freshCalculations.referenceReceipts) ||
+        JSON.stringify(restartedCalculations.receipts.find(row => row.id === '199_calculation_templates')) !==
+        JSON.stringify(freshCalculations.receipts.find(row => row.id === '199_calculation_templates')))
+        throw Error('199 fresh restart changed its original schema/reference receipts');
+    fs.writeFileSync(path.join(tmpDir, '199-deferred-restart-proof.json'), JSON.stringify(restartedCalculations));
 
     // Cross-restart assertion: Pre-restart token MUST authenticate without re-login!
     const preRestartAuthRes = await fetch(`http://127.0.0.1:${restartPort}/api/labs`, {
@@ -287,7 +339,87 @@ async function runSuite() {
         throw new Error('FATAL: Container reseeded an already-populated database on restart!');
     }
     console.log('  ✓ Verified seed.js was safely skipped on restart');
-    cp.execFileSync('docker', ['stop', restartContainer]);
+    console.log('  Preparing 199 conflict proof: quiescing its disposable source containers');
+    cp.execFileSync('docker', ['stop', restartContainer], { timeout: 60000 });
+    const stoppedSourceStates = cp.execFileSync('docker', ['inspect', '--format', '{{.State.Running}}', localContainer, restartContainer],
+        { encoding: 'utf8', timeout: 60000 }).trim().split(/\r?\n/);
+    if (stoppedSourceStates.length !== 2 || stoppedSourceStates.some(state => state !== 'false'))
+        throw Error('199 owned conflict snapshot requires both source writers stopped');
+    console.log('  Source containers stopped; starting bounded WAL-aware owned snapshot/conflict proof');
+
+    // A conflicting controlled prerequisite is injected only into a new owned
+    // backup of this empty lab. Both modes must refuse before any installer
+    // write, and the source volume remains byte-identical.
+    const conflictVolume = registerVolume(`lims_199_unit_conflict_${TS}`);
+    const conflictProofOutput = cp.execFileSync('docker', ['run', '--rm', '-v', `${localVol}:/source:ro`,
+        '-v', `${conflictVolume}:/owned-conflict`, IMAGE_TAG, 'node', '-e',
+        `(()=>{const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+          const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+          const source='/source/dev.db',file='/owned-conflict/dev.db';
+          // The two source containers are stopped and the mount remains read-only.
+          // Copy the complete quiesced SQLite file set, including committed WAL;
+          // SQLite must not create its WAL index on the read-only source mount.
+          const components=['','-wal','-shm','-journal'];
+          const manifest=base=>Object.fromEntries(components.map(suffix=>[suffix,fs.existsSync(base+suffix)?hash(base+suffix):null]));
+          const sourceBefore=manifest(source);
+          if(!sourceBefore[''])throw Error('199 owned source database is absent');
+          if(components.some(suffix=>fs.existsSync(file+suffix)))throw Error('199 snapshot refuses an existing owned destination');
+          for(const suffix of components){
+            if(sourceBefore[suffix]!==null)fs.copyFileSync(source+suffix,file+suffix,fs.constants.COPYFILE_EXCL);
+          }
+          if(JSON.stringify(manifest(file))!==JSON.stringify(sourceBefore)||JSON.stringify(manifest(source))!==JSON.stringify(sourceBefore))
+            throw Error('199 quiesced SQLite snapshot bytes differ');
+          const db=new Database(file,{fileMustExist:true});try{
+            if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)
+              throw Error('199 owned SQLite snapshot integrity differs');
+            if(db.prepare('SELECT count(*) n FROM Unit').get().n)throw Error('Conflicting-unit proof requires the owned empty catalogue');
+            db.prepare('INSERT INTO Unit(code,display,quantityKind,factorToBase,synonyms,updatedAt) VALUES(?,?,?,?,?,?)')
+              .run('pct_mass','%','RATIO',1,'[]','2026-10-10T00:00:00.000Z');
+          }finally{db.close();}
+          const before=hash(file),installer=require('./scripts/install_calculation_templates');
+          for(const apply of [false,true]){let refused=false;try{installer.installCalculationTemplates({dbPath:file,apply});}
+            catch(error){if(error.code!=='UNIT_CATALOGUE_CONFLICT')throw error;refused=true;}
+            if(!refused||hash(file)!==before)throw Error('199 controlled conflict was not a zero-write refusal');}
+          if(JSON.stringify(manifest(source))!==JSON.stringify(sourceBefore))throw Error('199 owned conflict proof changed a source artifact');
+          console.log(JSON.stringify({code:'UNIT_CATALOGUE_CONFLICT',dryRunAndApplyRefused:true,totalChanges:0,
+            refusedDatabaseBytesPreserved:true,sourceDatabaseBytesPreserved:true,sourceArtifactsPreserved:true,
+            quiescedSqliteFileSetCopied:true,sourceBefore}));
+        })();`], { encoding: 'utf8', timeout: 120000 }).trim();
+    const conflictProof = JSON.parse(conflictProofOutput);
+    if (!conflictProof.dryRunAndApplyRefused || !conflictProof.sourceDatabaseBytesPreserved) throw Error('199 controlled conflict proof missing');
+    fs.writeFileSync(path.join(tmpDir, '199-controlled-unit-conflict-proof.json'), JSON.stringify(conflictProof));
+    console.log('  ✓ Actual shipped installer refuses conflicting pct_mass in both modes, writes 0, owned/source bytes unchanged');
+
+    // Catalogue arrival makes the eleven deferred references installable. The
+    // next shipped entrypoint must add only those references and their receipts.
+    loadEmptyCalculationCatalogue(localVol);
+    const loadedCatalogue = cp.execFileSync('docker', ['run', '--rm', '-v', `${localVol}:/app/server/prisma`, IMAGE_TAG, 'node', '-e',
+        `const Database=require('better-sqlite3'),installer=require('./scripts/install_calculation_templates'),file='/app/server/prisma/dev.db';
+         const plan=installer.installCalculationTemplates({dbPath:file});
+         if(plan.ready||plan.classification!=='COMPLETE'||plan.plannedReferenceInsertCount!==11||plan.references.deferredReferenceCount!==0||plan.totalChanges!==0)
+           throw Error('199 later catalogue did not make exactly eleven references installable');
+         const db=new Database(file,{readonly:true,fileMustExist:true});try{
+           const excluded=new Set(['CalcTemplate','_schema_migrations']);
+           const tables=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all();
+           console.log(JSON.stringify({plan,schema:db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").all(),
+             rows:Object.fromEntries(tables.filter(r=>!excluded.has(r.name)).map(({name})=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`], { encoding: 'utf8' }).trim();
+    const beforeCatalogueRestart = JSON.parse(loadedCatalogue);
+    const catalogueContainer = registerContainer(`lims_199_catalogue_${TS}`), cataloguePort = await getFreePort();
+    cp.execFileSync('docker', ['run', '-d', '--name', catalogueContainer, '-p', `127.0.0.1:${cataloguePort}:3000`,
+        '-v', `${localVol}:/app/server/prisma`, '-e', 'DEPLOYMENT_MODE=local', '-e', 'PORT=3000', '-e', 'NODE_ENV=production',
+        '-e', 'ALLOW_PRISMA_DB_PUSH=false', '-e', 'ALLOW_AUTO_SEED=false', '-e', 'DISABLE_BACKGROUND_JOBS=true', IMAGE_TAG]);
+    await waitForHealth(cataloguePort, catalogueContainer);
+    cp.execFileSync('docker', ['stop', catalogueContainer]);
+    const afterCatalogueRestart = inspectCalculationInstallation(localVol, 11, 0);
+    if (JSON.stringify(afterCatalogueRestart.rows) !== JSON.stringify(beforeCatalogueRestart.rows) ||
+        JSON.stringify(afterCatalogueRestart.schema) !== JSON.stringify(beforeCatalogueRestart.schema) ||
+        beforeCatalogueRestart.receipts.some(row => !afterCatalogueRestart.receipts.some(after => JSON.stringify(row) === JSON.stringify(after))) ||
+        afterCatalogueRestart.receipts.length !== beforeCatalogueRestart.receipts.length + 11)
+        throw Error('199 later catalogue startup changed retained rows, schema or receipts');
+    fs.writeFileSync(path.join(tmpDir, '199-later-catalogue-proof.json'), JSON.stringify({ beforeCatalogueRestart, afterCatalogueRestart }));
+    console.log('  ✓ Explicit existing catalogue authorities → next shipped entrypoint adds exactly 11 inactive references/11 receipts; all old rows/schema/receipts retained; repeat NO_OP/byte-preserved');
 
     // ─────────────────────────────────────────────────────────────
     // SCENARIO 3: Interrupted-Init (Partial Seed Recovery) in Docker
@@ -1107,6 +1239,93 @@ async function runSuite() {
     const selectionProof=JSON.parse(selectionProofOutput);
     if(!selectionProof.retainedRowsPreserved)throw Error('192 rehearsal retained-data proof missing');
     console.log('  ✓ Owned #191 COMPLETE → #192 PRE_192 dry-run → COMPLETE; retained history unchanged, new selections 0, NO_OP writes 0');
+
+    // The supported baseline predates #272. Use its shipped additive owner
+    // before the #199 prerequisite check; never preinstall calculations here.
+    const rawInputProofOutput = cp.execFileSync('docker', ['run', '--rm',
+        '-v', `${repeatProofVolume}:/owned-272`, IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-272/dev.db',installer=require('./scripts/install_result_raw_input');
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const reader=new Database(dbPath,{readonly:true,fileMustExist:true});
+         const names=reader.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(row=>row.name);
+         const quote=name=>'"'+name.replaceAll('"','""')+'"';
+         const columns=Object.fromEntries(names.map(name=>[name,reader.prepare('PRAGMA table_xinfo('+quote(name)+')').all().map(row=>row.name)]));
+         const snapshot=db=>JSON.stringify(Object.fromEntries(names.map(name=>[name,
+           db.prepare('SELECT '+columns[name].map(quote).join(',')+' FROM '+quote(name)+' ORDER BY rowid').all()])));
+         const retained=snapshot(reader);reader.close();
+         const before=hash(),dry=installer.installResultRawInput({dbPath});
+         if(dry.classification!=='ABSENT'||dry.backfillCount!==0||dry.totalChanges!==0||hash()!==before)throw Error('272 owned dry-run differs');
+         const applied=installer.installResultRawInput({dbPath,apply:true});
+         const after=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try{
+           if(applied.classification!=='ALREADY_PRESENT'||applied.previousClassification!=='ABSENT'||applied.backfillCount!==0||
+             applied.counts.recordedRawInputs!==0||snapshot(after)!==retained||
+             after.pragma('integrity_check',{simple:true})!=='ok'||after.pragma('foreign_key_check').length)throw Error('272 owned original evidence differs');
+         }finally{after.close()}
+         const installed=hash(),again=installer.installResultRawInput({dbPath,apply:true});
+         if(again.mode!=='NO_OP'||again.totalChanges!==0||again.backfillCount!==0||hash()!==installed)throw Error('272 owned repeat differs');
+         console.log(JSON.stringify({dry,applied,again,allOriginalRowsFieldsAndReceiptsPreserved:true,noOpBytesPreserved:true}));`
+    ], { encoding: 'utf8', timeout: 120000 }).trim();
+    const rawInputProof = JSON.parse(rawInputProofOutput);
+    if (!rawInputProof.allOriginalRowsFieldsAndReceiptsPreserved || !rawInputProof.noOpBytesPreserved)
+        throw Error('272 owned prerequisite preservation proof missing');
+    console.log('  ✓ Owned #272 ABSENT → shipped additive rawInput owner → ALREADY_PRESENT; all old fields/receipts preserved, backfill0, repeat NO_OP bytes unchanged');
+
+    // #199 pin6090475511: this copy still has no calculation tables. Exercise
+    // the shipped default entrypoint, rather than preinstalling its successor.
+    loadEmptyCalculationCatalogue(repeatProofVolume);
+    const calculationBeforeOutput = cp.execFileSync('docker', ['run', '--rm',
+        '-v', `${repeatProofVolume}:/owned-199`, IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-199/dev.db',before=crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const dry=require('./scripts/install_calculation_templates').installCalculationTemplates({dbPath});
+         if(dry.classification!=='PRE_199'||dry.plannedReferenceInsertCount!==11||dry.references.deferredReferenceCount!==0||dry.plannedUnitInsertCount!==0||dry.totalChanges!==0||dry.backfillCount!==0||
+           crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex')!==before)throw Error('199 entrypoint predecessor differs');
+         const db=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
+           console.log(JSON.stringify({dry,rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`
+    ], { encoding: 'utf8' }).trim();
+    const calculationBefore = JSON.parse(calculationBeforeOutput);
+    const calculationContainer = registerContainer(`lims_199_entrypoint_${TS}`), calculationPort = await getFreePort();
+    cp.execFileSync('docker', ['run', '-d', '--name', calculationContainer,
+        '-p', `127.0.0.1:${calculationPort}:3000`, '-v', `${repeatProofVolume}:/app/server/prisma`,
+        '-e', 'DEPLOYMENT_MODE=global', '-e', 'PORT=3000', '-e', 'NODE_ENV=production',
+        '-e', 'ALLOW_PRISMA_DB_PUSH=false', '-e', 'ALLOW_AUTO_SEED=false', '-e', 'DISABLE_BACKGROUND_JOBS=true', IMAGE_TAG]);
+    await waitForHealth(calculationPort, calculationContainer);
+    cp.execFileSync('docker', ['stop', calculationContainer]);
+    const calculationStartupLog = cp.execFileSync('docker', ['logs', calculationContainer], { encoding: 'utf8' });
+    if (!calculationStartupLog.includes('Installing inactive calculation references and evidence guards') ||
+        !calculationStartupLog.includes('"previousClassification": "PRE_199"') ||
+        !calculationStartupLog.includes('CALCULATION_STARTUP_READY')) throw Error('199 default-entrypoint installation proof missing');
+    fs.writeFileSync(path.join(tmpDir, '199-default-entrypoint.log'), calculationStartupLog);
+    const calculationAfterOutput = cp.execFileSync('docker', ['run', '--rm',
+        '-v', `${repeatProofVolume}:/owned-199`, IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-199/dev.db',installer=require('./scripts/install_calculation_templates');
+         const ready=installer.assertCalculationStartupReady(dbPath),before=crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const again=installer.installCalculationTemplates({dbPath,apply:true});
+         if(!ready.ready||ready.references.installedReferenceCount!==11||ready.references.deferredReferenceCount!==0||ready.totalChanges!==0||again.mode!=='NO_OP'||again.totalChanges!==0||
+           crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex')!==before)throw Error('199 repeat changed bytes');
+         const db=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
+           if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw Error('199 integrity differs');
+           for(const table of ['CalcTemplateActivation','CalibrationCurve','CalibrationPoint','ResultCalculation'])
+             if(db.prepare('SELECT count(*) n FROM "'+table+'"').get().n!==0)throw Error('199 startup activated or backfilled calculations');
+           console.log(JSON.stringify({ready,again,noOpBytesPreserved:true,
+             rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`
+    ], { encoding: 'utf8' }).trim();
+    const calculationAfter = JSON.parse(calculationAfterOutput);
+    if (JSON.stringify(calculationAfter.rows) !== JSON.stringify(calculationBefore.rows) ||
+        calculationBefore.receipts.some(before => !calculationAfter.receipts.some(after => JSON.stringify(after) === JSON.stringify(before))))
+        throw Error('199 default entrypoint changed retained analytical, audit or receipt rows');
+    console.log('  ✓ calculation-default-entrypoint-pre199: PRE_199 → shipped default docker-entrypoint.sh → COMPLETE; inactive references 11, activations/backfill 0; retained evidence preserved; direct installer-module repeat NO_OP writes 0');
+    console.log(JSON.stringify({calculationEntrypointProof:{scenario:'calculation-default-entrypoint-pre199',repeatInvocation:'direct installer module (not a second entrypoint run)',dry:calculationBefore.dry,ready:calculationAfter.ready,
+        again:calculationAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:calculationAfter.noOpBytesPreserved}}));
 
     // 7. Upgrade: Run target image on the populated baseline volume
     const upgTargetContainer = registerContainer(`lims_c_upg_${TS}`);

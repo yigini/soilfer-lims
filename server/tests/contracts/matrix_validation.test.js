@@ -18,6 +18,7 @@ describe('Sample Matrix Cross-Parameter Validation Contract', () => {
     let techToken, sampleId;
 
     beforeAll(async () => {
+        await require('../setup').ensureTestLab('LAB-MX', 'GTM');
         techToken = await getAuthToken('LAB_TECHNICIAN', 'LAB-MX', ['GTM'], ['MX-PROJ']);
 
         const s = await createSampleFixture(prisma, { data: { id: `SMP-MX-${Date.now()}`,

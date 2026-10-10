@@ -4,11 +4,12 @@ const { randomUUID } = require('node:crypto');
 const prisma = require('../../prisma');
 const SyncService = require('../../services/syncService');
 const { transitionWorkItem } = require('../../services/workItemStateService');
-const { getAuthToken } = require('../setup');
+const { getAuthToken, ensureTestLab } = require('../setup');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const labId = 'LAB-OFFLINE-STATE-179', analysis = 'OFFLINE_STATE_179';
 let actor, manager;
 beforeAll(async () => {
+    await ensureTestLab(labId, 'TEST');
     actor = jwt.decode(await getAuthToken('LAB_TECHNICIAN', labId));
     manager = jwt.decode(await getAuthToken('LAB_MANAGER', labId));
     await prisma.analysis.create({ data: { code: analysis, name: 'Offline state numeric method', units: 'mg/kg', prerequisites: '[]' } });

@@ -36,6 +36,9 @@ model User {
   createdWorkItems   WorkItem[] @relation("AssignedBy")
   submissions        Submission[]
   analyticalBatches  Batch[] @relation("BatchAnalyst")
+  calcActivations    CalcTemplateActivation[]
+  calibrationCurves CalibrationCurve[]
+  resultCalculations ResultCalculation[]
   
   sentMessages       Message[]  @relation("SentMessages")
   receivedMessages   Message[]  @relation("ReceivedMessages")
@@ -436,6 +439,7 @@ model Batch {
   events      BatchEvent[]
   workAttempts WorkAttempt[]
   reagentLots BatchReagentLot[]
+  calibrationCurves CalibrationCurve[]
 }
 
 // #194 pin6072013517: retained links, never an inventory consumption record.
@@ -476,6 +480,8 @@ model BatchAnalyte {
   provenance              String
   legacyMembershipFrozen  Boolean @default(false)
   legacySource            String?
+
+  calibrationCurves       CalibrationCurve[]
 
   @@unique([batchId, analysisCode])
   @@index([labId, analysisCode, methodologyId])
@@ -716,6 +722,9 @@ model Lab {
   nonconformityReports NonconformityReport[]
   batchReagentLots    BatchReagentLot[]
   resultOverrideRequests ResultOverrideRequest[]
+  calcTemplates      CalcTemplate[]
+  calcActivations    CalcTemplateActivation[]
+  calibrationCurves CalibrationCurve[]
 }
 
 model LabPolicy {
@@ -1211,6 +1220,7 @@ model Result {
   updatedAt     DateTime  @updatedAt
 
   evidenceEvents ResultEvidenceEvent[]
+  calculation    ResultCalculation?
 
   @@index([sampleId, param, isCurrent])
   @@index([batchId])
@@ -1246,6 +1256,9 @@ model Unit {
 
   analyses     Analysis[]
   referenceValues ReferenceValue[]
+  calcTemplates   CalcTemplate[]
+  resultCalculations ResultCalculation[] @relation("ResultReportingUnit")
+  nativeCalculations ResultCalculation[] @relation("ResultNativeUnit")
 }
 
 model MethodReference {
@@ -1311,6 +1324,8 @@ model Analysis {
   qcRules            QcRule[]
   referenceValues    ReferenceValue[]
   resultOverrideRequests ResultOverrideRequest[]
+  calcTemplates      CalcTemplate[]
+  calcActivations    CalcTemplateActivation[]
 }
 
 model ExternalMapping {
@@ -1358,6 +1373,150 @@ model Methodology {
   referenceValues  ReferenceValue[]
   batchAnalytes    BatchAnalyte[]
   resultOverrideRequests ResultOverrideRequest[]
+  calcTemplates    CalcTemplate[]
+  calcActivations  CalcTemplateActivation[]
+  calibrationCurves CalibrationCurve[]
+}
+
+// #199 pins6083098510/6083312978: additive, immutable definitions and
+// per-Result evidence. The release SQL owns shape/chain/write-once guards.
+model CalcTemplate {
+  id               String @id
+  templateKey      String
+  labId            String?
+  parentTemplateId String?
+  version          Int
+  analysisCode     String
+  methodologyId    String?
+  variant          String
+  inputs           String
+  parameters       String
+  curve            String?
+  formulaModule    String
+  outputUnit       String
+  outputDecimals   Int?
+  precisionSource  String?
+  status           String
+  sourceCitation   String
+  createdBy        String
+  createdAt        DateTime @default(now())
+  reason           String
+  lab              Lab? @relation(fields: [labId], references: [id], onDelete: Restrict)
+  analysis         Analysis @relation(fields: [analysisCode], references: [code], onDelete: Restrict)
+  methodology      Methodology? @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  reportingUnit    Unit @relation(fields: [outputUnit], references: [code], onDelete: Restrict)
+  parent           CalcTemplate? @relation("CalcTemplateParent", fields: [parentTemplateId], references: [id], onDelete: Restrict)
+  children         CalcTemplate[] @relation("CalcTemplateParent")
+  activations      CalcTemplateActivation[]
+  calculations     ResultCalculation[]
+  calibrationCurves CalibrationCurve[]
+
+  @@unique([templateKey, labId, version])
+  @@index([labId, analysisCode, methodologyId])
+}
+
+model CalcTemplateActivation {
+  id                 String @id
+  labId              String
+  analysisCode       String
+  methodologyId      String?
+  templateId         String
+  templateVersion    Int
+  action             String
+  activatedBy        String
+  activatedAt        DateTime @default(now())
+  reason             String
+  verifiedAgainstSop Boolean
+  supersedesId       String? @unique
+  lab                Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  analysis           Analysis @relation(fields: [analysisCode], references: [code], onDelete: Restrict)
+  methodology        Methodology? @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  template           CalcTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  actor              User @relation(fields: [activatedBy], references: [username], onDelete: Restrict)
+  supersedes         CalcTemplateActivation? @relation("CalcActivationChain", fields: [supersedesId], references: [id], onDelete: Restrict)
+  successor          CalcTemplateActivation? @relation("CalcActivationChain")
+  calculations       ResultCalculation[]
+
+  @@index([labId, analysisCode, methodologyId])
+}
+
+model CalibrationCurve {
+  id                     String @id
+  labId                  String
+  batchId                String
+  batchAnalyteId         String
+  methodologyId          String
+  executedMethodRevision String
+  templateId             String
+  templateVersion        Int
+  revision               Int
+  supersedesId           String? @unique
+  slope                  Float?
+  intercept              Float?
+  r                      Float?
+  rSquared               Float?
+  pointCount             Int
+  levelCount             Int
+  minPointsApplied       Int
+  minRApplied            Float
+  thresholdSource        String
+  status                 String
+  failReason             String?
+  recordedBy             String
+  recordedAt             DateTime @default(now())
+  reason                 String?
+  lab                    Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  batch                  Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  batchAnalyte           BatchAnalyte @relation(fields: [batchAnalyteId], references: [id], onDelete: Restrict)
+  methodology            Methodology @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  template               CalcTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  actor                  User @relation(fields: [recordedBy], references: [username], onDelete: Restrict)
+  supersedes             CalibrationCurve? @relation("CalibrationCurveChain", fields: [supersedesId], references: [id], onDelete: Restrict)
+  successor              CalibrationCurve? @relation("CalibrationCurveChain")
+  points                 CalibrationPoint[]
+  calculations           ResultCalculation[]
+
+  @@unique([batchId, batchAnalyteId, revision])
+  @@index([labId, batchId, batchAnalyteId])
+}
+
+model CalibrationPoint {
+  curveId               String
+  ordinal               Int
+  standardConcentration Float
+  response              Float
+  curve                 CalibrationCurve @relation(fields: [curveId], references: [id], onDelete: Restrict)
+
+  @@id([curveId, ordinal])
+}
+
+model ResultCalculation {
+  id              String @id
+  resultId        String @unique
+  templateId      String
+  templateVersion Int
+  activationId    String
+  inputs          String
+  parameters      String
+  intermediate    String
+  nativeValue     Float
+  nativeUnit      String
+  conversionFactor Float
+  unitConversion  String
+  unroundedOutput Float
+  output          Float
+  outputUnit      String
+  curveId         String?
+  engineVersion   String
+  computedBy      String
+  computedAt      DateTime @default(now())
+  result          Result @relation(fields: [resultId], references: [id], onDelete: Restrict)
+  template        CalcTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  activation      CalcTemplateActivation @relation(fields: [activationId], references: [id], onDelete: Restrict)
+  curve           CalibrationCurve? @relation(fields: [curveId], references: [id], onDelete: Restrict)
+  reportingUnit   Unit @relation("ResultReportingUnit", fields: [outputUnit], references: [code], onDelete: Restrict)
+  nativeUnitCatalogue Unit @relation("ResultNativeUnit", fields: [nativeUnit], references: [code], onDelete: Restrict)
+  actor           User @relation(fields: [computedBy], references: [username], onDelete: Restrict)
 }
 
 // #184: each certificate/lot has its own material; assigned values are immutable.

@@ -220,6 +220,11 @@ function beforeGuards(options) {
             // #197 adds this exact table after the captured historical schema.
             // Keep the literal DDL and every other expected gap unchanged.
             expected.push({ table: 'ResultOverrideRequest', missingTable: true });
+            // #199 pin6088661994: exactly five additive tables; partial datamodels still fail.
+            const calculationTables = ['CalcTemplate', 'CalcTemplateActivation', 'CalibrationCurve', 'CalibrationPoint', 'ResultCalculation'];
+            const calculationModels = calculationTables.filter(table => modelNames.includes(table));
+            assert.ok(calculationModels.length === 0 || calculationModels.length === calculationTables.length, 'Generated calculation datamodel is partial.');
+            if (calculationModels.length) expected.push(...calculationTables.map(table => ({ table, missingTable: true })));
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }

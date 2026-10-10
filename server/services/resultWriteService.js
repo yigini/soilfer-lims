@@ -10,6 +10,7 @@ const { validateNumericMethod, validateTextureFractions } = require('./workbench
 const { TransitionError } = rules;
 const { canonicalWorkItemWhere } = require('./workAttemptContract');
 const { allocateExecution,insertExecution } = require('./workAttemptWriteService');
+const calculationService = require('./resultCalculationService');
 const TEXTURE_ANALYSES = new Set(['TEXTURE', 'SAND', 'SILT', 'CLAY', 'pSA', 'PSA', 'textureSum']);
 const FRACTIONS = ['SAND', 'SILT', 'CLAY'];
 const ATTEMPT_ERRORS = ['RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMATCH', 'RESULT_ATTEMPT_REFERENCED'];
@@ -18,7 +19,7 @@ const ATTEMPT_ERRORS = ['RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMA
 // batchId is retained only to compare with the server-derived batch in context.
 function selectMeasurement(measurement) {
     if (!measurement || typeof measurement !== 'object') return measurement;
-    return Object.fromEntries(['param', 'value', 'unit', 'methodologyId', 'equipmentId', 'basis', 'overrideReason', 'overrideRequestId', 'replicateNo', 'batchId']
+    return Object.fromEntries(['param', 'value', 'unit', 'methodologyId', 'equipmentId', 'basis', 'overrideReason', 'overrideRequestId', 'replicateNo', 'batchId', 'calculation']
         .filter(key => Object.hasOwn(measurement, key)).map(key => [key, measurement[key]]));
 }
 
@@ -254,7 +255,7 @@ async function cacheResult(tx, item, text) {
 
 // #191: a correction appends within the actual recorded attempt. Neither its
 // execution/readiness evidence nor another replicate is replaced or refilled.
-async function appendAttemptCorrection(tx, { item, sample, attempt, target, actor, value }) {
+async function appendAttemptCorrection(tx, { item, sample, attempt, target, actor, value, calculation }) {
     rules.requireTransaction(tx);
     const original = await tx.result.findFirst({ where: { id: target.id, attemptId: attempt.id, isCurrent: true, supersededBy: null } });
     const owner = await tx.workAttempt.findUnique({ where: { id: attempt.id }, include: { workItem: { include: { sample: true } } } });
@@ -286,9 +287,14 @@ async function appendAttemptCorrection(tx, { item, sample, attempt, target, acto
     const ctx = { sample,item,attemptId:attempt.id,correctionTargetId:original.id,correctionOriginalUpdatedAt:original.updatedAt,actor,performedBy:rules.actorName(actor),labId,
         analysis,method,methodId:original.methodologyId,batchId:original.batchId,replicateNo:original.replicateNo,
         basis:original.basis,equipmentId:original.equipmentId,equipmentReadiness,equipmentReadinessText:original.equipmentReadiness,source:'measurement' };
-    const measurement = { param:original.param,value,unit:original.unit,replicateNo:original.replicateNo }, now = new Date();
-    const values = await numericValues(tx,ctx,measurement);
+    const measurement = { param:original.param,value,unit:original.unit,replicateNo:original.replicateNo,calculation }, now = new Date();
+    const format = await getNumberFormat(ctx.labId, { db: tx, analysisCode: ctx.analysis.code, methodologyId: ctx.methodId });
+    const evidence = await calculationService.prepareCorrection(tx,ctx,original,measurement,format);
+    const values = await numericValues(tx,ctx,measurement,null,format,evidence);
+    if (evidence?.selected.curve && evidence.calculated.intermediate.aboveRange)
+        values.flags = JSON.stringify([...new Set([...JSON.parse(values.flags || '[]'),'ABOVE_RANGE'])]);
     const row = await appendResult(tx,ctx,measurement,{...values,provenance:original.provenance},now);
+    await calculationService.freeze(tx,ctx,row,evidence,now);
     if (row.param === item.analysis) await cacheResult(tx,item,row.value);
     return row;
 }
@@ -302,10 +308,10 @@ function numericReportingUnit(ctx, measurement) {
     return unit;
 }
 
-async function numericValidationContext(tx, ctx, measurement, parsedValue = null, numberFormat = null) {
+async function numericValidationContext(tx, ctx, measurement, parsedValue = null, numberFormat = null, calculationEvidence = null) {
     const unit = numericReportingUnit(ctx, measurement);
     const resolved = await require('./resultValueRulesService').resolveNumericValueRules(tx, {
-        labId: ctx.labId, analysis: ctx.analysis, method: ctx.method, unit });
+        labId: ctx.labId, analysis: ctx.analysis, method: ctx.method, unit, calibrationCurve: calculationEvidence?.selected.curve });
     const format = numberFormat || resolved.numberFormat;
     const validation = validateNumericMethod(measurement.value, resolved.rules, format, parsedValue);
     // Fixed rule keys and sorted flags give a stable hash of the actual
@@ -324,11 +330,14 @@ async function resolveResultValidationContext(tx, options) {
         throw new TransitionError('Use the correction route for a recorded cell.', 409, 'ATTEMPT_CORRECTION_REQUIRED');
     }
     await validateExecutionReadiness(tx, ctx);
-    return { ctx, ...await numericValidationContext(tx, ctx, selected.measurement) };
+    const calculated = await calculationService.prepareCalculation(tx, ctx, selected.measurement,
+        await getNumberFormat(ctx.labId, { db: tx, analysisCode: ctx.analysis.code, methodologyId: ctx.methodId }));
+    return { ctx, ...await numericValidationContext(tx, ctx, calculated
+        ? {...selected.measurement, unit:calculated.calculated.outputUnit} : selected.measurement, null, null, calculated) };
 }
 
-async function numericValues(tx, ctx, measurement, parsedValue=null, numberFormat=null) {
-    const resolved = await numericValidationContext(tx, ctx, measurement, parsedValue, numberFormat);
+async function numericValues(tx, ctx, measurement, parsedValue=null, numberFormat=null, calculationEvidence=null) {
+    const resolved = await numericValidationContext(tx, ctx, measurement, parsedValue, numberFormat, calculationEvidence);
     const { validation, unit } = resolved;
     const approvedRequest = measurement.overrideRequestId
         ? await require('./resultOverrideService').matchApproval(tx,ctx,measurement,resolved) : null;
@@ -411,19 +420,51 @@ async function writeResultsExecutionChecked(tx, options) {
         ctx.attemptId=ctx.recordedAttempt.id;ctx.equipmentReadiness=evidence.equipmentReadiness ?? null;ctx.equipmentReadinessText=snapshot;
     }
     const format=await getNumberFormat(ctx.labId,{db:tx,analysisCode:ctx.analysis.code,methodologyId:ctx.methodId});
-    const values=[];
-    for(const measurement of prepared)values.push(await numericValues(tx,ctx,measurement,null,format));
+    const values=[], calculations=[];
+    for(const measurement of prepared) {
+        const calculated = await calculationService.prepareCalculation(tx,ctx,measurement,format);
+        calculations.push(calculated);
+        const value = await numericValues(tx,ctx,calculated ? {...measurement,unit:calculated.calculated.outputUnit} : measurement,null,format,calculated);
+        if (calculated?.selected.curve && calculated.calculated.intermediate.aboveRange)
+            value.flags = JSON.stringify([...new Set([...JSON.parse(value.flags),'ABOVE_RANGE'])]);
+        values.push(value);
+    }
     const evidence={source:ctx.source,param:prepared[0].param,rawValue:values[0].rawInput,normalizedValue:values[0].numericValue,
         qualifier:values[0].censoring==='NONE'?null:values[0].censoring,recordedAt:now.toISOString(),resultId:prepared[0].id,
         sourceResultIds:prepared.map(row=>row.id),measurements:prepared.map((row,index)=>({resultId:row.id,replicateNo:Number(row.replicateNo ?? 1),
             rawValue:values[index].rawInput,normalizedValue:values[index].numericValue,censoring:values[index].censoring}))};
     if(!ctx.recordedAttempt)await insertExecution(tx,ctx,allocation,evidence,now,options.attemptMetadata);
     const rows=[];
-    for(const [index,measurement] of prepared.entries())rows.push(await appendResult(tx,{...ctx,replicateNo:Number(measurement.replicateNo ?? 1)},measurement,values[index],now));
+    for(const [index,measurement] of prepared.entries()) {
+        const row = await appendResult(tx,{...ctx,replicateNo:Number(measurement.replicateNo ?? 1)},measurement,values[index],now);
+        await calculationService.freeze(tx,ctx,row,calculations[index],now);
+        rows.push(row);
+    }
     if(ctx.recordedAttempt)await require('./workAttemptEventService').appendAttemptEvent(tx,ctx.item,ctx.recordedAttempt.id,ctx.actor,
         {action:'REPLICATE_ADDED',from:'RECORDED',to:'RECORDED',newResultIds:rows.map(row=>row.id)});
     if (!options.deferCache) await cacheResult(tx, ctx.item, rows.at(-1).value);
     return rows;
+}
+
+async function previewResultCalculation(db, { sampleId, workItemId, actor, inputs, measurement }) {
+    return rules.inTransaction(db, async tx => {
+        const item = await tx.workItem.findUnique({ where: { id: workItemId } });
+        if (!item || item.sampleId !== sampleId) throw new TransitionError('Choose the sample work item.',409,'RESULT_WORKITEM_REQUIRED');
+        const ctx = await context(tx,{sampleId,workItemId,actor,measurement:{...selectMeasurement(measurement),param:item.analysis},allowRecordedReplicates:true});
+        ctx.actor = actor;
+        await validateExecutionReadiness(tx,ctx);
+        if (measurement) {
+            const numberFormat=await getNumberFormat(ctx.labId,{db:tx,analysisCode:ctx.analysis.code,methodologyId:ctx.methodId});
+            const evidence=await calculationService.prepareCalculation(tx,ctx,measurement,numberFormat);
+            if(!evidence)return {active:null,template:null,calculation:null};
+            const {selected,calculated}=evidence;
+            return {active:{activationId:selected.activationId,templateId:selected.templateId,templateVersion:selected.templateVersion},
+                template:selected.template,curve:selected.curve,numberFormat,units:selected.units,calculation:calculated,
+                calculationEvidence:{...calculated,template:selected.template,templateId:selected.templateId,templateVersion:selected.templateVersion,
+                    activationId:selected.activationId,parameters:selected.template.parameters,curveId:selected.curve?.id || null,curve:selected.curve}};
+        }
+        return calculationService.preview(tx,ctx,inputs);
+    });
 }
 
 // Internal spectral ingestion uses an explicit option; a typed API measurement
@@ -629,4 +670,4 @@ function createRawResultFixture(db, data) {
 
 module.exports = { writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
     writeResultsExecution, appendAttemptCorrection, recordedExecution, assertRecordedResultSave,
-    createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError, resolveResultRunContext, resolveResultValidationContext };
+    createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError, resolveResultRunContext, previewResultCalculation, resolveResultValidationContext };

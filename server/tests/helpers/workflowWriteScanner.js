@@ -36,6 +36,11 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         loaderSha256:'f59d8614213b1949216d172fd32589da7f1c733c2a63ae2b23a18f41f8365026',
         directory:'20261009000300_result_override_requests',sqlSha256:'35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9',
         boundary:'-- Contract guards'}),
+    // #199: inspect the exact additive source; no runtime writer exemption.
+    Object.freeze({ functionName: 'loadCalculationTemplateMigrationSource', loader: 'services/calculationTemplateMigrationSource.js',
+        loaderSha256: '25e9302c060d9ffd3a7ed73f1497232e3a04e448201022f5fca373afbb865cbb',
+        directory: '20261009000400_calculation_templates', sqlSha256: '84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8',
+        boundary: '-- Contract guards' }),
     // #272 pin6087372517: inspect only the unchanged rawInput additive DDL.
     Object.freeze({ functionName: 'loadResultRawInputMigrationSource', loader: 'services/resultRawInputMigrationSource.js',
         loaderSha256: '9b421ca380840aad87482d52f1f681c861ee0d536016e21a755d488cca090b56',
@@ -136,6 +141,22 @@ const ATTEMPT_FIXTURE = Object.freeze({
     }),
     orphanTest: 'a literal pre-190 measured orphan refuses the installer and COMPLETE startup without writes'
 });
+// #199 pin6088661994: one digest-bound factory/export, one exact caller.
+const CALCULATION_FIXTURE = Object.freeze({
+    file: 'tests/helpers/calculationHistoricalFixture.js', exportName: 'createPre199CalculationFixture',
+    sha256: 'c30a45823719903ffcb0a95326af62955374a5ef58a9ef7b846fc0545b6585ff',
+    ddl: 'tests/helpers/fixtures/pre199_full_application_schema.sql',
+    ddlSha256: '33f558c18a0b47c806989e6b83eca2ce15923df9c27caf5036cbe11c4420b114',
+    caller: 'tests/contracts/audit_4_6_calculation_install.test.js'
+ });
+// #199 pins6089156077/6090475511: catalogue prerequisites and the real installer only.
+const CALCULATION_PREREQUISITES = Object.freeze({
+    file: 'tests/helpers/calculationReleasePrerequisites.js', exportName: 'installCalculationReleasePrerequisites',
+    sha256: 'c8dcb032ed0a8b8d0cc206bdefb29ccb10dc8a9b4e89926628e20df9ead31e04',
+    callers: ['tests/helpers/qcGateFixture.js', 'tests/helpers/normalizedQcFixture.js', 'tests/helpers/repeatQcPredecessors.js',
+        'tests/contracts/audit_2_3_native_runs.test.js', 'tests/contracts/audit_1_2_guard_installer.test.js',
+        'tests/contracts/deployment_readiness_bootstrap.test.js']
+});
 // #272 pin6087435363: one closed, no-argument baseline factory and caller.
 const RAW_INPUT_FIXTURE = Object.freeze({
     file: 'tests/helpers/rawInputHistoricalFixture.js', exportName: 'createRawInputSupportedBaselineFixture',
@@ -149,6 +170,16 @@ function scanSource(source, filename, exceptions = []) {
     const violations = [];
     const report = (node, code, detail) => violations.push({ file: filename, line: node?.loc?.start?.line || node?.loc?.line || 1, code, detail });
     let validAttemptFixture = false;
+    let validCalculationFixture = false;
+    if (filename === CALCULATION_PREREQUISITES.file && createHash('sha256').update(source).digest('hex') !== CALCULATION_PREREQUISITES.sha256)
+        report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pinned calculation prerequisite helper differs.');
+    if (filename === CALCULATION_FIXTURE.file) {
+        try {
+            validCalculationFixture = createHash('sha256').update(source).digest('hex') === CALCULATION_FIXTURE.sha256 &&
+                createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', CALCULATION_FIXTURE.ddl))).digest('hex') === CALCULATION_FIXTURE.ddlSha256;
+        } catch { validCalculationFixture = false; }
+        if (!validCalculationFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pinned #199 factory or pre-199 DDL digest differs.');
+    }
     let validRawInputFixture = false;
     if (filename === RAW_INPUT_FIXTURE.file) {
         try {
@@ -598,6 +629,7 @@ function scanSource(source, filename, exceptions = []) {
     function authorized(p, entities, operation) {
         const name = owner(p);
         if (!exportedNames.has(name)) return false;
+        if (validCalculationFixture && name === CALCULATION_FIXTURE.exportName) return true;
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName) return true;
         if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName) return true;
         const removal = ['delete', 'deleteMany'].includes(operation);
@@ -608,6 +640,7 @@ function scanSource(source, filename, exceptions = []) {
     }
     function resultProbe(p) {
         const name = owner(p);
+        if (validCalculationFixture && name === CALCULATION_FIXTURE.exportName && exportedNames.has(name)) return true;
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName && exportedNames.has(name)) return true;
         if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName && exportedNames.has(name)) return true;
         return exportedNames.has(name) && exceptions.some(entry => entry.file === filename && entry.exportName === name);
@@ -632,6 +665,20 @@ function scanSource(source, filename, exceptions = []) {
             const root = path.resolve(__dirname, '../..');
             const resolved = path.relative(root, path.resolve(root, path.dirname(filename), specifier))
                 .replace(/\\/g, '/').replace(/\.(?:js|cjs)$/, '');
+            if (resolved === CALCULATION_PREREQUISITES.file.replace(/\.js$/, '')) {
+                const declaration = p.parentPath;
+                const allowed = CALCULATION_PREREQUISITES.callers.includes(filename) && declaration.isVariableDeclarator() &&
+                    declaration.get('id').isObjectPattern() && declaration.get('id.properties').length === 1 &&
+                    declaration.get('id.properties').every(property => {
+                        if (!property.isObjectProperty() || property.node.computed || !property.get('value').isIdentifier() ||
+                            (property.node.key.name || property.node.key.value) !== CALCULATION_PREREQUISITES.exportName) return false;
+                        const binding = declaration.scope.getBinding(property.node.value.name);
+                        return binding && binding.constantViolations.length === 0 && binding.referencePaths.length > 0 &&
+                            binding.referencePaths.every(reference => reference.key === 'callee' && reference.parentPath.isCallExpression() &&
+                                reference.parentPath.get('arguments').length === 1 && reference.parentPath.get('arguments.0').isIdentifier());
+                    });
+                if (!allowed) report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+            }
             if (resolved === COMPOSITE_FIXTURE.file.replace(/\.js$/, '')) {
                 if (!filename.startsWith('tests/')) {
                     report(p.node, 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
@@ -671,6 +718,8 @@ function scanSource(source, filename, exceptions = []) {
                 if (!callerAllowed || !namedOrphan) report(p.node,
                     filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             }
+            if (resolved === CALCULATION_FIXTURE.file.replace(/\.js$/, '') && filename !== CALCULATION_FIXTURE.caller)
+                report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             if (resolved === RAW_INPUT_FIXTURE.file.replace(/\.js$/, '') && filename !== RAW_INPUT_FIXTURE.caller) {
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             }

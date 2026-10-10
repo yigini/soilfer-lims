@@ -491,6 +491,7 @@ exports.getQueue = async (req, res) => {
         // Group by analysis
         const groupsMap = {};
         const numberFormats = new Map();
+        const calculationSelections = new Map();
         for (const item of items) {
             const code = item.analysis;
             const labId = item.sample?.assignedLab || item.assignedLab || item.labId;
@@ -544,6 +545,15 @@ exports.getQueue = async (req, res) => {
                     labId, analysis: valueAnalyses.get(code), method: valueMethods.get(item.methodologyId) || null
                 }) : null;
 
+            const calculationScope = JSON.stringify([labId,code,item.methodologyId || null]);
+            if (!calculationSelections.has(calculationScope)) {
+                const active = isSpectral || groupsMap[code].category === 'Operational Gates' ? null :
+                    await require('../services/policyService').calcTemplate(labId,{analysisCode:code,methodologyId:item.methodologyId || null},{db:prisma});
+                const template = active && await prisma.calcTemplate.findUnique({where:{id:active.templateId}});
+                calculationSelections.set(calculationScope, active ? {...active,
+                    requiresCurve:Boolean(require('../services/calculationTemplateService').decode(template).curve)} : null);
+            }
+            if (valueContext && calculationSelections.get(calculationScope)?.requiresCurve) valueContext.rules.calibrationMax = null;
             groupsMap[code].items.push({
                 id: item.id,
                 workItemId: item.id,
@@ -556,6 +566,7 @@ exports.getQueue = async (req, res) => {
                 valueRules: valueContext?.rules || null,
                 dilutionOpportunity: editorKind === 'NUMERIC'
                     ? await require('../services/workbenchValueValidationService').dilutionOpportunity(prisma,item,user) : null,
+                calculationTemplate: calculationSelections.get(calculationScope),
                 projectCode: item.sample?.projectCode || null,
                 analysis: code,
                 analysisCode: code,
@@ -1104,6 +1115,7 @@ exports.batchSave = async (req, res) => {
                     const measurement = { param: item.analysis, value: entry.value, replicateNo: entry.replicateNo,
                         basis: entry.basis, methodologyId: item.methodologyId, equipmentId: entry.equipmentId,
                         overrideReason: entry.overrideReason,
+                        calculation:entry.calculation ?? entry.values?.calculation,
                         overrideRequestId: entry.overrideRequestId,
                         ...(Object.hasOwn(entry,'unit') && {unit:entry.unit}),
                         ...(Object.hasOwn(entry, 'batchId') && { batchId: entry.batchId }) };
@@ -1501,7 +1513,8 @@ exports.previewCompletion = async (req, res) => {
             let validation = { isValid: true, flags: [] };
             let approvalError = null;
             const isSpectralAnalysis = SPECTRAL_ACQUISITION_CODES.includes(item.analysis);
-            const isTextureAnalysis = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(item.analysis) || (entry.values != null);
+            const isTextureAnalysis = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(item.analysis) ||
+                (entry.values != null && !Object.hasOwn(entry.values,'calculation'));
             if (isSpectralAnalysis) {
                 validation = { isValid: false, flags: ['SPECTRAL_SCAN_REQUIRED'] };
             } else if (isTextureAnalysis) {
@@ -1523,6 +1536,26 @@ exports.previewCompletion = async (req, res) => {
 
             const blockers = [...readiness.blockers];
             const reasons = [...readiness.reasons];
+            let calculationPreview=null;
+            if (readiness.isReady && !isSpectralAnalysis && !isTextureAnalysis && item.category !== 'Operational Gates') {
+                const calculation=entry.calculation ?? entry.values?.calculation;
+                if(calculation != null || await require('../services/policyService').calcTemplate(labId,
+                    {analysisCode:item.analysis,methodologyId:item.methodologyId || null},{db:prisma})) {
+                    try {
+                        calculationPreview=await require('../services/resultWriteService').previewResultCalculation(prisma,
+                            {sampleId:item.sampleId,workItemId:item.id,actor:user,
+                                measurement:{param:item.analysis,value:entry.value,calculation,equipmentId:entry.equipmentId,
+                                    replicateNo:entry.replicateNo,basis:entry.basis}});
+                        if (calculationPreview.curve) validation = await require('../services/workbenchValueValidationService')
+                            .validateNumericEntry(prisma,item,user,entry,{calibrationCurve:calculationPreview.curve});
+                        if(calculationPreview.calculation?.intermediate.aboveRange)
+                            validation.flags=[...new Set([...validation.flags,'ABOVE_RANGE'])];
+                    } catch(error) {
+                        if(!error.statusCode)throw error;
+                        blockers.push(error.code);reasons.push(error.message);
+                    }
+                }
+            }
             if (approvalError) { blockers.push(approvalError.code);reasons.push(approvalError.message); }
             if (validation.nonOverridable) { blockers.push('CENSOR_LIMIT_BELOW_LOQ');reasons.push('A censoring limit must not be below the method LOQ.'); }
 
@@ -1593,6 +1626,8 @@ exports.previewCompletion = async (req, res) => {
                     analysis: item.analysis,
                     value: entry.value,
                     values: entry.values,
+                    ...(entry.calculation != null && {calculation:entry.calculation}),
+                    ...(calculationPreview?.calculationEvidence && {calculationEvidence:calculationPreview.calculationEvidence}),
                     checks: entry.checks,
                     basis: entry.basis || 'AIR_DRY',
                     replicateNo: entry.replicateNo || 1,

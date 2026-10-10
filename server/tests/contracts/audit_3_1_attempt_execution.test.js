@@ -21,7 +21,8 @@ beforeAll(async()=>{
     require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({dbPath:file,apply:true});
     client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
     await client.lab.create({data:{id:labId,code:labId,name:'Attempt execution laboratory',country:'TEST'}});
-    await client.unit.create({data:{code:'%',display:'%',quantityKind:'MASS_FRACTION',factorToBase:1}});
+    expect(await client.unit.findUnique({where:{code:'%'}}))
+        .toMatchObject(require('../../seeds/units').UNITS.find(row=>row.code==='%'));
     for(const code of ['AT190','TEXTURE','SAND','SILT','CLAY'])await client.analysis.create({data:{code,name:'Controlled '+code+' measurand',
         units:code==='AT190'?'g/kg':'%',validation:code==='TEXTURE'?'{"tolerance":2}':'{"type":"numeric"}',prerequisites:'[]'}});
 },60000);
