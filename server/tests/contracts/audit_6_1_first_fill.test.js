@@ -162,8 +162,9 @@ test('normal scientific retest review, reapproval and report generation preserve
   expect({status:approval.status,body:approval.body}).toMatchObject({status:200});
   const issued=await post('/api/reports/generate/'+item.sampleId);
   expect({status:issued.status,body:issued.body}).toMatchObject({status:200});
-  expect(issued.body).toMatchObject({status:'PUBLISHED',version:frozen.version+1,reportNumberBase:frozen.reportNumberBase,revision:frozen.revision+1});
-  const content=JSON.parse(issued.body.content);
+  const revised=await f.db.report.findUnique({where:{id:issued.body.id}});
+  expect(revised).toMatchObject({status:'PUBLISHED',version:frozen.version+1,reportNumberBase:frozen.reportNumberBase,revision:frozen.revision+1});
+  const content=JSON.parse(revised.content);
   expect(content.publication).toMatchObject({replacesReportId:frozen.id,issuer:{username:other.username}});
   expect(content.signedBy.username).toBe(other.username);
   expect(content.resultGroups[0].items[0]).toMatchObject({value:'7.3',sourceResultIds:[replacement.id]});
