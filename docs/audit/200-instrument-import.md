@@ -81,8 +81,28 @@ foreign-key insert before any #200 installation; that owned file is retained.
 The completed proof never disables foreign keys. Both rehearsals have zero
 Sample and Result rows; populated analytical preservation remains to be tested.
 
+After rebasing onto merged #201, the branch generates its own 92-model Prisma
+client. The scoped template owner and mounted workbench save/list routes now
+append instrument mappings and immutable revisions with MANAGE_EQUIPMENT,
+expected-version checks and audits. Identifier/analyte/input/unit/dilution/QC
+column choices are explicit; mappings contain no conversion or calculation.
+Historical fixture completeness accounts for exactly two new models and one
+nullable draft field, and the QC fixture invokes the actual additive installer.
+No historical literal, factory authority or old assertion changes.
+
+The six-file focused run passes all208 tests, zero skipped (18.860 s), including
+actual template transactions, mounted token/permission/scope routes, retained
+paste/source/installer tests and all105 scanner tests. Both the source owned
+database and working database SHA490b8c remain unchanged. This custom focused
+run is separate from the still-pending complete normal suite.
+
+Claude's entry-only QC pin6095469488 requires the same #186 owner, new observations
+and pending-state/event/audit writes only. Automatic evaluation, Result flags,
+references, corrections and evaluated-analyte entry are refused. The importer
+will implement this pin; no alternate measurement authority is introduced.
+
 Still unfinished: normal startup/Docker wiring and populated analytical
-preservation proof; template/preview/commit APIs; XLSX; the mapping/binding
+preservation proof; preview/commit APIs; XLSX; the mapping/binding
 wizard; complete 40 by four plus six native QC import; EXCH_CA/Olsen typed
 recording and activation/unit/binding refusal cases; normal full server tests,
 final build/lint, CI and Claude's audit. The importer must read input units

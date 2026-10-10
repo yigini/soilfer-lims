@@ -235,6 +235,13 @@ function beforeGuards(options) {
             assert.ok(amendmentModels.length===0||amendmentModels.length===amendmentTables.length,'Generated amendment datamodel is partial.');
             if(amendmentModels.length)expected.push({table:'SampleAmendment',fields:['requestPayload','version','priorApprovedBy','priorApprovedAt','selectedWorkItemIds']},
                 ...amendmentTables.map(table=>({table,missingTable:true})));
+            // #200 adds only these two models and one nullable draft pointer.
+            // The historical literals and every earlier expected gap stay fixed.
+            const importTables = ['ImportTemplate', 'InstrumentImportReceipt'];
+            const importModels = importTables.filter(table => modelNames.includes(table));
+            assert.ok(importModels.length === 0 || importModels.length === importTables.length, 'Generated import datamodel is partial.');
+            if (importModels.length) expected.push({ table: 'WorkItemDraft', fields: ['importReceiptId'] },
+                ...importTables.map(table => ({ table, missingTable: true })));
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }
