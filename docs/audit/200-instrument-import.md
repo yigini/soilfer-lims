@@ -166,7 +166,7 @@ fixtures, with no bypass, owner mocks, skipped or weakened tests:
 - ecf4c6d4:4 suites/**138 tests/0 skipped**,11.781s,PASS: import UI, existing paste/
   calculation UI, unchanged scanner. Real FormData, revisions, invalidation,
   permissions, refused commits and stale responses.
--8aeeb095:6 suites/**221 tests/0 skipped**,29.637s,PASS: populated preservation,
+- 8aeeb095:6 suites/**221 tests/0 skipped**,29.637s,PASS: populated preservation,
   actual commit/ICP/calculation/UI and scanner.
 - Client build PASS17.919s;lint PASS8.671s,**0 errors/same14 existing warnings**.
   Client source is unchanged afterecf4c6d4; existing bundle-size warning retained.

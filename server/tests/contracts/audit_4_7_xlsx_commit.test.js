@@ -166,7 +166,7 @@ test('the actual multipart compressed-size cap returns the pinned XLSX code on b
             expect(response.status).toBe(400); expect(response.body.code).toBe('IMPORT_XLSX_TOO_LARGE');
             expect(await f.state()).toEqual(before);
         }
-    });
+    }, { workbench: true });
 });
 
 test('malformed XML, macros, external parts and XML resource overflow refuse the real preview with zero writes', async () => {
