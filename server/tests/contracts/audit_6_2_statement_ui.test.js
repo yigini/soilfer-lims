@@ -2,19 +2,22 @@ const fs = require('node:fs'), path = require('node:path'), vm = require('node:v
 const esbuild = require('../../../client/node_modules/esbuild');
 const React = require('../../../client/node_modules/react');
 const { definition } = require('../../config/policyRegistry');
-const { IntlMessageFormat } = require('../../../client/node_modules/intl-messageformat');
+const formatter = { exports: {} };
+vm.runInNewContext(esbuild.buildSync({ entryPoints: [path.resolve(__dirname, '../../../client/src/utils/messageFormatter.js')],
+    bundle: true, platform: 'node', format: 'cjs', write: false }).outputFiles[0].text,
+    { module: formatter, exports: formatter.exports, console });
 const elements = tree => Array.isArray(tree) ? tree.flatMap(elements) : tree && typeof tree === 'object'
     ? [tree, ...elements(tree.props?.children)] : [];
 const filename = path.resolve(__dirname, '../../../client/src/components/lab/LabPolicies.jsx');
 const moduleObject = { exports: {} };
 vm.runInNewContext(esbuild.transformSync(fs.readFileSync(filename, 'utf8'), { loader: 'jsx', format: 'cjs' }).code,
     { module: moduleObject, exports: moduleObject.exports, require: name => name === 'react' ? React
-        : name === 'axios' ? require('../../../client/node_modules/axios') : {} });
+        : {} });
 const editor = moduleObject.exports.PolicyValueEditor, rule = definition('report.amendedStatement');
 
 test.each(['en', 'es', 'es-419', 'fr', 'pt'])('the %s template editor shows literal placeholder instructions and preserves the other locale strings', locale => {
     const pack = require('../../../client/src/translations/' + locale + '.json');
-    const t = (key, params = {}) => new IntlMessageFormat(key.split('.').reduce((value, part) => value?.[part], pack), locale).format(params);
+    const t = (key, params = {}) => formatter.exports.formatMessage(key.split('.').reduce((value, part) => value?.[part], pack), params, locale);
     const onChange = jest.fn(), initial = structuredClone(rule.localizedDefaults);
     const tree = editor({ definition: rule, value: initial, onChange, t });
     const help = elements(tree).find(node => node.type === 'p').props.children;
