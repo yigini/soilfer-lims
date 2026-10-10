@@ -3,7 +3,7 @@
 Target application commit: `042c04b54e7b3baa9f8c95e7f8d70b39daed2f91`.
 Last deployed application commit: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
 
-Current release status (October 10, 18:33 UTC): HELD at the required #191
+Current release status (October 10, 18:28 UTC): HELD at the required #191
 zero-blocked-owner gate. The complete merged-main fresh-copy rehearsal failed
 before #191 apply. One ACCEPTED WorkItem has a preexisting RECORDED attempt
 and an already published report. Claudio owns the separately reviewed
