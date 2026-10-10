@@ -89,6 +89,17 @@ Validation so far:
   assertions failed because of the unresolved-lab refusal; pin6093810127 resolves
   that authority explicitly. This failed log is retained; the corrected normal
   regression run is still pending.
+- Corrected normal setup regression: 11 suites / 273 tests passed, zero skipped
+  (50.992 s), including every unchanged matrix assertion, real direct startup,
+  new evidence/UI/policy/installer cases and existing security/wiring/scanners.
+  The template SHA stayed65d58934d45081f1e5366006be22a88e313f436c3b35bec95395e63ae47c05fe.
+
+The Docker readiness script now includes cross-check-installer-pre201 on its
+already owned #192-complete copy: classified dry/apply/readiness/repeated NO_OP
+checks retain all original rows, objects and receipts, with zero evaluations
+and backfills. Both invocations are explicitly direct installer-module calls;
+default-entrypoint health is covered separately by the existing scenarios.
+This new Docker proof remains pending final CI and is not a production run.
 
 Outstanding: final startup and existing-matrix regression verification, followed
 by a rebase after #199 is audited and merged. Full server tests and final CI have
