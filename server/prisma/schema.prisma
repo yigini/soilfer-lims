@@ -356,6 +356,8 @@ model WorkItemDraft {
   baseVersion   Int       @default(0)
   draftVersion  Int       @default(1)
   conflictValue String?   // Server value snapshot for conflict compare
+  importReceiptId String? // #200: no historical adoption or backfill.
+  importReceipt InstrumentImportReceipt? @relation(fields:[importReceiptId],references:[id],onDelete:Restrict,onUpdate:Restrict)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -728,6 +730,8 @@ model Lab {
   calcActivations    CalcTemplateActivation[]
   calibrationCurves CalibrationCurve[]
   crossCheckEvaluations CrossCheckEvaluation[]
+  importTemplates   ImportTemplate[]
+  instrumentImports InstrumentImportReceipt[]
 }
 
 model LabPolicy {
@@ -990,6 +994,44 @@ model EquipmentAsset {
   spectralScans      SpectralData[]
   batches            Batch[]
   resultOverrideRequests ResultOverrideRequest[]
+  importTemplates    ImportTemplate[]
+  instrumentImports  InstrumentImportReceipt[]
+}
+
+// #200 pins6091749530/6094747629: immutable configuration revisions and
+// retained source evidence. An import does not create analytical Results.
+model ImportTemplate {
+  id           String @id @default(uuid())
+  labId        String
+  lab          Lab @relation(fields:[labId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  instrumentId String
+  instrument   EquipmentAsset @relation(fields:[instrumentId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  name         String
+  version      Int
+  mapping      String
+  createdBy    String
+  createdAt    DateTime @default(now())
+  supersedesId String? @unique
+  supersedes   ImportTemplate? @relation("ImportTemplateRevision",fields:[supersedesId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  successor    ImportTemplate? @relation("ImportTemplateRevision")
+  imports      InstrumentImportReceipt[]
+}
+
+model InstrumentImportReceipt {
+  id              String @id @default(uuid())
+  labId           String
+  lab             Lab @relation(fields:[labId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  instrumentId    String
+  instrument      EquipmentAsset @relation(fields:[instrumentId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  templateId      String
+  template        ImportTemplate @relation(fields:[templateId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  templateVersion Int
+  sourceSha256    String
+  sourceName      String
+  mappingSnapshot String
+  importedBy      String
+  importedAt      DateTime @default(now())
+  drafts          WorkItemDraft[]
 }
 
 model EquipmentQualification {
