@@ -172,7 +172,7 @@ test.each(golden)('golden PDF %s preserves censoring, uncertainty, QC and public
   qcStatement:row.warning?'QC: PROCEED_WITH_WARNING · Reviewed blank warning':'QC: recorded decisions',
   resultGroups:[{categoryName:'Retained values',items:[{param:'SOC',name:'Soil organic carbon',value:row.value,unit:'g/kg',basis:'OVEN_DRY',
    reportedValueSelectionId:'saved-selection',decimalPlaces:2,censoring:row.censoring,method:'Executed WB',
-   uncertainty:row.uncertainty,flags:row.warning?['QC_WARN']:[],qcNotes:row.warning?['PROCEED_WITH_WARNING · Reviewed blank warning']:[]}]}],
+   interpretation:{label:row.interpretation},uncertainty:row.uncertainty,flags:row.warning?['QC_WARN']:[],qcNotes:row.warning?['PROCEED_WITH_WARNING · Reviewed blank warning']:[]}]}],
   methodologies:[{param:'SOC',method:'Executed WB',methodVersion:3,standard:'Retained laboratory SOP',reference:{citation:'Retained method reference'}}]};
  const pdf=await generateReportPdfBuffer(content);
  expect(pdf.subarray(0,5).toString()).toBe('%PDF-');
@@ -180,6 +180,31 @@ test.each(golden)('golden PDF %s preserves censoring, uncertainty, QC and public
  expect(calls.some(value=>/40.?C|QC.*met limits|GLOSOLAN Registered Laboratory/.test(value))).toBe(false);
  if(process.env.AUDIT_212_PDF_OUTPUT){const directory=path.resolve(process.env.AUDIT_212_PDF_OUTPUT);fs.mkdirSync(directory,{recursive:true});
   fs.writeFileSync(path.join(directory,row.name+'.pdf'),pdf);}
+});
+test.each(['en','es','es-419','fr','pt'])('saved interpretations retain their translated label and uncertainty in %s',async locale=>{
+ const labels=require('../../locales/'+locale+'.json').resultReports;
+ const calls=[],original=PDFDocument.prototype.text;
+ jest.spyOn(PDFDocument.prototype,'text').mockImplementation(function(value,x,y,options){
+  calls.push(String(value));return original.call(this,value,x,y,options);
+ });
+ const {getInterpretation}=require('../../services/pdfGenerator');
+ const storedOpinion='Retained reviewer opinion for this result';
+ expect(storedOpinion).not.toBe(getInterpretation('SOC','7.123456789','g/kg'));
+ const pdf=await generateReportPdfBuffer({meta:{locale},sample:{id:'OWNED-OPINION-212'},lab:{name:'Owned laboratory'},
+  resultGroups:[{categoryName:'Saved opinions',items:[
+   {param:'SOC',value:'7.123456789',unit:'g/kg',decimalPlaces:2,interpretation:{label:storedOpinion},
+    uncertainty:{state:'EXPANDED',mode:'EXPANDED_ABSOLUTE',value:0.25,coverageFactor:2}},
+   {param:'PH_H2O',value:'6.3',unit:'pH_units'},
+   {param:'SOC',value:'7.1',unit:'g/kg',interpretation:{label:null}},
+   {param:'SOC',value:'Saved unavailable reason',reportedMode:'NOT_REPORTABLE',interpretation:{label:'Unavailable opinion must not appear'}}
+  ]}]});
+ expect(pdf.subarray(0,5).toString()).toBe('%PDF-');
+ expect(calls).toContain(labels.expandedUncertainty);expect(calls).toContain('± 0.25 g/kg (k = 2)');
+ for(const opinion of [storedOpinion,getInterpretation('PH_H2O','6.3','pH_units'),labels.notStated])
+  expect(calls.some(text=>text.includes(`${labels.interpretation}: ${opinion}`))).toBe(true);
+ expect(calls.some(text=>text.includes(getInterpretation('SOC','7.123456789','g/kg')))).toBe(false);
+ expect(calls).toContain('Saved unavailable reason');
+ expect(calls.some(text=>text.includes('Unavailable opinion must not appear'))).toBe(false);
 });
 test.each(['en','es','es-419','fr','pt'])('wrapped approval and issuer evidence stays readable in %s',async locale=>{
  const labels=require('../../locales/'+locale+'.json').resultReports;
@@ -207,7 +232,7 @@ test.each(['en','es','es-419','fr','pt'])('wrapped approval and issuer evidence 
 
 test.each(['en','es','es-419','fr','pt'])('all report and uncertainty policy labels exist in %s',locale=>{
  const labels=require('../../locales/'+locale+'.json').resultReports;
- for(const key of ['notStated','expandedUncertainty','conditionOnReceipt','intakeNonconformities','analysisDates','sampling','issuedAt','approvalNotRecorded'])expect(labels[key]).toEqual(expect.any(String));
+ for(const key of ['notStated','interpretation','expandedUncertainty','conditionOnReceipt','intakeNonconformities','analysisDates','sampling','issuedAt','approvalNotRecorded'])expect(labels[key]).toEqual(expect.any(String));
  const item={value:'<0.5',reportedValueSelectionId:'saved',censoring:'BELOW_LOQ',decimalPlaces:6};
  expect(display.displayResult(item,labels)).toBe('<0.5 (LOQ)');expect(display.displayUncertainty(item,labels)).toBe('—');
  for(const file of ['../../locales/','../../../client/src/translations/'])for(const key of ['report_uncertaintyMode','report_uncertaintyCoverageFactor'])

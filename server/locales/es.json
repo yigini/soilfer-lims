@@ -98,6 +98,7 @@
     "issuedBy": "Emitido por",
     "issuerRole": "Rol del emisor",
     "notStated": "no indicado",
+    "interpretation": "Interpretación",
     "expandedUncertainty": "U (expandida)",
     "conditionOnReceipt": "Condición al recibir",
     "intakeNonconformities": "No conformidades de recepción",

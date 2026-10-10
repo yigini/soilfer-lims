@@ -226,7 +226,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             const col2 = startX + 155;        // Method (125pt)
             const col3 = startX + 285;        // Value (65pt)
             const col4 = startX + 355;        // Unit (55pt)
-            const col5 = startX + 415;        // Interpretation (108pt)
+            const col5 = startX + 415;        // Expanded uncertainty (100pt)
 
             // Table Header Row
             doc.rect(startX, currentY, pageWidth, 18).fill('#1E293B');
@@ -266,7 +266,13 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     const uncertaintyText = displayUncertainty(item, labels);
                     const uncertaintyHeight = doc.font('Helvetica').fontSize(7.5).heightOfString(uncertaintyText, { width: 100 });
                     const rowHeight=Math.max(16,valueHeight+8,uncertaintyHeight+8);
-                    const noteText=resultNotes(item, labels);
+                    // Keep the opinion frozen in the report payload. Historical
+                    // payloads without it retain the existing interpretation formatter.
+                    const interpretation = notReportable ? null : Object.hasOwn(item, 'interpretation')
+                        ? item.interpretation?.label : getInterpretation(item.param, item.value, item.unit);
+                    const noteText = [resultNotes(item, labels),
+                        notReportable ? null : `${labels.interpretation}: ${interpretation || labels.notStated}`
+                    ].filter(Boolean).join('\n');
                     const noteHeight=noteText ? doc.font('Helvetica').fontSize(7.5).heightOfString(noteText,{width:pageWidth-12})+8 : 0;
                     // Keep short explanations with their row. Long explanations
                     // flow across pages, reserving the publication footer.
