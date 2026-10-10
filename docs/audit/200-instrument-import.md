@@ -198,3 +198,19 @@ but failed11 new tests in their snapshot setup: WorkAttempt events are stored
 in AuditLog, not a separate WorkAttemptEvent model. The new snapshot now uses
 the actual AuditLog already included by the owned fixture. Assertions, owner
 guards and existing tests are unchanged; the original failed log is retained.
+
+The corrected draft group at32f70e7d passes four suites/144 tests, zero skipped
+(25.692 s). At24f4ba31 the normal seven-file group passes seven suites/173 tests,
+zero skipped (44.604 s), including actual multipart CSV preview/commit, exact raw
+draft/QC/receipt evidence, all-or-nothing multi-row refusals, unmatched rows,
+duplicate destinations, post-preview drafts, source/actor/signature changes,
+the complete existing draft integrity file and the unchanged scanner. Both
+protected database hashes remain unchanged. This is the bounded CSV proof,
+not the full40-by-four/XLSX/calculation acceptance or a full-suite claim.
+
+The preview and commit re-use the existing draft owner's read-only scope and
+readiness decision. A server-signed preview context binds actor/run/instrument/
+template/source hash and exact activations; commit re-reads them in the file's
+single transaction. A new receipt is created only with successful draft and
+entry-only QC writes. The upload has a16MiB memory resource cap, independent of
+laboratory batch/policy settings. CSV/TXT are implemented; XLSX is unfinished.
