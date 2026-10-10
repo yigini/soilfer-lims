@@ -1,4 +1,4 @@
-# Audit 4.8: cross-parameter checks (work in progress)
+# Audit 4.8: cross-parameter checks
 
 Scope: issue #201 and pins 6092380877, 6092654261, 6092909004, 6093661225 and 6093810127.
 
@@ -106,10 +106,19 @@ and backfills. Both invocations are explicitly direct installer-module calls;
 default-entrypoint health is covered separately by the existing scenarios.
 This new Docker proof remains pending final CI and is not a production run.
 
-Outstanding: final startup and existing-matrix regression verification, followed
-by a rebase after #199 is audited and merged. Full server tests and final CI have
-not yet run for the complete feature.
-No #201 PR, production changes, analytical/QC flag rewrites or backfills yet.
+After #199 merged, the branch was rebased onto main. The complete normal server
+run at dc3516cd82d1fd295402834a603c374c203ab94b passes all 324 suites and
+4,894 tests, zero skipped (2,344.410 s). It used the checkout's own 90-model
+client and normal global setup/teardown. The retained Help-only template remains
+SHA25665d58934d45081f1e5366006be22a88e313f436c3b35bec95395e63ae47c05fe.
+Current client build passes (32.26 s); lint passes (0 errors, 14 existing warnings).
+The prior full run passed 323 suites / 4,893 tests and found one retained startup
+fixture missing the real #201 installation. Its log is retained; the fixture now
+applies the actual installer with zero evaluation/backfill counts before all
+original startup assertions. That complete 25-test file also passes separately.
+The final documentation-only commit records these results; exact-head Linux CI,
+Docker readiness and Claude's audit remain required before merge. No production
+changes, analytical/QC flag rewrites or backfills have occurred.
 
 Deferred: EC/soluble-salts specification (#277). The old blocking texture gate
 has a stricter implicit tolerance than its message, parses text and ignores
