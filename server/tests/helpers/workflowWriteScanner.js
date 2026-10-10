@@ -38,7 +38,7 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         boundary:'-- Contract guards'}),
     // #199: inspect the exact additive source; no runtime writer exemption.
     Object.freeze({ functionName: 'loadCalculationTemplateMigrationSource', loader: 'services/calculationTemplateMigrationSource.js',
-        loaderSha256: 'e37503b280f678ab45d9980524203dd30dad6347bd1321291befc4e4644d929f',
+        loaderSha256: '25e9302c060d9ffd3a7ed73f1497232e3a04e448201022f5fca373afbb865cbb',
         directory: '20261009000400_calculation_templates', sqlSha256: '84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8',
         boundary: '-- Contract guards' }),
     // #272 pin6087372517: inspect only the unchanged rawInput additive DDL.

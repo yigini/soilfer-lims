@@ -84,7 +84,9 @@ const REFERENCES = frozen([
         [parameter('acidNormality', 'Standardized acid equivalent concentration', 'eq/L', 0.02,
             { ...kjeldahl, pages: [10], note: 'SOP-14 §9 example: 0.01 mol/L H2SO4 yields c(H+) = 0.02 mol/L; use the actual standardized H+ equivalent concentration in the local SOP.' }),
         parameter('nitrogenMgPerMilliMole', 'Nitrogen molar mass', 'mg/mmol', 14.0067, { ...kjeldahl, pages: [10] })],
-        'pct_mass', [kjeldahl], { sourceRule: { ...kjeldahl, pages: [11], pdfPage: 14, unit: 'Reported N in mg/g, g/kg or %N (the source reporting choices)', kind: 'CONDITIONAL_PRECISION',
+        'pct_mass', [kjeldahl], { sourceRule: { ...kjeldahl, pages: [11], pdfPage: 14,
+            unit: 'Not stated by the source. SOP-14 §9 (printed pp.10–11, PDF pp.13–14) permits mg/g or g/kg, or %N after division by ten; its precision thresholds do not specify the unit.',
+            kind: 'CONDITIONAL_PRECISION', executable: false, thresholdUnit: null,
             rule: 'The number of decimals reported must conform to the conventional rules of maintaining 3 digits:\n• values greater than 100, no decimal reported;\n• values between 10 and 100, 1 decimal (0.1) reported; and\n• values less than 10, 2 decimals (0.01) reported.' },
             notes: ['The equation produces mg/g or g/kg; division by ten yields native pct_mass. The source permits mg/g, g/kg or %N reporting. No threshold conversion or rounding is inferred for a different reporting unit.',
                 'Pin6087996018: conditional rounding is not executable in this release. A verified local clone must select a fixed reporting precision.'] })

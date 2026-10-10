@@ -48,3 +48,9 @@ into a lab/method scope, cites the local SOP, supplies fixed reporting precision
 when the publication does not prescribe it, and explicitly verifies activation.
 Definitions and activation decisions are append-only. Lab policy changes never
 activate a reference or select a different calculation variant implicitly.
+
+The Kjeldahl publication lists several reporting units without specifying the
+unit for its conditional precision thresholds. The reference retains this
+ambiguity as read-only source evidence with `executable: false` and
+`thresholdUnit: null`. A local SOP clone must choose fixed reporting decimals;
+the library does not execute the conditional rule or infer a threshold conversion.

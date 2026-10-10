@@ -14,6 +14,22 @@ const item={sampleId:'sample',workItemId:'work',calculationTemplate:active,draft
 function mount(response=context){const axios={post:jest.fn(async()=>({data:{data:response}}))};
     return mountUi('components/workbench/CalculationEntry.jsx',{item,onDraftChange:jest.fn()}, {axios});}
 
+test('the manager clone screen keeps the conditional Kjeldahl rule and threshold-unit ambiguity read-only',async()=>{
+    const source=decode(referenceRows().find(row=>row.templateKey==='kjeldahl-nitrogen'));
+    const axios={get:jest.fn(async url=>({data:{data:url.endsWith('/activation')?{active:null,activationHeadId:null}:[source]}})),post:jest.fn()};
+    const view=mountUi('components/workbench/CalculationTemplateManager.jsx',
+        {batch:{labId:'owned-lab'},analyte:{analysisCode:'TN',methodologyId:null,numberFormat}},
+        {axios,canEdit:true});
+    await view.render();await view.render();
+    const unit=view.all().find(row=>row.props?.['data-testid']==='calculation-source-unit');
+    expect(unit?.type).toBe('p');expect(unit?.props.onChange).toBeUndefined();
+    expect(view.text()).toContain(source.sourceCitation.sourceRule.rule);
+    expect(view.text()).toContain(source.sourceCitation.sourceRule.unit);
+    expect(source.sourceCitation.sourceRule).toMatchObject({executable:false,thresholdUnit:null});
+    expect(view.all().filter(row=>row.type==='select').find(row=>row.props.value==='')).toBeDefined();
+    expect(view.axios.post).not.toHaveBeenCalled();
+});
+
 test('inactive methods retain the old editor and issue no calculation preview request',async()=>{
     const view=mountUi('components/workbench/CalculationEntry.jsx',{item:{...item,calculationTemplate:null},children:'original-editor'});
     await view.render();expect(view.text()).toContain('original-editor');expect(view.axios.post).not.toHaveBeenCalled();

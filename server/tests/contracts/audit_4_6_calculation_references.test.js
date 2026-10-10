@@ -57,7 +57,8 @@ test('Kjeldahl retains the verbatim conditional rule and exact source location w
     const row = byKey('kjeldahl-nitrogen');
     expect(row.outputDecimals).toBeNull(); expect(row.precisionSource).toBeNull();
     expect(row.sourceCitation.sourceRule).toMatchObject({ document: 'GLOSOLAN-SOP-14', version: 1, date: '2021-01-18',
-        section: '9', pages: [11], pdfPage: 14, unit: 'Reported N in mg/g, g/kg or %N (the source reporting choices)',
+        section: '9', pages: [11], pdfPage: 14, kind: 'CONDITIONAL_PRECISION', executable: false, thresholdUnit: null,
+        unit: 'Not stated by the source. SOP-14 §9 (printed pp.10–11, PDF pp.13–14) permits mg/g or g/kg, or %N after division by ten; its precision thresholds do not specify the unit.',
         rule: 'The number of decimals reported must conform to the conventional rules of maintaining 3 digits:\n• values greater than 100, no decimal reported;\n• values between 10 and 100, 1 decimal (0.1) reported; and\n• values less than 10, 2 decimals (0.01) reported.' });
 });
 

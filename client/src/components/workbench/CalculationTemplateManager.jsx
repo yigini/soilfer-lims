@@ -68,6 +68,9 @@ export default function CalculationTemplateManager({ batch, analyte, onChanged }
                 <p className="text-xs text-sf-muted" data-testid="calculation-source-rule">
                     {source.sourceCitation.sourceRule?.rule || source.precisionSource?.rule || t('calculations.precisionRequired')}
                 </p>
+                {source.sourceCitation.sourceRule?.unit && <p className="text-xs text-sf-muted" data-testid="calculation-source-unit">
+                    {source.sourceCitation.sourceRule.unit}
+                </p>}
                 <label className="grid gap-1 text-xs">{t('calculations.sopCitation')}<input value={citation} disabled={busy}
                     onChange={event => setCitation(event.target.value)} className="p-2 border rounded bg-sf-canvas" /></label>
                 <label className="grid gap-1 text-xs">{t('calculations.reason')}<textarea value={reason} disabled={busy}
