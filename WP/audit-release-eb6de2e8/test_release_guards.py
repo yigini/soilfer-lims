@@ -238,6 +238,55 @@ class CompleteRehearsalGuards(unittest.TestCase):
                 preparation.validate(proof,build,gates)
 
 class RecoveryGuards(unittest.TestCase):
+    def test_forced_prequiesce_reserve_failure_preserves_owned_database(self):
+        with tempfile.TemporaryDirectory(prefix='lims-reserve-prequiesce-') as owned:
+            database=pathlib.Path(owned)/'dev.db'
+            with sqlite3.connect(database) as db:
+                db.executescript("CREATE TABLE AuditLog(id TEXT PRIMARY KEY,message TEXT); INSERT INTO AuditLog VALUES('retained','original');")
+            original=s.physical(database)
+            release.held=False
+            release.installer_attempted=False
+            release.receipt={}
+            with patch.object(s,'disk_free',return_value={'/opt/lims':8589934591,'/var/lib/docker':8589934591}), \
+                 patch.object(release,'save'),patch.object(release,'maintenance') as maintenance, \
+                 patch.object(release,'stop_app') as stop,patch.object(release,'start_app') as start, \
+                 patch.object(s,'consistent_backup') as backup,patch.object(s,'cli') as cli:
+                with self.assertRaisesRegex(AssertionError,'pre-quiesce') as error:
+                    release.require_reserve(8589934592,'pre-quiesce final')
+                release.recover_failure(error.exception)
+            self.assertEqual(s.physical(database),original)
+            self.assertEqual(release.receipt['status'],'REFUSED_BEFORE_MAINTENANCE')
+            for operation in [maintenance,stop,start,backup,cli]: operation.assert_not_called()
+
+    def test_forced_between_installers_reserve_failure_keeps_additive_database_and_forward_hold(self):
+        with tempfile.TemporaryDirectory(prefix='lims-reserve-between-installers-') as owned:
+            database=pathlib.Path(owned)/'dev.db'
+            with sqlite3.connect(database) as db:
+                db.executescript("CREATE TABLE AuditLog(id TEXT PRIMARY KEY,message TEXT); INSERT INTO AuditLog VALUES('retained','original');")
+            old=s.physical(database)
+            # Represent an already completed additive installer on this owned DB.
+            with sqlite3.connect(database) as db: db.execute('CREATE TABLE ReviewedAdditiveEvidence(id TEXT PRIMARY KEY)')
+            installed=s.physical(database)
+            self.assertNotEqual(installed,old)
+            release.held=True
+            release.installer_attempted=True
+            release.receipt={'preApplyState':{},'preApplyFiles':old}
+            with patch.object(s,'disk_free',return_value={'/opt/lims':8589934591,'/var/lib/docker':8589934591}), \
+                 patch.object(release,'writers_stopped'),patch.object(release,'save'),patch.object(release,'mark') as mark, \
+                 patch.object(release,'maintenance') as maintenance,patch.object(release,'stop_app') as stop, \
+                 patch.object(release,'start_app') as start,patch.object(s,'consistent_backup') as backup,patch.object(s,'cli') as cli:
+                with self.assertRaisesRegex(AssertionError,'installer 192') as error:
+                    release.guard_install_disk('192',8589934592)
+                release.recover_failure(error.exception)
+            self.assertEqual(s.physical(database),installed)
+            self.assertEqual(release.receipt['status'],'FAILED_FORWARD_HOLD')
+            self.assertTrue(release.held)
+            maintenance.assert_called_once(); stop.assert_called_once()
+            for operation in [start,backup,cli,mark]: operation.assert_not_called()
+            with sqlite3.connect(database) as db:
+                self.assertEqual(db.execute('SELECT message FROM AuditLog').fetchall(),[('original',)])
+                self.assertEqual(db.execute('PRAGMA integrity_check').fetchone()[0],'ok')
+
     def recover(self, attempted=False, changed=False, old_ready=True, startup_changed=False, health_failed=False):
         release.held = True
         release.installer_attempted = attempted

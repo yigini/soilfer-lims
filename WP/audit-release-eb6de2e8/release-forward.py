@@ -85,6 +85,23 @@ def allocated():
             total += file.stat().st_blocks * 512
     return total
 
+def require_reserve(reserve, stage):
+    free = s.disk_free()
+    assert min(free.values()) >= reserve, 'Disk reserve fell at ' + stage
+    return free
+
+def guard_install_disk(key, reserve):
+    global installer_attempted
+    writers_stopped()
+    free = require_reserve(reserve, 'installer ' + key)
+    growth = max(0, allocated() - receipt['ownedAllocatedBeforeQuiesce'])
+    known = {path: growth if os.stat(path).st_dev == os.stat(ROOT).st_dev else 0 for path in free}
+    drop = s.check_drop(receipt['freeBytesBeforeQuiesce'], free, known)
+    receipt.setdefault('installerDiskChecks', []).append({'key':key, 'freeBytes':free,
+        'knownAllocationBytes':known, 'unexplainedDropBytes':drop})
+    installer_attempted = True
+    mark('installerAttempt_' + key)
+
 def writers_stopped():
     ids = check(['docker', 'ps', '-q']).split()
     if not ids:
@@ -213,7 +230,7 @@ if __name__ == '__main__':
         assets_bytes = sum(file.stat().st_size for file in s.ASSETS.rglob('*') if file.is_file())
         image_bytes = int(check(['docker', 'image', 'inspect', image, '--format', '{{.Size}}']))
         reserve = s.disk_reserve(s.LIVE.stat().st_size, image_bytes, assets_bytes)
-        assert min(s.disk_free().values()) >= reserve
+        require_reserve(reserve, 'pre-quiesce initial')
         receipt.update({'candidateImage': image, 'retainedImage': s.OLD_IMAGE, 'githubGate': gate,
             'manifestSha256': s.sha(ROOT / 'prepared-manifest.json'), 'coordinatorSha256': s.sha(__file__),
             'diskReserveRequiredBytes': reserve, 'freeBytesBeforeQuiesce': s.disk_free()})
@@ -221,7 +238,7 @@ if __name__ == '__main__':
         assert old['classification'] == 'COMPLETE' and old['totalChanges'] == 0
         assert 'R=503' not in s.CONF.read_text(), 'Existing maintenance requires review'
         shutil.copy2(s.CONF, ROOT / 'apache-before.conf')
-        assert min(s.disk_free().values()) >= reserve
+        require_reserve(reserve, 'pre-quiesce final')
         receipt['ownedAllocatedBeforeQuiesce'] = allocated()
         receipt['freeBytesBeforeQuiesce'] = s.disk_free()
         mark('preflightPassed')
@@ -233,7 +250,7 @@ if __name__ == '__main__':
         stop_app()
         writers_stopped()
         mark('jobsQuiesced')
-        assert min(s.disk_free().values()) >= reserve
+        require_reserve(reserve, 'stopped-writer backup')
         backup = ROOT / 'dev-before-combined-release.db'
         s.consistent_backup(s.LIVE, backup)
         before = s.snapshot(backup)
@@ -250,19 +267,8 @@ if __name__ == '__main__':
         dry = s.cli(ROOT, image, s.LIVE.parent, 'install_work_attempt_contract.js', '--dry-run', '190-preflight-dry')
         s.verify_attempt_plan(dry, manifest['attemptPlanSha256'])
         assert s.snapshot(s.LIVE) == before
-        def before_apply(key):
-            global installer_attempted
-            writers_stopped()
-            free = s.disk_free()
-            assert min(free.values()) >= reserve, 'Disk reserve fell before installer ' + key
-            growth = max(0, allocated() - receipt['ownedAllocatedBeforeQuiesce'])
-            known = {path: growth if os.stat(path).st_dev == os.stat(ROOT).st_dev else 0 for path in free}
-            drop = s.check_drop(receipt['freeBytesBeforeQuiesce'], free, known)
-            receipt.setdefault('installerDiskChecks', []).append({'key': key, 'freeBytes': free, 'knownAllocationBytes': known, 'unexplainedDropBytes': drop})
-            installer_attempted = True
-            mark('installerAttempt_' + key)
         receipt['installers'], attempts = s.install_series(ROOT, image, s.LIVE.parent,
-            manifest['attemptPlanSha256'], before_apply=before_apply)
+            manifest['attemptPlanSha256'], before_apply=lambda key: guard_install_disk(key, reserve))
         after = s.snapshot(s.LIVE, before)
         receipt['preservation'] = s.preserve(before, after, attempts)
         receipt['installedTables'] = after['tables']
