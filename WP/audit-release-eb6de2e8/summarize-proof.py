@@ -20,7 +20,7 @@ if __name__ == '__main__':
         'backfillCount','newSelectionCount','newNcrCount','newAmendmentCount','activationInsertCount','unitInsertCount']
     for row in proof['installers']:
         measured = json.loads((root/(row['key']+'-apply-container.json')).read_text())
-        rows.append({'key':row['key'],'script':row['script'],'dryRunClassification':row['dryRun']['classification'],
+        rows.append({'key':row['key'],'script':row['script'],'dryRunClassification':row['dryRun'].get('classification'),
             'mode':row['apply']['mode'],'totalChanges':row['apply']['totalChanges'],
             'counts':{name:row['apply'][name] for name in count_fields if name in row['apply']},
             'blockedWorkItemCount':row['dryRun'].get('releaseInventory',{}).get('blockedWorkItemCount'),
@@ -38,6 +38,9 @@ if __name__ == '__main__':
         'sourceArchiveSha256':build['sourceArchiveSha256'],'sourceIndexSha256':build['sourceIndexSha256'],
         'verifiedGitBlobCount':build['verifiedGitBlobCount'],'productionCopySha256':proof['productionCopySha256'],
         'preservation':proof['preservation'],'installers':rows,
+        'acceptancePlanSha256':proof['acceptancePlanSha256'],
+        'yy191ReviewChoiceSha256':proof['yy191ReviewChoiceSha256'],
+        'acceptanceLink':next(row for row in proof['installers'] if row['key']=='191-link'),
         'attemptPlan':{'classification':dry['classification'],'status':plan['status'],
             'planSha256':proof['attemptPlanSha256'],'newAttemptCount':len(plan['newAttempts']),
             'linkedResultCount':len(plan['links']),'flaggedGroupCount':len(plan['flaggedGroups']),

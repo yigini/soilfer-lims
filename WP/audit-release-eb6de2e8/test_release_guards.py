@@ -1,5 +1,5 @@
 """Exercise release abort/recovery and evidence tampering without live I/O."""
-import copy, datetime, importlib.util, json, pathlib, sqlite3, subprocess, tempfile, unittest
+import copy, datetime, hashlib, importlib.util, json, pathlib, sqlite3, subprocess, tempfile, unittest
 from unittest.mock import Mock, patch
 import release_support as s
 import prepare_manifest as preparation
@@ -7,6 +7,135 @@ import prepare_manifest as preparation
 spec = importlib.util.spec_from_file_location('coordinator', pathlib.Path(__file__).with_name('release-forward.py'))
 release = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(release)
+
+def acceptance_fixture():
+    eligible = {**s.ACCEPTANCE_TUPLE,'reviewedAt':'2026-09-08 15:00:00','decisionCreatedAt':'2026-09-08 15:00:00'}
+    payload = {'reconciliation':s.ACCEPTANCE_RECONCILIATION,'blockedWorkItemCount':1,'eligible':[eligible],'unresolved':[]}
+    digest = hashlib.sha256(json.dumps(payload,separators=(',',':')).encode()).hexdigest()
+    dry = {**payload,'planSha256':digest,'alreadyLinked':[],'mode':'DRY_RUN','totalChanges':0}
+    event_id = '12345678-1234-4234-8234-123456789abc'
+    note = 'Links recorded ReviewDecision dec-s02-p-acc (reviewedAt 2026-09-08 15:00:00); acceptance pre-dated attempt review.'
+    details = {'from':'RECORDED','to':'ACCEPTED','reason':None,'note':note,'resultId':None,
+        'oldResultIds':[],'newResultIds':[],'reviewDecisionId':'dec-s02-p-acc',
+        'reconciliation':s.ACCEPTANCE_RECONCILIATION,'workItemId':'WI-GTM-DEMO-S02-P','linkedResultIds':['res-s02-p-run2']}
+    already = {'eventId':event_id,'attemptId':'att-s02-p-2',**details}
+    receipt = {'reconciliation':s.ACCEPTANCE_RECONCILIATION,'planSha256':digest,
+        'links':[{**eligible,'eventId':event_id}], 'originalRowsSha256':'b'*64,
+        'originalRowsAndFieldsPreserved':True,'attemptStatusChanges':1,'auditEventsAdded':1}
+    receipt['receiptSha256'] = hashlib.sha256(json.dumps(receipt,separators=(',',':')).encode()).hexdigest()
+    applied = {'reconciliation':s.ACCEPTANCE_RECONCILIATION,'blockedWorkItemCount':0,
+        'eligible':[],'unresolved':[],'alreadyLinked':[already],'planSha256':'c'*64,
+        'mode':'APPLIED','totalChanges':2,'receipt':receipt}
+    repeated = {name:value for name,value in applied.items() if name != 'receipt'}
+    repeated.update({'mode':'NO_OP','totalChanges':0})
+    stage = {'key':s.ACCEPTANCE_KEY,'script':'link_recorded_acceptance.js','dryRun':dry,'apply':applied,
+        'immediateRepeat':repeated,'immediateRepeatBefore191':True,'immediateRepeatDatabaseBytesPreserved':True,
+        'applyStartedUtc':'2026-10-10T21:00:00Z','applyCompletedUtc':'2026-10-10T21:00:02Z'}
+    event = {'id':event_id,'entity':'WORK_ATTEMPT','entityId':'att-s02-p-2','action':'ACCEPTED',
+        'details':json.dumps(details),'performedBy':s.ACCEPTANCE_ACTOR,'performedByName':s.ACCEPTANCE_ACTOR,
+        'timestamp':'2026-10-10T21:00:01Z','sampleId':'GTM-DEMO-S02','labId':'owned-lab','analysisCode':'P_OLSEN',
+        'before':json.dumps({'status':'RECORDED','resultIds':[]}),
+        'after':json.dumps({'status':'ACCEPTED','resultIds':[]})}
+    return stage,event
+
+class AcceptanceIntegrationGuards(unittest.TestCase):
+    def test_exact_tuple_and_reviewed_plan_only(self):
+        stage,_ = acceptance_fixture()
+        s.verify_acceptance_plan(stage['dryRun'],stage['dryRun']['planSha256'])
+        for fault in ['scope','result','decision','review-time','hash','unresolved','already-linked','write']:
+            dry=copy.deepcopy(stage['dryRun'])
+            if fault=='scope': dry['eligible'][0]['workItemId']='another-item'
+            elif fault=='result': dry['eligible'][0]['resultIds']=['another-result']
+            elif fault=='decision': dry['eligible'][0]['reviewDecisionId']='another-decision'
+            elif fault=='review-time': dry['eligible'][0]['reviewedAt']='2026-09-08 16:00:00'
+            elif fault=='hash': dry['planSha256']='0'*64
+            elif fault=='unresolved': dry['unresolved']=[{'workItemId':'unknown'}]
+            elif fault=='already-linked': dry['alreadyLinked']=[{}]
+            elif fault=='write': dry['totalChanges']=1
+            with self.subTest(fault=fault),self.assertRaises(AssertionError):
+                s.verify_acceptance_plan(dry,stage['dryRun']['planSha256'])
+        with self.assertRaises(AssertionError): s.verify_acceptance_plan(stage['dryRun'],'0'*64)
+
+    def test_apply_and_immediate_repeat_receipts_refuse_broader_or_changed_delta(self):
+        stage,_ = acceptance_fixture()
+        s.verify_acceptance_stage(stage)
+        for fault in ['writes','status-count','event-count','tuple','event-id','repeat-write','repeat-order','repeat-bytes']:
+            changed=copy.deepcopy(stage)
+            if fault=='writes': changed['apply']['totalChanges']=3
+            elif fault=='status-count': changed['apply']['receipt']['attemptStatusChanges']=2
+            elif fault=='event-count': changed['apply']['receipt']['auditEventsAdded']=2
+            elif fault=='tuple': changed['apply']['receipt']['links'][0]['attemptId']='another-attempt'
+            elif fault=='event-id': changed['immediateRepeat']['alreadyLinked'][0]['eventId']='another-event'
+            elif fault=='repeat-write': changed['immediateRepeat']['totalChanges']=1
+            elif fault=='repeat-order': changed['immediateRepeatBefore191']=False
+            elif fault=='repeat-bytes': changed['immediateRepeatDatabaseBytesPreserved']=False
+            with self.subTest(fault=fault),self.assertRaises(AssertionError): s.verify_acceptance_stage(changed)
+
+    def test_cli_order_and_scope_immediate_repeat_before_191(self):
+        stage,_=acceptance_fixture()
+        seen=[]
+        inventory={'releaseInventory':{'blockedWorkItemCount':0,'blockedWorkItems':[],'totalChanges':0}}
+        def run(root,image,directory,script,mode,label,extra_args=()):
+            seen.append((label,list(extra_args)))
+            if label=='191-link-dry': return copy.deepcopy(stage['dryRun'])
+            if label=='191-link-apply': return copy.deepcopy(stage['apply'])
+            if label=='191-link-repeat': return copy.deepcopy(stage['immediateRepeat'])
+            return {'mode':'DRY_RUN' if mode=='--dry-run' else 'NO_OP','classification':'COMPLETE','totalChanges':0,**inventory}
+        with tempfile.TemporaryDirectory(prefix='lims-acceptance-order-') as owned:
+            root=pathlib.Path(owned); (root/'dev.db').write_bytes(b'owned repeat bytes')
+            with patch.object(s,'INSTALLERS',[('190','old.js'),(s.ACCEPTANCE_KEY,'link_recorded_acceptance.js'),('191','repeat.js')]),patch.object(s,'cli',side_effect=run):
+                rows,_=s.install_series(root,'owned-image',root)
+                repeats=s.repeat_series(root,'owned-image',root)
+        self.assertEqual([label for label,_ in seen],['190-dry','190-apply','191-link-dry','191-link-apply','191-link-repeat','191-dry','191-apply','190-repeat','191-repeat'])
+        self.assertEqual([row['key'] for row in repeats],['190','191'])
+        extra=['--work-item','WI-GTM-DEMO-S02-P','--plan-sha256',stage['dryRun']['planSha256']]
+        self.assertEqual(seen[3][1],extra); self.assertEqual(seen[4][1],extra)
+        self.assertTrue(rows[1]['immediateRepeatDatabaseBytesPreserved'])
+
+    def test_unreviewed_plan_refuses_before_apply_or_191(self):
+        stage,_=acceptance_fixture()
+        with patch.object(s,'INSTALLERS',[(s.ACCEPTANCE_KEY,'link_recorded_acceptance.js'),('191','repeat.js')]),patch.object(s,'cli',return_value=stage['dryRun']) as run:
+            with self.assertRaisesRegex(AssertionError,'reviewed acceptance evidence'):
+                s.install_series(pathlib.Path('/owned'),'owned-image',pathlib.Path('/owned'),acceptance_sha='0'*64)
+        self.assertEqual(run.call_count,1)
+
+class AcceptancePreservationGuards(unittest.TestCase):
+    def test_exact_original_status_and_one_typed_event_only(self):
+        stage,event=acceptance_fixture()
+        with tempfile.TemporaryDirectory(prefix='lims-acceptance-preservation-') as owned:
+            file=pathlib.Path(owned)/'dev.db'
+            with sqlite3.connect(file) as db:
+                db.executescript('CREATE TABLE Result(id TEXT PRIMARY KEY,value TEXT,attemptId TEXT);'
+                    'CREATE TABLE WorkAttempt(id TEXT PRIMARY KEY,workItemId TEXT,status TEXT,updatedAt TEXT);'
+                    'CREATE TABLE WorkItem(id TEXT PRIMARY KEY,labId TEXT,assignedLab TEXT);'
+                    'CREATE TABLE AuditLog(id TEXT PRIMARY KEY,entity TEXT,entityId TEXT,action TEXT,details TEXT,performedBy TEXT,performedByName TEXT,timestamp TEXT,sampleId TEXT,labId TEXT,analysisCode TEXT,before TEXT,after TEXT);'
+                    'CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT);')
+                db.execute('INSERT INTO Result VALUES(?,?,?)',('res-s02-p-run2','retained analytical value','att-s02-p-2'))
+                db.execute('INSERT INTO WorkAttempt VALUES(?,?,?,?)',('att-s02-p-2','WI-GTM-DEMO-S02-P','RECORDED','original time'))
+                db.execute('INSERT INTO WorkItem VALUES(?,?,?)',('WI-GTM-DEMO-S02-P','owned-lab',None))
+                db.execute('INSERT INTO AuditLog(id,entity,entityId,action,performedBy,timestamp) VALUES(?,?,?,?,?,?)',('original-log','SAMPLE','original-sample','CREATE','original-actor','original-time'))
+                db.execute('INSERT INTO _schema_migrations VALUES(?,?)',('original-receipt','retained receipt'))
+            before=s.snapshot(file)
+            with sqlite3.connect(file) as db:
+                db.execute("UPDATE WorkAttempt SET status='ACCEPTED' WHERE id='att-s02-p-2'")
+                columns=','.join(s.quoted(name) for name in event)
+                db.execute('INSERT INTO AuditLog('+columns+') VALUES('+','.join('?' for _ in event)+')',list(event.values()))
+            after=s.snapshot(file,before)
+            result=s.preserve(before,after,acceptance=stage)
+            self.assertEqual((result['approvedAttemptStatusChanges'],result['approvedAcceptanceAuditEvents']),(1,1))
+            for fault in ['attempt-field','analytical-field','original-audit','extra-event','event-actor','event-context','event-details','event-time','missing-event','receipt']:
+                changed=copy.deepcopy(after)
+                if fault=='attempt-field': changed['keyed']['WorkAttempt']['att-s02-p-2']['updatedAt']='invented-time'
+                elif fault=='analytical-field': changed['keyed']['Result']['res-s02-p-run2']['value']='different-value'
+                elif fault=='original-audit': changed['keyed']['AuditLog']['original-log']['action']='different-action'
+                elif fault=='extra-event': changed['keyed']['AuditLog']['rogue']=dict(event,id='rogue')
+                elif fault=='event-actor': changed['keyed']['AuditLog'][event['id']]['performedBy']='other-actor'
+                elif fault=='event-context': changed['keyed']['AuditLog'][event['id']]['labId']='other-lab'
+                elif fault=='event-details': changed['keyed']['AuditLog'][event['id']]['details']='{}'
+                elif fault=='event-time': changed['keyed']['AuditLog'][event['id']]['timestamp']='2026-10-10T20:00:00Z'
+                elif fault=='missing-event': del changed['keyed']['AuditLog'][event['id']]
+                elif fault=='receipt': changed['keyed']['_schema_migrations']['original-receipt']['details']='changed-receipt'
+                with self.subTest(fault=fault),self.assertRaises(AssertionError): s.preserve(before,changed,acceptance=stage)
 
 class DiskAndPlanGuards(unittest.TestCase):
     def test_floor_scaled_reserve_and_negative_sizes(self):
@@ -123,24 +252,28 @@ class CliLifetimeGuards(unittest.TestCase):
 
 class ExactKitGateGuards(unittest.TestCase):
     def fixture(self):
-        now = datetime.datetime(2026,10,10,18,tzinfo=datetime.timezone.utc)
+        now = datetime.datetime(2026,10,10,21,tzinfo=datetime.timezone.utc)
         manifest = {'status':'PREPARED_ONLY_NOT_EXECUTED','head':s.HEAD,'image':'owned-image',
             'attemptPlanSha256':'d'*64,'files':{'release-forward.py':'a'*64,'rehearsal-receipt.json':'b'*64,
-                'yy-authorization-evidence.md':'e'*64}}
+                'yy-authorization-evidence.md':'e'*64,'yy-191-review-choice-evidence.md':'f'*64},
+            'acceptanceTuple':s.ACCEPTANCE_TUPLE,'acceptancePlanSha256':'1'*64}
         rows = []
-        for number in [258,257,259,260,263,264,265,266,267,268,269,273,271,276,275,280,282,285,286,287]:
+        for number in s.INCLUDED_PRS:
             head = format(number,'040x')
             rows.append({'number':number,'head':head,'state':'MERGED','gated':True,
                 'laterAuditFailure':False,'auditPass':{'body':'Audit passed: OK to merge and deploy '+head},
                 'checks':[{'conclusion':'SUCCESS'}]})
         gate = {'head':s.HEAD,'image':'owned-image','manifestSha256':'c'*64,
             'coordinatorSha256':'a'*64,'rehearsalReceiptSha256':'b'*64,'verifiedUtc':now.isoformat(),
-            'prGates':{'head':s.HEAD,'includedPrCount':20,'ungatedPrs':[],'prs':rows,
+            'prGates':{'head':s.HEAD,'includedPrCount':len(s.INCLUDED_PRS),'ungatedPrs':[],'prs':rows,
                 'mainCi':[{'name':'CI','headSha':s.HEAD,'status':'completed','conclusion':'success'}]},
             'kitReview':{'issue':162,'reviewedBy':'Claudio',
                 'url':'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-owned-test',
-                'body':'Audit passed: OK to merge and deploy '+s.HEAD+' '+'a'*64+' '+'b'*64+' '+'c'*64,
-                'approvedAttemptPlanSha256':'d'*64,'timeUtc':now.isoformat()},
+                'body':'Audit passed: OK to merge and deploy '+s.HEAD+' '+'a'*64+' '+'b'*64+' '+'c'*64+' '+'1'*64+' '+'f'*64,
+                'approvedAttemptPlanSha256':'d'*64,'approvedAcceptancePlanSha256':'1'*64,
+                'approvedYY191ReviewChoiceSha256':'f'*64,'timeUtc':now.isoformat()},
+            'yy191ReviewChoice':{'source':'CLAUDE_LIMS_AUDIT_THREAD_ORIGINAL_CARD','choice':'Link recorded accept',
+                'timeUtc':'2026-10-10T20:00:00Z','timePrecision':'minute','workItemId':s.ACCEPTANCE_TUPLE['workItemId'],'evidenceSha256':'f'*64},
             'yyGo':{'confirmedByYY':True,'source':'CLAUDE_LIMS_AUDIT_THREAD','evidenceSha256':'e'*64,
                 'timeUtc':(now-datetime.timedelta(hours=1)).isoformat(),'authorizationMode':'AUTO_AFTER_REVIEW',
                 'text':'Auto after review','scopeHead':s.HEAD,'scopeDecision':'Main now','scopeEvidenceSha256':'e'*64},
@@ -151,7 +284,7 @@ class ExactKitGateGuards(unittest.TestCase):
         def file_hash(file):
             name = pathlib.Path(file).name
             return {'prepared-manifest.json':'c'*64,'release-forward.py':'a'*64,'rehearsal-receipt.json':'b'*64,
-                'yy-authorization-evidence.md':'e'*64}[name]
+                'yy-authorization-evidence.md':'e'*64,'yy-191-review-choice-evidence.md':'f'*64}[name]
         with patch.object(s,'sha',side_effect=file_hash):
             release.verify_gate(manifest,gate,now)
 
@@ -159,7 +292,7 @@ class ExactKitGateGuards(unittest.TestCase):
         self.verify(*self.fixture())
 
     def test_missing_phrase_wrong_commit_hash_and_stale_gate_refuse(self):
-        for fault in ['phrase','head','hash','stale','repair','future','plan','yy-evidence','yy-scope']:
+        for fault in ['phrase','head','hash','stale','repair','future','plan','yy-evidence','yy-scope','acceptance-plan','yy191-evidence','yy191-choice','acceptance-tuple']:
             manifest, gate, now = self.fixture()
             if fault == 'phrase':
                 gate['kitReview']['body'] = gate['kitReview']['body'].replace('Audit passed: OK to merge and deploy','Looks good')
@@ -179,6 +312,10 @@ class ExactKitGateGuards(unittest.TestCase):
                 gate['yyGo']['evidenceSha256'] = '0'*64
             elif fault == 'yy-scope':
                 gate['yyGo']['scopeEvidenceSha256'] = '0'*64
+            elif fault == 'acceptance-plan': gate['kitReview']['approvedAcceptancePlanSha256']='0'*64
+            elif fault == 'yy191-evidence': gate['yy191ReviewChoice']['evidenceSha256']='0'*64
+            elif fault == 'yy191-choice': gate['yy191ReviewChoice']['choice']='Reopen and amend'
+            elif fault == 'acceptance-tuple': manifest['acceptanceTuple']={**s.ACCEPTANCE_TUPLE,'attemptId':'other-attempt'}
             with self.subTest(fault=fault), self.assertRaises(AssertionError):
                 self.verify(manifest,gate,now)
 
@@ -188,14 +325,15 @@ class CompleteRehearsalGuards(unittest.TestCase):
             'repeatTotalChanges':0,'startupChanges':0,'readOnlyProbeChanges':0,
             'repeatedInstallDatabaseBytesPreserved':True,
             'installers':[{'key':key,'script':script} for key,script in s.INSTALLERS],
-            'repeatInstallers':[{'key':key,'mode':'NO_OP','totalChanges':0} for key,_ in s.INSTALLERS],
+            'repeatInstallers':[{'key':key,'mode':'NO_OP','totalChanges':0} for key,_ in s.INSTALLERS if key!=s.ACCEPTANCE_KEY],
             'startupReady':[{'event':name+'_STARTUP_READY','totalChanges':0} for name in s.READY_EVENTS],
             'apiChecks':{'passed':31,'total':31,'failed':0},
             'probes':[{'file':name,'exitCode':0} for name in preparation.SCRIPTS if name.startswith('postflight-')]
                 + [{'file':'readonly-smoke.cjs','exitCode':0}],
             'health':{'status':'ok'},'benchCredentialCount':0,
             'preservation':{'originalRowsAndFieldsPreserved':True,'integrity':'ok','foreignKeyViolations':0,
-                'createdAttempts':17,'approvedNullResultLinks':19,'originalTableCount':90,'originalReceiptsPreserved':18},
+                'createdAttempts':17,'approvedNullResultLinks':19,'originalTableCount':90,'originalReceiptsPreserved':18,
+                'approvedAttemptStatusChanges':1,'approvedAcceptanceAuditEvents':1},
             'attemptDryRun':{'totalChanges':0,'mode':'DRY_RUN','classification':'PRE_190',
                 'plan':{'status':'READY','planSha256':'d'*64}},'attemptPlanSha256':'d'*64,
             'cliMemory':{key+'-'+mode+'-container.json':{'memoryLimitBytes':805306368,'nodeOptions':None,
@@ -204,11 +342,14 @@ class CompleteRehearsalGuards(unittest.TestCase):
             'startupMemoryAtReady':{'limitBytes':805306368,'nodeOptions':None,'peakBytes':300000000},
             'startupMemory':{'limitBytes':805306368,'nodeOptions':None,'peakBytes':320000000}}
         build = {'head':s.HEAD,'image':'owned-image','status':'BUILT_ONLY_NOT_DEPLOYED','productionDatabaseMounts':0}
-        gates = {'head':s.HEAD,'includedPrCount':20,'ungatedPrs':[],
-            'prs':[{'gated':True} for _ in range(20)],
+        gates = {'head':s.HEAD,'includedPrCount':len(s.INCLUDED_PRS),'ungatedPrs':[],
+            'prs':[{'number':number,'gated':True} for number in s.INCLUDED_PRS],
             'mainCi':[{'name':'CI','headSha':s.HEAD,'status':'completed','conclusion':'success'}]}
         repeat = next(row for row in proof['installers'] if row['key']=='191')
         repeat['dryRun'] = repeat['apply'] = {'releaseInventory':{'blockedWorkItemCount':0,'blockedWorkItems':[],'totalChanges':0}}
+        stage,_=acceptance_fixture()
+        proof['installers'][[key for key,_ in s.INSTALLERS].index(s.ACCEPTANCE_KEY)]=stage
+        proof['acceptancePlanSha256']=stage['dryRun']['planSha256']
         return proof,build,gates
 
     def test_complete_bounded_rehearsal_is_accepted(self):
@@ -216,7 +357,8 @@ class CompleteRehearsalGuards(unittest.TestCase):
 
     def test_partial_failed_unbounded_changed_or_stale_proof_is_refused(self):
         for fault in ['partial','installer','repeat','ready','probe','api','memory-missing','memory-over',
-                      'heap-override','startup-memory','preservation','main-ci','image','row-plan','blocked-owner']:
+                      'heap-override','startup-memory','preservation','main-ci','image','row-plan','blocked-owner',
+                      'acceptance-repeat','acceptance-delta','acceptance-proof-hash','missing-289']:
             proof,build,gates = self.fixture()
             if fault == 'partial': proof['status'] = 'PASSED_STARTUP_API_SUPPLEMENT'
             elif fault == 'installer': proof['installers'].reverse()
@@ -234,6 +376,10 @@ class CompleteRehearsalGuards(unittest.TestCase):
             elif fault == 'row-plan': proof['attemptPlanSha256'] = '0'*64
             elif fault == 'blocked-owner':
                 next(row for row in proof['installers'] if row['key']=='191')['dryRun']['releaseInventory']['blockedWorkItemCount']=1
+            elif fault == 'acceptance-repeat': next(row for row in proof['installers'] if row['key']==s.ACCEPTANCE_KEY)['immediateRepeatBefore191']=False
+            elif fault == 'acceptance-delta': proof['preservation']['approvedAcceptanceAuditEvents']=2
+            elif fault == 'acceptance-proof-hash': proof['acceptancePlanSha256']='0'*64
+            elif fault == 'missing-289': gates['prs'][-1]['number']=999
             with self.subTest(fault=fault), self.assertRaises(AssertionError):
                 preparation.validate(proof,build,gates)
 

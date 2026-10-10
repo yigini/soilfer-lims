@@ -1,9 +1,12 @@
 # Combined audit release kit
 
-Target application commit: `042c04b54e7b3baa9f8c95e7f8d70b39daed2f91`.
+Target application commit: `feac653495d6b8a21e082cec596f1e14672fb389`.
 Last deployed application commit: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
 
-Current release status (October 10, 20:32 UTC): HELD at the required #191
+Current release status (October 10, after 20:55 UTC): preparing the new kit
+integration and guard tests after #289's gated merge. Deployment is still
+HELD until the NEW complete fresh-copy rehearsal and exact-kit audit pass.
+The previous application target `042c04b5` stopped at the required #191
 zero-blocked-owner gate. The complete merged-main fresh-copy rehearsal failed
 before #191 apply. One ACCEPTED WorkItem has a preexisting RECORDED attempt
 and an already published report. Claudio owns the separately reviewed
@@ -35,14 +38,21 @@ Claudio pinned the held #191 resolution design and ownership in comment
 6100903042, then revised the transition scope explicitly in 6101762952 at
 20:17:30 UTC. PR #289 head a9e24600 addresses Pip's scope/plan-binding review.
 See `289-review-pending.md`, `191-resolution-pin.md` and
-`yy-191-review-choice-evidence.md`. The fix is not audited or merged yet;
-the failed rehearsal is not retried or relabelled.
+`yy-191-review-choice-evidence.md`. PR #289 passed the exact-head audit in
+comment 6102006161, and CI 38083146269 passed 339/339 suites, 5,087/5,087 tests
+and both Docker checks. It merged at 20:55:05 UTC as the target above, tree
+f06fb5450187212eab2a04bcf3a50b55d03bfdfe identical to audited a9e24600.
+Main CI 38085615017 is pending. The failed rehearsal stays FAILED.
 
 Pip independently verified PR #289 at exact head a9e24600: 3/3 focused suites,
 301/301 tests, zero skips, exit 0, 116.437 seconds. Both review findings are
 addressed by the revised scope pin and reviewed-plan/transaction binding.
-PR #289 has its ready-for-audit label and exact-head request; formal audit and
-CI run 38083146269 remain pending. See `289-focused-verification.md`.
+See `289-focused-verification.md`. The kit now includes 21 gated PRs and 22
+CLI steps, with the new repeat immediately before #191. All 21 existing
+installer repeats, 66 bounded CLI measurements and 20 original startup READY
+events are required. The final manifest/gate bind the exact acceptance plan,
+YY choice transcription and only the pinned one-status/one-event delta.
+Expanded helper guards and NEW fresh-copy Docker proof remain pending.
 
 Claudio requested this kit on #162, comment 6099151121. Pip owns preparation;
 Claudio owns review and post-deployment checks. YY selected "Main now" and

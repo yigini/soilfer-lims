@@ -1,4 +1,15 @@
-# PR #289 integration review, audit/CI pending
+# PR #289 review history and gated merge
+
+Current update: Claudio's exact-head pass is comment 6102006161 at 20:46:12 UTC.
+CI 38083146269 fully passed (339/339 suites, 5,087/5,087 tests and Docker).
+Pip matched the current head and pass, merged at 20:55:05 UTC as
+`feac653495d6b8a21e082cec596f1e14672fb389`, and verified the tree is identical
+to audited a9e24600: `f06fb5450187212eab2a04bcf3a50b55d03bfdfe`.
+Pip directly delivered the merged-head/ownership handoff to Claudio. Main CI
+38085615017 is pending; kit integration/guard testing now proceeds. A NEW
+complete fresh-copy rehearsal and exact-kit review are still required.
+
+The following sections retain the earlier pre-merge review checkpoints.
 
 PR: https://github.com/yigini/soilfer-lims/pull/289
 Initial reviewed head: `b4d52bd3369797c77c5a9c339af66e3274be460b`.

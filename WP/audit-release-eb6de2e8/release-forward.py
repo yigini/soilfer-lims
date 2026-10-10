@@ -37,8 +37,8 @@ def verify_gate(manifest, gate, now=None):
     fetched = datetime.datetime.fromisoformat(gate['verifiedUtc'].replace('Z', '+00:00'))
     assert 0 <= (now - fetched).total_seconds() <= 600, 'GitHub gate is stale'
     evidence = gate['prGates']
-    assert evidence['head'] == s.HEAD and evidence['includedPrCount'] == 20 and evidence['ungatedPrs'] == []
-    assert set(row['number'] for row in evidence['prs']) == {258,257,259,260,263,264,265,266,267,268,269,273,271,276,275,280,282,285,286,287}
+    assert evidence['head'] == s.HEAD and evidence['includedPrCount'] == len(s.INCLUDED_PRS) and evidence['ungatedPrs'] == []
+    assert len(evidence['prs']) == len(s.INCLUDED_PRS) and set(row['number'] for row in evidence['prs']) == set(s.INCLUDED_PRS)
     for row in evidence['prs']:
         assert row['gated'] and row['state'] == 'MERGED' and not row['laterAuditFailure']
         assert 'Audit passed: OK to merge and deploy' in row['auditPass']['body']
@@ -53,6 +53,16 @@ def verify_gate(manifest, gate, now=None):
     assert s.HEAD in review['body'], 'Kit audit does not name the exact release commit'
     assert all(value in review['body'] for value in [gate['manifestSha256'], gate['coordinatorSha256'], gate['rehearsalReceiptSha256']])
     assert review['approvedAttemptPlanSha256'] == manifest['attemptPlanSha256']
+    assert manifest['acceptanceTuple'] == s.ACCEPTANCE_TUPLE
+    assert review['approvedAcceptancePlanSha256'] == manifest['acceptancePlanSha256']
+    assert manifest['acceptancePlanSha256'] in review['body']
+    choice_sha = manifest['files']['yy-191-review-choice-evidence.md']
+    assert review['approvedYY191ReviewChoiceSha256'] == choice_sha and choice_sha in review['body']
+    choice = gate['yy191ReviewChoice']
+    assert choice == {'source':'CLAUDE_LIMS_AUDIT_THREAD_ORIGINAL_CARD','choice':'Link recorded accept',
+        'timeUtc':'2026-10-10T20:00:00Z','timePrecision':'minute','workItemId':s.ACCEPTANCE_TUPLE['workItemId'],
+        'evidenceSha256':choice_sha}
+    assert datetime.datetime.fromisoformat(choice['timeUtc'].replace('Z','+00:00')) <= now
     yy = gate['yyGo']
     assert yy['confirmedByYY'] is True
     assert yy['source'] == 'CLAUDE_LIMS_AUDIT_THREAD' and re.fullmatch('[a-f0-9]{64}', yy['evidenceSha256'])
@@ -268,11 +278,16 @@ if __name__ == '__main__':
         s.verify_attempt_plan(dry, manifest['attemptPlanSha256'])
         assert s.snapshot(s.LIVE) == before
         receipt['installers'], attempts = s.install_series(ROOT, image, s.LIVE.parent,
-            manifest['attemptPlanSha256'], before_apply=lambda key: guard_install_disk(key, reserve))
+            manifest['attemptPlanSha256'], before_apply=lambda key: guard_install_disk(key, reserve),
+            acceptance_sha=manifest['acceptancePlanSha256'])
+        acceptance = next(row for row in receipt['installers'] if row['key'] == s.ACCEPTANCE_KEY)
+        receipt['acceptancePlanSha256'] = acceptance['dryRun']['planSha256']
+        receipt['yy191ReviewChoiceSha256'] = manifest['files']['yy-191-review-choice-evidence.md']
         after = s.snapshot(s.LIVE, before)
-        receipt['preservation'] = s.preserve(before, after, attempts)
+        receipt['preservation'] = s.preserve(before, after, attempts, acceptance)
         receipt['installedTables'] = after['tables']
-        receipt['repeatInstallers'] = s.repeat_series(ROOT, image, s.LIVE.parent)
+        receipt['repeatInstallers'] = s.repeat_series(ROOT, image, s.LIVE.parent,
+            before_apply=lambda key: guard_install_disk(key, reserve))
         assert s.snapshot(s.LIVE, before) == after
         mark('schemaVerified')
         receipt['healthJobsOff'] = start_app(False, image)

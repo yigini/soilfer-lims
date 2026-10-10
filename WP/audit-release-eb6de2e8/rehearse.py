@@ -25,6 +25,7 @@ if __name__ == '__main__':
     receipt = {'status': 'PREPARING_OWNED_COPY', 'head': s.HEAD, 'candidateImage': image,
         'startedUtc': s.utc(), 'productionExecution': False, 'reserveBytes': reserve,
         'freeBytesBefore': s.disk_free(), 'buildReceiptSha256': s.sha(ROOT / 'build-receipt.json'),
+        'yy191ReviewChoiceSha256':s.sha(ROOT / 'yy-191-review-choice-evidence.md'),
         'scriptSha256': {file.name: s.sha(file) for file in ROOT.iterdir()
             if file.name in ['rehearse.py', 'release_support.py', 'release-forward.py', 'readonly-smoke.cjs'] + PROBES}}
     started = False
@@ -49,8 +50,10 @@ if __name__ == '__main__':
         dry = next(row['dryRun'] for row in receipt['installers'] if row['key'] == '190')
         receipt['attemptPlanSha256'] = dry.get('plan', {}).get('planSha256')
         receipt['attemptDryRun'] = dry
+        acceptance = next(row for row in receipt['installers'] if row['key'] == s.ACCEPTANCE_KEY)
+        receipt['acceptancePlanSha256'] = acceptance['dryRun']['planSha256']
         after = s.snapshot(database, before)
-        receipt['preservation'] = s.preserve(before, after, attempts)
+        receipt['preservation'] = s.preserve(before, after, attempts, acceptance)
         receipt['installedTables'] = after['tables']
         installed_sha = s.sha(database)
         receipt['repeatInstallers'] = s.repeat_series(ROOT, image, prisma)

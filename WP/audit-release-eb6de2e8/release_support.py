@@ -1,7 +1,7 @@
 """Shared release/rehearsal operations. Importing this module performs no I/O."""
 import datetime, hashlib, json, os, pathlib, re, shutil, sqlite3, subprocess
 
-HEAD = '042c04b54e7b3baa9f8c95e7f8d70b39daed2f91'
+HEAD = 'feac653495d6b8a21e082cec596f1e14672fb389'
 LAST_DEPLOY = '283a8bb54b66a2167d34d80ad724bdd6460850b1'
 OLD_IMAGE = 'sha256:b02ddff8d7549e981edc49215fef2d54ca654adaa2a8924eceb5d4ea0af00394'
 LIVE = pathlib.Path('/var/lib/docker/volumes/lims_lims-data/_data/dev.db')
@@ -20,6 +20,7 @@ INSTALLERS = [
     ('189', 'install_result_equipment_evidence.js'),
     ('178', 'install_workitem_uniqueness.js'),
     ('190', 'install_work_attempt_contract.js'),
+    ('191-link', 'link_recorded_acceptance.js'),
     ('191', 'install_work_repeat_contract.js'),
     ('192', 'install_reported_value_selections.js'),
     ('194', 'install_batch_reagent_lots.js'),
@@ -30,6 +31,13 @@ INSTALLERS = [
     ('211', 'install_report_revisions.js'),
     ('202', 'install_bench_credentials.js'),
 ]
+ACCEPTANCE_KEY = '191-link'
+ACCEPTANCE_RECONCILIATION = '191-recorded-acceptance-link-v1'
+ACCEPTANCE_ACTOR = 'system:release-191-acceptance-link'
+ACCEPTANCE_TUPLE = {'workItemId':'WI-GTM-DEMO-S02-P', 'sampleId':'GTM-DEMO-S02',
+    'analysis':'P_OLSEN', 'attemptId':'att-s02-p-2', 'resultIds':['res-s02-p-run2'],
+    'reviewDecisionId':'dec-s02-p-acc'}
+INCLUDED_PRS = [258,257,259,260,263,264,265,266,267,268,269,273,271,276,275,280,282,285,286,287,289]
 READY_EVENTS = ['WORKFLOW', 'RESULT_ATTEMPT', 'SAMPLE_HOLD', 'REFERENCE',
     'QC_RULE', 'QC_RUN', 'QC_GATE_SCOPE', 'PT', 'NCR', 'RESULT_EQUIPMENT',
     'WORK_ATTEMPT', 'WORK_REPEAT', 'REPORTED_VALUE', 'REAGENT_LOT',
@@ -74,22 +82,33 @@ def snapshot(file, original=None):
             count = db.execute('SELECT count(*) FROM ' + quoted(name)).fetchone()[0]
             rows = db.execute('SELECT ' + selected + ' FROM ' + quoted(name) + ' ORDER BY ' + selected)
             tables[name] = {'fields': fields, 'count': count, 'sha256': fingerprint([canonical(value) for value in row] for row in rows)}
-            if name in ['Result', 'WorkAttempt', '_schema_migrations']:
+            if name in ['Result', 'WorkAttempt', '_schema_migrations', 'AuditLog']:
                 keyed[name] = {row['id']: {field: canonical(row[field]) for field in fields}
                     for row in db.execute('SELECT ' + selected + ' FROM ' + quoted(name) + ' ORDER BY id')}
         attempts = {row['id']: dict(row) for row in db.execute('SELECT * FROM WorkAttempt ORDER BY id')}
+        context = None
+        if 'WorkItem' in shapes and {'id','labId','assignedLab'} <= {row['name'] for row in shapes['WorkItem']}:
+            row = db.execute('SELECT labId,assignedLab FROM WorkItem WHERE id=?', (ACCEPTANCE_TUPLE['workItemId'],)).fetchone()
+            context = dict(row) if row else None
         return {'tables': tables, 'shapes': shapes, 'keyed': keyed, 'objects': objects, 'fullAttempts': attempts,
+            'acceptanceContext': context,
             'integrity': db.execute('PRAGMA integrity_check').fetchone()[0],
             'foreignKeyViolations': len(db.execute('PRAGMA foreign_key_check').fetchall())}
     finally:
         db.close()
 
-def preserve(before, after, attempts=None):
+def preserve(before, after, attempts=None, acceptance=None):
     assert before['integrity'] == after['integrity'] == 'ok'
     assert before['foreignKeyViolations'] == after['foreignKeyViolations'] == 0
     assert set(before['tables']) <= set(after['tables']), 'An original table disappeared'
     links = {row['resultId']: row['attemptId'] for row in (attempts or {}).get('receipt', {}).get('links', [])}
     created = {row['id'] for row in (attempts or {}).get('receipt', {}).get('createdAttempts', [])}
+    linked = None
+    if acceptance:
+        verify_acceptance_stage(acceptance)
+        linked = acceptance['apply']['receipt']['links'][0]
+        assert linked['attemptId'] in before['keyed']['WorkAttempt'], 'The approved legacy owner must already exist'
+        assert before['keyed']['WorkAttempt'][linked['attemptId']]['status'] == 'RECORDED'
     for table, original in before['tables'].items():
         current_columns = {row['name']: row for row in after['shapes'][table]}
         assert all(current_columns.get(row['name']) == row for row in before['shapes'][table]), table + ' original column shape changed'
@@ -100,8 +119,16 @@ def preserve(before, after, attempts=None):
             assert all(key in before['keyed'][table] and before['keyed'][table][key]['attemptId'] is None for key in links)
         elif table == 'WorkAttempt':
             current = after['keyed'][table]
-            assert all(current.get(key) == row for key, row in before['keyed'][table].items()), 'Original attempt fields changed'
+            expected = {key:{**row, 'status':'ACCEPTED'} if linked and key == linked['attemptId'] else row
+                for key,row in before['keyed'][table].items()}
+            assert all(current.get(key) == row for key, row in expected.items()), 'Original attempt fields changed beyond the pinned status'
             assert set(current) - set(before['keyed'][table]) == created, 'Unapproved attempt rows were added'
+        elif table == 'AuditLog' and linked:
+            original_rows, current = before['keyed'][table], after['keyed'][table]
+            assert all(current.get(key) == row for key,row in original_rows.items()), 'An original audit row changed'
+            assert set(current) - set(original_rows) == {linked['eventId']}, 'Unexpected audit event rows'
+            assert after['tables'][table]['count'] == original['count'] + 1
+            verify_acceptance_event(current[linked['eventId']], linked, before['acceptanceContext'], acceptance)
         elif table == '_schema_migrations':
             assert all(after['keyed'][table].get(key) == row for key, row in before['keyed'][table].items()), 'An original migration receipt changed'
         else:
@@ -121,7 +148,9 @@ def preserve(before, after, attempts=None):
             assert actual['createdAt'] == actual['updatedAt']
     return {'originalTableCount': len(before['tables']),
         'originalRowsAndFieldsPreserved': True, 'approvedNullResultLinks': len(links),
-        'createdAttempts': len(created), 'originalReceiptsPreserved': len(before['keyed']['_schema_migrations']),
+        'createdAttempts': len(created), 'approvedAttemptStatusChanges':1 if linked else 0,
+        'approvedAcceptanceAuditEvents':1 if linked else 0,
+        'originalReceiptsPreserved': len(before['keyed']['_schema_migrations']),
         'additionalReceiptCount': len(after['keyed']['_schema_migrations']) - len(before['keyed']['_schema_migrations']),
         'newTables': sorted(set(after['tables']) - set(before['tables'])),
         'changedSchemaObjects': sorted(key for key in before['objects'] if before['objects'][key] != after['objects'][key]),
@@ -189,7 +218,7 @@ def stop_owned_cli(name, owner):
             capture_output=True, text=True, timeout=30)
         assert running.returncode != 0 or running.stdout.strip() == 'false', 'An owned CLI writer remains'
 
-def cli(root, image, database_dir, script, mode, label):
+def cli(root, image, database_dir, script, mode, label, extra_args=()):
     assert mode in ['--dry-run', '--apply']
     mount = 'type=volume,src=lims_lims-data,dst=/app/server/prisma' if database_dir == LIVE.parent else 'type=bind,src=' + str(database_dir) + ',dst=/app/server/prisma'
     assert re.fullmatch('[a-zA-Z0-9_.-]+', label)
@@ -201,7 +230,7 @@ def cli(root, image, database_dir, script, mode, label):
         '--network', 'none', '--memory', '768m',
         '-e', 'NODE_OPTIONS=',
         '--mount', mount, '--entrypoint', 'node', image, '-e', CLI_WRAPPER,
-        '/app/server/scripts/' + script, '--db', '/app/server/prisma/dev.db', mode]
+        '/app/server/scripts/' + script, '--db', '/app/server/prisma/dev.db', mode, *extra_args]
     try:
         result = command(root, args, label, expected=None)
     except BaseException:
@@ -231,7 +260,71 @@ def verify_repeat_inventory(value):
     assert inventory['totalChanges'] == 0
     assert inventory['blockedWorkItemCount'] == 0 and inventory['blockedWorkItems'] == [], 'Blocked #191 owners require operator resolution before release'
 
-def install_series(root, image, database_dir, reviewed_sha=None, before_apply=None):
+def acceptance_instant(value):
+    assert isinstance(value, str)
+    parsed = datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
+    return parsed.replace(tzinfo=datetime.timezone.utc) if parsed.tzinfo is None else parsed.astimezone(datetime.timezone.utc)
+
+def verify_acceptance_plan(dry, reviewed_sha=None):
+    assert dry['mode'] == 'DRY_RUN' and dry['totalChanges'] == 0
+    assert dry['reconciliation'] == ACCEPTANCE_RECONCILIATION
+    assert dry['blockedWorkItemCount'] == 1 and dry['unresolved'] == [] and dry['alreadyLinked'] == []
+    assert len(dry['eligible']) == 1, 'Exactly the approved legacy acceptance tuple is required'
+    row = dry['eligible'][0]
+    assert set(row) == set(ACCEPTANCE_TUPLE) | {'reviewedAt','decisionCreatedAt'}
+    assert {name:row[name] for name in ACCEPTANCE_TUPLE} == ACCEPTANCE_TUPLE, 'Legacy acceptance scope changed'
+    pinned_time = datetime.datetime(2026,9,8,15,tzinfo=datetime.timezone.utc)
+    assert acceptance_instant(row['reviewedAt']) == acceptance_instant(row['decisionCreatedAt']) == pinned_time
+    payload = {name:dry[name] for name in ['reconciliation','blockedWorkItemCount','eligible','unresolved']}
+    digest = hashlib.sha256(json.dumps(payload, separators=(',', ':'), ensure_ascii=False).encode()).hexdigest()
+    assert dry['planSha256'] == digest
+    if reviewed_sha is not None:
+        assert dry['planSha256'] == reviewed_sha, 'The reviewed acceptance evidence changed'
+
+def verify_acceptance_stage(stage):
+    dry, applied, repeated = stage['dryRun'], stage['apply'], stage['immediateRepeat']
+    verify_acceptance_plan(dry)
+    assert applied['mode'] == 'APPLIED' and applied['totalChanges'] == 2
+    assert applied['blockedWorkItemCount'] == 0 and applied['eligible'] == applied['unresolved'] == []
+    receipt = applied['receipt']
+    payload = {name:value for name,value in receipt.items() if name != 'receiptSha256'}
+    assert receipt['receiptSha256'] == hashlib.sha256(json.dumps(payload,separators=(',', ':'),ensure_ascii=False).encode()).hexdigest()
+    assert receipt['reconciliation'] == ACCEPTANCE_RECONCILIATION and receipt['planSha256'] == dry['planSha256']
+    assert receipt['attemptStatusChanges'] == receipt['auditEventsAdded'] == 1
+    assert receipt['originalRowsAndFieldsPreserved'] is True and re.fullmatch('[a-f0-9]{64}',receipt['originalRowsSha256'])
+    assert len(receipt['links']) == 1
+    link = receipt['links'][0]
+    assert {name:value for name,value in link.items() if name != 'eventId'} == dry['eligible'][0]
+    assert re.fullmatch('[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}', link['eventId'])
+    assert repeated['mode'] == 'NO_OP' and repeated['totalChanges'] == 0
+    for value in [applied,repeated]:
+        assert value['reconciliation'] == ACCEPTANCE_RECONCILIATION
+        assert value['blockedWorkItemCount'] == 0 and value['eligible'] == value['unresolved'] == []
+        assert len(value['alreadyLinked']) == 1
+        event = value['alreadyLinked'][0]
+        assert event['eventId'] == link['eventId'] and event['attemptId'] == link['attemptId']
+        assert event['workItemId'] == link['workItemId'] and event['reviewDecisionId'] == link['reviewDecisionId']
+        assert event['linkedResultIds'] == link['resultIds'] and event['reconciliation'] == ACCEPTANCE_RECONCILIATION
+    assert stage['immediateRepeatBefore191'] is True and stage['immediateRepeatDatabaseBytesPreserved'] is True
+
+def verify_acceptance_event(event, link, context, stage):
+    assert context is not None, 'Missing original owner context'
+    expected = {'id':link['eventId'], 'entity':'WORK_ATTEMPT', 'entityId':link['attemptId'],
+        'action':'ACCEPTED', 'performedBy':ACCEPTANCE_ACTOR, 'performedByName':ACCEPTANCE_ACTOR,
+        'sampleId':link['sampleId'], 'labId':context['labId'] or context['assignedLab'] or None,
+        'analysisCode':link['analysis']}
+    assert set(event) == set(expected) | {'timestamp','details','before','after'}, 'Unexpected audit event fields'
+    assert {name:event[name] for name in expected} == expected, 'Acceptance audit context changed'
+    timestamp = acceptance_instant(event['timestamp'])
+    assert acceptance_instant(stage['applyStartedUtc']) <= timestamp <= acceptance_instant(stage['applyCompletedUtc'])
+    note = 'Links recorded ReviewDecision ' + link['reviewDecisionId'] + ' (reviewedAt ' + link['reviewedAt'] + '); acceptance pre-dated attempt review.'
+    assert json.loads(event['details']) == {'from':'RECORDED','to':'ACCEPTED','reason':None,'note':note,
+        'resultId':None,'oldResultIds':[],'newResultIds':[],'reviewDecisionId':link['reviewDecisionId'],
+        'reconciliation':ACCEPTANCE_RECONCILIATION,'workItemId':link['workItemId'],'linkedResultIds':link['resultIds']}
+    assert json.loads(event['before']) == {'status':'RECORDED','resultIds':[]}
+    assert json.loads(event['after']) == {'status':'ACCEPTED','resultIds':[]}
+
+def install_series(root, image, database_dir, reviewed_sha=None, before_apply=None, acceptance_sha=None):
     stages, attempts = [], None
     for key, script in INSTALLERS:
         dry = cli(root, image, database_dir, script, '--dry-run', key + '-dry')
@@ -240,9 +333,15 @@ def install_series(root, image, database_dir, reviewed_sha=None, before_apply=No
             verify_attempt_plan(dry, reviewed_sha)
         if key == '191':
             verify_repeat_inventory(dry)
+        extra = []
+        if key == ACCEPTANCE_KEY:
+            verify_acceptance_plan(dry, acceptance_sha)
+            extra = ['--work-item',ACCEPTANCE_TUPLE['workItemId'],'--plan-sha256',dry['planSha256']]
         if before_apply:
             before_apply(key)
-        applied = cli(root, image, database_dir, script, '--apply', key + '-apply')
+        started = utc()
+        applied = cli(root, image, database_dir, script, '--apply', key + '-apply', extra_args=extra)
+        completed = utc()
         assert applied['mode'] in ['APPLIED', 'NO_OP']
         if key == '191':
             verify_repeat_inventory(applied)
@@ -251,13 +350,26 @@ def install_series(root, image, database_dir, reviewed_sha=None, before_apply=No
         if key != '190':
             for field in ['backfillCount', 'backfilledCount', 'newSelectionCount', 'newNcrCount', 'newAmendmentCount', 'newAttemptLinkCount', 'newWithdrawalCount', 'activationInsertCount', 'unitInsertCount']:
                 assert applied.get(field, 0) == 0, key + ' unexpected ' + field
-        stages.append({'key': key, 'script': script, 'dryRun': dry, 'apply': applied})
+        stage = {'key': key, 'script': script, 'dryRun': dry, 'apply': applied}
+        if key == ACCEPTANCE_KEY:
+            installed_hash = sha(database_dir / 'dev.db')
+            if before_apply:
+                before_apply(key + '-repeat')
+            stage['immediateRepeat'] = cli(root, image, database_dir, script, '--apply', key + '-repeat', extra_args=extra)
+            stage.update({'applyStartedUtc':started, 'applyCompletedUtc':completed,
+                'immediateRepeatBefore191':True, 'immediateRepeatDatabaseBytesPreserved':sha(database_dir / 'dev.db') == installed_hash})
+            verify_acceptance_stage(stage)
+        stages.append(stage)
         print(json.dumps({'stage': key, 'mode': applied['mode'], 'totalChanges': applied['totalChanges']}), flush=True)
     return stages, attempts
 
-def repeat_series(root, image, database_dir):
+def repeat_series(root, image, database_dir, before_apply=None):
     rows = []
     for key, script in INSTALLERS:
+        if key == ACCEPTANCE_KEY:
+            continue  # Its verified repeat already ran immediately before #191.
+        if before_apply:
+            before_apply(key + '-repeat')
         value = cli(root, image, database_dir, script, '--apply', key + '-repeat')
         assert value['mode'] == 'NO_OP' and value['totalChanges'] == 0
         if key == '191':

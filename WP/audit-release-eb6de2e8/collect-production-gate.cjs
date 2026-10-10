@@ -27,7 +27,9 @@ const hashes = [digest(path.join(root,'prepared-manifest.json')),
 const phrase = 'Audit passed: OK to merge and deploy';
 if (!review || !review.body.includes(phrase) || !review.body.includes(manifest.head)
     || !hashes.every(value => review.body.includes(value))
-    || !review.body.includes(manifest.attemptPlanSha256)) throw Error('No exact-head/hash/row-plan kit pass');
+    || !review.body.includes(manifest.attemptPlanSha256)
+    || !review.body.includes(manifest.acceptancePlanSha256)
+    || !review.body.includes(manifest.files['yy-191-review-choice-evidence.md'])) throw Error('No exact-head/hash/row-plan/YY-choice kit pass');
 if (comments.some(row => row.created_at > review.created_at && row.body.includes('Audit failed')
     && row.body.includes(manifest.head))) throw Error('A later kit audit failed');
 // Require an explicit current-kit workload pin rather than infer a new quiet window.
@@ -39,13 +41,20 @@ if (fs.existsSync(target)) throw Error('Never replace an execution gate');
 cp.execFileSync(process.execPath, [path.join(root,'collect-gates.cjs'), snapshot], {stdio:'pipe'});
 const prGates = JSON.parse(fs.readFileSync(snapshot,'utf8'));
 if (prGates.head !== manifest.head || prGates.ungatedPrs.length
-    || prGates.includedPrCount !== 20) throw Error('PR gate refused');
+    || prGates.includedPrCount !== 21) throw Error('PR gate refused');
+const mainCi = prGates.mainCi.filter(run => run.name === 'CI' && run.headSha === manifest.head);
+if (!mainCi.length || mainCi[0].status !== 'completed' || mainCi[0].conclusion !== 'success') throw Error('Merged-main CI refused');
 const evidenceSha = manifest.files['yy-authorization-evidence.md'];
 const gate = {head:manifest.head, image:manifest.image, manifestSha256:hashes[0],
   coordinatorSha256:hashes[1], rehearsalReceiptSha256:hashes[2],
   verifiedUtc:prGates.collectedUtc, prGates,
   kitReview:{issue:162, reviewedBy:'Claudio', url:review.html_url, body:review.body,
-    timeUtc:review.created_at, approvedAttemptPlanSha256:manifest.attemptPlanSha256},
+    timeUtc:review.created_at, approvedAttemptPlanSha256:manifest.attemptPlanSha256,
+    approvedAcceptancePlanSha256:manifest.acceptancePlanSha256,
+    approvedYY191ReviewChoiceSha256:manifest.files['yy-191-review-choice-evidence.md']},
+  yy191ReviewChoice:{source:'CLAUDE_LIMS_AUDIT_THREAD_ORIGINAL_CARD', choice:'Link recorded accept',
+    timeUtc:'2026-10-10T20:00:00Z', timePrecision:'minute', workItemId:manifest.acceptanceTuple.workItemId,
+    evidenceSha256:manifest.files['yy-191-review-choice-evidence.md']},
   yyGo:{confirmedByYY:true, source:'CLAUDE_LIMS_AUDIT_THREAD', authorizationMode:'AUTO_AFTER_REVIEW',
     text:'Auto after review', timeUtc:'2026-10-10T15:55:35Z', evidenceSha256:evidenceSha,
     scopeDecision:'Main now', scopeHead:manifest.head, scopeEvidenceSha256:evidenceSha},
