@@ -1,4 +1,27 @@
 {
+  "pastePreview": {
+    "title": "Pré-visualização da colagem — {analysis}",
+    "help": "Cole duas colunas: identificador da amostra e valor. Separe-as com vírgulas, pontos e vírgulas ou tabulações. Use aspas nas células que contenham o separador.",
+    "formatError": "São esperadas duas colunas: identificador da amostra e valor. Use aspas nas células que contenham o separador.",
+    "duplicate": "Esta amostra aparece mais de uma vez nas linhas coladas.",
+    "ambiguousId": "Este identificador corresponde a várias tarefas. Use um código de amostra único.",
+    "unmatched": "Nenhuma tarefa atribuída de {analysis} corresponde.",
+    "sealed": "A tarefa está encerrada ({status}).",
+    "blocked": "Os pré-requisitos estão bloqueados.",
+    "invalidNumber": "O valor é inválido ou ambíguo segundo o formato numérico desta tarefa.",
+    "separator": "Separador",
+    "auto": "Detetar automaticamente",
+    "tab": "Tabulação",
+    "comma": "Vírgula",
+    "semicolon": "Ponto e vírgula",
+    "preview": "Ver correspondências e exclusões",
+    "summary": "Pré-visualização: {count} linhas",
+    "matched": "{count} correspondências",
+    "excluded": "{count} excluídas",
+    "matchedRow": "Correspondência",
+    "draftNotice": "A colagem atualiza os rascunhos locais. As medições são guardadas com Registar.",
+    "apply": "Aplicar {count} valores aos rascunhos"
+  },
   "replicateGrid": {
     "rep1": "Rep 1",
     "rep2": "Rep 2",

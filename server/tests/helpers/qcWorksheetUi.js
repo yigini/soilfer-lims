@@ -38,6 +38,7 @@ function mountUi(filename, props = {}, { canEdit = true, user = null, responses 
                 if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
                 if (name.includes('HelpContext')) return { useHelp: () => ({ registerBlockers() {}, clearBlockers() {} }) };
                 if (name === '@lims/number-parse') return require('../../../shared/numberParse');
+                if (name === '@lims/delimited-text') return require('../../../shared/delimitedText');
                 if (name === '@lims/result-value-validation') return require('../../../shared/resultValueValidation');
                 if (name === '@lims/soil-calculation') return require('../../../shared/soilCalculation');
                 if (['./entryReadiness', './qcWorksheetNavigation', './worksheetReady', '../../utils/soilCalculations', './useRunBarcodeScan', './BarcodeSafeInput',

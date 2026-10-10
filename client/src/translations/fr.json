@@ -1,4 +1,27 @@
 {
+  "pastePreview": {
+    "title": "Aperçu du collage — {analysis}",
+    "help": "Collez deux colonnes : identifiant de l'échantillon et valeur. Séparez-les par des virgules, des points-virgules ou des tabulations. Mettez entre guillemets les cellules contenant le séparateur.",
+    "formatError": "Deux colonnes attendues : identifiant de l'échantillon et valeur. Mettez entre guillemets les cellules contenant le séparateur.",
+    "duplicate": "Cet échantillon apparaît plusieurs fois dans les lignes collées.",
+    "ambiguousId": "Cet identifiant correspond à plusieurs tâches. Utilisez un code d'échantillon unique.",
+    "unmatched": "Aucune tâche {analysis} attribuée ne correspond.",
+    "sealed": "La tâche est clôturée ({status}).",
+    "blocked": "Les prérequis sont bloqués.",
+    "invalidNumber": "La valeur est invalide ou ambiguë selon le format numérique de cette tâche.",
+    "separator": "Séparateur",
+    "auto": "Détecter automatiquement",
+    "tab": "Tabulation",
+    "comma": "Virgule",
+    "semicolon": "Point-virgule",
+    "preview": "Voir les correspondances et exclusions",
+    "summary": "Aperçu : {count} lignes",
+    "matched": "{count} correspondances",
+    "excluded": "{count} exclusions",
+    "matchedRow": "Correspondance",
+    "draftNotice": "Le collage met à jour les brouillons locaux. Les mesures sont sauvegardées avec Enregistrer.",
+    "apply": "Appliquer {count} valeurs aux brouillons"
+  },
   "replicateGrid": {
     "rep1": "Rép 1",
     "rep2": "Rép 2",

@@ -1,4 +1,27 @@
 {
+  "pastePreview": {
+    "title": "Paste preview — {analysis}",
+    "help": "Paste two columns: sample ID and value. Separate them with commas, semicolons or tabs. Quote cells containing the separator.",
+    "formatError": "Expected two columns: sample ID and value. Quote cells containing the separator.",
+    "duplicate": "This sample appears more than once in the pasted rows.",
+    "ambiguousId": "This identifier matches multiple tasks. Use a unique sample code.",
+    "unmatched": "No matching assigned {analysis} task.",
+    "sealed": "Work item is sealed ({status}).",
+    "blocked": "Prerequisites are blocked.",
+    "invalidNumber": "Value is invalid or ambiguous under this task's number format.",
+    "separator": "Separator",
+    "auto": "Detect automatically",
+    "tab": "Tab",
+    "comma": "Comma",
+    "semicolon": "Semicolon",
+    "preview": "Preview matches and exclusions",
+    "summary": "Preview: {count} rows",
+    "matched": "{count} matched",
+    "excluded": "{count} excluded",
+    "matchedRow": "Matched",
+    "draftNotice": "Paste updates local drafts. Measurements are saved with Record.",
+    "apply": "Apply {count} draft values"
+  },
   "replicateGrid": {
     "rep1": "Rep 1",
     "rep2": "Rep 2",

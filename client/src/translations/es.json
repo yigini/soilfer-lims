@@ -1,4 +1,27 @@
 {
+  "pastePreview": {
+    "title": "Vista previa del pegado — {analysis}",
+    "help": "Pegue dos columnas: identificador de muestra y valor. Sepárelas con comas, puntos y comas o tabulaciones. Use comillas en las celdas que contengan el separador.",
+    "formatError": "Se esperan dos columnas: identificador de muestra y valor. Use comillas en las celdas que contengan el separador.",
+    "duplicate": "Esta muestra aparece más de una vez en las filas pegadas.",
+    "ambiguousId": "Este identificador coincide con varias tareas. Use un código de muestra único.",
+    "unmatched": "No hay una tarea asignada de {analysis} que coincida.",
+    "sealed": "La tarea está cerrada ({status}).",
+    "blocked": "Los requisitos previos están bloqueados.",
+    "invalidNumber": "El valor es inválido o ambiguo según el formato numérico de esta tarea.",
+    "separator": "Separador",
+    "auto": "Detectar automáticamente",
+    "tab": "Tabulación",
+    "comma": "Coma",
+    "semicolon": "Punto y coma",
+    "preview": "Ver coincidencias y exclusiones",
+    "summary": "Vista previa: {count} filas",
+    "matched": "{count} coincidencias",
+    "excluded": "{count} excluidas",
+    "matchedRow": "Coincide",
+    "draftNotice": "El pegado actualiza los borradores locales. Las mediciones se guardan con Registrar.",
+    "apply": "Aplicar {count} valores al borrador"
+  },
   "replicateGrid": {
     "rep1": "Rep 1",
     "rep2": "Rep 2",
