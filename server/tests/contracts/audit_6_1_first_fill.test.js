@@ -1,4 +1,4 @@
-const {randomUUID}=require('node:crypto');
+const {randomUUID,createHash}=require('node:crypto');
 const Database=require('better-sqlite3');
 const request=require('supertest');
 const {qcGateFixture}=require('../helpers/qcGateFixture');
@@ -96,4 +96,81 @@ test('mounted request/authorise routes keep requests pending, enforce a second p
   const listing=await request(app).get('/api/samples/'+f.sample.id+'/amendments').set('Authorization','Bearer '+token);
   expect(listing.status).toBe(200);expect(listing.body.amendments).toHaveLength(1);expect(listing.body.requiresSecondPerson).toBe(true);
  },{samples:true});
+});
+
+test('normal scientific retest review, reapproval and report generation preserve the withdrawn original and issue the next revision',async()=>{
+ const f=await qcGateFixture({criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0}});owned.push(f);
+ require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:f.file,apply:true});
+ await f.setPolicy([{key:'results.replicatesRequired',value:1},{key:'qc.mode',value:'OFF'},{key:'qc.requireBatchQc',value:'NOT_REQUIRED'}]);
+ const item=f.items[0],record=value=>inTransaction(f.db,tx=>writeResultsExecution(tx,{sampleId:item.sampleId,workItemId:item.id,
+  actor:f.actor,measurements:[{param:f.analysisCode,value,replicateNo:1,equipmentId:f.instrument.id}]}));
+ const submit=async()=>{
+  await require('../../services/workItemStateService').transitionWorkItem(item.id,'COMPLETED',f.actor,'Recorded complete reading',{},f.db);
+  return require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,sampleId:item.sampleId,
+   type:'FULL',workItemIds:[item.id]});
+ };
+ const authoriser=await f.db.user.create({data:{id:randomUUID(),username:'normal-amendment-authoriser-'+randomUUID(),
+  email:randomUUID()+'@example.test',password:'owned-http-fixture',role:'LAB_MANAGER',labId:f.labId}});
+ const other={id:authoriser.id,username:authoriser.username,role:authoriser.role,labId:f.labId};
+ const [original]=await record('7.1');await submit();
+ let initialReport;
+ await withQcRunHttp(f.db,f.actor,async(app,token)=>{
+  const post=url=>request(app).post(url).set('Authorization','Bearer '+token);
+  const review=await post('/api/work/'+item.id+'/review').send({decision:'ACCEPT'});
+  expect({status:review.status,body:review.body}).toMatchObject({status:200});
+  const approval=await post('/api/samples/'+item.sampleId+'/approve');
+  expect({status:approval.status,body:approval.body}).toMatchObject({status:200});
+  const issued=await post('/api/reports/generate/'+item.sampleId);
+  expect({status:issued.status,body:issued.body}).toMatchObject({status:200});initialReport=issued.body;
+ },{reviews:true,samples:true,reports:true});
+ const parent=await f.db.workAttempt.findUnique({where:{id:original.attemptId}}),priorSample=await f.db.sample.findUnique({where:{id:item.sampleId}});
+ const priorSelections=await f.db.reportedValueSelection.findMany({where:{workItemId:item.id},orderBy:{id:'asc'}});
+ const frozen=await f.db.report.findUnique({where:{id:initialReport.id}}),publicToken='owned-public-'+randomUUID();
+ const link=await f.db.reportShareLink.create({data:{id:randomUUID(),reportId:frozen.id,createdBy:f.actor.username,
+  tokenHash:createHash('sha256').update(publicToken).digest('hex')}});
+ const {amendment}=await commands.command(f.db,{sampleId:item.sampleId,actor:f.actor,input:{type:'SCIENTIFIC',reason:'Client requested an analytical retest',
+  reasonCode:'CLIENT_RETEST',selectedWorkItemIds:[item.id],idempotencyKey:randomUUID()}});
+ const reopened=await commands.command(f.db,{sampleId:item.sampleId,amendmentId:amendment.id,actor:other,authorise:true,
+  input:{expectedVersion:1,idempotencyKey:randomUUID()}}),child=reopened.attempts[0];
+ expect(await f.db.sample.findUnique({where:{id:item.sampleId}})).toMatchObject({status:'PROCESSING',approvedBy:priorSample.approvedBy,approvedAt:priorSample.approvedAt});
+ const withdrawn=await f.db.report.findUnique({where:{id:frozen.id}});
+ expect(withdrawn).toEqual({...frozen,status:'WITHDRAWN',updatedAt:withdrawn.updatedAt});
+ const retained=async()=>({report:await f.db.report.findUnique({where:{id:frozen.id}}),
+  link:await f.db.reportShareLink.findUnique({where:{id:link.id}}),parent:await f.db.workAttempt.findUnique({where:{id:parent.id}}),
+  selections:await f.db.reportedValueSelection.findMany({where:{id:{in:priorSelections.map(row=>row.id)}},orderBy:{id:'asc'}}),
+  binding:await f.db.reportAmendmentWithdrawal.findUnique({where:{reportId:frozen.id}})});
+ const retainedBefore=await retained();
+ await withQcRunHttp(f.db,f.actor,async(app,token)=>{
+  const premature=await request(app).post('/api/reports/generate/'+item.sampleId).set('Authorization','Bearer '+token);
+  expect(premature.status).toBe(409);expect(await retained()).toEqual(retainedBefore);
+  const historical=await request(app).get('/api/reports/'+frozen.id).set('Authorization','Bearer '+token);
+  expect(historical.status).toBe(200);expect(historical.body.content).toEqual(JSON.parse(frozen.content));
+  expect(historical.body.withdrawal.amendmentId).toBe(amendment.id);
+  for(const suffix of ['','/pdf']){
+   const publicResponse=await request(app).get('/api/reports/public/'+publicToken+suffix);
+   expect(publicResponse.status).toBe(409);expect(publicResponse.body.code).toBe('REPORT_WITHDRAWN');
+   expect(publicResponse.body).not.toHaveProperty('content');
+  }
+ },{reports:true});
+ const [replacement]=await record('7.3');expect(replacement.attemptId).toBe(child.id);await submit();
+ await withQcRunHttp(f.db,other,async(app,token)=>{
+  const post=url=>request(app).post(url).set('Authorization','Bearer '+token);
+  const review=await post('/api/work/'+item.id+'/review').send({decision:'ACCEPT',attemptId:child.id,
+   reportedValueSelection:{mode:'ATTEMPT',attemptIds:[child.id],reason:'Report the completed client retest'}});
+  expect({status:review.status,body:review.body}).toMatchObject({status:200});
+  const approval=await post('/api/samples/'+item.sampleId+'/approve');
+  expect({status:approval.status,body:approval.body}).toMatchObject({status:200});
+  const issued=await post('/api/reports/generate/'+item.sampleId);
+  expect({status:issued.status,body:issued.body}).toMatchObject({status:200});
+  expect(issued.body).toMatchObject({status:'PUBLISHED',version:frozen.version+1,reportNumberBase:frozen.reportNumberBase,revision:frozen.revision+1});
+  const content=JSON.parse(issued.body.content);
+  expect(content.publication).toMatchObject({replacesReportId:frozen.id,issuer:{username:other.username}});
+  expect(content.signedBy.username).toBe(other.username);
+  expect(content.resultGroups[0].items[0]).toMatchObject({value:'7.3',sourceResultIds:[replacement.id]});
+ },{reviews:true,samples:true,reports:true});
+ expect(await retained()).toEqual(retainedBefore);
+ expect(await f.db.sampleAmendment.findUnique({where:{id:amendment.id}})).toMatchObject({status:'APPROVED',version:2,
+  priorApprovedBy:priorSample.approvedBy,priorApprovedAt:priorSample.approvedAt});
+ expect(await f.db.workAttempt.findUnique({where:{id:child.id}})).toMatchObject({status:'ACCEPTED',parentAttemptId:parent.id});
+ expect(await f.db.result.findUnique({where:{id:original.id}})).toEqual({...original,isCurrent:false,supersededBy:replacement.id});
 });
