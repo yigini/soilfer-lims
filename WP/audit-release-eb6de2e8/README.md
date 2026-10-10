@@ -3,15 +3,20 @@
 Target application commit: `feac653495d6b8a21e082cec596f1e14672fb389`.
 Last deployed application commit: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
 
-Current release status (October 10, after 20:55 UTC): preparing the new kit
-integration and guard tests after #289's gated merge. Deployment is still
-HELD until the NEW complete fresh-copy rehearsal and exact-kit audit pass.
+Current release status (October 10, 21:37 UTC): the NEW complete fresh-copy
+rehearsal PASSED, merged-main CI is fully green, and the exact kit is frozen
+PREPARED_ONLY_NOT_EXECUTED. See **release-kit-feac6534-ready.md** for the
+authoritative current head/hashes/counts and review request. Deployment is
+HELD on Claudio's exact-kit audit and YY's pending disk-headroom choice.
+Production is healthy #188 and untouched. Earlier preparation history follows;
+pending/failure statements below describe their original checkpoints.
+
 The previous application target `042c04b5` stopped at the required #191
 zero-blocked-owner gate. The complete merged-main fresh-copy rehearsal failed
 before #191 apply. One ACCEPTED WorkItem has a preexisting RECORDED attempt
 and an already published report. Claudio owns the separately reviewed
 resolution design. Pip directly verified YY's "Link recorded accept" selection
-in the original native decision card; Claudio is implementing the forward fix.
+in the original native decision card; Claudio implemented audited PR #289.
 The deployed #188 app cannot reopen this item before release. No production
 install, backfill, quiesce or review action has occurred.
 

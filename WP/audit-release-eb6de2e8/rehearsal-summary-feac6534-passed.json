@@ -1,0 +1,611 @@
+{
+  "status": "PASSED_OWNED_COPY_NOT_PRODUCTION",
+  "head": "feac653495d6b8a21e082cec596f1e14672fb389",
+  "root": "/opt/lims/releases/combined-eb6de2e8-rehearsal-feac6534-20261010211834Z",
+  "candidateImage": "sha256:159057d56c456a0c7cdef917fd04f53f9a66d6285cc476d7203d63047bfff8e1",
+  "startedUtc": "2026-10-10T21:18:39.098011+00:00",
+  "completedUtc": "2026-10-10T21:33:43.021327+00:00",
+  "productionExecution": false,
+  "rehearsalReceiptSha256": "1e8f8929f7d5a905abbd643ea0199c00ef6bd004dc64c7a2c84f9915f64efb11",
+  "buildReceiptSha256": "3ccc75f9902de974b55f3f2e39fcf2ef758ad2fe413511b323e9351e0b8b93e2",
+  "sourceArchiveSha256": "5ae6039446bbd3cb038e2ac202b6fee966c89de1513f144dfd29d5260ce9f10d",
+  "sourceIndexSha256": "70b9bf21d560ec932ef7613fc32971b7a693e5a6e15b697cc2327c70b3edb720",
+  "verifiedGitBlobCount": 2224,
+  "productionCopySha256": "8f6d881d17df728a1242c4ebbaf704470db8c2c35878be904827e2e6eb677714",
+  "preservation": {
+    "originalTableCount": 90,
+    "originalRowsAndFieldsPreserved": true,
+    "approvedNullResultLinks": 19,
+    "createdAttempts": 17,
+    "approvedAttemptStatusChanges": 1,
+    "approvedAcceptanceAuditEvents": 1,
+    "originalReceiptsPreserved": 18,
+    "additionalReceiptCount": 19,
+    "newTables": [
+      "BatchReagentLot",
+      "CalcTemplate",
+      "CalcTemplateActivation",
+      "CalibrationCurve",
+      "CalibrationPoint",
+      "CrossCheckEvaluation",
+      "NonconformityReport",
+      "ReportAmendmentWithdrawal",
+      "ReportedValueSelection",
+      "ResultCalculation",
+      "ResultOverrideRequest",
+      "SampleAmendmentAttempt",
+      "UserBenchCredential"
+    ],
+    "changedSchemaObjects": [
+      "table:ProficiencyRound",
+      "table:Report",
+      "table:ReviewDecision",
+      "table:SampleAmendment",
+      "table:WorkAttempt",
+      "trigger:ProficiencyRound_ncr_status_insert_guard",
+      "trigger:ProficiencyRound_ncr_status_update_guard",
+      "trigger:WorkItem_batch_membership_guard"
+    ],
+    "integrity": "ok",
+    "foreignKeyViolations": 0
+  },
+  "installers": [
+    {
+      "key": "179",
+      "script": "install_workflow_state_guards.js",
+      "dryRunClassification": "COMPLETE",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "counts": {},
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 82595840,
+      "dryRunPeakBytes": 83263488,
+      "repeatPeakBytes": 83488768
+    },
+    {
+      "key": "182",
+      "script": "install_result_attempt_links.js",
+      "dryRunClassification": "COMPLETE",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "counts": {
+        "backfillCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 26513408,
+      "dryRunPeakBytes": 26632192,
+      "repeatPeakBytes": 27414528
+    },
+    {
+      "key": "183",
+      "script": "install_sample_holds.js",
+      "dryRunClassification": "COMPLETE",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "counts": {
+        "backfillCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 26914816,
+      "dryRunPeakBytes": 26603520,
+      "repeatPeakBytes": 28004352
+    },
+    {
+      "key": "184",
+      "script": "install_reference_materials.js",
+      "dryRunClassification": "COMPLETE",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "counts": {
+        "backfillCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 27201536,
+      "dryRunPeakBytes": 27119616,
+      "repeatPeakBytes": 27615232
+    },
+    {
+      "key": "185",
+      "script": "install_qc_rules.js",
+      "dryRunClassification": "COMPLETE",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "counts": {
+        "backfillCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 26705920,
+      "dryRunPeakBytes": 26558464,
+      "repeatPeakBytes": 27607040
+    },
+    {
+      "key": "186",
+      "script": "install_qc_runs.js",
+      "dryRunClassification": "COMPLETE",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "counts": {
+        "backfillCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 47656960,
+      "dryRunPeakBytes": 47792128,
+      "repeatPeakBytes": 49840128
+    },
+    {
+      "key": "187",
+      "script": "install_qc_gate_scope.js",
+      "dryRunClassification": "COMPLETE",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "counts": {
+        "backfillCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 48041984,
+      "dryRunPeakBytes": 47845376,
+      "repeatPeakBytes": 50151424
+    },
+    {
+      "key": "272",
+      "script": "install_result_raw_input.js",
+      "dryRunClassification": "ALREADY_PRESENT",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "counts": {
+        "backfillCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 26361856,
+      "dryRunPeakBytes": 25935872,
+      "repeatPeakBytes": 26701824
+    },
+    {
+      "key": "193",
+      "script": "bootstrap_pt_nonconformity.js",
+      "dryRunClassification": "PRE_193",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "counts": {
+        "backfilledCount": 0,
+        "newNcrCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 81350656,
+      "dryRunPeakBytes": 26681344,
+      "repeatPeakBytes": 28078080
+    },
+    {
+      "key": "189",
+      "script": "install_result_equipment_evidence.js",
+      "dryRunClassification": "COMPLETE",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "counts": {
+        "backfillCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 26451968,
+      "dryRunPeakBytes": 26263552,
+      "repeatPeakBytes": 27172864
+    },
+    {
+      "key": "178",
+      "script": "install_workitem_uniqueness.js",
+      "dryRunClassification": "COMPLETE",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "counts": {},
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 26615808,
+      "dryRunPeakBytes": 26292224,
+      "repeatPeakBytes": 27045888
+    },
+    {
+      "key": "190",
+      "script": "install_work_attempt_contract.js",
+      "dryRunClassification": "PRE_190",
+      "mode": "APPLIED",
+      "totalChanges": 39,
+      "counts": {
+        "newAttemptCount": 17,
+        "linkedResultCount": 19,
+        "flaggedAttemptCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 100503552,
+      "dryRunPeakBytes": 79167488,
+      "repeatPeakBytes": 79937536
+    },
+    {
+      "key": "191-link",
+      "script": "link_recorded_acceptance.js",
+      "dryRunClassification": null,
+      "mode": "APPLIED",
+      "totalChanges": 2,
+      "counts": {},
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 80195584,
+      "dryRunPeakBytes": 29487104,
+      "repeatPeakBytes": 29368320
+    },
+    {
+      "key": "191",
+      "script": "install_work_repeat_contract.js",
+      "dryRunClassification": "PRE_191",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "counts": {
+        "newAttemptCount": 0,
+        "linkedResultCount": 0,
+        "backfilledCount": 0
+      },
+      "blockedWorkItemCount": 0,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 114954240,
+      "dryRunPeakBytes": 79818752,
+      "repeatPeakBytes": 82370560
+    },
+    {
+      "key": "192",
+      "script": "install_reported_value_selections.js",
+      "dryRunClassification": "PRE_192",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "counts": {
+        "newSelectionCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 94277632,
+      "dryRunPeakBytes": 81813504,
+      "repeatPeakBytes": 81981440
+    },
+    {
+      "key": "194",
+      "script": "install_batch_reagent_lots.js",
+      "dryRunClassification": "PRE_194",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "counts": {
+        "backfilledCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 81457152,
+      "dryRunPeakBytes": 26615808,
+      "repeatPeakBytes": 27996160
+    },
+    {
+      "key": "199",
+      "script": "install_calculation_templates.js",
+      "dryRunClassification": "PRE_199",
+      "mode": "APPLIED",
+      "totalChanges": 17,
+      "counts": {
+        "backfillCount": 0,
+        "activationInsertCount": 0,
+        "unitInsertCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 48926720,
+      "dryRunPeakBytes": 46657536,
+      "repeatPeakBytes": 48648192
+    },
+    {
+      "key": "197",
+      "script": "install_result_override_requests.js",
+      "dryRunClassification": "PRE_197",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "counts": {
+        "backfilledCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 82501632,
+      "dryRunPeakBytes": 27230208,
+      "repeatPeakBytes": 28880896
+    },
+    {
+      "key": "201",
+      "script": "install_cross_check_evaluations.js",
+      "dryRunClassification": "PRE_201",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "counts": {
+        "backfilledCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 105893888,
+      "dryRunPeakBytes": 82960384,
+      "repeatPeakBytes": 83456000
+    },
+    {
+      "key": "210",
+      "script": "install_sample_amendment_authorisation.js",
+      "dryRunClassification": "PRE_210",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "counts": {
+        "backfilledCount": 0,
+        "newAmendmentCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 550342656,
+      "dryRunPeakBytes": 45940736,
+      "repeatPeakBytes": 46198784
+    },
+    {
+      "key": "211",
+      "script": "install_report_revisions.js",
+      "dryRunClassification": "PRE_211",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "counts": {
+        "backfilledCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 549097472,
+      "dryRunPeakBytes": 46682112,
+      "repeatPeakBytes": 46657536
+    },
+    {
+      "key": "202",
+      "script": "install_bench_credentials.js",
+      "dryRunClassification": "PRE_202",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "counts": {
+        "backfilledCount": 0
+      },
+      "blockedWorkItemCount": null,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "applyPeakBytes": 546508800,
+      "dryRunPeakBytes": 47095808,
+      "repeatPeakBytes": 46936064
+    }
+  ],
+  "acceptancePlanSha256": "d894e33add6e7458077141d45922e27d2172b4975c2e7e9e650ab25c05bc1215",
+  "yy191ReviewChoiceSha256": "c1b07d025d1aa790c37d32bbf33f8f9a8cffe1c7c35727441d6e39f1d9e28d14",
+  "acceptanceLink": {
+    "key": "191-link",
+    "script": "link_recorded_acceptance.js",
+    "dryRun": {
+      "reconciliation": "191-recorded-acceptance-link-v1",
+      "blockedWorkItemCount": 1,
+      "eligible": [
+        {
+          "workItemId": "WI-GTM-DEMO-S02-P",
+          "sampleId": "GTM-DEMO-S02",
+          "analysis": "P_OLSEN",
+          "attemptId": "att-s02-p-2",
+          "resultIds": [
+            "res-s02-p-run2"
+          ],
+          "reviewDecisionId": "dec-s02-p-acc",
+          "reviewedAt": "2026-09-08 15:00:00",
+          "decisionCreatedAt": "2026-09-08 15:00:00"
+        }
+      ],
+      "unresolved": [],
+      "planSha256": "d894e33add6e7458077141d45922e27d2172b4975c2e7e9e650ab25c05bc1215",
+      "alreadyLinked": [],
+      "mode": "DRY_RUN",
+      "totalChanges": 0
+    },
+    "apply": {
+      "reconciliation": "191-recorded-acceptance-link-v1",
+      "blockedWorkItemCount": 0,
+      "eligible": [],
+      "unresolved": [],
+      "planSha256": "9040391b7c2b5672e87e0a55626e3778b646be2d4b39929484780a4924fcec84",
+      "alreadyLinked": [
+        {
+          "eventId": "07b5c891-39f5-46fe-bc5a-f49af489447d",
+          "attemptId": "att-s02-p-2",
+          "from": "RECORDED",
+          "to": "ACCEPTED",
+          "reason": null,
+          "note": "Links recorded ReviewDecision dec-s02-p-acc (reviewedAt 2026-09-08 15:00:00); acceptance pre-dated attempt review.",
+          "resultId": null,
+          "oldResultIds": [],
+          "newResultIds": [],
+          "reviewDecisionId": "dec-s02-p-acc",
+          "reconciliation": "191-recorded-acceptance-link-v1",
+          "workItemId": "WI-GTM-DEMO-S02-P",
+          "linkedResultIds": [
+            "res-s02-p-run2"
+          ]
+        }
+      ],
+      "mode": "APPLIED",
+      "receipt": {
+        "reconciliation": "191-recorded-acceptance-link-v1",
+        "planSha256": "d894e33add6e7458077141d45922e27d2172b4975c2e7e9e650ab25c05bc1215",
+        "links": [
+          {
+            "workItemId": "WI-GTM-DEMO-S02-P",
+            "sampleId": "GTM-DEMO-S02",
+            "analysis": "P_OLSEN",
+            "attemptId": "att-s02-p-2",
+            "resultIds": [
+              "res-s02-p-run2"
+            ],
+            "reviewDecisionId": "dec-s02-p-acc",
+            "reviewedAt": "2026-09-08 15:00:00",
+            "decisionCreatedAt": "2026-09-08 15:00:00",
+            "eventId": "07b5c891-39f5-46fe-bc5a-f49af489447d"
+          }
+        ],
+        "originalRowsSha256": "f85f060a7c41bc31d9fae344077525253e6e40f1b248fdc0719b30707c023e51",
+        "originalRowsAndFieldsPreserved": true,
+        "attemptStatusChanges": 1,
+        "auditEventsAdded": 1,
+        "receiptSha256": "09c9029e6f0579c6c30c4b867503b73590a7e73038d50e6baaa271a27011dab6"
+      },
+      "totalChanges": 2
+    },
+    "immediateRepeat": {
+      "reconciliation": "191-recorded-acceptance-link-v1",
+      "blockedWorkItemCount": 0,
+      "eligible": [],
+      "unresolved": [],
+      "planSha256": "9040391b7c2b5672e87e0a55626e3778b646be2d4b39929484780a4924fcec84",
+      "alreadyLinked": [
+        {
+          "eventId": "07b5c891-39f5-46fe-bc5a-f49af489447d",
+          "attemptId": "att-s02-p-2",
+          "from": "RECORDED",
+          "to": "ACCEPTED",
+          "reason": null,
+          "note": "Links recorded ReviewDecision dec-s02-p-acc (reviewedAt 2026-09-08 15:00:00); acceptance pre-dated attempt review.",
+          "resultId": null,
+          "oldResultIds": [],
+          "newResultIds": [],
+          "reviewDecisionId": "dec-s02-p-acc",
+          "reconciliation": "191-recorded-acceptance-link-v1",
+          "workItemId": "WI-GTM-DEMO-S02-P",
+          "linkedResultIds": [
+            "res-s02-p-run2"
+          ]
+        }
+      ],
+      "mode": "NO_OP",
+      "totalChanges": 0
+    },
+    "applyStartedUtc": "2026-10-10T21:21:02.981274+00:00",
+    "applyCompletedUtc": "2026-10-10T21:21:48.012462+00:00",
+    "immediateRepeatBefore191": true,
+    "immediateRepeatDatabaseBytesPreserved": true
+  },
+  "attemptPlan": {
+    "classification": "PRE_190",
+    "status": "READY",
+    "planSha256": "7ffdb375cab35663d188d6087f02ee81161ec950feae7611bbbad6d8706d57f9",
+    "newAttemptCount": 17,
+    "linkedResultCount": 19,
+    "flaggedGroupCount": 0,
+    "flaggedAttemptCount": 0,
+    "missingOrderedWorkCount": 225,
+    "samplesWithMissingOrderedWorkCount": 10,
+    "totalChanges": 0
+  },
+  "repeatTotalChanges": 0,
+  "startupChanges": 0,
+  "readOnlyProbeChanges": 0,
+  "repeatInstallDatabaseBytesPreserved": true,
+  "readyEvents": [
+    "WORKFLOW_STARTUP_READY",
+    "RESULT_ATTEMPT_STARTUP_READY",
+    "SAMPLE_HOLD_STARTUP_READY",
+    "REFERENCE_STARTUP_READY",
+    "QC_RULE_STARTUP_READY",
+    "QC_RUN_STARTUP_READY",
+    "QC_GATE_SCOPE_STARTUP_READY",
+    "PT_STARTUP_READY",
+    "NCR_STARTUP_READY",
+    "RESULT_EQUIPMENT_STARTUP_READY",
+    "WORK_ATTEMPT_STARTUP_READY",
+    "WORK_REPEAT_STARTUP_READY",
+    "REPORTED_VALUE_STARTUP_READY",
+    "REAGENT_LOT_STARTUP_READY",
+    "RESULT_OVERRIDE_STARTUP_READY",
+    "CALCULATION_STARTUP_READY",
+    "CROSS_CHECK_STARTUP_READY",
+    "AMENDMENT_STARTUP_READY",
+    "REPORT_REVISION_STARTUP_READY",
+    "BENCH_CREDENTIAL_STARTUP_READY"
+  ],
+  "startupMemory": {
+    "limitBytes": 805306368,
+    "nodeOptions": null,
+    "peakBytes": 335179776
+  },
+  "health": {
+    "status": "ok",
+    "version": "1.9.0",
+    "uptime": 33.449825731
+  },
+  "apiChecks": {
+    "passed": 31,
+    "total": 31,
+    "failed": 0
+  },
+  "probes": [
+    {
+      "file": "postflight-roles.cjs",
+      "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-auth.cjs",
+      "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-reference.cjs",
+      "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-qc-runs.cjs",
+      "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-policy.cjs",
+      "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+      "exitCode": 0
+    },
+    {
+      "file": "readonly-smoke.cjs",
+      "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+      "exitCode": 0
+    }
+  ],
+  "benchCredentialCount": 0,
+  "freeBytesAfter": {
+    "/opt/lims": 8519356416,
+    "/var/lib/docker": 8519356416
+  }
+}

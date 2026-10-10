@@ -1,0 +1,131 @@
+{
+  "status": "RAW_GIT_KIT_EXPORT",
+  "head": "a05791d6b8484c249dbfb9156962e66a568ba6b5",
+  "files": [
+    {
+      "name": "build-candidate.py",
+      "bytes": 4279,
+      "sha256": "f9d52bf67e9acd980ae2e1890302d083e74fc7da3f3f4709675745fb502b01ce"
+    },
+    {
+      "name": "collect-gates.cjs",
+      "bytes": 3183,
+      "sha256": "02242a7d287e79faec4a00c302ea358c7a10780efd220a89a90db66226374211"
+    },
+    {
+      "name": "collect-production-gate.cjs",
+      "bytes": 4794,
+      "sha256": "b75601a814f91a4235884412b446d4ef4a445136e6b9d02adc61f69c51352648"
+    },
+    {
+      "name": "export-git-source.cjs",
+      "bytes": 1989,
+      "sha256": "621f5b21e9d69338c356bc4c95092f601abce46ae71d5c1591b957a0987fa1b4"
+    },
+    {
+      "name": "export-kit.cjs",
+      "bytes": 1839,
+      "sha256": "3b43b298fb61869a8e7f404fff5c3af03562fb8345a8806a216f60f885f89d8a"
+    },
+    {
+      "name": "inspect-retained-startup.py",
+      "bytes": 2008,
+      "sha256": "bd69b7371b0379797d931ffc614b2c52849e4332ab0f370d53938136fce023b2"
+    },
+    {
+      "name": "plan-attempts-readonly.py",
+      "bytes": 1877,
+      "sha256": "7712bf9de4a6ffcfbef5dbc2189cd6c6cfcdb7327355352fb2501a9dc28b1fb1"
+    },
+    {
+      "name": "postflight-auth.cjs",
+      "bytes": 2045,
+      "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192"
+    },
+    {
+      "name": "postflight-policy.cjs",
+      "bytes": 4035,
+      "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51"
+    },
+    {
+      "name": "postflight-qc-runs.cjs",
+      "bytes": 4091,
+      "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f"
+    },
+    {
+      "name": "postflight-reference.cjs",
+      "bytes": 2096,
+      "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526"
+    },
+    {
+      "name": "postflight-roles.cjs",
+      "bytes": 12281,
+      "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da"
+    },
+    {
+      "name": "prepare-owned.py",
+      "bytes": 428,
+      "sha256": "ec1467bd31088849f685153457eb593172af97dc05af13f2cc1dcf830fb86de7"
+    },
+    {
+      "name": "prepare_manifest.py",
+      "bytes": 9450,
+      "sha256": "4d1620016eee0e3ca38351b97932bd8198b8a2334b0281fc4fca0d3b0025579b"
+    },
+    {
+      "name": "proof-owned-cli.py",
+      "bytes": 1351,
+      "sha256": "419cf0c31a2ba538c8953b0de8369d98d399ddb91366dda744d50c1e8fabcaab"
+    },
+    {
+      "name": "prune-builder-cache.py",
+      "bytes": 1162,
+      "sha256": "3483f8756f75471c6f27cfa288910b29811e326d45eba1ca29a39e236dec4485"
+    },
+    {
+      "name": "readonly-smoke.cjs",
+      "bytes": 3255,
+      "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626"
+    },
+    {
+      "name": "rehearse.py",
+      "bytes": 8600,
+      "sha256": "89f3ffcda86137c6da61ecf7bc649e4c805700ca38f8643b9e6e6b58d5c04cbc"
+    },
+    {
+      "name": "release-forward.py",
+      "bytes": 20218,
+      "sha256": "08ca5584f79893d0ffb4f8c525f1ec40e4438969c11a294c91f82cdc118ba3c7"
+    },
+    {
+      "name": "release_support.py",
+      "bytes": 24227,
+      "sha256": "37eef0a4dab2e30677a095066f41b1a1ea79729ec0c1c95ddd8115a468554490"
+    },
+    {
+      "name": "summarize-proof.py",
+      "bytes": 4373,
+      "sha256": "44a9d542746b174c20b3b3b4decba5050c5b32fa570db85ca4f51712a6bd56cc"
+    },
+    {
+      "name": "supplement-startup.py",
+      "bytes": 5785,
+      "sha256": "8d96f78c0442abbbbb73cefe3296fa97387f5878a3a07404decb9087168116ff"
+    },
+    {
+      "name": "test_release_guards.py",
+      "bytes": 41404,
+      "sha256": "a96e5b35044e2ca63b9cfbcdefd99015c4169c6da095ef11d00b04bb915929d2"
+    },
+    {
+      "name": "yy-191-review-choice-evidence.md",
+      "bytes": 1478,
+      "sha256": "c1b07d025d1aa790c37d32bbf33f8f9a8cffe1c7c35727441d6e39f1d9e28d14"
+    },
+    {
+      "name": "yy-authorization-evidence.md",
+      "bytes": 1669,
+      "sha256": "6cdc770a39f42ba8e83eaacf3430b9bfbc73f70e8cdeb2785d229c79a9807de6"
+    }
+  ]
+}
