@@ -101,5 +101,7 @@ they do not go through reserveRepeat, which seals an ordinary repeat parent.
 The accepted parent remains sealed. Actual unlinked accepted-parent calls
 must return409 ATTEMPT_CORRECTION_REQUIRED with no persisted changes. For
 field faults the actual writer must return409 AMENDMENT_ATTEMPT_LINK_INVALID;
-sample changes at the same authorised version, selected-line changes and
-child-reason changes are instead prevented by the retained SQL guards.
+sample changes at the same authorised version, selected-line changes,
+child-parent changes and child-reason changes are instead prevented by the
+retained SQL guards. The existing missing-original-replica case exercises the
+actual permitted replica write and its amendment-witness refusal.

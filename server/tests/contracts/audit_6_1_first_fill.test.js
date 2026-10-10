@@ -11,7 +11,12 @@ const {writeResultsExecution}=require('../../services/resultWriteService');
 const owned=[];
 afterEach(async()=>{for(const f of owned.splice(0))await f.close();});
 async function fixture(reasonCode='CLIENT_RETEST',originalReplicates=2,analysisCode,unlinked=false){
- const f=await qcGateFixture(analysisCode?{analysisCode}:undefined);owned.push(f);
+ const f=await qcGateFixture();owned.push(f);
+ if(analysisCode){
+  expect(await f.db.unit.findUnique({where:{code:'%'}})).not.toBeNull();
+  await f.db.analysis.create({data:{code:analysisCode,name:'Owned texture measurand',units:'%',unitCode:'%',validation:'{"tolerance":2}',prerequisites:'[]'}});
+  f.method=await f.db.methodology.create({data:{analysisCode,name:'Owned texture procedure'}});f.analysisCode=analysisCode;
+ }
  require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:f.file,apply:true});
  await f.setPolicy([{key:'results.replicatesRequired',value:2}]);
  f.sample=await createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,
@@ -65,7 +70,7 @@ test('an absent original replicate refuses and rolls back first fill, result and
  const f=await fixture('CLIENT_RETEST',1),{amendment}=await f.request();await f.authorise(amendment);const before=f.all();
  await expect(f.record(2)).rejects.toMatchObject({statusCode:409,code:'AMENDMENT_ATTEMPT_LINK_INVALID'});expect(f.all()).toEqual(before);
 });
-test.each(['version','lab','parent','replicate'])('a persisted %s field fault refuses the actual result write and rolls back every row',async field=>{
+test.each(['version','lab'])('a persisted %s field fault refuses the actual result write and rolls back every row',async field=>{
  const f=await fixture(),{amendment}=await f.request(),outcome=await f.authorise(amendment),child=outcome.attempts[0];
  // Construct only states the actual SQL permits in this owned negative fixture.
  // No model reads, contract guards or writer options are substituted.
@@ -74,19 +79,16 @@ test.each(['version','lab','parent','replicate'])('a persisted %s field fault re
   const lab=await f.db.lab.create({data:{id:randomUUID(),code:'foreign-'+randomUUID(),name:'Owned other laboratory',country:'GTM'}});
   await f.db.workItem.update({where:{id:f.item.id},data:{labId:lab.id}});
  }
- if(field==='parent'){
-  const other=await f.db.workAttempt.create({data:{id:randomUUID(),workItemId:f.item.id,attemptNo:3,status:'ACCEPTED'}});
-  await f.db.workAttempt.update({where:{id:child.id},data:{parentAttemptId:other.id,updatedAt:child.updatedAt}});
- }
  const before=f.all();
- await expect(f.record(field==='replicate'?3:1)).rejects.toMatchObject({statusCode:409,code:'AMENDMENT_ATTEMPT_LINK_INVALID'});
+ await expect(f.record(1)).rejects.toMatchObject({statusCode:409,code:'AMENDMENT_ATTEMPT_LINK_INVALID'});
  expect(f.all()).toEqual(before);
 });
-test.each(['sample','line','reason'])('the SQL guard prevents a persisted %s link fault with zero writes',async field=>{
+test.each(['sample','line','parent','reason'])('the SQL guard prevents a persisted %s link fault with zero writes',async field=>{
  const f=await fixture(),{amendment}=await f.request(),outcome=await f.authorise(amendment),child=outcome.attempts[0],before=f.all(),db=new Database(f.file);
  try{
   if(field==='sample')expect(()=>db.prepare('UPDATE SampleAmendment SET sampleId=? WHERE id=?').run(f.items[0].sampleId,amendment.id)).toThrow('AMENDMENT_VERSION_CONFLICT');
   else if(field==='line')expect(()=>db.prepare('UPDATE SampleAmendment SET selectedWorkItemIds=?,version=version+1 WHERE id=?').run('[]',amendment.id)).toThrow('AMENDMENT_REQUEST_IMMUTABLE');
+  else if(field==='parent')expect(()=>db.prepare('UPDATE WorkAttempt SET parentAttemptId=? WHERE id=?').run(randomUUID(),child.id)).toThrow('WORK_ATTEMPT_REQUEST_IMMUTABLE');
   else expect(()=>db.prepare('UPDATE WorkAttempt SET reason=? WHERE id=?').run('OTHER',child.id)).toThrow('WORK_ATTEMPT_IDENTITY_IMMUTABLE');
  }finally{db.close();}
  expect(f.all()).toEqual(before);
