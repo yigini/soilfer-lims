@@ -66,7 +66,19 @@ without new diagnostics; no test, mock or timeout is weakened. The branch is
 rebased onto the merged #201 implementation, retaining both actual installers,
 startup gates, migration-source bindings and all predecessor assertions.
 
-Still unfinished: rebased focused verification, exact-head CI, actual Docker
-readiness and audit. Amendment numbering beyond the full retained UUID remains
+At rebased executable head3e9ca5ca, the owned checkout generated its own
+92-model client; build passed (8.805 s), and lint passed with zero errors and
+fourteen existing warnings. A normal 24-file focused invocation ended with
+native exit3221225477 (0xC0000005) after368.374 s: fifteen PASS suites, zero FAIL,
+no Jest summary. The last completed suite was deployment_readiness_bootstrap;
+completed suites also include all five #201 files, amendment first fill and
+installation, separate authorisation, unchanged repeat commands, the startup
+installer, actual Chromium and the state-write scanner. The template digest
+remained unchanged. The failed invocation and receipt are retained; its counts
+are not represented as a completed focused or full pass. No application1000
+node event was returned by the diagnostic query, so no crash cause is claimed.
+
+Still unfinished: exact-head Linux CI, actual Docker readiness and audit.
+Amendment numbering beyond the full retained UUID remains
 deferred; public replacement navigation belongs to #211. Production installation
 and counts remain unrun under the #190 disk hold.
