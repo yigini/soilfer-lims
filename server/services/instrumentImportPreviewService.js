@@ -1,4 +1,4 @@
-const { templateForRun, fail } = require('./instrumentImportTemplateService');
+const { templateForRun, readImportRun, listTemplates, fail } = require('./instrumentImportTemplateService');
 const { decodeInstrumentDelimitedSource } = require('./instrumentDelimitedSource');
 const { decodeInstrumentXlsxSource, assertXlsxMappedCell } = require('./instrumentXlsxSource');
 const { matchInstrumentRow } = require('./instrumentImportRowMatch');
@@ -12,6 +12,18 @@ const policy = require('./policyService');
 const activations = require('./calculationActivationService');
 const calculationTemplates = require('./calculationTemplateService');
 
+async function activatedDefinition(db, lab, analyte, active) {
+    if (!active) return null;
+    const activation = await activations.readBoundActivation(db, active.activationId);
+    const row = await db.calcTemplate.findUnique({ where: { id: active.templateId } });
+    if (!activation || activation.action !== 'ACTIVATE' || activation.labId !== lab.id ||
+        activation.analysisCode !== analyte.analysisCode || activation.methodologyId !== analyte.methodologyId ||
+        activation.templateId !== active.templateId || activation.templateVersion !== active.templateVersion ||
+        !row || row.labId !== lab.id || row.analysisCode !== analyte.analysisCode || row.version !== active.templateVersion ||
+        row.methodologyId !== null && row.methodologyId !== analyte.methodologyId)
+        throw fail(409, 'IMPORT_TEMPLATE_BINDING_REQUIRED', 'The activated input definition is unavailable.');
+    return calculationTemplates.decode(row);
+}
 async function analysisBinding(db, lab, analyte, mapping, active) {
     const analysis = await db.analysis.findUnique({ where: { code: mapping.analysisCode } });
     if (!active) {
@@ -19,15 +31,7 @@ async function analysisBinding(db, lab, analyte, mapping, active) {
         return { analysis, active: null, inputs: null };
     }
     if (!mapping.inputs) throw fail(400, 'IMPORT_TEMPLATE_MAPPING_INVALID', 'Save an input mapping for the activated template.');
-    const activation = await activations.readBoundActivation(db, active.activationId);
-    const row = await db.calcTemplate.findUnique({ where: { id: active.templateId } });
-    if (!activation || activation.action !== 'ACTIVATE' || activation.labId !== lab.id ||
-        activation.analysisCode !== mapping.analysisCode || activation.methodologyId !== analyte.methodologyId ||
-        activation.templateId !== active.templateId || activation.templateVersion !== active.templateVersion ||
-        !row || row.labId !== lab.id || row.analysisCode !== mapping.analysisCode || row.version !== active.templateVersion ||
-        row.methodologyId !== null && row.methodologyId !== analyte.methodologyId)
-        throw fail(409, 'IMPORT_TEMPLATE_BINDING_REQUIRED', 'The activated input definition is unavailable.');
-    const definition = calculationTemplates.decode(row), names = mapping.inputs.map(input => input.variable);
+    const definition = await activatedDefinition(db, lab, analyte, active), names = mapping.inputs.map(input => input.variable);
     if (names.length !== definition.inputs.length || new Set(names).size !== names.length ||
         definition.inputs.some(input => !names.includes(input.key)))
         throw fail(409, 'IMPORT_TEMPLATE_BINDING_REQUIRED', 'Bind each activated input exactly once.');
@@ -169,4 +173,17 @@ async function previewInstrumentImport(db, actor, { batchId, templateId, sourceN
         ...(xlsx && { sheetName: decoded.sheetName, requestedSheetName: selectedSheet ?? null, sheets: decoded.sheets }),
         refusals, canCommit: refusals.length === 0 };
 }
-module.exports = { previewInstrumentImport };
+async function readInstrumentImportContext(db, actor, batchId) {
+    const { batch, lab, instrument } = await readImportRun(db, actor, batchId), analyses = [];
+    for (const analyte of batch.analytes) {
+        const analysis = await db.analysis.findUnique({ where: { code: analyte.analysisCode } });
+        const active = await policy.calcTemplate(lab.id, { analysisCode: analyte.analysisCode, methodologyId: analyte.methodologyId }, { db });
+        const definition = await activatedDefinition(db, lab, analyte, active);
+        analyses.push({ analysisCode: analyte.analysisCode, name: analysis?.name, methodologyId: analyte.methodologyId,
+            reportingUnits: [...new Set([analysis?.units, analysis?.unitCode].filter(value => typeof value === 'string' && value.length))],
+            active, inputs: definition?.inputs || null });
+    }
+    return { batchId: batch.id, labId: lab.id, instrumentId: instrument.id, analyses,
+        templates: await listTemplates(db, actor, instrument.id, lab.id) };
+}
+module.exports = { previewInstrumentImport, readInstrumentImportContext };

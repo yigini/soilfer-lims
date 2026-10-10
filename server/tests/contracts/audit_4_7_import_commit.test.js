@@ -110,3 +110,21 @@ test('mounted multipart preview and commit use actual token/permission/run owner
         expect(committed.status).toBe(201); expect(committed.body).toMatchObject({ draftCount: 2, qcCount: 1 });
     }, { workbench: true });
 });
+
+test('mounted wizard context reads only the actual scoped native instrument/run metadata and persisted templates', async () => {
+    const f = await fixture(), before = await f.state();
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const response = await request(app).get('/api/workbench/runs/' + f.run.id + '/imports/context').set('Authorization', 'Bearer ' + token);
+        expect(response.status).toBe(200); expect(response.body).toMatchObject({ batchId: f.run.id, labId: f.labId, instrumentId: f.instrument.id,
+            analyses: [{ analysisCode: f.analysisCode, methodologyId: f.method.id, reportingUnits: ['fixture-unit'], active: null, inputs: null }],
+            templates: [{ id: f.template.id, version: 1, mapping: f.template.mapping }] });
+        expect(await f.state()).toEqual(before);
+    }, { workbench: true });
+    const lab = await f.db.lab.create({ data: { id: randomUUID(), code: randomUUID(), name: 'Other owned context lab', country: 'ZZ' } });
+    const actor = await f.db.user.create({ data: { id: randomUUID(), username: randomUUID(), email: randomUUID() + '@example.test', password: 'synthetic', role: 'LAB_TECHNICIAN', labId: lab.id } });
+    const foreignBefore = await f.state();
+    await withQcRunHttp(f.db, actor, async (app, token) => {
+        const response = await request(app).get('/api/workbench/runs/' + f.run.id + '/imports/context').set('Authorization', 'Bearer ' + token);
+        expect(response.status).toBe(403); expect(await f.state()).toEqual(foreignBefore);
+    }, { workbench: true });
+});

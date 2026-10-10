@@ -100,13 +100,17 @@ async function listTemplates(db, actor, instrumentId, labId) {
     const { instrument, lab } = await instrumentScope(db, actor, instrumentId, labId);
     return (await db.importTemplate.findMany({ where: { instrumentId: instrument.id, labId: lab.id }, orderBy: [{ createdAt: 'desc' }, { id: 'asc' }] })).map(decode);
 }
-async function templateForRun(db, actor, batchId, templateId) {
+async function readImportRun(db, actor, batchId) {
     permission(actor);
     const batch = await require('./qcRunViewService').readQcRun(db, batchId, actor);
     const { instrument, lab } = await instrumentScope(db, actor, batch.instrumentId, batch.labId);
     if (!batch.startedAt || !batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE'))
         throw fail(409, 'IMPORT_NATIVE_RUN_REQUIRED', 'Select a started native run.');
     if (batch.status === 'CLOSED') throw fail(409, 'IMPORT_RUN_CLOSED', 'The selected run is closed.');
+    return { batch, lab, instrument };
+}
+async function templateForRun(db, actor, batchId, templateId) {
+    const { batch, lab, instrument } = await readImportRun(db, actor, batchId);
     const row = typeof templateId === 'string' && await db.importTemplate.findUnique({ where: { id: templateId } });
     if (!row || row.labId !== lab.id || row.instrumentId !== instrument.id)
         throw fail(409, 'IMPORT_TEMPLATE_INSTRUMENT_MISMATCH', 'Select a mapping for this run instrument.');
@@ -115,4 +119,4 @@ async function templateForRun(db, actor, batchId, templateId) {
         throw fail(409, 'IMPORT_ANALYSIS_NOT_IN_RUN', 'Every mapped analysis must belong to this run.');
     return { batch, template, lab, instrument };
 }
-module.exports = { validateMapping, saveTemplate, listTemplates, templateForRun, instrumentScope, fail };
+module.exports = { validateMapping, saveTemplate, listTemplates, templateForRun, readImportRun, instrumentScope, fail };

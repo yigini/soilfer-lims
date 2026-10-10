@@ -23,6 +23,13 @@ exports.saveTemplate = async (req, res) => {
         res.status(201).json(await templates.saveTemplate(db, req.user, { ...req.body, instrumentId: req.params.instrumentId }));
     } catch (error) { refuse(res, error); }
 };
+exports.importContext = async (req, res) => {
+    try {
+        const result = await require('../services/workflowStateRules').inTransaction(db, tx =>
+            require('../services/instrumentImportPreviewService').readInstrumentImportContext(tx, req.user, req.params.batchId));
+        res.json(result);
+    } catch (error) { refuse(res, error); }
+};
 function sourceInput(req, commit) {
     if (!req.file || !req.body || Object.keys(req.body).some(key => !['templateId', 'sheetName', ...(commit ? ['previewToken'] : [])].includes(key)) ||
         typeof req.body.templateId !== 'string' || !req.body.templateId ||

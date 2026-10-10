@@ -11,6 +11,7 @@ const native = require('../../services/qcNativeRunService');
 const rules = require('../../services/qcRuleService');
 const { saveTemplate } = require('../../services/instrumentImportTemplateService');
 const importer = require('../../services/instrumentImportService');
+const { readInstrumentImportContext } = require('../../services/instrumentImportPreviewService');
 let owned;
 afterEach(async () => { if (owned) await owned.close(); owned = null; });
 async function fixture() {
@@ -44,7 +45,7 @@ async function fixture() {
         sampleMass: '1.0000', moistureCorrectionFactor: '1.0000' };
     let column = 1;
     f.mapping = { version: 1, delimiter: 'COMMA', hasHeader: false, idType: 'ORIGINAL_ID', idColumn: 0,
-        analytes: f.calculated.map(row => ({ analysisCode: row.code, inputs: row.source.inputs.map(input => ({ variable: input.key, column: column++, unit: input.unit })) })) };
+        analytes: f.calculated.map(row => ({ analysisCode: row.code, inputs: row.template.inputs.map(input => ({ variable: input.key, column: column++, unit: input.unit })) })) };
     f.cells = [f.sample.originalId];
     const xml = f.mapping.analytes.flatMap(row => row.inputs.map(input => {
         f.cells[input.column] = raw[input.variable]; return `<c r="${String.fromCharCode(65 + input.column)}1"><v>${raw[input.variable]}</v></c>`;
@@ -62,6 +63,9 @@ async function fixture() {
 
 test('actual EXCH_CA/Olsen activated input imports do not calculate; later typed recording freezes the selected local definitions and verified raw input text', async () => {
     const f = await fixture(), before = await f.state(), preview = await importer.preview(f.db, f.actor, f.input);
+    const context = await readInstrumentImportContext(f.db, f.actor, f.run.id);
+    for (const row of f.calculated) expect(context.analyses.find(analysis => analysis.analysisCode === row.code)).toMatchObject({
+        active: { templateId: row.template.id, templateVersion: row.template.version, activationId: row.activation.id }, inputs: row.template.inputs });
     expect(preview.canCommit).toBe(true); expect(preview.rows[0].cells).toEqual(Object.fromEntries(f.cells.map((raw, column) => [column, raw])));
     expect(await f.state()).toEqual(before);
     const committed = await importer.commit(f.db, f.actor, { ...f.input, previewToken: preview.previewToken }); expect(committed).toMatchObject({ draftCount: 2, qcCount: 0 });

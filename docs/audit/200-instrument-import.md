@@ -323,3 +323,16 @@ freeze that exact template/version/activation/curve and verified lab text.
 Missing/duplicate/unknown bindings, output-unit guesses, active direct mappings
 and an activation changing after preview require whole-commit zero-write
 refusals. These new tests await validation; no scientific defaults are added.
+
+At fea05eed the real40-by-four ICP acceptance passes (4.802s). Nine suites/
+297 tests pass; the three new calculation setups read raw serialized library
+inputs as an array. They now use the actual decoded local clone inputs, which
+is the binding the importer must follow. Failed log54.158s and all protected
+database hashes remain unchanged; no owner/parser/activation guard is changed.
+
+The mapping screen's read-only context now uses the same scoped started-native
+run/instrument owner as preview. It returns persisted instrument templates,
+exact catalogue reporting-unit fields and the validated current local activation's
+input definitions. It invents no unit, method or variable. Added real mounted
+HTTP read-only/foreign-lab refusal tests and active-definition evidence checks.
+The new endpoint and corrected calculation acceptance await validation.

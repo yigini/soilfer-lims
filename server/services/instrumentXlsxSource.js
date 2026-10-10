@@ -183,7 +183,7 @@ function decodeInstrumentXlsxSource(bytes, sheetName) {
     if (!sheets.length || sheets.some(sheet => !sheet.name || !['visible', 'hidden', 'veryHidden'].includes(sheet.state) || !sheet.relation) || new Set(sheets.map(sheet => sheet.name)).size !== sheets.length) invalid();
     if (sheetName !== undefined && (typeof sheetName !== 'string' || !sheetName.trim())) invalid();
     if (sheetName === undefined && (sheets.length !== 1 || sheets.some(sheet => sheet.state !== 'visible')))
-        throw error('IMPORT_XLSX_SHEET_REQUIRED');
+        throw error('IMPORT_XLSX_SHEET_REQUIRED', 400, { sheets: sheets.map(({ name, state }) => ({ name, state })) });
     const selected = sheetName === undefined ? sheets[0] : sheets.find(sheet => sheet.name === sheetName);
     if (!selected) throw error('IMPORT_XLSX_SHEET_NOT_FOUND');
     if (!DOCUMENT_RELATIONSHIPS.has(selected.relation.type.slice(0, selected.relation.type.lastIndexOf('/'))) || !selected.relation.type.endsWith('/worksheet')) invalid();
