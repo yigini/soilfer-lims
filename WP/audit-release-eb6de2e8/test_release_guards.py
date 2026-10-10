@@ -2,6 +2,7 @@
 import copy, datetime, importlib.util, json, pathlib, sqlite3, subprocess, tempfile, unittest
 from unittest.mock import Mock, patch
 import release_support as s
+import prepare_manifest as preparation
 
 spec = importlib.util.spec_from_file_location('coordinator', pathlib.Path(__file__).with_name('release-forward.py'))
 release = importlib.util.module_from_spec(spec)
@@ -109,7 +110,8 @@ class ExactKitGateGuards(unittest.TestCase):
     def fixture(self):
         now = datetime.datetime(2026,10,10,18,tzinfo=datetime.timezone.utc)
         manifest = {'status':'PREPARED_ONLY_NOT_EXECUTED','head':s.HEAD,'image':'owned-image',
-            'attemptPlanSha256':'d'*64,'files':{'release-forward.py':'a'*64,'rehearsal-receipt.json':'b'*64}}
+            'attemptPlanSha256':'d'*64,'files':{'release-forward.py':'a'*64,'rehearsal-receipt.json':'b'*64,
+                'yy-authorization-evidence.md':'e'*64}}
         rows = []
         for number in [258,257,259,260,263,264,265,266,267,268,269,273,271,276,275,280,282,285,286,287]:
             head = format(number,'040x')
@@ -126,14 +128,15 @@ class ExactKitGateGuards(unittest.TestCase):
                 'approvedAttemptPlanSha256':'d'*64,'timeUtc':now.isoformat()},
             'yyGo':{'confirmedByYY':True,'source':'CLAUDE_LIMS_AUDIT_THREAD','evidenceSha256':'e'*64,
                 'timeUtc':(now-datetime.timedelta(hours=1)).isoformat(),'authorizationMode':'AUTO_AFTER_REVIEW',
-                'text':'Auto after review','scopeHead':s.HEAD,'scopeDecision':'Main now','scopeEvidenceSha256':'f'*64},
+                'text':'Auto after review','scopeHead':s.HEAD,'scopeDecision':'Main now','scopeEvidenceSha256':'e'*64},
             'workloadControl':{'labAndHubBuildsOwnedByYY':True,'releaseWindowControl':'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}}
         return manifest, gate, now
 
     def verify(self, manifest, gate, now):
         def file_hash(file):
             name = pathlib.Path(file).name
-            return {'prepared-manifest.json':'c'*64,'release-forward.py':'a'*64,'rehearsal-receipt.json':'b'*64}[name]
+            return {'prepared-manifest.json':'c'*64,'release-forward.py':'a'*64,'rehearsal-receipt.json':'b'*64,
+                'yy-authorization-evidence.md':'e'*64}[name]
         with patch.object(s,'sha',side_effect=file_hash):
             release.verify_gate(manifest,gate,now)
 
@@ -141,7 +144,7 @@ class ExactKitGateGuards(unittest.TestCase):
         self.verify(*self.fixture())
 
     def test_missing_phrase_wrong_commit_hash_and_stale_gate_refuse(self):
-        for fault in ['phrase','head','hash','stale','repair','future','plan']:
+        for fault in ['phrase','head','hash','stale','repair','future','plan','yy-evidence','yy-scope']:
             manifest, gate, now = self.fixture()
             if fault == 'phrase':
                 gate['kitReview']['body'] = gate['kitReview']['body'].replace('Audit passed: OK to merge and deploy','Looks good')
@@ -157,8 +160,63 @@ class ExactKitGateGuards(unittest.TestCase):
                 gate['kitReview']['timeUtc'] = (now+datetime.timedelta(seconds=1)).isoformat()
             elif fault == 'plan':
                 gate['kitReview']['approvedAttemptPlanSha256'] = '0'*64
+            elif fault == 'yy-evidence':
+                gate['yyGo']['evidenceSha256'] = '0'*64
+            elif fault == 'yy-scope':
+                gate['yyGo']['scopeEvidenceSha256'] = '0'*64
             with self.subTest(fault=fault), self.assertRaises(AssertionError):
                 self.verify(manifest,gate,now)
+
+class CompleteRehearsalGuards(unittest.TestCase):
+    def fixture(self):
+        proof = {'status':'PASSED','productionExecution':False,'head':s.HEAD,'candidateImage':'owned-image',
+            'repeatTotalChanges':0,'startupChanges':0,'readOnlyProbeChanges':0,
+            'repeatedInstallDatabaseBytesPreserved':True,
+            'installers':[{'key':key,'script':script} for key,script in s.INSTALLERS],
+            'repeatInstallers':[{'key':key,'mode':'NO_OP','totalChanges':0} for key,_ in s.INSTALLERS],
+            'startupReady':[{'event':name+'_STARTUP_READY','totalChanges':0} for name in s.READY_EVENTS],
+            'apiChecks':{'passed':31,'total':31,'failed':0},
+            'probes':[{'file':name,'exitCode':0} for name in preparation.SCRIPTS if name.startswith('postflight-')]
+                + [{'file':'readonly-smoke.cjs','exitCode':0}],
+            'health':{'status':'ok'},'benchCredentialCount':0,
+            'preservation':{'originalRowsAndFieldsPreserved':True,'integrity':'ok','foreignKeyViolations':0,
+                'createdAttempts':17,'approvedNullResultLinks':19,'originalTableCount':90,'originalReceiptsPreserved':18},
+            'attemptDryRun':{'totalChanges':0,'mode':'DRY_RUN','classification':'PRE_190',
+                'plan':{'status':'READY','planSha256':'d'*64}},'attemptPlanSha256':'d'*64,
+            'cliMemory':{key+'-'+mode+'-container.json':{'memoryLimitBytes':805306368,'nodeOptions':None,
+                'exitCode':0,'cgroupMemoryPeak':{'childStatus':0,'childSignal':None,'releaseCliPeakBytes':100000000}}
+                for key,_ in s.INSTALLERS for mode in ['dry','apply','repeat']},
+            'startupMemoryAtReady':{'limitBytes':805306368,'nodeOptions':None,'peakBytes':300000000},
+            'startupMemory':{'limitBytes':805306368,'nodeOptions':None,'peakBytes':320000000}}
+        build = {'head':s.HEAD,'image':'owned-image','status':'BUILT_ONLY_NOT_DEPLOYED','productionDatabaseMounts':0}
+        gates = {'head':s.HEAD,'includedPrCount':20,'ungatedPrs':[],
+            'prs':[{'gated':True} for _ in range(20)],
+            'mainCi':[{'name':'CI','headSha':s.HEAD,'status':'completed','conclusion':'success'}]}
+        return proof,build,gates
+
+    def test_complete_bounded_rehearsal_is_accepted(self):
+        preparation.validate(*self.fixture())
+
+    def test_partial_failed_unbounded_changed_or_stale_proof_is_refused(self):
+        for fault in ['partial','installer','repeat','ready','probe','api','memory-missing','memory-over',
+                      'heap-override','startup-memory','preservation','main-ci','image','row-plan']:
+            proof,build,gates = self.fixture()
+            if fault == 'partial': proof['status'] = 'PASSED_STARTUP_API_SUPPLEMENT'
+            elif fault == 'installer': proof['installers'].reverse()
+            elif fault == 'repeat': proof['repeatInstallers'][0]['totalChanges'] = 1
+            elif fault == 'ready': proof['startupReady'].pop()
+            elif fault == 'probe': proof['probes'].pop()
+            elif fault == 'api': proof['apiChecks']['failed'] = 1
+            elif fault == 'memory-missing': proof['cliMemory'].pop('193-apply-container.json')
+            elif fault == 'memory-over': proof['cliMemory']['193-apply-container.json']['cgroupMemoryPeak']['releaseCliPeakBytes'] = 805306369
+            elif fault == 'heap-override': proof['cliMemory']['193-apply-container.json']['nodeOptions'] = '--max-old-space-size=1536'
+            elif fault == 'startup-memory': proof['startupMemory']['peakBytes'] = 0
+            elif fault == 'preservation': proof['preservation']['originalRowsAndFieldsPreserved'] = False
+            elif fault == 'main-ci': gates['mainCi'][0]['headSha'] = '0'*40
+            elif fault == 'image': build['image'] = 'other-image'
+            elif fault == 'row-plan': proof['attemptPlanSha256'] = '0'*64
+            with self.subTest(fault=fault), self.assertRaises(AssertionError):
+                preparation.validate(proof,build,gates)
 
 class RecoveryGuards(unittest.TestCase):
     def recover(self, attempted=False, changed=False, old_ready=True, startup_changed=False, health_failed=False):

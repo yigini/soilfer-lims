@@ -5,6 +5,7 @@ later failure forward-only, with ingress and writers held for an audited fix.
 """
 import datetime, fcntl, json, os, pathlib, re, shutil, signal, subprocess, sys, tarfile, time
 import release_support as s
+import prepare_manifest as preparation
 
 ROOT = pathlib.Path(__file__).resolve().parent
 POSTFLIGHTS = ['postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs',
@@ -55,6 +56,7 @@ def verify_gate(manifest, gate, now=None):
     yy = gate['yyGo']
     assert yy['confirmedByYY'] is True
     assert yy['source'] == 'CLAUDE_LIMS_AUDIT_THREAD' and re.fullmatch('[a-f0-9]{64}', yy['evidenceSha256'])
+    assert yy['evidenceSha256'] == manifest['files']['yy-authorization-evidence.md']
     approved = datetime.datetime.fromisoformat(yy['timeUtc'].replace('Z', '+00:00'))
     reviewed = datetime.datetime.fromisoformat(review['timeUtc'].replace('Z', '+00:00'))
     assert reviewed <= now, 'Kit review timestamp is in the future'
@@ -65,6 +67,7 @@ def verify_gate(manifest, gate, now=None):
         assert yy['scopeHead'] == s.HEAD and approved <= now
         assert yy['scopeDecision'] == 'Main now'
         assert re.fullmatch('[a-f0-9]{64}', yy['scopeEvidenceSha256'])
+        assert yy['scopeEvidenceSha256'] == yy['evidenceSha256']
     else:
         assert yy['text'].strip().lower() == 'go'
         assert reviewed <= approved <= now and (now - approved).total_seconds() <= 1800
@@ -194,6 +197,11 @@ if __name__ == '__main__':
         verify_gate(manifest, gate)
         image = manifest['image']
         rehearsal = json.loads((ROOT / 'rehearsal-receipt.json').read_text())
+        build = json.loads((ROOT / 'build-receipt.json').read_text())
+        preparation.validate(rehearsal, build, gate['prGates'])
+        assert rehearsal['buildReceiptSha256'] == manifest['files']['build-receipt.json']
+        assert build['sourceArchiveSha256'] == manifest['files']['source.tar.gz']
+        assert build['sourceIndexSha256'] == manifest['files']['source-index.json']
         assert rehearsal['status'] == 'PASSED' and rehearsal['head'] == s.HEAD and rehearsal['candidateImage'] == image
         assert rehearsal['repeatTotalChanges'] == rehearsal['startupChanges'] == rehearsal['readOnlyProbeChanges'] == 0
         assert rehearsal['scriptSha256']['release-forward.py'] == s.sha(__file__)
