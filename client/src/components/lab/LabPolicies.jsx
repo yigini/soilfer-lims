@@ -4,6 +4,16 @@ import { useLanguage } from '../../context/LanguageContext';
 import QcRules from './QcRules';
 
 export function PolicyValueEditor({ definition, value, onChange, t }) {
+    if (definition.type === 'reportAmendmentTemplate') return <div className="space-y-2">
+        <select aria-label={t('policies.keys.report_amendedStatement')} value={value === null ? 'default' : 'custom'}
+            onChange={event => onChange(event.target.value === 'default' ? null : JSON.parse(JSON.stringify(definition.localizedDefaults)))}>
+            <option value="default">{t('policies.amendedDefault')}</option><option value="custom">{t('policies.amendedCustom')}</option>
+        </select>
+        <p>{t('policies.amendedHelp', { replacedNumber: '{replacedNumber}', replacedRevision: '{replacedRevision}', reason: '{reason}' })}</p>
+        {value !== null && definition.allowedLocales.map(locale => <label key={locale} className="block">{locale}
+            <textarea required aria-label={locale} value={value[locale] ?? ''} onChange={event => onChange({ ...value, [locale]: event.target.value })} />
+        </label>)}
+    </div>;
     if (definition.type === 'calibrationFailAction') return <div className="space-y-2">{Object.entries(definition.allowedActions).map(([kind, actions]) => <label key={kind}>
         {t(`qcRuns.kinds.${kind}`, kind)}<select value={value[kind]} onChange={e => onChange({ ...value, [kind]: e.target.value })}>
             {actions.map(action => <option key={action} value={action}>{t(`qcRules.actions.${action}`)}</option>)}

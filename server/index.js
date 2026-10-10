@@ -56,6 +56,8 @@ try {
     console.log(JSON.stringify({event:'CROSS_CHECK_STARTUP_READY',...crossChecksReady}));
     const amendmentsReady=require('./scripts/install_sample_amendment_authorisation').assertAmendmentStartupReady(dbPath);
     console.log(JSON.stringify({event:'AMENDMENT_STARTUP_READY',...amendmentsReady}));
+    const revisionsReady=require('./scripts/install_report_revisions').assertReportRevisionStartupReady(dbPath);
+    console.log(JSON.stringify({event:'REPORT_REVISION_STARTUP_READY',...revisionsReady}));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('QC_GATE_SCOPE_') ? 'Keep the lab stopped and follow docs/audit/2.4-qc-gate.md.'

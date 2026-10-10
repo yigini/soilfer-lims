@@ -113,6 +113,7 @@ async function assembleReport(sampleId, user, options = {}) {
 
         groupedResults[category].items.push({
             param: result.param,
+            analysisId: result.param, // #211: the Analysis.code primary key.
             name: analysis?.name || result.param,
             value: require('./reportedValueReadService').reportedValueText(result,reportLocale),
             unit: notReportable ? '' : interp.unit || rawUnit,

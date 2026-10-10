@@ -55,6 +55,20 @@ function publicLinkConflict(link) {
     return null;
 }
 
+// #211 pin6097077343: anonymous refusals carry text-only identity, never a
+// replacement link, analytical value or amendment reason.
+async function publicTombstone(conflict, report) {
+    if (!['REPORT_WITHDRAWN', 'REPORT_SUPERSEDED'].includes(conflict.code)) return conflict;
+    const number = row => row?.reportNumberBase ? displayNumber(row.reportNumberBase, row.revision) : row ? storedNumber(row) : null;
+    let replacement = null;
+    if (report.status === 'SUPERSEDED') replacement = await prisma.report.findFirst({ where: { sampleId: report.sampleId,
+        version: { gt: report.version }, status: { in: ['PUBLISHED', 'SUPERSEDED', 'WITHDRAWN'] }, publishedAt: { not: null } },
+    orderBy: { version: 'asc' }, select: { reportNumberBase: true, revision: true, content: true } });
+    let reportNumber = null, replacementNumber = null;
+    try { reportNumber = number(report); replacementNumber = number(replacement); } catch { /* Unreadable history stays unnamed. */ }
+    return { ...conflict, tombstone: { status: report.status, reportNumber, ...(report.status === 'SUPERSEDED' && { replacementNumber }) } };
+}
+
 /**
  * Shared Report Authorization Validator
  * Enforces shared precedence across list, detail, and counts:
@@ -155,6 +169,8 @@ async function generateReport(req, res) {
                 throw Object.assign(new Error(publishCheck.reason), { statusCode, publishCheck, qcModeEvidence });
             }
             require('../services/reportContentEvidence').assertApprovalEvidence(currentSample);
+            const revisionService = require('../services/reportRevisionService');
+            const revisionEvidence = await revisionService.resolveRevisionAmendment(tx, { sample: currentSample, amendmentId: req.body?.amendmentId });
             const maxReport = await tx.report.findFirst({ where: { sampleId }, orderBy: { version: 'desc' } });
             const version = (maxReport?.version || 0) + 1;
             const publishedAt = new Date();
@@ -169,6 +185,8 @@ async function generateReport(req, res) {
             content.reportNumber = displayNumber(identity.reportNumberBase, identity.revision);
             content.publication = { ...identity, publishedAt: publishedAt.toISOString(), status: 'PUBLISHED',
                 issuer: { username: req.user.username, name: req.user.name || req.user.username, role: req.user.role || null } };
+            if (revisionEvidence) revisionService.applyRevision(content, { ...revisionEvidence, locale: content.meta?.locale,
+                statementPolicy: await policyService.get(lab.id, 'report.amendedStatement', { db: tx }) });
             await tx.reportShareLink.updateMany({
                 where: { isRevoked: false, report: { sampleId, status: 'PUBLISHED' } },
                 data: { isRevoked: true, revokedAt: publishedAt, revokedBy: req.user.username }
@@ -185,6 +203,12 @@ async function generateReport(req, res) {
                     reportNumberBase: identity.reportNumberBase,
                     revision: identity.revision,
                     policyVersion: policySnapshot.version,
+                    supersedesReportId: revisionEvidence?.predecessor.id || null,
+                    amendmentId: revisionEvidence?.amendment.id || null,
+                    amendmentReason: revisionEvidence?.amendment.reason || null,
+                    amendmentAuthorizedBy: revisionEvidence?.amendment.authorizedBy || null,
+                    issuedBy: req.user?.username || 'system',
+                    approvedBy: currentSample.approvedBy || null,
                     status: 'PUBLISHED',
                     content: JSON.stringify(content),
                     generatedBy: req.user?.username || 'system',
@@ -220,6 +244,9 @@ async function generateReport(req, res) {
             generatedBy: report.generatedBy
         });
     } catch (err) {
+        if (err.code === 'P2002' && String(err.meta?.target || err.message).includes('amendmentId')) {
+            return res.status(409).json({ error: 'This amendment has already issued a revision.', code: 'AMENDMENT_ALREADY_CONSUMED' });
+        }
         if (err.code === 'P2002') {
             return res.status(409).json({ error: 'The report number was already issued.', code: 'REPORT_NUMBER_CONFLICT' });
         }
@@ -758,7 +785,7 @@ async function getPublicReport(req, res) {
 
         await logPublicAccess(link, req);
         const conflict = publicLinkConflict(link);
-        if (conflict) return res.status(conflict.code==='REPORT_WITHDRAWN'?409:410).json(conflict);
+        if (conflict) return res.status(conflict.code==='REPORT_WITHDRAWN'?409:410).json(await publicTombstone(conflict, link.report));
 
         const report = link.report;
         res.json({
@@ -795,7 +822,7 @@ async function getPublicReportPdf(req, res) {
         }
         await logPublicAccess(link, req);
         const conflict = publicLinkConflict(link);
-        if (conflict) return res.status(conflict.code==='REPORT_WITHDRAWN'?409:410).json(conflict);
+        if (conflict) return res.status(conflict.code==='REPORT_WITHDRAWN'?409:410).json(await publicTombstone(conflict, link.report));
 
         const report = link.report;
         const content = report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null;

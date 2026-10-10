@@ -2584,7 +2584,8 @@
       "crossCheck_textureClosureTolerancePct": "Texture closure tolerance (%)",
       "crossCheck_cnMin": "Minimum C:N ratio",
       "crossCheck_cnMax": "Maximum C:N ratio",
-      "crossCheck_carbonatePhMin": "Minimum water pH for carbonate"
+      "crossCheck_carbonatePhMin": "Minimum water pH for carbonate",
+      "report_amendedStatement": "Amended report statement"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -2724,7 +2725,10 @@
     "ptLimits": {
       "questionable": "Questionable boundary",
       "unsatisfactory": "Unsatisfactory boundary"
-    }
+    },
+    "amendedDefault": "Use localized defaults",
+    "amendedCustom": "Customize all five languages",
+    "amendedHelp": "Each language must contain {replacedNumber}, {replacedRevision} and {reason} exactly once. The text is frozen when the report is issued."
   },
   "referenceMaterials": {
     "title": "Reference materials",
@@ -3512,6 +3516,10 @@
     },
     "pendingNotice": "Request saved. Authorisation is required before changes are applied.",
     "authorisedNotice": "Amendment authorised. Scientific retests must complete the normal review and approval before a report can be reissued.",
-    "failed": "The amendment could not be saved. Your input is preserved."
+    "failed": "The amendment could not be saved. Your input is preserved.",
+    "publicReportNumber": "Report {number}.",
+    "publicSuperseded": "This report has been superseded by an amended report. Ask the laboratory for the current report.",
+    "publicReplacedBy": "Replaced by report {number}.",
+    "revisionRequiresAmendment": "An amended report needs an approved amendment. Request and authorise one first."
   }
 }

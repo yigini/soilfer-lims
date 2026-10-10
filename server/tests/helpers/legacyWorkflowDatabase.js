@@ -235,6 +235,9 @@ function beforeGuards(options) {
             assert.ok(amendmentModels.length===0||amendmentModels.length===amendmentTables.length,'Generated amendment datamodel is partial.');
             if(amendmentModels.length)expected.push({table:'SampleAmendment',fields:['requestPayload','version','priorApprovedBy','priorApprovedAt','selectedWorkItemIds']},
                 ...amendmentTables.map(table=>({table,missingTable:true})));
+            // #211 pin6097077343: exactly six nullable Report fields; the real
+            // additive installer adds them after the captured historical DDL.
+            expected.push({table:'Report',fields:['supersedesReportId','amendmentId','amendmentReason','issuedBy','approvedBy','amendmentAuthorizedBy']});
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }
@@ -310,7 +313,7 @@ function beforeGuards(options) {
             const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name != 'ResultEvidenceEvent'").all();
             // Copy schema-only indexes, leaving every additive release guard
             // and partial index for its actual installer on this new file.
-            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique','WorkAttempt_workItemId_attemptNo_unique','result_one_current','ReportedValueSelection_one_root','ResultOverrideRequest_one_active_cell')").all();
+            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique','WorkAttempt_workItemId_attemptNo_unique','result_one_current','ReportedValueSelection_one_root','ResultOverrideRequest_one_active_cell','Report_amendmentId_key')").all();
             source.close();
             for (const table of tables) db.exec(['Sample', 'WorkItem'].includes(table.name)
                 ? table.sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '') : table.sql);

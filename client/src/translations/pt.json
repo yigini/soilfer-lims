@@ -2584,7 +2584,8 @@
       "crossCheck_textureClosureTolerancePct": "Tolerância do fechamento da textura (%)",
       "crossCheck_cnMin": "Relação C:N mínima",
       "crossCheck_cnMax": "Relação C:N máxima",
-      "crossCheck_carbonatePhMin": "pH mínimo em água para carbonatos"
+      "crossCheck_carbonatePhMin": "pH mínimo em água para carbonatos",
+      "report_amendedStatement": "Texto do relatório alterado"
     },
     "title": "Políticas",
     "yes": "Sim",
@@ -2724,7 +2725,10 @@
     "ptLimits": {
       "questionable": "Limite questionável",
       "unsatisfactory": "Limite insatisfatório"
-    }
+    },
+    "amendedDefault": "Usar textos padrão por idioma",
+    "amendedCustom": "Personalizar os cinco idiomas",
+    "amendedHelp": "Cada idioma deve conter {replacedNumber}, {replacedRevision} e {reason} uma única vez. O texto é fixado quando o relatório é emitido."
   },
   "referenceMaterials": {
     "title": "Materiais de referência",
@@ -3512,6 +3516,10 @@
     },
     "pendingNotice": "Solicitação salva. É necessária autorização antes de aplicar alterações.",
     "authorisedNotice": "Emenda autorizada. As reanálises científicas devem concluir a revisão e aprovação habituais antes da emissão de outro relatório.",
-    "failed": "Não foi possível salvar a emenda. Os seus dados foram preservados."
+    "failed": "Não foi possível salvar a emenda. Os seus dados foram preservados.",
+    "publicReportNumber": "Relatório {number}.",
+    "publicSuperseded": "Este relatório foi substituído por um relatório emendado. Solicite o relatório vigente ao laboratório.",
+    "publicReplacedBy": "Substituído pelo relatório {number}.",
+    "revisionRequiresAmendment": "Um relatório emendado requer uma emenda aprovada. Solicite-a e autorize-a primeiro."
   }
 }

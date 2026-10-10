@@ -24,6 +24,7 @@ async function fixture(status='APPROVED',itemStatus='ACCEPTED'){
   status,approvedBy:'retained-approver',approvedAt:new Date('2026-09-20T10:00:00.123Z'),fieldMetadata:'{"site_id":"RETAINED-SITE","pit_id":"RETAINED-PIT","independent":"retained"}'}});
  f.item=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:f.sample.id,assignedLab:f.labId,analysis:'PH_H2O',status:itemStatus,result:'retained display cache'}});
  installWorkflowStateGuards({dbPath:file,apply:true});installSampleAmendmentAuthorisation({dbPath:file,apply:true});
+ require('../../scripts/install_report_revisions').installReportRevisions({dbPath:file,apply:true});
  f.input={type:'CLERICAL',reason:'Verified original field record',profileCorrection:{code:'CORRECTED-PIT',relation:'CONFIRMED_PROFILE'},expectedProfileRevision:0};
  f.snapshot=()=>{const db=new Database(file,{readonly:true,fileMustExist:true});try{return{
   rows:Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all()
@@ -325,7 +326,9 @@ test('withdrawal binding and every report content field stay sealed after author
   expect(()=>db.prepare('DELETE FROM ReportAmendmentWithdrawal').run()).toThrow('REPORT_WITHDRAWAL_IMMUTABLE');
   expect(()=>db.prepare("UPDATE Report SET status='SUPERSEDED' WHERE id=?").run(f.report.id)).toThrow('REPORT_WITHDRAWAL_CONTEXT_MISMATCH');
   for(const field of db.prepare('PRAGMA table_xinfo(Report)').all().map(row=>row.name).filter(name=>!['status','updatedAt'].includes(name)))
-   expect(()=>db.prepare('UPDATE Report SET "'+field+'"=? WHERE id=?').run(randomUUID(),f.report.id)).toThrow('REPORT_WITHDRAWAL_IMMUTABLE');
+   // #211's six revision fields are sealed by their own guard for every report.
+   expect(()=>db.prepare('UPDATE Report SET "'+field+'"=? WHERE id=?').run(randomUUID(),f.report.id)).toThrow(
+    ['supersedesReportId','amendmentId','amendmentReason','issuedBy','approvedBy','amendmentAuthorizedBy'].includes(field)?'REPORT_REVISION_IMMUTABLE':'REPORT_WITHDRAWAL_IMMUTABLE');
  }finally{db.close();}
  expect(f.snapshot()).toEqual(before);
 });
@@ -390,7 +393,9 @@ test('the actual report HTTP routes retain internal access and refuse both publi
   expect(internal.status).toBe(200);expect(internal.body.withdrawal.amendmentId).toBe(amendment.id);expect(JSON.stringify(internal.body.content)).toBe(content);
   for(const suffix of ['', '/pdf']){
    const response=await request(app).get('/api/reports/public/'+token+suffix);
-   expect(response.status).toBe(409);expect(response.body).toEqual({error:'This report is withdrawn pending amendment.',code:'REPORT_WITHDRAWN'});
+   expect(response.status).toBe(409);expect(response.body).toEqual({error:'This report is withdrawn pending amendment.',code:'REPORT_WITHDRAWN',
+    // #211: text-only tombstone; no link, values, replacement or amendment reason.
+    tombstone:{status:'WITHDRAWN',reportNumber:expect.any(String)}});expect(JSON.stringify(response.body)).not.toContain(amendment.id);
    expect(response.body).not.toHaveProperty('content');expect(response.body).not.toHaveProperty('replacement');
   }
  },{reports:true});

@@ -76,6 +76,14 @@ key('repeats.technicianSelfRepeatBeforeSubmit', 'boolean', true);
 key('review.secondPersonRequired', 'boolean', true, true, false);
 key('gate.verificationRequired', 'boolean', false, false, false, { scope: 'LAB', analysisOverrides: ['DRYING', 'PREPARATION'] });
 key('report.amendmentRequiresSecondPerson', 'boolean', true, true, false);
+// #211 pin6097077343: null selects the shipped localized statement; laboratories
+// may supply complete five-locale templates with exactly these placeholders.
+key('report.amendedStatement', 'reportAmendmentTemplate', null, undefined, undefined, {
+    scope: 'LAB', nullable: true, allowedLocales: ['en', 'es', 'es-419', 'fr', 'pt'],
+    requiredPlaceholders: ['replacedNumber', 'replacedRevision', 'reason'],
+    localizedDefaults: Object.fromEntries(['en', 'es', 'es-419', 'fr', 'pt'].map(locale =>
+        [locale, require('../locales/' + locale + '.json').resultReports.amendedStatement]))
+});
 key('report.uncertaintyMode', 'enum', 'NOT_REPORTED', 'NOT_REPORTED', 'NOT_REPORTED',
     { allowedValues: ['NOT_REPORTED', 'EXPANDED_ABSOLUTE', 'EXPANDED_RELATIVE_PCT'] });
 key('report.uncertaintyCoverageFactor', 'number', null, null, null, { min: 1, nullable: true });
@@ -108,6 +116,15 @@ function valid(name, value) {
     const d = definition(name);
     if (value === null) return d.nullable === true;
     switch (d.type) {
+    case 'reportAmendmentTemplate':
+        return !!value && typeof value === 'object' && !Array.isArray(value) &&
+            Object.keys(value).length === d.allowedLocales.length && d.allowedLocales.every(locale => {
+                const text = value[locale]; if (typeof text !== 'string' || !text.trim()) return false;
+                const tokens = text.match(/\{[^{}]+\}/g) || [];
+                return tokens.length === d.requiredPlaceholders.length &&
+                    d.requiredPlaceholders.every(name => tokens.includes('{' + name + '}')) &&
+                    !/[{}]/.test(text.replace(/\{(replacedNumber|replacedRevision|reason)\}/g, ''));
+            });
     case 'enum': return d.allowedValues.includes(value) && !d.unsupportedValues?.includes(value);
     case 'boolean': return typeof value === 'boolean';
     case 'integer': return Number.isSafeInteger(value) && value >= (d.min ?? 0) && (d.max === undefined || value <= d.max);

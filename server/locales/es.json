@@ -107,7 +107,13 @@
     "issuedAt": "Fecha de emisión",
     "approvalNotRecorded": "Aprobación: no registrada",
     "filterWithdrawn": "Retirado",
-    "withdrawnPendingAmendment": "Retirado pendiente de enmienda {{amendmentId}}"
+    "withdrawnPendingAmendment": "Retirado pendiente de enmienda {{amendmentId}}",
+    "amendedStatement": "Informe modificado — reemplaza {replacedNumber}, revisión {replacedRevision}; motivo: {reason}.",
+    "amendmentChangedMark": "†",
+    "amendmentChangedLegend": "modificado en esta enmienda",
+    "amendmentAddedMark": "‡",
+    "amendmentAddedLegend": "añadido en esta enmienda",
+    "amendmentRemoved": "Eliminado en esta enmienda"
   },
   "common": {
     "save": "Guardar",
@@ -1018,7 +1024,8 @@
       "crossCheck_textureClosureTolerancePct": "Tolerancia del cierre de textura (%)",
       "crossCheck_cnMin": "Relación C:N mínima",
       "crossCheck_cnMax": "Relación C:N máxima",
-      "crossCheck_carbonatePhMin": "pH mínimo en agua para carbonatos"
+      "crossCheck_carbonatePhMin": "pH mínimo en agua para carbonatos",
+      "report_amendedStatement": "Texto del informe modificado"
     },
     "title": "Políticas",
     "yes": "Sí",
@@ -1158,7 +1165,10 @@
     "ptLimits": {
       "questionable": "Límite cuestionable",
       "unsatisfactory": "Límite insatisfactorio"
-    }
+    },
+    "amendedDefault": "Usar textos predeterminados por idioma",
+    "amendedCustom": "Personalizar los cinco idiomas",
+    "amendedHelp": "Cada idioma debe incluir {replacedNumber}, {replacedRevision} y {reason} una sola vez. El texto queda fijado al emitir el informe."
   },
   "referenceMaterials": {
     "title": "Materiales de referencia",
