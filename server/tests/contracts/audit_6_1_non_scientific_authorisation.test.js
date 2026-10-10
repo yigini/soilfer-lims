@@ -9,6 +9,7 @@ const {installWorkflowStateGuards}=require('../../scripts/install_workflow_state
 const {installSampleAmendmentAuthorisation}=require('../../scripts/install_sample_amendment_authorisation');
 const {requestNonScientificAmendment:request,authoriseNonScientificAmendment:authorise}=require('../../services/nonScientificAmendmentService');
 const policy=require('../../services/policyService');
+const {createExecutionResultFixture}=require('../helpers/workAttemptFixtures');
 const owned=[];
 async function fixture(status='APPROVED'){
  const directory=path.resolve(__dirname,'../.tmp');fs.mkdirSync(directory,{recursive:true});
@@ -131,4 +132,60 @@ test('a late audit failure rolls back both authorisation and clerical profile ch
  // Prisma's SQLite adapter classifies this actual RAISE(ABORT) as P2003.
  // The independently verified trigger is the only injected failure.
  const before=f.snapshot();await expect(approve(f,created.amendment.id)).rejects.toMatchObject({code:'P2003'});expect(f.snapshot()).toEqual(before);
+});
+
+// These owned fixtures exercise the new SQL link contract independently of
+// the scientific authorise workflow, which is not wired yet. They do not
+// grant a runtime capability or claim an end-to-end scientific authorisation.
+async function linkFixture(kind='valid'){
+ const f=await fixture(),result=await createExecutionResultFixture(f.db,{attemptStatus:kind==='recorded-parent'?'RECORDED':'ACCEPTED',data:{
+  id:randomUUID(),sampleId:f.sample.id,param:'PH_H2O',value:'6.3',unit:'pH_units',replicateNo:1,isCurrent:true}});
+ const selected=kind==='unselected'?'[]':JSON.stringify([f.item.id]);
+ const amendment=await f.db.sampleAmendment.create({data:{id:randomUUID(),sampleId:f.sample.id,
+  type:kind==='clerical'?'CLERICAL':'SCIENTIFIC',reason:'Owned SQL link contract',createdBy:'requester',
+  ...(kind==='legacy'?{status:'APPROVED',authorizedBy:'legacy-requester',authorizedAt:new Date('2026-09-01T00:00:00Z')}:
+   {status:'PENDING',requestPayload:JSON.stringify({contract:'210-v1',reasonCode:'CLIENT_RETEST'}),selectedWorkItemIds:selected,version:1})}});
+ if(!['pending','legacy'].includes(kind))await f.db.sampleAmendment.update({where:{id:amendment.id},data:{status:'APPROVED',version:2,
+  authorizedBy:'authoriser',authorizedAt:new Date(),priorApprovedBy:f.sample.approvedBy,priorApprovedAt:f.sample.approvedAt}});
+ const child=await f.db.workAttempt.create({data:{id:randomUUID(),workItemId:f.item.id,attemptNo:2,
+  status:kind==='recorded-child'?'RECORDED':'OPEN',parentAttemptId:result.attemptId,
+  reason:kind==='reason-mismatch'?'CONFIRMATION':'CLIENT_RETEST',requestedBy:'authoriser',requestedAt:new Date()}});
+ return {...f,parentId:result.attemptId,link:{id:randomUUID(),amendmentId:amendment.id,workItemId:f.item.id,
+  parentAttemptId:result.attemptId,childAttemptId:child.id,reason:'CLIENT_RETEST'}};
+}
+function insertLinkProbe(f,data=f.link){
+ const db=new Database(f.file);try{
+  db.pragma('foreign_keys=ON');
+  return db.prepare('INSERT INTO SampleAmendmentAttempt(id,amendmentId,workItemId,parentAttemptId,childAttemptId,reason) VALUES(?,?,?,?,?,?)')
+   .run(data.id,data.amendmentId,data.workItemId,data.parentAttemptId,data.childAttemptId,data.reason);
+ }finally{db.close();}
+}
+test('the link guard accepts its exact authorised scientific context without changing any retained evidence',async()=>{
+ const f=await linkFixture(),before=f.snapshot();
+ const link=await f.db.sampleAmendmentAttempt.create({data:f.link});expect(link).toMatchObject(f.link);
+ const after=f.snapshot();for(const [table,rows]of Object.entries(before.rows))if(table!=='SampleAmendmentAttempt')expect(after.rows[table]).toEqual(rows);
+ expect(after.rows.SampleAmendmentAttempt).toHaveLength(1);expect(after.integrity).toBe('ok');expect(after.foreignKeys).toEqual([]);
+});
+test.each(['pending','legacy','clerical','unselected','recorded-parent','recorded-child','reason-mismatch'])('the link guard refuses %s with zero writes',async kind=>{
+ const f=await linkFixture(kind),before=f.snapshot();
+ expect(()=>insertLinkProbe(f)).toThrow('AMENDMENT_ATTEMPT_CONTEXT_MISMATCH');expect(f.snapshot()).toEqual(before);
+});
+test.each(['parentAttemptId','childAttemptId','workItemId','amendmentId','reason'])('an unrelated %s cannot produce a link',async field=>{
+ const f=await linkFixture(),before=f.snapshot();
+ expect(()=>insertLinkProbe(f,{...f.link,[field]:field==='reason'?'OTHER':randomUUID()})).toThrow('AMENDMENT_ATTEMPT_CONTEXT_MISMATCH');
+ expect(f.snapshot()).toEqual(before);
+});
+test('all seven link columns are immutable and links and referenced attempts cannot be deleted',async()=>{
+ const f=await linkFixture();await f.db.sampleAmendmentAttempt.create({data:f.link});const before=f.snapshot(),db=new Database(f.file);
+ try{
+  db.pragma('foreign_keys=ON');
+  for(const field of ['id','amendmentId','workItemId','parentAttemptId','childAttemptId','reason','createdAt']){
+   expect(()=>db.prepare('UPDATE SampleAmendmentAttempt SET "'+field+'"=? WHERE id=?').run(field==='createdAt'?0:randomUUID(),f.link.id))
+    .toThrow('AMENDMENT_ATTEMPT_IMMUTABLE');expect(f.snapshot()).toEqual(before);
+  }
+  expect(()=>db.prepare('DELETE FROM SampleAmendmentAttempt WHERE id=?').run(f.link.id)).toThrow('AMENDMENT_ATTEMPT_IMMUTABLE');
+  for(const id of [f.link.parentAttemptId,f.link.childAttemptId])expect(()=>db.prepare('DELETE FROM WorkAttempt WHERE id=?').run(id)).toThrow('FOREIGN KEY constraint failed');
+ }finally{db.close();}
+ expect(f.snapshot()).toEqual(before);
+ expect(()=>insertLinkProbe(f,{...f.link,id:randomUUID()})).toThrow('UNIQUE constraint failed: SampleAmendmentAttempt.childAttemptId');expect(f.snapshot()).toEqual(before);
 });
