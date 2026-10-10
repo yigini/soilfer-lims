@@ -204,6 +204,7 @@ model Sample {
 
   @@index([consignmentId])
   resultOverrideRequests ResultOverrideRequest[]
+  crossCheckEvaluations CrossCheckEvaluation[]
 }
 
 // Stage C: RC-12 Consignment Entity
@@ -725,6 +726,7 @@ model Lab {
   calcTemplates      CalcTemplate[]
   calcActivations    CalcTemplateActivation[]
   calibrationCurves CalibrationCurve[]
+  crossCheckEvaluations CrossCheckEvaluation[]
 }
 
 model LabPolicy {
@@ -2093,4 +2095,24 @@ model ResultOverrideRequest {
   consumedAt DateTime?
   @@index([labId,status,requestedAt])
   @@index([workItemId,replicateNo])
+}
+
+// #201 pin6092380877: immutable outcomes from the submission transaction.
+model CrossCheckEvaluation {
+  id          String   @id @default(uuid())
+  sampleId    String
+  sample      Sample   @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  labId       String
+  lab         Lab      @relation(fields: [labId], references: [id], onDelete: Restrict)
+  trigger     String
+  ruleCode    String
+  outcome     String
+  reasonCode  String?
+  inputs      String
+  thresholds  String
+  evaluatedBy String
+  evaluatedAt DateTime @default(now())
+
+  @@index([sampleId, evaluatedAt])
+  @@index([labId, sampleId, evaluatedAt])
 }

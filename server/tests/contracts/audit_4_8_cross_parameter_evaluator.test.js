@@ -84,7 +84,7 @@ describe('Audit 4.8: cross-parameter science from stored evidence', () => {
         expect(check('TEXTURE_CLOSURE', rows, snapshot({ 'crossCheck.textureClosureTolerancePct': 0.5 })).outcome).toBe('FLAGGED');
         expect(rows.every(row => row.value === 'retained text; never parsed')).toBe(true);
         // The pre-existing gate still rejects this non-exact closure. Pin
-        //6092715399 asks the author to resolve its misleading ±2 message.
+        //6092909004 keeps it unchanged; correction is deferred to#278.
         expect(calculateUsdaTexture(40, 40, 19).isValid).toBe(false);
     });
     test('g/kg texture is not compared with100, while the legacy gate still ignores its units', () => {

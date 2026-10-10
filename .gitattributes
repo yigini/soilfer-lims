@@ -62,3 +62,8 @@ server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql text 
 server/services/resultRawInputMigrationSource.js text eol=lf
 server/tests/helpers/fixtures/raw_input_supported_baseline.sql -text
 server/tests/helpers/rawInputHistoricalFixture.js text eol=lf
+server/tests/helpers/fixtures/pre201_full_application_schema.sql -text
+server/tests/helpers/crossCheckHistoricalFixture.js text eol=lf
+server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql text eol=lf
+server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json text eol=lf
+server/services/crossCheckMigrationSource.js text eol=lf
