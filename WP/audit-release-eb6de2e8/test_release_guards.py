@@ -162,6 +162,23 @@ class FreshKitPackagingGuards(unittest.TestCase):
             for name,data in source.items(): self.assertEqual((destination/name).read_bytes(),data)
             for name,data in retained.items(): self.assertEqual((prefix/name).read_bytes(),data)
 
+class PublicSummaryGuards(unittest.TestCase):
+    def test_real_dry_plan_shape_counts_duplicate_groups_without_apply_receipt(self):
+        summary_spec = importlib.util.spec_from_file_location('proof_summary', pathlib.Path(__file__).with_name('summarize-proof.py'))
+        summary = importlib.util.module_from_spec(summary_spec)
+        summary_spec.loader.exec_module(summary)
+        dry = {'classification':'PRE_190','mode':'DRY_RUN','totalChanges':0,'plan':{
+            'status':'READY','planSha256':'d'*64,'newAttempts':[{} for _ in range(17)],
+            'links':[{} for _ in range(19)],'duplicateAttemptNumberGroups':[],
+            'missingOrderedWorkCount':225,'samplesWithMissingOrderedWorkCount':10}}
+        counts = summary.attempt_counts(dry)
+        self.assertEqual(counts, {'classification':'PRE_190','status':'READY','planSha256':'d'*64,
+            'newAttemptCount':17,'linkedResultCount':19,'flaggedGroupCount':0,'flaggedAttemptCount':0,
+            'missingOrderedWorkCount':225,'samplesWithMissingOrderedWorkCount':10,'totalChanges':0})
+        dry['plan']['duplicateAttemptNumberGroups']=[{'attemptIds':['a','b']},{'attemptIds':['c','d','e']}]
+        counts = summary.attempt_counts(dry)
+        self.assertEqual((counts['flaggedGroupCount'],counts['flaggedAttemptCount']),(2,5))
+
 class DiskAndPlanGuards(unittest.TestCase):
     def test_floor_scaled_reserve_and_negative_sizes(self):
         self.assertEqual(s.disk_reserve(563322880, 413513955, 2000000), 8589934592)

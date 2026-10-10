@@ -59,8 +59,14 @@ def validate(proof, build, gates):
     assert main and main[0]['status'] == 'completed' and main[0]['conclusion'] == 'success'
 
 def prepare(origin, destination, gates_file):
+    # Packaging may fix a read-only projection after a PASSED rehearsal. Keep
+    # the original proof root/receipt and require every measured source byte
+    # to match; never edit or relabel the retained proof.
+    source_root = pathlib.Path(__file__).resolve().parent
     assert origin.parent == destination.parent == pathlib.Path('/opt/lims/releases')
     assert origin.name.startswith('combined-eb6de2e8-')
+    assert source_root.parent == origin.parent and source_root.name.startswith('combined-eb6de2e8-')
+    assert not source_root.is_symlink()
     assert destination.name.startswith('combined-release-eb6de2e8-')
     assert not origin.is_symlink() and not destination.exists()
     proof = json.loads((origin / 'rehearsal-receipt.json').read_text())
@@ -69,23 +75,28 @@ def prepare(origin, destination, gates_file):
     validate(proof, build, gates)
     assert proof['buildReceiptSha256'] == s.sha(origin / 'build-receipt.json')
     assert proof['yy191ReviewChoiceSha256'] == s.sha(origin / 'yy-191-review-choice-evidence.md')
+    assert proof['yy191ReviewChoiceSha256'] == s.sha(source_root / 'yy-191-review-choice-evidence.md')
+    assert s.sha(origin / 'yy-authorization-evidence.md') == s.sha(source_root / 'yy-authorization-evidence.md')
     assert build['sourceArchiveSha256'] == s.sha(origin / 'source.tar.gz')
     assert build['sourceIndexSha256'] == s.sha(origin / 'source-index.json')
     for name, digest in proof['scriptSha256'].items():
-        assert name in SCRIPTS and s.sha(origin / name) == digest, 'Rehearsed script changed: ' + name
-    files = SCRIPTS + ['rehearsal-receipt.json', 'build-receipt.json',
-        'source.tar.gz', 'source-index.json', 'yy-authorization-evidence.md',
+        assert name in SCRIPTS and s.sha(origin / name) == s.sha(source_root / name) == digest, 'Rehearsed script changed: ' + name
+    source_files = SCRIPTS + ['yy-authorization-evidence.md',
         'yy-191-review-choice-evidence.md', 'kit-source-index.json']
-    assert all((origin / name).is_file() and not (origin / name).is_symlink() for name in files)
-    kit = json.loads((origin / 'kit-source-index.json').read_text())
+    proof_files = ['rehearsal-receipt.json', 'build-receipt.json', 'source.tar.gz', 'source-index.json']
+    sources = {name:source_root / name for name in source_files}
+    sources.update({name:origin / name for name in proof_files})
+    files = source_files + proof_files
+    assert all(file.is_file() and not file.is_symlink() for file in sources.values())
+    kit = json.loads((source_root / 'kit-source-index.json').read_text())
     assert kit['status'] == 'RAW_GIT_KIT_EXPORT'
     committed = {row['name']: row['sha256'] for row in kit['files']}
     for name in SCRIPTS + ['yy-authorization-evidence.md','yy-191-review-choice-evidence.md']:
-        assert s.sha(origin / name) == committed[name], 'Kit source differs from Git: ' + name
-    summary = subprocess.check_output([sys.executable, str(origin / 'summarize-proof.py'), str(origin)], text=True)
+        assert s.sha(source_root / name) == committed[name], 'Kit source differs from Git: ' + name
+    summary = subprocess.check_output([sys.executable, str(source_root / 'summarize-proof.py'), str(origin)], text=True)
     destination.mkdir(mode=0o700)
     for name in files:
-        with (origin / name).open('rb') as source, (destination / name).open('xb') as target:
+        with sources[name].open('rb') as source, (destination / name).open('xb') as target:
             shutil.copyfileobj(source, target)
         (destination / name).chmod(0o400)
     for name, data in [('pr-gates-prepared.json', gates_file.read_bytes()),
@@ -95,7 +106,9 @@ def prepare(origin, destination, gates_file):
         (destination / name).chmod(0o400)
         files.append(name)
     manifest = {'status':'PREPARED_ONLY_NOT_EXECUTED', 'preparedUtc':s.utc(),
-        'head':s.HEAD, 'kitSourceCommit':kit['head'], 'lastDeployedSha':s.LAST_DEPLOY, 'image':build['image'],
+        'head':s.HEAD, 'kitSourceCommit':kit['head'],
+        'rehearsedKitSourceCommit':json.loads((origin / 'kit-source-index.json').read_text())['head'],
+        'packagingSourceRoot':str(source_root), 'lastDeployedSha':s.LAST_DEPLOY, 'image':build['image'],
         'retainedImage':s.OLD_IMAGE, 'rehearsalRoot':str(origin), 'executionRoot':str(destination),
         'attemptPlanSha256':proof['attemptPlanSha256'], 'includedPrCount':len(s.INCLUDED_PRS),
         'acceptancePlanSha256':proof['acceptancePlanSha256'], 'acceptanceTuple':s.ACCEPTANCE_TUPLE,

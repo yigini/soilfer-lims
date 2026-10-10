@@ -8,6 +8,19 @@ def sha(file):
             value.update(block)
     return value.hexdigest()
 
+def attempt_counts(dry):
+    plan = dry['plan']
+    # Dry plans name duplicate-number groups; flaggedGroups belongs to the
+    # APPLY receipt. Report the planned groups without borrowing APPLY data.
+    groups = plan['duplicateAttemptNumberGroups']
+    return {'classification':dry['classification'],'status':plan['status'],
+        'planSha256':plan['planSha256'],'newAttemptCount':len(plan['newAttempts']),
+        'linkedResultCount':len(plan['links']),'flaggedGroupCount':len(groups),
+        'flaggedAttemptCount':sum(len(group['attemptIds']) for group in groups),
+        'missingOrderedWorkCount':plan['missingOrderedWorkCount'],
+        'samplesWithMissingOrderedWorkCount':plan['samplesWithMissingOrderedWorkCount'],
+        'totalChanges':dry['totalChanges']}
+
 if __name__ == '__main__':
     root = pathlib.Path(sys.argv[1]).resolve()
     assert root.parent == pathlib.Path('/opt/lims/releases') and root.name.startswith('combined-eb6de2e8-')
@@ -41,12 +54,7 @@ if __name__ == '__main__':
         'acceptancePlanSha256':proof['acceptancePlanSha256'],
         'yy191ReviewChoiceSha256':proof['yy191ReviewChoiceSha256'],
         'acceptanceLink':next(row for row in proof['installers'] if row['key']=='191-link'),
-        'attemptPlan':{'classification':dry['classification'],'status':plan['status'],
-            'planSha256':proof['attemptPlanSha256'],'newAttemptCount':len(plan['newAttempts']),
-            'linkedResultCount':len(plan['links']),'flaggedGroupCount':len(plan['flaggedGroups']),
-            'missingOrderedWorkCount':plan.get('missingOrderedWorkCount'),
-            'samplesWithMissingOrderedWorkCount':plan.get('samplesWithMissingOrderedWorkCount'),
-            'totalChanges':dry['totalChanges']},
+        'attemptPlan':attempt_counts(dry),
         'repeatTotalChanges':proof['repeatTotalChanges'],'startupChanges':proof['startupChanges'],
         'readOnlyProbeChanges':proof['readOnlyProbeChanges'],
         'repeatInstallDatabaseBytesPreserved':proof['repeatedInstallDatabaseBytesPreserved'],
