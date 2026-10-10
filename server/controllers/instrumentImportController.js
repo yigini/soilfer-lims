@@ -2,14 +2,20 @@ const db = require('../prisma');
 const templates = require('../services/instrumentImportTemplateService');
 const importer = require('../services/instrumentImportService');
 const multer = require('multer');
+const sourceName = Symbol('instrumentImportSourceName');
 // Resource cap for an in-memory uploaded source, independent of lab policy.
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 16 * 1024 * 1024, files: 1, fields: 3 } }).single('file');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 16 * 1024 * 1024, files: 1, fields: 3 },
+    fileFilter(req, file, callback) { req[sourceName] = file.originalname; callback(null, true); } }).single('file');
 function refuse(res, error) {
     return res.status(error.statusCode || 500).json({ error: error.message, code: error.code || 'IMPORT_FAILED',
         ...(error.details && { details: error.details }) });
 }
 exports.uploadSource = (req, res, next) => upload(req, res, error => {
-    if (error) return refuse(res, templates.fail(400, error.code === 'LIMIT_FILE_SIZE' ? 'IMPORT_FILE_TOO_LARGE' : 'IMPORT_REQUEST_INVALID', 'Supply one instrument source file.'));
+    if (error) {
+        const xlsx = require('node:path').extname(req[sourceName] || '').toLowerCase() === '.xlsx';
+        return refuse(res, templates.fail(400, error.code === 'LIMIT_FILE_SIZE'
+            ? xlsx ? 'IMPORT_XLSX_TOO_LARGE' : 'IMPORT_FILE_TOO_LARGE' : 'IMPORT_REQUEST_INVALID', 'Supply one instrument source file.'));
+    }
     next();
 });
 exports.listTemplates = async (req, res) => {

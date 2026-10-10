@@ -155,6 +155,20 @@ test('mounted multipart sheets require an exact selection; changing it cannot au
     }, { workbench: true });
 });
 
+test('the actual multipart compressed-size cap returns the pinned XLSX code on both routes with zero writes', async () => {
+    const f = await fixture(), before = await f.state(), bytes = Buffer.alloc(16 * 1024 * 1024 + 1);
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        for (const action of ['preview', 'commit']) {
+            const query = request(app).post('/api/workbench/runs/' + f.run.id + '/imports/' + action)
+                .set('Authorization', 'Bearer ' + token).field('templateId', f.template.id);
+            if (action === 'commit') query.field('previewToken', 'oversized-file-never-reaches-the-owner');
+            const response = await query.attach('file', bytes, 'compressed-cap.XLSX');
+            expect(response.status).toBe(400); expect(response.body.code).toBe('IMPORT_XLSX_TOO_LARGE');
+            expect(await f.state()).toEqual(before);
+        }
+    });
+});
+
 test('malformed XML, macros, external parts and XML resource overflow refuse the real preview with zero writes', async () => {
     const f = await fixture(), before = await f.state();
     for (const [extraParts, code] of [
