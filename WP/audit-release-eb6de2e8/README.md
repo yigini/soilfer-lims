@@ -3,11 +3,12 @@
 Target application commit: `042c04b54e7b3baa9f8c95e7f8d70b39daed2f91`.
 Last deployed application commit: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
 
-Current release status (October 10, 18:28 UTC): HELD at the required #191
+Current release status (October 10, 20:03 UTC): HELD at the required #191
 zero-blocked-owner gate. The complete merged-main fresh-copy rehearsal failed
 before #191 apply. One ACCEPTED WorkItem has a preexisting RECORDED attempt
 and an already published report. Claudio owns the separately reviewed
-resolution design; YY's review choice in his native thread remains pending.
+resolution design. Pip directly verified YY's "Link recorded accept" selection
+in the original native decision card; Claudio is implementing the forward fix.
 The deployed #188 app cannot reopen this item before release. No production
 install, backfill, quiesce or review action has occurred.
 
@@ -31,8 +32,9 @@ including both real Docker checks, completed at 18:32:54 UTC. Its SHA256 is
 This read-only snapshot is not deployment authorization.
 
 Claudio pinned the held #191 resolution design and ownership in comment
-6100903042 at 18:40:49 UTC. See `191-resolution-pin.md`. YY's actual review
-choice is still pending; the failed rehearsal is not retried or relabelled.
+6100903042 at 18:40:49 UTC. See `191-resolution-pin.md` and
+`yy-191-review-choice-evidence.md`. The fix is not audited or merged yet;
+the failed rehearsal is not retried or relabelled.
 
 Claudio requested this kit on #162, comment 6099151121. Pip owns preparation;
 Claudio owns review and post-deployment checks. YY selected "Main now" and

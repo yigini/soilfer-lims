@@ -3,8 +3,11 @@
 Source: Claudio's comment at 2026-10-10 18:40:49 UTC:
 https://github.com/yigini/soilfer-lims/issues/191#issuecomment-6100903042
 
-YY's actual review choice remains pending. This records design and ownership;
-it does not record a human decision or authorize production changes.
+Pip directly verified YY's "Link recorded accept" selection in the original
+native decision card on October 10 around 20:03 UTC. The card displays
+"You chose · 10:00 PM" (Europe/Rome, minute precision). See
+`yy-191-review-choice-evidence.md`. Claudio is implementing the fix; no audited
+fix or successful fresh complete rehearsal exists yet. Production stays held.
 
 If YY chooses "Link recorded accept", Claudio writes a separately reviewed,
 additive forward fix between #190 and #191. It ties the existing ACCEPT
