@@ -598,3 +598,103 @@ test('#191 release objects include the two exact successors and both append-only
         'WorkAttempt_evidence_update', 'WorkAttempt_identity_update', 'WorkItem_batch_membership_guard', 'AuditLog_attempt_event_update', 'AuditLog_attempt_event_delete'
     ]));
 });
+
+// YY decision 2026-10-10 ("Link recorded accept"): legacy ACCEPTED work whose
+// stored ACCEPT decision pre-dates attempt review is linked before #191.
+describe('#191 recorded-acceptance link between the #190 and #191 installers', () => {
+    const { linkRecordedAcceptance, parseArguments: linkArguments, ACTOR } = require('../../scripts/link_recorded_acceptance');
+    const attemptAt = '2026-09-08T13:00:00.000Z', reviewAt = '2026-09-08T15:00:00.000Z';
+    function blockedFixture({ status = 'ACCEPTED', decisions } = {}) {
+        const file = fixture({ status, batchStatus: 'OPEN', extra: {
+            WorkAttempt: [{ id: 'recorded-owner', workItemId: 'measured', attemptNo: 1, status: 'RECORDED',
+                evidenceHash: 'retained-hash', evidenceData: 'retained-evidence', createdAt: attemptAt, updatedAt: attemptAt }],
+            ReviewDecision: decisions || [{ id: 'legacy-reject', sampleId: 'sample', workItemId: 'measured', decision: 'REJECT',
+                reviewerId: 'system:fixture', reason: 'reanalysis', createdAt: '2026-09-07T10:00:00.000Z' }] } });
+        const db = new Database(file);
+        try {
+            db.prepare('UPDATE "ReviewDecision" SET "createdAt"=? WHERE "id"=\'legacy-review\'').run(reviewAt);
+            db.prepare('UPDATE "Result" SET "createdAt"=? WHERE "id"=\'result\'').run(attemptAt);
+            db.prepare('UPDATE "WorkItem" SET "reviewedAt"=?, "reviewDecision"=\'ACCEPT\' WHERE "id"=\'measured\'').run(reviewAt);
+        } finally { db.close(); }
+        installWorkAttemptContract({ dbPath: file, apply: true });
+        require('../helpers/repeatQcPredecessors').installRepeatQcPredecessors(file);
+        return file;
+    }
+    const rowsWithout = (file, eventIds = []) => retained(file).map(entry => entry.table === 'AuditLog'
+        ? { ...entry, rows: entry.rows.filter(row => !eventIds.includes(row.id)) }
+        : entry.table === 'WorkAttempt' ? { ...entry, rows: entry.rows.map(row => row.id === 'recorded-owner' ? { ...row, status: 'LINKED' } : row) } : entry);
+
+    test('dry-run names the single eligible item and its recorded decision without changing bytes', () => {
+        const file = blockedFixture(), before = hash(file);
+        expect(linkRecordedAcceptance({ dbPath: file })).toMatchObject({ mode: 'DRY_RUN', totalChanges: 0, blockedWorkItemCount: 1,
+            unresolved: [], alreadyLinked: [], eligible: [{ workItemId: 'measured', attemptId: 'recorded-owner', resultIds: ['result'],
+                reviewDecisionId: 'legacy-review', reviewedAt: reviewAt }] });
+        expect(hash(file)).toBe(before);
+    });
+
+    test('apply needs the exact named scope and refuses any other scope with zero writes', () => {
+        const file = blockedFixture(), before = hash(file);
+        for (const workItemIds of [[], ['other'], ['measured', 'other']]) {
+            expect(() => linkRecordedAcceptance({ dbPath: file, apply: true, workItemIds }))
+                .toThrow(expect.objectContaining({ code: 'ACCEPTANCE_LINK_SCOPE_MISMATCH', totalChanges: 0 }));
+        }
+        expect(hash(file)).toBe(before);
+        expect(() => linkArguments(['--db', file, '--apply'])).toThrow(expect.objectContaining({ code: 'ACCEPTANCE_LINK_ARGUMENT_INVALID' }));
+        expect(linkArguments(['--db', file, '--apply', '--work-item', 'measured'])).toEqual({ dbPath: file, apply: true, workItemIds: ['measured'] });
+    });
+
+    test('apply links the recorded ACCEPT, preserves every other row, clears the #191 gate and is idempotent', () => {
+        const file = blockedFixture(), original = rowsWithout(file);
+        const applied = linkRecordedAcceptance({ dbPath: file, apply: true, workItemIds: ['measured'] });
+        expect(applied).toMatchObject({ mode: 'APPLIED', blockedWorkItemCount: 0, eligible: [], unresolved: [],
+            receipt: { originalRowsAndFieldsPreserved: true, attemptStatusChanges: 1, auditEventsAdded: 1,
+                links: [{ workItemId: 'measured', attemptId: 'recorded-owner', reviewDecisionId: 'legacy-review' }] } });
+        const eventId = applied.receipt.links[0].eventId;
+        expect(rowsWithout(file, [eventId])).toEqual(original);
+        const db = new Database(file, { readonly: true });
+        try {
+            expect(db.prepare('SELECT status, updatedAt, version FROM "WorkAttempt" WHERE id=\'recorded-owner\'').get())
+                .toEqual({ status: 'ACCEPTED', updatedAt: attemptAt, version: 1 });
+            const event = db.prepare('SELECT * FROM "AuditLog" WHERE id=?').get(eventId);
+            expect(event).toMatchObject({ entity: 'WORK_ATTEMPT', entityId: 'recorded-owner', action: 'ACCEPTED', performedBy: ACTOR,
+                sampleId: 'sample', analysisCode: 'P' });
+            expect(JSON.parse(event.details)).toMatchObject({ from: 'RECORDED', to: 'ACCEPTED', reviewDecisionId: 'legacy-review',
+                oldResultIds: [], newResultIds: [], linkedResultIds: ['result'] });
+            expect(db.prepare('SELECT attemptId FROM "ReviewDecision" WHERE id=\'legacy-review\'').get()).toEqual({ attemptId: null });
+        } finally { db.close(); }
+        const linked = hash(file);
+        expect(linkRecordedAcceptance({ dbPath: file, apply: true, workItemIds: ['measured'] }))
+            .toMatchObject({ mode: 'NO_OP', totalChanges: 0, alreadyLinked: [{ eventId, workItemId: 'measured' }] });
+        expect(hash(file)).toBe(linked);
+        expect(installWorkRepeatContract({ dbPath: file }).releaseInventory).toEqual({ blockedWorkItemCount: 0, blockedWorkItems: [], totalChanges: 0 });
+        installWorkRepeatContract({ dbPath: file, apply: true });
+        expect(assertWorkRepeatStartupReady(file).releaseInventory.blockedWorkItemCount).toBe(0);
+        expect(() => linkRecordedAcceptance({ dbPath: file })).toThrow(expect.objectContaining({ code: 'ACCEPTANCE_LINK_AFTER_191_REFUSED' }));
+    });
+
+    test.each([
+        ['submitted work has no acceptance to link', { status: 'SUBMITTED' }, 'WORK_ITEM_NOT_ACCEPTED'],
+        ['a later rejection is the current decision', { decisions: [{ id: 'later-reject', sampleId: 'sample', workItemId: 'measured',
+            decision: 'REJECT', reviewerId: 'system:fixture', reason: 'later', createdAt: '2026-09-09T10:00:00.000Z' }] }, 'LATEST_DECISION_NOT_ACCEPT'],
+    ])('%s: the item stays unresolved and apply refuses with zero writes', (_, options, reason) => {
+        const file = blockedFixture(options), before = hash(file);
+        const dry = linkRecordedAcceptance({ dbPath: file });
+        expect(dry.eligible).toEqual([]);
+        expect(dry.unresolved).toEqual([expect.objectContaining({ workItemId: 'measured', reasons: expect.arrayContaining([reason]) })]);
+        expect(() => linkRecordedAcceptance({ dbPath: file, apply: true, workItemIds: ['measured'] }))
+            .toThrow(expect.objectContaining({ code: 'ACCEPTANCE_LINK_UNRESOLVED', totalChanges: 0 }));
+        expect(hash(file)).toBe(before);
+    });
+
+    test('zone-less SQLite timestamps are compared as UTC, not host-local time', () => {
+        const file = blockedFixture(), db = new Database(file);
+        try { db.prepare('UPDATE "ReviewDecision" SET "createdAt"=? WHERE "id"=\'legacy-review\'').run('2026-09-08 15:00:00'); } finally { db.close(); }
+        expect(linkRecordedAcceptance({ dbPath: file })).toMatchObject({ unresolved: [], eligible: [{ workItemId: 'measured' }] });
+    });
+
+    test('an acceptance recorded before the attempt or its Result is never linked', () => {
+        const file = blockedFixture(), db = new Database(file);
+        try { db.prepare('UPDATE "Result" SET "createdAt"=? WHERE "id"=\'result\'').run('2026-09-08T16:00:00.000Z'); } finally { db.close(); }
+        expect(linkRecordedAcceptance({ dbPath: file }).unresolved[0].reasons).toEqual(['DECISION_PRECEDES_RESULT']);
+    });
+});
