@@ -99,7 +99,25 @@ run is separate from the still-pending complete normal suite.
 Claude's entry-only QC pin6095469488 requires the same #186 owner, new observations
 and pending-state/event/audit writes only. Automatic evaluation, Result flags,
 references, corrections and evaluated-analyte entry are refused. The importer
-will implement this pin; no alternate measurement authority is introduced.
+now uses this pin on the existing owner, with a receipt bound to the current
+lab/instrument/run/importer. Invalid option combinations refuse atomically.
+The normal evaluation loop is skipped only for this internal import call, and
+the entry event retains entryMode and importReceiptId. No alternate measurement
+authority is introduced.
+
+The eight-file focused run passes all273 tests, zero skipped (76.133 s), including
+the entire unchanged native QC file, the new entry-only cases and the earlier
+template/paste/source/SQL/scanner files. A real retained Result is byte-equivalent
+through the last required imported QC value; the analyte remains QC_PENDING,
+zero evaluations/NCRs are created, and the event/audit are present. Later
+explicit evaluation produces the normal verdict. Evaluated analytes, existing
+observations and invalid combinations refuse with all rows unchanged. Both
+owned-source and working database digests remain unchanged. Preview and commit
+integration are still unfinished; this is not the full 40-by-four acceptance.
+
+The direct/QC unit-reader question is posted at6095612837: the Prisma method
+has qudtUnit but no unit scalar, and its frozen revision has no unit. Until
+Claude pins the exact reader/precedence, no unit alias or conversion is inferred.
 
 Still unfinished: normal startup/Docker wiring and populated analytical
 preservation proof; preview/commit APIs; XLSX; the mapping/binding
