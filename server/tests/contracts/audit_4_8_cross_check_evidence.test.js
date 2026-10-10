@@ -11,12 +11,26 @@ const { replaceReportedSelection } = require('../../services/reportedValueSelect
 const owned = [];
 afterEach(async () => { for (const f of owned.splice(0)) await f.close(); });
 
+// The merged #199 owner installs genuine catalogue prerequisites first.
+// Reuse their exact units and analysis reporting units without overwriting
+// names, definitions or any row that belongs to that owner.
+async function ensureUnit(db,unit){
+    const existing=await db.unit.findUnique({where:{code:unit.code}});
+    if(existing){expect(existing).toMatchObject(unit);return existing;}
+    return db.unit.create({data:unit});
+}
+async function ensureAnalysis(db,data){
+    const existing=await db.analysis.findUnique({where:{code:data.code}});
+    if(existing){expect(existing).toMatchObject({unitCode:data.unitCode,units:data.units});return existing;}
+    return db.analysis.create({data});
+}
+
 async function cnFixture(basis) {
     const f = await fixture({ curated: true });
     const unit = require('../../seeds/units').UNITS.find(row => row.code === 'g/kg');
-    if (!await f.db.unit.findUnique({ where: { code: unit.code } })) await f.db.unit.create({ data: unit });
+    await ensureUnit(f.db,unit);
     for (const [param, numericValue] of [['SOC', 90], ['TN', 2]]) {
-        await f.db.analysis.create({ data: { code: param, name: 'Owned ' + param + ' cross-check determination', units: unit.code, unitCode: unit.code } });
+        await ensureAnalysis(f.db,{code:param,name:'Owned '+param+' cross-check determination',units:unit.code,unitCode:unit.code});
         const method = await f.db.methodology.create({ data: { analysisCode: param, name: 'Owned C:N method', loq: 0 } });
         await require('../../services/qcRuleService').change(f.actor, { labId: f.labId, analysisCode: param,
             methodologyId: method.id, expectedVersion: 0, reason: 'Owned C:N evidence contract',
@@ -60,9 +74,9 @@ test('an unregistered historical lab saves and submits through the real HTTP wor
         assignedLab: labRef, labId: labRef, status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE',
         requiredAnalyses: '["SOC","TN"]', receptionDate: new Date() } });
     const unit = require('../../seeds/units').UNITS.find(row => row.code === 'g/kg');
-    await f.db.unit.create({ data: unit });
+    await ensureUnit(f.db,unit);
     for (const param of ['SOC', 'TN']) {
-        await f.db.analysis.create({ data: { code: param, name: 'Owned historical ' + param + ' determination', units: unit.code, unitCode: unit.code } });
+        await ensureAnalysis(f.db,{code:param,name:'Owned historical '+param+' determination',units:unit.code,unitCode:unit.code});
         await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId, assignedLab: labRef,
             labId: labRef, analysis: param, assignedTo: f.actor.username, status: 'IN_PROGRESS' } });
     }
@@ -126,9 +140,9 @@ async function fixture({ differentText = false, curated = false } = {}) {
     require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({ dbPath: f.file, apply: true });
     f.sampleId = f.items[0].sampleId; f.rows = [await f.result(f.items[0])];
     const unit = require('../../seeds/units').UNITS.find(row => row.code === 'cmol(+)/kg');
-    await f.db.unit.create({ data: unit });
+    await ensureUnit(f.db,unit);
     for (const [param, value] of [['EXCH_CA', 8], ['EXCH_MG', 3], ['EXCH_K', 1], ['EXCH_NA', 1], ['CEC', 10]]) {
-        await f.db.analysis.create({ data: { code: param, name: curated ? 'Owned ' + param + ' cross-check determination' : param, units: unit.code, unitCode: unit.code } });
+        await ensureAnalysis(f.db,{code:param,name:curated?'Owned '+param+' cross-check determination':param,units:unit.code,unitCode:unit.code});
         const method = await f.db.methodology.create({ data: { analysisCode: param, name: 'Owned cross-check method', loq: 0 } });
         await require('../../services/qcRuleService').change(f.actor, { labId: f.labId, analysisCode: param,
             methodologyId: method.id, criteria, expectedVersion: 0, reason: 'Owned non-QC cross-check test' }, { db: f.db });
