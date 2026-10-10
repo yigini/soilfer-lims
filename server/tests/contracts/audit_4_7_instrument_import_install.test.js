@@ -152,8 +152,9 @@ test('a populated predecessor retains every analytical, QC, audit and raw draft 
         // fixture: the 94-model client cannot address its absent new column.
         // Sample, WorkItem, Result, QC and audit data use their existing owners.
         const rawValue = ' 0007.1000 ', rawValues = '{"note":"  é\\n土  "}';
-        read(raw => raw.prepare('INSERT INTO WorkItemDraft(workItemId,userId,value,replicateNo,values,instrumentId,updatedAt) VALUES(?,?,?,?,?,?,?)')
-            .run(f.items[0].id, f.actor.username, rawValue, 1, rawValues, f.instrument.id, '2026-10-10T00:00:00.000Z'));
+        read(raw => raw.prepare('INSERT INTO WorkItemDraft(id,workItemId,sampleId,userId,labId,analysis,value,replicateNo,"values",instrumentId,updatedAt) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
+            .run('owned-pre200-draft', f.items[0].id, f.items[0].sampleId, f.actor.username, f.labId, f.analysisCode,
+                rawValue, 1, rawValues, f.instrument.id, '2026-10-10T00:00:00.000Z'));
         await f.db.$disconnect();
         const beforeBackup = f.file.replace(/\.db$/, '-pre200-preservation-before.db'), afterBackup = f.file.replace(/\.db$/, '-pre200-preservation-after.db');
         expect(fs.existsSync(beforeBackup)).toBe(false); expect(fs.existsSync(afterBackup)).toBe(false);
@@ -177,7 +178,7 @@ test('a populated predecessor retains every analytical, QC, audit and raw draft 
             expect(table.name === '_schema_migrations' ? actual.all(MARKER) : actual.all()).toEqual(table.rows);
         });
         read(raw => {
-            expect(raw.prepare('SELECT value,values,importReceiptId FROM WorkItemDraft').get()).toEqual({ value: rawValue, values: rawValues, importReceiptId: null });
+            expect(raw.prepare('SELECT value,"values",importReceiptId FROM WorkItemDraft').get()).toEqual({ value: rawValue, values: rawValues, importReceiptId: null });
             expect(raw.pragma('integrity_check', { simple: true })).toBe('ok'); expect(raw.pragma('foreign_key_check')).toEqual([]);
         });
         fs.copyFileSync(f.file, afterBackup, fs.constants.COPYFILE_EXCL); const afterHash = hash(f.file);
