@@ -44,7 +44,7 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         boundary:'-- Contract guards'}),
     // #200: inspect the fixed additive import source; no writer exemption.
     Object.freeze({ functionName: 'loadInstrumentImportMigrationSource', loader: 'services/instrumentImportMigrationSource.js',
-        loaderSha256: '8c95faacaa01fb9d62e984a56da27ea658595f564a01d90ca07785d158edad93',
+        loaderSha256: '66cd5c07954a7c148e241b790e02e45332ed18a14f03c4a003cb3fa9d88789e6',
         directory: '20261010000100_instrument_import_templates', sqlSha256: '68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8',
         boundary: '-- Contract guards' }),
     // Inspect both exact #197 assets. Existing writer restrictions are unchanged.

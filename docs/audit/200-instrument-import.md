@@ -48,7 +48,40 @@ are retained. All checks left working dev.db exactly SHA256
 The rebased client build passes (12.48 s), and lint passes (zero errors,
 fourteen existing warnings).
 
-Still unfinished: classified dry-run/apply/startup installer and populated
+The classified installer module now requires the real #199 readiness check,
+then distinguishes the captured PRE_200, exact empty fresh-Prisma and verified
+COMPLETE_200 states. Foreign, partial, unmarked populated and forged-receipt
+states refuse. Original draft definitions and the actual SQLite ALTER result
+are captured independently at SHA256a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af
+and4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b.
+It uses an immediate transaction, verifies every original field/row/object and
+prior receipt, and appends one source-bound installation receipt. Dry-run and
+completed apply open read-only. The separate startup checker refuses an
+uninstalled or missing database without creating or changing it.
+
+Current focused validation passes five suites / 191 tests, zero skipped
+(12.346 s), including all 105 unchanged scanner tests. The earlier classifier
+run passed 182 tests and found one unresolved new test SQL source; the test now
+uses a separate digest-bound release-source binding for execution, preserving
+the scanner's restriction. The subsequent run passed 189 tests and found that
+an empty Jest parameter tuple accidentally selected the done-callback form;
+the new argument cases now pass arrays as explicit tuple values. All logs are
+retained; no existing test timeout or assertion changed.
+
+Separate owned rehearsals exercise PRE_200 and actual emitted FRESH_PRISMA
+through COMPLETE_200, startup readiness and repeated NO_OP. Both report zero
+new templates, zero import receipts, zero draft links and zero backfills; the
+only row change is one installation receipt. Original rows/schema objects and
+predecessor receipts are preserved. Dry-run and NO_OP preserve database bytes;
+the source owned template and working database remain unchanged. The fresh
+case clones only the actual owned catalogue prerequisites (36 Unit, 10
+AnalysisCategory and 176 Analysis rows), then invokes the real #199 installer.
+Its first setup omitted the category dependency and correctly refused a
+foreign-key insert before any #200 installation; that owned file is retained.
+The completed proof never disables foreign keys. Both rehearsals have zero
+Sample and Result rows; populated analytical preservation remains to be tested.
+
+Still unfinished: normal startup/Docker wiring and populated analytical
 preservation proof; template/preview/commit APIs; XLSX; the mapping/binding
 wizard; complete 40 by four plus six native QC import; EXCH_CA/Olsen typed
 recording and activation/unit/binding refusal cases; normal full server tests,

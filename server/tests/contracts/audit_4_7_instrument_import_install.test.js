@@ -2,6 +2,8 @@ const fs = require('node:fs'), path = require('node:path');
 const { createPre200ImportSchemaFixture } = require('../helpers/instrumentImportHistoricalFixture');
 const { loadInstrumentImportMigrationSource } = require('../../services/instrumentImportMigrationSource');
 const { scanSource } = require('../helpers/workflowWriteScanner');
+const { classifyInstrumentImportSchema, MARKER } = require('../../services/instrumentImportSchemaService');
+const { parseArguments, assertInstrumentImportStartupReady } = require('../../scripts/install_instrument_imports');
 let db;
 const source = loadInstrumentImportMigrationSource();
 const template = { id: 'mapping-v1', labId: 'import-lab', instrumentId: 'import-instrument', name: 'Owned ICP mapping', version: 1,
@@ -21,7 +23,8 @@ beforeEach(() => {
         db.prepare('INSERT INTO Lab(id,code,name,country,updatedAt) VALUES(?,?,?,?,?)').run(id, code, 'Synthetic lab', 'ZZ', '2026-10-10T00:00:00.000Z');
     for (const [id, labId] of [['import-instrument', 'IMPORT_LAB'], ['other-instrument', 'other-lab']])
         db.prepare('INSERT INTO EquipmentAsset(id,labId,assetType,name,status,criticality,updatedAt) VALUES(?,?,?,?,?,?,?)').run(id, labId, 'ICP', 'Synthetic instrument', 'IN_SERVICE', 'IMPORTANT', '2026-10-10T00:00:00.000Z');
-    db.transaction(() => db.exec(source.sql))();
+    const releaseSource = loadInstrumentImportMigrationSource();
+    db.transaction(() => db.exec(releaseSource.sql))();
     insert('ImportTemplate', template); insert('InstrumentImportReceipt', receipt);
 });
 afterEach(() => db?.close());
@@ -68,4 +71,45 @@ test('the schema-only factory is source-bound and unavailable to runtime or anot
     expect(scanSource("require('../tests/helpers/instrumentImportHistoricalFixture')", 'services/unlisted.js').map(row => row.code)).toContain('TEST_HELPER_IMPORTED_BY_RUNTIME');
     expect(scanSource("require('../helpers/instrumentImportHistoricalFixture')", 'tests/contracts/unlisted.test.js').map(row => row.code)).toContain('HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED');
     expect(() => createPre200ImportSchemaFixture('not permitted')).toThrow('accepts no arguments');
+});
+
+test('literal pre-200 classification is read-only and does not invent a receipt', () => {
+    db.close(); db = createPre200ImportSchemaFixture();
+    const before = db.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all(), changes = db.prepare('SELECT total_changes() n').get().n;
+    expect(classifyInstrumentImportSchema(db, source)).toMatchObject({ classification: 'PRE_200', counts: { templates: 0, receipts: 0, draftLinks: 0 } });
+    expect(db.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all()).toEqual(before);
+    expect(db.prepare('SELECT total_changes() n').get().n).toBe(changes);
+});
+test('an unmarked upgraded schema is refused without adopting its rows', () => {
+    const before = db.prepare('SELECT * FROM InstrumentImportReceipt').all(), changes = db.prepare('SELECT total_changes() n').get().n;
+    expect(() => classifyInstrumentImportSchema(db, source)).toThrow('partial, foreign, unmarked or populated');
+    expect(db.prepare('SELECT * FROM InstrumentImportReceipt').all()).toEqual(before);
+    expect(db.prepare('SELECT total_changes() n').get().n).toBe(changes);
+});
+test('a foreign object in the managed import namespace is refused', () => {
+    db.exec('CREATE INDEX "foreign_import_index" ON "ImportTemplate"("name")');
+    try { classifyInstrumentImportSchema(db, source); throw Error('Expected schema refusal'); }
+    catch (error) { expect(error.code).toBe('IMPORT_SCHEMA_MISMATCH'); expect(error.differences).toContain('foreign_import_index is not a release object'); }
+});
+test('a forged receipt refuses without changing any imported evidence', () => {
+    db.exec('CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY,"appliedAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,"details" TEXT)');
+    db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run(MARKER, '{}');
+    const before = db.prepare('SELECT * FROM InstrumentImportReceipt').all();
+    expect(() => classifyInstrumentImportSchema(db, source)).toThrow('installation receipt differs');
+    expect(db.prepare('SELECT * FROM InstrumentImportReceipt').all()).toEqual(before);
+});
+
+test.each([[], ['--apply'], ['--db'], ['--db','owned.db','--apply','--dry-run'], ['--db','owned.db','--apply','--apply'], ['--db','owned.db','--unknown']].map(args => [args]))('installer CLI refuses malformed arguments: %j', args => {
+    expect(() => parseArguments(args)).toThrow();
+});
+test('installer CLI accepts an explicit existing-path argument and one mode', () => {
+    expect(parseArguments(['--db','owned.db','--dry-run'])).toEqual({ dbPath: 'owned.db', apply: false });
+    expect(parseArguments(['--db','owned.db','--apply'])).toEqual({ dbPath: 'owned.db', apply: true });
+});
+test('startup refuses a missing database without creating it', () => {
+    const missing = path.resolve(__dirname, '../.tmp', 'audit_owned_missing_import_' + require('node:crypto').randomUUID() + '.db');
+    expect(fs.existsSync(missing)).toBe(false);
+    try { assertInstrumentImportStartupReady(missing); throw Error('Expected missing-database refusal'); }
+    catch (error) { expect(error.code).toBe('IMPORT_DATABASE_REQUIRED'); }
+    expect(fs.existsSync(missing)).toBe(false);
 });
