@@ -115,9 +115,14 @@ observations and invalid combinations refuse with all rows unchanged. Both
 owned-source and working database digests remain unchanged. Preview and commit
 integration are still unfinished; this is not the full 40-by-four acceptance.
 
-The direct/QC unit-reader question is posted at6095612837: the Prisma method
-has qudtUnit but no unit scalar, and its frozen revision has no unit. Until
-Claude pins the exact reader/precedence, no unit alias or conversion is inferred.
+Claude's unit-reader pin6095652486 answers6095612837: extract the typed writer's
+read-only unit decision into one shared function without changing its behavior.
+Direct/QC units must exactly match the non-null Analysis.units or unitCode (or
+percent for actual texture fractions). An empty accepted set refuses with409
+IMPORT_UNIT_UNAVAILABLE; synonyms/case changes refuse IMPORT_UNIT_MISMATCH.
+Each receipt retains the actual unit fields and which matched. Methodology.qudtUnit
+and the dead method.unit fallback are deferred to#283. Implementation is pending;
+no unit alias or conversion is inferred.
 
 Pure row matching now uses explicit lab-code/original-id/physical-position
 selection and only current native positions. It preserves the source id and
@@ -128,8 +133,17 @@ refuse rather than choosing a destination. The new pure file passes15/15 tests
 (0.274 s), including40-by-four plus six QC destination matching. These are pure
 matching tests, not a completed import or database acceptance claim.
 
-Still unfinished: normal startup/Docker wiring and populated analytical
-preservation proof; preview/commit APIs; XLSX; the mapping/binding
+The read-only #200 checker now runs before app/adapters/schedulers, the shipped
+default entrypoint invokes the actual installer after its predecessors, Docker
+retains all four digest-bound assets outside the Prisma mount, and normal test
+setup uses the real installer. Retained startup/bootstrap assertions remain,
+with an additional missing-import refusal/byte-preservation check and real
+COMPLETE_200 readiness before listen. The three-file focused run passes140/140
+tests, zero skipped (50.384 s), including the105 scanner tests. Source-owned and
+working database hashes stay unchanged. Actual Docker execution is still pending.
+
+Still unfinished: actual Docker execution and populated analytical preservation
+proof; shared unit reader; preview/commit APIs; XLSX; the mapping/binding
 wizard; complete 40 by four plus six native QC import; EXCH_CA/Olsen typed
 recording and activation/unit/binding refusal cases; normal full server tests,
 final build/lint, CI and Claude's audit. The importer must read input units

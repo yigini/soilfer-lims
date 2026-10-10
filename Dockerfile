@@ -91,6 +91,10 @@ COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sq
 COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json
 COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql
 COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json
+COPY server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/migration.sql
+COPY server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/fresh-prisma-tables.json
+COPY server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql
+COPY server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql
 
 # Copy and set entrypoint
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
