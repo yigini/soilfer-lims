@@ -14,7 +14,13 @@ records the new plan binding. Dry-run now returns planSha256 over the exact
 eligible/unresolved tuples. Apply requires that digest and checks it against
 both the reader and IMMEDIATE-transaction plans. A new same-item/changed-review
 test refuses the old digest with unchanged database bytes. Full CI and
-Claudio's formal exact current-head audit remain pending.
+Claudio's formal exact current-head audit remain pending. Pip independently
+ran the three changed-install/security/SQL-guard suites at this exact head:
+3/3 suites and 301/301 tests pass, zero skips, exit 0, 116.437 seconds under
+TZ=Europe/Rome. See `289-focused-verification.md` for the command and log hash.
+The PR is now labelled ready-for-audit and has the exact-head request in
+comment 6101858153. CI run 38083146269 and the formal pass are still pending
+at the 20:32 UTC checkpoint.
 
 The original findings, retained for traceability:
 

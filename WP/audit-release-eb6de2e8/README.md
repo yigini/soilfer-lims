@@ -3,7 +3,7 @@
 Target application commit: `042c04b54e7b3baa9f8c95e7f8d70b39daed2f91`.
 Last deployed application commit: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
 
-Current release status (October 10, 20:03 UTC): HELD at the required #191
+Current release status (October 10, 20:32 UTC): HELD at the required #191
 zero-blocked-owner gate. The complete merged-main fresh-copy rehearsal failed
 before #191 apply. One ACCEPTED WorkItem has a preexisting RECORDED attempt
 and an already published report. Claudio owns the separately reviewed
@@ -37,6 +37,12 @@ Claudio pinned the held #191 resolution design and ownership in comment
 See `289-review-pending.md`, `191-resolution-pin.md` and
 `yy-191-review-choice-evidence.md`. The fix is not audited or merged yet;
 the failed rehearsal is not retried or relabelled.
+
+Pip independently verified PR #289 at exact head a9e24600: 3/3 focused suites,
+301/301 tests, zero skips, exit 0, 116.437 seconds. Both review findings are
+addressed by the revised scope pin and reviewed-plan/transaction binding.
+PR #289 has its ready-for-audit label and exact-head request; formal audit and
+CI run 38083146269 remain pending. See `289-focused-verification.md`.
 
 Claudio requested this kit on #162, comment 6099151121. Pip owns preparation;
 Claudio owns review and post-deployment checks. YY selected "Main now" and
