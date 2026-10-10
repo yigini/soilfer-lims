@@ -1010,7 +1010,13 @@
       "pt_zScoreLimits": "PT z-score limits",
       "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC",
       "report_uncertaintyMode": "Report expanded uncertainty",
-      "report_uncertaintyCoverageFactor": "Uncertainty coverage factor"
+      "report_uncertaintyCoverageFactor": "Uncertainty coverage factor",
+      "crossCheck_basesCecFactor": "Maximum exchangeable bases / CEC factor",
+      "crossCheck_baseSaturationMaxPct": "Maximum base saturation (%)",
+      "crossCheck_textureClosureTolerancePct": "Texture closure tolerance (%)",
+      "crossCheck_cnMin": "Minimum C:N ratio",
+      "crossCheck_cnMax": "Maximum C:N ratio",
+      "crossCheck_carbonatePhMin": "Minimum water pH for carbonate"
     },
     "title": "Policies",
     "yes": "Yes",

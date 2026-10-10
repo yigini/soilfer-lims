@@ -64,6 +64,13 @@ key('results.phMax', 'number', 14, 14, 14, { min: 0, unit: 'pH' });
 key('results.typicalMin', 'number', null, null, null, { nullable: true, unit: 'method unit' });
 key('results.typicalMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
 key('results.calibrationMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
+// #201 scope pin6092380877: all presets expose laboratory-owned thresholds.
+key('crossCheck.basesCecFactor', 'number', 1.1, undefined, undefined, { scope: 'LAB', min: 1 });
+key('crossCheck.baseSaturationMaxPct', 'number', 100, undefined, undefined, { scope: 'LAB', unit: '%' });
+key('crossCheck.textureClosureTolerancePct', 'number', 2, undefined, undefined, { scope: 'LAB', unit: '%' });
+key('crossCheck.cnMin', 'number', 8, undefined, undefined, { scope: 'LAB' });
+key('crossCheck.cnMax', 'number', 25, undefined, undefined, { scope: 'LAB' });
+key('crossCheck.carbonatePhMin', 'number', 7, undefined, undefined, { scope: 'LAB', unit: 'pH' });
 key('repeats.maxAttemptsBeforeNcr', 'integer', 3, 5, 0, integer);
 key('repeats.technicianSelfRepeatBeforeSubmit', 'boolean', true);
 key('review.secondPersonRequired', 'boolean', true, true, false);

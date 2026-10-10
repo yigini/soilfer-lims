@@ -1010,7 +1010,13 @@
       "pt_zScoreLimits": "Limites do escore z de proficiência",
       "qc_reviewedTranscriptionCorrectionEnabled": "Permitir correção revisada de erros de transcrição em CQ reprovado sem decisão",
       "report_uncertaintyMode": "Informar incerteza expandida",
-      "report_uncertaintyCoverageFactor": "Fator de abrangência da incerteza"
+      "report_uncertaintyCoverageFactor": "Fator de abrangência da incerteza",
+      "crossCheck_basesCecFactor": "Fator máximo de bases trocáveis / CTC",
+      "crossCheck_baseSaturationMaxPct": "Saturação máxima por bases (%)",
+      "crossCheck_textureClosureTolerancePct": "Tolerância do fechamento da textura (%)",
+      "crossCheck_cnMin": "Relação C:N mínima",
+      "crossCheck_cnMax": "Relação C:N máxima",
+      "crossCheck_carbonatePhMin": "pH mínimo em água para carbonatos"
     },
     "title": "Políticas",
     "yes": "Sim",

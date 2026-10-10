@@ -54,6 +54,51 @@ describe('Audit 1.0: persistent lab policies', () => {
         expect(await policy.get(labId, 'qc.duplicateMaxRpd', { profile, analysisCode })).toBe(13);
         expect(await policy.get(labId, 'qc.duplicateMaxRpd', { profile })).toBe(12);
     });
+    test('cross-check thresholds persist for one lab, while an earlier policy snapshot stays frozen', async () => {
+        const foreign = id('CROSS-CHECK-FOREIGN');
+        await prisma.lab.create({ data: { id: foreign, code: foreign, name: 'Other laboratory', country: 'GTM' } });
+        const old = await policy.snapshot(labId);
+        const values = { 'crossCheck.basesCecFactor': 1.2, 'crossCheck.baseSaturationMaxPct': 105,
+            'crossCheck.textureClosureTolerancePct': 3, 'crossCheck.cnMin': 9,
+            'crossCheck.cnMax': 24, 'crossCheck.carbonatePhMin': 7.2 };
+        const changed = await edit(Object.entries(values).map(([key, value]) => ({ key, value })), { expectedVersion: 0 });
+        expect(changed.version).toBe(1);
+        expect(await prisma.labPolicyOverride.count({ where: { labId, revokedAt: null } })).toBe(6);
+        for (const [key, value] of Object.entries(values)) {
+            expect(await policy.get(labId, key)).toBe(value);
+            expect(await policy.get(foreign, key)).toBe(registry[key].presets.ISO17025_STRICT);
+            expect(await policy.get(labId, key, { snapshot: old })).toBe(registry[key].presets.ISO17025_STRICT);
+            expect(registry[key].scope).toBe('LAB');
+            for (const preset of ['ISO17025_STRICT', 'BASIC', 'ADVISORY']) {
+                expect(registry[key].presets[preset]).toBe(registry[key].presets.ISO17025_STRICT);
+            }
+        }
+        expect(await prisma.labPolicy.count({ where: { labId: foreign } })).toBe(0);
+        expect(await prisma.auditLog.count({ where: { labId: foreign } })).toBe(0);
+    });
+    test.each([
+        [{ key: 'crossCheck.basesCecFactor', value: 0.99 }],
+        [{ key: 'crossCheck.cnMin', value: 25 }],
+        [{ key: 'crossCheck.cnMax', value: 8 }],
+        [{ key: 'crossCheck.cnMin', value: 26 }, { key: 'crossCheck.cnMax', value: 25 }]
+    ])('invalid cross-check bounds refuse the whole policy change with no writes: %j', async (...changes) => {
+        await expect(edit(changes)).rejects.toMatchObject({ statusCode: 400, code: 'POLICY_VALUE_INVALID' });
+        expect(await prisma.labPolicy.count({ where: { labId } })).toBe(0);
+        expect(await prisma.labPolicyOverride.count({ where: { labId } })).toBe(0);
+        expect(await prisma.auditLog.count({ where: { labId } })).toBe(0);
+    });
+    test('cross-check keys refuse analysis/method overrides and invalid profile C:N pairs', async () => {
+        for (const key of Object.keys(registry).filter(key => key.startsWith('crossCheck.'))) {
+            for (const scope of [{ analysisCode }, { analysisCode, methodologyId }]) {
+                await expect(edit([{ key, value: registry[key].presets.ISO17025_STRICT, ...scope }]))
+                    .rejects.toMatchObject({ statusCode: 422, code: 'POLICY_SCOPE_INVALID' });
+            }
+        }
+        expect(() => policy.loadProfile({ profile: { overrides: { 'crossCheck.cnMin': 25, 'crossCheck.cnMax': 25 } } }))
+            .toThrow(expect.objectContaining({ statusCode: 409, code: 'POLICY_PROFILE_INVALID' }));
+        expect(await prisma.labPolicy.count({ where: { labId } })).toBe(0);
+        expect(await prisma.auditLog.count({ where: { labId } })).toBe(0);
+    });
     test('first override preserves profile inheritance, explicit preset wins, reset restores inheritance and preserves overrides', async () => {
         const options = { profile: { preset: 'BASIC', overrides: { 'bench.idleLockMinutes': 27 } } };
         const first = await policy.change(actor, labId, { changes: [{ key: 'qc.duplicateMaxRpd', value: 17 }], reason: 'First override' }, options);

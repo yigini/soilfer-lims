@@ -2576,7 +2576,13 @@
       "pt_zScoreLimits": "Limites du score z des essais d’aptitude",
       "qc_reviewedTranscriptionCorrectionEnabled": "Autoriser la correction révisée des erreurs de transcription du CQ échoué sans décision",
       "report_uncertaintyMode": "Rapporter l’incertitude élargie",
-      "report_uncertaintyCoverageFactor": "Facteur de couverture de l’incertitude"
+      "report_uncertaintyCoverageFactor": "Facteur de couverture de l’incertitude",
+      "crossCheck_basesCecFactor": "Facteur maximal des bases échangeables / CEC",
+      "crossCheck_baseSaturationMaxPct": "Saturation maximale en bases (%)",
+      "crossCheck_textureClosureTolerancePct": "Tolérance de fermeture de la texture (%)",
+      "crossCheck_cnMin": "Rapport C:N minimal",
+      "crossCheck_cnMax": "Rapport C:N maximal",
+      "crossCheck_carbonatePhMin": "pH minimal dans l’eau pour les carbonates"
     },
     "title": "Politiques",
     "yes": "Oui",

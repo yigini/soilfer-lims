@@ -133,6 +133,9 @@ function validatePairs(values, status = 400, code = 'POLICY_VALUE_INVALID') {
     if (values['qc.controlMinRecovery'] > values['qc.controlMaxRecovery'] || values['qc.ccvMin'] > values['qc.ccvMax'] || values['results.phMin'] > values['results.phMax']) {
         throw error(status, code, 'A policy lower bound cannot exceed its upper bound.');
     }
+    if (values['crossCheck.cnMin'] >= values['crossCheck.cnMax']) {
+        throw error(status, code, 'The C:N lower bound must be less than its upper bound.');
+    }
 }
 async function assertScope(actor, lab, edit = false, db = require('../prisma')) {
     if (!lab) throw error(404, 'LAB_NOT_FOUND', 'Laboratory not found.');
