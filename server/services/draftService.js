@@ -109,6 +109,9 @@ async function saveDraft(user, input, db = null) {
                 instrumentId: instrumentId !== undefined ? instrumentId : existingDraft.instrumentId,
                 methodologyId: methodologyId !== undefined ? methodologyId : existingDraft.methodologyId,
                 notes: notes !== undefined ? notes : existingDraft.notes,
+                // #202 B16: the latest saver owns the draft, so a bench
+                // handover keeps one draft instead of hiding it.
+                userId: user.username,
                 baseVersion: Number(baseVersion) || existingDraft.baseVersion,
                 draftVersion: { increment: 1 },
                 conflictValue: conflictValue || existingDraft.conflictValue,
@@ -227,7 +230,8 @@ async function getDrafts(user) {
     }
 
     const drafts = await prisma.workItemDraft.findMany({
-        where: { userId: user.username },
+        // #202 B16: the analyst now assigned also sees a colleague's draft.
+        where: { OR: [{ userId: user.username }, { workItem: { assignedTo: user.username } }] },
         include: {
             workItem: {
                 include: { sample: true }
@@ -265,7 +269,7 @@ async function discardDraft(user, workItemId, db = null) {
     }
 
     // Verify ownership
-    if (draft.userId !== user.username && !['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+    if (draft.userId !== user.username && draft.workItem?.assignedTo !== user.username && !['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
         throw new Error('Access denied: You cannot discard another user’s draft');
     }
 

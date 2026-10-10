@@ -265,6 +265,7 @@ test('the authenticated workspace returns linked and unlinked attempt metadata w
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({dbPath:file,apply:true});
     require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:file,apply:true});
     require('../../scripts/install_report_revisions').installReportRevisions({dbPath:file,apply:true});
+    require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:file,apply:true});
     await insert('linked',{attemptNo:2,evidenceData:'{"private":"linked"}'});
     result('linked-result',{attemptId:'linked'});result('imported',{param:'NO_WORK',provenance:'IMPORTED'});
     const {createAuthTokenFixture}=require('../helpers/workflowFixtures');

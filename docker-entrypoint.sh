@@ -185,6 +185,8 @@ echo "📦 Installing immutable amendment requests, attempt links and report wit
 node scripts/install_sample_amendment_authorisation.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 echo "📦 Installing immutable report revision evidence..."
 node scripts/install_report_revisions.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing bench credential storage..."
+node scripts/install_bench_credentials.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."

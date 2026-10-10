@@ -3521,5 +3521,36 @@
     "publicSuperseded": "This report has been superseded by an amended report. Ask the laboratory for the current report.",
     "publicReplacedBy": "Replaced by report {number}.",
     "revisionRequiresAmendment": "An amended report needs an approved amendment. Request and authorise one first."
+  },
+  "session": {
+    "expiredTitle": "Session expired",
+    "expiredBody": "Enter your password to continue as {name}. Your unsaved work is kept.",
+    "password": "Password",
+    "continue": "Continue",
+    "signOut": "Sign out",
+    "reloginFailed": "That password did not work. Try again or sign out."
+  },
+  "bench": {
+    "analyst": "Analyst: {name}",
+    "switchAnalyst": "Switch analyst",
+    "enable": "Turn on bench mode",
+    "disable": "Turn off bench mode",
+    "locked": "Enter your PIN to unlock",
+    "lockedFor": "Locked for {name}",
+    "confirmRecord": "Enter your PIN to record",
+    "unlock": "Unlock",
+    "pin": "PIN",
+    "password": "Password",
+    "setPinHelp": "Set a 4 to 8 digit bench PIN. Confirm with your password.",
+    "unsentKept": "{count} change(s) are not sent yet, so they stay on this device. Reconnect and try again.",
+    "errors": {
+      "generic": "Could not check the PIN.",
+      "BENCH_PIN_INVALID": "The PIN is not correct.",
+      "BENCH_PIN_LOCKED": "Too many wrong PINs. Try again in a few minutes.",
+      "BENCH_PIN_NOT_SET": "Set a bench PIN first.",
+      "BENCH_PIN_FORMAT_INVALID": "The PIN must be 4 to 8 digits.",
+      "BENCH_PIN_PASSWORD_INVALID": "Your password is not correct."
+    },
+    "draftBy": "by {name}"
   }
 }

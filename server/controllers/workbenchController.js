@@ -410,6 +410,7 @@ exports.getQueue = async (req, res) => {
                 baseVersion: d.baseVersion,
                 draftVersion: d.draftVersion,
                 conflictValue: d.conflictValue,
+                savedBy: d.userId,
                 updatedAt: d.updatedAt
             };
         });

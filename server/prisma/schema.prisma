@@ -45,6 +45,19 @@ model User {
   requestedOverrides ResultOverrideRequest[] @relation("OverrideRequester")
   decidedOverrides ResultOverrideRequest[] @relation("OverrideDecider")
   cancelledOverrides ResultOverrideRequest[] @relation("OverrideCanceller")
+  benchCredential    UserBenchCredential?
+}
+
+// #202: the analyst's bench PIN, kept apart from User so no user read returns it.
+model UserBenchCredential {
+  userId         String    @id
+  pinHash        String
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Message {

@@ -3521,5 +3521,36 @@
     "publicSuperseded": "Ce rapport a été remplacé par un rapport amendé. Demandez le rapport en vigueur au laboratoire.",
     "publicReplacedBy": "Remplacé par le rapport {number}.",
     "revisionRequiresAmendment": "Un rapport amendé nécessite un amendement approuvé. Demandez-le et autorisez-le d’abord."
+  },
+  "session": {
+    "expiredTitle": "Session expirée",
+    "expiredBody": "Saisissez votre mot de passe pour continuer en tant que {name}. Votre travail non enregistré est conservé.",
+    "password": "Mot de passe",
+    "continue": "Continuer",
+    "signOut": "Se déconnecter",
+    "reloginFailed": "Ce mot de passe ne fonctionne pas. Réessayez ou déconnectez-vous."
+  },
+  "bench": {
+    "analyst": "Analyste : {name}",
+    "switchAnalyst": "Changer d’analyste",
+    "enable": "Activer le mode paillasse",
+    "disable": "Désactiver le mode paillasse",
+    "locked": "Saisissez votre PIN pour déverrouiller",
+    "lockedFor": "Verrouillé pour {name}",
+    "confirmRecord": "Saisissez votre PIN pour enregistrer",
+    "unlock": "Déverrouiller",
+    "pin": "PIN",
+    "password": "Mot de passe",
+    "setPinHelp": "Définissez un PIN de paillasse de 4 à 8 chiffres. Confirmez avec votre mot de passe.",
+    "unsentKept": "{count} modification(s) ne sont pas encore envoyées et restent sur cet appareil. Reconnectez-vous et réessayez.",
+    "errors": {
+      "generic": "Impossible de vérifier le PIN.",
+      "BENCH_PIN_INVALID": "Le PIN est incorrect.",
+      "BENCH_PIN_LOCKED": "Trop de PIN erronés. Réessayez dans quelques minutes.",
+      "BENCH_PIN_NOT_SET": "Définissez d’abord un PIN de paillasse.",
+      "BENCH_PIN_FORMAT_INVALID": "Le PIN doit comporter de 4 à 8 chiffres.",
+      "BENCH_PIN_PASSWORD_INVALID": "Votre mot de passe est incorrect."
+    },
+    "draftBy": "par {name}"
   }
 }

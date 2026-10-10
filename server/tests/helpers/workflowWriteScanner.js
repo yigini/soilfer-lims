@@ -47,6 +47,11 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         loaderSha256:'7f6ca34a5c0e7ade0d1f1f032f1e6340e44cbb16298e376ff3a377ccda8e78dd',
         directory:'20261010000200_report_revision_amendment',sqlSha256:'3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52',
         boundary:'-- Contract guards'}),
+    // #202: inspect the exact additive bench credential table; no writer exception.
+    Object.freeze({functionName:'loadBenchCredentialMigrationSource',loader:'services/benchCredentialMigrationSource.js',
+        loaderSha256:'41e67eb28895cc0fdd3a9f41b5ff4e651dd36bbaded46d59179e2673938b0422',
+        directory:'20261010000300_bench_credentials',sqlSha256:'954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b',
+        wholeSql:true}),
     // Inspect both exact #197 assets. Existing writer restrictions are unchanged.
     Object.freeze({functionName:'loadResultOverrideMigrationSource',loader:'services/resultOverrideMigrationSource.js',
         loaderSha256:'f59d8614213b1949216d172fd32589da7f1c733c2a63ae2b23a18f41f8365026',
