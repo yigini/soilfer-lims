@@ -403,6 +403,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_calculation_templates.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_cross_check_evaluations.js',
                 `node "${path.join(serverDir, 'scripts/install_cross_check_evaluations.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_sample_amendment_authorisation.js',
+                `node "${path.join(serverDir, 'scripts/install_sample_amendment_authorisation.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_raw_input.js',
                 `node "${path.join(serverDir, 'scripts/install_result_raw_input.js').replace(/\\/g, '/')}"`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');

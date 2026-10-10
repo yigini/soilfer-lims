@@ -31,6 +31,7 @@ async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS',
     if (installOverrideRequests) require('../../scripts/install_result_override_requests').installResultOverrideRequests({ dbPath: file, apply: true });
     installCalculationReleasePrerequisites(file);
     if (installSelectionEvidence) require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({ dbPath: file, apply: true });
+    require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:file,apply:true});
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     const actor = { username, role: 'SUPER_ADMIN', labId };
     await db.unit.create({ data: { code: 'fixture-unit', display: 'Fixture unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });
