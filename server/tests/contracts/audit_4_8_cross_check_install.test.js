@@ -1,5 +1,6 @@
 const fs = require('node:fs'), path = require('node:path'), { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
+const { spawnSync } = require('node:child_process');
 const { PrismaClient } = require('../../prisma_client');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { createPre201CrossCheckFixture } = require('../helpers/crossCheckHistoricalFixture');
@@ -73,6 +74,20 @@ test('PRE_201 upgrades additively with every original analytical/QC/audit field,
     const installedHash = hash(f.file);
     expect(install({ dbPath: f.file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0, backfilledCount: 0 });
     expect(hash(f.file)).toBe(installedHash); expect(state(f.file)).toEqual(after);
+});
+test('real direct startup refuses missing cross-check installation before app startup and preserves the owned file', async () => {
+    const f = await fixture();
+    require('../../scripts/bootstrap_pt_nonconformity').bootstrapPtNonconformity({ dbPath: f.file, apply: true });
+    const before = state(f.file), bytes = hash(f.file);
+    const child = spawnSync(process.execPath, [path.join(root, 'index.js')], { cwd: root,
+        env: { ...process.env, NODE_ENV: 'test', DATABASE_PATH: f.file, DATABASE_URL: 'file:' + f.file, PORT: '0' },
+        encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
+    expect(child.error).toBeUndefined(); expect(child.status).toBe(1);
+    expect(child.stdout).toContain('RESULT_OVERRIDE_STARTUP_READY');
+    expect(child.stdout).not.toContain('CROSS_CHECK_STARTUP_READY');
+    expect(child.stderr).toContain('CROSS_CHECK_NOT_INSTALLED');
+    expect(child.stderr).toContain('docs/audit/201-cross-parameter-checks.md');
+    expect(state(f.file)).toEqual(before); expect(hash(f.file)).toBe(bytes);
 });
 test('the exact fresh Prisma table is classified separately and receives only guards/receipt with0 backfill', async () => {
     const f = await fixture(), db = new Database(f.file);

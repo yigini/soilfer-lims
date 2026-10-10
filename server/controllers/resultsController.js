@@ -193,7 +193,8 @@ exports.saveResults = async (req, res) => {
                 where: { sampleId, isCurrent: true }
             });
             const matrixDiagnostics = validationController.validateSampleMatrix(allActiveResults);
-            return { validatedMeasurements, matrixDiagnostics,derivation };
+            const crossChecks = await require('../services/crossCheckEvaluationService').currentObservationCrossChecks(tx, sampleId, user);
+            return { validatedMeasurements, matrixDiagnostics, crossChecks,derivation };
         });
 
         // Return validation feedback
@@ -201,6 +202,7 @@ exports.saveResults = async (req, res) => {
             success: true,
             validation: outcome.validatedMeasurements.map(m => ({ param: m.param, flags: m.validation.flags })),
             matrixDiagnostics: outcome.matrixDiagnostics,
+            crossChecks: outcome.crossChecks,
             ...(outcome.derivation && {derivation:outcome.derivation})
         });
 
@@ -270,7 +272,7 @@ exports.submitForApproval = async (req, res) => {
             return { ...committed, matrixDiagnostics };
         });
         res.json({ success: true, status: 'SUBMITTED_FULL', sample: outcome.sample, submission: outcome.submission,
-            matrixDiagnostics: outcome.matrixDiagnostics });
+            matrixDiagnostics: outcome.matrixDiagnostics, crossChecks: outcome.crossCheckEvaluations });
     } catch (error) {
         console.error('[submitForApproval] Error:', error);
         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,

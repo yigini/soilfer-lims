@@ -87,6 +87,8 @@ COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /a
 COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql
 COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql
 COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json
+COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql
+COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json
 
 # Copy and set entrypoint
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh

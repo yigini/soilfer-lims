@@ -36,6 +36,26 @@ function decode(row) {
     catch { throw new rules.TransitionError('Stored cross-check evidence cannot be read.', 409, 'CROSS_CHECK_EVIDENCE_INVALID'); }
 }
 
+// A result-save response is a read-only preview, separate from both the legacy
+// diagnostics and the immutable rows appended only when submission commits.
+async function currentObservationCrossChecks(tx, sampleId, actor) {
+    rules.requireTransaction(tx);
+    const sample = await scopedSample(tx, sampleId, actor, 'ENTER_RESULTS');
+    const snapshot = await labSnapshot(tx, sample);
+    const observations = await tx.result.findMany({ where: { sampleId, isCurrent: true }, orderBy: { id: 'asc' } });
+    const evaluations = evaluateCrossParameters(observations, snapshot);
+    try {
+        JSON.stringify(evaluations, (_, value) => {
+            if (typeof value === 'number' && !Number.isFinite(value)) throw Error('Non-finite stored evidence');
+            return value;
+        });
+    } catch (cause) {
+        throw Object.assign(new rules.TransitionError('Current cross-check evidence cannot be represented.',
+            409, 'CROSS_CHECK_EVIDENCE_INVALID'), { cause });
+    }
+    return evaluations;
+}
+
 // #201 pin6092380877: the caller's submission transaction owns both the
 // workflow change and these immutable rows. Never accept caller-supplied values.
 async function recordSubmissionCrossChecks(tx, sampleId, actor) {
@@ -90,4 +110,4 @@ async function reviewCrossChecks(db, sampleId, actor) {
                 isBlocking: gate.isBlocking, blockingErrors: gate.blockingErrors } };
     });
 }
-module.exports = { recordSubmissionCrossChecks, reviewCrossChecks };
+module.exports = { recordSubmissionCrossChecks, reviewCrossChecks, currentObservationCrossChecks };

@@ -10,7 +10,50 @@ const { transitionWorkItem } = require('../../services/workItemStateService');
 const { replaceReportedSelection } = require('../../services/reportedValueSelectionService');
 const owned = [];
 afterEach(async () => { for (const f of owned.splice(0)) await f.close(); });
-async function fixture({ differentText = false } = {}) {
+
+async function cnFixture(basis) {
+    const f = await fixture({ curated: true });
+    const unit = require('../../seeds/units').UNITS.find(row => row.code === 'g/kg');
+    if (!await f.db.unit.findUnique({ where: { code: unit.code } })) await f.db.unit.create({ data: unit });
+    for (const [param, numericValue] of [['SOC', 90], ['TN', 2]]) {
+        await f.db.analysis.create({ data: { code: param, name: 'Owned ' + param + ' cross-check determination', units: unit.code, unitCode: unit.code } });
+        const method = await f.db.methodology.create({ data: { analysisCode: param, name: 'Owned C:N method', loq: 0 } });
+        await require('../../services/qcRuleService').change(f.actor, { labId: f.labId, analysisCode: param,
+            methodologyId: method.id, expectedVersion: 0, reason: 'Owned C:N evidence contract',
+            criteria: { blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0, ccvEvery: 0 } }, { db: f.db });
+        const item = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: f.sampleId,
+            assignedLab: f.labId, analysis: param, methodologyId: method.id, status: 'IN_PROGRESS' } });
+        f.items.push(item);
+        f.rows.push(await createExecutionResultFixture(f.db, { data: { id: randomUUID(), sampleId: f.sampleId,
+            param, methodologyId: method.id, numericValue, value: String(numericValue), unit: unit.code, basis, censoring: 'NONE', isCurrent: true } }));
+        await transitionWorkItem(item.id, 'COMPLETED', f.actor, 'Owned C:N determination complete', {}, f.db);
+    }
+    return f;
+}
+test.each([null, 'AIR_DRY'])('current stored-numeric preview keeps legacy diagnostics separate for basis %s and writes no evidence', async basis => {
+    const f = await cnFixture(basis), before = await f.snapshotAll();
+    const checks = await f.db.$transaction(tx => require('../../services/crossCheckEvaluationService').currentObservationCrossChecks(tx, f.sampleId, f.actor));
+    const cn = checks.find(row => row.ruleCode === 'CN_RATIO');
+    expect(cn).toMatchObject(basis === null ? { outcome: 'NOT_EVALUATED', reasonCode: 'BASIS_MISMATCH', flagCode: null }
+        : { outcome: 'FLAGGED', reasonCode: null, flagCode: 'CROSS_CHECK_CN_OUT_OF_RANGE' });
+    expect(cn.inputs.values.map(row => row.value)).toEqual([90, 2]);
+    expect(await f.snapshotAll()).toBe(before);
+});
+test.each([null, 'AIR_DRY'])('the actual submission response retains legacy diagnostics and separate immutable crossChecks for basis %s', async basis => {
+    const f = await cnFixture(basis), observations = await f.db.result.findMany({ where: { sampleId: f.sampleId, isCurrent: true } });
+    const legacy = require('../../controllers/validationController').validateSampleMatrix(observations);
+    await require('../helpers/qcRunHttpHarness').withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const response = await require('supertest')(app).post(`/api/results/${f.sampleId}/submit`).set('Authorization', 'Bearer ' + token);
+        if (response.status !== 200) throw Error('Owned submission refusal: ' + JSON.stringify(response.body));
+        expect(response.status).toBe(200); expect(response.body.matrixDiagnostics).toEqual(legacy);
+        const cn = response.body.crossChecks.find(row => row.ruleCode === 'CN_RATIO');
+        expect(cn).toMatchObject(basis === null ? { outcome: 'NOT_EVALUATED', reasonCode: 'BASIS_MISMATCH' }
+            : { outcome: 'FLAGGED', reasonCode: null, flagCode: 'CROSS_CHECK_CN_OUT_OF_RANGE' });
+        expect(await f.db.crossCheckEvaluation.findUnique({ where: { id: cn.id } })).toMatchObject({ ruleCode: 'CN_RATIO', outcome: cn.outcome, reasonCode: cn.reasonCode });
+        expect(await f.db.result.findMany({ where: { sampleId: f.sampleId, isCurrent: true } })).toEqual(observations);
+    }, { repeatCommands: true });
+});
+async function fixture({ differentText = false, curated = false } = {}) {
     const criteria = { blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0, ccvEvery: 0 };
     const f = await qcGateFixture({ criteria }); owned.push(f);
     require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({ dbPath: f.file, apply: true });
@@ -18,7 +61,7 @@ async function fixture({ differentText = false } = {}) {
     const unit = require('../../seeds/units').UNITS.find(row => row.code === 'cmol(+)/kg');
     await f.db.unit.create({ data: unit });
     for (const [param, value] of [['EXCH_CA', 8], ['EXCH_MG', 3], ['EXCH_K', 1], ['EXCH_NA', 1], ['CEC', 10]]) {
-        await f.db.analysis.create({ data: { code: param, name: param, units: unit.code, unitCode: unit.code } });
+        await f.db.analysis.create({ data: { code: param, name: curated ? 'Owned ' + param + ' cross-check determination' : param, units: unit.code, unitCode: unit.code } });
         const method = await f.db.methodology.create({ data: { analysisCode: param, name: 'Owned cross-check method', loq: 0 } });
         await require('../../services/qcRuleService').change(f.actor, { labId: f.labId, analysisCode: param,
             methodologyId: method.id, criteria, expectedVersion: 0, reason: 'Owned non-QC cross-check test' }, { db: f.db });
