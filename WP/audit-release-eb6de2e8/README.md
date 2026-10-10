@@ -52,7 +52,13 @@ CLI steps, with the new repeat immediately before #191. All 21 existing
 installer repeats, 66 bounded CLI measurements and 20 original startup READY
 events are required. The final manifest/gate bind the exact acceptance plan,
 YY choice transcription and only the pinned one-status/one-event delta.
-Expanded helper guards and NEW fresh-copy Docker proof remain pending.
+The expanded 29 Linux helper guards passed at frozen source b0633b6f in
+0.253 seconds. All 21 PR gates are green; main CI is pending in the separately
+retained `pr-gates-feac6534-pending.json` snapshot. The first preparation export
+included an old committed build receipt and was refused before build/copy.
+See `289-preparation-packaging-refusal.md`. Packaging is corrected and has one
+additional guard pending; a NEW directory/proof is required. No PASSED complete
+fresh-copy proof or final manifest exists yet.
 
 Claudio requested this kit on #162, comment 6099151121. Pip owns preparation;
 Claudio owns review and post-deployment checks. YY selected "Main now" and

@@ -16,6 +16,11 @@ for (const row of rows) {
   if (!['100644','100755'].includes(mode) || type !== 'blob' || path.basename(relative) !== relative) {
     throw Error('Unsupported kit source: ' + name);
   }
+  // Historical proofs remain in Git for reference. A fresh execution directory
+  // contains only sources and the original authorization transcriptions;
+  // copying an old receipt would falsely make it look like a replay.
+  if (!relative.endsWith('.py') && !relative.endsWith('.cjs')
+      && !['yy-authorization-evidence.md','yy-191-review-choice-evidence.md'].includes(relative)) continue;
   const bytes = cp.execFileSync('git',['cat-file','blob',blob]);
   fs.writeFileSync(path.join(target,relative),bytes,{flag:'wx'});
   files.push({name:relative,bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')});

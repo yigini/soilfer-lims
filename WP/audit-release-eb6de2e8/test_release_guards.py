@@ -137,6 +137,31 @@ class AcceptancePreservationGuards(unittest.TestCase):
                 elif fault=='receipt': changed['keyed']['_schema_migrations']['original-receipt']['details']='changed-receipt'
                 with self.subTest(fault=fault),self.assertRaises(AssertionError): s.preserve(before,changed,acceptance=stage)
 
+class FreshKitPackagingGuards(unittest.TestCase):
+    def test_raw_export_never_copies_historical_execution_receipts(self):
+        with tempfile.TemporaryDirectory(prefix='lims-kit-packaging-') as owned:
+            root=pathlib.Path(owned); repository=root/'repo'; repository.mkdir()
+            prefix=repository/'WP'/'audit-release-eb6de2e8'; prefix.mkdir(parents=True)
+            source={'release_support.py':b'committed source\n','collect-gates.cjs':b'committed gate\n',
+                'yy-authorization-evidence.md':b'original authorization\n',
+                'yy-191-review-choice-evidence.md':b'original choice\n'}
+            retained={'build-receipt.json':b'old retained build', 'rehearsal-receipt.json':b'old failed proof',
+                'production-gate.json':b'old execution gate','prepared-manifest.json':b'old manifest'}
+            for name,data in {**source,**retained}.items(): (prefix/name).write_bytes(data)
+            def git(*args):
+                return subprocess.check_output(['git','-c','init.templateDir=',*args],cwd=repository,text=True).strip()
+            git('init','-q'); git('add','WP')
+            git('-c','user.name=Owned test','-c','user.email=owned-test@example.invalid','commit','-qm','owned fixture')
+            head=git('rev-parse','HEAD'); destination=root/'fresh-kit'
+            exporter=pathlib.Path(__file__).with_name('export-kit.cjs').resolve()
+            subprocess.run(['node',str(exporter),head,str(destination)],cwd=repository,check=True,capture_output=True,text=True)
+            self.assertEqual({file.name for file in destination.iterdir()},set(source)|{'kit-source-index.json'})
+            index=json.loads((destination/'kit-source-index.json').read_text())
+            self.assertEqual(index['head'],head)
+            self.assertEqual({row['name'] for row in index['files']},set(source))
+            for name,data in source.items(): self.assertEqual((destination/name).read_bytes(),data)
+            for name,data in retained.items(): self.assertEqual((prefix/name).read_bytes(),data)
+
 class DiskAndPlanGuards(unittest.TestCase):
     def test_floor_scaled_reserve_and_negative_sizes(self):
         self.assertEqual(s.disk_reserve(563322880, 413513955, 2000000), 8589934592)
