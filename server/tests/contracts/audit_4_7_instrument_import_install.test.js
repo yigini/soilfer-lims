@@ -4,7 +4,7 @@ const { createPre200After210SchemaFixture } = require('../helpers/instrumentImpo
 const { loadInstrumentImportMigrationSource } = require('../../services/instrumentImportMigrationSource');
 const { scanSource } = require('../helpers/workflowWriteScanner');
 const { classifyInstrumentImportSchema, MARKER } = require('../../services/instrumentImportSchemaService');
-const { parseArguments, assertInstrumentImportStartupReady } = require('../../scripts/install_instrument_imports');
+const { parseArguments, assertInstrumentImportStartupReady, installInstrumentImports } = require('../../scripts/install_instrument_imports');
 let db;
 const source = loadInstrumentImportMigrationSource();
 const template = { id: 'mapping-v1', labId: 'import-lab', instrumentId: 'import-instrument', name: 'Owned ICP mapping', version: 1,
@@ -131,4 +131,59 @@ test('the additional current-main schema-only factory is closed and digest-bound
         expect(current.prepare('SELECT count(*) n FROM Result').get().n).toBe(0);
         expect(current.prepare('SELECT count(*) n FROM AuditLog').get().n).toBe(0);
     } finally { current.close(); }
+});
+
+test('a populated predecessor retains every analytical, QC, audit and raw draft row across dry-run, apply and repeated apply', async () => {
+    const Database = require('better-sqlite3'), { createHash } = require('node:crypto');
+    const { qcGateFixture } = require('../helpers/qcGateFixture');
+    const { buildNativeRun, startNativeRun } = require('../../services/qcNativeRunService');
+    const { writeNativeMeasurements } = require('../../services/qcNativeMeasurementService');
+    const f = await qcGateFixture({ count: 2, installInstrumentImports: false,
+        criteria: { blankPerBatch: 1, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0, ccvEvery: 0 } });
+    const hash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+    const read = operation => { const raw = new Database(f.file, { fileMustExist: true }); try { return operation(raw); } finally { raw.close(); } };
+    const quote = name => '"' + name.replaceAll('"', '""') + '"';
+    try {
+        const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, f.input)).id, f.actor);
+        await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: f.analysisCode,
+            measurements: [{ positionId: run.positions.find(row => row.kind === 'BLANK').id, value: ' 0.0000 ' }] });
+        await f.result(f.items[1]);
+        // Historical draft data is inserted only into this owned pre-200
+        // fixture: the 94-model client cannot address its absent new column.
+        // Sample, WorkItem, Result, QC and audit data use their existing owners.
+        const rawValue = ' 0007.1000 ', rawValues = '{"note":"  é\\n土  "}';
+        read(raw => raw.prepare('INSERT INTO WorkItemDraft(workItemId,userId,value,replicateNo,values,instrumentId,updatedAt) VALUES(?,?,?,?,?,?,?)')
+            .run(f.items[0].id, f.actor.username, rawValue, 1, rawValues, f.instrument.id, '2026-10-10T00:00:00.000Z'));
+        await f.db.$disconnect();
+        const beforeBackup = f.file.replace(/\.db$/, '-pre200-preservation-before.db'), afterBackup = f.file.replace(/\.db$/, '-pre200-preservation-after.db');
+        expect(fs.existsSync(beforeBackup)).toBe(false); expect(fs.existsSync(afterBackup)).toBe(false);
+        fs.copyFileSync(f.file, beforeBackup, fs.constants.COPYFILE_EXCL); const beforeHash = hash(f.file);
+        const original = read(raw => raw.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(({ name }) => ({
+            name, columns: raw.prepare('PRAGMA table_xinfo(' + quote(name) + ')').all().map(column => column.name),
+            rows: raw.prepare('SELECT * FROM ' + quote(name) + ' ORDER BY rowid').all()
+        })));
+        const counts = Object.fromEntries(original.map(table => [table.name, table.rows.length]));
+        expect(counts).toMatchObject({ Sample: 2, WorkItem: 2, Result: 1, WorkAttempt: 1, WorkItemDraft: 1, QcMeasurement: 1 });
+        expect(counts.AuditLog).toBeGreaterThan(0); expect(counts.QcEvaluation).toBeGreaterThan(0);
+        const dry = installInstrumentImports({ dbPath: f.file });
+        expect(dry).toMatchObject({ classification: 'PRE_200', mode: 'DRY_RUN', totalChanges: 0, backfilledCount: 0 });
+        expect(hash(f.file)).toBe(beforeHash);
+        const applied = installInstrumentImports({ dbPath: f.file, apply: true });
+        expect(applied).toMatchObject({ classification: 'COMPLETE_200', previousClassification: 'PRE_200', mode: 'APPLIED',
+            totalChanges: 1, newTemplateCount: 0, newReceiptCount: 0, backfilledCount: 0 });
+        for (const table of original) read(raw => {
+            const actual = raw.prepare('SELECT ' + table.columns.map(quote).join(',') + ' FROM ' + quote(table.name) +
+                (table.name === '_schema_migrations' ? ' WHERE id<>?' : '') + ' ORDER BY rowid');
+            expect(table.name === '_schema_migrations' ? actual.all(MARKER) : actual.all()).toEqual(table.rows);
+        });
+        read(raw => {
+            expect(raw.prepare('SELECT value,values,importReceiptId FROM WorkItemDraft').get()).toEqual({ value: rawValue, values: rawValues, importReceiptId: null });
+            expect(raw.pragma('integrity_check', { simple: true })).toBe('ok'); expect(raw.pragma('foreign_key_check')).toEqual([]);
+        });
+        fs.copyFileSync(f.file, afterBackup, fs.constants.COPYFILE_EXCL); const afterHash = hash(f.file);
+        expect(installInstrumentImports({ dbPath: f.file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0, backfilledCount: 0 });
+        expect(hash(f.file)).toBe(afterHash); expect(hash(beforeBackup)).toBe(beforeHash); expect(hash(afterBackup)).toBe(afterHash);
+        console.info('IMPORT_POPULATED_PRESERVATION', JSON.stringify({ originalTableCount: original.length, counts, beforeHash, afterHash,
+            totalChanges: applied.totalChanges, newTemplateCount: 0, newReceiptCount: 0, backfilledCount: 0 }));
+    } finally { await f.close(); }
 });
