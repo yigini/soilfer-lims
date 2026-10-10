@@ -72,3 +72,5 @@ server/services/sampleAmendmentMigrationSource.js text eol=lf
 server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json text eol=lf
 server/tests/helpers/fixtures/pre210_full_application_schema.sql -text
 server/tests/helpers/sampleAmendmentHistoricalFixture.js text eol=lf
+server/tests/helpers/fixtures/pre210_after201_full_application_schema.sql -text
+server/tests/helpers/sampleAmendmentMainHistoricalFixture.js text eol=lf
