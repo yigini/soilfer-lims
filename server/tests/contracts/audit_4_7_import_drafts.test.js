@@ -28,7 +28,7 @@ async function fixture() {
         value: ' 0007.1000 ', instrumentId: f.instrument.id, methodologyId: f.method.id, baseVersion: f.item.version };
     f.state = async () => JSON.parse(JSON.stringify(await Promise.all([
         f.snapshot(), f.db.workItemDraft.findMany(), f.db.instrumentImportReceipt.findMany(),
-        f.db.workAttempt.findMany(), f.db.workAttemptEvent.findMany(), f.db.qcMeasurement.findMany(), f.db.qcEvaluation.findMany()
+        f.db.workAttempt.findMany(), f.db.qcMeasurement.findMany(), f.db.qcEvaluation.findMany()
     ])));
     return f;
 }

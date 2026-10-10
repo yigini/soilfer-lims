@@ -179,3 +179,22 @@ per analysis. The validator accepts the input-only variable bindings and refuses
 mixed, incomplete, unknown-key and duplicate-analysis shapes with400
 IMPORT_TEMPLATE_MAPPING_INVALID. Optional explicit sheetName follows XLSX
 pin6095961328. Preview/commit binding and atomicity acceptance remain pending.
+
+The mapping/scoped HTTP/matching/unchanged scanner group passes three suites/
+141 tests, zero skipped (15.234 s), through normal global setup at a71ccb75.
+The protected owned template and working database remain unchanged.
+
+Pin6096218065 confirms400 DRAFT_FIELDS_INVALID for receipt fields in ordinary
+draft owner inputs and HTTP bodies, with unknown non-receipt fields still
+ignored. Both boundaries now check before any write. The server-only import
+option validates the persisted receipt against actor/lab/instrument/run/line,
+then uses the existing draft owner and its readiness checks. Existing drafts
+of all kinds refuse IMPORT_DRAFT_EXISTS, and current Results keep the existing
+RESULT_WORKITEM_SEALED refusal. Input-only QC rows are deferred to#213 and must
+refuse the whole import; no new calculated-QC shape is inferred in#200.
+
+The first new draft proof at9b5fd075 passed three existing suites and133 tests
+but failed11 new tests in their snapshot setup: WorkAttempt events are stored
+in AuditLog, not a separate WorkAttemptEvent model. The new snapshot now uses
+the actual AuditLog already included by the owned fixture. Assertions, owner
+guards and existing tests are unchanged; the original failed log is retained.
