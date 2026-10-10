@@ -107,6 +107,11 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     .text(`${labels.superseded} – ${labels.see} ${publication.replacementNumber || labels.notRecorded}`, startX, currentY, { width: pageWidth });
                 currentY = doc.y + 10;
             }
+            if (status === 'WITHDRAWN') {
+                doc.fillColor('#B91C1C').font('Helvetica-Bold').fontSize(10)
+                    .text(labels.withdrawnPendingAmendment.replace('{{amendmentId}}', publication.withdrawal.amendmentId), startX, currentY, { width: pageWidth });
+                currentY = doc.y + 10;
+            }
             if (reportContent.publication?.replacesReportNumber) {
                 doc.fillColor(cGray).font('Helvetica').fontSize(8)
                     .text(`${labels.replaces} ${reportContent.publication.replacesReportNumber}`, startX, currentY, { width: pageWidth });
@@ -444,6 +449,10 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 if (status === 'SUPERSEDED') {
                     doc.fillColor('#B91C1C').font('Helvetica-Bold').fontSize(8)
                         .text(`${labels.superseded} - ${labels.see} ${publication.replacementNumber || labels.notRecorded}`, startX, 787, { width: pageWidth, lineBreak: false });
+                }
+                if (status === 'WITHDRAWN') {
+                    doc.fillColor('#B91C1C').font('Helvetica-Bold').fontSize(8)
+                        .text(labels.withdrawnPendingAmendment.replace('{{amendmentId}}', publication.withdrawal.amendmentId), startX, 787, { width: pageWidth, lineBreak: false });
                 }
                 doc.rect(36, 805, pageWidth, 0.5).fill(cBorder);
 

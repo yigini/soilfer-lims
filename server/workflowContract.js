@@ -200,6 +200,13 @@ function isValidSampleTransition(fromState, toState) {
     return !!allowed && allowed.includes(normalizeSampleState(toState));
 }
 
+// #210: these closed edges additionally require the private authorisation
+// capability. They are never ordinary graph transitions.
+function isScientificAmendmentTransition(entity, fromState, toState) {
+    return entity === 'Sample' && fromState === 'APPROVED' && toState === 'PROCESSING' ||
+        entity === 'WorkItem' && fromState === 'ACCEPTED' && toState === 'REPEAT_REQUIRED';
+}
+
 function isValidWorkItemState(state) {
     return WORK_ITEM_STATE_LIST.includes(state);
 }
@@ -267,6 +274,7 @@ module.exports = {
     isValidSampleState,
     isLegacySampleState,
     isValidSampleTransition,
+    isScientificAmendmentTransition,
     isValidWorkItemState,
     isLegacyWorkItemState,
     isValidWorkItemTransition,

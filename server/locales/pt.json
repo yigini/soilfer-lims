@@ -105,7 +105,9 @@
     "analysisDates": "Datas de análise",
     "sampling": "Amostragem",
     "issuedAt": "Emitido em",
-    "approvalNotRecorded": "Aprovação: não registrada"
+    "approvalNotRecorded": "Aprovação: não registrada",
+    "filterWithdrawn": "Retirado",
+    "withdrawnPendingAmendment": "Retirado enquanto aguarda a alteração {{amendmentId}}"
   },
   "common": {
     "save": "Salvar",
@@ -1881,5 +1883,15 @@
     "unavailable": {
       "CROSS_CHECK_LAB_REQUIRED": "Verificações cruzadas indisponíveis: a amostra não tem um laboratório registrado"
     }
+  },
+  "amendment": {
+    "publicWithdrawn": "Este relatório está em processo de alteração e está temporariamente indisponível.",
+    "limitOverride": "Solicitar uma exceção ao limite de repetições",
+    "limitOverrideHelp": "Autorizar esta exceção cria uma não conformidade pelo limite de repetições para esta linha de trabalho.",
+    "limitDescription": "Motivo para exceder o limite de repetições",
+    "limitImpact": "Avaliação do impacto",
+    "pending": "Solicitação salva. É necessária autorização antes de aplicar alterações.",
+    "authorised": "Emenda autorizada. As reanálises científicas devem concluir a revisão e aprovação habituais antes da emissão de outro relatório.",
+    "failed": "Não foi possível salvar a emenda. Os seus dados foram preservados."
   }
 }

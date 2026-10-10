@@ -2274,7 +2274,9 @@
     "qcNotRequired": "CQ não obrigatório",
     "qcEvidenceIncomplete": "A aceitação histórica do CQ tem evidência registrada incompleta",
     "qcAcknowledgedBy": "Aceito por",
-    "qcCalibrationBracketRepeatInfo": "Um intervalo de calibração está sendo repetido; este resultado está fora do escopo afetado"
+    "qcCalibrationBracketRepeatInfo": "Um intervalo de calibração está sendo repetido; este resultado está fora do escopo afetado",
+    "filterWithdrawn": "Retirado",
+    "withdrawnPendingAmendment": "Retirado enquanto aguarda a alteração {{amendmentId}}"
   },
   "qaSection": {
     "kicker": "Garantia de qualidade e conformidade regulamentar",
@@ -3469,5 +3471,47 @@
     "unavailable": {
       "CROSS_CHECK_LAB_REQUIRED": "Verificações cruzadas indisponíveis: a amostra não tem um laboratório registrado"
     }
+  },
+  "amendment": {
+    "publicWithdrawn": "Este relatório está em processo de alteração e está temporariamente indisponível.",
+    "limitOverride": "Solicitar uma exceção ao limite de repetições",
+    "limitOverrideHelp": "Autorizar esta exceção cria uma não conformidade pelo limite de repetições para esta linha de trabalho.",
+    "limitDescription": "Motivo para exceder o limite de repetições",
+    "limitImpact": "Avaliação do impacto",
+    "title": "Emendas da amostra",
+    "help": "Solicite uma alteração e depois autorize-a conforme a política do laboratório. As emendas científicas reabrem o trabalho selecionado e retiram o relatório emitido, preservando o seu conteúdo.",
+    "permission": "É necessária permissão de aprovação.",
+    "secondPerson": "Outra pessoa autorizada deve autorizar esta solicitação.",
+    "selfAllowed": "A política deste laboratório permite que o solicitante autorize a sua própria solicitação.",
+    "type": "Tipo de emenda",
+    "types": {
+      "CLERICAL": "Correção administrativa",
+      "SCIENTIFIC": "Reanálise científica",
+      "ORDER": "Emenda do pedido",
+      "REPORT": "Emenda do relatório"
+    },
+    "repeatReason": "Motivo da reanálise",
+    "reasons": {
+      "CLIENT_RETEST": "Reanálise solicitada pelo cliente",
+      "CONFIRMATION": "Confirmação"
+    },
+    "selectedLines": "Linhas do pedido selecionadas",
+    "noLines": "Não há linhas de medição aceitas disponíveis.",
+    "reason": "Motivo da emenda",
+    "request": "Solicitar emenda",
+    "history": "Histórico de emendas",
+    "empty": "Não há solicitações de emenda.",
+    "requester": "Solicitada por",
+    "authoriser": "Autorizada por",
+    "authorise": "Autorizar solicitação",
+    "awaitOther": "Aguardando outra pessoa autorizada.",
+    "status": {
+      "PENDING": "Aguardando autorização",
+      "APPROVED": "Autorizada",
+      "REJECTED": "Rejeitada"
+    },
+    "pendingNotice": "Solicitação salva. É necessária autorização antes de aplicar alterações.",
+    "authorisedNotice": "Emenda autorizada. As reanálises científicas devem concluir a revisão e aprovação habituais antes da emissão de outro relatório.",
+    "failed": "Não foi possível salvar a emenda. Os seus dados foram preservados."
   }
 }

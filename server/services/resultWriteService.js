@@ -43,8 +43,14 @@ function mapResultWriteError(error) {
 }
 
 async function recordedExecution(db, item, param) {
-    if (await db.workAttempt.count({where:{workItemId:item.id,status:'OPEN'}}))return null;
     const attempts=await db.workAttempt.findMany({where:{workItemId:item.id}});
+    const open=attempts.filter(row=>row.status==='OPEN');
+    for(const child of open){
+        const parent=attempts.find(row=>row.id===child.parentAttemptId);
+        if(parent?.status==='ACCEPTED'&&!await require('./amendmentReopenWitness').readAmendmentReopenWitness(db,{item,parent,child}))
+            throw new TransitionError('Use the correction route or request a reasoned repeat.',409,'ATTEMPT_CORRECTION_REQUIRED');
+    }
+    if(open.length)return null;
     const results=await db.result.findMany({where:{sampleId:item.sampleId,param,isCurrent:true,supersededBy:null,
         attemptId:{in:attempts.map(row=>row.id)}}});
     if(!results.length)return null;
@@ -54,9 +60,12 @@ async function recordedExecution(db, item, param) {
         // Pin6070797814: a partially filled replacement may finish its
         // parent's replica set. Prove the exact parent/child relationship;
         // do not select a latest attempt or filter review/report candidates.
-        const replacements = attempts.filter(child => ids.has(child.id) && child.status === 'RECORDED' &&
-            child.parentAttemptId && ids.has(child.parentAttemptId) && attempts.some(parent =>
-                parent.id === child.parentAttemptId && ['QUESTIONED', 'INVALIDATED'].includes(parent.status)));
+        const replacements=[];
+        for(const child of attempts.filter(row=>ids.has(row.id)&&row.status==='RECORDED'&&row.parentAttemptId&&ids.has(row.parentAttemptId))){
+            const parent=attempts.find(row=>row.id===child.parentAttemptId);
+            if(parent&&(['QUESTIONED','INVALIDATED'].includes(parent.status)||parent.status==='ACCEPTED'&&
+                await require('./amendmentReopenWitness').readAmendmentReopenWitness(db,{item,parent,child})))replacements.push(child);
+        }
         if (replacements.length === 1) attempt = replacements[0];
     }
     if(!attempt || attempt.status!=='RECORDED' || ['SUBMITTED','ACCEPTED'].includes(item.status)) {
@@ -213,8 +222,12 @@ async function appendResult(tx, ctx, measurement, values, now) {
     const id = measurement.id || randomUUID();
     let targetId = ctx.correctionTargetId, targetUpdatedAt = ctx.correctionOriginalUpdatedAt;
     if (!targetId && ctx.attemptId) {
-        const child = await tx.workAttempt.findUnique({ where: { id: ctx.attemptId }, select: { parentAttemptId: true } });
+        const child = await tx.workAttempt.findUnique({ where: { id: ctx.attemptId } });
         if (child?.parentAttemptId) {
+            const parent=await tx.workAttempt.findUnique({where:{id:child.parentAttemptId}});
+            if(parent?.status==='ACCEPTED'&&!await require('./amendmentReopenWitness').readAmendmentReopenWitness(tx,
+                {item:ctx.item,parent,child,replicateNo:ctx.replicateNo}))
+                throw new TransitionError('Use the correction route or request a reasoned repeat.',409,'ATTEMPT_CORRECTION_REQUIRED');
             const current = await tx.result.findMany({ where: { sampleId: ctx.sample.id, param: measurement.param,
                 replicateNo: ctx.replicateNo, isCurrent: true } });
             if (current.length > 1 || current.some(row => row.attemptId !== child.parentAttemptId)) {

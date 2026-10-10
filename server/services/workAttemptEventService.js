@@ -55,6 +55,15 @@ async function submitRecordedAttempt(tx,item,actor) {
     rules.requireTransaction(tx);
     if(require('./workItemKinds').isNonMeasurement(item))return null;
     const parents=await tx.workAttempt.findMany({where:{workItemId:item.id,status:{in:['QUESTIONED','INVALIDATED']}},select:{id:true}});
+    const children=await tx.workAttempt.findMany({where:{workItemId:item.id,status:{in:['OPEN','RECORDED']},parentAttemptId:{not:null}}});
+    for(const child of children){
+        const parent=await tx.workAttempt.findUnique({where:{id:child.parentAttemptId}});
+        if(parent?.status==='ACCEPTED'){
+            if(!await require('./amendmentReopenWitness').readAmendmentReopenWitness(tx,{item,parent,child}))
+                throw new rules.TransitionError('Use the correction route or request a reasoned repeat.',409,'ATTEMPT_CORRECTION_REQUIRED');
+            parents.push({id:parent.id});
+        }
+    }
     const residual=await tx.result.findMany({where:{attemptId:{in:parents.map(row=>row.id)},isCurrent:true},select:{replicateNo:true}});
     if(residual.length)throw new rules.TransitionError('Record the full parent replica set before submission.',409,
         'ATTEMPT_REPLICATE_SET_INCOMPLETE',{workItemId:item.id,missingReplicateNumbers:[...new Set(residual.map(row=>row.replicateNo))].sort((a,b)=>a-b)});

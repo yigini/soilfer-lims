@@ -72,7 +72,7 @@ async function dispositionBatch(batchId, decision, reason, actor, db = null, { a
         }
         for (const item of members) rules.assertScope(actor, item.sample);
         const published = canonical === 'REPEAT_BRACKET' ? await tx.report.findMany({ where: {
-            sampleId: { in: members.map(item => item.sampleId) }, status: { in: ['PUBLISHED', 'SUPERSEDED'] } }, select: { sampleId: true } }) : [];
+            sampleId: { in: members.map(item => item.sampleId) }, status: { in: ['PUBLISHED', 'SUPERSEDED', 'WITHDRAWN'] } }, select: { sampleId: true } }) : [];
         const publishedIds = new Set(published.map(row => row.sampleId));
         const sealed = item => ['ACCEPTED', 'WAIVED', 'CANCELLED', 'RELEASED'].includes(item.status) ||
             ['APPROVED', 'PUBLISHED', 'ARCHIVED', 'DISPOSED', 'RELEASED'].includes(item.sample?.status) || publishedIds.has(item.sampleId);

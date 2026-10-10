@@ -1154,9 +1154,16 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 counts: { results: 2, linked: 0 } });
             const equipmentUpgrade = require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: rehearsalDbPath, apply: true });
             expect(equipmentUpgrade).toMatchObject({ classification: 'COMPLETE', backfillCount: 0 });
+            // Keep the original Project upgrade checks above unchanged. The
+            // current report reader also requires its real additive #210
+            // withdrawal schema, with no adoption of historical evidence.
+            const amendmentUpgrade=require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:rehearsalDbPath,apply:true});
+            expect(amendmentUpgrade).toMatchObject({classification:'COMPLETE_210',newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0});
             const verified = new Database(rehearsalDbPath, { readonly: true });
             const originalResultFields = Object.keys(preSnapshots.results.rows[0]).map(field => `"${field}"`).join(',');
             expect(verified.prepare(`SELECT ${originalResultFields} FROM "Result" ORDER BY id`).all()).toEqual(preSnapshots.results.rows);
+            for(const [table,rows]of [['Report',preSnapshots.reports.rows],['ReportShareLink',preSnapshots.shareLinks.rows],['AuditLog',preSnapshots.auditLogs.rows]])
+                expect(verified.prepare(`SELECT * FROM "${table}" ORDER BY id`).all()).toEqual(rows);
             verified.close();
 
             // Query via Prisma Client using Better-Sqlite3 adapter — guarantees NO P2022 column missing errors

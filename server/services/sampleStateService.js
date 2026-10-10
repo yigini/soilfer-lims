@@ -36,7 +36,15 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
                 !hasPermission(actor, 'RECEIVE_SAMPLE'))) {
                 throw new TransitionError('Saving an expected specimen as a draft requires the authorized intake action.', 409, 'ILLEGAL_STATUS_TRANSITION');
             }
-            if (!workflow.isValidSampleTransition(currentStatus, nextStatus)) {
+            const scientificReopen = audit.action === 'SCIENTIFIC_AMENDMENT_AUTHORISED';
+            if (scientificReopen) {
+                if (!workflow.isScientificAmendmentTransition('Sample', currentStatus, nextStatus)) {
+                    throw new TransitionError('The amendment cannot reopen this sample.', 409, 'AMENDMENT_SAMPLE_UNAVAILABLE');
+                }
+                require('./scientificAmendmentService').assertScientificReopenCapability(client, audit.amendmentCapability, sample, actor);
+                rules.requireReason(reason);
+            }
+            if (!scientificReopen && !workflow.isValidSampleTransition(currentStatus, nextStatus)) {
                 throw new TransitionError(`Illegal transition from '${currentStatus}' to '${nextStatus}'.`, 409, 'ILLEGAL_STATUS_TRANSITION', {
                     currentStatus, attemptedStatus: nextStatus, allowedTransitions: workflow.SAMPLE_TRANSITIONS[currentStatus] || []
                 });

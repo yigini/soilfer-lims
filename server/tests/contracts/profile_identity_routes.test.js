@@ -5,14 +5,15 @@ const jwt = require('jsonwebtoken');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const state = require('../../services/exchangeStateService');
-const {getAuthToken} = require('../setup');
+const {getAuthToken,generateToken} = require('../setup');
+const {usersDb} = require('../../db');
 const adapter = require('../../services/sisAdapterService');
 
 describe('Mounted profile correction, scope and immutable export contracts',()=>{
     const lab = 'PROFILE-ROUTES-LAB', foreignLab = 'PROFILE-FOREIGN-LAB';
     const project = 'PROFILE-ROUTES-PROJECT';
     const ids = {draft:'PROFILE-DRAFT-SPECIMEN',released:'PROFILE-RELEASED-SPECIMEN',move:'PROFILE-MOVE-SPECIMEN'};
-    let admin,manager,foreign,managerId;
+    let admin,manager,foreign,managerId,authoriser;
     const amend = {type:'CLERICAL',reason:'Verified against the original field record',expectedProfileRevision:0,profileCorrection:{code:'PIT-NEW',relation:'CONFIRMED_PROFILE'},idempotencyKey:'profile-correction-operation'};
     beforeAll(async()=>{
         state.getDb(); // Install the actual publication triggers before creating released fixtures.
@@ -21,9 +22,13 @@ describe('Mounted profile correction, scope and immutable export contracts',()=>
         await prisma.project.create({data:{id:project+'-NEXT',code:project+'-NEXT',name:'Next project',labId:lab,status:'ACTIVE'}});
         admin = await getAuthToken('SUPER_ADMIN',lab);
         manager = await getAuthToken('LAB_MANAGER',lab,['GTM'],[project,project+'-NEXT']);
+        // getAuthToken deliberately reuses a user for the same role/lab. The
+        // amendment must be authorised by a distinct persisted actor.
+        authoriser = generateToken(usersDb.create({username:'profile_routes_authoriser',role:'LAB_MANAGER',labId:lab,
+            countries:['GTM'],projects:[project,project+'-NEXT']}));
         foreign = await getAuthToken('LAB_MANAGER',foreignLab,['GTM'],[]);
         managerId = jwt.decode(manager).id;
-        await prisma.user.updateMany({where:{id:{in:[admin,manager,foreign].map(token=>jwt.decode(token).id)}},data:{mustChangePassword:false}});
+        await prisma.user.updateMany({where:{id:{in:[admin,manager,foreign,authoriser].map(token=>jwt.decode(token).id)}},data:{mustChangePassword:false}});
         for (const [name,id] of Object.entries(ids)) await createSampleFixture(prisma, {data:{id,originalId:`FIELD-${id}`,labId:`ACCESSION-${id}`,assignedLab:lab,projectId:project,projectCode:project,country:'GTM',status:name==='draft'?'RECEIVED':'APPROVED',approvedAt:name==='draft'?null:new Date(),fieldMetadata:JSON.stringify({site_id:{value:'SITE-OLD'},pit_id:{value:'PIT-FIELD'}})}});
         await createWorkItemFixture(prisma, { data: { id: `${ids.released}-PH`, sampleId: ids.released,
             assignedLab: lab, analysis: 'PH_H2O', status: 'ACCEPTED' } });
@@ -63,7 +68,11 @@ describe('Mounted profile correction, scope and immutable export contracts',()=>
         const snapshot = await state.createSnapshot(auth,{filter:{projectCode:project,labId:lab}});
         const before = await state.getSnapshotPage(snapshot.snapshotId,auth,{limit:100});
         expect(before.data.find(row=>row.specimenId===ids.released).profile.code).toBe('SITE-OLD');
-        const response = await request(app).post(`/api/samples/${ids.released}/amendments`).set('Authorization',`Bearer ${manager}`).send(amend);
+        const pending = await request(app).post(`/api/samples/${ids.released}/amendments`).set('Authorization',`Bearer ${manager}`).send(amend);
+        expect(pending.status).toBe(200);
+        expect(pending.body.amendment).toMatchObject({status:'PENDING',version:1,authorizedBy:null});
+        const response = await request(app).post(`/api/samples/${ids.released}/amendments/${pending.body.amendment.id}/authorise`)
+            .set('Authorization',`Bearer ${authoriser}`).send({expectedVersion:pending.body.amendment.version});
         expect(response.status).toBe(200);
         expect(response.body.profileReference).toMatchObject({code:'PIT-NEW',revision:1,relation:'CONFIRMED_PROFILE'});
         const sample = await prisma.sample.findUnique({where:{id:ids.released},include:{results:true}});

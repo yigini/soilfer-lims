@@ -40,13 +40,13 @@ async function assertBaseOwner(tx, base, sampleId) {
     // Legacy rows deliberately remain nullable. Their frozen identities also
     // reserve the base and must not be taken over by a newly numbered sample.
     const legacy = await tx.report.findMany({ where: { reportNumberBase: null, sampleId: { not: sampleId },
-        status: { in: ['PUBLISHED', 'SUPERSEDED'] }, publishedAt: { not: null } }, select: { content: true, reportNumberBase: true } });
+        status: { in: ['PUBLISHED', 'SUPERSEDED', 'WITHDRAWN'] }, publishedAt: { not: null } }, select: { content: true, reportNumberBase: true } });
     if (legacy.some(row => storedNumber(row) === base)) throw conflict('REPORT_NUMBER_CONFLICT', 'A historical report number belongs to another sample.');
 }
 
 async function allocateReportIdentity(tx, { sampleId, lab, publishedAt, resolveFormat }) {
     if (!lab?.id || !lab.code) throw conflict('REPORT_LAB_REQUIRED', 'A registered laboratory is required for report numbering.');
-    const lineage = await tx.report.findMany({ where: { sampleId, status: { in: ['PUBLISHED', 'SUPERSEDED'] }, publishedAt: { not: null } }, orderBy: { version: 'desc' } });
+    const lineage = await tx.report.findMany({ where: { sampleId, status: { in: ['PUBLISHED', 'SUPERSEDED', 'WITHDRAWN'] }, publishedAt: { not: null } }, orderBy: { version: 'desc' } });
     const previous = lineage[0] || null;
     const base = previous ? storedNumber(previous) : null;
     if (base) {

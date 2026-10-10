@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const sampleController = require('../controllers/sampleController');
+const sampleAmendmentController = require('../controllers/sampleAmendmentController');
 const { checkPermission } = require('../middleware/authMiddleware');
 
 // Read routes
@@ -33,6 +34,8 @@ router.get('/:id/orders/preview', checkPermission('EDIT_ANALYSES'), sampleContro
 router.post('/:id/orders/preview', checkPermission('EDIT_ANALYSES'), sampleController.previewOrderRevision);
 router.post('/:id/orders', checkPermission('EDIT_ANALYSES'), sampleController.applyOrderRevision);
 router.post('/:id/amendments', checkPermission('APPROVE_RESULTS'), sampleController.createAmendment);
+router.get('/:id/amendments', checkPermission('APPROVE_RESULTS'), sampleAmendmentController.list);
+router.post('/:id/amendments/:amendmentId/authorise', checkPermission('APPROVE_RESULTS'), sampleAmendmentController.authorise);
 router.post('/:id/custody/move', checkPermission('ARCHIVE_SAMPLE'), sampleController.recordStorageMovement);
 
 // Final Approval + Closure

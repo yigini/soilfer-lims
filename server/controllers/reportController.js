@@ -7,14 +7,16 @@ const prisma = require('../prisma');
 const { assembleReport } = require('../services/reportAssembly');
 const { generateReportPdfBuffer } = require('../services/pdfGenerator');
 const { allocateReportIdentity, storedNumber, displayNumber } = require('../services/reportNumberService');
+const {readReportWithdrawal}=require('../services/reportWithdrawalService');
 
 async function pdfPublication(report) {
     if (!report) return { status: 'DRAFT', publishedAt: null };
     const replacement = report.status === 'SUPERSEDED' ? await prisma.report.findFirst({ where: {
-        sampleId: report.sampleId, version: { gt: report.version }, status: { in: ['PUBLISHED', 'SUPERSEDED'] }, publishedAt: { not: null }
+        sampleId: report.sampleId, version: { gt: report.version }, status: { in: ['PUBLISHED', 'SUPERSEDED', 'WITHDRAWN'] }, publishedAt: { not: null }
     }, orderBy: { version: 'asc' } }) : null;
     const number = row => row?.reportNumberBase ? displayNumber(row.reportNumberBase, row.revision) : row ? storedNumber(row) : null;
-    return { status: report.status, publishedAt: report.publishedAt, reportNumber: number(report), replacementNumber: number(replacement) };
+    return { status: report.status, publishedAt: report.publishedAt, reportNumber: number(report), replacementNumber: number(replacement),
+        withdrawal:await readReportWithdrawal(prisma,report) };
 }
 const policyService = require('../services/policyService');
 const { linkedBatchIds, resolveReportingModes } = require('../services/reportResultGovernance');
@@ -40,6 +42,9 @@ async function logPublicAccess(link, req) {
 }
 
 function publicLinkConflict(link) {
+    if (link.report.status === 'WITHDRAWN') {
+        return { error: 'This report is withdrawn pending amendment.', code: 'REPORT_WITHDRAWN' };
+    }
     if (link.report.status === 'SUPERSEDED') {
         return { error: 'This report has been superseded. Request a link to the current report.', code: 'REPORT_SUPERSEDED' };
     }
@@ -88,6 +93,7 @@ const reportSelectFields = {
     generatedBy: true,
     generatedAt: true,
     publishedAt: true,
+    amendmentWithdrawals:{select:{amendmentId:true,createdAt:true}},
     shareLinks: {
         where: { isRevoked: false },
         select: { id: true, expiresAt: true }
@@ -261,10 +267,12 @@ async function getReport(req, res) {
 
         res.json({
             ...report,
+            withdrawal:await readReportWithdrawal(prisma,report),
             content: report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null
         });
     } catch (err) {
         console.error('[Report] Get error:', err);
+        if(err.statusCode)return res.status(err.statusCode).json({error:err.message,code:err.code});
         res.status(500).json({ error: 'Failed to fetch report' });
     }
 }
@@ -307,10 +315,12 @@ async function getReportBySample(req, res) {
 
         res.json({
             ...report,
+            withdrawal:await readReportWithdrawal(prisma,report),
             content: report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null
         });
     } catch (err) {
         console.error('[Report] Get by sample error:', err);
+        if(err.statusCode)return res.status(err.statusCode).json({error:err.message,code:err.code});
         res.status(500).json({ error: 'Failed to fetch report' });
     }
 }
@@ -748,7 +758,7 @@ async function getPublicReport(req, res) {
 
         await logPublicAccess(link, req);
         const conflict = publicLinkConflict(link);
-        if (conflict) return res.status(410).json(conflict);
+        if (conflict) return res.status(conflict.code==='REPORT_WITHDRAWN'?409:410).json(conflict);
 
         const report = link.report;
         res.json({
@@ -785,7 +795,7 @@ async function getPublicReportPdf(req, res) {
         }
         await logPublicAccess(link, req);
         const conflict = publicLinkConflict(link);
-        if (conflict) return res.status(410).json(conflict);
+        if (conflict) return res.status(conflict.code==='REPORT_WITHDRAWN'?409:410).json(conflict);
 
         const report = link.report;
         const content = report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null;
@@ -847,6 +857,7 @@ async function getReportPdf(req, res) {
         return res.send(pdfBuffer);
     } catch (err) {
         console.error('[Report] PDF get error:', err);
+        if(err.statusCode)return res.status(err.statusCode).json({error:err.message,code:err.code});
         return res.status(500).json({ error: 'Failed to generate PDF' });
     }
 }

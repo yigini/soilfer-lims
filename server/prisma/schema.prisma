@@ -317,6 +317,7 @@ model WorkItem {
   batchPositions  BatchPositionWorkItem[]
   reportedValueSelections ReportedValueSelection[]
   resultOverrideRequests ResultOverrideRequest[]
+  amendmentAttempts SampleAmendmentAttempt[]
 }
 
 model SampleHold {
@@ -1592,7 +1593,7 @@ model Report {
   sampleId      String
   labId         String?
   version       Int       @default(1)
-  status        String    @default("DRAFT")  // DRAFT, PUBLISHED, SUPERSEDED
+  status        String    @default("DRAFT")  // DRAFT, PUBLISHED, SUPERSEDED, WITHDRAWN
   reportNumberBase String?
   revision      Int?
   policyVersion Int?
@@ -1615,6 +1616,7 @@ model Report {
   updatedAt     DateTime  @updatedAt
 
   shareLinks    ReportShareLink[]
+  amendmentWithdrawals ReportAmendmentWithdrawal[]
 
   @@unique([sampleId, version])
   @@index([sampleId])
@@ -1766,6 +1768,9 @@ model WorkAttempt {
   createdAt              DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
 
+  amendmentParentLinks SampleAmendmentAttempt[] @relation("AmendmentParentAttempt")
+  amendmentChildLink   SampleAmendmentAttempt?  @relation("AmendmentChildAttempt")
+
   @@index([workItemId])
   // Partial uniqueness is installed by the additive #190 SQL in every lab.
   @@index([workItemId, attemptNo])
@@ -1841,6 +1846,11 @@ model SampleAmendment {
   affectedResults    String?   // JSON array of result IDs
   affectedReports    String?   // JSON array of report IDs
   impactAssessment   String?
+  requestPayload     String?   // Immutable JSON request, #210; historical rows remain NULL.
+  version            Int?      // Compare-and-swap revision for the new request/authorise flow.
+  priorApprovedBy    String?
+  priorApprovedAt    DateTime?
+  selectedWorkItemIds String?  // Immutable JSON array of the selected current order-line IDs.
   authorizedBy       String?
   authorizedAt       DateTime?
   resolution         String?
@@ -1848,7 +1858,37 @@ model SampleAmendment {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
+  attemptLinks SampleAmendmentAttempt[]
+  reportWithdrawals ReportAmendmentWithdrawal[]
+
   @@index([sampleId])
+}
+
+// #210 pin6091749343: immutable authorisation authority, with no backfill.
+model SampleAmendmentAttempt {
+  id              String @id @default(uuid())
+  amendmentId     String
+  workItemId      String
+  parentAttemptId String
+  childAttemptId  String @unique
+  reason          String // CLIENT_RETEST or CONFIRMATION; SQL guards enforce it.
+  createdAt       DateTime @default(now())
+
+  amendment SampleAmendment @relation(fields: [amendmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  workItem  WorkItem @relation(fields: [workItemId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  parent    WorkAttempt @relation("AmendmentParentAttempt", fields: [parentAttemptId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  child     WorkAttempt @relation("AmendmentChildAttempt", fields: [childAttemptId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+}
+
+// #210 pin6094004400: a retained report has one immutable withdrawal reason.
+model ReportAmendmentWithdrawal {
+  id String @id @default(uuid())
+  reportId String @unique
+  amendmentId String
+  createdAt DateTime @default(now())
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  amendment SampleAmendment @relation(fields: [amendmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 }
 
 model CommandReceipt {

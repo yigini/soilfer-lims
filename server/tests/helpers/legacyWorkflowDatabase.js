@@ -228,6 +228,13 @@ function beforeGuards(options) {
             // #201 adds exactly one immutable evidence table. The captured
             // historical DDL and all previous gap assertions stay unchanged.
             expected.push({ table: 'CrossCheckEvaluation', missingTable: true });
+            // #210 pins6091161203/6091749343/6094004400: only these additive
+            // gaps. Preserve every literal historical schema and caller.
+            const amendmentTables=['SampleAmendmentAttempt','ReportAmendmentWithdrawal'];
+            const amendmentModels=amendmentTables.filter(table=>modelNames.includes(table));
+            assert.ok(amendmentModels.length===0||amendmentModels.length===amendmentTables.length,'Generated amendment datamodel is partial.');
+            if(amendmentModels.length)expected.push({table:'SampleAmendment',fields:['requestPayload','version','priorApprovedBy','priorApprovedAt','selectedWorkItemIds']},
+                ...amendmentTables.map(table=>({table,missingTable:true})));
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }

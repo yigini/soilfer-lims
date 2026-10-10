@@ -105,7 +105,9 @@
     "analysisDates": "Dates of analysis",
     "sampling": "Sampling",
     "issuedAt": "Issued at",
-    "approvalNotRecorded": "Approval: not recorded"
+    "approvalNotRecorded": "Approval: not recorded",
+    "filterWithdrawn": "Withdrawn",
+    "withdrawnPendingAmendment": "Withdrawn pending amendment {{amendmentId}}"
   },
   "common": {
     "save": "Save",
@@ -1881,5 +1883,15 @@
     "unavailable": {
       "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory"
     }
+  },
+  "amendment": {
+    "publicWithdrawn": "This report is under amendment and is temporarily unavailable.",
+    "limitOverride": "Request a repeat-limit override",
+    "limitOverrideHelp": "Authorising this override raises a repeat-limit nonconformity for this work line.",
+    "limitDescription": "Reason for exceeding the repeat limit",
+    "limitImpact": "Impact assessment",
+    "pending": "Request saved. Authorisation is required before changes are applied.",
+    "authorised": "Amendment authorised. Scientific retests must complete the normal review and approval before a report can be reissued.",
+    "failed": "The amendment could not be saved. Your input is preserved."
   }
 }

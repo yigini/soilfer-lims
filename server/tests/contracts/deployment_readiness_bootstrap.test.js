@@ -358,6 +358,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: targetDb, apply: true });
         require('../../scripts/install_result_override_requests').installResultOverrideRequests({ dbPath: targetDb, apply: true });
         require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({ dbPath: targetDb, apply: true });
+        expect(require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:targetDb,apply:true}))
+            .toMatchObject({classification:'COMPLETE_210',newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0});
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
@@ -403,6 +405,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_calculation_templates.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_cross_check_evaluations.js',
                 `node "${path.join(serverDir, 'scripts/install_cross_check_evaluations.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_sample_amendment_authorisation.js',
+                `node "${path.join(serverDir, 'scripts/install_sample_amendment_authorisation.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_raw_input.js',
                 `node "${path.join(serverDir, 'scripts/install_result_raw_input.js').replace(/\\/g, '/')}"`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
@@ -435,6 +439,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
         expect(res.stdout).toContain('Installing duplicate-marker prerequisite');
         expect(res.stdout).toContain('20261004190000_add_workitem_duplicate_marker');
         expect(res.stdout).toContain('20261004190100_unique_active_workitem');
+        expect(res.stdout).toContain('COMPLETE_210');
         expect(hashDb()).toBe(beforeSha);
     });
 

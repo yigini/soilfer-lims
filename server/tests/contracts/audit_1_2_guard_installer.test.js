@@ -392,8 +392,19 @@ test('a complete guarded database passes the read-only gate, listens and answers
     installCalculationReleasePrerequisites(calculationDatabase);
     const crossChecks=require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({dbPath:fixture.file,apply:true});
     expect(crossChecks).toMatchObject({classification:'COMPLETE_201',newEvaluationCount:0,backfilledCount:0});
+    const beforeAmendments=fingerprint(fixture.file);
+    const missingAmendments=await realStartup(fixture.file);
+    expect(missingAmendments.accepted).toBe(false);
+    expect(missingAmendments.stderr).toContain('AMENDMENT_STARTUP_REQUIRED');
+    expect(missingAmendments.stdout).not.toContain('Enterprise Server running on');
+    expect(fingerprint(fixture.file)).toBe(beforeAmendments);
+    expect(require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:fixture.file,apply:true}))
+        .toMatchObject({classification:'COMPLETE_210',newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0});
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
+    const amendmentsReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"AMENDMENT_STARTUP_READY"')));
+    expect(amendmentsReady).toMatchObject({classification:'COMPLETE_210',totalChanges:0});
+    expect(child.stdout.indexOf('AMENDMENT_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
     const ready = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"WORKFLOW_STARTUP_READY"')));
     expect(ready).toMatchObject({ classification: 'COMPLETE', totalChanges: 0,
         inventory: { candidateCount: 0, unmappedCount: 0, blockedCount: 0 } });

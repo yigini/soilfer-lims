@@ -16,6 +16,7 @@ import CrossCheckPanel from '../components/sample/CrossCheckPanel';
 import FieldMetadataCard from '../components/sample/FieldMetadataCard';
 import {ProfileReferenceSummary} from '../components/reception/ProfileReferenceFields';
 import ProfileCorrectionDialog from '../components/sample/ProfileCorrectionDialog';
+import AmendmentDialog from '../components/sample/AmendmentDialog';
 import FieldMap from '../components/sample/FieldMap';
 import IntakeRequestCard from '../components/sample/IntakeRequestCard';
 import AnalysisUpdateModal from '../components/sample/AnalysisUpdateModal';
@@ -1678,66 +1679,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
 
             {/* Amendment Modal */}
             {profileCorrectionOpen && <ProfileCorrectionDialog sampleId={id} profile={identity?.profileReference} released={!capabilities.canEditProfileReference?.allowed} onClose={closeProfileCorrection} onSaved={()=>{setProfileCorrectionOpen(false); fetchWorkspaceData();}}/>}
-            {amendmentModal.isOpen && (
-                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md p-6 border border-sf-divider">
-                        <h3 className="text-lg font-bold text-sf-text mb-2">Open Report Amendment</h3>
-                        <p className="text-xs text-gray-500 mb-4">Original released reports remain preserved as immutable snapshots. Amendments create traceable superseding records.</p>
-                        <div className="space-y-3 mb-4">
-                            <div>
-                                <label className="block text-xs font-bold text-sf-muted mb-1">Amendment Type</label>
-                                <select
-                                    value={amendmentModal.type}
-                                    onChange={(e) => setAmendmentModal(prev => ({ ...prev, type: e.target.value }))}
-                                    className="w-full text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text focus:border-sf-emerald"
-                                >
-                                    <option value="CLERICAL">Clerical / Typo correction</option>
-                                    <option value="SCIENTIFIC">Scientific / Result recalculation</option>
-                                    <option value="SUPPLEMENTAL">Supplemental testing requested</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-sf-muted mb-1">Reason for Amendment *</label>
-                                <textarea
-                                    value={amendmentModal.reason}
-                                    onChange={(e) => setAmendmentModal(prev => ({ ...prev, reason: e.target.value }))}
-                                    placeholder="Describe specific reasons and affected parameters..."
-                                    className="w-full text-xs p-2.5 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text focus:border-sf-emerald resize-none h-20"
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-end gap-2">
-                            <button
-                                onClick={() => setAmendmentModal({ isOpen: false, type: 'CLERICAL', reason: '', impact: '' })}
-                                className="px-4 py-2 text-xs font-bold text-sf-muted hover:bg-sf-raised rounded-lg"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    const reason = amendmentModal.reason.trim();
-                                    if (!reason) return;
-                                    try {
-                                        await axios.post(`/api/samples/${id}/amendments`, {
-                                            type: amendmentModal.type,
-                                            reason
-                                        });
-                                        setAmendmentModal({ isOpen: false, type: 'CLERICAL', reason: '', impact: '' });
-                                        showInfo(t('common.success', 'Success'), 'Amendment recorded. Ready for updated report release.');
-                                        fetchWorkspaceData();
-                                    } catch (err) {
-                                        showInfo(t('common.error', 'Error'), err.response?.data?.error || err.message);
-                                    }
-                                }}
-                                disabled={!amendmentModal.reason.trim()}
-                                className="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50"
-                            >
-                                Record Amendment
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {amendmentModal.isOpen && <AmendmentDialog sampleId={id} sampleStatus={sample.status} workItems={workItems} initialType={amendmentModal.type} onClose={()=>setAmendmentModal(previous=>({...previous,isOpen:false}))} onChanged={fetchWorkspaceData}/> }
 
             {/* General Confirm Modal */}
             {confirmModal.isOpen && (
