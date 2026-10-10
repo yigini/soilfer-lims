@@ -81,6 +81,33 @@
     "see": "see",
     "replaces": "Replaces",
     "preparationRecords": "Preparation records",
+    "preparationRecordText": {
+      "steps": {
+        "DRYING": "Drying",
+        "SIEVING": "Sieving",
+        "GRINDING": "Grinding",
+        "SPLITTING": "Splitting"
+      },
+      "methods": {
+        "AIR": "Air dried",
+        "OVEN_40": "Oven 40 °C",
+        "OVEN_105": "Oven 105 °C",
+        "OTHER": "Other method"
+      },
+      "sieve": "Sieve",
+      "coarseFraction": "Coarse fraction",
+      "grind": "Ground to",
+      "massBefore": "Mass before",
+      "massAfter": "Mass after",
+      "duration": "Duration",
+      "equipment": "Equipment",
+      "performedBy": "Performed by"
+    },
+    "reportBasis": {
+      "ovenDry": "Reported on an oven-dry basis",
+      "factor": "moisture correction factor",
+      "waterContent": "gravimetric water content"
+    },
     "qcNotRequired": "QC not required",
     "qcEvidenceIncomplete": "Historical QC acceptance has incomplete recorded evidence",
     "qcAcknowledgedBy": "Acknowledged by",
@@ -1019,6 +1046,7 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC",
       "report_uncertaintyMode": "Report expanded uncertainty",
       "report_uncertaintyCoverageFactor": "Uncertainty coverage factor",
+      "report_ovenDryConvertible": "Convert to oven-dry basis on request",
       "crossCheck_basesCecFactor": "Maximum exchangeable bases / CEC factor",
       "crossCheck_baseSaturationMaxPct": "Maximum base saturation (%)",
       "crossCheck_textureClosureTolerancePct": "Texture closure tolerance (%)",

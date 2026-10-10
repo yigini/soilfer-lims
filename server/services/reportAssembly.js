@@ -7,6 +7,8 @@ const { normalizeUnit, interpretParameter, evaluateSoilProfile } = require('./in
 const { isCurrentValidAnalyticalResult, matchingItems, governingItems,
     getReportingMode, reportingQc, linkedBatchIds, resolveReportingModes } = require('./reportResultGovernance');
 const { freezeReportEvidence, describeReportEvidence } = require('./reportTruthfulnessService');
+const { normalizeBasis, moistureFactor, applyOvenDryBasis, basisStatement } = require('./reportBasisService');
+const { TransitionError } = require('./workflowStateRules');
 const contentEvidence = require('./reportContentEvidence');
 
 /**
@@ -157,6 +159,19 @@ async function assembleReport(sampleId, user, options = {}) {
         group.categoryName = categoryMap.get(catId) || catId;
     }
 
+    // 8a. #205: an oven-dry report converts eligible air-dry values with the frozen moisture correction factor.
+    const reportBasis = normalizeBasis(options.basis);
+    let moistureCorrection = null;
+    if (reportBasis === 'OVEN_DRY') {
+        moistureCorrection = await moistureFactor(db, reportedSelectionProof.sourceResults);
+        moistureCorrection.convertedParams = [];
+        const items = Object.values(groupedResults).flatMap(group => group.items);
+        await applyOvenDryBasis(db, lab?.id || null, items, moistureCorrection);
+        moistureCorrection.convertedParams = items.filter(item => item.basisConversion).map(item => item.param);
+        if (!moistureCorrection.convertedParams.length) throw new TransitionError('No reported value is convertible to an oven-dry basis.', 409,
+            'OVEN_DRY_NOTHING_CONVERTIBLE');
+    }
+
     // 8b. Compute comprehensive multi-parameter soil diagnostics
     const soilDiagnostics = evaluateSoilProfile(reportableResults.filter(r=>r.mode!=='NOT_REPORTABLE').map(r => ({
         param: r.param,
@@ -238,7 +253,11 @@ async function assembleReport(sampleId, user, options = {}) {
     const warningLocale = ['en', 'es', 'es-419', 'fr', 'pt'].includes(reportLocale) ? reportLocale : 'en';
     const qcWarningStatement = qcWarnings.length
         ? require(`../locales/${warningLocale}.json`).resultReports.qcWarningStatement : null;
-    const evidence = freezeReportEvidence(reportedSelectionProof.sourceResults, sample.workItems, evidenceBatches, reportOptions);
+    const gateReceiptIds = sample.workItems.filter(item => ['DRYING', 'PREPARATION'].includes(item.analysis)).map(item => {
+        try { return (typeof item.result === 'string' ? JSON.parse(item.result) : item.result)?.receiptId; } catch { return null; }
+    });
+    const preparationRecords = await require('./preparationRecordService').forReceipts(db, gateReceiptIds);
+    const evidence = freezeReportEvidence(reportedSelectionProof.sourceResults, sample.workItems, evidenceBatches, { ...reportOptions, preparationRecords });
     const sourceModes=await Promise.all(reportedSelectionProof.sourceResults.map(result=>resolveReportingModes(
         {...sample,results:[result],workItems:reportedSelectionProof.workItemsByResult[result.id]},evidenceBatches,{db})));
     evidence.qcModes=sourceModes.flatMap(proof=>proof.qcModeEvidence);
@@ -305,6 +324,7 @@ async function assembleReport(sampleId, user, options = {}) {
         qcWarningStatement,
         evidence,
         ...evidenceText,
+        ...(moistureCorrection && { reportBasis, moistureCorrection, basisStatement: basisStatement(moistureCorrection, warningLocale) }),
         // Holistic Multi-Parameter Soil Metrology & Diagnostics
         diagnostics: soilDiagnostics,
         // Methodologies footnotes

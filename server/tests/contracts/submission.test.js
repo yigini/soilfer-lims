@@ -1,3 +1,4 @@
+const { gateRecords } = require('../helpers/preparationRecords');
 const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
@@ -57,7 +58,7 @@ describe('8.1 Section D: Submission Rules', () => {
             .send({ workItemIds: [phItemId, condItemId], assignee: techUsername });
 
         // Gates
-        const dRes = await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'DRYING', status: 'DONE', checklist: [true, true, true] });
+        const dRes = await request(app).put(`/api/samples/${sampleId}/phase`).set('Authorization', `Bearer ${mgrToken}`).send({ phase: 'DRYING', status: 'DONE', checklist: [true, true, true], records: gateRecords('DRYING') });
         if (dRes.status !== 200) console.log('DEBUG Drying Gate Failure:', dRes.body);
         expect(dRes.status).toBe(200);
 

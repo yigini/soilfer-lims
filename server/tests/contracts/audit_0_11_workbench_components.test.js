@@ -116,7 +116,10 @@ describe('Audit 0.11: workbench component behavior', () => {
         operational.props.onChange([true, false, true]);
         expect(change).toHaveBeenCalledWith('dry', null, { checks: [true, false, true] });
         operational.props.onConfirm();
-        expect(confirm).toHaveBeenCalledWith('dry', [true, true, true]);
+        expect(confirm).toHaveBeenCalledWith('dry', [true, true, true], null, undefined, undefined);
+        expect(operational.props.records).toEqual([]);
+        operational.props.onRecordsChange([{ gateCode: 'DRYING', method: 'AIR' }]);
+        expect(change).toHaveBeenCalledWith('dry', null, { records: [{ gateCode: 'DRYING', method: 'AIR' }] });
     });
     test.each([['INSTRUMENT_REQUIRED', false], ['SAMPLE_ON_HOLD', true], ['ITEM_SEALED', true]])('instrument selector handles %s without bypassing other blockers', (blocker, disabled) => {
         const h = harness('WorkbenchInspector');

@@ -1,6 +1,7 @@
 import checklists from '../../../../server/data/operationalChecklists.json';
 import React from 'react';
 import { CheckSquare, Square, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
+import PreparationRecordFields from './PreparationRecordFields';
 
 /**
  * OperationalTaskEditor
@@ -16,7 +17,11 @@ export default function OperationalTaskEditor({
     sampleId = '',
     savedReceipt = null,
     isEvidenceGap = false,
-    onConfirm = null
+    onConfirm = null,
+    preparationSteps = null,
+    records = [],
+    onRecordsChange = null,
+    equipment = []
 }) {
     const rawChecks = Array.isArray(checks) ? checks : [false, false, false];
 
@@ -79,6 +84,13 @@ export default function OperationalTaskEditor({
                         </div>
                     ))}
                 </div>
+                {(savedReceipt.preparationRecords || []).map(row => (
+                    <div key={row.id} className="text-[10px] text-sf-text font-mono">
+                        {[row.gateCode, row.method, row.temperatureC != null && `${row.temperatureC} °C`, row.sieveMm != null && `${row.sieveMm} mm`,
+                            row.coarseFractionPct != null && `${row.coarseFractionPct} %`, row.grindMm != null && `${row.grindMm} mm`,
+                            `${row.durationMinutes} min`].filter(Boolean).join(' · ')}
+                    </div>
+                ))}
                 <div className="text-[10px] text-sf-muted mt-1 border-t border-sf-divider pt-1">
                     Confirmed by {savedReceipt.recordedBy || 'Technician'} · {savedReceipt.recordedAt ? new Date(savedReceipt.recordedAt).toLocaleString() : 'Recorded'}
                 </div>
@@ -114,6 +126,9 @@ export default function OperationalTaskEditor({
                     );
                 })}
             </div>
+
+            <PreparationRecordFields steps={preparationSteps || (analysis === 'DRYING' ? ['DRYING'] : [])} records={records}
+                onChange={onRecordsChange} equipment={equipment} disabled={disabled} />
 
             <div className="flex items-center justify-between gap-2 mt-1">
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium

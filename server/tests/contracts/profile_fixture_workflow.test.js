@@ -1,3 +1,4 @@
+const { gateRecords } = require('../helpers/preparationRecords');
 'use strict';
 const mockConnections = [];
 jest.mock('better-sqlite3', () => {
@@ -82,7 +83,7 @@ describe('Guarded profile fixture through the laboratory workflow', () => {
             expect(items.map(row => row.analysis).sort()).toEqual(['DRYING', 'PH', 'PREPARATION']);
             expect((await call('/api/work/assign', manager, {workItemIds: items.map(row => row.id), assignee: technician})).status).toBe(200);
             for (const analysis of ['DRYING', 'PREPARATION']) {
-                const confirm = await call('/api/workbench/operations/confirm', tech, {workItemId: items.find(row => row.analysis === analysis).id, checklist: [true, true, true], idempotencyKey: `fixture-${id}-${analysis}`});
+                const confirm = await call('/api/workbench/operations/confirm', tech, {workItemId: items.find(row => row.analysis === analysis).id, checklist: [true, true, true], records: gateRecords(analysis), idempotencyKey: `fixture-${id}-${analysis}`});
                 expect({status: confirm.status, body: confirm.body}).toMatchObject({status: 200, body: {success: true}});
             }
             const analytic = await prisma.workItem.findFirst({where: {sampleId: id, analysis: 'PH'}});

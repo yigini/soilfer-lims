@@ -3,6 +3,7 @@ const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
+const { gateRecords } = require('../helpers/preparationRecords');
 const { transitionWorkItem } = require('../../services/workItemStateService');
 const operationalConfirmationService = require('../../services/operationalConfirmationService');
 const workbenchController = require('../../controllers/workbenchController');
@@ -191,6 +192,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
                 actor: testTech,
                 workItemId: testDryingId,
                 checklist: [true, true, true],
+                records: gateRecords('DRYING'),
                 observations: 'Tray dried to constant weight'
             });
 

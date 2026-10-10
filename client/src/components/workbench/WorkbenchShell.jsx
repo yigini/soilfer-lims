@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 
 import WorkbenchQueue from './WorkbenchQueue';
+import { preparationPayload } from './preparationPayload';
 import MyRunsPanel from './MyRunsPanel';
 import ResultOverrideInbox from './ResultOverrideInbox';
 import WorksheetArea from './WorksheetArea';
@@ -340,6 +341,7 @@ export default function WorkbenchShell({
                             value: value !== null && value !== undefined ? value : existingDraft.value,
                             values: extra.values !== undefined ? extra.values : existingDraft.values,
                             checks: extra.checks !== undefined ? extra.checks : existingDraft.checks,
+                            records: extra.records !== undefined ? extra.records : existingDraft.records,
                             basis: extra.basis || existingDraft.basis || 'AIR_DRY',
                             replicateNo: extra.replicateNo || existingDraft.replicateNo || 1,
                             instrumentId: entryInstrumentId(item, extra.instrumentId),
@@ -535,7 +537,7 @@ export default function WorkbenchShell({
     // ─────────────────────────────────────────────────────────────────────────
     // Confirm Operational Gate Checklist (Drying / Preparation)
     // ─────────────────────────────────────────────────────────────────────────
-    const handleConfirmOperation = async (workItemId, checklist, observations = null) => {
+    const handleConfirmOperation = async (workItemId, checklist, observations = null, records = [], version = undefined) => {
         if (debounceTimers.current[workItemId]) {
             clearTimeout(debounceTimers.current[workItemId]);
             delete debounceTimers.current[workItemId];
@@ -545,14 +547,18 @@ export default function WorkbenchShell({
             const res = await axios.post('/api/workbench/operations/confirm', {
                 workItemId,
                 checklist,
-                observations
+                observations,
+                records: preparationPayload(records || []),
+                ...(Number.isInteger(version) && { version })
             });
             addToast(`Operation confirmed successfully (${res.data.receipt?.receiptId || 'Verified'})`, 'success');
             await fetchQueue(queueView);
             await fetchReceipts();
         } catch (err) {
             console.error('[workbench] Failed to confirm operation:', err);
-            addToast(err.response?.data?.error || err.response?.data?.message || 'Failed to confirm operational checklist', 'error');
+            const missing = err.response?.data?.details?.missing;
+            addToast([err.response?.data?.error || err.response?.data?.message || 'Failed to confirm operational checklist',
+                missing?.length ? missing.join(', ') : null].filter(Boolean).join(': '), 'error');
         } finally {
             setIsLoading(false);
         }
@@ -639,11 +645,14 @@ export default function WorkbenchShell({
             addToast(t('workbench.recordingIncomplete', 'Recording incomplete'), 'warning');
         };
         try {
+            const draftRecords = workItemId => groups.flatMap(group => group.items || [])
+                .find(item => item.workItemId === workItemId)?.draft?.records;
             const entries = includedItems.map(i => ({
                 workItemId: i.workItemId,
                 value: i.value,
                 values: i.values,
                 checks: i.checks,
+                ...(draftRecords(i.workItemId)?.length && { preparationRecords: preparationPayload(draftRecords(i.workItemId)) }),
                 basis: i.basis,
                 replicateNo: i.replicateNo,
                 equipmentId: i.equipmentId,
