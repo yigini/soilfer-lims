@@ -1240,6 +1240,38 @@ async function runSuite() {
     if(!selectionProof.retainedRowsPreserved)throw Error('192 rehearsal retained-data proof missing');
     console.log('  ✓ Owned #191 COMPLETE → #192 PRE_192 dry-run → COMPLETE; retained history unchanged, new selections 0, NO_OP writes 0');
 
+    // The supported baseline predates #272. Use its shipped additive owner
+    // before the #199 prerequisite check; never preinstall calculations here.
+    const rawInputProofOutput = cp.execFileSync('docker', ['run', '--rm',
+        '-v', `${repeatProofVolume}:/owned-272`, IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-272/dev.db',installer=require('./scripts/install_result_raw_input');
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const reader=new Database(dbPath,{readonly:true,fileMustExist:true});
+         const names=reader.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(row=>row.name);
+         const quote=name=>'"'+name.replaceAll('"','""')+'"';
+         const columns=Object.fromEntries(names.map(name=>[name,reader.prepare('PRAGMA table_xinfo('+quote(name)+')').all().map(row=>row.name)]));
+         const snapshot=db=>JSON.stringify(Object.fromEntries(names.map(name=>[name,
+           db.prepare('SELECT '+columns[name].map(quote).join(',')+' FROM '+quote(name)+' ORDER BY rowid').all()])));
+         const retained=snapshot(reader);reader.close();
+         const before=hash(),dry=installer.installResultRawInput({dbPath});
+         if(dry.classification!=='ABSENT'||dry.backfillCount!==0||dry.totalChanges!==0||hash()!==before)throw Error('272 owned dry-run differs');
+         const applied=installer.installResultRawInput({dbPath,apply:true});
+         const after=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try{
+           if(applied.classification!=='ALREADY_PRESENT'||applied.previousClassification!=='ABSENT'||applied.backfillCount!==0||
+             applied.counts.recordedRawInputs!==0||snapshot(after)!==retained||
+             after.pragma('integrity_check',{simple:true})!=='ok'||after.pragma('foreign_key_check').length)throw Error('272 owned original evidence differs');
+         }finally{after.close()}
+         const installed=hash(),again=installer.installResultRawInput({dbPath,apply:true});
+         if(again.mode!=='NO_OP'||again.totalChanges!==0||again.backfillCount!==0||hash()!==installed)throw Error('272 owned repeat differs');
+         console.log(JSON.stringify({dry,applied,again,allOriginalRowsFieldsAndReceiptsPreserved:true,noOpBytesPreserved:true}));`
+    ], { encoding: 'utf8', timeout: 120000 }).trim();
+    const rawInputProof = JSON.parse(rawInputProofOutput);
+    if (!rawInputProof.allOriginalRowsFieldsAndReceiptsPreserved || !rawInputProof.noOpBytesPreserved)
+        throw Error('272 owned prerequisite preservation proof missing');
+    console.log('  ✓ Owned #272 ABSENT → shipped additive rawInput owner → ALREADY_PRESENT; all old fields/receipts preserved, backfill0, repeat NO_OP bytes unchanged');
+
     // #199 pin6090475511: this copy still has no calculation tables. Exercise
     // the shipped default entrypoint, rather than preinstalling its successor.
     loadEmptyCalculationCatalogue(repeatProofVolume);
