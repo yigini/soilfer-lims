@@ -65,8 +65,13 @@ def prepare(origin, destination, gates_file):
     for name, digest in proof['scriptSha256'].items():
         assert name in SCRIPTS and s.sha(origin / name) == digest, 'Rehearsed script changed: ' + name
     files = SCRIPTS + ['rehearsal-receipt.json', 'build-receipt.json',
-        'source.tar.gz', 'source-index.json', 'yy-authorization-evidence.md']
+        'source.tar.gz', 'source-index.json', 'yy-authorization-evidence.md', 'kit-source-index.json']
     assert all((origin / name).is_file() and not (origin / name).is_symlink() for name in files)
+    kit = json.loads((origin / 'kit-source-index.json').read_text())
+    assert kit['status'] == 'RAW_GIT_KIT_EXPORT'
+    committed = {row['name']: row['sha256'] for row in kit['files']}
+    for name in SCRIPTS + ['yy-authorization-evidence.md']:
+        assert s.sha(origin / name) == committed[name], 'Kit source differs from Git: ' + name
     summary = subprocess.check_output([sys.executable, str(origin / 'summarize-proof.py'), str(origin)], text=True)
     destination.mkdir(mode=0o700)
     for name in files:
@@ -80,7 +85,7 @@ def prepare(origin, destination, gates_file):
         (destination / name).chmod(0o400)
         files.append(name)
     manifest = {'status':'PREPARED_ONLY_NOT_EXECUTED', 'preparedUtc':s.utc(),
-        'head':s.HEAD, 'lastDeployedSha':s.LAST_DEPLOY, 'image':build['image'],
+        'head':s.HEAD, 'kitSourceCommit':kit['head'], 'lastDeployedSha':s.LAST_DEPLOY, 'image':build['image'],
         'retainedImage':s.OLD_IMAGE, 'rehearsalRoot':str(origin), 'executionRoot':str(destination),
         'attemptPlanSha256':proof['attemptPlanSha256'], 'includedPrCount':20,
         'installerOrder':[key for key, _ in s.INSTALLERS], 'diskReserveFloorBytes':8589934592,
