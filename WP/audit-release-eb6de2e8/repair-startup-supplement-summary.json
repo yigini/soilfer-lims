@@ -1,0 +1,94 @@
+{
+  "status": "PASSED_STARTUP_API_SUPPLEMENT",
+  "head": "0685d34d851ef6f115ae88bc772679929d8eee25",
+  "candidateImage": "sha256:e2ed0a732e5e34050e42f7796e1d745cb4e18eb991e049ee804993cdc792c9e6",
+  "productionExecution": false,
+  "completeCoordinatorRehearsal": false,
+  "origin": "/opt/lims/releases/combined-eb6de2e8-repair-pr-0685d34d-verified-20261010T170400Z",
+  "priorFailedReceiptSha256": "aa057edbb1f653b9e0356a186f945f9851cb01eed3a885acdfcc64dc57c84d2d",
+  "startedUtc": "2026-10-10T17:37:51.415885+00:00",
+  "scriptSha256": {
+    "postflight-policy.cjs": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+    "postflight-qc-runs.cjs": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+    "postflight-auth.cjs": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+    "readonly-smoke.cjs": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+    "supplement-startup.py": "8d96f78c0442abbbbb73cefe3296fa97387f5878a3a07404decb9087168116ff",
+    "postflight-reference.cjs": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+    "release_support.py": "3279bbf0255cac1a07ff2df885c7d1f6282d44e707710c732b39f777b2f8faaa",
+    "postflight-roles.cjs": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da"
+  },
+  "health": {
+    "status": "ok",
+    "version": "1.9.0",
+    "uptime": 35.721042733
+  },
+  "readyEvents": [
+    "WORKFLOW_STARTUP_READY",
+    "RESULT_ATTEMPT_STARTUP_READY",
+    "SAMPLE_HOLD_STARTUP_READY",
+    "REFERENCE_STARTUP_READY",
+    "QC_RULE_STARTUP_READY",
+    "QC_RUN_STARTUP_READY",
+    "QC_GATE_SCOPE_STARTUP_READY",
+    "PT_STARTUP_READY",
+    "NCR_STARTUP_READY",
+    "RESULT_EQUIPMENT_STARTUP_READY",
+    "WORK_ATTEMPT_STARTUP_READY",
+    "WORK_REPEAT_STARTUP_READY",
+    "REPORTED_VALUE_STARTUP_READY",
+    "REAGENT_LOT_STARTUP_READY",
+    "RESULT_OVERRIDE_STARTUP_READY",
+    "CALCULATION_STARTUP_READY",
+    "CROSS_CHECK_STARTUP_READY",
+    "AMENDMENT_STARTUP_READY",
+    "REPORT_REVISION_STARTUP_READY",
+    "BENCH_CREDENTIAL_STARTUP_READY"
+  ],
+  "apiChecks": {
+    "passed": 31,
+    "total": 31,
+    "failed": 0
+  },
+  "probes": [
+    {
+      "file": "postflight-roles.cjs",
+      "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-auth.cjs",
+      "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-reference.cjs",
+      "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-qc-runs.cjs",
+      "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-policy.cjs",
+      "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+      "exitCode": 0
+    },
+    {
+      "file": "readonly-smoke.cjs",
+      "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+      "exitCode": 0
+    }
+  ],
+  "memory": {
+    "limitBytes": 805306368,
+    "nodeOptions": null,
+    "peakBytes": 319590400
+  },
+  "startupAndProbeChanges": 0,
+  "databaseBytesPreserved": true,
+  "databaseSha256": "f850c0ee1556c2aa359d35a4697f238e21d15e5fb60fe27e132c7410518cc0e7",
+  "completedUtc": "2026-10-10T17:40:35.241466+00:00",
+  "supplementReceiptSha256": "e4849266b57fdf652da5c22945504b003dabdeee0bce3fe5c355082be0a49a77"
+}
