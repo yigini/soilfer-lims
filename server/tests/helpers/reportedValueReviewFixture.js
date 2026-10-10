@@ -6,6 +6,17 @@ const jwt = require('jsonwebtoken');
 // their policy version and use actual correction, QC, submission and review.
 // This zero-frequency rule is confined to these non-QC cases.
 async function correctAndApproveReportedValue(db, { app, token, labId, item, original, value }) {
+    // This retained positive fixture exercises today's submission path on an
+    // explicitly owned historical database. Install its additive #201 evidence
+    // prerequisite through the real installer; retain all existing rows/guards.
+    require('../../services/workflowStateRules').assertFixtureContext();
+    const path = require('node:path'), fs = require('node:fs');
+    const file = (await db.$queryRawUnsafe('PRAGMA database_list')).find(row => row.name === 'main')?.file;
+    if (!file || path.dirname(path.resolve(file)) !== path.resolve(__dirname, '../.tmp') ||
+        !/^[^/\\]+\.db$/.test(path.basename(file)) || !fs.existsSync(file) || fs.realpathSync(file) !== path.resolve(file)) {
+        throw Error('Reported-value fixture requires an owned test database.');
+    }
+    require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({ dbPath: file, apply: true });
     const actor = jwt.decode(token);
     await require('../../services/qcRuleService').change(actor, {
         labId, analysisCode: item.analysis, methodologyId: original.methodologyId,
