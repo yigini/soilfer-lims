@@ -27,7 +27,7 @@ function mountUi(filename, props = {}, { canEdit = true, user = null, responses 
         if (cache[file]) return cache[file];
         const module = { exports: {} };
         vm.runInNewContext(esbuild.transformSync(fs.readFileSync(file, 'utf8'), { loader: file.endsWith('.jsx') ? 'jsx' : 'js', format: 'cjs' }).code,
-            { module, exports: module.exports, console, setTimeout, clearTimeout, Date, crypto: require('node:crypto').webcrypto, AbortController, window: { innerWidth: 1200 }, require(name) {
+            { module, exports: module.exports, console, setTimeout, clearTimeout, Date, crypto: require('node:crypto').webcrypto, AbortController, FormData, window: { innerWidth: 1200 }, require(name) {
                 if (name === 'react') return react;
                 if (name === 'axios') return axios;
                 if (name === 'react-router-dom') return { useParams: () => routeParams };
