@@ -32,6 +32,15 @@ test('before selection the panel displays only stored submission checks; a legac
     expect(view.text()).toContain(translations('en').crossCheck.noSubmission);
     expect(view.text()).not.toContain(translations('en').crossCheck.current);
 });
+test.each(['en', 'es', 'es-419', 'fr', 'pt'])('%s unavailable laboratory is disclosed without an empty pass list', async locale => {
+    const response = { ...data(), current: null, crossChecks: [], atSubmission: [], crossCheckUnavailableReason: 'CROSS_CHECK_LAB_REQUIRED' };
+    const view = mount({ locale, response }); await view.render();
+    expect(view.find('cross-check-unavailable').props.role).toBe('status');
+    expect(view.text()).toContain(translations(locale).crossCheck.unavailable.CROSS_CHECK_LAB_REQUIRED);
+    expect(view.text()).not.toContain(translations(locale).crossCheck.beforeSelection);
+    expect(view.text()).not.toContain(translations(locale).crossCheck.noSubmission);
+    expect(view.find('cross-check-BASES_CEC-current')).toBeUndefined();
+});
 test.each(Object.keys(translations('en').crossCheck.reasons))('%s is shown as a localized not-evaluated reason', async reasonCode => {
     const response = data(); response.current.evaluations = [evaluation({ outcome: 'NOT_EVALUATED', flagCode: null, reasonCode })];
     const view = mount({ response }); await view.render();
@@ -73,7 +82,7 @@ test('all five client/server catalogues cover every outcome, rule, flag and refu
     for (const locale of ['en','es','es-419','fr','pt']) {
         const client = translations(locale).crossCheck, server = require('../../locales/' + locale + '.json').crossCheck;
         expect(client).toEqual(server);
-        for (const group of ['rules','outcomes','flags','reasons','errors']) {
+        for (const group of ['rules','outcomes','flags','reasons','errors','unavailable']) {
             expect(Object.keys(client[group])).toEqual(Object.keys(translations('en').crossCheck[group]));
             for (const message of Object.values(client[group])) expect(message).toEqual(expect.stringMatching(/\S/));
         }

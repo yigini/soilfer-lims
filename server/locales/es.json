@@ -1877,6 +1877,9 @@
       "SAMPLE_NOT_FOUND": "Muestra no encontrada.",
       "ACCESS_DENIED_LAB": "La muestra está fuera del ámbito de su laboratorio.",
       "CROSS_CHECK_SUBMISSION_REQUIRED": "La evidencia de comprobación requiere el envío correspondiente."
+    },
+    "unavailable": {
+      "CROSS_CHECK_LAB_REQUIRED": "Comprobaciones cruzadas no disponibles: la muestra no tiene un laboratorio registrado"
     }
   }
 }

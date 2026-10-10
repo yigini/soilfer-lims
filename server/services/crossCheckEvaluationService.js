@@ -14,11 +14,12 @@ async function scopedSample(tx, sampleId, actor, permission) {
     return sample;
 }
 async function labSnapshot(tx, sample) {
-    const snapshot = await policyService.snapshot(sample.assignedLab || sample.labId, { db: tx });
-    if (!snapshot.labId) throw new rules.TransitionError('Cross-checks require the sample laboratory.',
-        409, 'CROSS_CHECK_LAB_REQUIRED');
-    return snapshot;
+    // Pin6093810127: no new policy/evidence authority exists for an unresolved
+    // historical lab. Inactive registered labs still use their own policy.
+    const lab = await policyService.resolveLab(sample.assignedLab || sample.labId, tx);
+    return lab ? policyService.snapshot(lab.id, { db: tx }) : null;
 }
+const unavailable = () => ({ crossChecks: [], crossCheckUnavailableReason: 'CROSS_CHECK_LAB_REQUIRED' });
 function decode(row) {
     try {
         const inputs = JSON.parse(row.inputs), thresholds = JSON.parse(row.thresholds);
@@ -42,6 +43,7 @@ async function currentObservationCrossChecks(tx, sampleId, actor) {
     rules.requireTransaction(tx);
     const sample = await scopedSample(tx, sampleId, actor, 'ENTER_RESULTS');
     const snapshot = await labSnapshot(tx, sample);
+    if (!snapshot) return unavailable();
     const observations = await tx.result.findMany({ where: { sampleId, isCurrent: true }, orderBy: { id: 'asc' } });
     const evaluations = evaluateCrossParameters(observations, snapshot);
     try {
@@ -53,7 +55,7 @@ async function currentObservationCrossChecks(tx, sampleId, actor) {
         throw Object.assign(new rules.TransitionError('Current cross-check evidence cannot be represented.',
             409, 'CROSS_CHECK_EVIDENCE_INVALID'), { cause });
     }
-    return evaluations;
+    return { crossChecks: evaluations };
 }
 
 // #201 pin6092380877: the caller's submission transaction owns both the
@@ -65,6 +67,7 @@ async function recordSubmissionCrossChecks(tx, sampleId, actor) {
         throw new rules.TransitionError('Cross-check evidence requires the caller submission.', 409, 'CROSS_CHECK_SUBMISSION_REQUIRED');
     }
     const snapshot = await labSnapshot(tx, sample);
+    if (!snapshot) return unavailable();
     const rows = await tx.result.findMany({ where: { sampleId, isCurrent: true }, orderBy: { id: 'asc' } });
     const evaluations = evaluateCrossParameters(rows, snapshot), evaluatedBy = rules.actorName(actor), evaluatedAt = new Date();
     try {
@@ -81,7 +84,7 @@ async function recordSubmissionCrossChecks(tx, sampleId, actor) {
                 reasonCode: evaluation.reasonCode, inputs: json(evaluation.inputs), thresholds: json(evaluation.thresholds),
                 evaluatedBy, evaluatedAt } }));
         }
-        return saved.map(decode);
+        return { crossChecks: saved.map(decode) };
     } catch (cause) {
         throw Object.assign(new rules.TransitionError('Could not retain the submission cross-check evidence.',
             409, 'CROSS_CHECK_EVIDENCE_WRITE_FAILED'), { cause });
@@ -98,14 +101,15 @@ async function reviewCrossChecks(db, sampleId, actor) {
         // The existing gate deliberately retains its old text parser, units and
         // implicit tolerance (#201 pin6092909004; correction deferred to #278).
         const gate = require('../controllers/validationController').validateSampleMatrix(observations);
+        const snapshot = await labSnapshot(tx, sample);
         let current = null, selectionErrors = [];
-        if (selectionExists) {
+        if (selectionExists && snapshot) {
             const reported = await readSampleReportedValues(tx, sample, { partial: true });
-            const snapshot = await labSnapshot(tx, sample);
             current = { evaluations: evaluateCrossParameters(reported.values, snapshot), policyVersion: snapshot.version };
             selectionErrors = reported.errors;
         }
         return { sampleId, current, atSubmission: stored.map(decode), selectionErrors,
+            ...(snapshot ? { crossChecks: current?.evaluations || [] } : unavailable()),
             existingTextureGate: { evaluatedFrom: 'CURRENT_OBSERVATIONS', texture: gate.texture,
                 isBlocking: gate.isBlocking, blockingErrors: gate.blockingErrors } };
     });

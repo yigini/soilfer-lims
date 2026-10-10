@@ -1,6 +1,6 @@
 # Audit 4.8: cross-parameter checks (work in progress)
 
-Scope: issue #201 and pins 6092380877, 6092654261, 6092909004 and 6093661225.
+Scope: issue #201 and pins 6092380877, 6092654261, 6092909004, 6093661225 and 6093810127.
 
 Six laboratory policy keys supply every configurable threshold. The evaluator
 uses stored numeric observations at submission, or the validated current #192
@@ -33,6 +33,13 @@ never uses legacy advisory values, warnings or flags as inputs. Pin6093661225
 withdraws the earlier instruction to replace the legacy advisory implementation:
 validateSampleMatrix and every existing test remain unchanged. Only the separate
 new outcomes supply CrossCheckEvaluation rows and CROSS_CHECK_* flags.
+Pin6093810127 preserves the authorized historical workflow when the sample lab
+does not resolve through policyService: save, submission and review disclose
+crossChecks:[] and crossCheckUnavailableReason:CROSS_CHECK_LAB_REQUIRED, with no
+evaluation rows, invented lab or policy substitute. The panel translates the
+unavailable message in five locales. Registered inactive labs still use their
+own policy; existing workflow guards decide whether their work may continue.
+Every other registered-lab evidence failure remains an atomic stable4xx refusal.
 
 Startup integration is additive: Docker invokes the classified installer after
 its prerequisites, with the reviewed SQL and fresh-table oracle bundled outside
@@ -70,6 +77,18 @@ Validation so far:
   Missing C:N basis returns NOT_EVALUATED/BASIS_MISMATCH; equal explicit bases
   flag C:N 90/2. Actual submission HTTP responses retain the legacy diagnostics
   while returning the separate new outcomes and immutable evidence.
+- Missing-lab scope pin: 2 suites / 40 tests passed, zero skipped (26.390 s).
+  The real save/submission/review HTTP flow preserves an unregistered historical
+  lab's behavior, discloses the reason and writes zero evidence. Missing lab
+  metadata is read-only/unavailable; an inactive registered lab records its own
+  policy override normally. Five-locale panel tests disclose unavailable checks
+  without an empty pass list. Existing registered-lab rollback assertions remain.
+  Corrected client build passed (8.29 s); lint passed (0 errors, 14 existing warnings).
+- At wiring predecessor22da, normal setup/startup/security/matrix regression
+  checks passed10/11 suites and262/265 tests (54.102 s). Three unchanged matrix
+  assertions failed because of the unresolved-lab refusal; pin6093810127 resolves
+  that authority explicitly. This failed log is retained; the corrected normal
+  regression run is still pending.
 
 Outstanding: final startup and existing-matrix regression verification, followed
 by a rebase after #199 is audited and merged. Full server tests and final CI have

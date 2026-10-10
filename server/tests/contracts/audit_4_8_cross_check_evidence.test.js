@@ -1,7 +1,7 @@
 const { randomUUID } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { qcGateFixture } = require('../helpers/qcGateFixture');
-const { createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createWorkItemFixture, createSampleFixture } = require('../helpers/workflowFixtures');
 const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const rules = require('../../services/workflowStateRules');
 const { recordSubmissionCrossChecks: record, reviewCrossChecks: review } = require('../../services/crossCheckEvaluationService');
@@ -32,7 +32,7 @@ async function cnFixture(basis) {
 }
 test.each([null, 'AIR_DRY'])('current stored-numeric preview keeps legacy diagnostics separate for basis %s and writes no evidence', async basis => {
     const f = await cnFixture(basis), before = await f.snapshotAll();
-    const checks = await f.db.$transaction(tx => require('../../services/crossCheckEvaluationService').currentObservationCrossChecks(tx, f.sampleId, f.actor));
+    const { crossChecks: checks } = await f.db.$transaction(tx => require('../../services/crossCheckEvaluationService').currentObservationCrossChecks(tx, f.sampleId, f.actor));
     const cn = checks.find(row => row.ruleCode === 'CN_RATIO');
     expect(cn).toMatchObject(basis === null ? { outcome: 'NOT_EVALUATED', reasonCode: 'BASIS_MISMATCH', flagCode: null }
         : { outcome: 'FLAGGED', reasonCode: null, flagCode: 'CROSS_CHECK_CN_OUT_OF_RANGE' });
@@ -52,6 +52,57 @@ test.each([null, 'AIR_DRY'])('the actual submission response retains legacy diag
         expect(await f.db.crossCheckEvaluation.findUnique({ where: { id: cn.id } })).toMatchObject({ ruleCode: 'CN_RATIO', outcome: cn.outcome, reasonCode: cn.reasonCode });
         expect(await f.db.result.findMany({ where: { sampleId: f.sampleId, isCurrent: true } })).toEqual(observations);
     }, { repeatCommands: true });
+});
+test('an unregistered historical lab saves and submits through the real HTTP workflow with disclosed unavailable checks and zero evidence', async () => {
+    const f = await qcGateFixture(); owned.push(f);
+    const labRef = 'unregistered-' + randomUUID(), sampleId = randomUUID();
+    const sample = await createSampleFixture(f.db, { data: { id: sampleId, originalId: sampleId,
+        assignedLab: labRef, labId: labRef, status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE',
+        requiredAnalyses: '["SOC","TN"]', receptionDate: new Date() } });
+    const unit = require('../../seeds/units').UNITS.find(row => row.code === 'g/kg');
+    await f.db.unit.create({ data: unit });
+    for (const param of ['SOC', 'TN']) {
+        await f.db.analysis.create({ data: { code: param, name: 'Owned historical ' + param + ' determination', units: unit.code, unitCode: unit.code } });
+        await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId, assignedLab: labRef,
+            labId: labRef, analysis: param, assignedTo: f.actor.username, status: 'IN_PROGRESS' } });
+    }
+    const oldResults = await f.db.result.findMany(), oldEvidence = await f.db.crossCheckEvaluation.findMany(), labs = await f.db.lab.findMany();
+    await require('../helpers/qcRunHttpHarness').withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const save = await require('supertest')(app).post(`/api/results/${sampleId}`).set('Authorization', 'Bearer ' + token)
+            .send({ measurements: [{ param: 'SOC', value: '90', unit: unit.code }, { param: 'TN', value: '2', unit: unit.code }] });
+        expect(save.status).toBe(200); expect(save.body).toMatchObject({ success: true, crossChecks: [], crossCheckUnavailableReason: 'CROSS_CHECK_LAB_REQUIRED' });
+        expect(save.body.matrixDiagnostics.cnRatio.cnRatio).toBe(45);
+        const current = await f.db.result.findMany({ where: { sampleId, isCurrent: true }, orderBy: { param: 'asc' } });
+        expect(current.map(row => [row.param, row.value, row.numericValue])).toEqual([['SOC', '90', 90], ['TN', '2', 2]]);
+        const submit = await require('supertest')(app).post(`/api/results/${sampleId}/submit`).set('Authorization', 'Bearer ' + token);
+        expect(submit.status).toBe(200); expect(submit.body).toMatchObject({ status: 'SUBMITTED_FULL', crossChecks: [], crossCheckUnavailableReason: 'CROSS_CHECK_LAB_REQUIRED' });
+        expect(submit.body.matrixDiagnostics).toEqual(save.body.matrixDiagnostics);
+        expect(await f.db.result.findMany({ where: { sampleId, isCurrent: true }, orderBy: { param: 'asc' } })).toEqual(current);
+        const response = await require('supertest')(app).get(`/api/results/${sampleId}/cross-checks`).set('Authorization', 'Bearer ' + token);
+        expect(response.status).toBe(200); expect(response.body).toMatchObject({ current: null, crossChecks: [], atSubmission: [], crossCheckUnavailableReason: 'CROSS_CHECK_LAB_REQUIRED' });
+    }, { repeatCommands: true });
+    expect((await f.db.sample.findUnique({ where: { id: sample.id } })).status).toBe('SUBMITTED_FULL');
+    expect(await f.db.crossCheckEvaluation.findMany()).toEqual(oldEvidence);
+    expect(await f.db.lab.findMany()).toEqual(labs);
+    expect(await f.db.result.findMany({ where: { id: { in: oldResults.map(row => row.id) } } })).toEqual(oldResults);
+});
+test('missing sample lab metadata discloses unavailable preview/review without a policy substitute or database writes', async () => {
+    const f = await fixture();
+    await f.db.sample.update({ where: { id: f.sampleId }, data: { assignedLab: null, labId: null } });
+    const before = await f.snapshotAll(), service = require('../../services/crossCheckEvaluationService');
+    expect(await f.db.$transaction(tx => service.currentObservationCrossChecks(tx, f.sampleId, f.actor)))
+        .toEqual({ crossChecks: [], crossCheckUnavailableReason: 'CROSS_CHECK_LAB_REQUIRED' });
+    expect(await review(f.db, f.sampleId, f.actor)).toMatchObject({ current: null, crossChecks: [], atSubmission: [], crossCheckUnavailableReason: 'CROSS_CHECK_LAB_REQUIRED' });
+    expect(await f.snapshotAll()).toBe(before);
+});
+test('a registered inactive lab still records immutable checks using its own configured policy', async () => {
+    const f = await fixture();
+    await f.setPolicy([{ key: 'crossCheck.basesCecFactor', value: 1.4 }]);
+    await f.db.lab.update({ where: { id: f.labId }, data: { isActive: false } });
+    const submission = await f.submit(), bases = submission.crossChecks.find(row => row.ruleCode === 'BASES_CEC');
+    expect(submission.crossCheckUnavailableReason).toBeUndefined();
+    expect(bases).toMatchObject({ outcome: 'PASS', labId: f.labId, thresholds: { 'crossCheck.basesCecFactor': 1.4 } });
+    expect(await f.db.crossCheckEvaluation.count({ where: { sampleId: f.sampleId, labId: f.labId } })).toBe(7);
 });
 async function fixture({ differentText = false, curated = false } = {}) {
     const criteria = { blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0, ccvEvery: 0 };

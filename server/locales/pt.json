@@ -1877,6 +1877,9 @@
       "SAMPLE_NOT_FOUND": "Amostra não encontrada.",
       "ACCESS_DENIED_LAB": "A amostra está fora do âmbito do seu laboratório.",
       "CROSS_CHECK_SUBMISSION_REQUIRED": "A evidência de verificação requer o envio correspondente."
+    },
+    "unavailable": {
+      "CROSS_CHECK_LAB_REQUIRED": "Verificações cruzadas indisponíveis: a amostra não tem um laboratório registrado"
     }
   }
 }

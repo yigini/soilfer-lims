@@ -1877,6 +1877,9 @@
       "SAMPLE_NOT_FOUND": "Sample not found.",
       "ACCESS_DENIED_LAB": "The sample is outside your laboratory scope.",
       "CROSS_CHECK_SUBMISSION_REQUIRED": "Cross-check evidence requires the caller submission."
+    },
+    "unavailable": {
+      "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory"
     }
   }
 }

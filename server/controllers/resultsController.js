@@ -193,8 +193,8 @@ exports.saveResults = async (req, res) => {
                 where: { sampleId, isCurrent: true }
             });
             const matrixDiagnostics = validationController.validateSampleMatrix(allActiveResults);
-            const crossChecks = await require('../services/crossCheckEvaluationService').currentObservationCrossChecks(tx, sampleId, user);
-            return { validatedMeasurements, matrixDiagnostics, crossChecks,derivation };
+            const crossCheckOutcome = await require('../services/crossCheckEvaluationService').currentObservationCrossChecks(tx, sampleId, user);
+            return { validatedMeasurements, matrixDiagnostics, ...crossCheckOutcome,derivation };
         });
 
         // Return validation feedback
@@ -203,6 +203,7 @@ exports.saveResults = async (req, res) => {
             validation: outcome.validatedMeasurements.map(m => ({ param: m.param, flags: m.validation.flags })),
             matrixDiagnostics: outcome.matrixDiagnostics,
             crossChecks: outcome.crossChecks,
+            ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }),
             ...(outcome.derivation && {derivation:outcome.derivation})
         });
 
@@ -272,7 +273,8 @@ exports.submitForApproval = async (req, res) => {
             return { ...committed, matrixDiagnostics };
         });
         res.json({ success: true, status: 'SUBMITTED_FULL', sample: outcome.sample, submission: outcome.submission,
-            matrixDiagnostics: outcome.matrixDiagnostics, crossChecks: outcome.crossCheckEvaluations });
+            matrixDiagnostics: outcome.matrixDiagnostics, crossChecks: outcome.crossChecks,
+            ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
     } catch (error) {
         console.error('[submitForApproval] Error:', error);
         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,

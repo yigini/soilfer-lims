@@ -1877,6 +1877,9 @@
       "SAMPLE_NOT_FOUND": "Échantillon introuvable.",
       "ACCESS_DENIED_LAB": "L’échantillon est hors du périmètre de votre laboratoire.",
       "CROSS_CHECK_SUBMISSION_REQUIRED": "Les éléments probants nécessitent la soumission correspondante."
+    },
+    "unavailable": {
+      "CROSS_CHECK_LAB_REQUIRED": "Vérifications croisées indisponibles : aucun laboratoire enregistré pour cet échantillon"
     }
   }
 }

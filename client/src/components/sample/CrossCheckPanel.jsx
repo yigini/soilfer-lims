@@ -46,9 +46,12 @@ export default function CrossCheckPanel({ sampleId, reviewVersion, token, t, can
             <button type="button" data-testid="cross-check-reload" onClick={() => setReload(value => value + 1)}>{t('crossCheck.reload')}</button></p>}
         {!error && !data && <p>{t('crossCheck.loading')}</p>}
         {data && <>
+            {data.crossCheckUnavailableReason ? <p role="status" data-testid="cross-check-unavailable">
+                {t(`crossCheck.unavailable.${data.crossCheckUnavailableReason}`)}</p> : <>
             {data.current ? rows(data.current.evaluations, t('crossCheck.current')) : <p>{t('crossCheck.beforeSelection')}</p>}
             {rows(data.atSubmission, t('crossCheck.atSubmission'))}
             {data.selectionErrors.map(row => <p key={row.workItemId} role="status">{row.analysisCode}: {t(`reportedValue.errors.${row.code}`, row.code)}</p>)}
+            </>}
             <p data-testid="cross-check-existing-gate">{t('crossCheck.existingGate')}: {t(data.existingTextureGate.texture === null
                 ? 'crossCheck.gateNotEvaluated' : data.existingTextureGate.isBlocking ? 'crossCheck.gateBlocks' : 'crossCheck.gatePasses')}</p>
         </>}
