@@ -1,0 +1,230 @@
+{
+  "status": "PREPARED_POST_DEPLOY_COMMENT_TARGETS_NOT_DEPLOYED",
+  "head": "feac653495d6b8a21e082cec596f1e14672fb389",
+  "issueTargets": [
+    190,
+    191,
+    192,
+    193,
+    194,
+    195,
+    196,
+    197,
+    198,
+    199,
+    201,
+    202,
+    210,
+    211,
+    212,
+    252,
+    253,
+    262,
+    272
+  ],
+  "coordinatorIssue": 162,
+  "prs": [
+    {
+      "number": 258,
+      "title": "[Audit 252] QC runs: retire profile-only runs and require sample membership before QC entry",
+      "closingIssues": [
+        252
+      ],
+      "declaredIssueLines": [
+        "Closes #252"
+      ]
+    },
+    {
+      "number": 257,
+      "title": "[Audit 3.1] Attempt model: one WorkAttempt per measurement execution",
+      "closingIssues": [
+        190
+      ],
+      "declaredIssueLines": [
+        "Closes #190"
+      ]
+    },
+    {
+      "number": 259,
+      "title": "[Audit 253] QC runs: reviewed correction of transcription errors on failed runs",
+      "closingIssues": [
+        253
+      ],
+      "declaredIssueLines": [
+        "Closes #253"
+      ]
+    },
+    {
+      "number": 260,
+      "title": "[Audit 3.2] Repeat and correction commands with reason codes",
+      "closingIssues": [
+        191
+      ],
+      "declaredIssueLines": [
+        "Closes #191"
+      ]
+    },
+    {
+      "number": 263,
+      "title": "[Audit 4.2] Barcode scan-driven entry in the workbench",
+      "closingIssues": [
+        195
+      ],
+      "declaredIssueLines": [
+        "Closes #195"
+      ]
+    },
+    {
+      "number": 264,
+      "title": "[Audit CI] Preserve full server CI validation with sufficient test heap",
+      "closingIssues": [
+        262
+      ],
+      "declaredIssueLines": [
+        "Closes #262"
+      ]
+    },
+    {
+      "number": 265,
+      "title": "[Audit 3.3] Explicit reported-value selection across attempts",
+      "closingIssues": [
+        192
+      ],
+      "declaredIssueLines": [
+        "Closes #192"
+      ]
+    },
+    {
+      "number": 266,
+      "title": "[Audit 3.4] Nonconformity record (ISO §7.10)",
+      "closingIssues": [
+        193
+      ],
+      "declaredIssueLines": [
+        "Closes #193\r"
+      ]
+    },
+    {
+      "number": 267,
+      "title": "[Audit 4.1] Run-first workbench workflow with run header",
+      "closingIssues": [
+        194
+      ],
+      "declaredIssueLines": [
+        "Closes #194"
+      ]
+    },
+    {
+      "number": 268,
+      "title": "[Audit 4.3] Keyboard grid navigation for batch entry",
+      "closingIssues": [
+        196
+      ],
+      "declaredIssueLines": [
+        "Closes #196"
+      ]
+    },
+    {
+      "number": 269,
+      "title": "[Audit 4.5] Replicates and duplicates in the grid",
+      "closingIssues": [
+        198
+      ],
+      "declaredIssueLines": [
+        "Closes #198"
+      ]
+    },
+    {
+      "number": 273,
+      "title": "[Audit 1.5 follow-up] Wire the Result.rawInput additive upgrade before dependent guards",
+      "closingIssues": [
+        272
+      ],
+      "declaredIssueLines": [
+        "Closes #272"
+      ]
+    },
+    {
+      "number": 271,
+      "title": "[Audit 4.4] Live validation and override requests while typing",
+      "closingIssues": [
+        197
+      ],
+      "declaredIssueLines": [
+        "Closes #197"
+      ]
+    },
+    {
+      "number": 276,
+      "title": "[Audit 6.3] Report content per ISO/IEC 17025 7.8",
+      "closingIssues": [
+        212
+      ],
+      "declaredIssueLines": [
+        "Closes #212"
+      ]
+    },
+    {
+      "number": 275,
+      "title": "[Audit 4.6] Raw data capture and server-side calculation templates",
+      "closingIssues": [
+        199
+      ],
+      "declaredIssueLines": [
+        "Closes #199"
+      ]
+    },
+    {
+      "number": 280,
+      "title": "[Audit 4.8] Cross-parameter plausibility (review aid)",
+      "closingIssues": [
+        201
+      ],
+      "declaredIssueLines": [
+        "Closes #201"
+      ]
+    },
+    {
+      "number": 282,
+      "title": "[Audit 6.1] Amendment workflow with separate authoriser",
+      "closingIssues": [
+        210
+      ],
+      "declaredIssueLines": [
+        "Closes #210"
+      ]
+    },
+    {
+      "number": 285,
+      "title": "[Audit 6.2] Report revisions through approved amendments",
+      "closingIssues": [],
+      "declaredIssueLines": [
+        "Refs #211 (the issue closes after the post-deploy check)"
+      ]
+    },
+    {
+      "number": 286,
+      "title": "[Audit 4.9] Shared bench terminals: idle lock, analyst switch, draft safety",
+      "closingIssues": [],
+      "declaredIssueLines": [
+        "Refs #202 (the issue closes after the post-deploy check)"
+      ]
+    },
+    {
+      "number": 287,
+      "title": "[Audit 3.4] Bound preservation fingerprints in six release installers",
+      "closingIssues": [],
+      "declaredIssueLines": [
+        "Refs #193, #192, #191, #194, #197 and #201. Claudio pinned this single repair on #162 (6099580481, 6099940085), and the pre-merge proof threshold in 6100385595."
+      ]
+    },
+    {
+      "number": 289,
+      "title": "[#191] Link recorded legacy acceptance before the #191 installer",
+      "closingIssues": [],
+      "declaredIssueLines": [
+        "Refs #191, #162"
+      ]
+    }
+  ]
+}

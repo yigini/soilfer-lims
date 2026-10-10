@@ -58,10 +58,16 @@ retained `pr-gates-feac6534-pending.json` snapshot. The first preparation export
 included an old committed build receipt and was refused before build/copy.
 See `289-preparation-packaging-refusal.md`. Corrected frozen tooling b02238df
 passed all 30 Linux guards in 0.601 seconds. Its 25-source raw export and all
-application archive/index bytes are verified. A NEW build/fresh-copy proof is
-running under `combined-eb6de2e8-main-feac6534-retry-20261010210829Z`.
-See `289-guard-verification.md`. No PASSED complete fresh-copy proof or final
-manifest exists yet.
+application archive/index bytes are verified. The real build completed at
+21:14:48 UTC as image 159057d5. The post-build reserve guard refused before
+any fresh DB copy. After authorized cache-only pruning, a NEW proof is running
+under `combined-eb6de2e8-rehearsal-feac6534-20261010211834Z`, reusing only the
+valid build/source evidence. By 21:22 UTC the exact acceptance link/immediate
+repeat and #191 zero-blocker gate/install passed on the owned copy. Full
+preservation, remaining repeats/startup/API checks are still pending.
+See `289-build-provenance-reserve.md`. Disk headroom for deployment is with
+Claudio/YY; the production gate remains strict. No PASSED complete fresh-copy
+proof or final manifest exists yet.
 
 Claudio requested this kit on #162, comment 6099151121. Pip owns preparation;
 Claudio owns review and post-deployment checks. YY selected "Main now" and
