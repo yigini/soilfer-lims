@@ -1,5 +1,5 @@
 """Shared release/rehearsal operations. Importing this module performs no I/O."""
-import datetime, hashlib, json, os, pathlib, shutil, sqlite3, subprocess
+import datetime, hashlib, json, os, pathlib, re, shutil, sqlite3, subprocess
 
 HEAD = 'eb6de2e88df889be28972d393662ff0fc0abf711'
 LAST_DEPLOY = '283a8bb54b66a2167d34d80ad724bdd6460850b1'
@@ -158,7 +158,13 @@ def check_drop(before, current, allocated):
     return unexplained
 
 def command(root, args, label, expected=0, timeout=240, stdin=None):
-    result = subprocess.run(args, capture_output=True, text=True, input=stdin, timeout=timeout)
+    try:
+        result = subprocess.run(args, capture_output=True, text=True, input=stdin, timeout=timeout)
+    except subprocess.TimeoutExpired as error:
+        for suffix, content in [('stdout', error.stdout), ('stderr', error.stderr)]:
+            with (root / (label + '.' + suffix)).open('x') as output:
+                output.write(content.decode(errors='replace') if isinstance(content, bytes) else content or '')
+        raise
     for suffix, content in [('stdout', result.stdout), ('stderr', result.stderr)]:
         with (root / (label + '.' + suffix)).open('x') as output:
             output.write(content)
@@ -166,12 +172,50 @@ def command(root, args, label, expected=0, timeout=240, stdin=None):
         assert result.returncode == expected, label + ' failed; see retained logs'
     return result
 
+CLI_WRAPPER = """const fs=require('node:fs'),{spawnSync}=require('node:child_process');
+const child=spawnSync(process.execPath,process.argv.slice(1),{stdio:'inherit'});
+const peak=Number(fs.readFileSync('/sys/fs/cgroup/memory.peak','utf8').trim());
+process.stderr.write(JSON.stringify({releaseCliPeakBytes:peak,childStatus:child.status,childSignal:child.signal})+'\\n');
+process.exit(child.status===null?1:child.status);"""
+
+def stop_owned_cli(name, owner):
+    observed = subprocess.run(['docker', 'inspect', name, '--format',
+        '{{index .Config.Labels "io.soilfer.release-owned"}}'], capture_output=True, text=True, timeout=30)
+    if observed.returncode == 0:
+        assert observed.stdout.strip() == owner, 'Refusing to stop an unowned CLI container'
+        stopped = subprocess.run(['docker', 'stop', '-t', '10', name], capture_output=True, text=True, timeout=30)
+        assert stopped.returncode == 0, 'Owned CLI stop failed; hold writers for manual recovery'
+        running = subprocess.run(['docker', 'inspect', name, '--format', '{{.State.Running}}'],
+            capture_output=True, text=True, timeout=30)
+        assert running.returncode != 0 or running.stdout.strip() == 'false', 'An owned CLI writer remains'
+
 def cli(root, image, database_dir, script, mode, label):
     assert mode in ['--dry-run', '--apply']
     mount = 'type=volume,src=lims_lims-data,dst=/app/server/prisma' if database_dir == LIVE.parent else 'type=bind,src=' + str(database_dir) + ',dst=/app/server/prisma'
-    result = command(root, ['docker', 'run', '--rm', '--network', 'none', '--memory', '768m',
-        '--mount', mount, '--entrypoint', 'node', image, '/app/server/scripts/' + script,
-        '--db', '/app/server/prisma/dev.db', mode], label)
+    assert re.fullmatch('[a-zA-Z0-9_.-]+', label)
+    owner = str(root.resolve()) + ':' + label
+    name = 'lims-owned-cli-' + hashlib.sha256(owner.encode()).hexdigest()[:24]
+    # These bounds failed the original #193 implementation. Deployment still
+    # requires a successful fresh-copy proof of the audited streaming repair.
+    args = ['docker', 'run', '--rm', '--name', name, '--label', 'io.soilfer.release-owned=' + owner,
+        '--network', 'none', '--memory', '2g',
+        '-e', 'NODE_OPTIONS=--max-old-space-size=1536',
+        '--mount', mount, '--entrypoint', 'node', image, '-e', CLI_WRAPPER,
+        '/app/server/scripts/' + script, '--db', '/app/server/prisma/dev.db', mode]
+    try:
+        result = command(root, args, label, expected=None)
+    except BaseException:
+        stop_owned_cli(name, owner)
+        raise
+    measured = [json.loads(line) for line in result.stderr.splitlines()
+        if line.startswith('{"releaseCliPeakBytes":')]
+    metadata = {'containerName': name, 'memoryLimitBytes': 2147483648,
+        'nodeOptions': '--max-old-space-size=1536', 'exitCode': result.returncode,
+        'cgroupMemoryPeak': measured[-1] if measured else None}
+    with (root / (label + '-container.json')).open('x') as output:
+        json.dump(metadata, output, indent=2)
+    assert result.returncode == 0, label + ' failed; see retained logs'
+    assert len(measured) == 1 and 0 < measured[0]['releaseCliPeakBytes'] <= 2147483648
     return json.loads(result.stdout)
 
 def verify_attempt_plan(dry, reviewed_sha=None):

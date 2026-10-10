@@ -4,10 +4,49 @@ Target application commit: `eb6de2e88df889be28972d393662ff0fc0abf711`.
 Last deployed application commit: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
 
 Claudio requested this kit on #162, comment 6099151121. Pip owns preparation;
-Claudio owns review and post-deployment checks. Production execution requires
-YY's explicit go after Claudio reviews the exact coordinator, manifest and proof.
+Claudio owns review and post-deployment checks. YY selected "Main now" and
+"Auto after review" on October 10: deployment remains conditional on Claudio's
+exact-kit review and a successful fresh-production-copy rehearsal. The original
+YY decision must be verified and bound to the execution gate.
 
-Preparation is in progress. This document is not deployment authorization.
+Preparation is blocked by a reproducible #193 installer heap failure. Both
+rehearsals failed before #190 and before any live production operation. A
+separately audited installer repair and newly pinned application commit need a
+new rehearsal and kit review. This document is not deployment authorization.
+
+Verified evidence so far:
+
+- Exact main CI: 338 suites / 5,073 tests passed, run 38064045173.
+- Client build passed; lint passed with 0 errors and 14 existing warnings.
+- All 19 included PRs have matching-head audit passes and passing CI.
+- Candidate image built without a production database mount; identity and
+  build reserve are in `build-receipt.json`.
+- #190 read-only plan: READY, 17 new attempts, 19 result links, 0 flagged
+  groups, 225 missing ordered-work items across 10 samples, 0 changes. Missing
+  ordered work is reported evidence, not invented work or a backfill target.
+  Plan SHA: `7ffdb375cab35663d188d6087f02ee81161ec950feae7611bbbad6d8706d57f9`.
+- #193 failed at 768 MiB/default heap and again at 2 GiB/1536 MiB heap.
+  See `193-rehearsal-blocker.md`; both private production copies and full logs
+  remain on the production host under their distinct release directories.
+- CLI tooling now records cgroup memory.peak, uses explicitly owned container
+  names/labels, and stops a timed-out CLI writer only after ownership validation.
+  A failed install attempt always keeps production recovery forward-only.
+- 15 release guard tests pass. The real Docker read-only CLI proof preserved
+  both source/copy bytes and recorded 81,477,632 bytes cgroup peak for #190
+  planning. This does not establish #193's repaired peak.
+- Claudio pinned one separate PR for #193/#192, identical fingerprint bytes,
+  unchanged receipts/refusal codes, and a fresh-copy proof at the original
+  768 MiB CLI limit without a Node heap override. #205 and #284 stay out.
+
+Retained failed receipt hashes:
+
+- `combined-eb6de2e8-20261010T154300Z/rehearsal-receipt.json`:
+  `c19ee61cd1d307e019ce772bf7eee9746c64059c195a9e4fdde66bdef4824faf`.
+- `combined-eb6de2e8-20261010T160100Z/rehearsal-receipt.json`:
+  `e5c4756460299e08a240b444f4b97c246ff19a5aa6b15019fd04655a8de99dec`.
+
+All paths above are beneath `/opt/lims/releases/`. No final prepared manifest or
+PASSED rehearsal receipt exists yet. Do not execute `release-forward.py`.
 
 Required evidence:
 

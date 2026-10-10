@@ -1,0 +1,23 @@
+{
+  "status": "BUILT_ONLY_NOT_DEPLOYED",
+  "head": "eb6de2e88df889be28972d393662ff0fc0abf711",
+  "image": "sha256:76d5d7ae83a0f97f1732ded554a24670c1ee4c6bd189a01cf9ce2905c559913d",
+  "tag": "soilfer-lims:audit-combined-eb6de2e8-20261010T154300Z",
+  "sourceArchiveSha256": "7e6f719cc126f5987a65fdd5ddf0db2318f64153b736bb7bdc2d7589f65f6d29",
+  "verifiedUtc": "2026-10-10T15:50:36.815312+00:00",
+  "imageBytes": 413513955,
+  "reserveBytes": 8589934592,
+  "freeBytesBefore": {
+    "/opt/lims": 23122321408,
+    "/var/lib/docker": 23122321408
+  },
+  "freeBytesAfter": {
+    "/opt/lims": 19601887232,
+    "/var/lib/docker": 19601887232
+  },
+  "buildLogSha256": "f6bc99d646ef45e1c14394a47fac7e76147cb6c007ad7690f171dc41257f67a6",
+  "productionDatabaseMounts": 0,
+  "dockerIgnoredArchiveMembersNotExtracted": [
+    "server/node_modules"
+  ]
+}

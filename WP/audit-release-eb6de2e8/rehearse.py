@@ -3,7 +3,7 @@ import json, pathlib, re, shutil, subprocess, time
 import release_support as s
 
 ROOT = pathlib.Path(__file__).resolve().parent
-NAME = 'lims-owned-eb6de2e8-20261010T154300Z'
+NAME = 'lims-owned-' + ROOT.name
 PROBES = ['postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs',
           'postflight-qc-runs.cjs', 'postflight-policy.cjs']
 
@@ -12,7 +12,7 @@ def check(args):
 
 if __name__ == '__main__':
     assert ROOT.parent == pathlib.Path('/opt/lims/releases')
-    assert ROOT.name == 'combined-eb6de2e8-20261010T154300Z'
+    assert ROOT.name.startswith('combined-eb6de2e8-')
     assert not (ROOT / 'rehearsal-receipt.json').exists(), 'Never overwrite a retained rehearsal'
     build = json.loads((ROOT / 'build-receipt.json').read_text())
     assert build['head'] == s.HEAD and build['status'] == 'BUILT_ONLY_NOT_DEPLOYED'

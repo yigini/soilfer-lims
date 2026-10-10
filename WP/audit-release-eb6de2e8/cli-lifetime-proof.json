@@ -1,0 +1,19 @@
+{
+  "status": "READ_ONLY_CLI_LIFETIME_PROOF",
+  "head": "eb6de2e88df889be28972d393662ff0fc0abf711",
+  "totalChanges": 0,
+  "copyBytesPreserved": true,
+  "sourceCopyBytesPreserved": true,
+  "container": {
+    "containerName": "lims-owned-cli-f4be2fbb2b0f3ec4a2827aad",
+    "memoryLimitBytes": 2147483648,
+    "nodeOptions": "--max-old-space-size=1536",
+    "exitCode": 0,
+    "cgroupMemoryPeak": {
+      "releaseCliPeakBytes": 81477632,
+      "childStatus": 0,
+      "childSignal": null
+    }
+  },
+  "utc": "2026-10-10T16:14:55.126096+00:00"
+}

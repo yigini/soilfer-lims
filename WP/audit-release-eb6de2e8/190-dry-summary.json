@@ -1,0 +1,18 @@
+{
+  "status": "READ_ONLY_ATTEMPT_PLAN",
+  "head": "eb6de2e88df889be28972d393662ff0fc0abf711",
+  "utc": "2026-10-10T16:07:08.077714+00:00",
+  "sourceCopySha256": "d11ffb168af879ff6b51bfac471c23c8deb9cba641e89c5deaf0fd2236c323d9",
+  "classification": "PRE_190",
+  "planStatus": "READY",
+  "planSha256": "7ffdb375cab35663d188d6087f02ee81161ec950feae7611bbbad6d8706d57f9",
+  "newAttemptCount": 17,
+  "linkedResultCount": 19,
+  "flaggedGroupCount": 0,
+  "missingOrderedWorkCount": 225,
+  "samplesWithMissingOrderedWorkCount": 10,
+  "totalChanges": 0,
+  "productionExecution": false,
+  "copyBytesPreserved": true,
+  "dryRunSha256": "28d1476fec3f0f0c5507d67fb3454a69f024bee4224d03fe787c294ff142ded7"
+}

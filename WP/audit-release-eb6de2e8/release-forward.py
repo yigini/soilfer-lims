@@ -51,11 +51,20 @@ def verify_gate(manifest, gate, now=None):
     assert all(value in review['body'] for value in [gate['manifestSha256'], gate['coordinatorSha256'], gate['rehearsalReceiptSha256']])
     assert review['approvedAttemptPlanSha256'] == manifest['attemptPlanSha256']
     yy = gate['yyGo']
-    assert yy['confirmedByYY'] is True and yy['text'].strip().lower() == 'go'
+    assert yy['confirmedByYY'] is True
     assert yy['source'] == 'CLAUDE_LIMS_AUDIT_THREAD' and re.fullmatch('[a-f0-9]{64}', yy['evidenceSha256'])
     approved = datetime.datetime.fromisoformat(yy['timeUtc'].replace('Z', '+00:00'))
     reviewed = datetime.datetime.fromisoformat(review['timeUtc'].replace('Z', '+00:00'))
-    assert reviewed <= approved <= now and (now - approved).total_seconds() <= 1800
+    if yy.get('authorizationMode') == 'AUTO_AFTER_REVIEW':
+        # YY's Oct 10 decision authorizes this exact application commit after
+        # review/rehearsal, and does not require another permission request.
+        assert yy['text'] in ['Auto after review', 'go with the deploy']
+        assert yy['scopeHead'] == s.HEAD and approved <= now
+        assert yy['scopeDecision'] == 'Main now'
+        assert re.fullmatch('[a-f0-9]{64}', yy['scopeEvidenceSha256'])
+    else:
+        assert yy['text'].strip().lower() == 'go'
+        assert reviewed <= approved <= now and (now - approved).total_seconds() <= 1800
     assert gate['workloadControl']['labAndHubBuildsOwnedByYY'] is True
     assert gate['workloadControl']['releaseWindowControl'] in ['NO_LAB_HUB_BUILDS_OR_IMPORTS', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
     for name, expected in manifest['files'].items():
