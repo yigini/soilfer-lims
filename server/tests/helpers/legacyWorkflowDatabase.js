@@ -235,6 +235,9 @@ function beforeGuards(options) {
             assert.ok(amendmentModels.length===0||amendmentModels.length===amendmentTables.length,'Generated amendment datamodel is partial.');
             if(amendmentModels.length)expected.push({table:'SampleAmendment',fields:['requestPayload','version','priorApprovedBy','priorApprovedAt','selectedWorkItemIds']},
                 ...amendmentTables.map(table=>({table,missingTable:true})));
+            // #211 pin6097077343: exactly six nullable Report fields; the real
+            // additive installer adds them after the captured historical DDL.
+            expected.push({table:'Report',fields:['supersedesReportId','amendmentId','amendmentReason','issuedBy','approvedBy','amendmentAuthorizedBy']});
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }
