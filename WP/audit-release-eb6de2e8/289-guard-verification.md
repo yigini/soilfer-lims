@@ -7,9 +7,12 @@ in the new root. **30/30 Linux guards passed, exit 0, 0.601 seconds**.
 Log SHA256 `ad55e361d47f6dd51b4e4c2afd09fdc4389259cbbfbb60d5067a6a6e3b4991f5`.
 Owned guard/build/rehearsal root:
 `/opt/lims/releases/combined-eb6de2e8-main-feac6534-retry-20261010210829Z`.
-Unit `lims-owned-main-feac6534-retry-20261010210829z.service` is running the
-new build and subsequent fresh-copy proof. Earlier records below are retained
-for traceability. They do not establish a PASSED complete rehearsal.
+Unit `lims-owned-main-feac6534-retry-20261010210829z.service` completed a valid
+build and then refused the post-build reserve before any fresh DB copy or
+rehearsal receipt. A NEW proof runs only `rehearse.py` under
+`combined-eb6de2e8-rehearsal-feac6534-20261010211834Z`, reusing the valid build
+provenance. See `289-build-provenance-reserve.md`. Earlier records below are
+retained for traceability. They do not establish a PASSED complete rehearsal.
 
 Frozen integration source: `b0633b6ffbe04c9b4d0bb6b367930e5fb4af6356`.
 Raw Git export, 51 files, verified on the host before running guards.
@@ -29,8 +32,11 @@ Read-only current application gate snapshot:
 `pr-gates-feac6534-pending.json`, SHA256
 `2577e45b73bc239bfb549e8be6961d8f0da059b4dacf454a4361f06ac81d748e`.
 All 21 included PRs have matching-head audit passes and green CI; ungated 0.
-Merged-main CI 38085615017 is still pending at this snapshot. It does not
-authorize deployment.
+Merged-main CI 38085615017 was pending at that snapshot. The separately
+retained `pr-gates-feac6534-passed.json` now records all 21 PR gates and fully
+green merged-main CI, completed at 21:29:12 UTC. Its SHA256 is
+`2a44ff340a25e88f5b51bd02dee960ee888a346005631ac9f34eadaeb74ea58f`.
+Neither read-only snapshot authorizes deployment.
 
 Source export for merged application feac6534 verifies 2,224 raw Git blobs.
 Archive SHA256 `5ae6039446bbd3cb038e2ac202b6fee966c89de1513f144dfd29d5260ce9f10d`.
