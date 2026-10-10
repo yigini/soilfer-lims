@@ -640,14 +640,20 @@ describe('#191 recorded-acceptance link between the #190 and #191 installers', (
         }
         expect(hash(file)).toBe(before);
         expect(() => linkArguments(['--db', file, '--apply'])).toThrow(expect.objectContaining({ code: 'ACCEPTANCE_LINK_ARGUMENT_INVALID' }));
-        expect(linkArguments(['--db', file, '--apply', '--work-item', 'measured'])).toEqual({ dbPath: file, apply: true, workItemIds: ['measured'] });
+        expect(() => linkArguments(['--db', file, '--apply', '--work-item', 'measured'])).toThrow(expect.objectContaining({ code: 'ACCEPTANCE_LINK_ARGUMENT_INVALID' }));
+        const planSha256 = linkRecordedAcceptance({ dbPath: file }).planSha256;
+        expect(linkArguments(['--db', file, '--apply', '--work-item', 'measured', '--plan-sha256', planSha256]))
+            .toEqual({ dbPath: file, apply: true, workItemIds: ['measured'], planSha256 });
+        expect(() => linkRecordedAcceptance({ dbPath: file, apply: true, workItemIds: ['measured'], planSha256: '0'.repeat(64) }))
+            .toThrow(expect.objectContaining({ code: 'ACCEPTANCE_LINK_PLAN_MISMATCH', totalChanges: 0 }));
+        expect(hash(file)).toBe(before);
     });
 
     test('apply links the recorded ACCEPT, preserves every other row, clears the #191 gate and is idempotent', () => {
-        const file = blockedFixture(), original = rowsWithout(file);
-        const applied = linkRecordedAcceptance({ dbPath: file, apply: true, workItemIds: ['measured'] });
+        const file = blockedFixture(), original = rowsWithout(file), { planSha256 } = linkRecordedAcceptance({ dbPath: file });
+        const applied = linkRecordedAcceptance({ dbPath: file, apply: true, workItemIds: ['measured'], planSha256 });
         expect(applied).toMatchObject({ mode: 'APPLIED', blockedWorkItemCount: 0, eligible: [], unresolved: [],
-            receipt: { originalRowsAndFieldsPreserved: true, attemptStatusChanges: 1, auditEventsAdded: 1,
+            receipt: { planSha256, originalRowsAndFieldsPreserved: true, attemptStatusChanges: 1, auditEventsAdded: 1,
                 links: [{ workItemId: 'measured', attemptId: 'recorded-owner', reviewDecisionId: 'legacy-review' }] } });
         const eventId = applied.receipt.links[0].eventId;
         expect(rowsWithout(file, [eventId])).toEqual(original);
@@ -663,7 +669,7 @@ describe('#191 recorded-acceptance link between the #190 and #191 installers', (
             expect(db.prepare('SELECT attemptId FROM "ReviewDecision" WHERE id=\'legacy-review\'').get()).toEqual({ attemptId: null });
         } finally { db.close(); }
         const linked = hash(file);
-        expect(linkRecordedAcceptance({ dbPath: file, apply: true, workItemIds: ['measured'] }))
+        expect(linkRecordedAcceptance({ dbPath: file, apply: true, workItemIds: ['measured'], planSha256 }))
             .toMatchObject({ mode: 'NO_OP', totalChanges: 0, alreadyLinked: [{ eventId, workItemId: 'measured' }] });
         expect(hash(file)).toBe(linked);
         expect(installWorkRepeatContract({ dbPath: file }).releaseInventory).toEqual({ blockedWorkItemCount: 0, blockedWorkItems: [], totalChanges: 0 });
@@ -683,6 +689,21 @@ describe('#191 recorded-acceptance link between the #190 and #191 installers', (
         expect(dry.unresolved).toEqual([expect.objectContaining({ workItemId: 'measured', reasons: expect.arrayContaining([reason]) })]);
         expect(() => linkRecordedAcceptance({ dbPath: file, apply: true, workItemIds: ['measured'] }))
             .toThrow(expect.objectContaining({ code: 'ACCEPTANCE_LINK_UNRESOLVED', totalChanges: 0 }));
+        expect(hash(file)).toBe(before);
+    });
+
+    test('changed evidence for the same eligible work item refuses apply with zero writes', () => {
+        const file = blockedFixture(), reviewed = linkRecordedAcceptance({ dbPath: file });
+        const db = new Database(file), moved = '2026-09-08T15:30:00.000Z';
+        try {
+            db.prepare('UPDATE "ReviewDecision" SET "createdAt"=? WHERE "id"=\'legacy-review\'').run(moved);
+            db.prepare('UPDATE "WorkItem" SET "reviewedAt"=? WHERE "id"=\'measured\'').run(moved);
+        } finally { db.close(); }
+        const before = hash(file), changed = linkRecordedAcceptance({ dbPath: file });
+        expect(changed.eligible.map(row => row.workItemId)).toEqual(['measured']);
+        expect(changed.planSha256).not.toBe(reviewed.planSha256);
+        expect(() => linkRecordedAcceptance({ dbPath: file, apply: true, workItemIds: ['measured'], planSha256: reviewed.planSha256 }))
+            .toThrow(expect.objectContaining({ code: 'ACCEPTANCE_LINK_PLAN_MISMATCH', totalChanges: 0 }));
         expect(hash(file)).toBe(before);
     });
 

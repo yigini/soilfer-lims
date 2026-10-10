@@ -66,16 +66,20 @@ function assess(db, blocked) {
         if (results.some(row => instant(row.createdAt) === null || instant(decision.createdAt) < instant(row.createdAt))) reasons.push('DECISION_PRECEDES_RESULT');
     }
     return { workItemId: item.id, sampleId: item.sampleId, analysis: item.analysis, attemptId: attempt.id,
-        resultIds: [...owner.resultIds], reviewDecisionId: decision?.id || null, reviewedAt: item.reviewedAt, reasons };
+        resultIds: [...owner.resultIds], reviewDecisionId: decision?.id || null, reviewedAt: item.reviewedAt,
+        decisionCreatedAt: decision?.createdAt ?? null, reasons };
 }
 
 function plan(db) {
     assertPrerequisites(db);
     const inventory = inventorySubmittedRecordedOwners(db);
     const assessed = inventory.blockedWorkItems.map(blocked => assess(db, blocked));
-    return { reconciliation: RECONCILIATION, blockedWorkItemCount: inventory.blockedWorkItemCount,
-        eligible: assessed.filter(row => !row.reasons.length).map(({ reasons, ...row }) => row),
-        unresolved: assessed.filter(row => row.reasons.length), alreadyLinked: linkedEvents(db) };
+    const eligible = assessed.filter(row => !row.reasons.length).map(({ reasons, ...row }) => row);
+    const unresolved = assessed.filter(row => row.reasons.length);
+    // The digest binds apply to the exact reviewed evidence tuple, not only to the item ids.
+    const planSha256 = fingerprint({ reconciliation: RECONCILIATION, blockedWorkItemCount: inventory.blockedWorkItemCount, eligible, unresolved });
+    return { reconciliation: RECONCILIATION, blockedWorkItemCount: inventory.blockedWorkItemCount, eligible, unresolved,
+        planSha256, alreadyLinked: linkedEvents(db) };
 }
 
 function retainedRows(db, { acceptedAttemptIds = [], newEventIds = [] } = {}) {
@@ -92,7 +96,7 @@ function sameScope(expected, eligible) {
         new Set(expected).size === expected.length;
 }
 
-function linkRecordedAcceptance({ dbPath, apply = false, workItemIds = [] } = {}) {
+function linkRecordedAcceptance({ dbPath, apply = false, workItemIds = [], planSha256 } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('ACCEPTANCE_LINK_DATABASE_REQUIRED', 'An explicit database path is required.');
     const target = path.resolve(dbPath);
     const reader = new Database(target, { readonly: true, fileMustExist: true });
@@ -107,12 +111,13 @@ function linkRecordedAcceptance({ dbPath, apply = false, workItemIds = [] } = {}
     }
     if (before.unresolved.length) throw fail('ACCEPTANCE_LINK_UNRESOLVED', 'Some blocked work has no single recorded acceptance to link.', { plan: before });
     if (!sameScope(workItemIds, before.eligible)) throw fail('ACCEPTANCE_LINK_SCOPE_MISMATCH', 'Name exactly the eligible work items with --work-item.', { plan: before });
+    if (planSha256 !== before.planSha256) throw fail('ACCEPTANCE_LINK_PLAN_MISMATCH', 'Apply requires the reviewed dry-run planSha256.', { plan: before });
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
     try {
         db.pragma('foreign_keys=ON');
         return db.transaction(() => {
             const current = plan(db);
-            if (current.unresolved.length || !sameScope(workItemIds, current.eligible)) {
+            if (current.planSha256 !== planSha256 || current.unresolved.length || !sameScope(workItemIds, current.eligible)) {
                 throw fail('ACCEPTANCE_LINK_STATE_CHANGED', 'The database changed since the dry-run; re-run it.', { plan: current });
             }
             const acceptedAttemptIds = current.eligible.map(row => row.attemptId);
@@ -142,7 +147,7 @@ function linkRecordedAcceptance({ dbPath, apply = false, workItemIds = [] } = {}
                 db.pragma('foreign_key_check').length) {
                 throw fail('ACCEPTANCE_LINK_INTEGRITY_REFUSED', 'The link failed its post-checks.');
             }
-            const receipt = { reconciliation: RECONCILIATION, links, originalRowsSha256: expected, originalRowsAndFieldsPreserved: true,
+            const receipt = { reconciliation: RECONCILIATION, planSha256, links, originalRowsSha256: expected, originalRowsAndFieldsPreserved: true,
                 attemptStatusChanges: links.length, auditEventsAdded: links.length };
             receipt.receiptSha256 = fingerprint(receipt);
             return { ...after, mode: 'APPLIED', receipt, totalChanges: db.prepare('SELECT total_changes() n').get().n };
@@ -160,10 +165,13 @@ function parseArguments(args) {
         else if (arg === '--dry-run') continue;
         else if (arg === '--db' && args[i + 1] && !args[i + 1].startsWith('--')) options.dbPath = args[++i];
         else if (arg === '--work-item' && args[i + 1] && !args[i + 1].startsWith('--')) options.workItemIds.push(args[++i]);
+        else if (arg === '--plan-sha256' && /^[0-9a-f]{64}$/.test(args[i + 1] || '')) options.planSha256 = args[++i];
         else throw fail('ACCEPTANCE_LINK_ARGUMENT_INVALID', 'Unknown or incomplete argument.');
     }
     if (!options.dbPath || seen.has('--apply') && seen.has('--dry-run')) throw fail('ACCEPTANCE_LINK_ARGUMENT_INVALID', 'Provide --db and one execution mode.');
-    if (options.apply && !options.workItemIds.length) throw fail('ACCEPTANCE_LINK_ARGUMENT_INVALID', 'Apply requires every --work-item it may change.');
+    if (options.apply && (!options.workItemIds.length || !options.planSha256)) {
+        throw fail('ACCEPTANCE_LINK_ARGUMENT_INVALID', 'Apply requires every --work-item it may change and the reviewed --plan-sha256.');
+    }
     return options;
 }
 
