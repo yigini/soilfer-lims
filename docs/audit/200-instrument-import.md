@@ -214,3 +214,25 @@ template/source hash and exact activations; commit re-reads them in the file's
 single transaction. A new receipt is created only with successful draft and
 entry-only QC writes. The upload has a16MiB memory resource cap, independent of
 laboratory batch/policy settings. CSV/TXT are implemented; XLSX is unfinished.
+
+After #210 merged as e0462c85, the branch is rebased onto that exact main. Both
+startup gates, installer assets, fixture completeness checks and prior assertions
+are retained. Own Prisma7.10 clients now have94 models. A new schema-emitted,
+metadata/Help-only owned validation template has SHA256
+6d216ef232db2e7b0772bd1d59cf2425eeefa6f4542a1636e94feb4d027e08fe,
+zero Sample/Result/import/amendment bindings and intact foreign keys. The old
+6fa template is retained byte-equivalent; working490 is unchanged. The normal
+ten-file rebase group passes10 suites/252 tests/0 skipped (88.999s), including
+the full startup/bootstrap/installer and CSV/draft/QC/unit/scanner groups.
+
+XLSX archive decoding is being added with16MiB compressed/64MiB total
+uncompressed/4096-member resource caps. It reads stored/deflated members in memory
+and checks actual sizes, CRCs, local/central headers, descriptors, duplicates,
+overlaps and macro/external-link paths. No archive member is extracted to disk.
+The existing dev-locked saxes6.0.0 (ISC) is pinned as a proposed production XML
+dependency; xmlchars2.2.0 is its locked transitive dependency. Their current
+GitHub Advisory Database queries return zero matching advisories; this does
+not clear the repository's41 existing npm findings. Saxes upstream is archived.
+Per6096456697, explicit YY approval in the concrete#200 PR is still required
+before merge. No parser dependency approval, complete XLSX import or full-suite
+pass is claimed.
