@@ -38,8 +38,8 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         boundary:'-- Contract guards'}),
     // #199: inspect the exact additive source; no runtime writer exemption.
     Object.freeze({ functionName: 'loadCalculationTemplateMigrationSource', loader: 'services/calculationTemplateMigrationSource.js',
-        loaderSha256: '09cdd6d652373a82ff5f84d687ad8e7806aabd8178da4e3224298e830e058787',
-        directory: '20261009000400_calculation_templates', sqlSha256: '48f27dbe5921dd73e4241a7fc0c16faa3560ccbc7630a57a53b77dec96cba093',
+        loaderSha256: 'e37503b280f678ab45d9980524203dd30dad6347bd1321291befc4e4644d929f',
+        directory: '20261009000400_calculation_templates', sqlSha256: '84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8',
         boundary: '-- Contract guards' }),
     // #272 pin6087372517: inspect only the unchanged rawInput additive DDL.
     Object.freeze({ functionName: 'loadResultRawInputMigrationSource', loader: 'services/resultRawInputMigrationSource.js',
@@ -144,7 +144,7 @@ const ATTEMPT_FIXTURE = Object.freeze({
 // #199 pin6088661994: one digest-bound factory/export, one exact caller.
 const CALCULATION_FIXTURE = Object.freeze({
     file: 'tests/helpers/calculationHistoricalFixture.js', exportName: 'createPre199CalculationFixture',
-    sha256: 'c2b67b0f4d8288e6018c2e45b12d8ac004244f9801d89be9ee9a4990d729dc81',
+    sha256: 'c30a45823719903ffcb0a95326af62955374a5ef58a9ef7b846fc0545b6585ff',
     ddl: 'tests/helpers/fixtures/pre199_full_application_schema.sql',
     ddlSha256: '33f558c18a0b47c806989e6b83eca2ce15923df9c27caf5036cbe11c4420b114',
     caller: 'tests/contracts/audit_4_6_calculation_install.test.js'
@@ -152,7 +152,7 @@ const CALCULATION_FIXTURE = Object.freeze({
 // #199 pins6089156077/6090475511: catalogue prerequisites and the real installer only.
 const CALCULATION_PREREQUISITES = Object.freeze({
     file: 'tests/helpers/calculationReleasePrerequisites.js', exportName: 'installCalculationReleasePrerequisites',
-    sha256: 'bb8d5befaeb4484fd8660ff0e163a32384d731eef6562d4e4fbe9e426ebb9600',
+    sha256: 'c8dcb032ed0a8b8d0cc206bdefb29ccb10dc8a9b4e89926628e20df9ead31e04',
     callers: ['tests/helpers/qcGateFixture.js', 'tests/helpers/normalizedQcFixture.js', 'tests/helpers/repeatQcPredecessors.js',
         'tests/contracts/audit_2_3_native_runs.test.js', 'tests/contracts/audit_1_2_guard_installer.test.js',
         'tests/contracts/deployment_readiness_bootstrap.test.js']

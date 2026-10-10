@@ -1323,8 +1323,8 @@ async function runSuite() {
     if (JSON.stringify(calculationAfter.rows) !== JSON.stringify(calculationBefore.rows) ||
         calculationBefore.receipts.some(before => !calculationAfter.receipts.some(after => JSON.stringify(after) === JSON.stringify(before))))
         throw Error('199 default entrypoint changed retained analytical, audit or receipt rows');
-    console.log('  ✓ PRE_199 → shipped default docker-entrypoint.sh → COMPLETE; inactive references 11, activations/backfill 0; retained evidence preserved; repeat NO_OP writes 0');
-    console.log(JSON.stringify({calculationEntrypointProof:{dry:calculationBefore.dry,ready:calculationAfter.ready,
+    console.log('  ✓ calculation-default-entrypoint-pre199: PRE_199 → shipped default docker-entrypoint.sh → COMPLETE; inactive references 11, activations/backfill 0; retained evidence preserved; direct installer-module repeat NO_OP writes 0');
+    console.log(JSON.stringify({calculationEntrypointProof:{scenario:'calculation-default-entrypoint-pre199',repeatInvocation:'direct installer module (not a second entrypoint run)',dry:calculationBefore.dry,ready:calculationAfter.ready,
         again:calculationAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:calculationAfter.noOpBytesPreserved}}));
 
     // 7. Upgrade: Run target image on the populated baseline volume

@@ -31,7 +31,8 @@ async function checkStoredCompletion(db, sample, item, results, actor) {
             if (rows.some(result => !validation.validateNumericMethod(result.value, methodRules, format).isValid)) return { ready: false, code: 'RESULT_NOT_COMPLETE' };
         }
     }
-    const mapping = await db.equipmentMethodEligibility.findFirst({ where: { labId: sample.assignedLab || sample.labId, analysisCode: item.analysis } });
+    const labId = sample.assignedLab || sample.labId;
+    const mapping = labId ? await db.equipmentMethodEligibility.findFirst({ where: { labId, analysisCode: item.analysis } }) : null;
     const eligibleIds = mapping?.eligibleEquipmentIds ? parseJson(mapping.eligibleEquipmentIds, null) : [];
     if (!Array.isArray(eligibleIds)) return { ready: false, code: 'INSTRUMENT_CONFIGURATION_INVALID' };
     for (const result of current) {

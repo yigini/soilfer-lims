@@ -238,7 +238,7 @@ test('managed creation installs the same PASS guard and preserves historical res
     });
 });
 
-test('managed receipt failure rolls the five new tables, unit and references back while retaining every old object and row', () => {
+test('managed receipt failure rolls the five new tables and references back while retaining every old object and row', () => {
     const { file } = createPre199CalculationFixture(); files.push(file);
     raw(file, db => db.exec("CREATE TRIGGER owned_calc_receipt_failure BEFORE INSERT ON _schema_migrations WHEN NEW.id='199_calculation_templates' BEGIN SELECT RAISE(ABORT,'OWNED_CALC_RECEIPT_FAILURE'); END;"));
     const before = snapshot(file), digest = hash(file);
@@ -282,7 +282,7 @@ test('real fresh schema dry-run, additive install and repeated no-op preserve al
     expect(snapshot(file)).toEqual(after); expect(hash(file)).toBe(installed);
 });
 
-test('receipt refusal rolls every new guard, unit and reference back atomically', async () => {
+test('receipt refusal rolls every new guard and reference back atomically', async () => {
     const file = await freshFixture();
     raw(file, db => db.exec("CREATE TRIGGER owned_calc_receipt_failure BEFORE INSERT ON _schema_migrations WHEN NEW.id='199_calculation_templates' BEGIN SELECT RAISE(ABORT,'OWNED_CALC_RECEIPT_FAILURE'); END;"));
     const before = snapshot(file), digest = hash(file);
@@ -436,6 +436,21 @@ test('every managed table is byte-identical to its independently emitted fresh P
     for (const [table, sql] of Object.entries(source.freshTables)) expect(source.schemaSql.match(new RegExp(`CREATE TABLE "${table}" \\([\\s\\S]*?\\n\\);`))[0]).toBe(sql);
     expect(source.schemaSql).not.toMatch(/CHECK|TRIGGER|DROP|ALTER/);
     expect(source.guardsSql.match(/CREATE TRIGGER/g)).toHaveLength(16);
+});
+test('the actual point INSERT guard refuses out-of-range ordinals before capacity and extra points after capacity', async () => {
+    const file = await freshFixture(); installCalculationTemplates({ dbPath: file, apply: true });
+    const curve = await curveContext(file); raw(file, db => insertCurve(db, curve));
+    const insert = (db, ordinal) => db.prepare('INSERT INTO CalibrationPoint(curveId,ordinal,standardConcentration,response) VALUES(?,?,?,?)')
+        .run(curve.id, ordinal, ordinal, ordinal * 2);
+    for (const ordinal of [0, -1, 2.5, curve.pointCount + 1]) {
+        const before = snapshot(file);
+        expect(() => raw(file, db => insert(db, ordinal))).toThrow('CALIBRATION_POINT_INVALID');
+        expect(snapshot(file)).toEqual(before);
+    }
+    raw(file, db => { insert(db, 1); insert(db, 2); });
+    const before = snapshot(file);
+    expect(() => raw(file, db => insert(db, 3))).toThrow('CALIBRATION_POINT_INVALID');
+    expect(snapshot(file)).toEqual(before);
 });
 
 test('CLI requires an explicit existing database and an unambiguous mode', () => {

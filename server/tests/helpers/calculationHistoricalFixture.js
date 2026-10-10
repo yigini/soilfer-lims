@@ -7,7 +7,9 @@ const catalogue = require('../../seeds/data/catalogue.json');
 
 // #199 pin6088661994. Unmodified fresh Prisma7.10 DDL from schema at
 // 200ca0bdaf6a4cf6c445fa39f58c96a80bb7714f; cwd server; exact command:
-// prisma migrate diff --from-empty --to-schema <exact schema blob> --script
+// Reproduced for audit6093305929 with the exact saved git-show schema above:
+// node C:/Users/yigin/Documents/soilfer-lims/server/node_modules/prisma/build/index.js migrate diff --from-empty --to-schema C:/Users/yigin/AppData/Local/Temp/qc199-audit-6093305929-pre199.prisma --script
+// Prisma CLI7.10.0; schema SHA256 8592b294e3e042723b313e4b08a9081fae3d0bf0af40a113646f89e155edbd75.
 // 65670 bytes, SHA25633f558c18a0b47c806989e6b83eca2ce15923df9c27caf5036cbe11c4420b114.
 // The SQL has no added header. Provenance belongs here, outside its exact bytes.
 // Pin6091749172: positive catalogue prerequisites include pct_mass from the

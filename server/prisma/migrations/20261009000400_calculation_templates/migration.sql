@@ -176,6 +176,11 @@ BEGIN
       AND native.factorToBase>0 AND reporting.factorToBase>0
       AND native.factorToBase<=1.7976931348623157e308 AND reporting.factorToBase<=1.7976931348623157e308
   ) THEN RAISE(ABORT,'CALC_TEMPLATE_UNIT_MISMATCH') END;
+  SELECT CASE WHEN NEW.action='ACTIVATE' AND EXISTS (
+    SELECT 1 FROM "CalcTemplate" template JOIN "Analysis" analysis ON analysis.code=NEW.analysisCode
+    WHERE template.id=NEW.templateId AND json_type(template.precisionSource,'$.unit')='text'
+      AND json_extract(template.precisionSource,'$.unit')<>analysis.unitCode
+  ) THEN RAISE(ABORT,'CALC_TEMPLATE_PRECISION_REQUIRED') END;
   SELECT CASE WHEN NEW.action NOT IN ('ACTIVATE','DEACTIVATE') OR NEW.verifiedAgainstSop<>1
     OR length(trim(NEW.reason))=0 OR NOT EXISTS (
       SELECT 1 FROM "CalcTemplate" template WHERE template.id=NEW.templateId AND template.version=NEW.templateVersion
@@ -205,8 +210,9 @@ BEGIN
     OR (CASE WHEN json_valid(NEW.executedMethodRevision) THEN json_type(NEW.executedMethodRevision)<>'object' ELSE 1 END)
     OR (CASE WHEN json_valid(NEW.thresholdSource) THEN json_type(NEW.thresholdSource)<>'object' ELSE 1 END)
     OR (NEW.r IS NOT NULL AND (NEW.r < -1 OR NEW.r > 1)) OR (NEW.rSquared IS NOT NULL AND (NEW.rSquared<0 OR NEW.rSquared>1))
-    OR (NEW.status='PASS' AND (NEW.slope IS NULL OR NEW.slope=0 OR NEW.intercept IS NULL OR NEW.r IS NULL OR NEW.rSquared IS NULL
-      OR NEW.levelCount<NEW.minPointsApplied OR NEW.r<NEW.minRApplied OR NEW.failReason IS NOT NULL))
+    -- The dedicated PASS-coefficients guard owns null/nonfinite/zero-slope
+    -- refusals, so its stable code does not depend on trigger firing order.
+    OR (NEW.status='PASS' AND (NEW.levelCount<NEW.minPointsApplied OR NEW.r<NEW.minRApplied OR NEW.failReason IS NOT NULL))
     OR (NEW.status='FAIL' AND (NEW.failReason IS NULL OR length(trim(NEW.failReason))=0))
     OR (NEW.failReason='DEGENERATE_FIT' AND (NEW.status<>'FAIL' OR NEW.slope IS NOT NULL OR NEW.intercept IS NOT NULL OR NEW.r IS NOT NULL OR NEW.rSquared IS NOT NULL))
     OR (NEW.revision>1 AND (NEW.reason IS NULL OR length(trim(NEW.reason))=0))

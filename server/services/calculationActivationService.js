@@ -38,6 +38,11 @@ async function compatibleUnits(db, template, analysis) {
     }
     return { native, reporting };
 }
+// Historical correction reads its immutable bound row through this owner;
+// selecting today's active variant remains solely policyService.calcTemplate.
+async function readBoundActivation(db, id) {
+    return db.calcTemplateActivation.findUnique({ where: { id } });
+}
 async function change(db, actor, id, body, now = new Date()) {
     templates.permission(actor, true);
     return db.$transaction(async tx => {
@@ -56,6 +61,9 @@ async function change(db, actor, id, body, now = new Date()) {
         if (body.action === 'ACTIVATE') {
             if (template.outputDecimals === null) throw fail(422, 'CALC_TEMPLATE_PRECISION_REQUIRED', 'Clone the reference and verify fixed reporting decimals.');
             await compatibleUnits(tx, template, analysis);
+            if (template.precisionSource?.unit && template.precisionSource.unit !== analysis.unitCode) {
+                throw fail(422, 'CALC_TEMPLATE_PRECISION_REQUIRED', 'Clone the reference and verify decimals for the reporting unit.');
+            }
         }
         const current = await state(tx, lab.id, row.analysisCode, body.methodologyId);
         if (body.expectedActivationId !== (current.head?.id || null) || body.action === 'DEACTIVATE' &&
@@ -74,4 +82,4 @@ async function change(db, actor, id, body, now = new Date()) {
         return created;
     });
 }
-module.exports = { change, getState, compatibleUnits };
+module.exports = { change, getState, compatibleUnits, readBoundActivation };

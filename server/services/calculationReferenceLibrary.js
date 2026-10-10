@@ -11,9 +11,14 @@ const moisture = sop('GLOSOLAN-SOP-20', 'cc4831en', '2023-01-24', [7], '9');
 const wb = sop('GLOSOLAN-SOP-02', 'ca7471en', '2019-10-28', [15, 16], '9.1');
 const olsen = sop('GLOSOLAN-SOP-10', 'cb3644en', '2021-01-13', [7], '9');
 const bray = sop('GLOSOLAN-SOP-09', 'cb3460en', '2021-01-13', [8], '9');
-const cec = sop('GLOSOLAN-SOP-17', 'cc1200en', '2022-07-26', [9], '9.1');
-const cations = { ...cec, section: '9.2' };
-const kjeldahl = sop('GLOSOLAN-SOP-14', 'cb3642en', '2021-01-18', [10, 11], '9');
+const cec = { ...sop('GLOSOLAN-SOP-17', 'cc1200en', '2022-07-26', [9], '9.1'), pdfPage: 12,
+    equation: 'Section9.1 CEC equation: titre difference × acid normality ×100/soil mass ×extract/aliquot volumes.',
+    moistureCorrection: 'The printed equation has no additional moisture correction factor. Verify the sample mass basis against the local SOP before activation.' };
+const cations = { ...cec, section: '9.2',
+    equation: 'Section9.2 Ca/Mg/Na/K equations: blank-corrected extract concentration ×extract/soil mass ×charge/atomic mass /10 ×dilution factor.' };
+const kjeldahl = { ...sop('GLOSOLAN-SOP-14', 'cb3642en', '2021-01-18', [10, 11], '9'), pdfPage: 13,
+    equation: 'Section9 N equation: (V1−V0) ×c(H+) ×MN /m, in mg/g or g/kg. PDF page14 describes division by ten for percent N.',
+    moistureCorrection: 'The printed equation has no additional moisture correction factor. PDF page14 allows air-dry or oven-dry40°C reporting; verify the local sample mass basis before activation.' };
 const wb133 = { document: 'Bierer et al., Evaluation of a microplate spectrophotometer for soil organic carbon determination in south-central Idaho',
     publication: 'Soil Science Society of America Journal 85 (2021) 438–451', doi: '10.1002/saj2.20165',
     section: '2.3', url: 'https://acsess.onlinelibrary.wiley.com/doi/10.1002/saj2.20165', sourceKind: 'PRIMARY_RESEARCH' };

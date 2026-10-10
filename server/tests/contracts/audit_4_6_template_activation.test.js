@@ -61,6 +61,17 @@ test('all lab profiles and the inactive library resolve no implicit template or 
     }
     expect(await db.calcTemplateActivation.count()).toBe(0);
 });
+test('published precision in percent cannot activate for g/kg reporting; an explicit reporting-SOP clone can', async () => {
+    const { db, labA, managerA, method } = context, source = row('walkley-black-130'), before = await evidence(db);
+    expect(JSON.parse(source.precisionSource).unit).toBe('pct_mass');
+    expect((await db.analysis.findUnique({ where: { code: 'SOC' } })).unitCode).toBe('g/kg');
+    await expect(activations.change(db, managerA, source.id, activationBody(source, { labId: labA.id, methodologyId: method.id })))
+        .rejects.toMatchObject({ statusCode: 422, code: 'CALC_TEMPLATE_PRECISION_REQUIRED' });
+    expect(await evidence(db)).toEqual(before);
+    const local = await templates.clone(db, managerA, source.id, cloneBody(source, labA, method));
+    expect(local.precisionSource).toMatchObject({ kind: 'LOCAL_SOP', citation: expect.any(String) });
+    expect(await activations.change(db, managerA, local.id, activationBody(local))).toMatchObject({ templateId: local.id });
+});
 
 test('cloning and editing insert new versions, retain original definitions and source rules, and audit the reason/SOP', async () => {
     const { db, labA, managerA, method } = context, source = row('walkley-black-130');

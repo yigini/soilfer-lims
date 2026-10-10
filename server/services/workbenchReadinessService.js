@@ -160,8 +160,8 @@ async function resolveEquipmentRequirement(db, item, labId) {
     const methodId = item.methodologyId || null;
     const policy = await require('./policyService').resolve(labId, 'equipment.requireEquipment',
         { db, analysisCode: item.analysis, methodologyId: methodId });
-    let mapping = methodId ? await db.equipmentMethodEligibility.findFirst({ where: { labId, analysisCode: item.analysis, methodId } }) : null;
-    if (!mapping) mapping = await db.equipmentMethodEligibility.findFirst({ where: { labId, analysisCode: item.analysis, methodId: null } });
+    let mapping = labId && methodId ? await db.equipmentMethodEligibility.findFirst({ where: { labId, analysisCode: item.analysis, methodId } }) : null;
+    if (!mapping && labId) mapping = await db.equipmentMethodEligibility.findFirst({ where: { labId, analysisCode: item.analysis, methodId: null } });
     const eligibleIds = mapping?.eligibleEquipmentIds == null ? [] : require('./cataloguePolicy').parseJson(mapping.eligibleEquipmentIds, null);
     if (!Array.isArray(eligibleIds)) throw Object.assign(new Error('Equipment eligibility must be a list.'),
         { statusCode: 409, code: 'INSTRUMENT_CONFIGURATION_INVALID' });

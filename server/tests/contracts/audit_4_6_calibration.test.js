@@ -19,7 +19,7 @@ const files = [];
 const clients = [];
 let context;
 
-async function fixture() {
+async function fixture({ additionalItem = false } = {}) {
     const directory = path.resolve(__dirname, '../.tmp'); fs.mkdirSync(directory, { recursive: true });
     const file = assertOwnedTestDatabase(path.join(directory, `audit_legacy_calibration_${randomUUID()}.db`), 'system:fixture'); files.push(file);
     beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'CREATE_PRISMA' });
@@ -60,10 +60,17 @@ async function fixture() {
         dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date() } });
     const item = await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: sample.id, labId: lab.id, analysis: method.analysisCode,
         methodologyId: method.id, assignedTo: analyst.username, status: 'IN_PROGRESS', history: '[]' } });
-    const run = await native.buildNativeRun(db, analyst, { labId: lab.id, workItemIds: [item.id], analyses: [{ analysisCode: method.analysisCode, methodologyId: method.id }], seed: 'owned-calibration' });
+    let laterItem = null;
+    if (additionalItem) {
+        const laterSample = await createSampleFixture(db, { data: { id: randomUUID(), originalId: randomUUID(), status: 'PROCESSING', assignedLab: lab.id,
+            dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date() } });
+        laterItem = await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: laterSample.id, labId: lab.id, analysis: method.analysisCode,
+            methodologyId: method.id, assignedTo: analyst.username, status: 'IN_PROGRESS', history: '[]' } });
+    }
+    const run = await native.buildNativeRun(db, analyst, { labId: lab.id, workItemIds: [item.id, ...(laterItem ? [laterItem.id] : [])], analyses: [{ analysisCode: method.analysisCode, methodologyId: method.id }], seed: 'owned-calibration' });
     const input = { analysisCode: method.analysisCode, templateId: template.id, templateVersion: template.version, activationId: activation.id,
         expectedCurveId: null, points: [{ standardConcentration: 0, response: 1 }, { standardConcentration: 1, response: 3 }, { standardConcentration: 2, response: 5 }] };
-    return { file, db, lab, analyst, otherAnalyst, manager, outsider, method, template, activation, run, input, sample, item,
+    return { file, db, lab, analyst, otherAnalyst, manager, outsider, method, template, activation, run, input, sample, item, laterItem,
         start: () => native.startNativeRun(db, run.id, analyst),
         snapshot: async () => JSON.parse(JSON.stringify(await Promise.all([db.calibrationCurve.findMany({ orderBy: { id: 'asc' } }),
             db.calibrationPoint.findMany({ orderBy: [{ curveId: 'asc' }, { ordinal: 'asc' }] }), db.auditLog.findMany({ orderBy: { id: 'asc' } }),
@@ -266,6 +273,106 @@ test('the pinned prerequisite helper has only the closed owned successors and no
 });
 
 const correctionInputs={absorbance:'3.00',blankConcentration:'0',extractVolume:'20',dilutionFactor:'2',sampleMass:'1',moistureCorrectionFactor:'1'};
+// Audit6093305929: independent Pearson oracle for x=[0,1,2], y=[1,3,5.1].
+const boundaryR = 0.9999008674099175;
+test.each(['LAB', 'METHOD'].flatMap(scope => [
+    { scope, key: 'curveMinPoints', minimum: 3, pass: true },
+    { scope, key: 'curveMinPoints', minimum: 4, pass: false },
+    { scope, key: 'curveMinR', minimum: boundaryR - 0.000001, pass: true },
+    { scope, key: 'curveMinR', minimum: boundaryR + 0.000001, pass: false }
+]))('$scope $key boundary $minimum retains a curve PASS=$pass from laboratory policy', async scenario => {
+    const f = context;
+    await rules.change(f.manager, { labId: f.lab.id, analysisCode: 'P_OLSEN', methodologyId: f.method.id, expectedVersion: 1,
+        criteria: { curveMinPoints: null, curveMinR: null }, reason: 'Use laboratory policy calibration limits' }, { db: f.db });
+    const scope = scenario.scope === 'METHOD' ? { analysisCode: 'P_OLSEN', methodologyId: f.method.id } : {};
+    await require('../../services/policyService').change(f.manager, f.lab.id, { expectedVersion: 0,
+        reason: 'Owned laboratory calibration policy boundary', changes: [
+            { key: 'qc.curveMinPoints', value: scenario.key === 'curveMinPoints' ? scenario.minimum : 3, ...scope },
+            { key: 'qc.curveMinR', value: scenario.key === 'curveMinR' ? scenario.minimum : 0.995, ...scope }
+        ] }, { db: f.db });
+    await f.start();
+    const saved = await curves.recordCurve(f.db, f.run.id, f.analyst, { ...f.input, points: [
+        { standardConcentration: 0, response: 1 }, { standardConcentration: 1, response: 3 }, { standardConcentration: 2, response: 5.1 }
+    ] });
+    expect(saved.r).toBeCloseTo(boundaryR, 12);
+    expect(saved.status).toBe(scenario.pass ? 'PASS' : 'FAIL');
+    expect(saved[scenario.key === 'curveMinPoints' ? 'minPointsApplied' : 'minRApplied']).toBe(scenario.minimum);
+    expect(JSON.parse(saved.thresholdSource)[scenario.key].source).toBe(scenario.scope + '_OVERRIDE');
+    const resolved = await rules.resolve(f.lab.id, 'P_OLSEN', { db: f.db, methodologyId: f.method.id });
+    expect(resolved.deferredFields).not.toContain('curveMinPoints');
+    expect(resolved.deferredFields).not.toContain('curveMinR');
+});
+
+test('a passing recalibration binds later readings to revision2 while the original Result/calculation remain on revision1', async () => {
+    const f = await fixture({ additionalItem: true }), original = await correctionReading(f);
+    const second = await curves.recordCurve(f.db, f.run.id, f.analyst, { ...f.input, expectedCurveId: original.curve.id,
+        reason: 'Owned passing recalibration', points: [{ standardConcentration: 0, response: 2 },
+            { standardConcentration: 1, response: 4 }, { standardConcentration: 2, response: 6 }] });
+    expect(second).toMatchObject({ status: 'PASS', revision: 2, supersedesId: original.curve.id });
+    const writer = require('../../services/resultWriteService'), inputs = { ...correctionInputs, absorbance: '4' };
+    const preview = await writer.previewResultCalculation(f.db, { sampleId: f.laterItem.sampleId, workItemId: f.laterItem.id, actor: f.analyst, inputs });
+    expect(preview.curve.id).toBe(second.id);
+    const later = await f.db.$transaction(tx => writer.writeResult(tx, { sampleId: f.laterItem.sampleId, workItemId: f.laterItem.id, actor: f.analyst,
+        measurement: { param: 'P_OLSEN', value: preview.calculation.output,
+            calculation: { ...preview.active, curveId: second.id, inputs } } }));
+    expect(await f.db.resultCalculation.findUnique({ where: { resultId: later.id } })).toMatchObject({ curveId: second.id });
+    expect(await f.db.result.findUnique({ where: { id: original.result.id } })).toEqual(original.result);
+    expect(await f.db.resultCalculation.findUnique({ where: { resultId: original.result.id } })).toEqual(original.calculation);
+});
+test.each([null, 'unresolvable-owned-lab'])('no-template completion retains the historical path for lab %s without writes', async lab => {
+    const f = context;
+    const item = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: f.sample.id, labId: f.lab.id,
+        analysis: 'P_BRAY1', assignedTo: f.analyst.username, status: 'IN_PROGRESS', history: '[]' } });
+    const result = await require('../helpers/workAttemptFixtures').createExecutionResultFixture(f.db, { data: {
+        id: randomUUID(), sampleId: f.sample.id, param: 'P_BRAY1', value: '7', numericValue: 7, unit: 'mg/kg', isCurrent: true, isValid: true
+    } });
+    const root = await f.db.user.create({ data: { id: randomUUID(), username: randomUUID(), email: `${randomUUID()}@example.invalid`,
+        password: 'synthetic-unusable', role: 'SUPER_ADMIN' } });
+    const historicalSample = { ...f.sample, assignedLab: lab, labId: lab }, before = await f.snapshot();
+    expect(await require('../../services/storedResultCompletenessService').checkStoredCompletion(f.db, historicalSample, item, [result], root))
+        .toMatchObject({ ready: true, resultIds: [result.id] });
+    expect(await f.snapshot()).toEqual(before);
+});
+
+test('UPDATE and DELETE are refused on every calculation table, preserving all original rows', async () => {
+    const f = context, original = await correctionReading(f), before = await correctionSnapshot(f);
+    const unchanged = async (operation, code) => {
+        await expect(operation).rejects.toThrow(code);
+        expect(await correctionSnapshot(f)).toEqual(before);
+    };
+    // Literal statements keep every SQL probe statically inspectable by the
+    // existing workflow scanner, without a dynamic SQL allowance.
+    await unchanged(f.db.$executeRawUnsafe('UPDATE CalcTemplate SET id=id WHERE id=?', f.template.id), 'CALC_TEMPLATE_IMMUTABLE');
+    await unchanged(f.db.$executeRawUnsafe('DELETE FROM CalcTemplate WHERE id=?', f.template.id), 'CALC_TEMPLATE_IMMUTABLE');
+    await unchanged(f.db.$executeRawUnsafe('UPDATE CalcTemplateActivation SET id=id WHERE id=?', f.activation.id), 'CALC_ACTIVATION_IMMUTABLE');
+    await unchanged(f.db.$executeRawUnsafe('DELETE FROM CalcTemplateActivation WHERE id=?', f.activation.id), 'CALC_ACTIVATION_IMMUTABLE');
+    await unchanged(f.db.$executeRawUnsafe('UPDATE CalibrationCurve SET id=id WHERE id=?', original.curve.id), 'CALIBRATION_CURVE_IMMUTABLE');
+    await unchanged(f.db.$executeRawUnsafe('DELETE FROM CalibrationCurve WHERE id=?', original.curve.id), 'CALIBRATION_CURVE_IMMUTABLE');
+    await unchanged(f.db.$executeRawUnsafe('UPDATE CalibrationPoint SET ordinal=ordinal WHERE curveId=? AND ordinal=1', original.curve.id), 'CALIBRATION_POINT_IMMUTABLE');
+    await unchanged(f.db.$executeRawUnsafe('DELETE FROM CalibrationPoint WHERE curveId=? AND ordinal=1', original.curve.id), 'CALIBRATION_POINT_IMMUTABLE');
+    await unchanged(f.db.$executeRawUnsafe('UPDATE ResultCalculation SET id=id WHERE id=?', original.calculation.id), 'RESULT_CALCULATION_IMMUTABLE');
+    await unchanged(f.db.$executeRawUnsafe('DELETE FROM ResultCalculation WHERE id=?', original.calculation.id), 'RESULT_CALCULATION_IMMUTABLE');
+});
+test('an actual calculation SQL context abort becomes a stable409 through the mapped repeat controller', async () => {
+    const f = context, original = await correctionReading(f), before = await correctionSnapshot(f);
+    let guardError;
+    // Raw SQL retains the actual SQLite guard code instead of Prisma's generic
+    // model-write constraint translation. Reuse the original context unchanged.
+    try { await f.db.$executeRawUnsafe('INSERT INTO ResultCalculation(id,resultId,templateId,templateVersion,activationId,inputs,parameters,intermediate,nativeValue,nativeUnit,conversionFactor,unitConversion,unroundedOutput,output,outputUnit,curveId,engineVersion,computedBy,computedAt) SELECT ?,resultId,templateId,templateVersion,activationId,inputs,parameters,intermediate,nativeValue,nativeUnit,conversionFactor,unitConversion,unroundedOutput,?,outputUnit,curveId,engineVersion,computedBy,computedAt FROM ResultCalculation WHERE id=?',
+        randomUUID(), original.calculation.output + 1, original.calculation.id); }
+    catch (error) { guardError = error; }
+    expect(guardError?.message).toContain('RESULT_CALCULATION_CONTEXT_MISMATCH');
+    expect(await correctionSnapshot(f)).toEqual(before);
+    // Exercise only the controller's service-error boundary with the real SQL
+    // abort. Authentication/authorization and workflow behavior have their own
+    // retained HTTP contracts; no role, guard or analytical data is mocked.
+    jest.spyOn(require('../../services/workRepeatService'), 'requestRepeat').mockRejectedValueOnce(guardError);
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn().mockReturnThis() };
+    await require('../../controllers/workRepeatController').requestRepeat({ params: { id: f.item.id }, user: f.analyst, body: {} }, res);
+    expect(res.status).toHaveBeenCalledWith(409);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'RESULT_CALCULATION_CONTEXT_MISMATCH' }));
+    expect(await correctionSnapshot(f)).toEqual(before);
+});
 test.each([
     {absorbance:'3.00',value:40,extract:1,genericMax:0.1,above:false},
     {absorbance:'9.00',value:160,extract:4,genericMax:1000,above:true}

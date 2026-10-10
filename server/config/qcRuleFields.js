@@ -15,5 +15,5 @@ const SHIPPED_ANALYSIS_DEFAULTS = Object.freeze(Object.fromEntries([
     ...['SAND', 'SILT', 'CLAY', 'TEXTURE'].map(code => [code, { duplicateMode: 'ABS_DIFF', duplicateAbsMax: 3, crmEveryNBatches: 0 }]),
     ...['EXT_ZN', 'EXT_FE', 'EXT_CU', 'EXT_MN', 'EXT_B', 'EXT_MO', 'DTPA_EXT_CO'].map(code => [code, { duplicateRpdMax: 20 }])
 ]));
-const DEFERRED_FIELDS = Object.freeze(['maxBatchSize', 'crmEveryNBatches', 'ccvEvery', 'ccvMin', 'ccvMax', 'curveMinPoints', 'curveMinR', 'repeatabilityLimit']);
+const DEFERRED_FIELDS = Object.freeze(['maxBatchSize', 'crmEveryNBatches', 'ccvEvery', 'ccvMin', 'ccvMax', 'repeatabilityLimit']);
 module.exports = { FIELD_POLICIES, SHIPPED_ANALYSIS_DEFAULTS, DEFERRED_FIELDS };

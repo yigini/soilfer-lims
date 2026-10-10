@@ -1,4 +1,4 @@
-// #199 pin6089156077: closed owned-file release preparation. Only the three
+// #199 pin6089156077: closed owned-file release preparation. Only the six
 // retained QC fixture successors may call this export, with the owned db only.
 const fs = require('node:fs'), path = require('node:path');
 const Database = require('better-sqlite3');

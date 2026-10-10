@@ -12,7 +12,7 @@ const { fail } = templates;
 // payloads cannot select another laboratory, analysis, method or run.
 async function selection(db, ctx, { metadata = false } = {}) {
     const lab = await policy.resolveLab(ctx.labId, db);
-    if (!lab) throw fail(409, 'CALC_TEMPLATE_SCOPE_INVALID', 'The result laboratory is unavailable.');
+    if (!lab) return null; // No exact laboratory scope can have an active template.
     const analyte = { analysisCode: ctx.analysis.code, methodologyId: ctx.methodId || null };
     const active = await curves.activeTemplate(db, { lab, analyte });
     if (!active) return null;
@@ -72,12 +72,13 @@ async function prepareCalculation(db, ctx, measurement, numberFormat) {
 // rewritten or silently rebound to a later template/curve.
 async function prepareCorrection(db, ctx, original, measurement, numberFormat) {
     const bound = await db.resultCalculation.findUnique({ where: { resultId: original.id },
-        include: { template: true, activation: true, curve: { include: { points: { orderBy: { ordinal: 'asc' } } } } } });
+        include: { template: true, curve: { include: { points: { orderBy: { ordinal: 'asc' } } } } } });
     const supplied = measurement.calculation;
     if (!bound) {
         if (supplied !== undefined) throw fail(400, 'ATTEMPT_CORRECTION_FIELDS_INVALID', 'This Result has no bound calculation.');
         return null;
     }
+    bound.activation = await activations.readBoundActivation(db, bound.activationId);
     if (supplied === undefined) throw fail(422, 'CALC_CORRECTION_INPUTS_REQUIRED', 'Correct the complete raw measurements for this calculated Result.');
     if (!supplied || typeof supplied !== 'object' || Array.isArray(supplied) ||
         Object.keys(supplied).some(key => key !== 'inputs') || !Object.hasOwn(supplied, 'inputs'))

@@ -2,9 +2,9 @@ const fs = require('node:fs'), path = require('node:path');
 const { createHash } = require('node:crypto');
 const { referenceRows } = require('./calculationReferenceLibrary');
 const DIRECTORY = '20261009000400_calculation_templates';
-const SHA256 = '48f27dbe5921dd73e4241a7fc0c16faa3560ccbc7630a57a53b77dec96cba093';
+const SHA256 = '84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8';
 const ORACLE_SHA256 = '684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d';
-const REFERENCE_SHA256 = 'c8a9d21fbbac293807d41c66034b14be3773977fd47e1ee8975f9f6a1a226140';
+const REFERENCE_SHA256 = '18acae8f86e9f2a53db9640af789c231ff6d508528ca520a6f9862787e8afbd8';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const mismatch = cause => Object.assign(new Error('Calculation release evidence differs from the reviewed source.', { cause }),
     { statusCode: 409, code: 'CALC_SOURCE_MISMATCH' });
