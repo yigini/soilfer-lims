@@ -99,13 +99,15 @@ function loadEmptyCalculationCatalogue(volume) {
         `const Database=require('better-sqlite3');const db=new Database('/app/server/prisma/dev.db',{readonly:true,fileMustExist:true});try{
            if(db.prepare('SELECT count(*) n FROM Analysis').get().n||db.prepare('SELECT count(*) n FROM Unit').get().n)
              throw Error('Owned catalogue-load proof refuses existing catalogue rows');console.log('CATALOGUE_PREREQUISITES_ABSENT');
-         }finally{db.close();}`], { encoding: 'utf8' });
+         }finally{db.close();}`], { encoding: 'utf8', timeout: 120000 });
     if (!absent.includes('CATALOGUE_PREREQUISITES_ABSENT')) throw Error('Empty catalogue proof missing');
     // Existing authorities run explicitly on the disposable lab database.
     // The calculation installer does not insert analyses, units or offers.
-    for (const [script, args] of [['units', []], ['references', []], ['catalogue', ['--confirm']]])
+    for (const [script, args] of [['units', []], ['references', []], ['catalogue', ['--confirm']]]) {
+        console.log(`  Loading owned catalogue prerequisite through existing ${script} authority`);
         cp.execFileSync('docker', ['run', '--rm', '-v', `${volume}:/app/server/prisma`,
-            '-e', 'DATABASE_PATH=/app/server/prisma/dev.db', IMAGE_TAG, 'node', `seeds/${script}.js`, ...args], { stdio: 'pipe' });
+            '-e', 'DATABASE_PATH=/app/server/prisma/dev.db', IMAGE_TAG, 'node', `seeds/${script}.js`, ...args], { stdio: 'pipe', timeout: 120000 });
+    }
 }
 
 function extractTokenAndUser(data) {
@@ -337,7 +339,13 @@ async function runSuite() {
         throw new Error('FATAL: Container reseeded an already-populated database on restart!');
     }
     console.log('  ✓ Verified seed.js was safely skipped on restart');
-    cp.execFileSync('docker', ['stop', restartContainer]);
+    console.log('  Preparing 199 conflict proof: quiescing its disposable source containers');
+    cp.execFileSync('docker', ['stop', restartContainer], { timeout: 60000 });
+    const stoppedSourceStates = cp.execFileSync('docker', ['inspect', '--format', '{{.State.Running}}', localContainer, restartContainer],
+        { encoding: 'utf8', timeout: 60000 }).trim().split(/\r?\n/);
+    if (stoppedSourceStates.length !== 2 || stoppedSourceStates.some(state => state !== 'false'))
+        throw Error('199 owned conflict snapshot requires both source writers stopped');
+    console.log('  Source containers stopped; starting bounded WAL-aware owned snapshot/conflict proof');
 
     // A conflicting controlled prerequisite is injected only into a new owned
     // backup of this empty lab. Both modes must refuse before any installer
@@ -345,11 +353,25 @@ async function runSuite() {
     const conflictVolume = registerVolume(`lims_199_unit_conflict_${TS}`);
     const conflictProofOutput = cp.execFileSync('docker', ['run', '--rm', '-v', `${localVol}:/source:ro`,
         '-v', `${conflictVolume}:/owned-conflict`, IMAGE_TAG, 'node', '-e',
-        `(async()=>{const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+        `(()=>{const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
           const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-          const source='/source/dev.db',file='/owned-conflict/dev.db',sourceBefore=hash(source);
-          const reader=new Database(source,{readonly:true,fileMustExist:true});try{await reader.backup(file);}finally{reader.close();}
+          const source='/source/dev.db',file='/owned-conflict/dev.db';
+          // The two source containers are stopped and the mount remains read-only.
+          // Copy the complete quiesced SQLite file set, including committed WAL;
+          // SQLite must not create its WAL index on the read-only source mount.
+          const components=['','-wal','-shm','-journal'];
+          const manifest=base=>Object.fromEntries(components.map(suffix=>[suffix,fs.existsSync(base+suffix)?hash(base+suffix):null]));
+          const sourceBefore=manifest(source);
+          if(!sourceBefore[''])throw Error('199 owned source database is absent');
+          if(components.some(suffix=>fs.existsSync(file+suffix)))throw Error('199 snapshot refuses an existing owned destination');
+          for(const suffix of components){
+            if(sourceBefore[suffix]!==null)fs.copyFileSync(source+suffix,file+suffix,fs.constants.COPYFILE_EXCL);
+          }
+          if(JSON.stringify(manifest(file))!==JSON.stringify(sourceBefore)||JSON.stringify(manifest(source))!==JSON.stringify(sourceBefore))
+            throw Error('199 quiesced SQLite snapshot bytes differ');
           const db=new Database(file,{fileMustExist:true});try{
+            if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)
+              throw Error('199 owned SQLite snapshot integrity differs');
             if(db.prepare('SELECT count(*) n FROM Unit').get().n)throw Error('Conflicting-unit proof requires the owned empty catalogue');
             db.prepare('INSERT INTO Unit(code,display,quantityKind,factorToBase,synonyms,updatedAt) VALUES(?,?,?,?,?,?)')
               .run('pct_mass','%','RATIO',1,'[]','2026-10-10T00:00:00.000Z');
@@ -358,10 +380,11 @@ async function runSuite() {
           for(const apply of [false,true]){let refused=false;try{installer.installCalculationTemplates({dbPath:file,apply});}
             catch(error){if(error.code!=='UNIT_CATALOGUE_CONFLICT')throw error;refused=true;}
             if(!refused||hash(file)!==before)throw Error('199 controlled conflict was not a zero-write refusal');}
-          if(hash(source)!==sourceBefore)throw Error('199 owned conflict proof changed its source');
+          if(JSON.stringify(manifest(source))!==JSON.stringify(sourceBefore))throw Error('199 owned conflict proof changed a source artifact');
           console.log(JSON.stringify({code:'UNIT_CATALOGUE_CONFLICT',dryRunAndApplyRefused:true,totalChanges:0,
-            refusedDatabaseBytesPreserved:true,sourceDatabaseBytesPreserved:true}));
-        })().catch(error=>{console.error(error);process.exit(1)});`], { encoding: 'utf8' }).trim();
+            refusedDatabaseBytesPreserved:true,sourceDatabaseBytesPreserved:true,sourceArtifactsPreserved:true,
+            quiescedSqliteFileSetCopied:true,sourceBefore}));
+        })();`], { encoding: 'utf8', timeout: 120000 }).trim();
     const conflictProof = JSON.parse(conflictProofOutput);
     if (!conflictProof.dryRunAndApplyRefused || !conflictProof.sourceDatabaseBytesPreserved) throw Error('199 controlled conflict proof missing');
     fs.writeFileSync(path.join(tmpDir, '199-controlled-unit-conflict-proof.json'), JSON.stringify(conflictProof));
