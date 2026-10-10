@@ -39,6 +39,18 @@ test.each([9, 14, 27, 36, 45, 46, 50, 58])('implied format ID %s refuses numeric
     const row = source('<c r="A1"><v>45200</v></c>', { styles: '<cellXfs><xf numFmtId="' + id + '"/></cellXfs>' });
     expect(() => assertXlsxMappedCell(row, 0, dot)).toThrow(expect.objectContaining({ code: 'IMPORT_XLSX_DISPLAY_SCALED' }));
 });
+
+test.each(['0', 'false', ' false '])('inherited percentage format with boolean %s cannot hide behind a direct General format', apply => {
+    const row = source('<c r="A1"><v>0.25</v></c>', { styles: '<cellStyleXfs><xf numFmtId="9"/></cellStyleXfs>' +
+        '<cellXfs><xf xfId="0" numFmtId="0" applyNumberFormat="' + apply + '"/></cellXfs>' });
+    expect(row.cellEvidence[0]).toMatchObject({ numFmtId: 9, formatCode: '0%' });
+    expect(() => assertXlsxMappedCell(row, 0, dot)).toThrow(expect.objectContaining({ code: 'IMPORT_XLSX_DISPLAY_SCALED' }));
+});
+
+test('invalid style boolean is refused as malformed metadata rather than silently applying the direct format', () => {
+    expect(() => source('<c r="A1"><v>0.25</v></c>', { styles: '<cellXfs><xf numFmtId="0" applyNumberFormat="not-a-boolean"/></cellXfs>' }))
+        .toThrow(expect.objectContaining({ code: 'IMPORT_XLSX_INVALID' }));
+});
 test.each(['0.00', '#,##0.00', '0.00E+00', '0.00&quot;kg&quot;', '0.00\\%'])('plain/literal format %s retains the stored value', code => {
     const row = source('<c r="A1"><v>1.2500</v></c>', { styles: styles(code) });
     expect(row.cells[0]).toBe('1.2500'); expect(() => assertXlsxMappedCell(row, 0, dot)).not.toThrow();

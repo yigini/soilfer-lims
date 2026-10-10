@@ -109,7 +109,9 @@ function readStyles(trees, part) {
         const baseIndex = attribute(node, 'xfId'), base = baseIndex === undefined ? null : bases[integer(baseIndex)];
         if (baseIndex !== undefined && !base) invalid();
         const apply = attribute(node, 'applyNumberFormat'), own = attribute(node, 'numFmtId');
-        const id = integer(apply === '0' && base ? attribute(base, 'numFmtId') || '0' : own ?? (base ? attribute(base, 'numFmtId') : null) ?? '0');
+        if (apply !== undefined && !['0', '1', 'false', 'true'].includes(apply.trim())) invalid();
+        const inherit = apply !== undefined && ['0', 'false'].includes(apply.trim()) && base;
+        const id = integer(inherit ? attribute(base, 'numFmtId') || '0' : own ?? (base ? attribute(base, 'numFmtId') : null) ?? '0');
         const code = formats.get(id) ?? BUILTIN_FORMATS[id] ?? null;
         if (code === null && !builtinDate(id)) invalid(); return { numFmtId: id, formatCode: code };
     });
