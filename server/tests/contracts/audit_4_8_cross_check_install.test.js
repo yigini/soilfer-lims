@@ -78,12 +78,19 @@ test('PRE_201 upgrades additively with every original analytical/QC/audit field,
 test('real direct startup refuses missing cross-check installation before app startup and preserves the owned file', async () => {
     const f = await fixture();
     require('../../scripts/bootstrap_pt_nonconformity').bootstrapPtNonconformity({ dbPath: f.file, apply: true });
+    // #199 is merged and now precedes the #201 startup gate. Install its real
+    // additive owner on this owned historical file; retain honest catalogue
+    // deferrals, with no fabricated catalogue or expanded fixture authority.
+    const calculations=require('../../scripts/install_calculation_templates').installCalculationTemplates({dbPath:f.file,apply:true});
+    expect(calculations.classification).toBe('COMPLETE');expect(calculations.plannedUnitInsertCount).toBe(0);
+    expect(calculations.backfillCount).toBe(0);
     const before = state(f.file), bytes = hash(f.file);
     const child = spawnSync(process.execPath, [path.join(root, 'index.js')], { cwd: root,
         env: { ...process.env, NODE_ENV: 'test', DATABASE_PATH: f.file, DATABASE_URL: 'file:' + f.file, PORT: '0' },
         encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
     expect(child.error).toBeUndefined(); expect(child.status).toBe(1);
     expect(child.stdout).toContain('RESULT_OVERRIDE_STARTUP_READY');
+    expect(child.stdout).toContain('CALCULATION_STARTUP_READY');
     expect(child.stdout).not.toContain('CROSS_CHECK_STARTUP_READY');
     expect(child.stderr).toContain('CROSS_CHECK_NOT_INSTALLED');
     expect(child.stderr).toContain('docs/audit/201-cross-parameter-checks.md');
