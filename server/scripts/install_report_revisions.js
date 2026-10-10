@@ -79,8 +79,8 @@ function installReportRevisions({dbPath,apply=false}={}){
   return db.transaction(()=>{
    const current=classify(db,source);
    if(current.classification==='COMPLETE_211')return{...current,mode:'NO_OP',totalChanges:0,backfilledCount:0};
-   const before=snapshot(db);
-   db.exec(current.classification==='PRE_211'?source.sql:source.guardsSql);
+   const before=snapshot(db),release=loadReportRevisionMigrationSource();
+   db.exec(current.classification==='PRE_211'?release.sql:release.guardsSql);
    if(fingerprint(snapshot(db))!==fingerprint(before)||populated(db))
     throw fail('REPORT_REVISION_PRESERVATION_REFUSED','Installation changed historical rows.');
    const receipt={sources:current.sources,originalRowsSha256:fingerprint(before),originalRowsPreserved:true,backfilledCount:0};
