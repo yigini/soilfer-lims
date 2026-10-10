@@ -187,10 +187,10 @@ const INSTRUMENT_IMPORT_MAIN_FIXTURE = Object.freeze({
 // #199 pins6089156077/6090475511: catalogue prerequisites and the real installer only.
 const CALCULATION_PREREQUISITES = Object.freeze({
     file: 'tests/helpers/calculationReleasePrerequisites.js', exportName: 'installCalculationReleasePrerequisites',
-    sha256: 'c8dcb032ed0a8b8d0cc206bdefb29ccb10dc8a9b4e89926628e20df9ead31e04',
+    sha256: '5b091435c1e3ce5468a5dedcddf1f278fe3d6f6238c129804959f1826287ac57',
     callers: ['tests/helpers/qcGateFixture.js', 'tests/helpers/normalizedQcFixture.js', 'tests/helpers/repeatQcPredecessors.js',
         'tests/contracts/audit_2_3_native_runs.test.js', 'tests/contracts/audit_1_2_guard_installer.test.js',
-        'tests/contracts/deployment_readiness_bootstrap.test.js']
+        'tests/contracts/deployment_readiness_bootstrap.test.js', 'tests/contracts/audit_3_1_attempt_sql_guards.test.js']
 });
 // #272 pin6087435363: one closed, no-argument baseline factory and caller.
 const RAW_INPUT_FIXTURE = Object.freeze({

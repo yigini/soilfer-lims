@@ -264,6 +264,11 @@ test('the authenticated workspace returns linked and unlinked attempt metadata w
     // additive schema without changing this predecessor's attempt guards.
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({dbPath:file,apply:true});
     require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:file,apply:true});
+    // Current workspace reads include the nullable draft import pointer. Prepare
+    // this one owned predecessor through the actual prerequisite and import
+    // installers; all retained raw Result/attempt assertions stay unchanged.
+    require('../helpers/calculationReleasePrerequisites').installCalculationReleasePrerequisites(file);
+    require('../../scripts/install_instrument_imports').installInstrumentImports({dbPath:file,apply:true});
     await insert('linked',{attemptNo:2,evidenceData:'{"private":"linked"}'});
     result('linked-result',{attemptId:'linked'});result('imported',{param:'NO_WORK',provenance:'IMPORTED'});
     const {createAuthTokenFixture}=require('../helpers/workflowFixtures');
