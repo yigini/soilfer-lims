@@ -44,16 +44,17 @@ test.each(['0.00', '#,##0.00', '0.00E+00', '0.00&quot;kg&quot;', '0.00\\%'])('pl
     expect(row.cells[0]).toBe('1.2500'); expect(() => assertXlsxMappedCell(row, 0, dot)).not.toThrow();
 });
 
-test('numeric policy conflict is explicit while the same shared string uses existing lab parsing', () => {
+test('numeric lab text has a verified round trip while shared strings retain existing lab parsing', () => {
     const row = source('<c r="A1"><v>1.234</v></c><c r="B1" t="s"><v>0</v></c>', { sharedStrings: '<si><t>1.234</t></si>' });
-    expect(() => assertXlsxMappedCell(row, 0, comma)).toThrow(expect.objectContaining({ code: 'IMPORT_XLSX_NUMBER_POLICY_CONFLICT', statusCode: 409,
-        details: { cellRef: 'A1', lexeme: '1.234', invariantCanonical: '1.234', laboratory: expect.objectContaining({ valid: true, value: 1234 }) } }));
-    expect(() => assertXlsxMappedCell(row, 0, { decimal: '.', thousands: null })).toThrow(expect.objectContaining({ code: 'IMPORT_XLSX_NUMBER_POLICY_CONFLICT' }));
-    expect(() => assertXlsxMappedCell(row, 0, dot)).not.toThrow(); expect(() => assertXlsxMappedCell(row, 1, comma)).not.toThrow();
+    expect(assertXlsxMappedCell(row, 0, comma)).toBe('1,234');
+    for (const decimal of ['.', ',']) expect(() => assertXlsxMappedCell(row, 0, { decimal, thousands: null })).toThrow(expect.objectContaining({ code: 'IMPORT_XLSX_NUMBER_POLICY_CONFLICT', statusCode: 409,
+        details: expect.objectContaining({ cellRef: 'A1', lexeme: '1.234', invariantCanonical: '1.234', laboratory: expect.objectContaining({ code: 'AMBIGUOUS_NUMBER' }) }) }));
+    expect(assertXlsxMappedCell(row, 0, dot)).toBe('1.234'); expect(assertXlsxMappedCell(row, 1, comma)).toBe('1.234');
     expect(row.cells).toEqual({ 0: '1.234', 1: '1.234' });
 });
-test.each(['1.5', '12', '1E-3'])('comma-decimal lab parser agrees on OOXML numeric %s', lexeme => {
-    expect(() => assertXlsxMappedCell(source(`<c r="A1"><v>${lexeme}</v></c>`), 0, comma)).not.toThrow();
+test.each(['1.5', '12', '1E-3', '-1.5E-3', '1234.5'])('comma-decimal lab syntax preserves every digit/exponent of OOXML numeric %s', lexeme => {
+    const row = source(`<c r="A1"><v>${lexeme}</v></c>`);
+    expect(assertXlsxMappedCell(row, 0, comma)).toBe(lexeme.replace('.', ',')); expect(row.cells[0]).toBe(lexeme);
 });
 
 test('multiple/hidden sheets need an exact name; explicit selection decodes that sheet', () => {

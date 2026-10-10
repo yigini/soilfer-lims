@@ -33,8 +33,8 @@ async function analysisBinding(db, lab, analyte, mapping, active) {
         throw fail(409, 'IMPORT_TEMPLATE_BINDING_REQUIRED', 'Bind each activated input exactly once.');
     return { analysis, active, inputs: definition.inputs };
 }
-function unitCell(binding, cells) {
-    return Object.hasOwn(binding, 'unitColumn') ? cells[binding.unitColumn] : binding.unit;
+function unitCell(binding, source, format) {
+    return Object.hasOwn(binding, 'unitColumn') ? assertXlsxMappedCell(source, binding.unitColumn, format) : binding.unit;
 }
 function parsedValue(raw, numberFormat, input = false) {
     const parsed = parseNumber(raw, numberFormat);
@@ -43,15 +43,13 @@ function parsedValue(raw, numberFormat, input = false) {
     return parsed;
 }
 function measurements(binding, mapping, source, numberFormat) {
-    const cells = source.cells;
     if (mapping.inputs) {
         const inputs = {}, evidence = [];
         for (const input of mapping.inputs) {
-            assertXlsxMappedCell(source, input.column, numberFormat, { value: true });
-            if (input.unitColumn !== undefined) assertXlsxMappedCell(source, input.unitColumn, numberFormat);
-            const declared = binding.inputs.find(row => row.key === input.variable), rawUnit = unitCell(input, cells);
+            const rawValue = assertXlsxMappedCell(source, input.column, numberFormat, { value: true });
+            const declared = binding.inputs.find(row => row.key === input.variable), rawUnit = unitCell(input, source, numberFormat);
             if (rawUnit !== declared.unit) throw fail(409, 'IMPORT_UNIT_MISMATCH', 'Use the exact activated input unit.');
-            const rawValue = cells[input.column]; parsedValue(rawValue, numberFormat, true);
+            parsedValue(rawValue, numberFormat, true);
             inputs[input.variable] = rawValue;
             evidence.push({ variable: input.variable, column: input.column, rawValue, rawUnit,
                 unitColumn: input.unitColumn ?? null, declaredUnit: declared.unit, ...binding.active });
@@ -59,12 +57,9 @@ function measurements(binding, mapping, source, numberFormat) {
         return { value: '', values: { calculation: { ...binding.active, inputs } },
             evidence: { mode: 'ACTIVATED_INPUTS', inputs: evidence, activation: binding.active } };
     }
-    assertXlsxMappedCell(source, mapping.valueColumn, numberFormat, { value: true });
-    for (const column of [mapping.unitColumn, mapping.dilutionColumn]) if (column !== undefined)
-        assertXlsxMappedCell(source, column, numberFormat);
-    const rawValue = cells[mapping.valueColumn], rawUnit = unitCell(mapping, cells);
+    const rawValue = assertXlsxMappedCell(source, mapping.valueColumn, numberFormat, { value: true }), rawUnit = unitCell(mapping, source, numberFormat);
     const unit = numericReportingUnit({ analysis: binding.analysis }, { param: mapping.analysisCode, unit: rawUnit }, { instrumentImport: true });
-    const rawDilution = mapping.dilutionColumn === undefined ? null : cells[mapping.dilutionColumn];
+    const rawDilution = mapping.dilutionColumn === undefined ? null : assertXlsxMappedCell(source, mapping.dilutionColumn, numberFormat);
     if (rawDilution != null && rawDilution.trim()) {
         const dilution = parseNumber(rawDilution, numberFormat);
         if (!dilution.valid || dilution.qualifier || dilution.value !== 1)
@@ -127,6 +122,14 @@ async function previewInstrumentImport(db, actor, { batchId, templateId, sourceN
                     assertXlsxMappedCell(source, column, format);
                 const raw = measurements(binding, mapping, source, format);
                 raw.evidence.numberPolicy = numberPolicy[mapping.analysisCode];
+                if (xlsx) {
+                    const columns = [...new Set([template.mapping.idColumn, template.mapping.qcDetector?.positionColumn,
+                        ...(mapping.inputs ? mapping.inputs.flatMap(input => [input.column, input.unitColumn]) :
+                            [mapping.valueColumn, mapping.unitColumn, mapping.dilutionColumn])].filter(column => column !== undefined))];
+                    raw.evidence.cells = columns.filter(column => source.cellEvidence[column]).map(column => ({ column,
+                        ...source.cellEvidence[column], labText: assertXlsxMappedCell(source, column, format),
+                        numberPolicyVersion: numberPolicy[mapping.analysisCode].version }));
+                }
                 let plan;
                 if (match.kind === 'SAMPLE') {
                     const workItemId = match.workItemIdsByAnalysis[mapping.analysisCode];
@@ -151,7 +154,8 @@ async function previewInstrumentImport(db, actor, { batchId, templateId, sourceN
                 destinations.get(destination).push(row);
             } catch (error) {
                 row.errors.push({ analysisCode: mapping.analysisCode, code: error.code || 'IMPORT_LINE_NOT_ENTERABLE',
-                    message: error.message, statusCode: error.statusCode || 409, ...(error.details && { details: error.details }) });
+                    message: error.message, statusCode: error.statusCode || 409,
+                    ...(error.details && Object.keys(error.details).length && { details: error.details }) });
             }
         }
     }

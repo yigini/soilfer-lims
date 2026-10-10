@@ -36,7 +36,7 @@ test('real XLSX commit keeps long, exponent and rounded-display raw drafts plus 
     const committed = await importer.commit(f.db, f.actor, { ...input, previewToken: preview.previewToken });
     expect(committed).toMatchObject({ draftCount: 3, qcCount: 0 });
     const receipt = await f.db.instrumentImportReceipt.findUnique({ where: { id: committed.receiptId } }), snapshot = JSON.parse(receipt.mappingSnapshot);
-    expect(snapshot.numberPolicy[f.analysisCode]).toMatchObject({ version: 0, format: { decimal: '.', thousands: ',' } });
+    expect(snapshot.numberPolicy[f.analysisCode]).toMatchObject({ version: 0, format: { decimal: '.', thousands: null } });
     for (let index = 0; index < values.length; index++) {
         const draft = await f.db.workItemDraft.findFirst({ where: { sampleId: f.samples[index].id } });
         expect(draft).toMatchObject({ value: values[index], importReceiptId: receipt.id });
@@ -68,8 +68,9 @@ test('every mapped cell refusal lists its cell and leaves actual drafts, results
 });
 
 test.each([
-    [{ decimal: ',', thousands: '.' }, false], [{ decimal: '.', thousands: null }, false], [{ decimal: '.', thousands: ',' }, true]
-])('actual lab number policy %j controls numeric1.234 without rewriting it', async (format, allowed) => {
+    [{ decimal: ',', thousands: '.' }, true], [{ decimal: ',', thousands: null }, false],
+    [{ decimal: '.', thousands: null }, false], [{ decimal: '.', thousands: ',' }, true]
+])('actual lab number policy %j controls the verified numeric1.234 lab text', async (format, allowed) => {
     const f = await fixture();
     await f.setPolicy([{ key: 'numbers.decimalSeparator', value: format.decimal }, { key: 'numbers.thousandsSeparator', value: format.thousands }]);
     const before = await f.state(), input = f.input([numeric('1.234')]), preview = await importer.preview(f.db, f.actor, input);
@@ -81,20 +82,34 @@ test.each([
         expect(await f.state()).toEqual(before);
     } else {
         await importer.commit(f.db, f.actor, { ...input, previewToken: preview.previewToken });
-        expect(await f.db.workItemDraft.findFirst()).toMatchObject({ value: '1.234' });
+        expect(await f.db.workItemDraft.findFirst()).toMatchObject({ value: format.decimal === ',' ? '1,234' : '1.234' });
     }
 });
 
-test('comma policy accepts1.5/12/1E-3 and shared-string1.234, retaining all source lexemes and the used policy version', async () => {
-    const f = await fixture(4);
-    await f.setPolicy([{ key: 'numbers.decimalSeparator', value: ',' }, { key: 'numbers.thousandsSeparator', value: '.' }]);
-    const input = f.input([numeric('1.5'), numeric('12'), numeric('1E-3'), '<c r="B1" t="s"><v>0</v></c>'], { sharedStrings: '<si><t>1.234</t></si>' });
+test.each([{ decimal: ',', thousands: '.' }, { decimal: ',', thousands: ' ' }, { decimal: '.', thousands: ',' }])(
+    'numeric/text imports under%j keep source lexemes, verified draft text and the used policy version', async format => {
+    const f = await fixture(6), original = ['1.5', '1.234', '12', '1E-3', '-1.5E-3', '1.234'];
+    await f.setPolicy([{ key: 'numbers.decimalSeparator', value: format.decimal }, { key: 'numbers.thousandsSeparator', value: format.thousands }]);
+    const input = f.input([...original.slice(0, 5).map(numeric), '<c r="B1" t="s"><v>0</v></c>'], { sharedStrings: '<si><t>1.234</t></si>' });
     const preview = await importer.preview(f.db, f.actor, input); expect(preview.canCommit).toBe(true);
-    const result = await importer.commit(f.db, f.actor, { ...input, previewToken: preview.previewToken }); expect(result.draftCount).toBe(4);
-    for (const [index, raw] of ['1.5', '12', '1E-3', '1.234'].entries())
-        expect(await f.db.workItemDraft.findFirst({ where: { sampleId: f.samples[index].id } })).toMatchObject({ value: raw });
+    const result = await importer.commit(f.db, f.actor, { ...input, previewToken: preview.previewToken }); expect(result.draftCount).toBe(6);
     const receipt = await f.db.instrumentImportReceipt.findFirst();
-    expect(JSON.parse(receipt.mappingSnapshot).numberPolicy[f.analysisCode]).toMatchObject({ version: 1, format: { decimal: ',', thousands: '.' } });
+    const snapshot = JSON.parse(receipt.mappingSnapshot);
+    for (const [index, raw] of original.entries()) {
+        const labText = index < 5 && format.decimal === ',' ? raw.replace('.', ',') : raw;
+        const draft = await f.db.workItemDraft.findFirst({ where: { sampleId: f.samples[index].id } });
+        expect(draft).toMatchObject({ value: labText });
+        expect(snapshot.rows[index].cells[1]).toBe(raw);
+        expect(snapshot.rows[index].plans[0].evidence.cells.find(cell => cell.column === 1)).toMatchObject({ rawLexeme: raw, labText, numberPolicyVersion: 1 });
+        if (index < 5) {
+            const recorded = await f.db.$transaction(tx => require('../../services/resultWriteService').writeResult(tx, {
+                sampleId: draft.sampleId, workItemId: draft.workItemId, actor: f.actor,
+                measurement: { param: f.analysisCode, value: draft.value, unit: 'fixture-unit' }
+            }));
+            expect(recorded).toMatchObject({ numericValue: Number(raw), rawInput: labText });
+        }
+    }
+    expect(snapshot.numberPolicy[f.analysisCode]).toMatchObject({ version: 1, format });
 });
 
 test('policy changes after preview invalidate the actual commit before any receipt or draft', async () => {

@@ -254,3 +254,22 @@ raw-input columns receive the same check. Selected worksheet, resolved format
 and policy version now bind the signed preview and are re-read before commit.
 New pure decoder and actual multipart/transaction tests await validation;
 complete40-by-four/QC/calculation/UI/full-suite acceptance remains unfinished.
+
+The first XLSX group at ae9407d2 passes197/201 tests, four suites passed and
+three failed (50.823s). Both owned templates and the working database retain
+their hashes. Two new failures exposed the pin's impossible1.5 acceptance
+under comma-decimal/dot-grouping; a new evidence assertion assumed a comma
+grouping default instead of the actual null default; and adding an empty
+details object broke an existing CSV refusal assertion. The old assertion
+is retained and empty details are omitted again. Failed logs are retained.
+
+Claude's superseding6096643904 now allows numeric-cell separator transliteration
+with a verified round trip: the regex-constrained OOXML lexeme's single decimal
+dot becomes a comma only for a comma-decimal lab, preserving digits/exponent.
+No Number round trip or shared parser change. The draft/#199 raw input stores
+this verified lab text; the receipt preserves the original lexeme, lab text,
+cell/style and policy version. Three-fraction ambiguity with null grouping
+still refuses409 with zero writes. Text cells retain their original lab parse.
+New tests also exercise the existing typed Result writer after importing each
+numeric case. This supersedes the prior numeric raw-storage paragraph only;
+whole-source bytes, all original evidence and scientific values stay exact.

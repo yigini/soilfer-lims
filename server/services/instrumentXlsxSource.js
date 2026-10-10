@@ -223,11 +223,11 @@ function decodeInstrumentXlsxSource(bytes, sheetName) {
         sheets: sheets.map(({ name, state }) => ({ name, state })), rows };
 }
 function assertXlsxMappedCell(source, column, format, { value = false } = {}) {
-    const cell = source.cellEvidence?.[column]; if (!cell || cell.mergedEmpty) return;
+    const cell = source.cellEvidence?.[column]; if (!cell || cell.mergedEmpty) return source.cells[column];
     const details = { cellRef: cell.cellRef, lexeme: cell.rawLexeme };
     if (cell.error) throw error(cell.error, 400, details);
     if (value && ['b', 'd'].includes(cell.t)) throw error('IMPORT_XLSX_CELL_TYPE_UNSUPPORTED', 400, details);
-    if (!cell.numeric) return;
+    if (!cell.numeric) return source.cells[column];
     if (displayScaled(cell)) throw error('IMPORT_XLSX_DISPLAY_SCALED', 400, details);
     if (!/^-?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(cell.rawLexeme)) throw error('IMPORT_XLSX_INVALID', 400, details);
     // Pin6096497546: this comma can never group because the regex excluded it.
@@ -235,8 +235,13 @@ function assertXlsxMappedCell(source, column, format, { value = false } = {}) {
     // invariant comparison only; the laboratory parser is unchanged.
     const invariant = parseNumber(cell.rawLexeme, { decimal: '.', thousands: ',' });
     if (!invariant.valid) throw error('IMPORT_XLSX_INVALID', 400, details);
-    const laboratory = parseNumber(cell.rawLexeme, format);
+    // Pin6096643904 supersedes raw numeric storage: change only the decimal
+    // character, preserving every digit and the exponent. The original stays
+    // in the source evidence; the existing typed writer consumes this lab text.
+    const labText = format.decimal === ',' ? cell.rawLexeme.replace('.', ',') : cell.rawLexeme;
+    const laboratory = parseNumber(labText, format);
     if (!laboratory.valid || laboratory.value !== invariant.value || laboratory.canonical !== invariant.canonical)
-        throw error('IMPORT_XLSX_NUMBER_POLICY_CONFLICT', 409, { ...details, invariantCanonical: invariant.canonical, laboratory });
+        throw error('IMPORT_XLSX_NUMBER_POLICY_CONFLICT', 409, { ...details, labText, invariantCanonical: invariant.canonical, laboratory });
+    return labText;
 }
 module.exports = { decodeInstrumentXlsxSource, assertXlsxMappedCell, XML_LIMITS };
