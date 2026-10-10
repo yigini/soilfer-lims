@@ -1,7 +1,7 @@
 """Shared release/rehearsal operations. Importing this module performs no I/O."""
 import datetime, hashlib, json, os, pathlib, re, shutil, sqlite3, subprocess
 
-HEAD = 'eb6de2e88df889be28972d393662ff0fc0abf711'
+HEAD = '042c04b54e7b3baa9f8c95e7f8d70b39daed2f91'
 LAST_DEPLOY = '283a8bb54b66a2167d34d80ad724bdd6460850b1'
 OLD_IMAGE = 'sha256:b02ddff8d7549e981edc49215fef2d54ca654adaa2a8924eceb5d4ea0af00394'
 LIVE = pathlib.Path('/var/lib/docker/volumes/lims_lims-data/_data/dev.db')

@@ -5,7 +5,7 @@ const cp = require('node:child_process');
 const crypto = require('node:crypto');
 const { promisify } = require('node:util');
 const exec = promisify(cp.execFile);
-const HEAD = 'eb6de2e88df889be28972d393662ff0fc0abf711';
+const HEAD = '042c04b54e7b3baa9f8c95e7f8d70b39daed2f91';
 const PRS = [258,257,259,260,263,264,265,266,267,268,269,273,271,276,275,280,282,285,286,287];
 const phrase = 'Audit passed: OK to merge and deploy';
 

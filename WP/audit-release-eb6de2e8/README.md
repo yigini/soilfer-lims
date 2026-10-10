@@ -1,6 +1,6 @@
 # Combined audit release kit
 
-Target application commit: `eb6de2e88df889be28972d393662ff0fc0abf711`.
+Target application commit: `042c04b54e7b3baa9f8c95e7f8d70b39daed2f91`.
 Last deployed application commit: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
 
 Claudio requested this kit on #162, comment 6099151121. Pip owns preparation;
@@ -9,12 +9,20 @@ Claudio owns review and post-deployment checks. YY selected "Main now" and
 exact-kit review and a successful fresh-production-copy rehearsal. The original
 YY decision must be verified and bound to the execution gate.
 
-Preparation awaits PR #287's audit and a newly pinned application commit.
+PR #287 passed Claudio's exact-head audit (6100508428) and merged as the
+target above at 17:58:07 UTC. Its tree is byte-identical to reviewed head
+0685d34d. The only commit after original main eb6de2e8 is this repair.
 The original #193 heap failures were reproduced and repaired with identical
 streamed fingerprints. The first repaired fresh-copy trial passed #193/#192
 and then reproduced #194's identical memory failure; #287 now covers all six
-affected production installers. Its expanded fresh-copy trial and CI are
-running. This document is not deployment authorization.
+affected production installers. Exact-head Linux CI passed 339 suites /
+5,079 tests, build/lint and both Docker checks. All 21 CLI steps/repeats and
+20 READY events passed on the copy. Our READY parser then failed on valid
+JSON scalar noise; that receipt remains FAILED. The fixed-parser read-only
+supplement passed all 31+6 probes, startup peak 319,590,400 bytes, unchanged
+rows/schema/database bytes. See repair-review-ready.md for all retained roots
+and hashes. The complete fresh-copy rehearsal of the merged target and its
+main CI are still required. This document is not deployment authorization.
 
 Verified evidence so far:
 
@@ -33,7 +41,7 @@ Verified evidence so far:
 - CLI tooling now records cgroup memory.peak, uses explicitly owned container
   names/labels, and stops a timed-out CLI writer only after ownership validation.
   A failed install attempt always keeps production recovery forward-only.
-- 15 release guard tests pass. The real Docker read-only CLI proof preserved
+- 21 release guard tests pass. The real Docker read-only CLI proof preserved
   both source/copy bytes and recorded 81,477,632 bytes cgroup peak for #190
   planning. This does not establish #193's repaired peak.
 - Claudio pinned one separate PR for #193/#192/#191/#194/#197/#201, identical fingerprint bytes,
@@ -42,8 +50,8 @@ Verified evidence so far:
 - Expanded repair head `0685d34d851ef6f115ae88bc772679929d8eee25`: 154 focused
   tests across 8 suites pass. See `repair-scope-expanded.md` for the additional
   APPLY installer scope and retained first-repair trial.
-- The final kit must include 20 PRs, adding #287 to the original 19 after its
-  exact-head audit/merge. The source pin and main CI evidence must then change.
+- The final kit includes 20 PRs, adding merged #287 to the original 19. Both
+  source pins now name the merged target. The final main CI gate is pending.
 
 Retained failed receipt hashes:
 
@@ -68,7 +76,7 @@ Required evidence:
 - Retained immutable rehearsal receipt, integrity/FK and read-only health/API
   checks. No production database backfill, quiesce or deployment during preparation.
 
-Read-only host check at 2026-10-10 15:38 UTC: live container healthy, 23,275,548,672
-bytes available on the shared /opt/lims and /var/lib/docker filesystem. Current
-build cache is 5.487 GB with 43.11 MB reclaimable, rather than the earlier 7.7 GB
-estimate. Fresh reserve and cache state will be recorded in the kit.
+Read-only host check at 2026-10-10 17:55 UTC: live container healthy, zero
+restarts; 12,715,212,800 bytes available on both paths. Authorized cache-only
+prunes and owned proof allocation are retained with the proof. Fresh reserve
+and cache state will be recorded in the kit.
