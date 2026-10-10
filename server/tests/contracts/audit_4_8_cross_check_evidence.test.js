@@ -30,11 +30,11 @@ async function fixture({ differentText = false } = {}) {
             basis: 'AIR_DRY', censoring: 'NONE', flags: '["RETAINED_QC_FLAG"]', isCurrent: true } }));
     }
     for (const item of f.items) await transitionWorkItem(item.id, 'COMPLETED', f.actor, 'Owned recorded determination', {}, f.db);
-    f.submit = () => rules.inTransaction(f.db, async tx => {
-        const submission = await createSubmissionForItems({ db: tx, actor: f.actor, sampleId: f.sampleId,
+    f.submit = async () => {
+        const submission = await createSubmissionForItems({ db: f.db, actor: f.actor, sampleId: f.sampleId,
             type: 'FULL', workItemIds: f.items.map(item => item.id) });
-        return { ...submission, evaluations: await record(tx, f.sampleId, f.actor) };
-    });
+        return { ...submission, evaluations: submission.crossCheckEvaluations };
+    };
     f.snapshotAll = async () => JSON.stringify({ sample: await f.db.sample.findUnique({ where: { id: f.sampleId } }),
         items: await f.db.workItem.findMany({ orderBy: { id: 'asc' } }), results: await f.db.result.findMany({ orderBy: { id: 'asc' } }),
         attempts: await f.db.workAttempt.findMany({ orderBy: { id: 'asc' } }),
@@ -64,6 +64,11 @@ test('real submission retains all seven numeric-evidence checks and review reads
     const before = await f.snapshotAll(), panel = await review(f.db, f.sampleId, f.actor);
     expect(panel.current).toBeNull();
     expect(panel.atSubmission.find(row => row.ruleCode === 'BASES_CEC')).toEqual(base);
+    expect(await f.snapshotAll()).toBe(before);
+    const installer = require('../../scripts/install_cross_check_evaluations');
+    expect(installer.assertCrossCheckStartupReady(f.file)).toMatchObject({ classification: 'COMPLETE_201', evaluationCount: 7, totalChanges: 0 });
+    expect(installer.installCrossCheckEvaluations({ dbPath: f.file, apply: true }))
+        .toMatchObject({ classification: 'COMPLETE_201', mode: 'NO_OP', evaluationCount: 7, totalChanges: 0 });
     expect(await f.snapshotAll()).toBe(before);
     await require('../helpers/qcRunHttpHarness').withQcRunHttp(f.db, f.actor, async (app, token) => {
         const response = await require('supertest')(app).get(`/api/results/${f.sampleId}/cross-checks`)
@@ -124,4 +129,28 @@ test('a later laboratory policy affects only live selected checks; stored submis
     expect(panel.atSubmission.find(row => row.ruleCode === 'BASES_CEC').outcome).toBe('FLAGGED');
     expect(otherPanel.atSubmission.find(row => row.ruleCode === 'BASES_CEC').thresholds['crossCheck.basesCecFactor']).toBe(1.1);
     expect(await f.db.crossCheckEvaluation.findMany()).toEqual(frozen);
+});
+test('a partial selection never fills missing selected inputs from the still-current observations', async () => {
+    const f = await fixture(); await f.submit();
+    const item = f.items.find(row => row.analysis === 'EXCH_CA');
+    await require('../helpers/qcRunHttpHarness').withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const response = await require('supertest')(app).post(`/api/work/${item.id}/review`)
+            .set('Authorization', 'Bearer ' + token).send({ decision: 'ACCEPT' });
+        expect(response.status).toBe(200);
+    }, { reviews: true });
+    const before = await f.snapshotAll(), panel = await review(f.db, f.sampleId, f.actor);
+    const base = panel.current.evaluations.find(row => row.ruleCode === 'BASES_CEC');
+    expect(base).toMatchObject({ outcome: 'NOT_EVALUATED', reasonCode: 'INPUT_MISSING' });
+    expect(base.inputs.values.map(row => row.analysisCode)).toEqual(['EXCH_CA']);
+    expect(panel.atSubmission.find(row => row.ruleCode === 'BASES_CEC').outcome).toBe('FLAGGED');
+    expect(await f.snapshotAll()).toBe(before);
+});
+test.each(['{invalid', 'null', '{"values":null}', '{"values":[],"missing":[],"lowerBound":false}'])
+('invalid retained JSON %s is refused with a stable4xx without adopting or changing evidence', async inputs => {
+    const f = await fixture(), submitted = await f.submit(), original = await f.db.crossCheckEvaluation.findUnique({ where: { id: submitted.evaluations[0].id } });
+    await f.db.crossCheckEvaluation.create({ data: { ...original, id: randomUUID(), inputs,
+        ...(inputs.startsWith('{"values":[]') && { thresholds: '{"policyVersion":"4"}' }) } });
+    const before = await f.snapshotAll();
+    await expect(review(f.db, f.sampleId, f.actor)).rejects.toMatchObject({ statusCode: 409, code: 'CROSS_CHECK_EVIDENCE_INVALID' });
+    expect(await f.snapshotAll()).toBe(before);
 });

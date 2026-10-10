@@ -56,7 +56,8 @@ async function createSubmissionForItems({ db, actor, sampleId, type, workItemIds
             `${performedBy} submitted ${items.length} items for ${derived.type} review`, {
                 lastSubmissionId: submissionId, lastSubmissionType: derived.type, lastSubmissionAt: now
             }, tx);
-        return { submission, sample: updated };
+        const crossCheckEvaluations = await require('./crossCheckEvaluationService').recordSubmissionCrossChecks(tx, sample.id, actor);
+        return { submission, sample: updated, crossCheckEvaluations };
     });
 }
 

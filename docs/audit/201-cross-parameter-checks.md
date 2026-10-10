@@ -17,7 +17,8 @@ is a read-only NO_OP. UPDATE and DELETE are rejected by SQLite triggers.
 The PRE_201 fixture and fresh-table oracle come from the checkout's own schema
 using Prisma 7.10; loaders, DDL, oracle and fixture/caller remain source-bound.
 
-The submission writer requires the caller transaction and actual submission
+The central submission service now calls the evidence writer in its transaction
+for every submission entry point. The writer requires actual submission
 state, and reads its own scoped inputs. A late insert failure returns
 CROSS_CHECK_EVIDENCE_WRITE_FAILED (409) and rolls back the workflow transaction.
 The scoped GET /api/results/:sampleId/cross-checks requires APPROVE_RESULTS.
@@ -30,13 +31,16 @@ Validation so far:
 
 - Owned normal setup: 8 suites / 259 tests passed, zero skipped (25.566 s),
   covering policies, evaluator, additive installer and existing security/wiring.
-- Evidence/service and component checks: 2 suites / 23 tests passed, zero skipped
-  (9.423 s). Includes real submission rollback, actual review/selection/HTTP,
-  per-lab changes with immutable prior evidence, and five-locale panel behaviour.
+- Evidence/service and component checks: 2 suites / 28 tests passed, zero skipped
+  (13.773 s). Includes actual central submission rollback, actual review/selection/HTTP,
+  partial selections with no observation fallback, startup/NO_OP after real evidence,
+  invalid retained JSON refusal, lab isolation and five-locale panel behaviour.
+- Existing repeat, bracket-disposition and selection-acceptance contracts:
+  3 suites / 85 tests passed, zero skipped (93.918 s).
 - Client build passed (17.86 s); lint passed (0 errors, 14 existing warnings).
 
-Outstanding: central submission wiring, replacement of the legacy advisory
-messages, startup/entrypoint integration and attachment to the #192 review page.
+Outstanding: replacement of the legacy advisory messages, startup/entrypoint
+integration and attachment to the #192 review page.
 Files shared with #199 wait until that PR is audited and merged, followed by a
 rebase. Full server tests and final CI have not yet run for the complete feature.
 No #201 PR, production changes, analytical/QC flag rewrites or backfills yet.

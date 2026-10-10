@@ -20,11 +20,19 @@ async function labSnapshot(tx, sample) {
     return snapshot;
 }
 function decode(row) {
-    try { return { ...row, inputs: JSON.parse(row.inputs), thresholds: JSON.parse(row.thresholds), severity: 'ADVISORY',
+    try {
+        const inputs = JSON.parse(row.inputs), thresholds = JSON.parse(row.thresholds);
+        if (!inputs || !Array.isArray(inputs.values) || !Array.isArray(inputs.missing) || typeof inputs.lowerBound !== 'boolean' ||
+            inputs.values.some(value => !value || typeof value.analysisCode !== 'string' || !Array.isArray(value.resultIds)) ||
+            !thresholds || Array.isArray(thresholds) || !Number.isSafeInteger(thresholds.policyVersion) || thresholds.policyVersion < 0) {
+            throw Error('Invalid stored evidence shape');
+        }
+        return { ...row, inputs, thresholds, severity: 'ADVISORY',
         flagCode: row.outcome === 'FLAGGED' ? ({ BASES_CEC: 'CROSS_CHECK_BASES_GT_CEC',
             BASE_SATURATION: 'CROSS_CHECK_BASE_SAT_GT_MAX', CN_RATIO: 'CROSS_CHECK_CN_OUT_OF_RANGE',
             CACO3_PH: 'CROSS_CHECK_CACO3_LOW_PH', PH_KCL_WATER: 'CROSS_CHECK_PH_SALT_GE_WATER',
-            PH_CACL2_WATER: 'CROSS_CHECK_PH_SALT_GE_WATER' }[row.ruleCode] || 'TEXTURE_CLOSURE') : null }; }
+            PH_CACL2_WATER: 'CROSS_CHECK_PH_SALT_GE_WATER' }[row.ruleCode] || 'TEXTURE_CLOSURE') : null };
+    }
     catch { throw new rules.TransitionError('Stored cross-check evidence cannot be read.', 409, 'CROSS_CHECK_EVIDENCE_INVALID'); }
 }
 
