@@ -105,3 +105,28 @@ sample changes at the same authorised version, selected-line changes,
 child-parent changes and child-reason changes are instead prevented by the
 retained SQL guards. The existing missing-original-replica case exercises the
 actual permitted replica write and its amendment-witness refusal.
+
+At executable head8f62545e, the normal owned five-file validation passes:
+5 suites/149 tests/0 skipped,35.411s, covering current-main installation,
+dialog/public withdrawal UI, the unchanged state-write scanner and the full
+first-fill/reapproval file. Own92-model build8.605s and lint1.419s pass with
+0 errors/14 existing warnings; the published Help-only template SHA remains
+65d58934d45081f1e5366006be22a88e313f436c3b35bec95395e63ae47c05fe.
+
+Retained correction diagnostics:52698d26 four-file group had3 passed suites,
+1 failed scanner test/133 passed tests (134 total); the fixture's two direct
+state updates were replaced by existing fixture/event owners. fb9a6ed0 science
+group had2 passed suites/1 failed suite,134 passed tests/3 failed tests
+(137 total),161.050s. Authorisation (including new NCR/stale-line cases) and
+unchanged repeat-command files passed; three new first-fill fixtures were
+incorrect. Parent pointers are SQL-immutable, third readings hit the existing
+replica policy first, and qcGateFixture does not take an analysisCode option.
+The final fixture uses the retained parent guard, the existing real absent
+original replica case, and an actual TEXTURE catalogue/method for appendResult.
+All failed logs and receipts remain retained; no original assertion, mock,
+guard, skip or timeout was changed to obtain the final focus pass.
+
+Previous head1b7389d5 Linux CI38036847692 completed329 suites/5000 tests,
+0 skipped,1436.749s, plus both real disposable Docker stages. That evidence
+applies only to the head that failed the early review. Final exact-head full
+Linux CI/Docker and Claude's formal current-head audit remain pending.
