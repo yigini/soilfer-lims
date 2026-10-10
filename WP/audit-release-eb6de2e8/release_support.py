@@ -198,8 +198,8 @@ def cli(root, image, database_dir, script, mode, label):
     # These bounds failed the original #193 implementation. Deployment still
     # requires a successful fresh-copy proof of the audited streaming repair.
     args = ['docker', 'run', '--rm', '--name', name, '--label', 'io.soilfer.release-owned=' + owner,
-        '--network', 'none', '--memory', '2g',
-        '-e', 'NODE_OPTIONS=--max-old-space-size=1536',
+        '--network', 'none', '--memory', '768m',
+        '-e', 'NODE_OPTIONS=',
         '--mount', mount, '--entrypoint', 'node', image, '-e', CLI_WRAPPER,
         '/app/server/scripts/' + script, '--db', '/app/server/prisma/dev.db', mode]
     try:
@@ -209,13 +209,13 @@ def cli(root, image, database_dir, script, mode, label):
         raise
     measured = [json.loads(line) for line in result.stderr.splitlines()
         if line.startswith('{"releaseCliPeakBytes":')]
-    metadata = {'containerName': name, 'memoryLimitBytes': 2147483648,
-        'nodeOptions': '--max-old-space-size=1536', 'exitCode': result.returncode,
+    metadata = {'containerName': name, 'memoryLimitBytes': 805306368,
+        'nodeOptions': None, 'exitCode': result.returncode,
         'cgroupMemoryPeak': measured[-1] if measured else None}
     with (root / (label + '-container.json')).open('x') as output:
         json.dump(metadata, output, indent=2)
     assert result.returncode == 0, label + ' failed; see retained logs'
-    assert len(measured) == 1 and 0 < measured[0]['releaseCliPeakBytes'] <= 2147483648
+    assert len(measured) == 1 and 0 < measured[0]['releaseCliPeakBytes'] <= 805306368
     return json.loads(result.stdout)
 
 def verify_attempt_plan(dry, reviewed_sha=None):

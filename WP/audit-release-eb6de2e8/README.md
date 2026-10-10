@@ -9,10 +9,12 @@ Claudio owns review and post-deployment checks. YY selected "Main now" and
 exact-kit review and a successful fresh-production-copy rehearsal. The original
 YY decision must be verified and bound to the execution gate.
 
-Preparation is blocked by a reproducible #193 installer heap failure. Both
-rehearsals failed before #190 and before any live production operation. A
-separately audited installer repair and newly pinned application commit need a
-new rehearsal and kit review. This document is not deployment authorization.
+Preparation awaits PR #287's audit and a newly pinned application commit.
+The original #193 heap failures were reproduced and repaired with identical
+streamed fingerprints. The first repaired fresh-copy trial passed #193/#192
+and then reproduced #194's identical memory failure; #287 now covers all six
+affected production installers. Its expanded fresh-copy trial and CI are
+running. This document is not deployment authorization.
 
 Verified evidence so far:
 
@@ -34,9 +36,14 @@ Verified evidence so far:
 - 15 release guard tests pass. The real Docker read-only CLI proof preserved
   both source/copy bytes and recorded 81,477,632 bytes cgroup peak for #190
   planning. This does not establish #193's repaired peak.
-- Claudio pinned one separate PR for #193/#192, identical fingerprint bytes,
+- Claudio pinned one separate PR for #193/#192/#191/#194/#197/#201, identical fingerprint bytes,
   unchanged receipts/refusal codes, and a fresh-copy proof at the original
   768 MiB CLI limit without a Node heap override. #205 and #284 stay out.
+- Expanded repair head `0685d34d851ef6f115ae88bc772679929d8eee25`: 154 focused
+  tests across 8 suites pass. See `repair-scope-expanded.md` for the additional
+  APPLY installer scope and retained first-repair trial.
+- The final kit must include 20 PRs, adding #287 to the original 19 after its
+  exact-head audit/merge. The source pin and main CI evidence must then change.
 
 Retained failed receipt hashes:
 

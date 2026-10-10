@@ -57,9 +57,9 @@ if __name__ == '__main__':
         assert s.snapshot(database, before) == after and s.sha(database) == installed_sha
         receipt['repeatTotalChanges'] = 0
         receipt['repeatedInstallDatabaseBytesPreserved'] = True
-        s.command(ROOT, ['docker', 'run', '-d', '--name', NAME, '--network', 'none', '--memory', '1g',
+        s.command(ROOT, ['docker', 'run', '-d', '--name', NAME, '--network', 'none', '--memory', '768m',
             '--env-file', '/opt/lims/.env', '-e', 'DATABASE_PATH=/app/server/prisma/dev.db',
-            '-e', 'DATABASE_URL=file:/app/server/prisma/dev.db', '-e', 'DISABLE_BACKGROUND_JOBS=true',
+            '-e', 'DATABASE_URL=file:/app/server/prisma/dev.db', '-e', 'DISABLE_BACKGROUND_JOBS=true', '-e', 'NODE_OPTIONS=',
             '-e', 'ALLOW_PRISMA_DB_PUSH=false', '-e', 'ALLOW_AUTO_SEED=false',
             '--mount', 'type=bind,src=' + str(prisma) + ',dst=/app/server/prisma',
             '--mount', 'type=bind,src=' + str(owned / 'uploads') + ',dst=/app/server/uploads', image], 'owned-start')
@@ -97,6 +97,12 @@ if __name__ == '__main__':
         with __import__('sqlite3').connect('file:' + str(database) + '?mode=ro', uri=True) as db:
             receipt['benchCredentialCount'] = db.execute('SELECT count(*) FROM UserBenchCredential').fetchone()[0]
             assert receipt['benchCredentialCount'] == 0
+        memory = s.command(ROOT, ['docker', 'exec', NAME, 'node', '-e',
+            "console.log(Number(require('node:fs').readFileSync('/sys/fs/cgroup/memory.peak','utf8')))"], 'startup-memory-peak')
+        receipt['startupMemory'] = {'limitBytes': 805306368, 'nodeOptions': None,
+            'peakBytes': int(memory.stdout.strip().splitlines()[-1])}
+        assert 0 < receipt['startupMemory']['peakBytes'] <= 805306368
+        receipt['cliMemory'] = {file.name: json.loads(file.read_text()) for file in ROOT.glob('*-container.json')}
         s.command(ROOT, ['docker', 'stop', '-t', '20', NAME], 'owned-stop')
         started = False
         assert s.sha(backup) == receipt['productionCopySha256']

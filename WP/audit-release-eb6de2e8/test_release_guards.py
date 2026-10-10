@@ -1,5 +1,5 @@
 """Exercise release abort/recovery and evidence tampering without live I/O."""
-import copy, importlib.util, pathlib, sqlite3, subprocess, tempfile, unittest
+import copy, datetime, importlib.util, json, pathlib, sqlite3, subprocess, tempfile, unittest
 from unittest.mock import Mock, patch
 import release_support as s
 
@@ -40,6 +40,26 @@ class DiskAndPlanGuards(unittest.TestCase):
                 s.ready_logs('\n'.join(changed))
 
 class CliLifetimeGuards(unittest.TestCase):
+    def test_cli_enforces_original_memory_bound_without_heap_override(self):
+        for peak in [805306368, 805306369]:
+            with tempfile.TemporaryDirectory(prefix='lims-owned-memory-') as owned:
+                root = pathlib.Path(owned)
+                reply = Mock(returncode=0, stdout='{"totalChanges":0}', stderr=json.dumps({
+                    'releaseCliPeakBytes':peak,'childStatus':0,'childSignal':None}))
+                with patch.object(s, 'command', return_value=reply) as run:
+                    if peak <= 805306368:
+                        self.assertEqual(s.cli(root,'image',root/'prisma','owned.js','--dry-run','proof'), {'totalChanges':0})
+                    else:
+                        with self.assertRaises(AssertionError):
+                            s.cli(root,'image',root/'prisma','owned.js','--dry-run','proof')
+                args = run.call_args.args[1]
+                self.assertEqual(args[args.index('--memory')+1], '768m')
+                self.assertIn('NODE_OPTIONS=', args)
+                self.assertNotIn('NODE_OPTIONS=--max-old-space-size=1536', args)
+                evidence = json.loads((root/'proof-container.json').read_text())
+                self.assertEqual(evidence['memoryLimitBytes'], 805306368)
+                self.assertIsNone(evidence['nodeOptions'])
+
     def test_timeout_retains_partial_logs(self):
         with tempfile.TemporaryDirectory(prefix='lims-owned-timeout-') as owned:
             root = pathlib.Path(owned)
@@ -75,6 +95,61 @@ class CliLifetimeGuards(unittest.TestCase):
             with self.assertRaisesRegex(AssertionError, 'writer remains'):
                 s.stop_owned_cli('lims-owned-cli-test', owner)
         self.assertEqual(run.call_args_list[1].args[0], ['docker','stop','-t','10','lims-owned-cli-test'])
+
+class ExactKitGateGuards(unittest.TestCase):
+    def fixture(self):
+        now = datetime.datetime(2026,10,10,18,tzinfo=datetime.timezone.utc)
+        manifest = {'status':'PREPARED_ONLY_NOT_EXECUTED','head':s.HEAD,'image':'owned-image',
+            'attemptPlanSha256':'d'*64,'files':{'release-forward.py':'a'*64,'rehearsal-receipt.json':'b'*64}}
+        rows = []
+        for number in [258,257,259,260,263,264,265,266,267,268,269,273,271,276,275,280,282,285,286,287]:
+            head = format(number,'040x')
+            rows.append({'number':number,'head':head,'state':'MERGED','gated':True,
+                'laterAuditFailure':False,'auditPass':{'body':'Audit passed: OK to merge and deploy '+head},
+                'checks':[{'conclusion':'SUCCESS'}]})
+        gate = {'head':s.HEAD,'image':'owned-image','manifestSha256':'c'*64,
+            'coordinatorSha256':'a'*64,'rehearsalReceiptSha256':'b'*64,'verifiedUtc':now.isoformat(),
+            'prGates':{'head':s.HEAD,'includedPrCount':20,'ungatedPrs':[],'prs':rows,
+                'mainCi':[{'name':'CI','headSha':s.HEAD,'status':'completed','conclusion':'success'}]},
+            'kitReview':{'issue':162,'reviewedBy':'Claudio',
+                'url':'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-owned-test',
+                'body':'Audit passed: OK to merge and deploy '+s.HEAD+' '+'a'*64+' '+'b'*64+' '+'c'*64,
+                'approvedAttemptPlanSha256':'d'*64,'timeUtc':now.isoformat()},
+            'yyGo':{'confirmedByYY':True,'source':'CLAUDE_LIMS_AUDIT_THREAD','evidenceSha256':'e'*64,
+                'timeUtc':(now-datetime.timedelta(hours=1)).isoformat(),'authorizationMode':'AUTO_AFTER_REVIEW',
+                'text':'Auto after review','scopeHead':s.HEAD,'scopeDecision':'Main now','scopeEvidenceSha256':'f'*64},
+            'workloadControl':{'labAndHubBuildsOwnedByYY':True,'releaseWindowControl':'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}}
+        return manifest, gate, now
+
+    def verify(self, manifest, gate, now):
+        def file_hash(file):
+            name = pathlib.Path(file).name
+            return {'prepared-manifest.json':'c'*64,'release-forward.py':'a'*64,'rehearsal-receipt.json':'b'*64}[name]
+        with patch.object(s,'sha',side_effect=file_hash):
+            release.verify_gate(manifest,gate,now)
+
+    def test_existing_yy_auto_choice_only_runs_after_exact_kit_pass(self):
+        self.verify(*self.fixture())
+
+    def test_missing_phrase_wrong_commit_hash_and_stale_gate_refuse(self):
+        for fault in ['phrase','head','hash','stale','repair','future','plan']:
+            manifest, gate, now = self.fixture()
+            if fault == 'phrase':
+                gate['kitReview']['body'] = gate['kitReview']['body'].replace('Audit passed: OK to merge and deploy','Looks good')
+            elif fault == 'head':
+                gate['kitReview']['body'] = gate['kitReview']['body'].replace(s.HEAD,'0'*40)
+            elif fault == 'hash':
+                gate['kitReview']['body'] = gate['kitReview']['body'].replace('b'*64,'0'*64)
+            elif fault == 'stale':
+                gate['verifiedUtc'] = (now-datetime.timedelta(seconds=601)).isoformat()
+            elif fault == 'repair':
+                gate['prGates']['prs'] = gate['prGates']['prs'][:-1]
+            elif fault == 'future':
+                gate['kitReview']['timeUtc'] = (now+datetime.timedelta(seconds=1)).isoformat()
+            elif fault == 'plan':
+                gate['kitReview']['approvedAttemptPlanSha256'] = '0'*64
+            with self.subTest(fault=fault), self.assertRaises(AssertionError):
+                self.verify(manifest,gate,now)
 
 class RecoveryGuards(unittest.TestCase):
     def recover(self, attempted=False, changed=False, old_ready=True, startup_changed=False, health_failed=False):

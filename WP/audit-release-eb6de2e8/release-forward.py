@@ -36,8 +36,8 @@ def verify_gate(manifest, gate, now=None):
     fetched = datetime.datetime.fromisoformat(gate['verifiedUtc'].replace('Z', '+00:00'))
     assert 0 <= (now - fetched).total_seconds() <= 600, 'GitHub gate is stale'
     evidence = gate['prGates']
-    assert evidence['head'] == s.HEAD and evidence['includedPrCount'] == 19 and evidence['ungatedPrs'] == []
-    assert set(row['number'] for row in evidence['prs']) == {258,257,259,260,263,264,265,266,267,268,269,273,271,276,275,280,282,285,286}
+    assert evidence['head'] == s.HEAD and evidence['includedPrCount'] == 20 and evidence['ungatedPrs'] == []
+    assert set(row['number'] for row in evidence['prs']) == {258,257,259,260,263,264,265,266,267,268,269,273,271,276,275,280,282,285,286,287}
     for row in evidence['prs']:
         assert row['gated'] and row['state'] == 'MERGED' and not row['laterAuditFailure']
         assert 'Audit passed: OK to merge and deploy' in row['auditPass']['body']
@@ -48,6 +48,8 @@ def verify_gate(manifest, gate, now=None):
     review = gate['kitReview']
     assert review['issue'] == 162 and review['reviewedBy'] == 'Claudio'
     assert review['url'].startswith('https://github.com/yigini/soilfer-lims/issues/162#issuecomment-')
+    assert 'Audit passed: OK to merge and deploy' in review['body'], 'Exact kit has no audit pass'
+    assert s.HEAD in review['body'], 'Kit audit does not name the exact release commit'
     assert all(value in review['body'] for value in [gate['manifestSha256'], gate['coordinatorSha256'], gate['rehearsalReceiptSha256']])
     assert review['approvedAttemptPlanSha256'] == manifest['attemptPlanSha256']
     yy = gate['yyGo']
@@ -55,6 +57,7 @@ def verify_gate(manifest, gate, now=None):
     assert yy['source'] == 'CLAUDE_LIMS_AUDIT_THREAD' and re.fullmatch('[a-f0-9]{64}', yy['evidenceSha256'])
     approved = datetime.datetime.fromisoformat(yy['timeUtc'].replace('Z', '+00:00'))
     reviewed = datetime.datetime.fromisoformat(review['timeUtc'].replace('Z', '+00:00'))
+    assert reviewed <= now, 'Kit review timestamp is in the future'
     if yy.get('authorizationMode') == 'AUTO_AFTER_REVIEW':
         # YY's Oct 10 decision authorizes this exact application commit after
         # review/rehearsal, and does not require another permission request.
