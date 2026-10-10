@@ -445,13 +445,20 @@ function repeatFixture({ interim = false } = {}) {
 
 test('#191 retained dry-run/apply/no-op preserves every original field and the exact #190 receipt', () => {
     const file = repeatFixture({ interim: true }), before = retained(file), bytes = hash(file);
+    const original = new Database(file, { readonly: true, fileMustExist: true });
+    let originalRowsSha256;
+    try {
+        originalRowsSha256 = createHash('sha256').update(JSON.stringify(Object.fromEntries(['WorkAttempt','WorkItem','Result','ReviewDecision','AuditLog','_schema_migrations',
+            'Batch','BatchAnalyte','BatchPosition','BatchPositionWorkItem','BatchPositionReference','QcMeasurement','QcEvaluation','BatchDisposition','BatchEvent']
+            .map(table => [table, original.prepare('SELECT * FROM "'+table+'" ORDER BY id').all()])))).digest('hex');
+    } finally { original.close(); }
     expect(installWorkRepeatContract({ dbPath: file })).toMatchObject({ classification: 'PRE_191', mode: 'DRY_RUN', totalChanges: 0,
         plan: { reasonNotRecordedCount: 1, backfilledCount: 0, reasonNotRecorded: [{ id: 'interim-repeat', description: 'reason not recorded', reason: null }] } });
     expect(hash(file)).toBe(bytes);
     expect(() => assertWorkRepeatStartupReady(file)).toThrow(expect.objectContaining({ code: 'WORK_REPEAT_NOT_INSTALLED' }));
     const applied = installWorkRepeatContract({ dbPath: file, apply: true });
     expect(applied).toMatchObject({ classification: 'COMPLETE', previousClassification: 'PRE_191', mode: 'APPLIED', totalChanges: 1,
-        newAttemptCount: 0, linkedResultCount: 0, backfilledCount: 0, receipt: { originalRowsAndFieldsPreserved: true, reasonNotRecordedCount: 1 } });
+        newAttemptCount: 0, linkedResultCount: 0, backfilledCount: 0, receipt: { originalRowsAndFieldsPreserved: true, reasonNotRecordedCount: 1, originalRowsSha256 } });
     const after = retained(file);
     for (const group of before.filter(row => row.table)) {
         const rows = after.find(row => row.table === group.table).rows;

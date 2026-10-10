@@ -3,6 +3,7 @@ const path = require('node:path');
 const { createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { loadResultOverrideMigrationSource } = require('../services/resultOverrideMigrationSource');
+const { fingerprintRows, fingerprintRetainedTables } = require('../services/retainedRowsFingerprint');
 const MARKER = '197_result_override_requests';
 const fingerprint = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, differences, totalChanges: 0 });
@@ -72,8 +73,7 @@ function classify(db) {
     return { classification: 'COMPLETE_197', sources, requestCount, receipt };
 }
 function retainedRows(db) {
-    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT IN ('ResultOverrideRequest','_schema_migrations') ORDER BY name").all();
-    return Object.fromEntries(tables.map(({ name }) => [name, db.prepare(`SELECT * FROM "${name.replace(/"/g, '""')}" ORDER BY rowid`).all()]));
+    return fingerprintRetainedTables(db, { excludeTables: ['ResultOverrideRequest', '_schema_migrations'] });
 }
 function installResultOverrideRequests({ dbPath, apply = false } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('OVERRIDE_DATABASE_REQUIRED', 'Provide an explicit database path.');
@@ -87,15 +87,15 @@ function installResultOverrideRequests({ dbPath, apply = false } = {}) {
         return db.transaction(() => {
             const current = classify(db);
             if (current.classification === 'COMPLETE_197') return { ...current, mode: 'NO_OP', totalChanges: 0, backfilledCount: 0 };
-            const before = fingerprint(retainedRows(db)), ledger = db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all();
+            const before = retainedRows(db), ledger = fingerprintRows(db.prepare('SELECT * FROM _schema_migrations ORDER BY id').iterate());
             db.exec(current.classification === 'PRE_197' ? source.sql : source.guardsSql);
-            if (fingerprint(retainedRows(db)) !== before || db.prepare('SELECT count(*) n FROM ResultOverrideRequest').get().n !== 0) {
+            if (retainedRows(db) !== before || db.prepare('SELECT count(*) n FROM ResultOverrideRequest').get().n !== 0) {
                 throw fail('OVERRIDE_PRESERVATION_REFUSED', 'Override-request installation changed retained data.');
             }
             const receipt = { sources: current.sources, originalRowsSha256: before, originalRowsPreserved: true, newRequestCount: 0, backfilledCount: 0 };
             receipt.receiptSha256 = fingerprint(receipt);
             db.prepare('INSERT INTO _schema_migrations(id,details) VALUES(?,?)').run(MARKER, JSON.stringify(receipt));
-            if (fingerprint(db.prepare('SELECT * FROM _schema_migrations WHERE id<>? ORDER BY id').all(MARKER)) !== fingerprint(ledger) ||
+            if (fingerprintRows(db.prepare('SELECT * FROM _schema_migrations WHERE id<>? ORDER BY id').iterate(MARKER)) !== ledger ||
                 db.pragma('integrity_check', { simple: true }) !== 'ok' || db.pragma('foreign_key_check').length) {
                 throw fail('OVERRIDE_INTEGRITY_REFUSED', 'Override-request installation failed preservation or integrity checks.');
             }
