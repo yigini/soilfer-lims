@@ -119,6 +119,15 @@ The direct/QC unit-reader question is posted at6095612837: the Prisma method
 has qudtUnit but no unit scalar, and its frozen revision has no unit. Until
 Claude pins the exact reader/precedence, no unit alias or conversion is inferred.
 
+Pure row matching now uses explicit lab-code/original-id/physical-position
+selection and only current native positions. It preserves the source id and
+all four analyte work-item destinations. QC matching requires both the selected
+prefix's kind and the exact mapped physical-position column; overlapping
+prefixes, duplicates, unknown labels and historical/duplicate sample positions
+refuse rather than choosing a destination. The new pure file passes15/15 tests
+(0.274 s), including40-by-four plus six QC destination matching. These are pure
+matching tests, not a completed import or database acceptance claim.
+
 Still unfinished: normal startup/Docker wiring and populated analytical
 preservation proof; preview/commit APIs; XLSX; the mapping/binding
 wizard; complete 40 by four plus six native QC import; EXCH_CA/Olsen typed
