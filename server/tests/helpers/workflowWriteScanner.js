@@ -36,6 +36,11 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         loaderSha256: 'a9cbb4f46ca24569593b0e7d84bf2d9ac999b428b89f9d5c050023982587425a',
         directory: '20261010000100_cross_check_evaluation', sqlSha256: '7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4',
         boundary: '-- Contract guards', assets: [{ file: 'fresh-prisma-tables.json', sha256: '97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0' }] }),
+    // #210: inspect the two exact additive assets; no workflow writer exception.
+    Object.freeze({functionName:'loadSampleAmendmentMigrationSource',loader:'services/sampleAmendmentMigrationSource.js',
+        loaderSha256:'2d6dc01b9b2551d7d309c539f6daac6f1736617765b651b1507f5d600ace3060',
+        directory:'20261010000000_sample_amendment_authorisation',sqlSha256:'27572a538f7d1467049c75bdfc53c4a9862d4c1b6ec1a1970fab4acb51a187b3',
+        boundary:'-- Contract guards'}),
     // Inspect both exact #197 assets. Existing writer restrictions are unchanged.
     Object.freeze({functionName:'loadResultOverrideMigrationSource',loader:'services/resultOverrideMigrationSource.js',
         loaderSha256:'f59d8614213b1949216d172fd32589da7f1c733c2a63ae2b23a18f41f8365026',
@@ -177,6 +182,14 @@ const CROSS_CHECK_FIXTURE = Object.freeze({
     ddlSha256: '6ae0cc1d26dc3ba301d435d3f332d432a9765c3d30b7fd0725aa119db6f8f622',
     caller: 'tests/contracts/audit_4_8_cross_check_install.test.js'
 });
+// #210 working agreement6089928620: same closed factory precedent6088661994.
+const AMENDMENT_FIXTURE = Object.freeze({
+    file: 'tests/helpers/sampleAmendmentHistoricalFixture.js', exportName: 'createPre210AmendmentFixture',
+    sha256: '7f64cd9fddd96085f6203ed95b1a06eb4e1871d3f021b65529b4d819b390b399',
+    ddl: 'tests/helpers/fixtures/pre210_full_application_schema.sql',
+    ddlSha256: '6ae0cc1d26dc3ba301d435d3f332d432a9765c3d30b7fd0725aa119db6f8f622',
+    caller: 'tests/contracts/audit_6_1_amendment_install.test.js'
+});
 
 function scanSource(source, filename, exceptions = []) {
     const violations = [];
@@ -200,6 +213,14 @@ function scanSource(source, filename, exceptions = []) {
                 createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', CROSS_CHECK_FIXTURE.ddl))).digest('hex') === CROSS_CHECK_FIXTURE.ddlSha256;
         } catch { validCrossCheckFixture = false; }
         if (!validCrossCheckFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The closed #201 factory or full pre-201 DDL differs.');
+    }
+    let validAmendmentFixture = false;
+    if (filename === AMENDMENT_FIXTURE.file) {
+        try {
+            validAmendmentFixture = createHash('sha256').update(source).digest('hex') === AMENDMENT_FIXTURE.sha256 &&
+                createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', AMENDMENT_FIXTURE.ddl))).digest('hex') === AMENDMENT_FIXTURE.ddlSha256;
+        } catch { validAmendmentFixture = false; }
+        if (!validAmendmentFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The closed #210 factory or pre-210 DDL digest differs.');
     }
     if (filename === RAW_INPUT_FIXTURE.file) {
         try {
@@ -656,6 +677,7 @@ function scanSource(source, filename, exceptions = []) {
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName) return true;
         if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName) return true;
         if (validCrossCheckFixture && name === CROSS_CHECK_FIXTURE.exportName) return true;
+        if (validAmendmentFixture && name === AMENDMENT_FIXTURE.exportName) return true;
         const removal = ['delete', 'deleteMany'].includes(operation);
         if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample', 'writeSampleHoldCompatibility'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
         if (filename === 'services/workItemStateService.js' && (['createWorkItem', 'transitionWorkItem'].includes(name) || removal && name === 'removeUnstartedWorkItems') && entities.every(entity => entity === 'WorkItem')) return true;
@@ -668,6 +690,7 @@ function scanSource(source, filename, exceptions = []) {
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName && exportedNames.has(name)) return true;
         if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName && exportedNames.has(name)) return true;
         if (validCrossCheckFixture && name === CROSS_CHECK_FIXTURE.exportName && exportedNames.has(name)) return true;
+        if (validAmendmentFixture && name === AMENDMENT_FIXTURE.exportName && exportedNames.has(name)) return true;
         return exportedNames.has(name) && exceptions.some(entry => entry.file === filename && entry.exportName === name);
     }
     function pinnedCorruptProjectConnection(p, sql) {
@@ -748,7 +771,8 @@ function scanSource(source, filename, exceptions = []) {
             if (resolved === RAW_INPUT_FIXTURE.file.replace(/\.js$/, '') && filename !== RAW_INPUT_FIXTURE.caller) {
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             }
-            if (resolved === CROSS_CHECK_FIXTURE.file.replace(/\.js$/, '') && filename !== CROSS_CHECK_FIXTURE.caller) {
+            if ((resolved === CROSS_CHECK_FIXTURE.file.replace(/\.js$/, '') && filename !== CROSS_CHECK_FIXTURE.caller) ||
+                (resolved === AMENDMENT_FIXTURE.file.replace(/\.js$/, '') && filename !== AMENDMENT_FIXTURE.caller)) {
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             }
             if (filename.startsWith('tests/')) continue;

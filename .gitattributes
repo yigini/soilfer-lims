@@ -69,3 +69,5 @@ server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tabl
 server/services/crossCheckMigrationSource.js text eol=lf
 server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql text eol=lf
 server/services/sampleAmendmentMigrationSource.js text eol=lf
+server/tests/helpers/fixtures/pre210_full_application_schema.sql -text
+server/tests/helpers/sampleAmendmentHistoricalFixture.js text eol=lf

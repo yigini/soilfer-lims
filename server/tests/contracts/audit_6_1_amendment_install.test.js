@@ -8,6 +8,8 @@ const {createSampleFixture}=require('../helpers/workflowFixtures');
 const {installWorkflowStateGuards}=require('../../scripts/install_workflow_state_guards');
 const {installSampleAmendmentAuthorisation,parseArguments}=require('../../scripts/install_sample_amendment_authorisation');
 const {loadSampleAmendmentMigrationSource}=require('../../services/sampleAmendmentMigrationSource');
+const {createPre210AmendmentFixture}=require('../helpers/sampleAmendmentHistoricalFixture');
+const {scanSource}=require('../helpers/workflowWriteScanner');
 const files=[],hash=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 async function fixture(){
  const directory=path.resolve(__dirname,'../.tmp');fs.mkdirSync(directory,{recursive:true});
@@ -32,6 +34,77 @@ function snapshot(db){
 }
 afterAll(()=>{for(const file of files)fs.rmSync(assertOwnedTestDatabase(file,'system:fixture'),{force:true});});
 
+test('the real pre-210 schema upgrades additively while retaining every historical field, schema object, foreign key and receipt',()=>{
+ const {file}=createPre210AmendmentFixture();files.push(file);const db=new Database(file);db.pragma('foreign_keys=ON');
+ try{
+  const before=snapshot(db),initialHash=hash(file),source=loadSampleAmendmentMigrationSource();
+  const shapes=Object.fromEntries(Object.keys(before.rows).map(table=>[table,{
+   columns:db.prepare('PRAGMA table_xinfo("'+table+'")').all(),foreignKeys:db.prepare('PRAGMA foreign_key_list("'+table+'")').all()}]));
+  expect(shapes.SampleAmendment.columns.map(row=>row.name)).not.toEqual(expect.arrayContaining(['version','requestPayload','priorApprovedBy','priorApprovedAt','selectedWorkItemIds']));
+  expect(before.rows.SampleAmendment).toHaveLength(2);expect(before.rows.Result).toHaveLength(1);expect(before.rows.AuditLog).toHaveLength(1);
+  expect(before.rows.SampleAmendment.find(row=>row.id==='pre210-approved')).toMatchObject({status:'APPROVED',createdBy:'prior-requester',authorizedBy:'prior-requester'});
+  expect(installSampleAmendmentAuthorisation({dbPath:file})).toMatchObject({classification:'PRE_210',mode:'DRY_RUN',totalChanges:0,backfilledCount:0});
+  expect(snapshot(db)).toEqual(before);expect(hash(file)).toBe(initialHash);
+  expect(installSampleAmendmentAuthorisation({dbPath:file,apply:true})).toMatchObject({classification:'COMPLETE_210',previousClassification:'PRE_210',
+   mode:'APPLIED',newAmendmentCount:0,backfilledCount:0,receipt:{originalRowsPreserved:true}});
+  const after=snapshot(db),newNames=new Set([...source.guardsSql.matchAll(/^CREATE TRIGGER "([^"]+)"/gm)].map(row=>row[1]));
+  expect(after.objects.filter(row=>!newNames.has(row.name)&&row.name!=='SampleAmendment')).toEqual(before.objects.filter(row=>row.name!=='SampleAmendment'));
+  expect(Object.keys(after.rows)).toEqual(Object.keys(before.rows));
+  for(const [table,rows]of Object.entries(before.rows)){
+   const columnNames=shapes[table].columns.map(row=>row.name);
+   const retained=after.rows[table].filter(row=>table!=='_schema_migrations'||row.id!=='210_sample_amendment_authorisation')
+    .map(row=>Object.fromEntries(columnNames.map(name=>[name,row[name]])));
+   expect(retained).toEqual(rows);
+   expect(db.prepare('PRAGMA table_xinfo("'+table+'")').all().filter(row=>columnNames.includes(row.name))).toEqual(shapes[table].columns);
+   expect(db.prepare('PRAGMA foreign_key_list("'+table+'")').all()).toEqual(shapes[table].foreignKeys);
+  }
+  expect(after.rows._schema_migrations).toHaveLength(before.rows._schema_migrations.length+1);
+  for(const row of after.rows.SampleAmendment)expect(row).toMatchObject({requestPayload:null,version:null,priorApprovedBy:null,priorApprovedAt:null,selectedWorkItemIds:null});
+  for(const row of after.rows.SampleAmendment){
+   expect(()=>db.prepare('UPDATE SampleAmendment SET version=1 WHERE id=?').run(row.id)).toThrow('AMENDMENT_VERSION_CONFLICT');
+   expect(db.prepare('SELECT * FROM SampleAmendment WHERE id=?').get(row.id)).toEqual(row);
+  }
+  expect(db.pragma('integrity_check',{simple:true})).toBe('ok');expect(db.pragma('foreign_key_check')).toEqual([]);
+  const completeHash=hash(file);expect(installSampleAmendmentAuthorisation({dbPath:file,apply:true})).toMatchObject({mode:'NO_OP',totalChanges:0});
+  expect(snapshot(db)).toEqual(after);expect(hash(file)).toBe(completeHash);
+ }finally{db.close();}
+});
+
+test('the pre-210 factory has one no-argument caller and exact source and DDL boundaries',()=>{
+ expect(()=>createPre210AmendmentFixture({file:'arbitrary'})).toThrow('accepts no arguments');
+ const root=path.resolve(__dirname,'../..'),factory='tests/helpers/sampleAmendmentHistoricalFixture.js',source=fs.readFileSync(path.join(root,factory),'utf8');
+ expect(scanSource(source,factory)).toEqual([]);
+ expect(scanSource(source+'\n// changed\n',factory)).toEqual(expect.arrayContaining([expect.objectContaining({code:'HISTORICAL_FIXTURE_SOURCE_MISMATCH'})]));
+ const allowed="require('../helpers/sampleAmendmentHistoricalFixture')";
+ expect(scanSource(allowed,'tests/contracts/audit_6_1_amendment_install.test.js')).toEqual([]);
+ expect(scanSource(allowed,'tests/contracts/second_caller.test.js')).toEqual([expect.objectContaining({code:'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED'})]);
+ expect(scanSource("require('../tests/helpers/sampleAmendmentHistoricalFixture')",'services/probe.js')).toEqual([expect.objectContaining({code:'TEST_HELPER_IMPORTED_BY_RUNTIME'})]);
+ const read=fs.readFileSync,literal=path.join(root,'tests/helpers/fixtures/pre210_full_application_schema.sql');
+ const spy=jest.spyOn(fs,'readFileSync').mockImplementation((target,...args)=>{
+  const bytes=read(target,...args);return path.resolve(String(target))===literal?Buffer.concat([Buffer.from(bytes),Buffer.from('\n')]):bytes;
+ });
+ try{
+  expect(scanSource(source,factory)).toEqual(expect.arrayContaining([expect.objectContaining({code:'HISTORICAL_FIXTURE_SOURCE_MISMATCH'})]));
+  expect(()=>createPre210AmendmentFixture()).toThrow('literal pre-210 DDL differs');
+ }finally{spy.mockRestore();}
+ const originalState=expect.getState,callerSpy=jest.spyOn(expect,'getState').mockImplementation(()=>({...originalState(),testPath:path.join(root,'tests/contracts/second_caller.test.js')}));
+ try{expect(()=>createPre210AmendmentFixture()).toThrow('unlisted caller');}finally{callerSpy.mockRestore();}
+});
+
+test('only the exact amendment loader and DDL resolve; aliases and changed bytes grant no SQL authority',()=>{
+ const root=path.resolve(__dirname,'../..'),header="const {loadSampleAmendmentMigrationSource}=require('../services/sampleAmendmentMigrationSource'); const source=loadSampleAmendmentMigrationSource();";
+ expect(scanSource(header+'db.exec(source.sql)','scripts/probe.js')).toEqual([]);
+ expect(scanSource(header+'db.exec(source.guardsSql)','scripts/probe.js')).toEqual([]);
+ expect(scanSource(header+'const alias=source;db.exec(alias.sql)','scripts/probe.js')).toEqual([expect.objectContaining({code:'UNRESOLVED_WORKFLOW_SQL'})]);
+ for(const file of ['services/sampleAmendmentMigrationSource.js','prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql']){
+  const target=path.join(root,file),read=fs.readFileSync,spy=jest.spyOn(fs,'readFileSync').mockImplementation((requested,...args)=>{
+   const bytes=read(requested,...args);return path.resolve(String(requested))===target?Buffer.concat([Buffer.from(bytes),Buffer.from('\n')]):bytes;
+  });
+  try{expect(scanSource(header+'db.exec(source.sql)','scripts/probe.js')).toEqual([expect.objectContaining({code:'UNRESOLVED_WORKFLOW_SQL'})]);}
+  finally{spy.mockRestore();}
+ }
+});
+
 test('fresh generated Prisma receives guards with every historical field and prior receipt retained; repeat is byte-preserving NO_OP',async()=>{
  const file=await fixture(),db=new Database(file);db.pragma('foreign_keys=ON');
  try{
@@ -54,7 +127,11 @@ test('fresh generated Prisma receives guards with every historical field and pri
 test.each([['partial'],['foreign'],['late-receipt-fault']])('a %s installation refuses with zero persisted writes',async variant=>{
  const file=await fixture(),db=new Database(file);
  try{
-  if(variant==='partial')db.exec(loadSampleAmendmentMigrationSource().guardsSql.match(/^CREATE TRIGGER "[^"]+"[\s\S]*?^END;/m)[0]);
+  if(variant==='partial'){
+   const firstGuard='CREATE TRIGGER "SampleAmendment_request_evidence_immutable"\nBEFORE UPDATE OF "requestPayload", "selectedWorkItemIds" ON "SampleAmendment"\nWHEN NEW.requestPayload IS NOT OLD.requestPayload OR NEW.selectedWorkItemIds IS NOT OLD.selectedWorkItemIds\nBEGIN SELECT RAISE(ABORT, \'AMENDMENT_REQUEST_IMMUTABLE\');\nEND;';
+   expect(loadSampleAmendmentMigrationSource().guardsSql.match(/^CREATE TRIGGER "[^"]+"[\s\S]*?^END;/m)[0]).toBe(firstGuard);
+   db.exec(firstGuard);
+  }
   else if(variant==='foreign')db.exec('CREATE TRIGGER "SampleAmendment_delete_immutable" BEFORE DELETE ON SampleAmendment BEGIN SELECT RAISE(ABORT, \'FOREIGN_GUARD\'); END;');
   else db.exec("CREATE TRIGGER owned_amendment_receipt_failure BEFORE INSERT ON _schema_migrations WHEN NEW.id='210_sample_amendment_authorisation' BEGIN SELECT RAISE(ABORT,'OWNED_AMENDMENT_RECEIPT_FAILURE'); END;");
   const before=snapshot(db),beforeHash=hash(file);
@@ -74,13 +151,13 @@ test('the actual guards preserve immutable request evidence, require one CAS inc
   expect(()=>insert.run(...values.slice(0,8),'{}','{}',1)).toThrow('AMENDMENT_REQUEST_INVALID');
   insert.run(...values);
   const pending=db.prepare('SELECT * FROM SampleAmendment WHERE id=?').get(id);
-  for(const [statement,code] of [
-   ['UPDATE SampleAmendment SET requestPayload=\'{}\',version=2 WHERE id=?','AMENDMENT_REQUEST_IMMUTABLE'],
-   ['UPDATE SampleAmendment SET selectedWorkItemIds=\'["other"]\',version=2 WHERE id=?','AMENDMENT_REQUEST_IMMUTABLE'],
-   ['UPDATE SampleAmendment SET status=\'APPROVED\' WHERE id=?','AMENDMENT_VERSION_CONFLICT'],
-   ['UPDATE SampleAmendment SET priorApprovedBy=\'other\',priorApprovedAt=123,version=2 WHERE id=?','AMENDMENT_PRIOR_APPROVAL_IMMUTABLE'],
-   ['DELETE FROM SampleAmendment WHERE id=?','AMENDMENT_DELETE_REFUSED']
-  ]){expect(()=>db.prepare(statement).run(id)).toThrow(code);expect(db.prepare('SELECT * FROM SampleAmendment WHERE id=?').get(id)).toEqual(pending);}
+  for(const [probe,code] of [
+   [()=>db.prepare('UPDATE SampleAmendment SET requestPayload=\'{}\',version=2 WHERE id=?').run(id),'AMENDMENT_REQUEST_IMMUTABLE'],
+   [()=>db.prepare('UPDATE SampleAmendment SET selectedWorkItemIds=\'["other"]\',version=2 WHERE id=?').run(id),'AMENDMENT_REQUEST_IMMUTABLE'],
+   [()=>db.prepare('UPDATE SampleAmendment SET status=\'APPROVED\' WHERE id=?').run(id),'AMENDMENT_VERSION_CONFLICT'],
+   [()=>db.prepare('UPDATE SampleAmendment SET priorApprovedBy=\'other\',priorApprovedAt=123,version=2 WHERE id=?').run(id),'AMENDMENT_PRIOR_APPROVAL_IMMUTABLE'],
+   [()=>db.prepare('DELETE FROM SampleAmendment WHERE id=?').run(id),'AMENDMENT_DELETE_REFUSED']
+  ]){expect(probe).toThrow(code);expect(db.prepare('SELECT * FROM SampleAmendment WHERE id=?').get(id)).toEqual(pending);}
   db.prepare("UPDATE SampleAmendment SET status='APPROVED',authorizedBy='other-approver',authorizedAt=123,priorApprovedBy='prior-approver',priorApprovedAt=100,version=2 WHERE id=?").run(id);
   const approved=db.prepare('SELECT * FROM SampleAmendment WHERE id=?').get(id);
   expect(approved).toMatchObject({status:'APPROVED',version:2,priorApprovedBy:'prior-approver',priorApprovedAt:100});
