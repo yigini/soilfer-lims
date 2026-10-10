@@ -9,7 +9,8 @@ const key = () => process.env.JWT_SECRET || processPreviewKey;
 function context(preview, actor) {
     return { version: 1, actor: actorName(actor), batchId: preview.batchId, labId: preview.labId,
         instrumentId: preview.instrumentId, templateId: preview.templateId, templateVersion: preview.templateVersion,
-        sourceName: preview.sourceName, sourceSha256: preview.sourceSha256, activations: preview.activations };
+        sourceName: preview.sourceName, sourceSha256: preview.sourceSha256, activations: preview.activations,
+        numberPolicy: preview.numberPolicy, sheetName: preview.sheetName ?? null, requestedSheetName: preview.requestedSheetName ?? null };
 }
 function seal(value) {
     const payload = Buffer.from(JSON.stringify(value)).toString('base64url');

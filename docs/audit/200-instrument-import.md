@@ -236,3 +236,21 @@ not clear the repository's41 existing npm findings. Saxes upstream is archived.
 Per6096456697, explicit YY approval in the concrete#200 PR is still required
 before merge. No parser dependency approval, complete XLSX import or full-suite
 pass is claimed.
+
+The server-side XLSX XML/cell decoder is now implemented but unvalidated. It
+adds resource caps of250,000 XML elements in the whole archive,64 nesting levels
+and4,096 merge ranges, in addition to the archive caps above. Saxes rejects
+malformed XML and DTDs; all XML and relationship parts are checked, including
+unused content. Relative OPC targets resolve only inside the uploaded in-memory
+parts; external targets and macro content are refused. Sparse worksheet cells
+never allocate a dense grid. Merges retain the top-left value only.
+
+Exact numeric/shared/inline lexemes and cell/style/sheet evidence are carried
+into preview and the immutable receipt. Pins6096456697/6096497546 require the
+unchanged lab parser to agree with the regex-constrained invariant comparator,
+including canonical text; otherwise409 IMPORT_XLSX_NUMBER_POLICY_CONFLICT
+refuses the complete import. Text cells keep existing lab parsing. Activated
+raw-input columns receive the same check. Selected worksheet, resolved format
+and policy version now bind the signed preview and are re-read before commit.
+New pure decoder and actual multipart/transaction tests await validation;
+complete40-by-four/QC/calculation/UI/full-suite acceptance remains unfinished.

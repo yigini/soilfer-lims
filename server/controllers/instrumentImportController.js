@@ -3,7 +3,7 @@ const templates = require('../services/instrumentImportTemplateService');
 const importer = require('../services/instrumentImportService');
 const multer = require('multer');
 // Resource cap for an in-memory uploaded source, independent of lab policy.
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 16 * 1024 * 1024, files: 1, fields: 2 } }).single('file');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 16 * 1024 * 1024, files: 1, fields: 3 } }).single('file');
 function refuse(res, error) {
     return res.status(error.statusCode || 500).json({ error: error.message, code: error.code || 'IMPORT_FAILED',
         ...(error.details && { details: error.details }) });
@@ -24,12 +24,14 @@ exports.saveTemplate = async (req, res) => {
     } catch (error) { refuse(res, error); }
 };
 function sourceInput(req, commit) {
-    if (!req.file || !req.body || Object.keys(req.body).some(key => !['templateId', ...(commit ? ['previewToken'] : [])].includes(key)) ||
+    if (!req.file || !req.body || Object.keys(req.body).some(key => !['templateId', 'sheetName', ...(commit ? ['previewToken'] : [])].includes(key)) ||
         typeof req.body.templateId !== 'string' || !req.body.templateId ||
+        Object.hasOwn(req.body, 'sheetName') && (typeof req.body.sheetName !== 'string' || !req.body.sheetName.trim()) ||
         commit && (typeof req.body.previewToken !== 'string' || !req.body.previewToken))
         throw templates.fail(400, 'IMPORT_REQUEST_INVALID', 'Supply the source file and exact template preview.');
     return { batchId: req.params.batchId, templateId: req.body.templateId, sourceName: req.file.originalname,
-        bytes: req.file.buffer, ...(commit && { previewToken: req.body.previewToken }) };
+        bytes: req.file.buffer, ...(Object.hasOwn(req.body, 'sheetName') && { sheetName: req.body.sheetName }),
+        ...(commit && { previewToken: req.body.previewToken }) };
 }
 exports.previewImport = async (req, res) => {
     try { res.json(await importer.preview(db, req.user, sourceInput(req, false))); }

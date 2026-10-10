@@ -1,5 +1,6 @@
 const { templateForRun, fail } = require('./instrumentImportTemplateService');
 const { decodeInstrumentDelimitedSource } = require('./instrumentDelimitedSource');
+const { decodeInstrumentXlsxSource, assertXlsxMappedCell } = require('./instrumentXlsxSource');
 const { matchInstrumentRow } = require('./instrumentImportRowMatch');
 const { numericReportingUnit } = require('./resultReportingUnit');
 const { readDraftContext } = require('./draftService');
@@ -41,10 +42,13 @@ function parsedValue(raw, numberFormat, input = false) {
         throw fail(400, input ? 'CALC_INPUT_INVALID' : parsed.code, 'Enter a valid raw measurement.');
     return parsed;
 }
-function measurements(binding, mapping, cells, numberFormat) {
+function measurements(binding, mapping, source, numberFormat) {
+    const cells = source.cells;
     if (mapping.inputs) {
         const inputs = {}, evidence = [];
         for (const input of mapping.inputs) {
+            assertXlsxMappedCell(source, input.column, numberFormat, { value: true });
+            if (input.unitColumn !== undefined) assertXlsxMappedCell(source, input.unitColumn, numberFormat);
             const declared = binding.inputs.find(row => row.key === input.variable), rawUnit = unitCell(input, cells);
             if (rawUnit !== declared.unit) throw fail(409, 'IMPORT_UNIT_MISMATCH', 'Use the exact activated input unit.');
             const rawValue = cells[input.column]; parsedValue(rawValue, numberFormat, true);
@@ -55,6 +59,9 @@ function measurements(binding, mapping, cells, numberFormat) {
         return { value: '', values: { calculation: { ...binding.active, inputs } },
             evidence: { mode: 'ACTIVATED_INPUTS', inputs: evidence, activation: binding.active } };
     }
+    assertXlsxMappedCell(source, mapping.valueColumn, numberFormat, { value: true });
+    for (const column of [mapping.unitColumn, mapping.dilutionColumn]) if (column !== undefined)
+        assertXlsxMappedCell(source, column, numberFormat);
     const rawValue = cells[mapping.valueColumn], rawUnit = unitCell(mapping, cells);
     const unit = numericReportingUnit({ analysis: binding.analysis }, { param: mapping.analysisCode, unit: rawUnit }, { instrumentImport: true });
     const rawDilution = mapping.dilutionColumn === undefined ? null : cells[mapping.dilutionColumn];
@@ -71,22 +78,31 @@ function measurements(binding, mapping, cells, numberFormat) {
 
 // This owner reads actual run, template, activation, catalogue, draft and QC
 // evidence. It constructs candidate plans without persisting or calculating.
-async function previewInstrumentImport(db, actor, { batchId, templateId, sourceName, bytes }) {
+async function previewInstrumentImport(db, actor, { batchId, templateId, sourceName, bytes, sheetName }) {
     const { batch, template, lab, instrument } = await templateForRun(db, actor, batchId, templateId);
-    if (typeof sourceName !== 'string' || !sourceName.trim() || !/\.(csv|txt)$/i.test(sourceName))
-        throw fail(400, 'IMPORT_FILE_TYPE_UNSUPPORTED', 'Select a CSV or TXT source file.');
+    if (typeof sourceName === 'string' && /\.xlsm$/i.test(sourceName))
+        throw fail(400, 'IMPORT_XLSX_INVALID', 'Macro-enabled sources cannot be imported.');
+    if (typeof sourceName !== 'string' || !sourceName.trim() || !/\.(csv|txt|xlsx)$/i.test(sourceName))
+        throw fail(400, 'IMPORT_FILE_TYPE_UNSUPPORTED', 'Select a CSV, TXT or XLSX source file.');
+    const xlsx = /\.xlsx$/i.test(sourceName);
+    if (!xlsx && sheetName !== undefined) throw fail(400, 'IMPORT_REQUEST_INVALID', 'Sheet selection requires an XLSX source.');
     const delimiter = { COMMA: ',', SEMICOLON: ';', TAB: '\t' }[template.mapping.delimiter];
-    const decoded = decodeInstrumentDelimitedSource(bytes, delimiter);
+    const selectedSheet = sheetName ?? template.mapping.sheetName;
+    const decoded = xlsx ? decodeInstrumentXlsxSource(bytes, selectedSheet) : decodeInstrumentDelimitedSource(bytes, delimiter);
     const sampleIds = [...new Set(batch.positions.map(row => row.sampleId).filter(Boolean))];
     const samples = await db.sample.findMany({ where: { id: { in: sampleIds } }, select: { id: true, labSampleCode: true, originalId: true } });
-    const bindings = new Map(), formats = new Map(), activationContexts = {};
+    const bindings = new Map(), formats = new Map(), activationContexts = {}, numberPolicy = {};
     for (const mapping of template.mapping.analytes) {
         const analyte = batch.analytes.find(row => row.analysisCode === mapping.analysisCode);
         const active = await policy.calcTemplate(lab.id, { analysisCode: mapping.analysisCode, methodologyId: analyte.methodologyId }, { db });
         activationContexts[mapping.analysisCode] = active;
         try { bindings.set(mapping.analysisCode, await analysisBinding(db, lab, analyte, mapping, active)); }
         catch (error) { bindings.set(mapping.analysisCode, { error }); }
-        formats.set(mapping.analysisCode, await getNumberFormat(lab.id, { db, analysisCode: mapping.analysisCode, methodologyId: analyte.methodologyId }));
+        const snapshot = await policy.snapshot(lab.id, { db, analysisCode: mapping.analysisCode, methodologyId: analyte.methodologyId });
+        const format = await getNumberFormat(lab.id, { snapshot });
+        formats.set(mapping.analysisCode, format);
+        numberPolicy[mapping.analysisCode] = { version: snapshot.version, format,
+            decimalSource: snapshot.resolved['numbers.decimalSeparator'], thousandsSource: snapshot.resolved['numbers.thousandsSeparator'] };
     }
     const header = template.mapping.hasHeader ? decoded.rows[0] : null;
     const sourceRows = template.mapping.hasHeader ? decoded.rows.slice(1) : decoded.rows;
@@ -97,7 +113,7 @@ async function previewInstrumentImport(db, actor, { batchId, templateId, sourceN
         rows.push(row);
         if (match.kind === 'UNKNOWN') continue;
         if (match.kind === 'AMBIGUOUS') { row.errors.push({ code: 'IMPORT_MATCH_AMBIGUOUS', sourceCode: match.code }); continue; }
-        if (source.error || header?.error || header && source.cells.length !== header.cells.length) {
+        if (source.error || header?.error || !xlsx && header && source.cells.length !== header.cells.length) {
             row.errors.push({ code: 'IMPORT_ROW_INVALID', sourceCode: source.error || header?.error || 'COLUMN_COUNT_MISMATCH' }); continue;
         }
         for (const mapping of template.mapping.analytes) {
@@ -106,7 +122,11 @@ async function previewInstrumentImport(db, actor, { batchId, templateId, sourceN
                     throw fail(400, 'IMPORT_TEMPLATE_MAPPING_INVALID', 'Calculated-analysis QC entry belongs to its QC workflow.');
                 const binding = bindings.get(mapping.analysisCode);
                 if (binding.error) throw binding.error;
-                const raw = measurements(binding, mapping, source.cells, formats.get(mapping.analysisCode));
+                const format = formats.get(mapping.analysisCode);
+                for (const column of [template.mapping.idColumn, template.mapping.qcDetector?.positionColumn]) if (column !== undefined)
+                    assertXlsxMappedCell(source, column, format);
+                const raw = measurements(binding, mapping, source, format);
+                raw.evidence.numberPolicy = numberPolicy[mapping.analysisCode];
                 let plan;
                 if (match.kind === 'SAMPLE') {
                     const workItemId = match.workItemIdsByAnalysis[mapping.analysisCode];
@@ -131,7 +151,7 @@ async function previewInstrumentImport(db, actor, { batchId, templateId, sourceN
                 destinations.get(destination).push(row);
             } catch (error) {
                 row.errors.push({ analysisCode: mapping.analysisCode, code: error.code || 'IMPORT_LINE_NOT_ENTERABLE',
-                    message: error.message, statusCode: error.statusCode || 409 });
+                    message: error.message, statusCode: error.statusCode || 409, ...(error.details && { details: error.details }) });
             }
         }
     }
@@ -141,7 +161,8 @@ async function previewInstrumentImport(db, actor, { batchId, templateId, sourceN
     if (!rows.some(row => row.match.kind !== 'UNKNOWN')) refusals.push({ rowNumber: null, code: 'IMPORT_NO_MATCHED_ROWS' });
     return { batchId: batch.id, labId: lab.id, instrumentId: instrument.id, templateId: template.id, templateVersion: template.version,
         mapping: template.mapping, sourceName, sourceSha256: decoded.sourceSha256, header, rows,
-        activations: activationContexts,
+        activations: activationContexts, numberPolicy,
+        ...(xlsx && { sheetName: decoded.sheetName, requestedSheetName: selectedSheet ?? null, sheets: decoded.sheets }),
         refusals, canCommit: refusals.length === 0 };
 }
 module.exports = { previewInstrumentImport };

@@ -22,4 +22,24 @@ function xlsxZip(parts, { deflate = false, descriptor = false, declaredSize = nu
     end.writeUInt16LE(parts.length, 8); end.writeUInt16LE(parts.length, 10); end.writeUInt32LE(directory.length, 12); end.writeUInt32LE(offset, 16);
     return Buffer.concat([...local, directory, end]);
 }
-module.exports = { xlsxZip };
+const spreadsheetNamespace = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+const relationshipNamespace = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+const xmlAttribute = text => String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+function xlsxWorkbook({ sheets = [{ name: 'Raw', xml: '<sheetData/>' }], sharedStrings = null, styles = null, extraParts = [] } = {}) {
+    const parts = [
+        ['[Content_Types].xml', '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+            sheets.map((_, index) => `<Override PartName="/xl/worksheets/sheet${index + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('') + '</Types>'],
+        ['_rels/.rels', `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="workbook" Type="${relationshipNamespace}/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+        ['xl/workbook.xml', `<workbook xmlns="${spreadsheetNamespace}" xmlns:r="${relationshipNamespace}"><sheets>` + sheets.map((sheet, index) =>
+            `<sheet name="${xmlAttribute(sheet.name)}" sheetId="${index + 1}" r:id="sheet${index + 1}"${sheet.state ? ` state="${sheet.state}"` : ''}/>`).join('') + '</sheets></workbook>'],
+        ['xl/_rels/workbook.xml.rels', '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + sheets.map((_, index) =>
+            `<Relationship Id="sheet${index + 1}" Type="${relationshipNamespace}/worksheet" Target="worksheets/sheet${index + 1}.xml"/>`).join('') +
+            (sharedStrings !== null ? `<Relationship Id="strings" Type="${relationshipNamespace}/sharedStrings" Target="sharedStrings.xml"/>` : '') +
+            (styles !== null ? `<Relationship Id="styles" Type="${relationshipNamespace}/styles" Target="styles.xml"/>` : '') + '</Relationships>']
+    ];
+    sheets.forEach((sheet, index) => parts.push([`xl/worksheets/sheet${index + 1}.xml`, `<worksheet xmlns="${spreadsheetNamespace}">${sheet.xml}</worksheet>`]));
+    if (sharedStrings !== null) parts.push(['xl/sharedStrings.xml', `<sst xmlns="${spreadsheetNamespace}">${sharedStrings}</sst>`]);
+    if (styles !== null) parts.push(['xl/styles.xml', `<styleSheet xmlns="${spreadsheetNamespace}">${styles}</styleSheet>`]);
+    parts.push(...extraParts); return xlsxZip(parts, { deflate: true, descriptor: true });
+}
+module.exports = { xlsxZip, xlsxWorkbook, xmlAttribute };
