@@ -105,7 +105,9 @@
     "analysisDates": "Dates of analysis",
     "sampling": "Sampling",
     "issuedAt": "Issued at",
-    "approvalNotRecorded": "Approval: not recorded"
+    "approvalNotRecorded": "Approval: not recorded",
+    "filterWithdrawn": "Withdrawn",
+    "withdrawnPendingAmendment": "Withdrawn pending amendment {{amendmentId}}"
   },
   "common": {
     "save": "Save",

@@ -2274,7 +2274,9 @@
     "qcNotRequired": "QC not required",
     "qcEvidenceIncomplete": "Historical QC acceptance has incomplete recorded evidence",
     "qcAcknowledgedBy": "Acknowledged by",
-    "qcCalibrationBracketRepeatInfo": "A calibration bracket is being repeated; this result is outside the affected scope"
+    "qcCalibrationBracketRepeatInfo": "A calibration bracket is being repeated; this result is outside the affected scope",
+    "filterWithdrawn": "Withdrawn",
+    "withdrawnPendingAmendment": "Withdrawn pending amendment {{amendmentId}}"
   },
   "qaSection": {
     "kicker": "Quality & Regulatory Compliance",

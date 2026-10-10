@@ -2274,7 +2274,9 @@
     "qcNotRequired": "CQ non requis",
     "qcEvidenceIncomplete": "L’acceptation historique du CQ dispose de preuves enregistrées incomplètes",
     "qcAcknowledgedBy": "Accepté par",
-    "qcCalibrationBracketRepeatInfo": "Un intervalle d’étalonnage est répété ; ce résultat est hors du périmètre concerné"
+    "qcCalibrationBracketRepeatInfo": "Un intervalle d’étalonnage est répété ; ce résultat est hors du périmètre concerné",
+    "filterWithdrawn": "Retiré",
+    "withdrawnPendingAmendment": "Retiré dans l’attente de la modification {{amendmentId}}"
   },
   "qaSection": {
     "kicker": "Assurance qualité et conformité réglementaire",

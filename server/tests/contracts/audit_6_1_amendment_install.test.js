@@ -49,13 +49,18 @@ test('the real pre-210 schema upgrades additively while retaining every historic
    mode:'APPLIED',newAmendmentCount:0,backfilledCount:0,receipt:{originalRowsPreserved:true}});
   const after=snapshot(db),newNames=new Set([...source.guardsSql.matchAll(/^CREATE TRIGGER "([^"]+)"/gm)].map(row=>row[1]));
   newNames.add('SampleAmendmentAttempt');newNames.add('SampleAmendmentAttempt_childAttemptId_key');
+  newNames.add('ReportAmendmentWithdrawal');newNames.add('ReportAmendmentWithdrawal_reportId_key');
   expect(after.objects.find(row=>row.name==='SampleAmendmentAttempt')).toMatchObject({type:'table',
    sql:source.freshTables.SampleAmendmentAttempt.replace(/;$/,'')});
   expect(after.objects.find(row=>row.name==='SampleAmendmentAttempt_childAttemptId_key')).toMatchObject({type:'index',
    sql:'CREATE UNIQUE INDEX "SampleAmendmentAttempt_childAttemptId_key" ON "SampleAmendmentAttempt"("childAttemptId")'});
   expect(after.objects.filter(row=>!newNames.has(row.name)&&row.name!=='SampleAmendment')).toEqual(before.objects.filter(row=>row.name!=='SampleAmendment'));
-  expect(Object.keys(after.rows)).toEqual([...Object.keys(before.rows),'SampleAmendmentAttempt'].sort());
+  expect(Object.keys(after.rows)).toEqual([...Object.keys(before.rows),'SampleAmendmentAttempt','ReportAmendmentWithdrawal'].sort());
   expect(after.rows.SampleAmendmentAttempt).toEqual([]);
+  expect(after.rows.ReportAmendmentWithdrawal).toEqual([]);
+  const withdrawalForeignKeys=db.prepare('PRAGMA foreign_key_list("ReportAmendmentWithdrawal")').all();
+  expect(withdrawalForeignKeys).toHaveLength(2);
+  for(const key of withdrawalForeignKeys)expect(key).toMatchObject({on_delete:'RESTRICT',on_update:'RESTRICT'});
   const linkForeignKeys=db.prepare('PRAGMA foreign_key_list("SampleAmendmentAttempt")').all();
   expect(linkForeignKeys).toHaveLength(4);
   for(const foreignKey of linkForeignKeys)expect(foreignKey).toMatchObject({on_delete:'RESTRICT',on_update:'RESTRICT'});
@@ -189,6 +194,8 @@ test.each([[],['--db','owned.db','--apply','--dry-run'],['--db','owned.db','--ap
 test('managed amendment attempt table matches the actual independently emitted fresh Prisma oracle',()=>{
  const source=loadSampleAmendmentMigrationSource();
  expect(source.schemaSql.match(/CREATE TABLE "SampleAmendmentAttempt" \([\s\S]*?\n\);/)[0]).toBe(source.freshTables.SampleAmendmentAttempt);
- expect(source.guardsSql.match(/CREATE TRIGGER/g)).toHaveLength(8);
+ expect(source.guardsSql.match(/CREATE TRIGGER/g)).toHaveLength(14);
  expect(source.freshTables.SampleAmendmentAttempt).not.toMatch(/CHECK|TRIGGER/);
+ expect(source.schemaSql.match(/CREATE TABLE "ReportAmendmentWithdrawal" \([\s\S]*?\n\);/)[0]).toBe(source.freshTables.ReportAmendmentWithdrawal);
+ expect(source.freshTables.ReportAmendmentWithdrawal).not.toMatch(/CHECK|TRIGGER/);
 });

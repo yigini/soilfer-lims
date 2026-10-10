@@ -105,7 +105,9 @@
     "analysisDates": "Dates des analyses",
     "sampling": "Échantillonnage",
     "issuedAt": "Émis le",
-    "approvalNotRecorded": "Approbation : non enregistrée"
+    "approvalNotRecorded": "Approbation : non enregistrée",
+    "filterWithdrawn": "Retiré",
+    "withdrawnPendingAmendment": "Retiré dans l’attente de la modification {{amendmentId}}"
   },
   "common": {
     "save": "Enregistrer",

@@ -4,6 +4,8 @@ const {loadSampleAmendmentMigrationSource}=require('../services/sampleAmendmentM
 const MARKER='210_sample_amendment_authorisation';
 const COLUMNS=Object.freeze({requestPayload:'TEXT',version:'INTEGER',priorApprovedBy:'TEXT',priorApprovedAt:'DATETIME',selectedWorkItemIds:'TEXT'});
 const LINK_TABLE='SampleAmendmentAttempt',LINK_INDEX='SampleAmendmentAttempt_childAttemptId_key';
+const WITHDRAWAL_TABLE='ReportAmendmentWithdrawal',WITHDRAWAL_INDEX='ReportAmendmentWithdrawal_reportId_key';
+const MANAGED_OBJECTS=Object.freeze([LINK_TABLE,LINK_INDEX,WITHDRAWAL_TABLE,WITHDRAWAL_INDEX]);
 const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
 const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
@@ -27,8 +29,15 @@ function classify(db,source){
  const linkIndex=db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(LINK_INDEX);
  if(linkIndex&&(linkIndex.type!=='index'||normalized(linkIndex.sql)!==normalized(indexSql)))differences.push('Amendment child-attempt index differs');
  const schemaPresent=[...present,Boolean(link),Boolean(linkIndex)];
+ const withdrawal=db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(WITHDRAWAL_TABLE);
+ if(withdrawal&&(withdrawal.type!=='table'||normalized(withdrawal.sql)!==normalized(source.freshTables[WITHDRAWAL_TABLE])))differences.push('Report withdrawal table differs');
+ const withdrawalIndexSql=source.schemaSql.match(/^CREATE UNIQUE INDEX "ReportAmendmentWithdrawal_reportId_key"[^;]*;/m)?.[0];
+ if(!withdrawalIndexSql)throw fail('AMENDMENT_SOURCE_MISMATCH','The release requires its unique report-withdrawal index.');
+ const withdrawalIndex=db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(WITHDRAWAL_INDEX);
+ if(withdrawalIndex&&(withdrawalIndex.type!=='index'||normalized(withdrawalIndex.sql)!==normalized(withdrawalIndexSql)))differences.push('Report withdrawal index differs');
+ schemaPresent.push(Boolean(withdrawal),Boolean(withdrawalIndex));
  const guards=[...source.guardsSql.matchAll(/^CREATE TRIGGER "([^"]+)"[\s\S]*?^END;/gm)].map(match=>({name:match[1],sql:match[0]}));
- if(guards.length!==8)throw fail('AMENDMENT_SOURCE_MISMATCH','The release requires all eight request and attempt-link guards.');
+ if(guards.length!==14)throw fail('AMENDMENT_SOURCE_MISMATCH','The release requires all fourteen request, attempt-link and withdrawal guards.');
  const installed=guards.map(guard=>{
   const row=db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(guard.name);
   if(row&&(row.type!=='trigger'||normalized(row.sql)!==normalized(guard.sql)))differences.push(guard.name+' differs');
@@ -39,10 +48,10 @@ function classify(db,source){
  let receipt;
  if(marker){
   try{receipt=JSON.parse(marker.details);}catch{/* Refuse unverified provenance. */}
-  const keys=['sources','originalRowsSha256','originalRowsPreserved','newAmendmentCount','newAttemptLinkCount','backfilledCount','receiptSha256'];
+  const keys=['sources','originalRowsSha256','originalRowsPreserved','newAmendmentCount','newAttemptLinkCount','newWithdrawalCount','backfilledCount','receiptSha256'];
   if(!receipt||JSON.stringify(Object.keys(receipt).sort())!==JSON.stringify(keys.sort())||
    JSON.stringify(receipt.sources)!==JSON.stringify(sources)||!/^[a-f0-9]{64}$/.test(receipt.originalRowsSha256)||
-   receipt.originalRowsPreserved!==true||receipt.newAmendmentCount!==0||receipt.newAttemptLinkCount!==0||receipt.backfilledCount!==0||
+   receipt.originalRowsPreserved!==true||receipt.newAmendmentCount!==0||receipt.newAttemptLinkCount!==0||receipt.newWithdrawalCount!==0||receipt.backfilledCount!==0||
    receipt.receiptSha256!==fingerprint(Object.fromEntries(Object.entries(receipt).filter(([key])=>key!=='receiptSha256'))))
    differences.push('Amendment installation receipt differs');
  }
@@ -53,11 +62,13 @@ function classify(db,source){
   if(db.prepare('SELECT count(*) n FROM SampleAmendment WHERE '+Object.keys(COLUMNS).map(name=>'"'+name+'" IS NOT NULL').join(' OR ')).get().n)
    differences.push('Unmarked request evidence must not be adopted');
   if(db.prepare('SELECT count(*) n FROM SampleAmendmentAttempt').get().n)differences.push('Unmarked amendment attempt links must not be adopted');
+  if(db.prepare('SELECT count(*) n FROM ReportAmendmentWithdrawal').get().n)differences.push('Unmarked report withdrawals must not be adopted');
  }else if([...schemaPresent,...installed,Boolean(marker)].every(Boolean))classification='COMPLETE_210';
  else differences.push('Amendment installation is partial or unmarked');
  if(differences.length)throw fail('AMENDMENT_SCHEMA_MISMATCH','Amendment request evidence differs from the release.',differences);
  return{classification,sources,amendmentCount:db.prepare('SELECT count(*) n FROM SampleAmendment').get().n,
-  amendmentAttemptLinkCount:link?db.prepare('SELECT count(*) n FROM SampleAmendmentAttempt').get().n:0,...(receipt&&{receipt})};
+  amendmentAttemptLinkCount:link?db.prepare('SELECT count(*) n FROM SampleAmendmentAttempt').get().n:0,
+  withdrawalCount:withdrawal?db.prepare('SELECT count(*) n FROM ReportAmendmentWithdrawal').get().n:0,...(receipt&&{receipt})};
 }
 
 function snapshot(db,originalColumns){
@@ -83,31 +94,32 @@ function installSampleAmendmentAuthorisation({dbPath,apply=false}={}){
  const target=path.resolve(dbPath),source=loadSampleAmendmentMigrationSource();
  const reader=new Database(target,{readonly:true,fileMustExist:true});let reviewed;
  try{reviewed=reader.transaction(()=>classify(reader,source))();}finally{reader.close();}
- if(!apply||reviewed.classification==='COMPLETE_210')return{...reviewed,mode:apply?'NO_OP':'DRY_RUN',totalChanges:0,newAmendmentCount:0,newAttemptLinkCount:0,backfilledCount:0};
+ if(!apply||reviewed.classification==='COMPLETE_210')return{...reviewed,mode:apply?'NO_OP':'DRY_RUN',totalChanges:0,newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0};
  const db=new Database(target,{fileMustExist:true,timeout:5000});
  try{
   db.pragma('foreign_keys=ON');
   return db.transaction(()=>{
    const current=classify(db,source);
-   if(current.classification==='COMPLETE_210')return{...current,mode:'NO_OP',totalChanges:0,newAmendmentCount:0,newAttemptLinkCount:0,backfilledCount:0};
+   if(current.classification==='COMPLETE_210')return{...current,mode:'NO_OP',totalChanges:0,newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0};
    if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw fail('AMENDMENT_INTEGRITY_REFUSED','An intact database is required.');
    const before=snapshot(db),release=loadSampleAmendmentMigrationSource();
    db.exec(current.classification==='PRE_210'?release.sql:release.guardsSql);
    const after=snapshot(db,before.tables),guardNames=new Set([...release.guardsSql.matchAll(/^CREATE TRIGGER "([^"]+)"/gm)].map(match=>match[1]));
    const originalObjects=new Set(before.objects.map(row=>row.type+':'+row.name));
    if(fingerprint(after.tables)!==fingerprint(before.tables)||fingerprint(after.objects.filter(row=>!guardNames.has(row.name)&&
-    (originalObjects.has(row.type+':'+row.name)||![LINK_TABLE,LINK_INDEX].includes(row.name))))!==fingerprint(before.objects)||
+    (originalObjects.has(row.type+':'+row.name)||!MANAGED_OBJECTS.includes(row.name))))!==fingerprint(before.objects)||
     fingerprint(after.amendmentForeignKeys)!==fingerprint(before.amendmentForeignKeys)||
     before.amendmentColumns.some(row=>fingerprint(after.amendmentColumns.find(value=>value.name===row.name))!==fingerprint(row))||
     db.prepare('SELECT count(*) n FROM SampleAmendment WHERE '+Object.keys(COLUMNS).map(name=>'"'+name+'" IS NOT NULL').join(' OR ')).get().n||
-    db.prepare('SELECT count(*) n FROM SampleAmendmentAttempt').get().n)
+    db.prepare('SELECT count(*) n FROM SampleAmendmentAttempt').get().n||
+    db.prepare('SELECT count(*) n FROM ReportAmendmentWithdrawal').get().n)
     throw fail('AMENDMENT_PRESERVATION_REFUSED','Installation changed historical rows or schema evidence.');
-   const receipt={sources:current.sources,originalRowsSha256:fingerprint(before.tables),originalRowsPreserved:true,newAmendmentCount:0,newAttemptLinkCount:0,backfilledCount:0};
+   const receipt={sources:current.sources,originalRowsSha256:fingerprint(before.tables),originalRowsPreserved:true,newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0};
    receipt.receiptSha256=fingerprint(receipt);
    db.prepare('INSERT INTO _schema_migrations(id,details) VALUES(?,?)').run(MARKER,JSON.stringify(receipt));
    if(fingerprint(snapshot(db,before.tables).tables)!==fingerprint(before.tables)||db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)
     throw fail('AMENDMENT_INTEGRITY_REFUSED','Installation failed preservation or integrity checks.');
-   return{...classify(db,source),previousClassification:current.classification,mode:'APPLIED',newAmendmentCount:0,newAttemptLinkCount:0,backfilledCount:0,totalChanges:db.prepare('SELECT total_changes() n').get().n};
+   return{...classify(db,source),previousClassification:current.classification,mode:'APPLIED',newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0,totalChanges:db.prepare('SELECT total_changes() n').get().n};
   }).immediate();
  }finally{db.close();}
 }

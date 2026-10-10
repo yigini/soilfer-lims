@@ -64,7 +64,7 @@ function toScalar(v, fallback = '—') {
 
 // ─── Main Component ──────────────────────────────────────
 
-const ReportContent = ({ data }) => {
+const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
     if (!data) return <div style={{ textAlign: 'center', color: '#999', padding: '80px 0' }}>No report content available</div>;
 
     const { sample, client, project, lab, labBranding, resultGroups, locationData, fieldMetadata, receptionData, signedBy, methodologies, generated, reportNumber } = data;
@@ -109,6 +109,11 @@ const ReportContent = ({ data }) => {
 
     return (
         <div className="report-document">
+            {publication.status === 'WITHDRAWN' && (
+                <p role="status" data-testid="report-withdrawal-banner" style={{color:'#b91c1c',fontWeight:700}}>
+                    {withdrawalBanner || `Withdrawn pending amendment ${publication.withdrawal?.amendmentId || '—'}`}
+                </p>
+            )}
 
             {/* ═══════════════════════════════════════════════════
                 1. LAB LETTERHEAD

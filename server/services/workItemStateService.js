@@ -24,6 +24,10 @@ function assertActionEdge(item, sample, nextStatus, actor, reason, options) {
     const current = workflow.normalizeWorkItemState(item.status);
     const operational = OPERATIONAL.includes(item.analysis);
     const action = options.action;
+    if (action === 'SCIENTIFIC_AMENDMENT_AUTHORISED') {
+        rules.requireReason(reason);
+        return workflow.isScientificAmendmentTransition('WorkItem', current, nextStatus);
+    }
     if (current === 'CANCELLED') {
         if (options.intakeAction !== INTAKE_ACTION || action !== 'reactivateCancelledIntakeWork' || nextStatus !== 'NOT_ASSIGNED') {
             throw new TransitionError('Cancelled work requires legal intake re-acceptance.', 409, 'WORKITEM_REACTIVATION_ACTION_REQUIRED');
@@ -136,6 +140,12 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
         const sample = await client.sample.findUnique({ where: { id: item.sampleId } });
         if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
         rules.assertScope(actor, sample);
+        if (options.action === 'SCIENTIFIC_AMENDMENT_AUTHORISED') {
+            if (!workflow.isScientificAmendmentTransition('WorkItem', item.status, nextStatus)) {
+                throw new TransitionError('The selected work changed.', 409, 'AMENDMENT_LINE_INVALID');
+            }
+            require('./scientificAmendmentService').assertScientificReopenCapability(client, options.amendmentCapability, sample, actor, item);
+        }
         if(options.action==='DERIVED_RECALCULATED') {
             await require('./sampleHoldService').assertNotHeld(client,sample);
             await require('./derivedResultReviewService').assertPendingDerivedEvent(client,item,options.derivedEventId,options.derivedResultId);
@@ -200,7 +210,7 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
         const isRepeatHistory = ['REANALYZE_BATCH', 'REJECT_BATCH'].includes(options.action) &&
             workflow.normalizeWorkItemState(item.status) === 'REPEAT_REQUIRED';
         const writeStatus = isRepeatHistory ? item.status : nextStatus;
-        const reviewData = !migrating && !isRepeatHistory && options.action !== 'REPEAT_REQUESTED' && ['ACCEPTED', 'REPEAT_REQUIRED', 'WAIVED'].includes(nextStatus)
+        const reviewData = !migrating && !isRepeatHistory && !['REPEAT_REQUESTED', 'SCIENTIFIC_AMENDMENT_AUTHORISED'].includes(options.action) && ['ACCEPTED', 'REPEAT_REQUIRED', 'WAIVED'].includes(nextStatus)
             ? { reviewedBy: performedBy, reviewedAt: data.reviewedAt || new Date() } : {};
         const { result: _cache, ...changes } = { ...data, ...provenance, ...reviewData, status: writeStatus, updatedAt: new Date(),
             version: data.version ?? (item.version === null ? 1 : { increment: 1 }) };

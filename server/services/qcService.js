@@ -481,7 +481,7 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
             const pubReports = await prismaClient.report.findMany({
                 where: {
                     sampleId: { in: sampleIds },
-                    status: { in: ['PUBLISHED', 'SUPERSEDED'] }
+                    status: { in: ['PUBLISHED', 'SUPERSEDED', 'WITHDRAWN'] }
                 },
                 select: { sampleId: true }
             });

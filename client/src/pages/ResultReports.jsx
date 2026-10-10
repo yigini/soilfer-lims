@@ -274,6 +274,7 @@ const ResultReports = ({
                     {[
                         { id: 'PUBLISHED', label: t('resultReports.filterPublished', 'Published') },
                         { id: 'SUPERSEDED', label: t('resultReports.filterSuperseded', 'Superseded') },
+                        { id: 'WITHDRAWN', label: t('resultReports.filterWithdrawn', 'Withdrawn') },
                         { id: 'ALL', label: t('resultReports.filterAll', 'All Versions') }
                     ].map(tab => (
                         <button
@@ -343,6 +344,10 @@ const ResultReports = ({
                                                 }`}>
                                                     v{r.version} {r.status === 'SUPERSEDED' && '· Superseded'}
                                                 </span>
+                                                {r.status === 'WITHDRAWN' && <p className="mt-1 text-xs text-red-700">
+                                                    {t('resultReports.withdrawnPendingAmendment', 'Withdrawn pending amendment {{amendmentId}}',
+                                                        {amendmentId:r.amendmentWithdrawals?.[0]?.amendmentId || '—'})}
+                                                </p>}
                                             </td>
                                             <td className="px-6 py-4 text-sf-muted text-sm">
                                                 <div>{formatDate(r.generatedAt)}</div>
@@ -436,7 +441,10 @@ const ResultReports = ({
                         {/* Report Content */}
                         <div className="flex-1 overflow-y-auto p-8 bg-sf-canvas" data-surface="paper">
                             {selectedReport.content ? (
-                                <ReportContent data={typeof selectedReport.content === 'string' ? JSON.parse(selectedReport.content) : selectedReport.content} showActions />
+                                <ReportContent data={typeof selectedReport.content === 'string' ? JSON.parse(selectedReport.content) : selectedReport.content}
+                                    publication={{status:selectedReport.status,withdrawal:selectedReport.withdrawal}}
+                                    withdrawalBanner={selectedReport.withdrawal && t('resultReports.withdrawnPendingAmendment',
+                                        'Withdrawn pending amendment {{amendmentId}}',{amendmentId:selectedReport.withdrawal.amendmentId})} showActions />
                             ) : (
                                 <div className="text-center text-gray-400 py-20">No report content available</div>
                             )}

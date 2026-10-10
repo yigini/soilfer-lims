@@ -1593,7 +1593,7 @@ model Report {
   sampleId      String
   labId         String?
   version       Int       @default(1)
-  status        String    @default("DRAFT")  // DRAFT, PUBLISHED, SUPERSEDED
+  status        String    @default("DRAFT")  // DRAFT, PUBLISHED, SUPERSEDED, WITHDRAWN
   reportNumberBase String?
   revision      Int?
   policyVersion Int?
@@ -1616,6 +1616,7 @@ model Report {
   updatedAt     DateTime  @updatedAt
 
   shareLinks    ReportShareLink[]
+  amendmentWithdrawals ReportAmendmentWithdrawal[]
 
   @@unique([sampleId, version])
   @@index([sampleId])
@@ -1858,6 +1859,7 @@ model SampleAmendment {
   updatedAt          DateTime  @updatedAt
 
   attemptLinks SampleAmendmentAttempt[]
+  reportWithdrawals ReportAmendmentWithdrawal[]
 
   @@index([sampleId])
 }
@@ -1876,6 +1878,17 @@ model SampleAmendmentAttempt {
   workItem  WorkItem @relation(fields: [workItemId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   parent    WorkAttempt @relation("AmendmentParentAttempt", fields: [parentAttemptId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   child     WorkAttempt @relation("AmendmentChildAttempt", fields: [childAttemptId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+}
+
+// #210 pin6094004400: a retained report has one immutable withdrawal reason.
+model ReportAmendmentWithdrawal {
+  id String @id @default(uuid())
+  reportId String @unique
+  amendmentId String
+  createdAt DateTime @default(now())
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  amendment SampleAmendment @relation(fields: [amendmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 }
 
 model CommandReceipt {

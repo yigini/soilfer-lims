@@ -22,6 +22,18 @@ CREATE TABLE "SampleAmendmentAttempt" (
 
 CREATE UNIQUE INDEX "SampleAmendmentAttempt_childAttemptId_key" ON "SampleAmendmentAttempt"("childAttemptId");
 
+-- #210 pin6094004400: exact fresh Prisma7.10 withdrawal authority.
+CREATE TABLE "ReportAmendmentWithdrawal" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "reportId" TEXT NOT NULL,
+    "amendmentId" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "ReportAmendmentWithdrawal_reportId_fkey" FOREIGN KEY ("reportId") REFERENCES "Report" ("id") ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT "ReportAmendmentWithdrawal_amendmentId_fkey" FOREIGN KEY ("amendmentId") REFERENCES "SampleAmendment" ("id") ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE UNIQUE INDEX "ReportAmendmentWithdrawal_reportId_key" ON "ReportAmendmentWithdrawal"("reportId");
+
 -- Contract guards
 CREATE TRIGGER "SampleAmendment_request_evidence_immutable"
 BEFORE UPDATE OF "requestPayload", "selectedWorkItemIds" ON "SampleAmendment"
@@ -88,4 +100,68 @@ END;
 CREATE TRIGGER "SampleAmendmentAttempt_delete_immutable"
 BEFORE DELETE ON "SampleAmendmentAttempt"
 BEGIN SELECT RAISE(ABORT, 'AMENDMENT_ATTEMPT_IMMUTABLE');
+END;
+
+CREATE TRIGGER "ReportAmendmentWithdrawal_context_guard"
+BEFORE INSERT ON "ReportAmendmentWithdrawal"
+WHEN NOT EXISTS (
+ SELECT 1 FROM "Report" r JOIN "SampleAmendment" a ON a.sampleId=r.sampleId
+ WHERE r.id=NEW.reportId AND a.id=NEW.amendmentId
+  AND r.status='PUBLISHED' AND r.publishedAt IS NOT NULL
+  AND a.type='SCIENTIFIC' AND a.status='APPROVED'
+  AND typeof(a.version)='integer' AND a.version>1
+  AND a.requestPayload IS NOT NULL AND a.selectedWorkItemIds IS NOT NULL
+  AND a.authorizedBy IS NOT NULL AND a.authorizedAt IS NOT NULL
+)
+BEGIN SELECT RAISE(ABORT, 'REPORT_WITHDRAWAL_CONTEXT_MISMATCH');
+END;
+
+CREATE TRIGGER "ReportAmendmentWithdrawal_update_immutable"
+BEFORE UPDATE ON "ReportAmendmentWithdrawal"
+BEGIN SELECT RAISE(ABORT, 'REPORT_WITHDRAWAL_IMMUTABLE');
+END;
+
+CREATE TRIGGER "ReportAmendmentWithdrawal_delete_immutable"
+BEFORE DELETE ON "ReportAmendmentWithdrawal"
+BEGIN SELECT RAISE(ABORT, 'REPORT_WITHDRAWAL_IMMUTABLE');
+END;
+
+CREATE TRIGGER "Report_withdrawal_insert_guard"
+BEFORE INSERT ON "Report"
+WHEN NEW.status='WITHDRAWN'
+BEGIN SELECT RAISE(ABORT, 'REPORT_WITHDRAWAL_CONTEXT_MISMATCH');
+END;
+
+CREATE TRIGGER "Report_withdrawal_status_guard"
+BEFORE UPDATE OF "status" ON "Report"
+WHEN (NEW.status='WITHDRAWN' AND OLD.status IS NOT 'WITHDRAWN' AND (
+ OLD.status IS NOT 'PUBLISHED' OR NOT EXISTS (
+  SELECT 1 FROM "ReportAmendmentWithdrawal" w WHERE w.reportId=OLD.id)))
+ OR (OLD.status='WITHDRAWN' AND NEW.status IS NOT 'WITHDRAWN')
+BEGIN SELECT RAISE(ABORT, 'REPORT_WITHDRAWAL_CONTEXT_MISMATCH');
+END;
+
+CREATE TRIGGER "Report_withdrawal_content_guard"
+BEFORE UPDATE ON "Report"
+WHEN (OLD.status='WITHDRAWN' OR NEW.status='WITHDRAWN') AND (
+ NEW."id" IS NOT OLD."id" OR
+ NEW."sampleId" IS NOT OLD."sampleId" OR
+ NEW."labId" IS NOT OLD."labId" OR
+ NEW."version" IS NOT OLD."version" OR
+ NEW."reportNumberBase" IS NOT OLD."reportNumberBase" OR
+ NEW."revision" IS NOT OLD."revision" OR
+ NEW."policyVersion" IS NOT OLD."policyVersion" OR
+ NEW."firstName" IS NOT OLD."firstName" OR
+ NEW."surname" IS NOT OLD."surname" OR
+ NEW."phone" IS NOT OLD."phone" OR
+ NEW."phoneNorm" IS NOT OLD."phoneNorm" OR
+ NEW."projectCode" IS NOT OLD."projectCode" OR
+ NEW."projectName" IS NOT OLD."projectName" OR
+ NEW."sampleLabId" IS NOT OLD."sampleLabId" OR
+ NEW."content" IS NOT OLD."content" OR
+ NEW."generatedBy" IS NOT OLD."generatedBy" OR
+ NEW."generatedAt" IS NOT OLD."generatedAt" OR
+ NEW."publishedAt" IS NOT OLD."publishedAt" OR
+ NEW."createdAt" IS NOT OLD."createdAt")
+BEGIN SELECT RAISE(ABORT, 'REPORT_WITHDRAWAL_IMMUTABLE');
 END;

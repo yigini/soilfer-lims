@@ -10,7 +10,7 @@ const {installSampleAmendmentAuthorisation}=require('../../scripts/install_sampl
 const {requestNonScientificAmendment:request,authoriseNonScientificAmendment:authorise}=require('../../services/nonScientificAmendmentService');
 const policy=require('../../services/policyService');
 const {createExecutionResultFixture}=require('../helpers/workAttemptFixtures');
-const {requestScientificAmendment}=require('../../services/scientificAmendmentService');
+const {requestScientificAmendment,authoriseScientificAmendment}=require('../../services/scientificAmendmentService');
 const owned=[];
 async function fixture(status='APPROVED',itemStatus='ACCEPTED'){
  const directory=path.resolve(__dirname,'../.tmp');fs.mkdirSync(directory,{recursive:true});
@@ -241,4 +241,155 @@ test('a late scientific request audit failure rolls back the request without cha
  const before=f.snapshot();
  await expect(requestScientificAmendment(f.db,f.sample.id,f.actor,{reason:'Owned request',reasonCode:'CONFIRMATION',selectedWorkItemIds:[f.item.id]}))
   .rejects.toMatchObject({code:'P2003'});expect(f.snapshot()).toEqual(before);
+});
+
+async function scientificFixture(){
+ const f=await fixture();
+ f.original=await createExecutionResultFixture(f.db,{attemptStatus:'ACCEPTED',data:{id:randomUUID(),sampleId:f.sample.id,
+  param:'PH_H2O',value:'6.3',unit:'pH_units',replicateNo:1,isCurrent:true}});
+ f.report=await f.db.report.create({data:{id:randomUUID(),sampleId:f.sample.id,labId:f.labId,status:'PUBLISHED',version:1,
+  publishedAt:new Date('2026-09-20T10:01:00.123Z'),generatedBy:'retained-issuer',reportNumberBase:'OWNED-REPORT',revision:0,
+  content:'{"retained":"é精确","sample":{"id":"retained"},"results":[]}'}});
+ f.link=await f.db.reportShareLink.create({data:{id:randomUUID(),reportId:f.report.id,tokenHash:randomUUID(),createdBy:'retained-issuer'}});
+ f.scientificInput={reason:'Review the retained analytical finding',reasonCode:'CLIENT_RETEST',selectedWorkItemIds:[f.item.id]};
+ return f;
+}
+const scientificRequest=f=>requestScientificAmendment(f.db,f.sample.id,f.actor,f.scientificInput);
+const scientificApprove=(f,id,actor=f.other,expectedVersion=1)=>authoriseScientificAmendment(f.db,f.sample.id,id,actor,{expectedVersion});
+
+test.each(['CLIENT_RETEST','CONFIRMATION'])('scientific %s authorisation reopens only selected work, seals the accepted parent and withdraws the exact report',async reasonCode=>{
+ const f=await scientificFixture();f.scientificInput.reasonCode=reasonCode;
+ const untouched=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:f.sample.id,assignedLab:f.labId,analysis:'SOC',status:'ACCEPTED'}});
+ const {amendment}=await scientificRequest(f),before=f.snapshot(),outcome=await scientificApprove(f,amendment.id),after=f.snapshot();
+ expect(outcome.amendment).toMatchObject({status:'APPROVED',version:2,authorizedBy:'authoriser',priorApprovedBy:f.sample.approvedBy,priorApprovedAt:f.sample.approvedAt});
+ expect(outcome).not.toHaveProperty('capability');expect(outcome.attempts).toHaveLength(1);
+ expect(outcome.attempts[0]).toMatchObject({workItemId:f.item.id,status:'OPEN',parentAttemptId:f.original.attemptId,reason:reasonCode,attemptNo:2});
+ expect(after.rows.WorkItem.find(row=>row.id===untouched.id)).toEqual(before.rows.WorkItem.find(row=>row.id===untouched.id));
+ expect(after.rows.WorkItem.find(row=>row.id===f.item.id)).toMatchObject({status:'REPEAT_REQUIRED',reviewedBy:null,reviewedAt:null,reviewDecision:null});
+ const priorSample=before.rows.Sample.find(row=>row.id===f.sample.id),newSample=after.rows.Sample.find(row=>row.id===f.sample.id);
+ expect({...newSample,status:priorSample.status,updatedAt:priorSample.updatedAt}).toEqual(priorSample);
+ expect(newSample.status).toBe('PROCESSING');
+ for(const parent of before.rows.WorkAttempt)expect(after.rows.WorkAttempt.find(row=>row.id===parent.id)).toEqual(parent);
+ const priorReport=before.rows.Report.find(row=>row.id===f.report.id),newReport=after.rows.Report.find(row=>row.id===f.report.id);
+ expect({...newReport,status:priorReport.status,updatedAt:priorReport.updatedAt}).toEqual(priorReport);expect(newReport.status).toBe('WITHDRAWN');
+ expect(after.rows.ReportShareLink).toEqual(before.rows.ReportShareLink);
+ expect(after.rows.SampleAmendmentAttempt).toEqual([expect.objectContaining({amendmentId:amendment.id,workItemId:f.item.id,
+  parentAttemptId:f.original.attemptId,childAttemptId:outcome.attempts[0].id,reason:reasonCode})]);
+ expect(after.rows.ReportAmendmentWithdrawal).toEqual([expect.objectContaining({reportId:f.report.id,amendmentId:amendment.id})]);
+ for(const [table,rows]of Object.entries(before.rows))if(!['Sample','WorkItem','WorkAttempt','SampleAmendment','SampleAmendmentAttempt','Report','ReportAmendmentWithdrawal','AuditLog'].includes(table))expect(after.rows[table]).toEqual(rows);
+ expect(after.integrity).toBe('ok');expect(after.foreignKeys).toEqual([]);
+ await expect(scientificApprove(f,amendment.id)).rejects.toMatchObject({statusCode:409,code:'AMENDMENT_SAMPLE_UNAVAILABLE'});expect(f.snapshot()).toEqual(after);
+});
+
+test('scientific authorisation re-reads second-person policy and explicitly records ADVISORY self-authorisation',async()=>{
+ const f=await scientificFixture(),{amendment}=await scientificRequest(f),before=f.snapshot();
+ await expect(scientificApprove(f,amendment.id,f.actor)).rejects.toMatchObject({statusCode:409,code:'AMENDMENT_SECOND_PERSON_REQUIRED'});expect(f.snapshot()).toEqual(before);
+ await policy.change(f.actor,f.labId,{presetCode:'ADVISORY',reason:'Owned single-manager policy'},{db:f.db});
+ const outcome=await scientificApprove(f,amendment.id,f.actor);
+ expect(outcome.amendment.authorizedBy).toBe('requester');
+ const audit=f.snapshot().rows.AuditLog.find(row=>row.action==='SAMPLE_AMENDMENT_AUTHORISED');
+ expect(JSON.parse(audit.details)).toMatchObject({selfAuthorised:true,requiresSecondPerson:false});
+});
+
+test.each(['permission','tenant','stale-version','forged-capability'])('scientific authorisation rejects %s with zero writes',async kind=>{
+ const f=await scientificFixture(),{amendment}=await scientificRequest(f),before=f.snapshot(),actor={...f.other},input={expectedVersion:1};let code='AMENDMENT_INPUT_INVALID';
+ if(kind==='permission'){actor.role='TECHNICIAN';code='AMENDMENT_FORBIDDEN';}
+ if(kind==='tenant'){actor.labId='foreign-lab';code='ACCESS_DENIED_LAB';}
+ if(kind==='stale-version'){input.expectedVersion=2;code='AMENDMENT_STATE_CHANGED';}
+ if(kind==='forged-capability')input.capability={amendmentId:amendment.id};
+ await expect(authoriseScientificAmendment(f.db,f.sample.id,amendment.id,actor,input)).rejects.toMatchObject({code});expect(f.snapshot()).toEqual(before);
+});
+
+test.each(['Sample','WorkItem'])('an action string or forged capability cannot reopen a released %s',async entity=>{
+ const f=await scientificFixture(),before=f.snapshot();
+ await expect(f.db.$transaction(tx=>entity==='Sample'?
+  require('../../services/sampleStateService').transitionSample(f.sample.id,'PROCESSING',f.other,'Owned forged action',{},tx,
+   {action:'SCIENTIFIC_AMENDMENT_AUTHORISED',amendmentCapability:{amendmentId:'forged'}}):
+  require('../../services/workItemStateService').transitionWorkItem(f.item.id,'REPEAT_REQUIRED',f.other,'Owned forged action',{},tx,
+   {action:'SCIENTIFIC_AMENDMENT_AUTHORISED',amendmentCapability:{amendmentId:'forged'}})))
+  .rejects.toMatchObject({statusCode:409,code:'AMENDMENT_CAPABILITY_REQUIRED'});expect(f.snapshot()).toEqual(before);
+ expect(require('../../workflowContract')[entity==='Sample'?'isValidSampleTransition':'isValidWorkItemTransition']
+  (entity==='Sample'?'APPROVED':'ACCEPTED',entity==='Sample'?'PROCESSING':'REPEAT_REQUIRED')).toBe(false);
+});
+
+test('a late scientific authorisation audit failure rolls back every reopen, child, binding and report change',async()=>{
+ const f=await scientificFixture(),{amendment}=await scientificRequest(f),db=new Database(f.file);
+ try{db.exec("CREATE TRIGGER owned_late_scientific_auth_failure BEFORE INSERT ON AuditLog WHEN NEW.action='SAMPLE_AMENDMENT_AUTHORISED' BEGIN SELECT RAISE(ABORT,'OWNED_SCIENTIFIC_AUTH_FAILURE'); END;");}finally{db.close();}
+ const before=f.snapshot();await expect(scientificApprove(f,amendment.id)).rejects.toMatchObject({code:'P2003'});expect(f.snapshot()).toEqual(before);
+});
+
+test('withdrawal binding and every report content field stay sealed after authorisation',async()=>{
+ const f=await scientificFixture(),{amendment}=await scientificRequest(f);await scientificApprove(f,amendment.id);const before=f.snapshot(),db=new Database(f.file);
+ try{
+  for(const field of ['id','reportId','amendmentId','createdAt'])expect(()=>db.prepare('UPDATE ReportAmendmentWithdrawal SET "'+field+'"=?').run(field==='createdAt'?0:randomUUID())).toThrow('REPORT_WITHDRAWAL_IMMUTABLE');
+  expect(()=>db.prepare('DELETE FROM ReportAmendmentWithdrawal').run()).toThrow('REPORT_WITHDRAWAL_IMMUTABLE');
+  expect(()=>db.prepare("UPDATE Report SET status='SUPERSEDED' WHERE id=?").run(f.report.id)).toThrow('REPORT_WITHDRAWAL_CONTEXT_MISMATCH');
+  for(const field of db.prepare('PRAGMA table_xinfo(Report)').all().map(row=>row.name).filter(name=>!['status','updatedAt'].includes(name)))
+   expect(()=>db.prepare('UPDATE Report SET "'+field+'"=? WHERE id=?').run(randomUUID(),f.report.id)).toThrow('REPORT_WITHDRAWAL_IMMUTABLE');
+ }finally{db.close();}
+ expect(f.snapshot()).toEqual(before);
+});
+
+test('scientific repeats preserve the existing configured attempt limit and NCR refusal',async()=>{
+ const f=await scientificFixture(),{amendment}=await scientificRequest(f);
+ await policy.change(f.actor,f.labId,{reason:'Owned attempt-limit boundary',changes:[{key:'repeats.maxAttemptsBeforeNcr',value:1}]},{db:f.db});
+ const before=f.snapshot();await expect(scientificApprove(f,amendment.id)).rejects.toMatchObject({statusCode:409,code:'ATTEMPT_LIMIT'});expect(f.snapshot()).toEqual(before);
+});
+
+test.each(['ARCHIVED','DISPOSED'])('a pending scientific amendment cannot reopen a subsequently %s sample',async status=>{
+ const f=await scientificFixture(),{amendment}=await scientificRequest(f);
+ await require('../../services/sampleStateService').transitionSample(f.sample.id,status,f.other,'Retained lifecycle decision',{},f.db);
+ const before=f.snapshot();await expect(scientificApprove(f,amendment.id)).rejects.toMatchObject({statusCode:409,code:'AMENDMENT_SAMPLE_UNAVAILABLE'});expect(f.snapshot()).toEqual(before);
+});
+
+test('the actual report HTTP routes retain internal access and refuse both public formats before expiry or revocation',async()=>{
+ const f=await scientificFixture(),token=randomUUID(),hash=require('node:crypto').createHash('sha256').update(token).digest('hex');
+ await f.db.reportShareLink.update({where:{id:f.link.id},data:{tokenHash:hash,expiresAt:new Date('2020-01-01T00:00:00Z'),isRevoked:true}});
+ await f.db.user.create({data:{id:f.other.username,username:f.other.username,email:randomUUID()+'@example.test',password:'owned-http-fixture',role:'LAB_MANAGER',labId:f.labId}});
+ const {amendment}=await scientificRequest(f);await scientificApprove(f,amendment.id);
+ const content=(await f.db.report.findUnique({where:{id:f.report.id}})).content;
+ await require('../helpers/qcRunHttpHarness').withQcRunHttp(f.db,f.other,async(app,jwt)=>{
+  const request=require('supertest');
+  const internal=await request(app).get('/api/reports/'+f.report.id).set('Authorization','Bearer '+jwt);
+  expect(internal.status).toBe(200);expect(internal.body.withdrawal.amendmentId).toBe(amendment.id);expect(JSON.stringify(internal.body.content)).toBe(content);
+  for(const suffix of ['', '/pdf']){
+   const response=await request(app).get('/api/reports/public/'+token+suffix);
+   expect(response.status).toBe(409);expect(response.body).toEqual({error:'This report is withdrawn pending amendment.',code:'REPORT_WITHDRAWN'});
+   expect(response.body).not.toHaveProperty('content');expect(response.body).not.toHaveProperty('replacement');
+  }
+ },{reports:true});
+});
+
+test('withdrawn report numbering remains reserved and the next issuance preserves its row and takes the next revision',async()=>{
+ const f=await scientificFixture(),{amendment}=await scientificRequest(f);await scientificApprove(f,amendment.id);
+ const before=f.snapshot(),lab=await f.db.lab.findUnique({where:{id:f.labId}});
+ const identity=await f.db.$transaction(async tx=>{
+  const identity=await require('../../services/reportNumberService').allocateReportIdentity(tx,{sampleId:f.sample.id,lab,publishedAt:new Date(),
+   resolveFormat:()=>{throw Error('Existing issued lineage must retain its number.');}});
+  await tx.report.create({data:{id:randomUUID(),sampleId:f.sample.id,labId:f.labId,version:2,status:'PUBLISHED',publishedAt:new Date(),generatedBy:'new-issuer',
+   reportNumberBase:identity.reportNumberBase,revision:identity.revision,content:'{"new":"retained reissue"}'}});
+  return identity;
+ });
+ expect(identity).toMatchObject({reportNumberBase:'OWNED-REPORT',revision:1,replacesReportId:f.report.id});
+ const after=f.snapshot();expect(after.rows.Report.find(row=>row.id===f.report.id)).toEqual(before.rows.Report.find(row=>row.id===f.report.id));
+ expect(after.rows.ReportAmendmentWithdrawal).toEqual(before.rows.ReportAmendmentWithdrawal);
+});
+
+test.each(['request','authorise'])('scientific %s refuses unregistered laboratory authority without policy fallback or writes',async action=>{
+ const f=await scientificFixture(),amendment=action==='authorise'?(await scientificRequest(f)).amendment:null;
+ await f.db.sample.update({where:{id:f.sample.id},data:{assignedLab:'unregistered-owned-lab'}});
+ const before=f.snapshot(),actor={...f.other,role:'SUPER_ADMIN'};
+ await expect(action==='authorise'?scientificApprove(f,amendment.id,actor):requestScientificAmendment(f.db,f.sample.id,actor,f.scientificInput))
+  .rejects.toMatchObject({statusCode:409,code:'AMENDMENT_SAMPLE_UNAVAILABLE'});expect(f.snapshot()).toEqual(before);
+});
+
+test('a pending request cannot grant withdrawal authority and a report cannot become withdrawn without its binding',async()=>{
+ const f=await scientificFixture(),{amendment}=await scientificRequest(f),before=f.snapshot(),db=new Database(f.file);
+ try{
+  db.pragma('foreign_keys=ON');
+  expect(()=>db.prepare('INSERT INTO ReportAmendmentWithdrawal(id,reportId,amendmentId) VALUES(?,?,?)').run(randomUUID(),f.report.id,amendment.id))
+   .toThrow('REPORT_WITHDRAWAL_CONTEXT_MISMATCH');
+  expect(()=>db.prepare("UPDATE Report SET status='WITHDRAWN' WHERE id=?").run(f.report.id)).toThrow('REPORT_WITHDRAWAL_CONTEXT_MISMATCH');
+ }finally{db.close();}
+ expect(f.snapshot()).toEqual(before);
 });

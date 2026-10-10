@@ -2274,7 +2274,9 @@
     "qcNotRequired": "QC no requerido",
     "qcEvidenceIncomplete": "La aceptación histórica de QC tiene evidencia registrada incompleta",
     "qcAcknowledgedBy": "Aceptado por",
-    "qcCalibrationBracketRepeatInfo": "Se repite un intervalo de calibración; este resultado está fuera del alcance afectado"
+    "qcCalibrationBracketRepeatInfo": "Se repite un intervalo de calibración; este resultado está fuera del alcance afectado",
+    "filterWithdrawn": "Retirado",
+    "withdrawnPendingAmendment": "Retirado pendiente de enmienda {{amendmentId}}"
   },
   "qaSection": {
     "kicker": "Garantía de calidad y cumplimiento normativo",

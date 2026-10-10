@@ -38,9 +38,9 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         boundary: '-- Contract guards', assets: [{ file: 'fresh-prisma-tables.json', sha256: '97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0' }] }),
     // #210: inspect the two exact additive assets; no workflow writer exception.
     Object.freeze({functionName:'loadSampleAmendmentMigrationSource',loader:'services/sampleAmendmentMigrationSource.js',
-        loaderSha256:'1878301812dfb2dc528f2b089dda3f6923ea7e5ff1fe0ced4573af60d06841cd',
-        directory:'20261010000000_sample_amendment_authorisation',sqlSha256:'fcf8544bece6aa184e43781bac94cee8c848c6e2659b8b66d43e4d8a249c06df',
-        oracleSha256:'6c3cff214a6f6c3c5397521a7f3e02563313ece9336a485605a8a5cb81ad2e6b',
+        loaderSha256:'592da015bcb5344e4c5d7acd86f45bcd8ce53d88158021aa14bb9b26ed3863a4',
+        directory:'20261010000000_sample_amendment_authorisation',sqlSha256:'98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0',
+        oracleSha256:'d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2',
         boundary:'-- Contract guards'}),
     // Inspect both exact #197 assets. Existing writer restrictions are unchanged.
     Object.freeze({functionName:'loadResultOverrideMigrationSource',loader:'services/resultOverrideMigrationSource.js',
@@ -186,7 +186,7 @@ const CROSS_CHECK_FIXTURE = Object.freeze({
 // #210 working agreement6089928620: same closed factory precedent6088661994.
 const AMENDMENT_FIXTURE = Object.freeze({
     file: 'tests/helpers/sampleAmendmentHistoricalFixture.js', exportName: 'createPre210AmendmentFixture',
-    sha256: '7f64cd9fddd96085f6203ed95b1a06eb4e1871d3f021b65529b4d819b390b399',
+    sha256: 'cd04b289677dead115fa15d86801687a046607302c7ee0603a0f85e9e2ddb1d3',
     ddl: 'tests/helpers/fixtures/pre210_full_application_schema.sql',
     ddlSha256: '6ae0cc1d26dc3ba301d435d3f332d432a9765c3d30b7fd0725aa119db6f8f622',
     caller: 'tests/contracts/audit_6_1_amendment_install.test.js'
