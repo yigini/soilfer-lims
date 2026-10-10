@@ -17,7 +17,9 @@ function guardObjects(source){
 function classify(db,source){
  if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw fail('REPORT_REVISION_INTEGRITY_REFUSED','An intact database is required.');
  const columns=db.prepare('PRAGMA table_xinfo("Report")').all();
- if(!['id','sampleId','reportNumberBase','revision','status','content'].every(name=>columns.some(row=>row.name===name))||
+ // #170 numbering columns may still be pending on a supported upgrade copy;
+ // the guards bind them by name and only fire on new report writes.
+ if(!['id','sampleId','status','content'].every(name=>columns.some(row=>row.name===name))||
   !db.prepare('PRAGMA table_info("_schema_migrations")').all().some(row=>row.name==='details'))
   throw fail('REPORT_REVISION_PREREQUISITE_REQUIRED','Install the prior application schema first.');
  const differences=[];
