@@ -7,7 +7,8 @@ Current release status (October 10, 21:37 UTC): the NEW complete fresh-copy
 rehearsal PASSED, merged-main CI is fully green, and the exact kit is frozen
 PREPARED_ONLY_NOT_EXECUTED. See **release-kit-feac6534-ready.md** for the
 authoritative current head/hashes/counts and review request. Deployment is
-HELD on Claudio's exact-kit audit and YY's pending disk-headroom choice.
+Claudio's exact-kit audit PASSED at 21:42:44 UTC, comment 6102481848.
+Deployment remains HELD on YY's pending disk-headroom choice and live reserve.
 Production is healthy #188 and untouched. Earlier preparation history follows;
 pending/failure statements below describe their original checkpoints.
 

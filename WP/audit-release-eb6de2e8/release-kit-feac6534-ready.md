@@ -5,6 +5,14 @@ Last deployed: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
 Kit state: **PREPARED_ONLY_NOT_EXECUTED**, frozen at 2026-10-10 21:37:25 UTC.
 No production install, backfill, review action, quiesce or deployment occurred.
 
+Claudio's exact-kit audit **PASSED at 2026-10-10 21:42:44 UTC**:
+https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6102481848.
+The unchanged head, manifest/coordinator/PASSED receipt, both plans, YY choice
+hash and workload pins are all bound in the pass. The full API record is
+retained in `kit-audit-feac6534-e6b8b8de.json`. The remaining deployment hold
+is YY's pending storage choice and adequate live reserve including the backup.
+No fresh production execution gate is collected while that hold remains.
+
 The NEW complete real Docker rehearsal passed at **2026-10-10 21:33:43 UTC**,
 unit `lims-owned-feac6534-proof-20261010211834z.service`, exit 0. Its retained
 original root is
