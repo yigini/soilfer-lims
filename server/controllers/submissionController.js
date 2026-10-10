@@ -71,11 +71,13 @@ exports.createSubmission = async (req, res) => {
             return res.status(400).json({ error: 'Invalid work items', details: errors });
         }
 
-        const { submission } = await createSubmissionForItems({ db: prisma, actor: user, sampleId, type, workItemIds,
+        const { submission, crossChecks, crossCheckUnavailableReason } = await createSubmissionForItems({ db: prisma, actor: user, sampleId, type, workItemIds,
             expectedItems: validItems, note: note || null, requireOwnAssignment: true });
 
         res.status(201).json({
             submission,
+            crossChecks,
+            ...(crossCheckUnavailableReason && { crossCheckUnavailableReason }),
             message: `${submission.type} submission created`
         });
 

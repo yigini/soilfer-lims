@@ -104,6 +104,22 @@ test('a registered inactive lab still records immutable checks using its own con
     expect(bases).toMatchObject({ outcome: 'PASS', labId: f.labId, thresholds: { 'crossCheck.basesCecFactor': 1.4 } });
     expect(await f.db.crossCheckEvaluation.count({ where: { sampleId: f.sampleId, labId: f.labId } })).toBe(7);
 });
+test.each([true, false])('the separate submission endpoint exposes cross-check evidence or its unavailable reason, registered=%s', async registered => {
+    const f = await fixture({ curated: true });
+    for (const item of f.items) await f.db.workItem.update({ where: { id: item.id }, data: { assignedTo: f.actor.username } });
+    if (!registered) await f.db.sample.update({ where: { id: f.sampleId }, data: { assignedLab: 'unknown-' + randomUUID(), labId: null } });
+    const results = await f.db.result.findMany({ orderBy: { id: 'asc' } });
+    await require('../helpers/qcRunHttpHarness').withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const response = await require('supertest')(app).post('/api/submissions').set('Authorization', 'Bearer ' + token)
+            .send({ sampleId: f.sampleId, type: 'FULL', workItemIds: f.items.map(item => item.id) });
+        expect(response.status).toBe(201); expect(response.body.submission.type).toBe('FULL');
+        expect(response.body.crossChecks).toHaveLength(registered ? 7 : 0);
+        expect(await f.db.crossCheckEvaluation.count({ where: { sampleId: f.sampleId } })).toBe(registered ? 7 : 0);
+        if (registered) expect(response.body.crossCheckUnavailableReason).toBeUndefined();
+        else expect(response.body.crossCheckUnavailableReason).toBe('CROSS_CHECK_LAB_REQUIRED');
+    }, { reviews: true });
+    expect(await f.db.result.findMany({ orderBy: { id: 'asc' } })).toEqual(results);
+});
 async function fixture({ differentText = false, curated = false } = {}) {
     const criteria = { blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0, ccvEvery: 0 };
     const f = await qcGateFixture({ criteria }); owned.push(f);

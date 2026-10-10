@@ -93,6 +93,11 @@ Validation so far:
   (50.992 s), including every unchanged matrix assertion, real direct startup,
   new evidence/UI/policy/installer cases and existing security/wiring/scanners.
   The template SHA stayed65d58934d45081f1e5366006be22a88e313f436c3b35bec95395e63ae47c05fe.
+- Latest startup/bootstrap/security checks: 3 suites / 136 tests passed,
+  zero skipped (29.157 s), with every existing release assertion retained.
+- Both submission endpoints expose the separate evidence/unavailable response:
+  2 evidence/UI suites / 42 tests passed, zero skipped (30.518 s), including the
+  real /api/submissions registered and unregistered lab cases with retained Results.
 
 The Docker readiness script now includes cross-check-installer-pre201 on its
 already owned #192-complete copy: classified dry/apply/readiness/repeated NO_OP
