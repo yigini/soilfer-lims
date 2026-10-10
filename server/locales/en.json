@@ -107,7 +107,8 @@
     "issuedAt": "Issued at",
     "approvalNotRecorded": "Approval: not recorded",
     "filterWithdrawn": "Withdrawn",
-    "withdrawnPendingAmendment": "Withdrawn pending amendment {{amendmentId}}"
+    "withdrawnPendingAmendment": "Withdrawn pending amendment {{amendmentId}}",
+    "amendedStatement": "Amended report — replaces {replacedNumber} revision {replacedRevision}; reason: {reason}."
   },
   "common": {
     "save": "Save",
@@ -1018,7 +1019,8 @@
       "crossCheck_textureClosureTolerancePct": "Texture closure tolerance (%)",
       "crossCheck_cnMin": "Minimum C:N ratio",
       "crossCheck_cnMax": "Maximum C:N ratio",
-      "crossCheck_carbonatePhMin": "Minimum water pH for carbonate"
+      "crossCheck_carbonatePhMin": "Minimum water pH for carbonate",
+      "report_amendedStatement": "Amended report statement"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -1158,7 +1160,10 @@
     "ptLimits": {
       "questionable": "Questionable boundary",
       "unsatisfactory": "Unsatisfactory boundary"
-    }
+    },
+    "amendedDefault": "Use localized defaults",
+    "amendedCustom": "Customize all five languages",
+    "amendedHelp": "Each language must contain {replacedNumber}, {replacedRevision} and {reason} exactly once. The text is frozen when the report is issued."
   },
   "referenceMaterials": {
     "title": "Reference materials",

@@ -107,7 +107,8 @@
     "issuedAt": "Émis le",
     "approvalNotRecorded": "Approbation : non enregistrée",
     "filterWithdrawn": "Retiré",
-    "withdrawnPendingAmendment": "Retiré dans l’attente de la modification {{amendmentId}}"
+    "withdrawnPendingAmendment": "Retiré dans l’attente de la modification {{amendmentId}}",
+    "amendedStatement": "Rapport modifié — remplace {replacedNumber}, révision {replacedRevision} ; motif : {reason}."
   },
   "common": {
     "save": "Enregistrer",
@@ -1018,7 +1019,8 @@
       "crossCheck_textureClosureTolerancePct": "Tolérance de fermeture de la texture (%)",
       "crossCheck_cnMin": "Rapport C:N minimal",
       "crossCheck_cnMax": "Rapport C:N maximal",
-      "crossCheck_carbonatePhMin": "pH minimal dans l’eau pour les carbonates"
+      "crossCheck_carbonatePhMin": "pH minimal dans l’eau pour les carbonates",
+      "report_amendedStatement": "Texte du rapport modifié"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -1158,7 +1160,10 @@
     "ptLimits": {
       "questionable": "Seuil discutable",
       "unsatisfactory": "Seuil non satisfaisant"
-    }
+    },
+    "amendedDefault": "Utiliser les textes par défaut par langue",
+    "amendedCustom": "Personnaliser les cinq langues",
+    "amendedHelp": "Chaque langue doit contenir {replacedNumber}, {replacedRevision} et {reason} une seule fois. Le texte est figé à l’émission du rapport."
   },
   "referenceMaterials": {
     "title": "Matériaux de référence",
