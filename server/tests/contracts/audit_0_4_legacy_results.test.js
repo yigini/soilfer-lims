@@ -1,3 +1,4 @@
+const { gateRecords } = require('../helpers/preparationRecords');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -47,7 +48,7 @@ describe('Audit 0.4: legacy status result writes are disabled', () => {
     });
     test.each(['DRYING', 'PREPARATION'])('%s completion still records checklist evidence through status', async analysis => {
         const item = await fixture(analysis);
-        const res = await put(item, { status: 'COMPLETED', result: JSON.stringify({ checklist: [true,true,true] }) });
+        const res = await put(item, { status: 'COMPLETED', result: JSON.stringify({ checklist: [true,true,true] }), records: gateRecords(analysis) });
         expect(res.status).toBe(200); expect(res.body.receipt.analysis).toBe(analysis);
         const after = await prisma.workItem.findUnique({ where: { id: item.id } });
         expect(after.status).toBe('COMPLETED'); expect(JSON.parse(after.result).kind).toBe('operational-checklist-v1');

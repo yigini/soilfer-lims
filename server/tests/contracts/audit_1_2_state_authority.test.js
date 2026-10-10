@@ -1,3 +1,4 @@
+const { gateRecords } = require('../helpers/preparationRecords');
 const { createResultFixture } = require('../../services/resultWriteService');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -538,7 +539,7 @@ test('default policy completes both gates atomically and advances ACCEPTED to PR
     const { sample, item } = await fixture('ACCEPTED', 'DRYING', 'NOT_ASSIGNED');
     await client.sample.update({ where: { id: sample.id }, data: { dryingStatus: 'PENDING', preparationStatus: 'PENDING' } });
     const prep = await work.createWorkItem({ id: id(), sampleId: sample.id, analysis: 'PREPARATION', assignedLab: manager.labId }, manager, { tx: client });
-    const dryOutcome = await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], db: client });
+    const dryOutcome = await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], records: gateRecords('DRYING'), db: client });
     expect(dryOutcome.sample).toMatchObject({ status: 'ACCEPTED', dryingStatus: 'DONE', preparationStatus: 'PENDING' });
     const prepOutcome = await operations.confirmOperation({ actor: technician, workItemId: prep.id, checklist: [true, true, true], db: client });
     expect(prepOutcome.sample).toMatchObject({ status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE' });
@@ -572,7 +573,7 @@ test('analysis policy cannot be bypassed by false input; rejected verification s
 test('a request may demand stricter drying verification; acceptance of the last gate advances the sample', async () => {
     const { sample, item } = await fixture('ACCEPTED', 'DRYING', 'NOT_ASSIGNED');
     await client.sample.update({ where: { id: sample.id }, data: { dryingStatus: 'PENDING' } });
-    const outcome = await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], verificationRequired: true, db: client });
+    const outcome = await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], records: gateRecords('DRYING'), verificationRequired: true, db: client });
     expect(outcome.workItem.status).toBe('AWAITING_VERIFICATION');
     expect(JSON.parse(outcome.workItem.history).at(-1)).toMatchObject({ verificationPolicy: false, verificationRequested: true });
     const accepted = await operations.verifyOperation({ actor: manager, workItemId: item.id, decision: 'ACCEPT', db: client });
@@ -602,7 +603,7 @@ test.each(['APPROVED', 'ARCHIVED', 'DISPOSED', 'PROCESSING'])('undo approval is 
 test('concurrent operational verification commits one decision and refuses the stale decision without side effects', async () => {
     const { sample, item } = await fixture('ACCEPTED', 'DRYING', 'NOT_ASSIGNED');
     await client.sample.update({ where: { id: sample.id }, data: { dryingStatus: 'PENDING' } });
-    await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], verificationRequired: true, db: client });
+    await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], records: gateRecords('DRYING'), verificationRequired: true, db: client });
     const outcomes = await Promise.allSettled([1, 2].map(() => operations.verifyOperation({ actor: manager, workItemId: item.id, decision: 'ACCEPT', db: client })));
     expect(outcomes.filter(row => row.status === 'fulfilled')).toHaveLength(1);
     expect(outcomes.find(row => row.status === 'rejected').reason).toMatchObject({ code: 'WORKITEM_NOT_AWAITING_VERIFICATION' });
@@ -613,7 +614,7 @@ test('concurrent operational verification commits one decision and refuses the s
 test('failed decision insertion rolls back operational state, gate flags and both audits', async () => {
     const { sample, item } = await fixture('ACCEPTED', 'DRYING', 'NOT_ASSIGNED');
     await client.sample.update({ where: { id: sample.id }, data: { dryingStatus: 'PENDING' } });
-    await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], verificationRequired: true, db: client });
+    await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], records: gateRecords('DRYING'), verificationRequired: true, db: client });
     const before = await snapshot(sample.id), transaction = client.$transaction.bind(client);
     const injected = jest.spyOn(client, '$transaction').mockImplementation(callback => transaction(tx => callback(new Proxy(tx, {
         get(target, key) {

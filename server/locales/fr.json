@@ -81,6 +81,33 @@
     "see": "voir",
     "replaces": "Remplace",
     "preparationRecords": "Enregistrements de préparation",
+    "preparationRecordText": {
+      "steps": {
+        "DRYING": "Séchage",
+        "SIEVING": "Tamisage",
+        "GRINDING": "Broyage",
+        "SPLITTING": "Division"
+      },
+      "methods": {
+        "AIR": "Séché à l’air",
+        "OVEN_40": "Étuve 40 °C",
+        "OVEN_105": "Étuve 105 °C",
+        "OTHER": "Autre méthode"
+      },
+      "sieve": "Tamis",
+      "coarseFraction": "Fraction grossière",
+      "grind": "Broyé à",
+      "massBefore": "Masse initiale",
+      "massAfter": "Masse finale",
+      "duration": "Durée",
+      "equipment": "Équipement",
+      "performedBy": "Réalisé par"
+    },
+    "reportBasis": {
+      "ovenDry": "Exprimé sur base séchée à l’étuve",
+      "factor": "facteur de correction d’humidité",
+      "waterContent": "teneur en eau gravimétrique"
+    },
     "qcNotRequired": "CQ non requis",
     "qcEvidenceIncomplete": "L’acceptation historique du CQ dispose de preuves enregistrées incomplètes",
     "qcAcknowledgedBy": "Accepté par",
@@ -1019,6 +1046,7 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Autoriser la correction révisée des erreurs de transcription du CQ échoué sans décision",
       "report_uncertaintyMode": "Rapporter l’incertitude élargie",
       "report_uncertaintyCoverageFactor": "Facteur de couverture de l’incertitude",
+      "report_ovenDryConvertible": "Convertir en base séchée à l’étuve sur demande",
       "crossCheck_basesCecFactor": "Facteur maximal des bases échangeables / CEC",
       "crossCheck_baseSaturationMaxPct": "Saturation maximale en bases (%)",
       "crossCheck_textureClosureTolerancePct": "Tolérance de fermeture de la texture (%)",

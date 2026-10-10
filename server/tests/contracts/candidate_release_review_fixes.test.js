@@ -1165,6 +1165,9 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             // #202 adds one empty credential table with no backfill.
             expect(require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:rehearsalDbPath,apply:true}))
                 .toMatchObject({classification:'COMPLETE_202',previousClassification:'PRE_202',backfilledCount:0});
+            // #205 adds one empty append-only evidence table with no backfill.
+            expect(require('../../scripts/install_preparation_records').installPreparationRecords({dbPath:rehearsalDbPath,apply:true}))
+                .toMatchObject({classification:'COMPLETE_205',previousClassification:'PRE_205',backfilledCount:0});
             const verified = new Database(rehearsalDbPath, { readonly: true });
             const originalResultFields = Object.keys(preSnapshots.results.rows[0]).map(field => `"${field}"`).join(',');
             expect(verified.prepare(`SELECT ${originalResultFields} FROM "Result" ORDER BY id`).all()).toEqual(preSnapshots.results.rows);

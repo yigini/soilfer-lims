@@ -87,6 +87,7 @@ key('report.amendedStatement', 'reportAmendmentTemplate', null, undefined, undef
 key('report.uncertaintyMode', 'enum', 'NOT_REPORTED', 'NOT_REPORTED', 'NOT_REPORTED',
     { allowedValues: ['NOT_REPORTED', 'EXPANDED_ABSOLUTE', 'EXPANDED_RELATIVE_PCT'] });
 key('report.uncertaintyCoverageFactor', 'number', null, null, null, { min: 1, nullable: true });
+key('report.ovenDryConvertible', 'boolean', false, false, false);
 key('report.numberFormat', 'reportFormat', 'RPT-{LAB}-{YYYY}-{SEQ:5}', undefined, undefined, { scope: 'LAB' });
 key('sample.codeFormat', 'sampleFormat', '{LAB}-{YY}-{SEQ:6}{CHK}', undefined, undefined, { scope: 'LAB' });
 key('sample.sequenceReset', 'enum', 'YEARLY', 'YEARLY', 'YEARLY', { scope: 'LAB', allowedValues: ['YEARLY', 'NEVER'] });

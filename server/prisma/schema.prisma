@@ -210,6 +210,7 @@ model Sample {
   results           Result[]
   orderRevisions    SampleOrderRevision[]
   amendments        SampleAmendment[]
+  preparationRecords PreparationRecord[]
   reviewDecisions   ReviewDecision[]
   resultEvidenceEvents ResultEvidenceEvent[]
   holds             SampleHold[]
@@ -326,6 +327,7 @@ model WorkItem {
   draft           WorkItemDraft?
   spectralScans   SpectralData[]
   workAttempts    WorkAttempt[]
+  preparationRecords PreparationRecord[]
   reviewDecisions ReviewDecision[]
   batchPositions  BatchPositionWorkItem[]
   reportedValueSelections ReportedValueSelection[]
@@ -1003,6 +1005,7 @@ model EquipmentAsset {
   spectralScans      SpectralData[]
   batches            Batch[]
   resultOverrideRequests ResultOverrideRequest[]
+  preparationRecords PreparationRecord[]
 }
 
 model EquipmentQualification {
@@ -2175,4 +2178,37 @@ model CrossCheckEvaluation {
 
   @@index([sampleId, evaluatedAt])
   @@index([labId, sampleId, evaluatedAt])
+}
+
+// #205: append-only structured preparation evidence, one row per recorded
+// step of a confirmed DRYING or PREPARATION gate receipt.
+model PreparationRecord {
+  id                String          @id
+  sampleId          String
+  workItemId        String
+  receiptId         String
+  gateCode          String          // DRYING | SIEVING | GRINDING | SPLITTING
+  equipmentId       String?
+  method            String?         // AIR | OVEN_40 | OVEN_105 | OTHER (DRYING only)
+  startedAt         DateTime
+  endedAt           DateTime
+  temperatureC      Float?
+  massBeforeG       Float?
+  massAfterG        Float?
+  coarseFractionG   Float?
+  coarseFractionPct Float?
+  sieveMm           Float?
+  grindMm           Float?
+  performedBy       String
+  notes             String?
+  version           Int             @default(1)
+  createdAt         DateTime        @default(now())
+
+  sample    Sample          @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  workItem  WorkItem        @relation(fields: [workItemId], references: [id], onDelete: Restrict)
+  equipment EquipmentAsset? @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+
+  @@unique([receiptId, gateCode])
+  @@index([sampleId])
+  @@index([workItemId])
 }

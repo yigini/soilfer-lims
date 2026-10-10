@@ -179,6 +179,7 @@ class SyncService {
                         workItemId: workItemId,
                         checklist: op.payload?.checklist,
                         observations: op.payload?.observations,
+                        records: op.payload?.records,
                         idempotencyKey: opId
                     });
                     outcome = confirmRes;

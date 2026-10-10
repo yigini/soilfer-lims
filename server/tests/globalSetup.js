@@ -79,6 +79,7 @@ module.exports = async function globalSetup() {
         require('../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:testDbPath,apply:true});
         require('../scripts/install_report_revisions').installReportRevisions({dbPath:testDbPath,apply:true});
         require('../scripts/install_bench_credentials').installBenchCredentials({dbPath:testDbPath,apply:true});
+        require('../scripts/install_preparation_records').installPreparationRecords({dbPath:testDbPath,apply:true});
     }
 
     process.env.DATABASE_PATH = testDbPath;

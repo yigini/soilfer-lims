@@ -452,7 +452,11 @@ export default function WorksheetArea({
                                                         isEvidenceGap={isEvidenceGap}
                                                         onChange={(chk) => onDraftChange(item.workItemId, null, { checks: chk })}
                                                         sampleId={item.sampleId}
-                                                        onConfirm={() => onConfirmOperation && onConfirmOperation(item.workItemId, draft?.checks || [true, true, true])}
+                                                        onConfirm={() => onConfirmOperation && onConfirmOperation(item.workItemId, draft?.checks || [true, true, true], null, draft?.records, item.version)}
+                                                        preparationSteps={item.preparationSteps}
+                                                        records={draft?.records || []}
+                                                        onRecordsChange={records => onDraftChange(item.workItemId, null, { records })}
+                                                        equipment={item.eligibleEquipment || []}
                                                     />
                                                 ) : isSpectral ? (
                                                     <div className="flex items-center gap-2">
@@ -584,7 +588,7 @@ export default function WorksheetArea({
                                         const target = items.find(i => i.workItemId === wiId);
                                         const checksToConfirm = target?.draft?.checks || [true, true, true];
                                         if (onConfirmOperation) {
-                                            onConfirmOperation(wiId, checksToConfirm);
+                                            onConfirmOperation(wiId, checksToConfirm, null, target?.draft?.records, target?.version);
                                         }
                                     });
                                 }}

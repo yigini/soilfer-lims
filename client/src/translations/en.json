@@ -2499,7 +2499,31 @@
     "recordingIncomplete": "Recording incomplete",
     "recordedCount": "Recorded",
     "retryFailed": "Retry failed",
-    "recordingUnconfirmed": "Recording was not confirmed for this row."
+    "recordingUnconfirmed": "Recording was not confirmed for this row.",
+    "preparationRecord": {
+      "steps": {
+        "DRYING": "Drying",
+        "SIEVING": "Sieving",
+        "GRINDING": "Grinding",
+        "SPLITTING": "Splitting"
+      },
+      "methods": {
+        "AIR": "Air dried",
+        "OVEN_40": "Oven 40 °C",
+        "OVEN_105": "Oven 105 °C",
+        "OTHER": "Other method"
+      },
+      "method": "Method",
+      "temperatureC": "Temperature (°C)",
+      "massBeforeG": "Mass before (g)",
+      "massAfterG": "Mass after (g)",
+      "coarseFractionG": "Coarse fraction (g)",
+      "sieveMm": "Sieve (mm)",
+      "grindMm": "Ground to (mm)",
+      "startedAt": "Started",
+      "endedAt": "Ended",
+      "equipment": "Equipment"
+    }
   },
   "batchIntake": {
     "massToApply": "Mass to apply (g)",
@@ -2579,6 +2603,7 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC",
       "report_uncertaintyMode": "Report expanded uncertainty",
       "report_uncertaintyCoverageFactor": "Uncertainty coverage factor",
+      "report_ovenDryConvertible": "Convert to oven-dry basis on request",
       "crossCheck_basesCecFactor": "Maximum exchangeable bases / CEC factor",
       "crossCheck_baseSaturationMaxPct": "Maximum base saturation (%)",
       "crossCheck_textureClosureTolerancePct": "Texture closure tolerance (%)",

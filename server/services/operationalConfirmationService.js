@@ -11,6 +11,7 @@ const evidence = require('./resultEvidenceService');
 const policyService = require('./policyService');
 const CommandReceiptService = require('./commandReceiptService');
 const { broadcastToLab } = require('../wsServer');
+const preparation = require('./preparationRecordService');
 const { TransitionError } = rules;
 
 function historyOf(item) {
@@ -40,6 +41,8 @@ async function loadOperation(tx, actor, workItemId, verification = false) {
         throw new TransitionError('Sample has not been physically received.', 409, 'SAMPLE_NOT_RECEIVED');
     }
     if (sampleStatus === 'RECEIVED_REJECTED') throw new TransitionError('Sample intake was rejected.', 409, 'SAMPLE_REJECTED');
+    // #205 A21: preparation starts only after the sample is accepted.
+    if (!verification && sampleStatus === 'RECEIVED') throw new TransitionError('Accept the sample before recording its preparation.', 409, 'SAMPLE_NOT_ACCEPTED');
     evidence.assertAmendable(sample);
     const gates = require('./gateEvidenceService');
     const gateEvidence = await gates.assertGateEvidence(tx, sample, analysis === 'PREPARATION' ? ['DRYING'] : [],
@@ -65,7 +68,7 @@ function broadcast(sample, actor, analysis, status, action) {
 }
 
 class OperationalConfirmationService {
-    static async confirmOperation({ actor, workItemId, checklist, observations, idempotencyKey, verificationRequired = false,
+    static async confirmOperation({ actor, workItemId, checklist, observations, records, idempotencyKey, verificationRequired = false,
         expected, db = require('../prisma') }) {
         if (!actor) throw new TransitionError('Authentication required.', 401, 'UNAUTHORIZED');
         if (!workItemId) throw new TransitionError('workItemId is required.', 400, 'MISSING_WORK_ITEM_ID');
@@ -90,9 +93,7 @@ class OperationalConfirmationService {
                 throw new TransitionError('Revert the completed gate with a reason before a new verification attempt.', 409, 'GATE_ALREADY_DONE');
             }
             const now = new Date(), receiptId = `REC-OPS-${randomUUID()}`;
-            const payload = { kind: 'operational-checklist-v1', analysis, checklist, checks: checklist, steps: definition.steps,
-                observations: observations || null, recordedBy: actor.username, recordedAt: now.toISOString(), receiptId,
-                schemaVersion: definition.revision || 'operational-checklist-v1' };
+            const prepared = await preparation.validateRecords(tx, { gate: analysis, sample, records, now });
             const history = historyOf(item);
             history.push({ status, action: 'OPERATION_CONFIRMED', checklistRevision: definition.revision,
                 confirmedBy: actor.username, timestamp: now.toISOString(), receiptId, policyVersion: policy.version,
@@ -104,6 +105,11 @@ class OperationalConfirmationService {
                 audit: { details: JSON.stringify({ analysis, receiptId, checklistRevision: definition.revision,
                     policyVersion: policy.version, verificationPolicy: policy.value, verificationRequired: requiresVerification, ...gateEvidence }) }
             });
+            const written = await preparation.write(tx, prepared, { sampleId: sample.id, workItemId: item.id, receiptId, actor });
+            const payload = { kind: 'operational-checklist-v1', analysis, checklist, checks: checklist, steps: definition.steps,
+                observations: observations || null, recordedBy: actor.username, recordedAt: now.toISOString(), receiptId,
+                schemaVersion: definition.revision || 'operational-checklist-v1',
+                preparationRecords: written.map(preparation.summary), requiredSteps: prepared.required };
             const updatedItem = await require('./resultWriteService').writeNonMeasurementSummary(tx, item,
                 { kind: payload.kind, text: JSON.stringify(payload), actor });
             await tx.workItemDraft.deleteMany({ where: { workItemId: item.id } });

@@ -416,11 +416,22 @@ test('a complete guarded database passes the read-only gate, listens and answers
     expect(fingerprint(fixture.file)).toBe(beforeBench);
     expect(require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:fixture.file,apply:true}))
         .toMatchObject({classification:'COMPLETE_202',backfilledCount:0});
+    const beforePreparation=fingerprint(fixture.file);
+    const missingPreparation=await realStartup(fixture.file);
+    expect(missingPreparation.accepted).toBe(false);
+    expect(missingPreparation.stderr).toContain('PREPARATION_RECORD_STARTUP_REQUIRED');
+    expect(missingPreparation.stdout).not.toContain('Enterprise Server running on');
+    expect(fingerprint(fixture.file)).toBe(beforePreparation);
+    expect(require('../../scripts/install_preparation_records').installPreparationRecords({dbPath:fixture.file,apply:true}))
+        .toMatchObject({classification:'COMPLETE_205',previousClassification:'FRESH_PRISMA_205',backfilledCount:0});
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const benchReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"BENCH_CREDENTIAL_STARTUP_READY"')));
     expect(benchReady).toMatchObject({classification:'COMPLETE_202',totalChanges:0});
     expect(child.stdout.indexOf('BENCH_CREDENTIAL_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
+    const preparationReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"PREPARATION_RECORD_STARTUP_READY"')));
+    expect(preparationReady).toMatchObject({classification:'COMPLETE_205',totalChanges:0});
+    expect(child.stdout.indexOf('PREPARATION_RECORD_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
     const revisionsReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"REPORT_REVISION_STARTUP_READY"')));
     expect(revisionsReady).toMatchObject({classification:'COMPLETE_211',totalChanges:0});
     expect(child.stdout.indexOf('REPORT_REVISION_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));

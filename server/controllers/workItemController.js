@@ -614,6 +614,7 @@ exports.updateWorkItemStatus = async (req, res) => {
                     workItemId: id,
                     checklist,
                     observations: req.body.observations,
+                    records: req.body.records,
                     idempotencyKey: req.body.idempotencyKey
                 });
                 return res.json({

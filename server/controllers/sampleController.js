@@ -582,7 +582,7 @@ exports.updatePhaseStatus = async (req, res) => {
             const item = await prisma.workItem.findFirst({ where: { sampleId: sample.id, analysis: gate, duplicateOf: null } });
             if (!item) return res.status(404).json({ code: 'WORK_ITEM_NOT_FOUND', error: 'Operational gate work item not found.' });
             const outcome = await require('../services/operationalConfirmationService').confirmOperation({
-                actor: req.user, workItemId: item.id, checklist: req.body.checklist, observations: req.body.observations,
+                actor: req.user, workItemId: item.id, checklist: req.body.checklist, observations: req.body.observations, records: req.body.records,
                 idempotencyKey: req.body.idempotencyKey, verificationRequired: req.body.verificationRequired
             });
             return res.json({
