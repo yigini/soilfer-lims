@@ -55,6 +55,7 @@ test('every mapped cell refusal lists its cell and leaves actual drafts, results
         ['<c r="B1" t="b"><v>1</v></c>', null, 'IMPORT_XLSX_CELL_TYPE_UNSUPPORTED'],
         ['<c r="B1" t="d"><v>2026-10-10</v></c>', null, 'IMPORT_XLSX_CELL_TYPE_UNSUPPORTED'],
         [numeric('0.25'), customStyle('0%'), 'IMPORT_XLSX_DISPLAY_SCALED'],
+        [numeric('0.25'), '<cellStyleXfs><xf numFmtId="9"/></cellStyleXfs><cellXfs><xf xfId="0" numFmtId="0" applyNumberFormat="false"/></cellXfs>', 'IMPORT_XLSX_DISPLAY_SCALED'],
         [numeric('12345'), customStyle('#,##0,'), 'IMPORT_XLSX_DISPLAY_SCALED'],
         [numeric('45200'), '<cellXfs><xf numFmtId="14"/></cellXfs>', 'IMPORT_XLSX_DISPLAY_SCALED'],
         [numeric('45200'), customStyle('yyyy-mm-dd'), 'IMPORT_XLSX_DISPLAY_SCALED'],
