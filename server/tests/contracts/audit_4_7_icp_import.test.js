@@ -27,7 +27,7 @@ test('one real ICP CSV places40 samples by four analytes and six native QC rows 
             labId: f.labId, analysis: code, methodologyId: method.id, status: 'IN_PROGRESS' } }));
     }
     const lot = await references.createMaterial(f.db, f.actor, { labId: f.labId, code: 'ICP-' + randomUUID(), name: 'Owned ICP check lot',
-        kind: 'LRM', matrix: 'SOIL', lotNumber: 'synthetic-acceptance', status: 'ACTIVE', expiryDate: '2099-01-01' });
+        kind: 'LRM', matrix: 'SOIL', lotNumber: 'synthetic-acceptance', status: 'ACTIVE', expiryDate: '2099-01-01T00:00:00.000Z' });
     for (const code of codes) await references.addValue(f.db, f.actor, lot.id, { analysisCode: code, assignedValue: '7.0000', unit: 'fixture-unit', valueType: 'LAB_ASSIGNED' });
     const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { instrumentId: f.instrument.id, workItemIds: items.map(item => item.id),
         seed: 'owned-icp-acceptance', analyses: codes.map((analysisCode, index) => ({ analysisCode, methodologyId: methods[index].id,

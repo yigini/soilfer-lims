@@ -308,3 +308,18 @@ owned lab-assigned lot through existing reference owners, plus one unknown ID.
 It requires160 exact raw drafts/24 pending observations, complete source receipt,
 zero Results/evaluations/NCR/attempt additions and unchanged original workflow,
 reference values and audit rows. It is pending validation; no production counts.
+
+At0419e145 eight existing/import suites pass296 tests; the new ICP setup
+requires the reference owner's complete ISO timestamp for expiryDate. The
+fixture now supplies that exact valid timestamp without changing its owner.
+Retained failure47.929s; all protected databases unchanged. The additional
+current-main installer/closure tests are now green.
+
+Added actual activated EXCH_CA/Olsen import acceptance: exact local manager
+clones/activation and input units, every variable mapped once, genuine started
+run and current Olsen calibration curve. Imports must save raw-input drafts
+without calculating or recording. Later existing preview/typed recording must
+freeze that exact template/version/activation/curve and verified lab text.
+Missing/duplicate/unknown bindings, output-unit guesses, active direct mappings
+and an activation changing after preview require whole-commit zero-write
+refusals. These new tests await validation; no scientific defaults are added.
