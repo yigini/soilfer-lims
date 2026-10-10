@@ -13,8 +13,22 @@ const { transitionWorkItem } = require('./workItemStateService');
 /**
  * Save or update a draft determination
  */
-async function saveDraft(user, input, db = null) {
-    if (!db) return rules.inTransaction(prisma, tx => saveDraft(user, input, tx));
+function assertNoReceiptFields(value, seen = new WeakSet()) {
+    if (value === null || typeof value !== 'object' || seen.has(value)) return;
+    seen.add(value);
+    for (const [key, child] of Object.entries(value)) {
+        if (/receipt/i.test(key)) throw new rules.TransitionError('Import receipts are attached by the import owner.', 400, 'DRAFT_FIELDS_INVALID');
+        assertNoReceiptFields(child, seen);
+    }
+}
+
+async function saveDraft(user, input, db = null, options = {}) {
+    assertNoReceiptFields(input);
+    if (!options || typeof options !== 'object' || Array.isArray(options) ||
+        Object.keys(options).some(key => key !== 'importReceiptId') ||
+        Object.hasOwn(options, 'importReceiptId') && (typeof options.importReceiptId !== 'string' || !options.importReceiptId))
+        throw new rules.TransitionError('Supply a server-owned import receipt.', 400, 'DRAFT_FIELDS_INVALID');
+    if (!db) return rules.inTransaction(prisma, tx => saveDraft(user, input, tx, options));
     const {
     workItemId,
     sampleId,
@@ -64,6 +78,22 @@ async function saveDraft(user, input, db = null) {
         if (sampleLab && sampleLab !== user.labId) {
             throw new Error('Access denied: Sample is in another laboratory');
         }
+    }
+
+    if (options.importReceiptId) {
+        const receipt = await db.instrumentImportReceipt.findUnique({ where: { id: options.importReceiptId } });
+        const lab = await require('./policyService').resolveLab(workItem.sample?.assignedLab || workItem.sample?.labId || workItem.labId, db);
+        let snapshot;
+        try { snapshot = JSON.parse(receipt?.mappingSnapshot); } catch { /* Refuse unavailable receipt evidence. */ }
+        if (!receipt || receipt.labId !== lab?.id || receipt.instrumentId !== instrumentId ||
+            receipt.importedBy !== user.username || snapshot?.batchId !== workItem.batchId ||
+            !Array.isArray(snapshot.rows) || !snapshot.rows.some(row =>
+                row.match?.workItemIdsByAnalysis?.[workItem.analysis] === workItem.id))
+            throw new rules.TransitionError('The import receipt does not bind this draft line.', 400, 'DRAFT_FIELDS_INVALID');
+        if (await db.workItemDraft.findUnique({ where: { workItemId } }))
+            throw new rules.TransitionError('Save or clear the existing draft before importing.', 409, 'IMPORT_DRAFT_EXISTS');
+        if (await db.result.findFirst({ where: { sampleId: workItem.sampleId, param: workItem.analysis, isCurrent: true, supersededBy: null } }))
+            throw new rules.TransitionError('Recorded or sealed work requires its correction workflow.', 409, 'RESULT_WORKITEM_SEALED');
     }
 
     const readiness = await require('./workbenchReadinessService').evaluateExecutionReadiness(db, workItem, user,
@@ -133,7 +163,8 @@ async function saveDraft(user, input, db = null) {
                 notes: notes || null,
                 baseVersion: Number(baseVersion) || workItem.version || 0,
                 draftVersion: 1,
-                conflictValue: conflictValue
+                conflictValue: conflictValue,
+                ...(options.importReceiptId && { importReceiptId: options.importReceiptId })
             }
         });
     }
@@ -410,6 +441,7 @@ async function resolveConflict(user, workItemId, { resolution, reason }) {
 }
 
 module.exports = {
+    assertNoReceiptFields,
     saveDraft,
     getDrafts,
     discardDraft,
