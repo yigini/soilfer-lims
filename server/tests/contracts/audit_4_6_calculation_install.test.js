@@ -9,7 +9,7 @@ const { installWorkflowStateGuards } = require('../../scripts/install_workflow_s
 const { installCalculationTemplates, assertCalculationStartupReady, parseArguments } = require('../../scripts/install_calculation_templates');
 const { loadCalculationTemplateMigrationSource } = require('../../services/calculationTemplateMigrationSource');
 const { installCalculationUnit } = require('../../services/calculationReferenceUnit');
-const { installCalculationReferences } = require('../../services/calculationReferenceInstall');
+const { installCalculationReferences, referenceReceiptId, referenceReceipt } = require('../../services/calculationReferenceInstall');
 const { referenceRows } = require('../../services/calculationReferenceLibrary');
 const { UNITS } = require('../../seeds/units');
 const catalogue = require('../../seeds/data/catalogue.json');
@@ -32,17 +32,18 @@ function snapshot(file) {
         rows: Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all()
             .map(({ name }) => [name, db.prepare(`SELECT * FROM "${name}" ORDER BY rowid`).all()])) }));
 }
-async function freshFixture() {
+async function freshFixture({ omittedUnit = null, emptyCatalogue = false, conflictingUnit = null } = {}) {
     const directory = path.resolve(__dirname, '../.tmp'); fs.mkdirSync(directory, { recursive: true });
     const file = assertOwnedTestDatabase(path.join(directory, `audit_legacy_calc_install_${randomUUID()}.db`), 'system:fixture'); files.push(file);
     // The existing owned CREATE_PRISMA authority executes the real current schema.
     beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'CREATE_PRISMA' });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     try {
-        for (const row of UNITS.filter(unit => unit.code !== 'pct_mass')) await db.unit.create({ data: { ...row,
+        for (const row of UNITS.filter(unit => !emptyCatalogue && unit.code !== omittedUnit)) await db.unit.create({ data: { ...row,
+            ...(row.code === conflictingUnit ? { factorToBase: row.factorToBase + 1 } : {}),
             createdAt: new Date('2026-09-01T00:00:00.123Z'), updatedAt: new Date('2026-09-02T00:00:00.456Z') } });
         const codes = new Set(referenceRows().map(row => row.analysisCode));
-        for (const row of catalogue.analyses.filter(value => codes.has(value.code))) await db.analysis.create({ data: {
+        for (const row of catalogue.analyses.filter(value => !emptyCatalogue && codes.has(value.code))) await db.analysis.create({ data: {
             code: row.code, name: `Retained local ${row.name}`, unitCode: row.unitCode, units: row.units,
             version: 17, decimalPlaces: 5, description: 'Historical local metadata', validation: '{"local":true}' } });
     } finally { await db.$disconnect(); }
@@ -203,16 +204,19 @@ test('PRE_199 actual populated baseline retains every old row, column, foreign k
     for (const column of originalShapes.Result.columns) expect(before.rows.Result.some(row => row[column.name] != null &&
         String(row[column.name]) !== column.dflt_value?.replace(/^'|'$/g, '') && !(column.name === 'isCurrent' && row[column.name] === 1))).toBe(true);
     expect(installCalculationTemplates({ dbPath: file })).toMatchObject({ classification: 'PRE_199', mode: 'DRY_RUN',
-        plannedUnitInsertCount: 1, plannedReferenceInsertCount: 11, totalChanges: 0, backfillCount: 0 });
+        plannedUnitInsertCount: 0, plannedReferenceInsertCount: 11, totalChanges: 0, backfillCount: 0 });
     expect(snapshot(file)).toEqual(before); expect(hash(file)).toBe(digest);
     expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ previousClassification: 'PRE_199', classification: 'COMPLETE',
-        mode: 'APPLIED', unitInsertCount: 1, referenceInsertCount: 11, activationInsertCount: 0, backfillCount: 0 });
+        mode: 'APPLIED', unitInsertCount: 0, referenceInsertCount: 11, referenceReceiptInsertCount: 11, schemaReceiptInsertCount: 1, activationInsertCount: 0, backfillCount: 0 });
     const after = snapshot(file);
     for (const object of before.objects) expect(after.objects).toContainEqual(object);
     expect(shapes()).toEqual(originalShapes);
-    for (const [table, rows] of Object.entries(before.rows)) expect(table === 'Unit' ? after.rows[table].filter(row => row.code !== 'pct_mass') :
-        table === '_schema_migrations' ? after.rows[table].filter(row => row.id !== '199_calculation_templates') : after.rows[table]).toEqual(rows);
+    for (const [table, rows] of Object.entries(before.rows)) expect(table === '_schema_migrations' ?
+        after.rows[table].filter(row => row.id !== '199_calculation_templates' && !row.id.startsWith('199_calculation_reference:')) : after.rows[table]).toEqual(rows);
     expect(after.rows.CalcTemplate).toEqual(referenceRows());
+    expect(after.rows._schema_migrations).toHaveLength(before.rows._schema_migrations.length + 12);
+    for (const row of referenceRows()) expect(after.rows._schema_migrations.find(marker => marker.id === referenceReceiptId(row.id)))
+        .toMatchObject({ details: JSON.stringify(referenceReceipt(row, loadCalculationTemplateMigrationSource().referenceSha256)) });
     for (const table of ['CalcTemplateActivation', 'CalibrationCurve', 'CalibrationPoint', 'ResultCalculation']) expect(after.rows[table]).toEqual([]);
     const installedHash = hash(file);
     expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
@@ -256,20 +260,22 @@ test('the closed factory binds its bytes and sole caller; changed helper and sec
 test('real fresh schema dry-run, additive install and repeated no-op preserve all original rows and schema objects', async () => {
     const file = await freshFixture(), before = snapshot(file), digest = hash(file);
     expect(installCalculationTemplates({ dbPath: file })).toMatchObject({ classification: 'FRESH_PRISMA', mode: 'DRY_RUN',
-        plannedUnitInsertCount: 1, plannedReferenceInsertCount: 11, totalChanges: 0, backfillCount: 0, activationInsertCount: 0 });
+        plannedUnitInsertCount: 0, plannedReferenceInsertCount: 11, totalChanges: 0, backfillCount: 0, activationInsertCount: 0 });
     expect(() => assertCalculationStartupReady(file)).toThrow(expect.objectContaining({ code: 'CALC_NOT_INSTALLED' }));
     expect(hash(file)).toBe(digest); expect(snapshot(file)).toEqual(before);
     expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ previousClassification: 'FRESH_PRISMA',
-        classification: 'COMPLETE', mode: 'APPLIED', unitInsertCount: 1, referenceInsertCount: 11, activationInsertCount: 0, backfillCount: 0 });
+        classification: 'COMPLETE', mode: 'APPLIED', unitInsertCount: 0, referenceInsertCount: 11, referenceReceiptInsertCount: 11, schemaReceiptInsertCount: 1, activationInsertCount: 0, backfillCount: 0 });
     const after = snapshot(file);
     for (const object of before.objects) expect(after.objects).toContainEqual(object);
     for (const [table, rows] of Object.entries(before.rows)) {
         if (table === 'CalcTemplate') expect(after.rows[table]).toEqual(referenceRows());
-        else if (table === 'Unit') expect(after.rows[table].filter(row => row.code !== 'pct_mass')).toEqual(rows);
-        else if (table === '_schema_migrations') expect(after.rows[table].filter(row => row.id !== '199_calculation_templates')).toEqual(rows);
+        else if (table === '_schema_migrations') expect(after.rows[table].filter(row => row.id !== '199_calculation_templates' && !row.id.startsWith('199_calculation_reference:'))).toEqual(rows);
         else expect(after.rows[table]).toEqual(rows);
     }
     expect(after.rows.CalcTemplateActivation).toEqual([]);
+    expect(after.rows._schema_migrations).toHaveLength(before.rows._schema_migrations.length + 12);
+    for (const row of referenceRows()) expect(after.rows._schema_migrations.find(marker => marker.id === referenceReceiptId(row.id)))
+        .toMatchObject({ details: JSON.stringify(referenceReceipt(row, loadCalculationTemplateMigrationSource().referenceSha256)) });
     const installed = hash(file);
     expect(assertCalculationStartupReady(file).classification).toBe('COMPLETE');
     expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
@@ -284,8 +290,92 @@ test('receipt refusal rolls every new guard, unit and reference back atomically'
     expect(snapshot(file)).toEqual(before); expect(hash(file)).toBe(digest);
 });
 
-test.each(['partial-guard', 'changed-column', 'wrong-unit', 'wrong-reference'])('refuses %s with unchanged bytes before any installation writes', async variant => {
+test('empty fresh catalogue installs schema with eleven deferred references, then restarts without any file-byte changes', async () => {
+    const file = await freshFixture({ emptyCatalogue: true }), before = snapshot(file), digest = hash(file);
+    expect(installCalculationTemplates({ dbPath: file })).toMatchObject({ classification: 'FRESH_PRISMA',
+        plannedUnitInsertCount: 0, plannedReferenceInsertCount: 0, references: { deferredReferenceCount: 11 } });
+    expect(snapshot(file)).toEqual(before); expect(hash(file)).toBe(digest);
+    const applied = installCalculationTemplates({ dbPath: file, apply: true });
+    expect(applied).toMatchObject({ classification: 'COMPLETE', ready: true, unitInsertCount: 0,
+        referenceInsertCount: 0, referenceReceiptInsertCount: 0, schemaReceiptInsertCount: 1,
+        activationInsertCount: 0, backfillCount: 0, references: { installedReferenceCount: 0, deferredReferenceCount: 11 } });
+    for (const deferred of applied.references.deferredReferences) {
+        const wanted = referenceRows().find(row => row.id === deferred.id);
+        expect(deferred).toEqual({ id: wanted.id, code: 'DEFERRED_PREREQUISITE_ABSENT',
+            missingAnalysisCodes: [wanted.analysisCode], missingUnitCodes: [wanted.outputUnit] });
+    }
+    const after = snapshot(file);
+    for (const [table, rows] of Object.entries(before.rows)) expect(table === '_schema_migrations' ?
+        after.rows[table].filter(row => row.id !== '199_calculation_templates') : after.rows[table]).toEqual(rows);
+    for (const object of before.objects) expect(after.objects).toContainEqual(object);
+    expect(after.rows._schema_migrations.find(row => row.id === '199_calculation_templates').details).toBe(JSON.stringify(applied.receipt));
+    expect(applied.receipt).not.toHaveProperty('referenceCount'); expect(applied.receipt).not.toHaveProperty('referenceSha256');
+    const installed = hash(file);
+    expect(assertCalculationStartupReady(file)).toMatchObject({ ready: true, references: { deferredReferenceCount: 11 } });
+    expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
+    expect(snapshot(file)).toEqual(after); expect(hash(file)).toBe(installed);
+    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    try {
+        expect(await db.analysis.count()).toBe(0); expect(await db.unit.count()).toBe(0);
+        await expect(activations.change(db, { username: 'owned-missing-reference-manager', role: 'LAB_MANAGER' },
+            'calc-ref-kjeldahl-nitrogen-v1', {})).rejects.toMatchObject({ code: 'CALC_TEMPLATE_NOT_FOUND' });
+    } finally { await db.$disconnect(); }
+    expect(snapshot(file)).toEqual(after); expect(hash(file)).toBe(installed);
+});
+
+test('absent pct_mass defers only its three references; later catalogue insertion gets three receipts and preserves all prior evidence', async () => {
+    const file = await freshFixture({ omittedUnit: 'pct_mass' }), before = snapshot(file);
+    const first = installCalculationTemplates({ dbPath: file, apply: true });
+    expect(first).toMatchObject({ ready: true, referenceInsertCount: 8, referenceReceiptInsertCount: 8, unitInsertCount: 0,
+        references: { deferredReferenceCount: 3, installedReferenceCount: 8 } });
+    for (const row of first.references.deferredReferences) expect(row).toMatchObject({
+        code: 'DEFERRED_PREREQUISITE_ABSENT', missingAnalysisCodes: [], missingUnitCodes: ['pct_mass'] });
+    const partial = snapshot(file), partialHash = hash(file);
+    expect(partial.rows.Unit).toEqual(before.rows.Unit); expect(partial.rows.Analysis).toEqual(before.rows.Analysis);
+    expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
+    expect(snapshot(file)).toEqual(partial); expect(hash(file)).toBe(partialHash);
+    // Only an absent owned prerequisite is inserted from its published seed.
+    const unit = UNITS.find(row => row.code === 'pct_mass');
+    raw(file, db => db.prepare('INSERT INTO Unit(code,display,quantityKind,factorToBase,synonyms,updatedAt) VALUES(?,?,?,?,?,?)')
+        .run(unit.code, unit.display, unit.quantityKind, unit.factorToBase, unit.synonyms, Date.now()));
+    const catalogueLoaded = snapshot(file), loadedHash = hash(file);
+    expect(() => assertCalculationStartupReady(file)).toThrow(expect.objectContaining({ code: 'CALC_NOT_INSTALLED' }));
+    expect(snapshot(file)).toEqual(catalogueLoaded); expect(hash(file)).toBe(loadedHash);
+    expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ previousClassification: 'COMPLETE',
+        ready: true, referenceInsertCount: 3, referenceReceiptInsertCount: 3, schemaReceiptInsertCount: 0, unitInsertCount: 0,
+        references: { installedReferenceCount: 11, deferredReferenceCount: 0 } });
+    const complete = snapshot(file);
+    expect(complete.objects).toEqual(catalogueLoaded.objects);
+    for (const [table, rows] of Object.entries(catalogueLoaded.rows)) {
+        if (table === 'CalcTemplate' || table === '_schema_migrations') for (const row of rows) expect(complete.rows[table]).toContainEqual(row);
+        else expect(complete.rows[table]).toEqual(rows);
+    }
+    expect(complete.rows.CalcTemplate).toEqual(referenceRows().filter(row => row.outputUnit !== 'pct_mass').concat(referenceRows().filter(row => row.outputUnit === 'pct_mass')));
+    for (const row of referenceRows()) expect(complete.rows._schema_migrations.find(marker => marker.id === referenceReceiptId(row.id)))
+        .toMatchObject({ details: JSON.stringify(referenceReceipt(row, loadCalculationTemplateMigrationSource().referenceSha256)) });
+    const completeHash = hash(file);
+    expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
+    expect(snapshot(file)).toEqual(complete); expect(hash(file)).toBe(completeHash);
+});
+
+test.each(['%', 'mg/kg', 'cmol(+)/kg'])('a conflicting present controlled prerequisite %s refuses before schema or receipt writes', async code => {
+    const file = await freshFixture({ conflictingUnit: code });
+    const before = snapshot(file), digest = hash(file);
+    for (const apply of [false, true]) expect(() => installCalculationTemplates({ dbPath: file, apply }))
+        .toThrow(expect.objectContaining({ code: 'CALC_REFERENCE_CONFLICT' }));
+    expect(snapshot(file)).toEqual(before); expect(hash(file)).toBe(digest);
+});
+
+test('a late per-reference receipt failure rolls every schema/reference addition back and preserves the complete prior database', async () => {
     const file = await freshFixture();
+    raw(file, db => db.exec("CREATE TRIGGER owned_calc_reference_receipt_failure BEFORE INSERT ON _schema_migrations WHEN NEW.id='199_calculation_reference:calc-ref-kjeldahl-nitrogen-v1' BEGIN SELECT RAISE(ABORT,'OWNED_REFERENCE_RECEIPT_FAILURE'); END;"));
+    const before = snapshot(file), digest = hash(file);
+    expect(() => installCalculationTemplates({ dbPath: file, apply: true })).toThrow('OWNED_REFERENCE_RECEIPT_FAILURE');
+    expect(snapshot(file)).toEqual(before); expect(hash(file)).toBe(digest);
+});
+
+test.each(['partial-guard', 'changed-column', 'wrong-unit', 'wrong-reference'])('refuses %s with unchanged bytes before any installation writes', async variant => {
+    const file = await freshFixture({ omittedUnit: variant === 'wrong-unit' ? 'pct_mass' : null });
     raw(file, db => {
         if (variant === 'partial-guard') {
             const partialGuard = `CREATE TRIGGER "CalcTemplate_update_immutable" BEFORE UPDATE ON "CalcTemplate"

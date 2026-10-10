@@ -1,5 +1,4 @@
 const { validateTemplate } = require('../../shared/soilCalculation');
-const { referenceRows } = require('./calculationReferenceLibrary');
 const TABLES = Object.freeze(['CalcTemplate', 'CalcTemplateActivation', 'CalibrationCurve', 'CalibrationPoint', 'ResultCalculation']);
 const MARKER = '199_calculation_templates';
 const fail = (code, message, differences = []) => Object.assign(new Error(message), { statusCode: 409, code, differences });
@@ -46,7 +45,10 @@ function classifyCalculationSchema(db, source) {
     };
     const presentIndexes = indexes.map(row => installed(row, 'index')), presentGuards = guards.map(row => installed(row, 'trigger'));
     const sources = { migrationSha256: source.sha256, oracleSha256: source.oracleSha256, referenceSha256: source.referenceSha256 };
-    const receipt = { ...sources, guards: guards.map(row => row.name), referenceCount: referenceRows().length, unitCode: 'pct_mass', backfillCount: 0 };
+    // The schema receipt is independent of catalogue availability. Each
+    // installed reference has its own immutable row/source receipt.
+    const receipt = { migrationSha256: source.sha256, oracleSha256: source.oracleSha256,
+        guards: guards.map(row => row.name), backfillCount: 0 };
     const marker = db.prepare('SELECT details FROM "_schema_migrations" WHERE id=?').get(MARKER);
     if (marker) {
         let recorded; try { recorded = JSON.parse(marker.details); } catch { /* Refuse unverifiable receipts. */ }

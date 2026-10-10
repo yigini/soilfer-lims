@@ -144,7 +144,7 @@ const ATTEMPT_FIXTURE = Object.freeze({
 // #199 pin6088661994: one digest-bound factory/export, one exact caller.
 const CALCULATION_FIXTURE = Object.freeze({
     file: 'tests/helpers/calculationHistoricalFixture.js', exportName: 'createPre199CalculationFixture',
-    sha256: '23a15ba76fe1aa5f740fb81a12e5f4e99a89087a99e5e38d8050867cb8d51778',
+    sha256: 'c2b67b0f4d8288e6018c2e45b12d8ac004244f9801d89be9ee9a4990d729dc81',
     ddl: 'tests/helpers/fixtures/pre199_full_application_schema.sql',
     ddlSha256: '33f558c18a0b47c806989e6b83eca2ce15923df9c27caf5036cbe11c4420b114',
     caller: 'tests/contracts/audit_4_6_calculation_install.test.js'

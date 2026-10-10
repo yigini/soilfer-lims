@@ -28,18 +28,18 @@ function fixture({ historical = true, conflict = null } = {}) {
 const rows = db => db.prepare('SELECT * FROM "Unit" ORDER BY code').all();
 afterAll(() => { for (const file of files) fs.rmSync(assertOwnedTestDatabase(file, 'system:fixture'), { force: true }); });
 
-test('dry-run has zero writes; one additive unit insert preserves all historical catalogue fields and second apply is a byte-identical no-op', () => {
+test('dry-run and apply only classify an absent unit; every historical catalogue field and file byte is preserved', () => {
     const file = fixture(), beforeHash = digest(file), db = new Database(file);
     try {
         const before = rows(db);
         expect(installCalculationUnit(db)).toMatchObject({ mode: 'DRY_RUN', classification: 'ABSENT', unitInsertCount: 0, backfillCount: 0 });
         expect(rows(db)).toEqual(before); expect(digest(file)).toBe(beforeHash);
-        expect(installCalculationUnit(db, { apply: true })).toMatchObject({ mode: 'APPLIED', classification: 'ALREADY_PRESENT', unitInsertCount: 1, backfillCount: 0 });
-        expect(rows(db).filter(row => row.code !== 'pct_mass')).toEqual(before);
+        expect(installCalculationUnit(db, { apply: true })).toMatchObject({ mode: 'NO_OP', classification: 'ABSENT', unitInsertCount: 0, backfillCount: 0 });
+        expect(rows(db)).toEqual(before); expect(digest(file)).toBe(beforeHash);
         const after = rows(db), afterHash = digest(file);
         expect(installCalculationUnit(db, { apply: true })).toMatchObject({ mode: 'NO_OP', unitInsertCount: 0 });
         expect(rows(db)).toEqual(after); expect(digest(file)).toBe(afterHash);
-        expect(classifyCalculationUnit(db)).toMatchObject({ classification: 'ALREADY_PRESENT' });
+        expect(classifyCalculationUnit(db)).toMatchObject({ classification: 'ABSENT' });
     } finally { db.close(); }
 });
 
@@ -53,7 +53,7 @@ test.each([{ display: '%' }, { quantityKind: 'RATIO' }, { factorToBase: 1 }, { s
         } finally { db.close(); }
     });
 
-test('an outer schema-installation failure rolls the new unit back atomically', () => {
+test('an outer schema-installation failure preserves the absent unit and every catalogue field atomically', () => {
     const file = fixture(), db = new Database(file), hash = digest(file);
     try {
         const before = rows(db);

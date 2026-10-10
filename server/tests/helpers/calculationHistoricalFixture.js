@@ -10,6 +10,8 @@ const catalogue = require('../../seeds/data/catalogue.json');
 // prisma migrate diff --from-empty --to-schema <exact schema blob> --script
 // 65670 bytes, SHA25633f558c18a0b47c806989e6b83eca2ce15923df9c27caf5036cbe11c4420b114.
 // The SQL has no added header. Provenance belongs here, outside its exact bytes.
+// Pin6091749172: positive catalogue prerequisites include pct_mass from the
+// published units seed; #199 itself creates no catalogue rows. DDL is unchanged.
 const DDL_SHA256 = '33f558c18a0b47c806989e6b83eca2ce15923df9c27caf5036cbe11c4420b114';
 const CALLER = 'tests/contracts/audit_4_6_calculation_install.test.js';
 
@@ -29,7 +31,7 @@ function createPre199CalculationFixture() {
         db.pragma('foreign_keys=ON');
         db.transaction(() => {
             db.exec(bytes.toString('utf8'));
-            for (const unit of UNITS.filter(row => row.code !== 'pct_mass')) db.prepare('INSERT INTO Unit(code,display,quantityKind,factorToBase,synonyms,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?)')
+            for (const unit of UNITS) db.prepare('INSERT INTO Unit(code,display,quantityKind,factorToBase,synonyms,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?)')
                 .run(unit.code, unit.display, unit.quantityKind, unit.factorToBase, unit.synonyms, '2026-09-01T00:00:00.123Z', '2026-09-02T00:00:00.456Z');
             const codes = ['SOIL_MOISTURE', 'SOC', 'P_OLSEN', 'P_BRAY1', 'EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA', 'CEC', 'TN'];
             for (const row of catalogue.analyses.filter(value => codes.includes(value.code))) db.prepare('INSERT INTO Analysis(code,name,unitCode,units,description,version,decimalPlaces,validation) VALUES(?,?,?,?,?,?,?,?)')

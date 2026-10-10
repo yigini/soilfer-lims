@@ -25,7 +25,7 @@ async function fixture() {
     beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'CREATE_PRISMA' });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     clients.push(db);
-    for (const row of UNITS.filter(unit => unit.code !== 'pct_mass')) await db.unit.create({ data: row });
+    for (const row of UNITS) await db.unit.create({ data: row });
     const codes = new Set(referenceRows().map(row => row.analysisCode));
     for (const row of catalogue.analyses.filter(value => codes.has(value.code))) await db.analysis.create({ data: {
         code: row.code, name: row.name, unitCode: row.unitCode, units: row.units, isGlobal: true } });

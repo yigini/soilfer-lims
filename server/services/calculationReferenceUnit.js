@@ -14,19 +14,11 @@ function classifyCalculationUnit(db) {
         unitInsertCount: 0, backfillCount: 0 };
 }
 
-// The outer additive calculation installer can compose this transaction with
-// its schema/reference inserts; an outer failure rolls this one row back too.
+// Pin6091749172: catalogue authority owns this unit. Calculation installation
+// only verifies it; an absent row is a deferred prerequisite, never an insert.
 function installCalculationUnit(db, { apply = false } = {}) {
     const plan = classifyCalculationUnit(db);
-    if (!apply || plan.classification === 'ALREADY_PRESENT') return { ...plan, mode: apply ? 'NO_OP' : 'DRY_RUN' };
-    return db.transaction(() => {
-        const locked = classifyCalculationUnit(db);
-        if (locked.classification === 'ALREADY_PRESENT') return { ...locked, mode: 'NO_OP' };
-        const unit = MASS_FRACTION_PERCENT, timestamp = new Date().toISOString();
-        db.prepare('INSERT INTO "Unit" (code,display,quantityKind,factorToBase,synonyms,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?)')
-            .run(unit.code, unit.display, unit.quantityKind, unit.factorToBase, unit.synonyms, timestamp, timestamp);
-        return { ...classifyCalculationUnit(db), mode: 'APPLIED', previousClassification: locked.classification, unitInsertCount: 1 };
-    }).immediate();
+    return { ...plan, mode: apply ? 'NO_OP' : 'DRY_RUN' };
 }
 
 module.exports = { MASS_FRACTION_PERCENT, classifyCalculationUnit, installCalculationUnit };

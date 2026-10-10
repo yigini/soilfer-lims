@@ -22,6 +22,7 @@ async function fixture() {
     const directory = path.resolve(__dirname, '../.tmp'); fs.mkdirSync(directory, { recursive: true });
     const file = assertOwnedTestDatabase(path.join(directory, `audit_legacy_calc_activation_${randomUUID()}.db`), 'system:fixture'); files.push(file);
     beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'CREATE_PRISMA' });
+    require('../../scripts/install_workflow_state_guards').installWorkflowStateGuards({ dbPath: file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     for (const row of UNITS) await db.unit.create({ data: row });
     const codes = new Set(referenceRows().map(row => row.analysisCode));

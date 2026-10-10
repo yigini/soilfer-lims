@@ -3,9 +3,8 @@ const fs = require('node:fs'), path = require('node:path');
 const Database = require('better-sqlite3');
 const { loadCalculationTemplateMigrationSource } = require('../services/calculationTemplateMigrationSource');
 const { classifyCalculationSchema, MARKER } = require('../services/calculationTemplateSchemaService');
-const { classifyCalculationUnit, installCalculationUnit } = require('../services/calculationReferenceUnit');
+const { classifyCalculationUnit } = require('../services/calculationReferenceUnit');
 const { classifyCalculationReferences, installCalculationReferences } = require('../services/calculationReferenceInstall');
-const { referenceRows } = require('../services/calculationReferenceLibrary');
 const fail = (code, message, differences = []) => Object.assign(new Error(message), { statusCode: 409, code, differences });
 
 function integrity(db) {
@@ -15,17 +14,9 @@ function integrity(db) {
 }
 function plan(db, source) {
     const schema = classifyCalculationSchema(db, source), unit = classifyCalculationUnit(db);
-    const differences = [];
-    for (const code of new Set(referenceRows().map(row => row.analysisCode))) if (!db.prepare('SELECT code FROM "Analysis" WHERE code=?').get(code)) differences.push(`Analysis ${code} absent`);
-    for (const code of new Set(referenceRows().map(row => row.outputUnit).filter(code => code !== 'pct_mass'))) if (!db.prepare('SELECT code FROM "Unit" WHERE code=?').get(code)) differences.push(`Unit ${code} absent`);
-    if (differences.length) throw fail('CALC_REFERENCE_CONFLICT', 'Install the existing catalogue prerequisites without rewriting local data.', differences);
     integrity(db);
-    let references = { classification: 'INCOMPLETE', missingReferenceIds: referenceRows().map(row => row.id) };
-    if (schema.classification !== 'PRE_199' && unit.classification === 'ALREADY_PRESENT') references = classifyCalculationReferences(db);
-    if (schema.classification === 'COMPLETE' && (unit.classification !== 'ALREADY_PRESENT' || references.classification !== 'COMPLETE')) {
-        throw fail('CALC_REFERENCE_CONFLICT', 'An installed calculation release has incomplete reference evidence.');
-    }
-    return { ...schema, unit, references, plannedUnitInsertCount: unit.classification === 'ABSENT' ? 1 : 0,
+    const references = classifyCalculationReferences(db);
+    return { ...schema, unit, references, ready: schema.classification === 'COMPLETE' && references.classification === 'COMPLETE', plannedUnitInsertCount: 0,
         plannedReferenceInsertCount: references.missingReferenceIds.length, activationInsertCount: 0 };
 }
 function installCalculationTemplates({ dbPath, apply = false } = {}) {
@@ -33,26 +24,27 @@ function installCalculationTemplates({ dbPath, apply = false } = {}) {
     const source = loadCalculationTemplateMigrationSource(), target = path.resolve(dbPath);
     const reader = new Database(target, { readonly: true, fileMustExist: true });
     let planned; try { planned = reader.transaction(() => plan(reader, source))(); } finally { reader.close(); }
-    if (!apply || planned.classification === 'COMPLETE') return { ...planned, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0, unitInsertCount: 0, referenceInsertCount: 0 };
+    if (!apply || planned.ready) return { ...planned, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0, unitInsertCount: 0, referenceInsertCount: 0, referenceReceiptInsertCount: 0, schemaReceiptInsertCount: 0 };
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
     try {
         db.pragma('foreign_keys = ON');
         return db.transaction(() => {
             const locked = plan(db, source);
-            if (locked.classification === 'COMPLETE') return { ...locked, mode: 'NO_OP', totalChanges: 0, unitInsertCount: 0, referenceInsertCount: 0 };
+            if (locked.ready) return { ...locked, mode: 'NO_OP', totalChanges: 0, unitInsertCount: 0, referenceInsertCount: 0, referenceReceiptInsertCount: 0, schemaReceiptInsertCount: 0 };
             if (locked.classification !== planned.classification) throw fail('CALC_PLAN_STALE', 'The calculation schema changed after the read-only plan.');
             const releaseSource = loadCalculationTemplateMigrationSource();
             if (locked.classification === 'PRE_199') db.exec(releaseSource.schemaSql);
             // The same additive guard set protects fresh and managed tables.
             // No existing analytical table is rebuilt or rewritten.
-            db.exec(releaseSource.guardsSql);
-            const unit = installCalculationUnit(db, { apply: true });
+            if (locked.classification !== 'COMPLETE') db.exec(releaseSource.guardsSql);
             const references = installCalculationReferences(db, { apply: true });
-            db.prepare('INSERT INTO "_schema_migrations" (id,details) VALUES (?,?)').run(MARKER, JSON.stringify(locked.receipt));
+            if (locked.classification !== 'COMPLETE') db.prepare('INSERT INTO "_schema_migrations" (id,details) VALUES (?,?)').run(MARKER, JSON.stringify(locked.receipt));
             const complete = plan(db, source); integrity(db);
-            if (complete.classification !== 'COMPLETE') throw fail('CALC_INTEGRITY_REFUSED', 'Calculation installation did not complete.');
+            if (!complete.ready) throw fail('CALC_INTEGRITY_REFUSED', 'Calculation installation did not complete.');
             return { ...complete, previousClassification: locked.classification, mode: 'APPLIED',
-                unitInsertCount: unit.unitInsertCount, referenceInsertCount: references.referenceInsertCount,
+                unitInsertCount: 0, referenceInsertCount: references.referenceInsertCount,
+                referenceReceiptInsertCount: references.referenceReceiptInsertCount,
+                schemaReceiptInsertCount: locked.classification === 'COMPLETE' ? 0 : 1,
                 totalChanges: db.prepare('SELECT total_changes() n').get().n };
         }).immediate();
     } finally { db.close(); }
@@ -60,7 +52,7 @@ function installCalculationTemplates({ dbPath, apply = false } = {}) {
 function assertCalculationStartupReady(dbPath) {
     if (!fs.existsSync(dbPath)) throw fail('CALC_DATABASE_REQUIRED', 'The lab database does not exist.');
     const outcome = installCalculationTemplates({ dbPath });
-    if (outcome.classification !== 'COMPLETE') throw fail('CALC_NOT_INSTALLED', 'Run the reviewed calculation installer before starting the lab.');
+    if (!outcome.ready) throw fail('CALC_NOT_INSTALLED', 'Run the reviewed calculation installer before starting the lab.');
     return outcome;
 }
 function parseArguments(args) {
