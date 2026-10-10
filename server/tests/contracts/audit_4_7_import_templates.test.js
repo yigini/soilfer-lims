@@ -3,8 +3,7 @@ const { qcGateFixture } = require('../helpers/qcGateFixture');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const request = require('supertest');
 const mapping = () => ({ version: 1, delimiter: 'SEMICOLON', hasHeader: true, idColumn: 0, idType: 'LAB_SAMPLE_CODE',
-    analytes: [{ analysisCode: 'EXCH_CA', valueColumn: 1, unitColumn: 2, dilutionColumn: 3,
-        inputs: [{ inputKey: 'concentration', column: 1, unit: 'mg/L' }] }],
+    analytes: [{ analysisCode: 'EXCH_CA', inputs: [{ variable: 'concentration', column: 1, unit: 'mg/L' }] }],
     qcDetector: { positionColumn: 4, prefixes: [{ prefix: 'BLK', kind: 'BLANK' }, { prefix: 'CCV', kind: 'CCV' }, { prefix: 'LRM', kind: 'LRM' }] } });
 const owned = [];
 afterEach(async () => { for (const f of owned.splice(0)) await f.close(); });
@@ -24,12 +23,16 @@ test.each([
     { analytes: [{ analysisCode: 'X', valueColumn: 1, unit: 'mg/L', unitColumn: 2 }] },
     { analytes: [{ analysisCode: 'X', valueColumn: 1, unit: 'mg/L', unitColumn: -1 }] },
     { analytes: [{ analysisCode: 'X', valueColumn: 1 }] },
-    { analytes: [{ analysisCode: 'X', valueColumn: 1, unitColumn: 2, inputs: [{ inputKey: 'c', column: 1 }] }] },
+    { analytes: [{ analysisCode: 'X', valueColumn: 1, unitColumn: 2, inputs: [{ variable: 'c', column: 1, unit: 'mg/L' }] }] },
+    { analytes: [{ analysisCode: 'X', inputs: [{ inputKey: 'c', column: 1, unit: 'mg/L' }] }] },
+    { analytes: [{ analysisCode: 'X', inputs: [] }] },
+    { analytes: [{ analysisCode: 'X', inputs: [{ variable: 'c', column: 1 }] }] },
+    { analytes: [{ analysisCode: 'X', valueColumn: 1, unit: 'mg/L' }, { analysisCode: 'X', valueColumn: 2, unit: 'mg/L' }] },
     { qcDetector: { prefixes: [{ prefix: 'BLK', kind: 'BLANK' }] } },
     { qcDetector: { positionColumn: 4, prefixes: [{ prefix: 'BLK', kind: 'GUESS' }] } }
 ])('invalid or implicit mapping is refused without changing the supplied cells: %j', changes => {
     const value = { ...mapping(), ...changes }, before = JSON.stringify(value);
-    expect(() => service.validateMapping(value)).toThrow(expect.objectContaining({ statusCode: 422, code: 'IMPORT_MAPPING_INVALID' }));
+    expect(() => service.validateMapping(value)).toThrow(expect.objectContaining({ statusCode: 400, code: 'IMPORT_TEMPLATE_MAPPING_INVALID' }));
     expect(JSON.stringify(value)).toBe(before);
 });
 test('actual scoped template owner appends revisions, retains the root and audits each save', async () => {

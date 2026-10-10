@@ -14,26 +14,26 @@ const unitSource = value => Object.hasOwn(value, 'unitColumn')
 // Column numbers are zero-based. The mapping describes raw cells; it never
 // resolves methods, converts units, calculates values or chooses a QC limit.
 function validateMapping(mapping) {
-    const invalid = () => { throw fail(422, 'IMPORT_MAPPING_INVALID', 'Select exact identifier, analyte and raw-input columns.'); };
-    if (!keys(mapping, ['version', 'delimiter', 'hasHeader', 'idColumn', 'idType', 'analytes', 'qcDetector']) ||
+    const invalid = () => { throw fail(400, 'IMPORT_TEMPLATE_MAPPING_INVALID', 'Select exact identifier, analyte and raw-input columns.'); };
+    if (!keys(mapping, ['version', 'delimiter', 'hasHeader', 'idColumn', 'idType', 'analytes', 'qcDetector', 'sheetName']) ||
         mapping.version !== 1 || !['COMMA', 'SEMICOLON', 'TAB'].includes(mapping.delimiter) ||
         typeof mapping.hasHeader !== 'boolean' || !column(mapping.idColumn) ||
         !['LAB_SAMPLE_CODE', 'ORIGINAL_ID', 'POSITION'].includes(mapping.idType) ||
-        !Array.isArray(mapping.analytes) || !mapping.analytes.length) invalid();
+        !Array.isArray(mapping.analytes) || !mapping.analytes.length ||
+        Object.hasOwn(mapping, 'sheetName') && !text(mapping.sheetName)) invalid();
     const codes = new Set();
     for (const analyte of mapping.analytes) {
-        if (!keys(analyte, ['analysisCode', 'valueColumn', 'unit', 'unitColumn', 'dilutionColumn', 'inputs']) ||
-            !text(analyte.analysisCode) || codes.has(analyte.analysisCode) || !column(analyte.valueColumn) ||
-            !unitSource(analyte) ||
-            analyte.dilutionColumn !== undefined && !column(analyte.dilutionColumn)) invalid();
+        if (!plainObject(analyte) || !text(analyte.analysisCode) || codes.has(analyte.analysisCode)) invalid();
         codes.add(analyte.analysisCode);
-        if (analyte.inputs !== undefined) {
-            if (!Array.isArray(analyte.inputs) || !analyte.inputs.length) invalid();
+        if (Object.hasOwn(analyte, 'inputs')) {
+            if (!keys(analyte, ['analysisCode', 'inputs']) || !Array.isArray(analyte.inputs) || !analyte.inputs.length) invalid();
             for (const input of analyte.inputs) {
-                if (!keys(input, ['inputKey', 'column', 'unit', 'unitColumn']) || !text(input.inputKey) || !column(input.column) ||
+                if (!keys(input, ['variable', 'column', 'unit', 'unitColumn']) || !text(input.variable) || !column(input.column) ||
                     !unitSource(input)) invalid();
             }
-        }
+        } else if (!keys(analyte, ['analysisCode', 'valueColumn', 'unit', 'unitColumn', 'dilutionColumn']) ||
+            !column(analyte.valueColumn) || !unitSource(analyte) ||
+            Object.hasOwn(analyte, 'dilutionColumn') && !column(analyte.dilutionColumn)) invalid();
     }
     if (mapping.qcDetector !== undefined) {
         const detector = mapping.qcDetector;

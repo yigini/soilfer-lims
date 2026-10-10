@@ -121,8 +121,8 @@ Direct/QC units must exactly match the non-null Analysis.units or unitCode (or
 percent for actual texture fractions). An empty accepted set refuses with409
 IMPORT_UNIT_UNAVAILABLE; synonyms/case changes refuse IMPORT_UNIT_MISMATCH.
 Each receipt retains the actual unit fields and which matched. Methodology.qudtUnit
-and the dead method.unit fallback are deferred to#283. Implementation is pending;
-no unit alias or conversion is inferred.
+and the dead method.unit fallback are deferred to#283. The shared decision is
+implemented; no unit alias or conversion is inferred.
 
 Pure row matching now uses explicit lab-code/original-id/physical-position
 selection and only current native positions. It preserves the source id and
@@ -160,4 +160,22 @@ fractions, with no method/QUDT inference, aliases or conversions. It returns
 the analysis code, both original catalogue unit fields and the matched field
 for the future immutable receipt. Import-unit preflight/API/receipt integration
 and zero-write commit refusal acceptance remain unfinished. Read-decision and
-unchanged typed-writer tests are being validated; no full import pass is claimed.
+unchanged typed-writer tests pass in the normal validation environment; no full
+import pass is claimed.
+
+At d631fd7b, the normal unchanged global setup passes five suites/196 tests,
+zero skipped (37.257 s), including the entire original result-write and catalogue
+files, receipt-bound QC entry, import-unit decisions and the state-write scanner.
+This resolves all four earlier reduced-harness prerequisite failures without
+changing their assertions. Their original failed logs remain retained. The
+owned validation checkout has its own dependencies/configuration/92-model
+Prisma client and a newly emitted metadata/Help-only template, SHA256
+6fa171ade891660acad4717b6a53a89b805f77f6397bfeb9d11b39afe2d8858e,
+with zero Sample/Result/import receipt rows. That template, the original Help-only
+template and the primary working database remain unchanged.
+
+Pin6096085980 now defines exactly one direct or activated-input mapping shape
+per analysis. The validator accepts the input-only variable bindings and refuses
+mixed, incomplete, unknown-key and duplicate-analysis shapes with400
+IMPORT_TEMPLATE_MAPPING_INVALID. Optional explicit sheetName follows XLSX
+pin6095961328. Preview/commit binding and atomicity acceptance remain pending.
