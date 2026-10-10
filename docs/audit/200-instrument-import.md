@@ -273,3 +273,23 @@ still refuses409 with zero writes. Text cells retain their original lab parse.
 New tests also exercise the existing typed Result writer after importing each
 numeric case. This supersedes the prior numeric raw-storage paragraph only;
 whole-source bytes, all original evidence and scientific values stay exact.
+
+Additional actual main-after210 predecessor: e0462c85 (92 models), schema
+SHA256 a8e2aa335963e709dfc9047166ca775bae948ddaebaf10cb0e07d5cdeb482b33,
+untouched own Prisma7.10 emission79,066 bytes, DDL SHA256
+d54b007ef4182ed1a08b340228a52b799308349a5cb632a05f7374cb8d5ebfb6.
+Exact emission command and preserved working database hash are checked in with
+the provenance. The earlier89-model literal/factory/scanner digest remain
+unchanged. A separate no-argument, test-only, exact-caller/digest-bound factory
+creates schema only; it grants no analytical-row authority. All prior installer
+assertions now run against both predecessors, with added closure/shape probes.
+Current-main installer validation and populated preservation are pending.
+
+The revised702e951c XLSX/CSV group passes205/206 tests (44.839s), including
+actual typed recording of the verified comma/dot numeric drafts. Its remaining
+new fixture put shared-string1.234 under comma/space grouping and expected a
+successful import, while the existing lab parser correctly reports
+AMBIGUOUS_NUMBER. That fixture now supplies lab-syntax text for its positive
+case, and an additional whole-commit zero-write test retains the ambiguous
+original string. No shared parser or existing assertion is changed; the failed
+log and all three protected database hashes are retained.

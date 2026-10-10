@@ -176,6 +176,14 @@ const INSTRUMENT_IMPORT_FIXTURE = Object.freeze({
     ddlSha256: 'c49761af3bab4bc8b822bc94f4f2193c8f3f780b7da6c715fe5a8a424af70aee',
     caller: 'tests/contracts/audit_4_7_instrument_import_install.test.js'
 });
+// #162 closed schema-only precedent: additional main after#210, old binding retained.
+const INSTRUMENT_IMPORT_MAIN_FIXTURE = Object.freeze({
+    file: 'tests/helpers/instrumentImportMainHistoricalFixture.js', exportName: 'createPre200After210SchemaFixture',
+    sha256: '4a5843fb24d0fc3e694ebcdf4a4872c967d0bfef074ee31055e9c95e8f1e9e7b',
+    ddl: 'tests/helpers/fixtures/pre200_after210_full_application_schema.sql',
+    ddlSha256: 'd54b007ef4182ed1a08b340228a52b799308349a5cb632a05f7374cb8d5ebfb6',
+    caller: 'tests/contracts/audit_4_7_instrument_import_install.test.js'
+});
 // #199 pins6089156077/6090475511: catalogue prerequisites and the real installer only.
 const CALCULATION_PREREQUISITES = Object.freeze({
     file: 'tests/helpers/calculationReleasePrerequisites.js', exportName: 'installCalculationReleasePrerequisites',
@@ -222,6 +230,7 @@ function scanSource(source, filename, exceptions = []) {
     let validAttemptFixture = false;
     let validCalculationFixture = false;
     let validInstrumentImportFixture = false;
+    let validInstrumentImportMainFixture = false;
     if (filename === INSTRUMENT_IMPORT_FIXTURE.file) {
         try {
             validInstrumentImportFixture = createHash('sha256').update(source).digest('hex') === INSTRUMENT_IMPORT_FIXTURE.sha256 &&
@@ -231,6 +240,13 @@ function scanSource(source, filename, exceptions = []) {
     }
     if (filename === CALCULATION_PREREQUISITES.file && createHash('sha256').update(source).digest('hex') !== CALCULATION_PREREQUISITES.sha256)
         report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pinned calculation prerequisite helper differs.');
+    if (filename === INSTRUMENT_IMPORT_MAIN_FIXTURE.file) {
+        try {
+            validInstrumentImportMainFixture = createHash('sha256').update(source).digest('hex') === INSTRUMENT_IMPORT_MAIN_FIXTURE.sha256 &&
+                createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', INSTRUMENT_IMPORT_MAIN_FIXTURE.ddl))).digest('hex') === INSTRUMENT_IMPORT_MAIN_FIXTURE.ddlSha256;
+        } catch { validInstrumentImportMainFixture = false; }
+        if (!validInstrumentImportMainFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pre-200 current-main schema-only factory or literal DDL differs.');
+    }
     if (filename === CALCULATION_FIXTURE.file) {
         try {
             validCalculationFixture = createHash('sha256').update(source).digest('hex') === CALCULATION_FIXTURE.sha256 &&
@@ -718,6 +734,7 @@ function scanSource(source, filename, exceptions = []) {
         if (!exportedNames.has(name)) return false;
         if (validCalculationFixture && name === CALCULATION_FIXTURE.exportName) return true;
         if (validInstrumentImportFixture && name === INSTRUMENT_IMPORT_FIXTURE.exportName) return true;
+        if (validInstrumentImportMainFixture && name === INSTRUMENT_IMPORT_MAIN_FIXTURE.exportName) return true;
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName) return true;
         if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName) return true;
         if (validCrossCheckFixture && name === CROSS_CHECK_FIXTURE.exportName) return true;
@@ -815,6 +832,8 @@ function scanSource(source, filename, exceptions = []) {
             if (resolved === CALCULATION_FIXTURE.file.replace(/\.js$/, '') && filename !== CALCULATION_FIXTURE.caller)
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             if (resolved === INSTRUMENT_IMPORT_FIXTURE.file.replace(/\.js$/, '') && filename !== INSTRUMENT_IMPORT_FIXTURE.caller)
+                report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+            if (resolved === INSTRUMENT_IMPORT_MAIN_FIXTURE.file.replace(/\.js$/, '') && filename !== INSTRUMENT_IMPORT_MAIN_FIXTURE.caller)
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             if (resolved === RAW_INPUT_FIXTURE.file.replace(/\.js$/, '') && filename !== RAW_INPUT_FIXTURE.caller) {
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);

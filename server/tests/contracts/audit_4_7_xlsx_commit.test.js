@@ -88,9 +88,10 @@ test.each([
 
 test.each([{ decimal: ',', thousands: '.' }, { decimal: ',', thousands: ' ' }, { decimal: '.', thousands: ',' }])(
     'numeric/text imports under%j keep source lexemes, verified draft text and the used policy version', async format => {
-    const f = await fixture(6), original = ['1.5', '1.234', '12', '1E-3', '-1.5E-3', '1.234'];
+    const f = await fixture(6), textRaw = format.thousands === ' ' ? '1,234' : '1.234',
+        original = ['1.5', '1.234', '12', '1E-3', '-1.5E-3', textRaw];
     await f.setPolicy([{ key: 'numbers.decimalSeparator', value: format.decimal }, { key: 'numbers.thousandsSeparator', value: format.thousands }]);
-    const input = f.input([...original.slice(0, 5).map(numeric), '<c r="B1" t="s"><v>0</v></c>'], { sharedStrings: '<si><t>1.234</t></si>' });
+    const input = f.input([...original.slice(0, 5).map(numeric), '<c r="B1" t="s"><v>0</v></c>'], { sharedStrings: '<si><t>' + textRaw + '</t></si>' });
     const preview = await importer.preview(f.db, f.actor, input); expect(preview.canCommit).toBe(true);
     const result = await importer.commit(f.db, f.actor, { ...input, previewToken: preview.previewToken }); expect(result.draftCount).toBe(6);
     const receipt = await f.db.instrumentImportReceipt.findFirst();
@@ -110,6 +111,18 @@ test.each([{ decimal: ',', thousands: '.' }, { decimal: ',', thousands: ' ' }, {
         }
     }
     expect(snapshot.numberPolicy[f.analysisCode]).toMatchObject({ version: 1, format });
+});
+
+test('shared-string1.234 remains ambiguous under comma/space policy and refuses the whole commit without transliteration', async () => {
+    const f = await fixture(2);
+    await f.setPolicy([{ key: 'numbers.decimalSeparator', value: ',' }, { key: 'numbers.thousandsSeparator', value: ' ' }]);
+    const before = await f.state(), input = f.input([numeric('1.234'), '<c r="B1" t="s"><v>0</v></c>'], { sharedStrings: '<si><t>1.234</t></si>' });
+    const preview = await importer.preview(f.db, f.actor, input);
+    expect(preview.rows[0].plans[0].input.value).toBe('1,234');
+    expect(preview.rows[1].cells[1]).toBe('1.234'); expect(preview.canCommit).toBe(false);
+    expect(preview.refusals).toEqual([expect.objectContaining({ rowNumber: 2, code: 'AMBIGUOUS_NUMBER' })]);
+    await expect(importer.commit(f.db, f.actor, { ...input, previewToken: preview.previewToken })).rejects.toMatchObject({ code: 'AMBIGUOUS_NUMBER' });
+    expect(await f.state()).toEqual(before);
 });
 
 test('policy changes after preview invalidate the actual commit before any receipt or draft', async () => {

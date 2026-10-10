@@ -1,5 +1,6 @@
 const fs = require('node:fs'), path = require('node:path');
 const { createPre200ImportSchemaFixture } = require('../helpers/instrumentImportHistoricalFixture');
+const { createPre200After210SchemaFixture } = require('../helpers/instrumentImportMainHistoricalFixture');
 const { loadInstrumentImportMigrationSource } = require('../../services/instrumentImportMigrationSource');
 const { scanSource } = require('../helpers/workflowWriteScanner');
 const { classifyInstrumentImportSchema, MARKER } = require('../../services/instrumentImportSchemaService');
@@ -17,8 +18,9 @@ function insert(table, row) {
         .run(row.id,row.labId,row.instrumentId,row.templateId,row.templateVersion,row.sourceSha256,row.sourceName,row.mappingSnapshot,row.importedBy);
     throw Error('Only synthetic import templates and receipts may be inserted.');
 }
+describe.each([['retained historical89-model main', createPre200ImportSchemaFixture], ['actual current92-model main after210', createPre200After210SchemaFixture]])('%s', (_name, createSchema) => {
 beforeEach(() => {
-    db = createPre200ImportSchemaFixture();
+    db = createSchema();
     for (const [id, code] of [['import-lab', 'IMPORT_LAB'], ['other-lab', 'OTHER_LAB']])
         db.prepare('INSERT INTO Lab(id,code,name,country,updatedAt) VALUES(?,?,?,?,?)').run(id, code, 'Synthetic lab', 'ZZ', '2026-10-10T00:00:00.000Z');
     for (const [id, labId] of [['import-instrument', 'IMPORT_LAB'], ['other-instrument', 'other-lab']])
@@ -74,7 +76,7 @@ test('the schema-only factory is source-bound and unavailable to runtime or anot
 });
 
 test('literal pre-200 classification is read-only and does not invent a receipt', () => {
-    db.close(); db = createPre200ImportSchemaFixture();
+    db.close(); db = createSchema();
     const before = db.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all(), changes = db.prepare('SELECT total_changes() n').get().n;
     expect(classifyInstrumentImportSchema(db, source)).toMatchObject({ classification: 'PRE_200', counts: { templates: 0, receipts: 0, draftLinks: 0 } });
     expect(db.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all()).toEqual(before);
@@ -112,4 +114,21 @@ test('startup refuses a missing database without creating it', () => {
     try { assertInstrumentImportStartupReady(missing); throw Error('Expected missing-database refusal'); }
     catch (error) { expect(error.code).toBe('IMPORT_DATABASE_REQUIRED'); }
     expect(fs.existsSync(missing)).toBe(false);
+});
+});
+
+test('the additional current-main schema-only factory is closed and digest-bound without changing the old fixture', () => {
+    const file = 'tests/helpers/instrumentImportMainHistoricalFixture.js', bytes = fs.readFileSync(path.resolve(__dirname, '../..', file), 'utf8');
+    expect(scanSource(bytes, file)).toEqual([]);
+    expect(scanSource(bytes + '\n// changed\n', file).map(row => row.code)).toContain('HISTORICAL_FIXTURE_SOURCE_MISMATCH');
+    expect(scanSource("require('../tests/helpers/instrumentImportMainHistoricalFixture')", 'services/unlisted.js').map(row => row.code)).toContain('TEST_HELPER_IMPORTED_BY_RUNTIME');
+    expect(scanSource("require('../helpers/instrumentImportMainHistoricalFixture')", 'tests/contracts/unlisted.test.js').map(row => row.code)).toContain('HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED');
+    expect(() => createPre200After210SchemaFixture('not permitted')).toThrow('accepts no arguments');
+    const current = createPre200After210SchemaFixture();
+    try {
+        expect(current.prepare('PRAGMA table_info(SampleAmendmentAuthorisation)').all()).toHaveLength(7);
+        expect(current.prepare('PRAGMA table_info(ReportWithdrawal)').all()).toHaveLength(4);
+        expect(current.prepare('SELECT count(*) n FROM Result').get().n).toBe(0);
+        expect(current.prepare('SELECT count(*) n FROM AuditLog').get().n).toBe(0);
+    } finally { current.close(); }
 });
