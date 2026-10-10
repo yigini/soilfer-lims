@@ -24,8 +24,15 @@ All 24 Linux release guard tests pass. The completed standard Windows server
 run passes 339/339 suites and 5,079/5,079 tests, zero skips, exit 0 (1,746.911s),
 on the byte-identical audited application tree. Client build/lint pass with
 0 errors and 14 existing warnings. `pr-gates-042c04b5-pending.json` retains the
-read-only snapshot of all 20 included PR audit/CI gates; exact merged-main CI
-38073878578 is pending its Docker checks, after passing the server suite.
+earlier pending snapshot. `pr-gates-042c04b5-passed.json` records all 20 included
+PR audit/CI gates passing and exact merged-main CI 38073878578 fully green,
+including both real Docker checks, completed at 18:32:54 UTC. Its SHA256 is
+`65110eee88267c979938b6d7093e6b4b5caea40426741809ef5d5b3a2b2a2569`.
+This read-only snapshot is not deployment authorization.
+
+Claudio pinned the held #191 resolution design and ownership in comment
+6100903042 at 18:40:49 UTC. See `191-resolution-pin.md`. YY's actual review
+choice is still pending; the failed rehearsal is not retried or relabelled.
 
 Claudio requested this kit on #162, comment 6099151121. Pip owns preparation;
 Claudio owns review and post-deployment checks. YY selected "Main now" and
@@ -50,9 +57,9 @@ main CI are still required. This document is not deployment authorization.
 
 Verified evidence so far:
 
-- Exact main CI: 338 suites / 5,073 tests passed, run 38064045173.
+- Exact merged-main CI: 339 suites / 5,079 tests passed, run 38073878578.
 - Client build passed; lint passed with 0 errors and 14 existing warnings.
-- All 19 included PRs have matching-head audit passes and passing CI.
+- All 20 included PRs have matching-head audit passes and passing CI.
 - Candidate image built without a production database mount; identity and
   build reserve are in `build-receipt.json`.
 - #190 read-only plan: READY, 17 new attempts, 19 result links, 0 flagged
@@ -75,7 +82,7 @@ Verified evidence so far:
   tests across 8 suites pass. See `repair-scope-expanded.md` for the additional
   APPLY installer scope and retained first-repair trial.
 - The final kit includes 20 PRs, adding merged #287 to the original 19. Both
-  source pins now name the merged target. The final main CI gate is pending.
+  source pins now name the merged target. The final main CI gate passes.
 
 Retained failed receipt hashes:
 
