@@ -56,9 +56,12 @@ The expanded 29 Linux helper guards passed at frozen source b0633b6f in
 0.253 seconds. All 21 PR gates are green; main CI is pending in the separately
 retained `pr-gates-feac6534-pending.json` snapshot. The first preparation export
 included an old committed build receipt and was refused before build/copy.
-See `289-preparation-packaging-refusal.md`. Packaging is corrected and has one
-additional guard pending; a NEW directory/proof is required. No PASSED complete
-fresh-copy proof or final manifest exists yet.
+See `289-preparation-packaging-refusal.md`. Corrected frozen tooling b02238df
+passed all 30 Linux guards in 0.601 seconds. Its 25-source raw export and all
+application archive/index bytes are verified. A NEW build/fresh-copy proof is
+running under `combined-eb6de2e8-main-feac6534-retry-20261010210829Z`.
+See `289-guard-verification.md`. No PASSED complete fresh-copy proof or final
+manifest exists yet.
 
 Claudio requested this kit on #162, comment 6099151121. Pip owns preparation;
 Claudio owns review and post-deployment checks. YY selected "Main now" and
@@ -66,9 +69,10 @@ Claudio owns review and post-deployment checks. YY selected "Main now" and
 exact-kit review and a successful fresh-production-copy rehearsal. The original
 YY decision must be verified and bound to the execution gate.
 
-PR #287 passed Claudio's exact-head audit (6100508428) and merged as the
-target above at 17:58:07 UTC. Its tree is byte-identical to reviewed head
-0685d34d. The only commit after original main eb6de2e8 is this repair.
+PR #287 passed Claudio's exact-head audit (6100508428) and merged as
+042c04b5 at 17:58:07 UTC. Its tree is byte-identical to reviewed head
+0685d34d. The two commits after original main eb6de2e8 are this repair and
+the separately audited #289 reconciliation.
 The original #193 heap failures were reproduced and repaired with identical
 streamed fingerprints. The first repaired fresh-copy trial passed #193/#192
 and then reproduced #194's identical memory failure; #287 now covers all six

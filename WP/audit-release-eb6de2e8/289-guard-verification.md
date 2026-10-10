@@ -1,5 +1,16 @@
 # Expanded release guard evidence
 
+Current frozen source: `b02238df5ef4da6f91d2757f8a0498c45e7b1326`.
+Corrected raw export has 25 executable sources/authorization transcriptions;
+all upload hashes match, and no old execution receipts/gates/manifests exist
+in the new root. **30/30 Linux guards passed, exit 0, 0.601 seconds**.
+Log SHA256 `ad55e361d47f6dd51b4e4c2afd09fdc4389259cbbfbb60d5067a6a6e3b4991f5`.
+Owned guard/build/rehearsal root:
+`/opt/lims/releases/combined-eb6de2e8-main-feac6534-retry-20261010210829Z`.
+Unit `lims-owned-main-feac6534-retry-20261010210829z.service` is running the
+new build and subsequent fresh-copy proof. Earlier records below are retained
+for traceability. They do not establish a PASSED complete rehearsal.
+
 Frozen integration source: `b0633b6ffbe04c9b4d0bb6b367930e5fb4af6356`.
 Raw Git export, 51 files, verified on the host before running guards.
 Owned tooling root:
