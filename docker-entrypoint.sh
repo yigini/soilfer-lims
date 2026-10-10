@@ -181,6 +181,8 @@ node scripts/install_result_override_requests.js --db "${DATABASE_PATH:-$DB_FILE
 
 echo "📦 Installing immutable cross-check evidence..."
 node scripts/install_cross_check_evaluations.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing immutable amendment requests, attempt links and report withdrawals..."
+node scripts/install_sample_amendment_authorisation.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."

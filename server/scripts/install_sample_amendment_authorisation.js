@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const path=require('node:path'),{createHash}=require('node:crypto'),Database=require('better-sqlite3');
+const fs=require('node:fs'),path=require('node:path'),{createHash}=require('node:crypto'),Database=require('better-sqlite3');
 const {loadSampleAmendmentMigrationSource}=require('../services/sampleAmendmentMigrationSource');
 const MARKER='210_sample_amendment_authorisation';
 const COLUMNS=Object.freeze({requestPayload:'TEXT',version:'INTEGER',priorApprovedBy:'TEXT',priorApprovedAt:'DATETIME',selectedWorkItemIds:'TEXT'});
@@ -123,6 +123,14 @@ function installSampleAmendmentAuthorisation({dbPath,apply=false}={}){
   }).immediate();
  }finally{db.close();}
 }
+function assertAmendmentStartupReady(dbPath){
+ if(typeof dbPath!=='string'||!dbPath.trim()||!fs.existsSync(dbPath))
+  throw fail('AMENDMENT_DATABASE_REQUIRED','The lab database does not exist.');
+ const outcome=installSampleAmendmentAuthorisation({dbPath});
+ if(outcome.classification!=='COMPLETE_210')
+  throw fail('AMENDMENT_STARTUP_REQUIRED','Run the reviewed amendment installer before starting the lab.');
+ return outcome;
+}
 function parseArguments(args){
  const options={apply:false},seen=new Set();
  for(let index=0;index<args.length;index++){
@@ -139,4 +147,4 @@ if(require.main===module){
  try{process.stdout.write(JSON.stringify(installSampleAmendmentAuthorisation(parseArguments(process.argv.slice(2))),null,2)+'\n');}
  catch(error){process.stderr.write(JSON.stringify({error:error.code||'AMENDMENT_INSTALL_REFUSED',message:error.message,differences:error.differences||[],totalChanges:0})+'\n');process.exitCode=1;}
 }
-module.exports={installSampleAmendmentAuthorisation,parseArguments};
+module.exports={installSampleAmendmentAuthorisation,assertAmendmentStartupReady,parseArguments};

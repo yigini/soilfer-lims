@@ -5,7 +5,8 @@ const jwt = require('jsonwebtoken');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const state = require('../../services/exchangeStateService');
-const {getAuthToken} = require('../setup');
+const {getAuthToken,generateToken} = require('../setup');
+const {usersDb} = require('../../db');
 const adapter = require('../../services/sisAdapterService');
 
 describe('Mounted profile correction, scope and immutable export contracts',()=>{
@@ -21,7 +22,10 @@ describe('Mounted profile correction, scope and immutable export contracts',()=>
         await prisma.project.create({data:{id:project+'-NEXT',code:project+'-NEXT',name:'Next project',labId:lab,status:'ACTIVE'}});
         admin = await getAuthToken('SUPER_ADMIN',lab);
         manager = await getAuthToken('LAB_MANAGER',lab,['GTM'],[project,project+'-NEXT']);
-        authoriser = await getAuthToken('LAB_MANAGER',lab,['GTM'],[project,project+'-NEXT']);
+        // getAuthToken deliberately reuses a user for the same role/lab. The
+        // amendment must be authorised by a distinct persisted actor.
+        authoriser = generateToken(usersDb.create({username:'profile_routes_authoriser',role:'LAB_MANAGER',labId:lab,
+            countries:['GTM'],projects:[project,project+'-NEXT']}));
         foreign = await getAuthToken('LAB_MANAGER',foreignLab,['GTM'],[]);
         managerId = jwt.decode(manager).id;
         await prisma.user.updateMany({where:{id:{in:[admin,manager,foreign,authoriser].map(token=>jwt.decode(token).id)}},data:{mustChangePassword:false}});

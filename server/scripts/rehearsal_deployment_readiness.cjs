@@ -1318,6 +1318,25 @@ async function runSuite() {
          }finally{db.close();}`
     ], { encoding: 'utf8' }).trim();
     const calculationBefore = JSON.parse(calculationBeforeOutput);
+    // #210 uses this same owned predecessor and the actual shipped default
+    // entrypoint. Keep #199's PRE_199 proof intact: neither successor is
+    // preinstalled by this rehearsal.
+    const amendmentBeforeOutput=cp.execFileSync('docker',['run','--rm',
+        '-v',`${repeatProofVolume}:/owned-210`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-210/dev.db',hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const before=hash(),dry=require('./scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath});
+         if(dry.classification!=='PRE_210'||dry.mode!=='DRY_RUN'||dry.totalChanges!==0||dry.backfilledCount!==0||hash()!==before)
+           throw Error('210 entrypoint predecessor or dry-run differs');
+         const db=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try{const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(row=>row.name);
+           const quote=name=>'"'+name.replaceAll('"','""')+'"';
+           const columns=Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all().filter(row=>row.hidden===0).map(row=>row.name)]));
+           console.log(JSON.stringify({dry,columns,rows:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT * FROM '+quote(name)+' ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`
+    ],{encoding:'utf8'}).trim();
+    const amendmentBefore=JSON.parse(amendmentBeforeOutput);
     const calculationContainer = registerContainer(`lims_199_entrypoint_${TS}`), calculationPort = await getFreePort();
     cp.execFileSync('docker', ['run', '-d', '--name', calculationContainer,
         '-p', `127.0.0.1:${calculationPort}:3000`, '-v', `${repeatProofVolume}:/app/server/prisma`,
@@ -1355,6 +1374,41 @@ async function runSuite() {
     console.log('  ✓ calculation-default-entrypoint-pre199: PRE_199 → shipped default docker-entrypoint.sh → COMPLETE; inactive references 11, activations/backfill 0; retained evidence preserved; direct installer-module repeat NO_OP writes 0');
     console.log(JSON.stringify({calculationEntrypointProof:{scenario:'calculation-default-entrypoint-pre199',repeatInvocation:'direct installer module (not a second entrypoint run)',dry:calculationBefore.dry,ready:calculationAfter.ready,
         again:calculationAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:calculationAfter.noOpBytesPreserved}}));
+    if(!calculationStartupLog.includes('Installing immutable amendment requests, attempt links and report withdrawals')||
+        !calculationStartupLog.includes('"previousClassification": "PRE_210"')||!calculationStartupLog.includes('AMENDMENT_STARTUP_READY'))
+        throw Error('210 default-entrypoint installation proof missing');
+    fs.writeFileSync(path.join(tmpDir,'210-default-entrypoint.log'),calculationStartupLog);
+    const amendmentAfterOutput=cp.execFileSync('docker',['run','--rm',
+        '-v',`${repeatProofVolume}:/owned-210`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-210/dev.db',installer=require('./scripts/install_sample_amendment_authorisation');
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex'),before=hash();
+         const ready=installer.assertAmendmentStartupReady(dbPath),again=installer.installSampleAmendmentAuthorisation({dbPath,apply:true});
+         if(ready.classification!=='COMPLETE_210'||ready.totalChanges!==0||again.mode!=='NO_OP'||again.totalChanges!==0||
+           again.newAmendmentCount!==0||again.newAttemptLinkCount!==0||again.newWithdrawalCount!==0||again.backfilledCount!==0||hash()!==before)
+           throw Error('210 startup or direct-module repeat changed bytes');
+         const db=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try{if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw Error('210 integrity differs');
+           for(const table of ['SampleAmendmentAttempt','ReportAmendmentWithdrawal'])
+             if(db.prepare('SELECT count(*) n FROM "'+table+'"').get().n!==0)throw Error('210 startup created analytical links or withdrawals');
+           if(db.prepare('SELECT count(*) n FROM SampleAmendment WHERE requestPayload IS NOT NULL OR version IS NOT NULL OR priorApprovedBy IS NOT NULL OR priorApprovedAt IS NOT NULL OR selectedWorkItemIds IS NOT NULL').get().n)
+             throw Error('210 startup adopted historical amendments');
+           const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(row=>row.name);
+           console.log(JSON.stringify({ready,again,noOpBytesPreserved:true,rows:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`
+    ],{encoding:'utf8'}).trim();
+    const amendmentAfter=JSON.parse(amendmentAfterOutput);
+    for(const [table,rows]of Object.entries(amendmentBefore.rows)){
+        const projected=amendmentAfter.rows[table].filter(row=>table!=='_schema_migrations'||amendmentBefore.receipts.some(receipt=>receipt.id===row.id))
+            .map(row=>Object.fromEntries(amendmentBefore.columns[table].map(column=>[column,row[column]])));
+        if(JSON.stringify(projected)!==JSON.stringify(rows))throw Error('210 default entrypoint changed retained '+table+' rows or fields');
+    }
+    if(amendmentBefore.receipts.some(before=>!amendmentAfter.receipts.some(after=>JSON.stringify(after)===JSON.stringify(before))))
+        throw Error('210 default entrypoint changed a predecessor receipt');
+    console.log('  ✓ amendment-default-entrypoint-pre210: PRE_210 → shipped default docker-entrypoint.sh → COMPLETE_210; request/link/withdrawal/backfill0; retained rows and receipts preserved; direct installer-module repeat NO_OP writes0');
+    console.log(JSON.stringify({amendmentEntrypointProof:{scenario:'amendment-default-entrypoint-pre210',repeatInvocation:'direct installer module (not a second entrypoint run)',
+        dry:amendmentBefore.dry,ready:amendmentAfter.ready,again:amendmentAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:amendmentAfter.noOpBytesPreserved}}));
 
     // 7. Upgrade: Run target image on the populated baseline volume
     const upgTargetContainer = registerContainer(`lims_c_upg_${TS}`);

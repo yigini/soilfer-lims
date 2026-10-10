@@ -6,7 +6,7 @@ const {beforeGuards}=require('../helpers/legacyWorkflowDatabase');
 const {assertOwnedTestDatabase}=require('../helpers/testOwnedDatabase');
 const {createSampleFixture}=require('../helpers/workflowFixtures');
 const {installWorkflowStateGuards}=require('../../scripts/install_workflow_state_guards');
-const {installSampleAmendmentAuthorisation,parseArguments}=require('../../scripts/install_sample_amendment_authorisation');
+const {installSampleAmendmentAuthorisation,assertAmendmentStartupReady,parseArguments}=require('../../scripts/install_sample_amendment_authorisation');
 const {loadSampleAmendmentMigrationSource}=require('../../services/sampleAmendmentMigrationSource');
 const {createPre210AmendmentFixture}=require('../helpers/sampleAmendmentHistoricalFixture');
 const {scanSource}=require('../helpers/workflowWriteScanner');
@@ -185,6 +185,24 @@ test('the actual guards preserve immutable request evidence, require one CAS inc
   expect(()=>db.prepare('UPDATE SampleAmendment SET version=1 WHERE id=?').run(historical.id)).toThrow('AMENDMENT_VERSION_CONFLICT');
   expect(db.prepare('SELECT * FROM SampleAmendment WHERE id=?').get(historical.id)).toEqual(historical);
  }finally{db.close();}
+});
+
+test('the read-only startup gate refuses uninstalled evidence and accepts only the complete receipt with zero writes',async()=>{
+ const file=await fixture(),before=hash(file);
+ expect(()=>assertAmendmentStartupReady(file)).toThrow(expect.objectContaining({code:'AMENDMENT_STARTUP_REQUIRED',totalChanges:0}));
+ expect(hash(file)).toBe(before);
+ installSampleAmendmentAuthorisation({dbPath:file,apply:true});
+ const installed=hash(file),writes=[],originalClose=Database.prototype.close;
+ const close=jest.spyOn(Database.prototype,'close').mockImplementation(function(){
+  writes.push(this.prepare('SELECT total_changes() n').get().n);return originalClose.call(this);
+ });
+ try{expect(assertAmendmentStartupReady(file)).toMatchObject({classification:'COMPLETE_210',mode:'DRY_RUN',totalChanges:0,
+  newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0});}
+ finally{close.mockRestore();}
+ expect(writes.length).toBeGreaterThan(0);expect(writes.every(count=>count===0)).toBe(true);expect(hash(file)).toBe(installed);
+ const missing=path.resolve(__dirname,'../.tmp','audit_legacy_amendment_missing_'+randomUUID()+'.db');
+ expect(()=>assertAmendmentStartupReady(missing)).toThrow(expect.objectContaining({code:'AMENDMENT_DATABASE_REQUIRED',totalChanges:0}));
+ expect(fs.existsSync(missing)).toBe(false);
 });
 
 test.each([[],['--db','owned.db','--apply','--dry-run'],['--db','owned.db','--apply','--apply'],['--db','owned.db','--unknown']].map(args=>[args]))('installer arguments require an explicit unambiguous mode: %j',args=>{
