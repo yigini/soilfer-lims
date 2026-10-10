@@ -58,7 +58,7 @@ describe('Audit 1.0: persistent lab policies', () => {
         const foreign = id('CROSS-CHECK-FOREIGN');
         await prisma.lab.create({ data: { id: foreign, code: foreign, name: 'Other laboratory', country: 'GTM' } });
         const old = await policy.snapshot(labId);
-        const values = { 'crossCheck.basesCecFactor': 1.2, 'crossCheck.baseSaturationMaxPct': 105,
+        const values = { 'crossCheck.basesCecFactor': 1.4, 'crossCheck.baseSaturationMaxPct': 105,
             'crossCheck.textureClosureTolerancePct': 3, 'crossCheck.cnMin': 9,
             'crossCheck.cnMax': 24, 'crossCheck.carbonatePhMin': 7.2 };
         const changed = await edit(Object.entries(values).map(([key, value]) => ({ key, value })), { expectedVersion: 0 });
@@ -75,6 +75,13 @@ describe('Audit 1.0: persistent lab policies', () => {
         }
         expect(await prisma.labPolicy.count({ where: { labId: foreign } })).toBe(0);
         expect(await prisma.auditLog.count({ where: { labId: foreign } })).toBe(0);
+        const { evaluateCrossParameters } = require('../../services/crossParameterEvaluator');
+        const rows = [['EXCH_CA', 6], ['EXCH_MG', 5], ['EXCH_K', 2], ['EXCH_NA', 0], ['CEC', 10]]
+            .map(([param, numericValue]) => ({ id: param, param, numericValue, unit: 'cmol(+)/kg', basis: 'AIR_DRY', censoring: 'NONE' }));
+        const outcome = state => evaluateCrossParameters(rows, state).find(row => row.ruleCode === 'BASES_CEC').outcome;
+        expect(outcome(await policy.snapshot(labId))).toBe('PASS');
+        expect(outcome(await policy.snapshot(foreign))).toBe('FLAGGED');
+        expect(outcome(old)).toBe('FLAGGED');
     });
     test.each([
         [{ key: 'crossCheck.basesCecFactor', value: 0.99 }],
