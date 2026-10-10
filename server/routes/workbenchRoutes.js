@@ -15,6 +15,8 @@ router.post('/batch-save', checkPermission('ENTER_RESULTS'), workbenchController
 router.post('/calculation-preview', checkPermission('ENTER_RESULTS'), calculationController.previewResult);
 router.get('/instruments/:instrumentId/import-templates', checkPermission('ENTER_RESULTS'), importController.listTemplates);
 router.post('/instruments/:instrumentId/import-templates', checkPermission('MANAGE_EQUIPMENT'), importController.saveTemplate);
+router.post('/runs/:batchId/imports/preview', checkPermission('ENTER_RESULTS'), importController.uploadSource, importController.previewImport);
+router.post('/runs/:batchId/imports/commit', checkPermission('ENTER_RESULTS'), importController.uploadSource, importController.commitImport);
 
 // Server-side drafts
 router.get('/drafts', checkPermission('ENTER_RESULTS'), workbenchController.getDrafts);
