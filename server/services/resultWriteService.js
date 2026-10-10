@@ -11,8 +11,7 @@ const { TransitionError } = rules;
 const { canonicalWorkItemWhere } = require('./workAttemptContract');
 const { allocateExecution,insertExecution } = require('./workAttemptWriteService');
 const calculationService = require('./resultCalculationService');
-const TEXTURE_ANALYSES = new Set(['TEXTURE', 'SAND', 'SILT', 'CLAY', 'pSA', 'PSA', 'textureSum']);
-const FRACTIONS = ['SAND', 'SILT', 'CLAY'];
+const { numericReportingUnit, TEXTURE_ANALYSES, FRACTIONS } = require('./resultReportingUnit');
 const ATTEMPT_ERRORS = ['RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMATCH', 'RESULT_ATTEMPT_REFERENCED'];
 
 // Request data never supplies Result identity, parser evidence or provenance.
@@ -310,15 +309,6 @@ async function appendAttemptCorrection(tx, { item, sample, attempt, target, acto
     await calculationService.freeze(tx,ctx,row,evidence,now);
     if (row.param === item.analysis) await cacheResult(tx,item,row.value);
     return row;
-}
-
-function numericReportingUnit(ctx, measurement) {
-    const fraction = FRACTIONS.includes(measurement.param) && TEXTURE_ANALYSES.has(ctx.analysis.code);
-    const unit = fraction ? '%' : measurement.unit || ctx.method?.unit || ctx.analysis.units || ctx.analysis.unitCode || null;
-    if (!fraction && measurement.unit && ctx.analysis.units && ![ctx.analysis.units, ctx.analysis.unitCode].includes(measurement.unit)) {
-        throw new TransitionError('Use the configured reporting unit.', 409, 'RESULT_UNIT_MISMATCH');
-    }
-    return unit;
 }
 
 async function numericValidationContext(tx, ctx, measurement, parsedValue = null, numberFormat = null, calculationEvidence = null) {

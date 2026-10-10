@@ -143,7 +143,7 @@ tests, zero skipped (50.384 s), including the105 scanner tests. Source-owned and
 working database hashes stay unchanged. Actual Docker execution is still pending.
 
 Still unfinished: actual Docker execution and populated analytical preservation
-proof; shared unit reader; preview/commit APIs; XLSX; the mapping/binding
+proof; preview/commit APIs; XLSX; the mapping/binding
 wizard; complete 40 by four plus six native QC import; EXCH_CA/Olsen typed
 recording and activation/unit/binding refusal cases; normal full server tests,
 final build/lint, CI and Claude's audit. The importer must read input units
@@ -151,3 +151,13 @@ from the laboratory's activated template version and recheck activation at
 commit. It must preserve the raw inputs for the existing typed writer.
 No conversion, dilution arithmetic, final Result writer, QC overwrite,
 evaluation, historical backfill or production mutation is introduced here.
+
+Pin6095652486: the typed writer's numericReportingUnit decision is extracted
+into resultReportingUnit.js and remains the writer's actual runtime call.
+Ordinary fallback/refusal behavior is retained. The additional import mode
+requires an exact catalogue units/unitCode match, or percent for actual texture
+fractions, with no method/QUDT inference, aliases or conversions. It returns
+the analysis code, both original catalogue unit fields and the matched field
+for the future immutable receipt. Import-unit preflight/API/receipt integration
+and zero-write commit refusal acceptance remain unfinished. Read-decision and
+unchanged typed-writer tests are being validated; no full import pass is claimed.
