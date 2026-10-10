@@ -1,0 +1,247 @@
+{
+  "status": "PARTIAL_VERIFIED_STARTUP_NOT_COMPLETE_REHEARSAL",
+  "retainedStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+  "head": "0685d34d851ef6f115ae88bc772679929d8eee25",
+  "root": "/opt/lims/releases/combined-eb6de2e8-repair-pr-0685d34d-verified-20261010T170400Z",
+  "receiptSha256": "aa057edbb1f653b9e0356a186f945f9851cb01eed3a885acdfcc64dc57c84d2d",
+  "failedCoordinatorCheck": "'str' object has no attribute 'get'",
+  "candidateImage": "sha256:e2ed0a732e5e34050e42f7796e1d745cb4e18eb991e049ee804993cdc792c9e6",
+  "productionExecution": false,
+  "preservation": {
+    "originalTableCount": 90,
+    "originalRowsAndFieldsPreserved": true,
+    "approvedNullResultLinks": 19,
+    "createdAttempts": 17,
+    "originalReceiptsPreserved": 18,
+    "additionalReceiptCount": 19,
+    "newTables": [
+      "BatchReagentLot",
+      "CalcTemplate",
+      "CalcTemplateActivation",
+      "CalibrationCurve",
+      "CalibrationPoint",
+      "CrossCheckEvaluation",
+      "NonconformityReport",
+      "ReportAmendmentWithdrawal",
+      "ReportedValueSelection",
+      "ResultCalculation",
+      "ResultOverrideRequest",
+      "SampleAmendmentAttempt",
+      "UserBenchCredential"
+    ],
+    "changedSchemaObjects": [
+      "table:ProficiencyRound",
+      "table:Report",
+      "table:ReviewDecision",
+      "table:SampleAmendment",
+      "table:WorkAttempt",
+      "trigger:ProficiencyRound_ncr_status_insert_guard",
+      "trigger:ProficiencyRound_ncr_status_update_guard",
+      "trigger:WorkItem_batch_membership_guard"
+    ],
+    "integrity": "ok",
+    "foreignKeyViolations": 0
+  },
+  "installers": [
+    {
+      "key": "179",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 85008384
+    },
+    {
+      "key": "182",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 26439680
+    },
+    {
+      "key": "183",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 26759168
+    },
+    {
+      "key": "184",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 30986240
+    },
+    {
+      "key": "185",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 30892032
+    },
+    {
+      "key": "186",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 51650560
+    },
+    {
+      "key": "187",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 47878144
+    },
+    {
+      "key": "272",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 26017792
+    },
+    {
+      "key": "193",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 81518592
+    },
+    {
+      "key": "189",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 26136576
+    },
+    {
+      "key": "178",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 26525696
+    },
+    {
+      "key": "190",
+      "mode": "APPLIED",
+      "totalChanges": 39,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 102993920
+    },
+    {
+      "key": "191",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 115572736
+    },
+    {
+      "key": "192",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 93970432
+    },
+    {
+      "key": "194",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 81727488
+    },
+    {
+      "key": "199",
+      "mode": "APPLIED",
+      "totalChanges": 17,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 48631808
+    },
+    {
+      "key": "197",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 82178048
+    },
+    {
+      "key": "201",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 106385408
+    },
+    {
+      "key": "210",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 549953536
+    },
+    {
+      "key": "211",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 548675584
+    },
+    {
+      "key": "202",
+      "mode": "APPLIED",
+      "totalChanges": 1,
+      "memoryLimitBytes": 805306368,
+      "nodeOptions": null,
+      "peakBytes": 548343808
+    }
+  ],
+  "repeatTotalChanges": 0,
+  "repeatDatabaseBytesPreserved": true,
+  "readyEvents": [
+    "WORKFLOW_STARTUP_READY",
+    "RESULT_ATTEMPT_STARTUP_READY",
+    "SAMPLE_HOLD_STARTUP_READY",
+    "REFERENCE_STARTUP_READY",
+    "QC_RULE_STARTUP_READY",
+    "QC_RUN_STARTUP_READY",
+    "QC_GATE_SCOPE_STARTUP_READY",
+    "PT_STARTUP_READY",
+    "NCR_STARTUP_READY",
+    "RESULT_EQUIPMENT_STARTUP_READY",
+    "WORK_ATTEMPT_STARTUP_READY",
+    "WORK_REPEAT_STARTUP_READY",
+    "REPORTED_VALUE_STARTUP_READY",
+    "REAGENT_LOT_STARTUP_READY",
+    "RESULT_OVERRIDE_STARTUP_READY",
+    "CALCULATION_STARTUP_READY",
+    "CROSS_CHECK_STARTUP_READY",
+    "AMENDMENT_STARTUP_READY",
+    "REPORT_REVISION_STARTUP_READY",
+    "BENCH_CREDENTIAL_STARTUP_READY"
+  ],
+  "health": {
+    "status": "ok",
+    "version": "1.9.0",
+    "uptime": 34.872617828
+  },
+  "startupMemoryLimitBytes": 805306368,
+  "startupPeakBytes": null,
+  "apiPostflightsComplete": false
+}
