@@ -3,7 +3,7 @@ const rules=require('./workflowStateRules');
 const {hasPermission}=require('../config/roles');
 const {isNonMeasurement}=require('./workItemKinds');
 const policy=require('./policyService');
-const fields=new Set(['type','reason','reasonCode','selectedWorkItemIds','affectedResults','affectedReports','impactAssessment']);
+const fields=new Set(['type','reason','reasonCode','selectedWorkItemIds','affectedResults','affectedReports','impactAssessment','limitOverrides']);
 const fail=(code,message,status=409)=>new rules.TransitionError(message,status,code);
 const capabilities=new WeakMap();
 
@@ -23,6 +23,14 @@ function exactIds(value,required=false){
   new Set(value).size!==value.length)throw fail('AMENDMENT_INPUT_INVALID','Choose distinct exact evidence identifiers.',400);
  return value;
 }
+function readScientificLimitOverrides(value,selected){
+ if(value===undefined)return[];
+ if(!Array.isArray(value)||value.some(row=>!row||typeof row!=='object'||Array.isArray(row)||
+  Object.keys(row).sort().join(',')!=='description,impactAssessment,workItemId'||!selected.includes(row.workItemId))||
+  new Set(value.map(row=>row.workItemId)).size!==value.length)
+  throw fail('AMENDMENT_INPUT_INVALID','Limit overrides must identify distinct selected work lines.',400);
+ return value.map(row=>({workItemId:row.workItemId,...require('./workRepeatContract').repeatLimitAssessment(row)}));
+}
 
 // A request records the proposal only. It cannot reopen work, withdraw a
 // report, change approval metadata or grant the authorise capability.
@@ -40,6 +48,7 @@ async function requestScientificAmendment(db,sampleId,actor,input){
   if(input.type!==undefined&&input.type!=='SCIENTIFIC')throw fail('AMENDMENT_TYPE_INVALID','Use the workflow for this amendment type.',400);
   if(!['CLIENT_RETEST','CONFIRMATION'].includes(input.reasonCode))throw fail('AMENDMENT_REASON_INVALID','Choose client retest or confirmation.',400);
   const reason=rules.requireReason(input.reason),selected=exactIds(input.selectedWorkItemIds,true);
+  const limitOverrides=readScientificLimitOverrides(input.limitOverrides,selected);
   if(input.impactAssessment!==undefined&&typeof input.impactAssessment!=='string')throw fail('AMENDMENT_INPUT_INVALID','The impact assessment must be text.',400);
   const items=await tx.workItem.findMany({where:{id:{in:selected},sampleId:sample.id,status:'ACCEPTED',duplicateOf:null}});
   if(items.length!==selected.length||items.some(isNonMeasurement))throw fail('AMENDMENT_LINE_INVALID','Choose current accepted measurement work from this sample.');
@@ -52,7 +61,7 @@ async function requestScientificAmendment(db,sampleId,actor,input){
   }
   const now=new Date(),amendment=await tx.sampleAmendment.create({data:{id:randomUUID(),sampleId:sample.id,type:'SCIENTIFIC',status:'PENDING',
    reason,affectedOrderLines:JSON.stringify(selected),...affected,impactAssessment:input.impactAssessment??null,
-   requestPayload:JSON.stringify({contract:'210-v1',reasonCode:input.reasonCode}),selectedWorkItemIds:JSON.stringify(selected),
+   requestPayload:JSON.stringify({contract:'210-v1',reasonCode:input.reasonCode,...(limitOverrides.length&&{limitOverrides})}),selectedWorkItemIds:JSON.stringify(selected),
    version:1,createdBy:performedBy,createdAt:now,updatedAt:now}});
   await tx.auditLog.create({data:{id:randomUUID(),entity:'SAMPLE',entityId:sample.id,sampleId:sample.id,labId:sample.assignedLab,
    action:'SAMPLE_AMENDMENT_CREATED',performedBy,performedByName:actor.name||performedBy,timestamp:now,
@@ -81,11 +90,14 @@ async function authoriseScientificAmendment(db,sampleId,amendmentId,actor,input)
    throw fail('AMENDMENT_STATE_CHANGED','The amendment request changed. Reload before authorising it.');
   let payload,selected;
   try{payload=JSON.parse(amendment.requestPayload);selected=JSON.parse(amendment.selectedWorkItemIds);}catch{/* Never adopt historical evidence. */}
-  if(!payload||payload.contract!=='210-v1'||Object.keys(payload).sort().join(',')!=='contract,reasonCode'||
+  if(!payload||payload.contract!=='210-v1'||!['contract,reasonCode','contract,limitOverrides,reasonCode'].includes(Object.keys(payload).sort().join(','))||
    !['CLIENT_RETEST','CONFIRMATION'].includes(payload.reasonCode)||!Array.isArray(selected)||!selected.length||
    selected.some(id=>typeof id!=='string'||!id.trim()||id!==id.trim())||new Set(selected).size!==selected.length||
    amendment.affectedOrderLines!==JSON.stringify(selected))
    throw fail('AMENDMENT_REQUEST_INVALID','The amendment request evidence is unavailable.');
+  let limitOverrides;
+  try{limitOverrides=new Map(readScientificLimitOverrides(payload.limitOverrides,selected).map(row=>[row.workItemId,row]));}
+  catch{throw fail('AMENDMENT_REQUEST_INVALID','The amendment limit-override evidence is unavailable.');}
   const requiresSecondPerson=await policy.get(lab.id,'report.amendmentRequiresSecondPerson',{db:tx});
   const selfAuthorised=amendment.createdBy===performedBy;
   if(requiresSecondPerson&&selfAuthorised)throw fail('AMENDMENT_SECOND_PERSON_REQUIRED','Another authorised user must authorise this amendment.');
@@ -100,10 +112,11 @@ async function authoriseScientificAmendment(db,sampleId,amendmentId,actor,input)
    const attempts=await tx.workAttempt.findMany({where:{workItemId:item.id},orderBy:{attemptNo:'asc'}});
    const parent=attempts.find(row=>row.id===parentId);
    if(!parent||parent.status!=='ACCEPTED')throw fail('AMENDMENT_LINE_INVALID','The selected current attempt is not accepted.');
-   if(attempts.some(row=>row.status==='OPEN'))throw fail('WORK_REPEAT_ALREADY_OPEN','An OPEN repeat already exists for this work.');
+   if(attempts.some(row=>row.status==='OPEN'))throw fail('AMENDMENT_LINE_INVALID','An OPEN repeat already exists for this work.');
    await require('./workRepeatBatchService').assertRepeatSourceReleased(tx,item);
-   await require('./workRepeatService').assertRepeatCapacity(tx,item,sample);
-   plans.push({item,parent,attemptNo:Math.max(0,...attempts.map(row=>row.attemptNo))+1});
+   const override=limitOverrides.get(item.id),limitOverride=override?{description:override.description,impactAssessment:override.impactAssessment}:null;
+   await require('./workRepeatService').assertRepeatCapacity(tx,item,sample,Boolean(limitOverride));
+   plans.push({item,parent,attemptNo:Math.max(0,...attempts.map(row=>row.attemptNo))+1,limitOverride});
   }
   const reports=await tx.report.findMany({where:{sampleId:sample.id,status:'PUBLISHED'}});
   if(reports.length>1||reports.some(row=>!row.publishedAt))throw fail('REPORT_WITHDRAWAL_SCOPE_INVALID','The current issued report is unavailable.');
@@ -119,13 +132,19 @@ async function authoriseScientificAmendment(db,sampleId,amendmentId,actor,input)
     {expectedStatus:'APPROVED',action:'SCIENTIFIC_AMENDMENT_AUTHORISED',amendmentCapability:capability,
      details:JSON.stringify({amendmentId:amendment.id,selectedWorkItemIds:selected,priorApprovedBy:sample.approvedBy,priorApprovedAt:sample.approvedAt})});
    const children=[];
-   for(const {item,parent,attemptNo}of plans){
+   for(const {item,parent,attemptNo,limitOverride}of plans){
     const child=await tx.workAttempt.create({data:{id:'att-'+item.id+'-'+randomUUID(),workItemId:item.id,attemptNo,status:'OPEN',
      parentAttemptId:parent.id,reason:payload.reasonCode,note:amendment.reason,requestedBy:performedBy,requestedAt:now,createdAt:now,updatedAt:now}});
     await tx.sampleAmendmentAttempt.create({data:{id:randomUUID(),amendmentId:amendment.id,workItemId:item.id,
      parentAttemptId:parent.id,childAttemptId:child.id,reason:payload.reasonCode,createdAt:now}});
+    let nonconformityId;
+    if(limitOverride){
+     const {report}=await require('./nonconformityService').raise(tx,actor,{labId:sample.assignedLab||item.labId,
+      source:'REPEAT_LIMIT',refType:'WorkAttempt',refId:child.id,...limitOverride});
+     nonconformityId=report.id;
+    }
     await require('./workAttemptEventService').appendAttemptEvent(tx,{...item,sample},child.id,actor,
-     {action:'CREATED',from:null,to:'OPEN',reason:payload.reasonCode,note:amendment.reason});
+     {action:'CREATED',from:null,to:'OPEN',reason:payload.reasonCode,note:amendment.reason,...(nonconformityId&&{nonconformityId})});
     const history=rules.requireHistory(item.history);
     history.push({status:'REPEAT_REQUIRED',action:'SCIENTIFIC_AMENDMENT_AUTHORISED',amendmentId:amendment.id,
      attemptId:child.id,parentAttemptId:parent.id,reasonCode:payload.reasonCode,changedBy:performedBy,timestamp:now.toISOString()});
@@ -153,4 +172,4 @@ async function authoriseScientificAmendment(db,sampleId,amendmentId,actor,input)
   }finally{capabilities.delete(capability);}
  });
 }
-module.exports={requestScientificAmendment,authoriseScientificAmendment,assertScientificReopenCapability};
+module.exports={requestScientificAmendment,authoriseScientificAmendment,assertScientificReopenCapability,readScientificLimitOverrides};

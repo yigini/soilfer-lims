@@ -8,11 +8,10 @@ const {withQcRunHttp}=require('../helpers/qcRunHttpHarness');
 const {inTransaction}=require('../../services/workflowStateRules');
 const commands=require('../../services/sampleAmendmentCommandService');
 const {writeResultsExecution}=require('../../services/resultWriteService');
-const {readAmendmentReopenWitness}=require('../../services/amendmentReopenWitness');
 const owned=[];
 afterEach(async()=>{for(const f of owned.splice(0))await f.close();});
-async function fixture(reasonCode='CLIENT_RETEST',originalReplicates=2){
- const f=await qcGateFixture();owned.push(f);
+async function fixture(reasonCode='CLIENT_RETEST',originalReplicates=2,analysisCode){
+ const f=await qcGateFixture(analysisCode?{analysisCode}:undefined);owned.push(f);
  require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:f.file,apply:true});
  await f.setPolicy([{key:'results.replicatesRequired',value:2}]);
  f.sample=await createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,
@@ -61,22 +60,59 @@ test('an absent original replicate refuses and rolls back first fill, result and
  const f=await fixture('CLIENT_RETEST',1),{amendment}=await f.request();await f.authorise(amendment);const before=f.all();
  await expect(f.record(2)).rejects.toMatchObject({statusCode:409,code:'AMENDMENT_ATTEMPT_LINK_INVALID'});expect(f.all()).toEqual(before);
 });
-test.each(['version','sample','lab','line','parent','reason','replicate'])('read-only witness refuses a %s field fault with no writes',async field=>{
+test.each(['version','lab','parent','replicate'])('a persisted %s field fault refuses the actual result write and rolls back every row',async field=>{
  const f=await fixture(),{amendment}=await f.request(),outcome=await f.authorise(amendment),child=outcome.attempts[0];
- const item=await f.db.workItem.findUnique({where:{id:f.item.id}}),before=f.all();
- // Fault injection changes only a model read, never an immutable database row,
- // trigger or execution contract. All other reads use the actual owned file.
- const originalRead=f.db.sampleAmendment.findUnique.bind(f.db.sampleAmendment);
- const db=Object.create(f.db);db.sampleAmendment={findUnique:async args=>{
-  const row=await originalRead(args);return field==='version'?{...row,version:3}:field==='sample'?{...row,sampleId:randomUUID()}:row;
- }};
- const args={item,parent:f.parent,child,replicateNo:1};
- if(field==='lab')args.item={...item,assignedLab:'unregistered-owned-lab'};
- if(field==='line')args.item={...item,id:randomUUID()};
- if(field==='parent')args.parent={...f.parent,id:randomUUID()};
- if(field==='reason')args.child={...child,reason:'OTHER'};
- if(field==='replicate')args.replicateNo=3;
- await expect(readAmendmentReopenWitness(db,args)).rejects.toMatchObject({statusCode:409,code:'AMENDMENT_ATTEMPT_LINK_INVALID'});expect(f.all()).toEqual(before);
+ // Construct only states the actual SQL permits in this owned negative fixture.
+ // No model reads, contract guards or writer options are substituted.
+ if(field==='version')await f.db.sampleAmendment.update({where:{id:amendment.id},data:{version:3}});
+ if(field==='lab'){
+  const lab=await f.db.lab.create({data:{id:randomUUID(),code:'foreign-'+randomUUID(),name:'Owned other laboratory',country:'GTM'}});
+  await f.db.workItem.update({where:{id:f.item.id},data:{labId:lab.id}});
+ }
+ if(field==='parent'){
+  const other=await f.db.workAttempt.create({data:{id:randomUUID(),workItemId:f.item.id,attemptNo:3,status:'ACCEPTED'}});
+  await f.db.workAttempt.update({where:{id:child.id},data:{parentAttemptId:other.id,updatedAt:child.updatedAt}});
+ }
+ const before=f.all();
+ await expect(f.record(field==='replicate'?3:1)).rejects.toMatchObject({statusCode:409,code:'AMENDMENT_ATTEMPT_LINK_INVALID'});
+ expect(f.all()).toEqual(before);
+});
+test.each(['sample','line','reason'])('the SQL guard prevents a persisted %s link fault with zero writes',async field=>{
+ const f=await fixture(),{amendment}=await f.request(),outcome=await f.authorise(amendment),child=outcome.attempts[0],before=f.all(),db=new Database(f.file);
+ try{
+  if(field==='sample')expect(()=>db.prepare('UPDATE SampleAmendment SET sampleId=? WHERE id=?').run(f.items[0].sampleId,amendment.id)).toThrow('AMENDMENT_VERSION_CONFLICT');
+  else if(field==='line')expect(()=>db.prepare('UPDATE SampleAmendment SET selectedWorkItemIds=?,version=version+1 WHERE id=?').run('[]',amendment.id)).toThrow('AMENDMENT_REQUEST_IMMUTABLE');
+  else expect(()=>db.prepare('UPDATE WorkAttempt SET reason=? WHERE id=?').run('OTHER',child.id)).toThrow('WORK_ATTEMPT_IDENTITY_IMMUTABLE');
+ }finally{db.close();}
+ expect(f.all()).toEqual(before);
+});
+async function unlinkedFixture(analysisCode){
+ const f=await fixture('CONFIRMATION',2,analysisCode);
+ // Historical/invalid OPEN rows are possible without a new amendment link.
+ // Retain every guard and the accepted parent; the runtime must refuse reuse.
+ await f.db.sample.update({where:{id:f.sample.id},data:{status:'PROCESSING'}});
+ f.item=await f.db.workItem.update({where:{id:f.item.id},data:{status:'REPEAT_REQUIRED'}});
+ f.child=await f.db.workAttempt.create({data:{id:randomUUID(),workItemId:f.item.id,attemptNo:2,status:'OPEN',parentAttemptId:f.parent.id,
+  reason:'CONFIRMATION',requestedBy:f.other.username,requestedAt:new Date()}});
+ expect(await f.db.sampleAmendmentAttempt.count()).toBe(0);return f;
+}
+test('recordedExecution refuses a real unlinked OPEN child of an accepted parent without writes',async()=>{
+ const f=await unlinkedFixture(),before=f.all();
+ await expect(inTransaction(f.db,tx=>require('../../services/resultWriteService').recordedExecution(tx,f.item,f.analysisCode)))
+  .rejects.toMatchObject({statusCode:409,code:'ATTEMPT_CORRECTION_REQUIRED'});expect(f.all()).toEqual(before);
+});
+test('the texture writer reaches appendResult and rolls back first fill for a real unlinked accepted-parent child',async()=>{
+ const f=await unlinkedFixture('TEXTURE'),before=f.all();
+ // This public writer does not call recordedExecution. Its first-fill and
+ // fraction supersession go through insertExecution then appendResult.
+ await expect(inTransaction(f.db,tx=>require('../../services/resultWriteService').writeTextureDetermination(tx,{sampleId:f.sample.id,workItemId:f.item.id,
+  actor:f.actor,measurement:{param:'TEXTURE',replicateNo:1,equipmentId:f.instrument.id},fractions:{sand:'40',silt:'40',clay:'20'}})))
+  .rejects.toMatchObject({statusCode:409,code:'ATTEMPT_CORRECTION_REQUIRED'});expect(f.all()).toEqual(before);
+});
+test('submitRecordedAttempt refuses a real unlinked accepted-parent child without writes',async()=>{
+ const f=await unlinkedFixture(),before=f.all();
+ await expect(inTransaction(f.db,tx=>require('../../services/workAttemptEventService').submitRecordedAttempt(tx,f.item,f.actor)))
+  .rejects.toMatchObject({statusCode:409,code:'ATTEMPT_CORRECTION_REQUIRED'});expect(f.all()).toEqual(before);
 });
 test('mounted request/authorise routes keep requests pending, enforce a second person and preserve command replay',async()=>{
  const f=await fixture();let created;

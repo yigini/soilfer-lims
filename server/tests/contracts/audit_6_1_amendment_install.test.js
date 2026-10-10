@@ -9,6 +9,7 @@ const {installWorkflowStateGuards}=require('../../scripts/install_workflow_state
 const {installSampleAmendmentAuthorisation,assertAmendmentStartupReady,parseArguments}=require('../../scripts/install_sample_amendment_authorisation');
 const {loadSampleAmendmentMigrationSource}=require('../../services/sampleAmendmentMigrationSource');
 const {createPre210AmendmentFixture}=require('../helpers/sampleAmendmentHistoricalFixture');
+const {createPre210After201Fixture}=require('../helpers/sampleAmendmentMainHistoricalFixture');
 const {scanSource}=require('../helpers/workflowWriteScanner');
 const files=[],hash=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 async function fixture(){
@@ -34,8 +35,11 @@ function snapshot(db){
 }
 afterAll(()=>{for(const file of files)fs.rmSync(assertOwnedTestDatabase(file,'system:fixture'),{force:true});});
 
-test('the real pre-210 schema upgrades additively while retaining every historical field, schema object, foreign key and receipt',()=>{
- const {file}=createPre210AmendmentFixture();files.push(file);const db=new Database(file);db.pragma('foreign_keys=ON');
+test.each([
+ ['retained earlier 84-model predecessor',createPre210AmendmentFixture],
+ ['current main after #201 with 90 models',createPre210After201Fixture]
+])('%s upgrades additively while retaining every historical field, schema object, foreign key and receipt',(_label,create)=>{
+ const {file}=create();files.push(file);const db=new Database(file);db.pragma('foreign_keys=ON');
  try{
   const before=snapshot(db),initialHash=hash(file),source=loadSampleAmendmentMigrationSource();
   const shapes=Object.fromEntries(Object.keys(before.rows).map(table=>[table,{
@@ -84,25 +88,28 @@ test('the real pre-210 schema upgrades additively while retaining every historic
  }finally{db.close();}
 });
 
-test('the pre-210 factory has one no-argument caller and exact source and DDL boundaries',()=>{
- expect(()=>createPre210AmendmentFixture({file:'arbitrary'})).toThrow('accepts no arguments');
- const root=path.resolve(__dirname,'../..'),factory='tests/helpers/sampleAmendmentHistoricalFixture.js',source=fs.readFileSync(path.join(root,factory),'utf8');
+test.each([
+ [createPre210AmendmentFixture,'sampleAmendmentHistoricalFixture','pre210_full_application_schema.sql'],
+ [createPre210After201Fixture,'sampleAmendmentMainHistoricalFixture','pre210_after201_full_application_schema.sql']
+])('the %s factory has one no-argument caller and exact source and DDL boundaries',(create,name,ddl)=>{
+ expect(()=>create({file:'arbitrary'})).toThrow('accepts no arguments');
+ const root=path.resolve(__dirname,'../..'),factory='tests/helpers/'+name+'.js',source=fs.readFileSync(path.join(root,factory),'utf8');
  expect(scanSource(source,factory)).toEqual([]);
  expect(scanSource(source+'\n// changed\n',factory)).toEqual(expect.arrayContaining([expect.objectContaining({code:'HISTORICAL_FIXTURE_SOURCE_MISMATCH'})]));
- const allowed="require('../helpers/sampleAmendmentHistoricalFixture')";
+ const allowed="require('../helpers/"+name+"')";
  expect(scanSource(allowed,'tests/contracts/audit_6_1_amendment_install.test.js')).toEqual([]);
  expect(scanSource(allowed,'tests/contracts/second_caller.test.js')).toEqual([expect.objectContaining({code:'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED'})]);
- expect(scanSource("require('../tests/helpers/sampleAmendmentHistoricalFixture')",'services/probe.js')).toEqual([expect.objectContaining({code:'TEST_HELPER_IMPORTED_BY_RUNTIME'})]);
- const read=fs.readFileSync,literal=path.join(root,'tests/helpers/fixtures/pre210_full_application_schema.sql');
+ expect(scanSource("require('../tests/helpers/"+name+"')",'services/probe.js')).toEqual([expect.objectContaining({code:'TEST_HELPER_IMPORTED_BY_RUNTIME'})]);
+ const read=fs.readFileSync,literal=path.join(root,'tests/helpers/fixtures',ddl);
  const spy=jest.spyOn(fs,'readFileSync').mockImplementation((target,...args)=>{
   const bytes=read(target,...args);return path.resolve(String(target))===literal?Buffer.concat([Buffer.from(bytes),Buffer.from('\n')]):bytes;
  });
  try{
   expect(scanSource(source,factory)).toEqual(expect.arrayContaining([expect.objectContaining({code:'HISTORICAL_FIXTURE_SOURCE_MISMATCH'})]));
-  expect(()=>createPre210AmendmentFixture()).toThrow('literal pre-210 DDL differs');
+  expect(()=>create()).toThrow('literal pre-210 DDL differs');
  }finally{spy.mockRestore();}
  const originalState=expect.getState,callerSpy=jest.spyOn(expect,'getState').mockImplementation(()=>({...originalState(),testPath:path.join(root,'tests/contracts/second_caller.test.js')}));
- try{expect(()=>createPre210AmendmentFixture()).toThrow('unlisted caller');}finally{callerSpy.mockRestore();}
+ try{expect(()=>create()).toThrow('unlisted caller');}finally{callerSpy.mockRestore();}
 });
 
 test('only the exact amendment loader and DDL resolve; aliases and changed bytes grant no SQL authority',()=>{

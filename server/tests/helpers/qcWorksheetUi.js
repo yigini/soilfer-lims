@@ -8,7 +8,7 @@ const translate = key => key;
 
 // Execute real JSX callbacks and effect cleanup. Child Result editors remain
 // boundaries so the tests can inspect and exercise their existing draft props.
-function mountUi(filename, props = {}, { canEdit = true, user = null, responses = {}, axios: suppliedAxios } = {}) {
+function mountUi(filename, props = {}, { canEdit = true, user = null, responses = {}, axios: suppliedAxios, routeParams = {} } = {}) {
     const hooks = [], effects = [], children = {}, cache = {}; let cursor = 0, tree;
     const equal = (a, b) => a && b && a.length === b.length && a.every((value, index) => value === b[index]);
     const react = { ...React,
@@ -30,6 +30,7 @@ function mountUi(filename, props = {}, { canEdit = true, user = null, responses 
             { module, exports: module.exports, console, setTimeout, clearTimeout, Date, crypto: require('node:crypto').webcrypto, AbortController, window: { innerWidth: 1200 }, require(name) {
                 if (name === 'react') return react;
                 if (name === 'axios') return axios;
+                if (name === 'react-router-dom') return { useParams: () => routeParams };
                 if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
                 if (name.includes('LanguageContext')) return { useLanguage: () => ({ t: translate }) };
                 if (name.includes('AuthContext')) return { useAuth: () => ({ user, hasPermission: () => canEdit }) };

@@ -3473,6 +3473,11 @@
     }
   },
   "amendment": {
+    "publicWithdrawn": "Este informe está en proceso de enmienda y no está disponible temporalmente.",
+    "limitOverride": "Solicitar una excepción al límite de repeticiones",
+    "limitOverrideHelp": "Autorizar esta excepción crea una no conformidad por el límite de repeticiones para esta línea de trabajo.",
+    "limitDescription": "Motivo para superar el límite de repeticiones",
+    "limitImpact": "Evaluación del impacto",
     "title": "Enmiendas de la muestra",
     "help": "Solicite un cambio y después autorícelo según la política del laboratorio. Las enmiendas científicas reabren el trabajo seleccionado y retiran el informe emitido, conservando su contenido.",
     "permission": "Se requiere permiso de aprobación.",

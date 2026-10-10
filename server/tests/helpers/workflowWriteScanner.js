@@ -194,6 +194,14 @@ const AMENDMENT_FIXTURE = Object.freeze({
     ddlSha256: '6ae0cc1d26dc3ba301d435d3f332d432a9765c3d30b7fd0725aa119db6f8f622',
     caller: 'tests/contracts/audit_6_1_amendment_install.test.js'
 });
+// Review6095648270: additional literal from main after #201; old binding retained.
+const AMENDMENT_MAIN_FIXTURE = Object.freeze({
+    file: 'tests/helpers/sampleAmendmentMainHistoricalFixture.js', exportName: 'createPre210After201Fixture',
+    sha256: '774f2b135451ef04580be6cef0e566f7c3cdf2185ceab6e6b422d1d06ed6fec6',
+    ddl: 'tests/helpers/fixtures/pre210_after201_full_application_schema.sql',
+    ddlSha256: 'b7de680237c07ff2454ed27afcc95481ddb45cc24cd80ade943b88291d9ca397',
+    caller: 'tests/contracts/audit_6_1_amendment_install.test.js'
+});
 
 function scanSource(source, filename, exceptions = []) {
     const violations = [];
@@ -225,6 +233,14 @@ function scanSource(source, filename, exceptions = []) {
                 createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', AMENDMENT_FIXTURE.ddl))).digest('hex') === AMENDMENT_FIXTURE.ddlSha256;
         } catch { validAmendmentFixture = false; }
         if (!validAmendmentFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The closed #210 factory or pre-210 DDL digest differs.');
+    }
+    let validAmendmentMainFixture = false;
+    if (filename === AMENDMENT_MAIN_FIXTURE.file) {
+        try {
+            validAmendmentMainFixture = createHash('sha256').update(source).digest('hex') === AMENDMENT_MAIN_FIXTURE.sha256 &&
+                createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', AMENDMENT_MAIN_FIXTURE.ddl))).digest('hex') === AMENDMENT_MAIN_FIXTURE.ddlSha256;
+        } catch { validAmendmentMainFixture = false; }
+        if (!validAmendmentMainFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The closed #210 current-main factory or DDL digest differs.');
     }
     if (filename === RAW_INPUT_FIXTURE.file) {
         try {
@@ -684,6 +700,7 @@ function scanSource(source, filename, exceptions = []) {
         if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName) return true;
         if (validCrossCheckFixture && name === CROSS_CHECK_FIXTURE.exportName) return true;
         if (validAmendmentFixture && name === AMENDMENT_FIXTURE.exportName) return true;
+        if (validAmendmentMainFixture && name === AMENDMENT_MAIN_FIXTURE.exportName) return true;
         const removal = ['delete', 'deleteMany'].includes(operation);
         if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample', 'writeSampleHoldCompatibility'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
         if (filename === 'services/workItemStateService.js' && (['createWorkItem', 'transitionWorkItem'].includes(name) || removal && name === 'removeUnstartedWorkItems') && entities.every(entity => entity === 'WorkItem')) return true;
@@ -697,6 +714,7 @@ function scanSource(source, filename, exceptions = []) {
         if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName && exportedNames.has(name)) return true;
         if (validCrossCheckFixture && name === CROSS_CHECK_FIXTURE.exportName && exportedNames.has(name)) return true;
         if (validAmendmentFixture && name === AMENDMENT_FIXTURE.exportName && exportedNames.has(name)) return true;
+        if (validAmendmentMainFixture && name === AMENDMENT_MAIN_FIXTURE.exportName && exportedNames.has(name)) return true;
         return exportedNames.has(name) && exceptions.some(entry => entry.file === filename && entry.exportName === name);
     }
     function pinnedCorruptProjectConnection(p, sql) {
@@ -778,7 +796,8 @@ function scanSource(source, filename, exceptions = []) {
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             }
             if ((resolved === CROSS_CHECK_FIXTURE.file.replace(/\.js$/, '') && filename !== CROSS_CHECK_FIXTURE.caller) ||
-                (resolved === AMENDMENT_FIXTURE.file.replace(/\.js$/, '') && filename !== AMENDMENT_FIXTURE.caller)) {
+                (resolved === AMENDMENT_FIXTURE.file.replace(/\.js$/, '') && filename !== AMENDMENT_FIXTURE.caller) ||
+                (resolved === AMENDMENT_MAIN_FIXTURE.file.replace(/\.js$/, '') && filename !== AMENDMENT_MAIN_FIXTURE.caller)) {
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             }
             if (filename.startsWith('tests/')) continue;

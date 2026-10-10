@@ -3473,6 +3473,11 @@
     }
   },
   "amendment": {
+    "publicWithdrawn": "Ce rapport est en cours de modification et est temporairement indisponible.",
+    "limitOverride": "Demander une dérogation à la limite de répétitions",
+    "limitOverrideHelp": "Autoriser cette dérogation crée une non-conformité liée à la limite de répétitions pour cette ligne de travail.",
+    "limitDescription": "Motif du dépassement de la limite de répétitions",
+    "limitImpact": "Évaluation des conséquences",
     "title": "Amendements de l’échantillon",
     "help": "Demandez une modification, puis autorisez-la selon la politique du laboratoire. Les amendements scientifiques rouvrent les travaux sélectionnés et retirent le rapport émis tout en conservant son contenu.",
     "permission": "Une permission d’approbation est requise.",

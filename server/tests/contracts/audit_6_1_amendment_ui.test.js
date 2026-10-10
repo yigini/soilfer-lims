@@ -21,6 +21,20 @@ test('a requester waits for a second person while the lab self-authorisation pol
  const second=mount({user:'requester'});await second.render();expect(button(second,'amendment.authorise').props.disabled).toBe(true);expect(second.text()).toContain('amendment.awaitOther');second.unmount();
  const advisory=mount({user:'requester',requiresSecondPerson:false});await advisory.render();expect(button(advisory,'amendment.authorise').props.disabled).toBe(false);expect(advisory.text()).toContain('amendment.selfAllowed');advisory.unmount();
 });
+test('the actual dialog requires both assessments and sends an explicit override only for the selected line',async()=>{
+ const view=mount({amendments:[]});await view.render();
+ view.all().find(node=>node.type==='input'&&node.props.type==='checkbox').props.onChange({target:{checked:true}});
+ view.all().find(node=>node.type==='textarea').props.onChange({target:{value:'Reasoned analytical retest'}});
+ await view.render();view.find('amendment-limit-accepted').props.onChange({target:{checked:true}});await view.render();
+ expect(button(view,'amendment.request').props.disabled).toBe(true);
+ view.find('amendment-limit-description-accepted').props.onChange({target:{value:' Confirm despite the repeat limit '}});await view.render();
+ expect(button(view,'amendment.request').props.disabled).toBe(true);
+ view.find('amendment-limit-impact-accepted').props.onChange({target:{value:' Retain the issued evidence pending separate review '}});await view.render();
+ expect(button(view,'amendment.request').props.disabled).toBe(false);
+ await button(view,'amendment.request').props.onClick();await view.render();
+ expect(view.axios.post).toHaveBeenCalledWith('/api/samples/owned-sample/amendments',expect.objectContaining({limitOverrides:[{
+  workItemId:'accepted',description:'Confirm despite the repeat limit',impactAssessment:'Retain the issued evidence pending separate review'}]}));view.unmount();
+});
 test('an authoriser sends the persisted request version and retains the full UUID',async()=>{
  const view=mount();await view.render();expect(view.text()).toContain(pending.id);await button(view,'amendment.authorise').props.onClick();await view.render();
  expect(view.axios.post).toHaveBeenCalledWith('/api/samples/owned-sample/amendments/'+pending.id+'/authorise',
@@ -39,7 +53,7 @@ test('an authorisation refusal preserves the request and permits an idempotent r
 test.each(['en','es','es-419','fr','pt'])('amendment workflow notices and labels are present in %s without changing old keys',locale=>{
  const client=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../../../client/src/translations',locale+'.json'),'utf8')).amendment;
  const server=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../../locales',locale+'.json'),'utf8')).amendment;
- for(const key of ['title','help','permission','secondPerson','selfAllowed','type','repeatReason','selectedLines','noLines','reason','request','history','empty','requester','authoriser','authorise','awaitOther','pendingNotice','authorisedNotice','failed'])expect(client[key].trim()).not.toBe('');
+ for(const key of ['title','help','permission','secondPerson','selfAllowed','type','repeatReason','selectedLines','noLines','reason','request','history','empty','requester','authoriser','authorise','awaitOther','pendingNotice','authorisedNotice','failed','publicWithdrawn','limitOverride','limitOverrideHelp','limitDescription','limitImpact'])expect(client[key].trim()).not.toBe('');
  for(const type of ['CLERICAL','SCIENTIFIC','ORDER','REPORT'])expect(client.types[type].trim()).not.toBe('');
  for(const key of ['pending','authorised','failed'])expect(server[key].trim()).not.toBe('');
 });

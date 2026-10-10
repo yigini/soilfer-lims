@@ -3473,6 +3473,11 @@
     }
   },
   "amendment": {
+    "publicWithdrawn": "This report is under amendment and is temporarily unavailable.",
+    "limitOverride": "Request a repeat-limit override",
+    "limitOverrideHelp": "Authorising this override raises a repeat-limit nonconformity for this work line.",
+    "limitDescription": "Reason for exceeding the repeat limit",
+    "limitImpact": "Impact assessment",
     "title": "Sample amendments",
     "help": "Request a change, then authorise it under the laboratory policy. Scientific amendments reopen selected work and withdraw the issued report while preserving its content.",
     "permission": "Approval permission is required.",

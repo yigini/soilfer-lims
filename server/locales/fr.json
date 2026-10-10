@@ -1885,6 +1885,11 @@
     }
   },
   "amendment": {
+    "publicWithdrawn": "Ce rapport est en cours de modification et est temporairement indisponible.",
+    "limitOverride": "Demander une dérogation à la limite de répétitions",
+    "limitOverrideHelp": "Autoriser cette dérogation crée une non-conformité liée à la limite de répétitions pour cette ligne de travail.",
+    "limitDescription": "Motif du dépassement de la limite de répétitions",
+    "limitImpact": "Évaluation des conséquences",
     "pending": "Demande enregistrée. Une autorisation est nécessaire avant d’appliquer les modifications.",
     "authorised": "Amendement autorisé. Les nouvelles analyses scientifiques doivent suivre la revue et l’approbation habituelles avant l’émission d’un nouveau rapport.",
     "failed": "L’amendement n’a pas pu être enregistré. Votre saisie est conservée."

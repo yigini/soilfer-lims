@@ -15,7 +15,7 @@ async function readAmendmentReopenWitness(db,{item,parent,child,replicateNo}){
  // version cannot borrow that authorisation's immutable child binding.
  if(!amendment||amendment.type!=='SCIENTIFIC'||amendment.status!=='APPROVED'||amendment.version!==2||
   !amendment.authorizedBy||!amendment.authorizedAt||amendment.sampleId!==item.sampleId||!sample||
-  !payload||payload.contract!=='210-v1'||Object.keys(payload).sort().join(',')!=='contract,reasonCode'||
+  !payload||payload.contract!=='210-v1'||!['contract,reasonCode','contract,limitOverrides,reasonCode'].includes(Object.keys(payload).sort().join(','))||
   !['CLIENT_RETEST','CONFIRMATION'].includes(payload.reasonCode)||!Array.isArray(selected)||!selected.length||
   selected.some(id=>typeof id!=='string'||!id.trim()||id!==id.trim())||new Set(selected).size!==selected.length||
   !selected.includes(item.id)||amendment.affectedOrderLines!==JSON.stringify(selected)||item.duplicateOf!=null||
@@ -23,6 +23,8 @@ async function readAmendmentReopenWitness(db,{item,parent,child,replicateNo}){
   parent.status!=='ACCEPTED'||parent.workItemId!==item.id||child.workItemId!==item.id||child.parentAttemptId!==parent.id||
   child.attemptNo<=parent.attemptNo||link.reason!==child.reason||child.reason!==payload.reasonCode)
   throw invalid();
+ try{require('./scientificAmendmentService').readScientificLimitOverrides(payload.limitOverrides,selected);}
+ catch{throw invalid();}
  const lab=sample.assignedLab?await policy.resolveLab(sample.assignedLab,db):null;
  if(!lab)throw invalid();
  const references=[item.assignedLab,item.labId].filter(value=>value!=null);

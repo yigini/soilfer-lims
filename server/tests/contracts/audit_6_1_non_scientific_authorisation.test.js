@@ -336,6 +336,42 @@ test('scientific repeats preserve the existing configured attempt limit and NCR 
  const before=f.snapshot();await expect(scientificApprove(f,amendment.id)).rejects.toMatchObject({statusCode:409,code:'ATTEMPT_LIMIT'});expect(f.snapshot()).toEqual(before);
 });
 
+test.each(['parent-no-longer-accepted','new-open-child'])('authorisation revalidates %s after a valid request and refuses the whole transaction',async kind=>{
+ const f=await scientificFixture(),{amendment}=await scientificRequest(f);
+ if(kind==='parent-no-longer-accepted'){
+  const parent=await f.db.workAttempt.findUnique({where:{id:f.original.attemptId}});
+  await f.db.workAttempt.update({where:{id:parent.id},data:{status:'QUESTIONED',updatedAt:parent.updatedAt}});
+ }else await f.db.workAttempt.create({data:{id:randomUUID(),workItemId:f.item.id,attemptNo:2,status:'OPEN',parentAttemptId:f.original.attemptId,
+  reason:'CONFIRMATION',requestedBy:'owned-independent-requester',requestedAt:new Date()}});
+ const before=f.snapshot();
+ await expect(scientificApprove(f,amendment.id)).rejects.toMatchObject({statusCode:409,code:'AMENDMENT_LINE_INVALID'});
+ expect(f.snapshot()).toEqual(before);
+ expect(await f.db.sampleAmendment.findUnique({where:{id:amendment.id}})).toMatchObject({status:'PENDING',version:1,authorizedBy:null});
+});
+
+test.each(['CLIENT_RETEST','CONFIRMATION'])('an explicit selected-line %s limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent',async reasonCode=>{
+ const f=await scientificFixture();f.scientificInput.reasonCode=reasonCode;
+ await policy.change(f.actor,f.labId,{reason:'Owned attempt-limit boundary',changes:[{key:'repeats.maxAttemptsBeforeNcr',value:1}]},{db:f.db});
+ f.scientificInput.limitOverrides=[{workItemId:f.item.id,description:'Laboratory requested confirmation beyond the limit',impactAssessment:'Retain the issued result until the separate amendment review is complete'}];
+ const {amendment}=await scientificRequest(f),parent=await f.db.workAttempt.findUnique({where:{id:f.original.attemptId}});
+ expect(JSON.parse(amendment.requestPayload).limitOverrides).toEqual(f.scientificInput.limitOverrides);
+ const outcome=await scientificApprove(f,amendment.id),child=outcome.attempts[0];
+ const ncr=await f.db.nonconformityReport.findUnique({where:{source_refType_refId:{source:'REPEAT_LIMIT',refType:'WorkAttempt',refId:child.id}}});
+ expect(ncr).toMatchObject({labId:f.labId,status:'OPEN',raisedBy:f.other.username,
+  description:f.scientificInput.limitOverrides[0].description,impactAssessment:f.scientificInput.limitOverrides[0].impactAssessment});
+ expect(await f.db.workAttempt.findUnique({where:{id:parent.id}})).toEqual(parent);
+ expect(await f.db.result.findUnique({where:{id:f.original.id}})).toEqual(f.original);
+ const event=await f.db.auditLog.findFirst({where:{entity:'WORK_ATTEMPT',entityId:child.id,action:'CREATED'}});
+ expect(JSON.parse(event.details)).toMatchObject({nonconformityId:ncr.id});
+});
+
+test('a line override without the existing NCR assessment refuses the request atomically',async()=>{
+ const f=await scientificFixture(),before=f.snapshot();
+ f.scientificInput.limitOverrides=[{workItemId:f.item.id,description:'Limit exceeded',impactAssessment:' '}];
+ await expect(scientificRequest(f)).rejects.toMatchObject({code:'NCR_ASSESSMENT_REQUIRED'});
+ expect(f.snapshot()).toEqual(before);
+});
+
 test.each(['ARCHIVED','DISPOSED'])('a pending scientific amendment cannot reopen a subsequently %s sample',async status=>{
  const f=await scientificFixture(),{amendment}=await scientificRequest(f);
  await require('../../services/sampleStateService').transitionSample(f.sample.id,status,f.other,'Retained lifecycle decision',{},f.db);

@@ -1,0 +1,27 @@
+{
+  "main": "e7259dd8108330155ad29225087abdc17e00aa50",
+  "models": 90,
+  "tables": 90,
+  "schemaSha256": "5e27d096f83f86efa51f17cfdfb8baf80f1871d6d4c1ec7f1d2e037d8a8d1c90",
+  "prismaVersion": "7.10.0",
+  "schemaCommand": [
+    "git",
+    "show",
+    "e7259dd8108330155ad29225087abdc17e00aa50:server/prisma/schema.prisma"
+  ],
+  "ddlCommand": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-transcription\\soilfer-lims\\server\\node_modules\\prisma\\build\\index.js",
+    "migrate",
+    "diff",
+    "--from-empty",
+    "--to-schema",
+    "C:\\Users\\yigin\\AppData\\Local\\Temp\\qc210-main-predecessor-ohGQqI\\schema.prisma",
+    "--script",
+    "--config",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-transcription\\soilfer-lims\\server\\prisma.config.ts"
+  ],
+  "ddlBytes": 77186,
+  "ddlSha256": "b7de680237c07ff2454ed27afcc95481ddb45cc24cd80ade943b88291d9ca397",
+  "note": "Unmodified CLI stdout. Additive new literal; pre210 and pre201 literals remain unchanged."
+}

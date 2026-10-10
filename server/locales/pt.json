@@ -1885,6 +1885,11 @@
     }
   },
   "amendment": {
+    "publicWithdrawn": "Este relatório está em processo de alteração e está temporariamente indisponível.",
+    "limitOverride": "Solicitar uma exceção ao limite de repetições",
+    "limitOverrideHelp": "Autorizar esta exceção cria uma não conformidade pelo limite de repetições para esta linha de trabalho.",
+    "limitDescription": "Motivo para exceder o limite de repetições",
+    "limitImpact": "Avaliação do impacto",
     "pending": "Solicitação salva. É necessária autorização antes de aplicar alterações.",
     "authorised": "Emenda autorizada. As reanálises científicas devem concluir a revisão e aprovação habituais antes da emissão de outro relatório.",
     "failed": "Não foi possível salvar a emenda. Os seus dados foram preservados."

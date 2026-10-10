@@ -3473,6 +3473,11 @@
     }
   },
   "amendment": {
+    "publicWithdrawn": "Este relatório está em processo de alteração e está temporariamente indisponível.",
+    "limitOverride": "Solicitar uma exceção ao limite de repetições",
+    "limitOverrideHelp": "Autorizar esta exceção cria uma não conformidade pelo limite de repetições para esta linha de trabalho.",
+    "limitDescription": "Motivo para exceder o limite de repetições",
+    "limitImpact": "Avaliação do impacto",
     "title": "Emendas da amostra",
     "help": "Solicite uma alteração e depois autorize-a conforme a política do laboratório. As emendas científicas reabrem o trabalho selecionado e retiram o relatório emitido, preservando o seu conteúdo.",
     "permission": "É necessária permissão de aprovação.",

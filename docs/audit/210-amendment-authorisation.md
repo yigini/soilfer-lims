@@ -82,3 +82,24 @@ Still unfinished: exact-head Linux CI, actual Docker readiness and audit.
 Amendment numbering beyond the full retained UUID remains
 deferred; public replacement navigation belongs to #211. Production installation
 and counts remain unrun under the #190 disk hold.
+
+Claude's early review6095648270 at1b7389d5 requested seven corrections.
+This WIP adds explicit per-line repeat-limit assessments using the existing
+REPEAT_LIMIT NCR owner, a five-locale public withdrawal notice, actual unlinked
+accepted-parent refusal paths, persisted field-fault/SQL-guard probes,
+authorise-time line revalidation, and an additional current-main predecessor
+literal. The new literal is unmodified own Prisma7.10 stdout from main
+e7259dd8108330155ad29225087abdc17e00aa50:90 models,77186 bytes,
+SHA256 b7de680237c07ff2454ed27afcc95481ddb45cc24cd80ade943b88291d9ca397.
+Its provenance file records the exact command and schema digest. The old
+84-model literal, old factory and their digest boundaries remain unchanged.
+The new tests are awaiting validation; this WIP is not an audit-ready head.
+
+Children are created by the capability-bound scientific authorisation
+transaction after the existing released-source and repeat-capacity checks;
+they do not go through reserveRepeat, which seals an ordinary repeat parent.
+The accepted parent remains sealed. Actual unlinked accepted-parent calls
+must return409 ATTEMPT_CORRECTION_REQUIRED with no persisted changes. For
+field faults the actual writer must return409 AMENDMENT_ATTEMPT_LINK_INVALID;
+sample changes at the same authorised version, selected-line changes and
+child-reason changes are instead prevented by the retained SQL guards.

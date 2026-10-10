@@ -9,6 +9,7 @@ export default function AmendmentDialog({sampleId,sampleStatus,workItems,initial
  const allowed=Boolean(hasPermission?.('APPROVE_RESULTS'));
  const [type,setType]=useState(initialType),[reason,setReason]=useState(''),[reasonCode,setReasonCode]=useState('CLIENT_RETEST');
  const [selected,setSelected]=useState([]),[amendments,setAmendments]=useState([]),[requiresSecondPerson,setRequiresSecondPerson]=useState(null);
+ const [limitOverrides,setLimitOverrides]=useState({});
  const [loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [reload,setReload]=useState(0),operation=useRef(crypto.randomUUID()),authoriseKeys=useRef(new Map()),generation=useRef(0);
  const dialogRef=useFocusTrap(true,()=>{if(!busy)onClose();});
@@ -24,6 +25,10 @@ export default function AmendmentDialog({sampleId,sampleStatus,workItems,initial
  },[sampleId,allowed,reload,t]);
  const scientificAvailable=sampleStatus==='APPROVED';
  const candidates=workItems.filter(item=>item.status==='ACCEPTED'&&!item.duplicateOf&&!item.isGate&&item.category!=='Operational Gates');
+ const overrides=selected.filter(id=>limitOverrides[id]).map(workItemId=>({workItemId,
+  description:limitOverrides[workItemId].description.trim(),impactAssessment:limitOverrides[workItemId].impactAssessment.trim()}));
+ const invalidOverride=overrides.some(row=>!row.description||!row.impactAssessment);
+ const updateOverride=(id,field,value)=>setLimitOverrides(rows=>({...rows,[id]:{...rows[id],[field]:value}}));
  const send=async(amendment=null)=>{
   if(busy||!allowed||loading)return;
   const current=generation.current;setBusy(true);setError('');setNotice('');
@@ -34,11 +39,11 @@ export default function AmendmentDialog({sampleId,sampleStatus,workItems,initial
      {expectedVersion:amendment.version,idempotencyKey:authoriseKeys.current.get(amendment.id)});
    }else{
     await axios.post(`/api/samples/${sampleId}/amendments`,{type,reason:reason.trim(),idempotencyKey:operation.current,
-     ...(type==='SCIENTIFIC'&&{reasonCode,selectedWorkItemIds:selected})});
+     ...(type==='SCIENTIFIC'&&{reasonCode,selectedWorkItemIds:selected,...(overrides.length&&{limitOverrides:overrides})})});
    }
    if(generation.current!==current)return;
    setNotice(t(amendment?'amendment.authorisedNotice':'amendment.pendingNotice'));
-   if(!amendment){setReason('');setSelected([]);operation.current=crypto.randomUUID();}
+   if(!amendment){setReason('');setSelected([]);setLimitOverrides({});operation.current=crypto.randomUUID();}
    onChanged();setReload(value=>value+1);
   }catch(err){if(generation.current===current)setError(err.response?.data?.error||t('amendment.failed'));}
   finally{if(generation.current===current)setBusy(false);}
@@ -59,11 +64,23 @@ export default function AmendmentDialog({sampleId,sampleStatus,workItems,initial
       </select></label>
       <div className="space-y-2"><p className="text-sm font-semibold">{t('amendment.selectedLines')}</p>
        {!candidates.length&&<p>{t('amendment.noLines')}</p>}
-       {candidates.map(item=><label key={item.id} className="flex gap-2 items-start text-sm"><input type="checkbox" checked={selected.includes(item.id)} onChange={event=>setSelected(ids=>event.target.checked?[...ids,item.id]:ids.filter(id=>id!==item.id))}/><span>{item.analysisName||item.analysis} <span className="text-sf-muted break-all">({item.id})</span></span></label>)}
+       {candidates.map(item=><div key={item.id} className="space-y-2 text-sm">
+        <label className="flex gap-2 items-start"><input type="checkbox" checked={selected.includes(item.id)} onChange={event=>{setSelected(ids=>event.target.checked?[...ids,item.id]:ids.filter(id=>id!==item.id));
+         if(!event.target.checked)setLimitOverrides(rows=>{const next={...rows};delete next[item.id];return next;});}}/><span>{item.analysisName||item.analysis} <span className="text-sf-muted break-all">({item.id})</span></span></label>
+        {selected.includes(item.id)&&<div className="ml-6 space-y-2">
+         <label className="flex gap-2"><input type="checkbox" data-testid={'amendment-limit-'+item.id} checked={Boolean(limitOverrides[item.id])} onChange={event=>setLimitOverrides(rows=>{const next={...rows};
+          if(event.target.checked)next[item.id]={description:'',impactAssessment:''};else delete next[item.id];return next;})}/>{t('amendment.limitOverride')}</label>
+         {limitOverrides[item.id]&&<>
+          <p className="text-sf-muted">{t('amendment.limitOverrideHelp')}</p>
+          <label className="block">{t('amendment.limitDescription')}<textarea data-testid={'amendment-limit-description-'+item.id} value={limitOverrides[item.id].description} onChange={event=>updateOverride(item.id,'description',event.target.value)} className="mt-1 w-full p-2 rounded-lg border border-sf-divider bg-sf-canvas"/></label>
+          <label className="block">{t('amendment.limitImpact')}<textarea data-testid={'amendment-limit-impact-'+item.id} value={limitOverrides[item.id].impactAssessment} onChange={event=>updateOverride(item.id,'impactAssessment',event.target.value)} className="mt-1 w-full p-2 rounded-lg border border-sf-divider bg-sf-canvas"/></label>
+         </>}
+        </div>}
+       </div>)}
       </div>
      </>}
      <label className="block text-sm">{t('amendment.reason')}<textarea value={reason} onChange={event=>setReason(event.target.value)} maxLength={4000} className="mt-1 w-full min-h-24 p-2 rounded-lg border border-sf-divider bg-sf-canvas"/></label>
-     <button type="button" onClick={()=>send()} disabled={!reason.trim()||type==='SCIENTIFIC'&&(!scientificAvailable||!selected.length)} className="btn-primary">{t('amendment.request')}</button>
+     <button type="button" onClick={()=>send()} disabled={!reason.trim()||type==='SCIENTIFIC'&&(!scientificAvailable||!selected.length||invalidOverride)} className="btn-primary">{t('amendment.request')}</button>
     </fieldset>
     <div className="space-y-3"><h3 className="font-semibold">{t('amendment.history')}</h3>
      {!loading&&!amendments.length&&<p className="text-sm text-sf-muted">{t('amendment.empty')}</p>}

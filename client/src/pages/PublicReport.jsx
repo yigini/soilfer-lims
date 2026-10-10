@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import ReportContent from '../components/report/ReportContent';
+import { useLanguage } from '../context/LanguageContext';
 
 /**
  * PublicReport — Customer-facing public report page.
  * Clean, professional, light-only. No dark mode.
  */
 const PublicReport = () => {
+    const { t } = useLanguage();
     const { token } = useParams();
     const [report, setReport] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -24,7 +26,8 @@ const PublicReport = () => {
             setReport({ ...res.data, content });
         } catch (e) {
             const status = e.response?.status;
-            if (status === 404) setError('This report link is invalid or has been removed.');
+            if (status === 409 && e.response?.data?.code === 'REPORT_WITHDRAWN') setError(t('amendment.publicWithdrawn'));
+            else if (status === 404) setError('This report link is invalid or has been removed.');
             else if (status === 410) setError(e.response?.data?.error || 'This link has expired or been revoked.');
             else setError('Failed to load report. Please try again later.');
         } finally {
