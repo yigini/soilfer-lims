@@ -6,7 +6,8 @@
  */
 
 const PDFDocument = require('pdfkit');
-const { formatReportedValue } = require('../../shared/reportedValueFormat');
+const { displayResult, resultNotes, displayUncertainty } = require('./reportContentDisplay');
+const { iso } = require('./reportContentEvidence');
 const { calculateUsdaTexture, evaluateCnRatio, evaluateCecAndBases } = require('../utils/soilCalculations');
 const { interpretParameter, normalizeUnit } = require('./interpretationService');
 const { describeReportEvidence } = require('./reportTruthfulnessService');
@@ -149,11 +150,9 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 .text(lab.name || 'National Soil Testing Laboratory', startX + 8, currentY + 24, { width: colWidth - 16, ellipsis: true });
 
             doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                .text(`Lab Code: ${lab.code || sample?.assignedLab || 'LAB-GTM'}`, startX + 8, currentY + 40)
-                .text(`Address: ${lab.address || 'Central Research Station'}, ${lab.city || ''}`, startX + 8, currentY + 52)
-                .text(`Email: ${lab.email || 'lab@soilfer.org'} | Tel: ${lab.phone || '+502 2300-0000'}`, startX + 8, currentY + 64)
-                .text(`Registration: GLOSOLAN Registered Laboratory`, startX + 8, currentY + 76)
-                .text(`Quality System: ISO/IEC 17025 Aligned Quality Records`, startX + 8, currentY + 88);
+                .text(`Lab Code: ${lab.code || labels.notRecorded}`, startX + 8, currentY + 40)
+                .text(`Address: ${lab.address || labels.notRecorded}${lab.city ? ', ' + lab.city : ''}`, startX + 8, currentY + 52)
+                .text(`Email: ${lab.email || labels.notRecorded} | Tel: ${lab.phone || labels.notRecorded}`, startX + 8, currentY + 64);
 
             // --- Right Box: Sample Identification & Provenance ---
             const rightX = startX + colWidth + 12;
@@ -164,9 +163,9 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             doc.fillColor(cPrimary).font('Helvetica-Bold').fontSize(8.5)
                 .text('SAMPLE PROVENANCE & IDENTIFICATION', rightX + 8, currentY + 5);
 
-            const sampleDepth = sample.depthTop !== undefined && sample.depthBottom !== undefined 
+            const sampleDepth = sample.depthTop != null && sample.depthBottom != null
                 ? `${sample.depthTop} - ${sample.depthBottom} cm` 
-                : '0 - 20 cm (Topsoil)';
+                : labels.notRecorded;
 
             doc.fillColor(cDark).font('Helvetica-Bold').fontSize(8)
                 .text('Laboratory ID:', rightX + 8, currentY + 24)
@@ -175,7 +174,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 .text('Client / Submitter:', rightX + 8, currentY + 60)
                 .text('Sampling Depth / Horiz:', rightX + 8, currentY + 72)
                 .text('Date Received / Accepted:', rightX + 8, currentY + 84)
-                .text('Date Approved / Issued:', rightX + 8, currentY + 96);
+                .text(labels.approvedAt + ':', rightX + 8, currentY + 96);
 
             doc.font('Helvetica').fontSize(8).fillColor(cDark)
                 .text(sample.labId || sample.id || 'N/A', rightX + 110, currentY + 24)
@@ -183,8 +182,8 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 .text(`${sample.projectCode || reportContent.project?.code || 'SOILFER'} (${sample.countryName || 'Regional'})`, rightX + 110, currentY + 48)
                 .text(`${client.name || sample.clientName || 'General Intake'}`, rightX + 110, currentY + 60, { width: colWidth - 118, ellipsis: true })
                 .text(`${sampleDepth} ${sample.horizon ? `[${sample.horizon}]` : ''}`, rightX + 110, currentY + 72)
-                .text(`${sample.receptionDate ? String(sample.receptionDate).split('T')[0] : 'Recorded'}`, rightX + 110, currentY + 84)
-                .text(issuedDate, rightX + 110, currentY + 96);
+                .text(iso(sample.receptionDate)?.split('T')[0] || labels.notRecorded, rightX + 110, currentY + 84)
+                .text(iso(reportContent.signedBy?.date)?.split('T')[0] || labels.notRecorded, rightX + 110, currentY + 96);
 
             currentY += boxHeight + 12;
 
@@ -202,6 +201,19 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
 
             currentY += preparationHeight + 8;
 
+            const sampleEvidence = sample.reportEvidence || {};
+            const condition = sampleEvidence.conditionOnReceipt || {};
+            const sampleText = [
+                `${labels.conditionOnReceipt}: ${[condition.moisture, condition.status, condition.note].filter(Boolean).join(' · ') || labels.notRecorded}`,
+                `${labels.intakeNonconformities}: ${sampleEvidence.intakeNonconformities?.join('; ') || labels.notRecorded}`,
+                `${labels.analysisDates}: ${sampleEvidence.analysisStart || labels.notRecorded} – ${sampleEvidence.analysisEnd || labels.notRecorded}`,
+                `${labels.sampling}: ${sampleEvidence.sampling || labels.notStated}`
+            ].join('\n');
+            const bottomMargin = doc.page.margins.bottom;
+            doc.page.margins.bottom = 92;
+            doc.font('Helvetica').fontSize(7.5).fillColor(cGray).text(sampleText, startX, currentY, { width: pageWidth });
+            currentY = doc.y + 10; doc.page.margins.bottom = bottomMargin;
+
             // =========================================================================
             // 5. TEST RESULTS TABLE (Categorized)
             // =========================================================================
@@ -214,7 +226,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             const col2 = startX + 155;        // Method (125pt)
             const col3 = startX + 285;        // Value (65pt)
             const col4 = startX + 355;        // Unit (55pt)
-            const col5 = startX + 415;        // Interpretation (108pt)
+            const col5 = startX + 415;        // Expanded uncertainty (100pt)
 
             // Table Header Row
             doc.rect(startX, currentY, pageWidth, 18).fill('#1E293B');
@@ -223,7 +235,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 .text('METHOD / STANDARD', col2 + 4, currentY + 5)
                 .text('RESULT', col3 + 4, currentY + 5, { width: 60, align: 'right' })
                 .text('UNIT', col4 + 4, currentY + 5)
-                .text('FAO INTERPRETATION', col5 + 4, currentY + 5);
+                .text(labels.expandedUncertainty, col5 + 4, currentY + 5);
 
             currentY += 19;
 
@@ -249,11 +261,18 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
 
                 (group.items || []).forEach(item => {
                     const notReportable=item.reportedMode==='NOT_REPORTABLE';
-                    const valueText=notReportable ? require('../locales/'+locale+'.json').reportedValue.notReportable :
-                        item.reportedValueSelectionId ? formatReportedValue(item) : String(item.value ?? '—');
+                    const valueText=notReportable ? require('../locales/'+locale+'.json').reportedValue.notReportable : displayResult(item, labels);
                     const valueHeight=doc.font('Helvetica-Bold').fontSize(8).heightOfString(valueText,{width:60});
-                    const rowHeight=Math.max(16,valueHeight+8);
-                    const noteText=notReportable ? String(item.value ?? '') : '';
+                    const uncertaintyText = displayUncertainty(item, labels);
+                    const uncertaintyHeight = doc.font('Helvetica').fontSize(7.5).heightOfString(uncertaintyText, { width: 100 });
+                    const rowHeight=Math.max(16,valueHeight+8,uncertaintyHeight+8);
+                    // Keep the opinion frozen in the report payload. Historical
+                    // payloads without it retain the existing interpretation formatter.
+                    const interpretation = notReportable ? null : Object.hasOwn(item, 'interpretation')
+                        ? item.interpretation?.label : getInterpretation(item.param, item.value, item.unit);
+                    const noteText = [resultNotes(item, labels),
+                        notReportable ? null : `${labels.interpretation}: ${interpretation || labels.notStated}`
+                    ].filter(Boolean).join('\n');
                     const noteHeight=noteText ? doc.font('Helvetica').fontSize(7.5).heightOfString(noteText,{width:pageWidth-12})+8 : 0;
                     // Keep short explanations with their row. Long explanations
                     // flow across pages, reserving the publication footer.
@@ -275,13 +294,11 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     if (paramUpper === 'SOC') socVal = Number(item.value);
                     if (paramUpper === 'TN') tnVal = Number(item.value);
 
-                    const interp = notReportable ? '' : getInterpretation(item.param, item.value);
-
                     doc.fillColor(cDark).font('Helvetica-Bold').fontSize(7.5)
                         .text(item.name || item.param, col1 + 6, currentY + 4, { width: 145, ellipsis: true });
 
                     doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                        .text(item.method || item.standard || 'SoilFER SOP', col2 + 4, currentY + 4, { width: 120, ellipsis: true });
+                        .text(item.method || item.standard || labels.methodNotRecorded, col2 + 4, currentY + 4, { width: 120, ellipsis: true });
 
                     doc.font('Helvetica-Bold').fontSize(8).fillColor(cDark)
                         .text(valueText,col3+4,currentY+4,{width:60,align:'right'});
@@ -289,8 +306,8 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
                         .text(item.unit || '', col4 + 4, currentY + 4);
 
-                    doc.font('Helvetica-Bold').fontSize(7.5).fillColor(interp.includes('Optimal') || interp.includes('Adequate') ? '#059669' : interp.includes('Low') || interp.includes('Acidic') ? '#D97706' : cDark)
-                        .text(interp, col5 + 4, currentY + 4, { width: 100, ellipsis: true });
+                    doc.font('Helvetica').fontSize(7.5).fillColor(cDark)
+                        .text(uncertaintyText, col5 + 4, currentY + 4, { width: 100 });
 
                     if(noteText) {
                         const bottomMargin=doc.page.margins.bottom;
@@ -313,6 +330,21 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             }
 
             currentY += 10;
+
+            // Display only the actual methods frozen into this report payload.
+            if (reportContent.methodologies?.length) {
+                const methodText = reportContent.methodologies.map(method => `${method.param}: ${method.method || labels.methodNotRecorded}` +
+                    `${method.methodVersion != null ? ` · v${method.methodVersion}` : ''}` +
+                    `${method.standard ? ` · ${method.standard}` : ''}` +
+                    `${method.reference?.citation ? ` · ${method.reference.citation}` : ''}`).join('\n');
+                const height = doc.font('Helvetica').fontSize(7.5).heightOfString(methodText, { width: pageWidth });
+                if (currentY + Math.min(height + 24, 710) > 750) { doc.addPage(); currentY = 40; }
+                doc.font('Helvetica-Bold').fontSize(8).fillColor(cPrimary).text(labels.methodReferences, startX, currentY);
+                const bottomMargin = doc.page.margins.bottom;
+                doc.page.margins.bottom = 92;
+                doc.font('Helvetica').fontSize(7.5).fillColor(cGray).text(methodText, startX, doc.y + 4, { width: pageWidth });
+                currentY = doc.y + 12; doc.page.margins.bottom = bottomMargin;
+            }
 
             // =========================================================================
             // 6. SOIL METROLOGY & SCIENTIFIC EVALUATION (USDA Texture & Stoichiometry)
@@ -358,7 +390,23 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
 
             doc.font('Helvetica').fontSize(7.5);
             const qcHeight = doc.heightOfString(qcStatement, { width: 320 });
-            const endorseHeight = Math.max(84, qcHeight + 66);
+            const signedBy = reportContent.signedBy || {};
+            const issuer = reportContent.publication?.issuer || {};
+            const signatureRows = [
+                { text: signedBy.username && signedBy.date ? signedBy.name || signedBy.username : labels.approvalNotRecorded, font: 'Helvetica-Bold', size: 9 },
+                { text: `${labels.approvalRole}: ${signedBy.title || labels.notRecorded}`, font: 'Helvetica', size: 7.5 },
+                { text: `${labels.approvedAt}: ${iso(signedBy.date) || labels.notRecorded}`, font: 'Helvetica', size: 7.5 },
+                { text: `${labels.issuedBy}: ${issuer.name || issuer.username || labels.notRecorded}`, font: 'Helvetica-Bold', size: 8, gapBefore: 10 },
+                { text: `${labels.issuerRole}: ${issuer.role || labels.notRecorded}`, font: 'Helvetica', size: 7.5 },
+                { text: `${labels.issuedAt}: ${iso(issuedAt) || labels.notRecorded}`, font: 'Helvetica', size: 7.5 }
+            ];
+            let signatureEnd = 24;
+            for (const row of signatureRows) {
+                signatureEnd += row.gapBefore || 0;
+                row.offset = signatureEnd;
+                signatureEnd += doc.font(row.font).fontSize(row.size).heightOfString(row.text, { width: 160 }) + 4;
+            }
+            const endorseHeight = Math.max(120, qcHeight + 66, signatureEnd + 8);
             if (currentY + endorseHeight > 770) { doc.addPage(); currentY = 40; }
             doc.rect(startX, currentY, pageWidth, endorseHeight).fillAndStroke(cLightBg, cBorder);
 
@@ -376,14 +424,10 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             doc.fillColor(cPrimary).font('Helvetica-Bold').fontSize(8.5)
                 .text('ELECTRONIC APPROVAL RECORD', sigX, currentY + 8);
 
-            const signedBy = reportContent.signedBy || {};
-            doc.font('Helvetica-Bold').fontSize(9).fillColor(cDark)
-                .text(signedBy.name || 'Laboratory Director', sigX, currentY + 24);
-
-            doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                .text(signedBy.title || 'Laboratory Quality Manager', sigX, currentY + 36)
-                .text(`Signed: ${signedBy.date ? String(signedBy.date).split('T')[0] : new Date().toISOString().split('T')[0]}`, sigX, currentY + 48)
-                .text(`Approval Record: RECORDED IN AUDIT LOG`, sigX, currentY + 60, { width: 140 });
+            for (const row of signatureRows) {
+                doc.font(row.font).fontSize(row.size).fillColor(row.font === 'Helvetica-Bold' ? cDark : cGray)
+                    .text(row.text, sigX, currentY + row.offset, { width: 160 });
+            }
 
             currentY += endorseHeight + 14;
 

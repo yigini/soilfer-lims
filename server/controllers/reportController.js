@@ -148,6 +148,7 @@ async function generateReport(req, res) {
                 const statusCode = publishCheck.code === 'PERMISSION_DENIED' ? 403 : 409;
                 throw Object.assign(new Error(publishCheck.reason), { statusCode, publishCheck, qcModeEvidence });
             }
+            require('../services/reportContentEvidence').assertApprovalEvidence(currentSample);
             const maxReport = await tx.report.findFirst({ where: { sampleId }, orderBy: { version: 'desc' } });
             const version = (maxReport?.version || 0) + 1;
             const publishedAt = new Date();
@@ -160,7 +161,8 @@ async function generateReport(req, res) {
             content.policy = { version: policySnapshot.version, presetCode: policySnapshot.presetCode,
                 reportNumberFormat: policySnapshot.values['report.numberFormat'], qcModes, qcModeEvidence };
             content.reportNumber = displayNumber(identity.reportNumberBase, identity.revision);
-            content.publication = { ...identity, publishedAt: publishedAt.toISOString(), status: 'PUBLISHED' };
+            content.publication = { ...identity, publishedAt: publishedAt.toISOString(), status: 'PUBLISHED',
+                issuer: { username: req.user.username, name: req.user.name || req.user.username, role: req.user.role || null } };
             await tx.reportShareLink.updateMany({
                 where: { isRevoked: false, report: { sampleId, status: 'PUBLISHED' } },
                 data: { isRevoked: true, revokedAt: publishedAt, revokedBy: req.user.username }

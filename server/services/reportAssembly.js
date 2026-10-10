@@ -7,6 +7,7 @@ const { normalizeUnit, interpretParameter, evaluateSoilProfile } = require('./in
 const { isCurrentValidAnalyticalResult, matchingItems, governingItems,
     getReportingMode, reportingQc, linkedBatchIds, resolveReportingModes } = require('./reportResultGovernance');
 const { freezeReportEvidence, describeReportEvidence } = require('./reportTruthfulnessService');
+const contentEvidence = require('./reportContentEvidence');
 
 /**
  * Assemble a full report object for a given sample.
@@ -58,29 +59,8 @@ async function assembleReport(sampleId, user, options = {}) {
         });
     }
 
-    // 3. Fetch lab manager for auto-signature
-    let labManager = null;
-    if (lab) {
-        labManager = await db.user.findFirst({
-            where: {
-                labId: lab.id,
-                role: 'LAB_MANAGER',
-                isActive: true
-            },
-            select: { name: true, username: true, email: true }
-        });
-        // Fallback: try matching by lab code
-        if (!labManager) {
-            labManager = await db.user.findFirst({
-                where: {
-                    labId: lab.code,
-                    role: 'LAB_MANAGER',
-                    isActive: true
-                },
-                select: { name: true, username: true, email: true }
-            });
-        }
-    }
+    const attemptIds = [...new Set(reportedSelectionProof.sourceResults.map(row => row.attemptId).filter(Boolean))];
+    const sourceAttempts = attemptIds.length ? await db.workAttempt.findMany({ where: { id: { in: attemptIds } } }) : [];
 
     // 4. Parse metadata
     const metadata = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
@@ -90,29 +70,17 @@ async function assembleReport(sampleId, user, options = {}) {
     // 5. Extract client/farmer info for search keys
     const clientInfo = extractClientInfo(metadata, fieldMeta, receptionData, sample);
 
-    // 6. Fetch all analyses and their default methodologies
+    // 6. Fetch analyses and the methods named by the saved reported values.
     const analyses = await db.analysis.findMany();
     const analysisMap = new Map(analyses.map(a => [a.code, a]));
 
-    // Fetch default methodologies for all analysis codes in results, and exact methodologies where assigned
-    const resultParams = reportableResults.map(r => r.param);
     const resultMethodIds = [...new Set(reportableResults.map(r => r.methodologyId).filter(Boolean))];
-    let methodologies = [];
     let specificMethodologies = [];
     try {
-        [methodologies, specificMethodologies] = await Promise.all([
-            db.methodology.findMany({
-                where: {
-                    analysisCode: { in: resultParams },
-                    isDefault: true
-                }
-            }),
-            resultMethodIds.length > 0 ? db.methodology.findMany({
-                where: { id: { in: resultMethodIds } }
-            }) : []
-        ]);
+        specificMethodologies = resultMethodIds.length > 0 ? await db.methodology.findMany({
+            where: { id: { in: resultMethodIds } }
+        }) : [];
     } catch (e) { /* methodologies table may be empty */ }
-    const methodMap = new Map(methodologies.map(m => [m.analysisCode, m]));
     const specificMethodMap = new Map(specificMethodologies.map(m => [m.id, m]));
 
     // 7. Group results by category and apply controlled units & agronomic interpretation
@@ -127,8 +95,18 @@ async function assembleReport(sampleId, user, options = {}) {
             };
         }
 
-        const flags = typeof result.flags === 'string' ? JSON.parse(result.flags) : (result.flags || []);
-        const methodology = (result.methodologyId && specificMethodMap.get(result.methodologyId)) || methodMap.get(result.param);
+        const sources = reportedSelectionProof.sourceResults.filter(row => result.sourceResultIds.includes(row.id));
+        const flags = [...new Set(sources.flatMap(row => typeof row.flags === 'string' ? JSON.parse(row.flags) : row.flags || []))];
+        const methodology = result.methodologyId ? specificMethodMap.get(result.methodologyId) : null;
+        const methods = contentEvidence.executedMethods(sources, sourceAttempts, evidenceBatches);
+        const scope = { db, analysisCode: result.param, methodologyId: result.methodologyId || null };
+        const policy = lab ? { mode: await require('./policyService').get(lab.id, 'report.uncertaintyMode', scope),
+            coverageFactor: await require('./policyService').get(lab.id, 'report.uncertaintyCoverageFactor', scope) } : {};
+        const uncertainty = contentEvidence.expandedUncertainty(result.numericValue, methodology, policy, {
+            censored: result.censoring && result.censoring !== 'NONE',
+            methodKnown: methods.length > 0 && methods.every(row => row.methodologyId === methodology?.id &&
+                row.methodVersion != null && String(row.methodVersion) === String(methodology?.version))
+        });
         const rawUnit = result.unit || analysis?.units || '';
         const notReportable = result.mode==='NOT_REPORTABLE';
         const interp = notReportable ? {unit:'',rating:null,label:null,advisory:null} : interpretParameter(result.param, result.value, rawUnit);
@@ -147,8 +125,13 @@ async function assembleReport(sampleId, user, options = {}) {
             attemptIds: result.attemptIds,
             selectionRule: result.rule,
             selectionPolicyVersion: result.policyVersion,
-            method: methodology?.name || null,
-            standard: methodology?.standard || null,
+            method: methods.map(row => row.method).filter(Boolean).join('; ') || null,
+            standard: methods.map(row => row.standard).filter(Boolean).join('; ') || null,
+            methodologyId: result.methodologyId || null,
+            methodVersion: methods.length === 1 ? methods[0].methodVersion : null,
+            executedMethods: methods,
+            uncertainty,
+            uncertaintyPolicy: policy,
             interpretation: {
                 rating: interp.rating,
                 label: interp.label,
@@ -157,7 +140,7 @@ async function assembleReport(sampleId, user, options = {}) {
             flags,
             isValid: result.isValid,
             provenance: result.provenance || 'MEASURED',
-            basis: result.basis || 'AIR_DRY',
+            basis: result.basis || null,
             replicateNo: result.replicateNo || 1,
             censoring: result.censoring || 'NONE'
         });
@@ -199,16 +182,12 @@ async function assembleReport(sampleId, user, options = {}) {
     // 11. Build unique methodologies list for footnotes
     const usedMethods = [];
     const seenMethods = new Set();
-    for (const m of methodologies) {
-        const key = m.analysisCode;
+    for (const item of Object.values(groupedResults).flatMap(group => group.items)) for (const method of item.executedMethods) {
+        const key = JSON.stringify(method);
         if (!seenMethods.has(key)) {
             seenMethods.add(key);
-            const analysis = analysisMap.get(m.analysisCode);
             usedMethods.push({
-                param: m.analysisCode,
-                paramName: analysis?.name || m.analysisCode,
-                method: m.name,
-                standard: m.standard || null
+                ...method, paramName: item.name
             });
         }
     }
@@ -217,13 +196,6 @@ async function assembleReport(sampleId, user, options = {}) {
     const locationData = extractLocationData(fieldMeta, receptionData, sample);
 
     // 14. Build signedBy block
-    const signedByName = labManager?.name || labManager?.username || user?.name || user?.username || 'Laboratory Manager';
-    const signedBy = {
-        name: signedByName,
-        title: 'Laboratory Manager',
-        date: new Date().toISOString()
-    };
-
     // SD-17: Compute analytical episodes for reopened samples
     const auditLogs = await db.auditLog.findMany({
         where: { OR: [{ sampleId: sample.id }, { entityId: sample.id }] },
@@ -231,6 +203,7 @@ async function assembleReport(sampleId, user, options = {}) {
     });
     const undoLogs = auditLogs.filter(a => a.action === 'UNDO_APPROVAL' || a.action === 'SAMPLE_REOPENED');
     const approvalLogs = auditLogs.filter(a => a.action === 'SAMPLE_APPROVED' || (a.action === 'STATUS_CHANGE' && a.details && a.details.includes('APPROVED')));
+    const signedBy = contentEvidence.approvalEvidence(sample, auditLogs);
 
     const episodes = [];
     if (undoLogs.length > 0) {
@@ -270,6 +243,8 @@ async function assembleReport(sampleId, user, options = {}) {
     evidence.qcModes=sourceModes.flatMap(proof=>proof.qcModeEvidence);
     evidence.reportedValueSelections = reportedSelectionProof.groups;
     const evidenceText = describeReportEvidence(evidence, warningLocale);
+    for (const item of Object.values(groupedResults).flatMap(group => group.items)) item.qcNotes = evidence.qc.deviations
+        .filter(row => row.analysisCode === item.param).map(row => [row.qcStatus, row.dispositionReason, row.acknowledgementReason].filter(Boolean).join(' · '));
     const reportContent = {
         meta: {
             reportId: null, // assigned when saved
@@ -296,6 +271,10 @@ async function assembleReport(sampleId, user, options = {}) {
             acceptedAt: sample.acceptedAt,
             approvedBy: sample.approvedBy,
             approvedAt: sample.approvedAt,
+            depthTop: sample.depthTop,
+            depthBottom: sample.depthBottom,
+            horizon: sample.horizon,
+            reportEvidence: contentEvidence.sampleContentEvidence(sample, reportedSelectionProof.sourceResults, sourceAttempts),
             episodes
         },
         // Client/Farmer Info
@@ -343,7 +322,8 @@ async function assembleReport(sampleId, user, options = {}) {
         generated: {
             at: new Date().toISOString(),
             by: user?.username || 'system',
-            byName: user?.name || user?.username || 'System'
+            byName: user?.name || user?.username || 'System',
+            role: user?.role || null
         }
     };
 

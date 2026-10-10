@@ -2574,7 +2574,9 @@
       "equipment_requireEquipment": "Required equipment",
       "equipment_unconfiguredReadiness": "Unconfigured equipment readiness",
       "pt_zScoreLimits": "PT z-score limits",
-      "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC"
+      "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC",
+      "report_uncertaintyMode": "Report expanded uncertainty",
+      "report_uncertaintyCoverageFactor": "Uncertainty coverage factor"
     },
     "title": "Policies",
     "yes": "Yes",
