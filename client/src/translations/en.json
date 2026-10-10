@@ -3400,5 +3400,71 @@
       "CONSUMED": "Used for recording"
     },
     "loadFailed": "Could not load override requests."
+  },
+  "crossCheck": {
+    "title": "Cross-parameter plausibility",
+    "advisory": "These checks are advisory. The existing texture gate is shown separately.",
+    "check": "Check",
+    "outcome": "Outcome",
+    "evidence": "Evidence",
+    "policyVersion": "Policy version {{version}}",
+    "sources": "Source results",
+    "selection": "Reported selection",
+    "missingInputs": "Missing inputs",
+    "current": "Current reported selections",
+    "atSubmission": "At submission",
+    "beforeSelection": "Before a reported value is selected, the panel shows the retained submission checks.",
+    "noSubmission": "No submission checks were recorded.",
+    "existingGate": "Existing texture gate on current observations",
+    "gateNotEvaluated": "Not evaluated",
+    "gateBlocks": "Blocks submission",
+    "gatePasses": "Passes",
+    "lowerBound": "The measured bases form a lower bound; sodium is missing.",
+    "reload": "Reload",
+    "loading": "Loading cross-checks…",
+    "rules": {
+      "TEXTURE_CLOSURE": "Texture closure",
+      "BASES_CEC": "Exchangeable bases / CEC",
+      "BASE_SATURATION": "Base saturation",
+      "CN_RATIO": "C:N ratio",
+      "CACO3_PH": "Carbonate / water pH",
+      "PH_KCL_WATER": "KCl pH / water pH",
+      "PH_CACL2_WATER": "CaCl₂ pH / water pH"
+    },
+    "outcomes": {
+      "PASS": "Pass",
+      "FLAGGED": "Flagged",
+      "NOT_EVALUATED": "Not evaluated"
+    },
+    "flags": {
+      "TEXTURE_CLOSURE": "Texture closure is outside the lab tolerance.",
+      "CROSS_CHECK_BASES_GT_CEC": "Exchangeable bases exceed the lab CEC factor.",
+      "CROSS_CHECK_BASE_SAT_GT_MAX": "Base saturation exceeds the lab limit.",
+      "CROSS_CHECK_CN_OUT_OF_RANGE": "C:N is outside the lab limits.",
+      "CROSS_CHECK_CACO3_LOW_PH": "Carbonate is positive below the lab water-pH limit.",
+      "CROSS_CHECK_PH_SALT_GE_WATER": "Salt pH is not below water pH."
+    },
+    "reasons": {
+      "INPUT_MISSING": "An input is missing.",
+      "INPUT_NOT_REPORTABLE": "An input is not reportable.",
+      "INPUT_NON_NUMERIC": "An input has no finite numeric value.",
+      "INPUT_CENSORED": "An input is censored.",
+      "MULTIPLE_CANDIDATES": "An input has multiple current candidates.",
+      "UNIT_MISMATCH": "An input unit is missing, incompatible or unknown.",
+      "BASIS_MISMATCH": "Recorded bases are missing or differ.",
+      "DENOMINATOR_NOT_POSITIVE": "The denominator is zero or negative."
+    },
+    "errors": {
+      "CROSS_CHECK_FORBIDDEN": "You cannot review these checks.",
+      "CROSS_CHECK_LAB_REQUIRED": "The sample laboratory is required.",
+      "CROSS_CHECK_EVIDENCE_INVALID": "Stored cross-check evidence could not be read.",
+      "CROSS_CHECK_EVIDENCE_WRITE_FAILED": "Submission cross-check evidence could not be retained.",
+      "CROSS_CHECK_POLICY_REQUIRED": "Valid laboratory thresholds are required.",
+      "CROSS_CHECK_INPUT_INVALID": "Stored cross-check inputs are invalid.",
+      "CROSS_CHECK_READ_FAILED": "Could not load cross-checks.",
+      "SAMPLE_NOT_FOUND": "Sample not found.",
+      "ACCESS_DENIED_LAB": "The sample is outside your laboratory scope.",
+      "CROSS_CHECK_SUBMISSION_REQUIRED": "Cross-check evidence requires the caller submission."
+    }
   }
 }

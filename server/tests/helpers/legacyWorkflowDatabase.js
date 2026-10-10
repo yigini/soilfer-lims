@@ -225,6 +225,9 @@ function beforeGuards(options) {
             const calculationModels = calculationTables.filter(table => modelNames.includes(table));
             assert.ok(calculationModels.length === 0 || calculationModels.length === calculationTables.length, 'Generated calculation datamodel is partial.');
             if (calculationModels.length) expected.push(...calculationTables.map(table => ({ table, missingTable: true })));
+            // #201 adds exactly one immutable evidence table. The captured
+            // historical DDL and all previous gap assertions stay unchanged.
+            expected.push({ table: 'CrossCheckEvaluation', missingTable: true });
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }

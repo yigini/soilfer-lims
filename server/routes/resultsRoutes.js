@@ -5,6 +5,7 @@ const { verifyToken, checkPermission } = require('../middleware/authMiddleware')
 
 router.use(verifyToken);
 
+router.get('/:sampleId/cross-checks', checkPermission('APPROVE_RESULTS'), require('../controllers/crossCheckController').review);
 router.get('/:sampleId', checkPermission('VIEW_SAMPLES'), resultsController.getResults);
 router.get('/:sampleId/history', checkPermission('VIEW_SAMPLES'), resultsController.getResultHistory);
 router.get('/:sampleId/history/:param', checkPermission('VIEW_SAMPLES'), resultsController.getResultHistory);
