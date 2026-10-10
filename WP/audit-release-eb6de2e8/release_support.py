@@ -226,6 +226,11 @@ def verify_attempt_plan(dry, reviewed_sha=None):
     if reviewed_sha is not None:
         assert dry['plan']['planSha256'] == reviewed_sha, 'The reviewed #190 row plan changed'
 
+def verify_repeat_inventory(value):
+    inventory = value['releaseInventory']
+    assert inventory['totalChanges'] == 0
+    assert inventory['blockedWorkItemCount'] == 0 and inventory['blockedWorkItems'] == [], 'Blocked #191 owners require operator resolution before release'
+
 def install_series(root, image, database_dir, reviewed_sha=None, before_apply=None):
     stages, attempts = [], None
     for key, script in INSTALLERS:
@@ -233,10 +238,14 @@ def install_series(root, image, database_dir, reviewed_sha=None, before_apply=No
         assert dry['totalChanges'] == 0
         if key == '190':
             verify_attempt_plan(dry, reviewed_sha)
+        if key == '191':
+            verify_repeat_inventory(dry)
         if before_apply:
             before_apply(key)
         applied = cli(root, image, database_dir, script, '--apply', key + '-apply')
         assert applied['mode'] in ['APPLIED', 'NO_OP']
+        if key == '191':
+            verify_repeat_inventory(applied)
         if key == '190' and applied['mode'] == 'APPLIED':
             attempts = applied
         if key != '190':
@@ -251,6 +260,8 @@ def repeat_series(root, image, database_dir):
     for key, script in INSTALLERS:
         value = cli(root, image, database_dir, script, '--apply', key + '-repeat')
         assert value['mode'] == 'NO_OP' and value['totalChanges'] == 0
+        if key == '191':
+            verify_repeat_inventory(value)
         rows.append({'key': key, 'mode': value['mode'], 'totalChanges': value['totalChanges']})
     return rows
 

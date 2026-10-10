@@ -40,6 +40,21 @@ class DiskAndPlanGuards(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 s.ready_logs('\n'.join(changed))
 
+    def test_repeat_inventory_refuses_blocked_owners_before_apply(self):
+        ready = {'releaseInventory':{'blockedWorkItemCount':0,'blockedWorkItems':[],'totalChanges':0},'totalChanges':0}
+        s.verify_repeat_inventory(ready)
+        for inventory in [{'blockedWorkItemCount':1,'blockedWorkItems':[{'workItemId':'owned-blocker'}],'totalChanges':0},
+                          {'blockedWorkItemCount':0,'blockedWorkItems':[],'totalChanges':1}]:
+            with self.assertRaises(AssertionError):
+                s.verify_repeat_inventory({'releaseInventory':inventory})
+        with tempfile.TemporaryDirectory(prefix='lims-repeat-refusal-') as owned:
+            with patch.object(s,'INSTALLERS',[('191','owned-repeat.js')]), \
+                 patch.object(s,'cli',return_value={'releaseInventory':{'blockedWorkItemCount':1,'blockedWorkItems':[{}],'totalChanges':0},'totalChanges':0}) as run:
+                with self.assertRaisesRegex(AssertionError,'Blocked #191 owners'):
+                    s.install_series(pathlib.Path(owned),'owned-image',pathlib.Path(owned))
+            self.assertEqual(run.call_count,1)
+            self.assertEqual(run.call_args.args[4],'--dry-run')
+
     def test_ready_logs_ignore_valid_json_scalars_without_accepting_fake_events(self):
         lines = [json.dumps({'event':name+'_STARTUP_READY','totalChanges':0}) for name in s.READY_EVENTS]
         noise = ['"ordinary startup message"','null','true','1','[]',
@@ -192,6 +207,8 @@ class CompleteRehearsalGuards(unittest.TestCase):
         gates = {'head':s.HEAD,'includedPrCount':20,'ungatedPrs':[],
             'prs':[{'gated':True} for _ in range(20)],
             'mainCi':[{'name':'CI','headSha':s.HEAD,'status':'completed','conclusion':'success'}]}
+        repeat = next(row for row in proof['installers'] if row['key']=='191')
+        repeat['dryRun'] = repeat['apply'] = {'releaseInventory':{'blockedWorkItemCount':0,'blockedWorkItems':[],'totalChanges':0}}
         return proof,build,gates
 
     def test_complete_bounded_rehearsal_is_accepted(self):
@@ -199,7 +216,7 @@ class CompleteRehearsalGuards(unittest.TestCase):
 
     def test_partial_failed_unbounded_changed_or_stale_proof_is_refused(self):
         for fault in ['partial','installer','repeat','ready','probe','api','memory-missing','memory-over',
-                      'heap-override','startup-memory','preservation','main-ci','image','row-plan']:
+                      'heap-override','startup-memory','preservation','main-ci','image','row-plan','blocked-owner']:
             proof,build,gates = self.fixture()
             if fault == 'partial': proof['status'] = 'PASSED_STARTUP_API_SUPPLEMENT'
             elif fault == 'installer': proof['installers'].reverse()
@@ -215,6 +232,8 @@ class CompleteRehearsalGuards(unittest.TestCase):
             elif fault == 'main-ci': gates['mainCi'][0]['headSha'] = '0'*40
             elif fault == 'image': build['image'] = 'other-image'
             elif fault == 'row-plan': proof['attemptPlanSha256'] = '0'*64
+            elif fault == 'blocked-owner':
+                next(row for row in proof['installers'] if row['key']=='191')['dryRun']['releaseInventory']['blockedWorkItemCount']=1
             with self.subTest(fault=fault), self.assertRaises(AssertionError):
                 preparation.validate(proof,build,gates)
 

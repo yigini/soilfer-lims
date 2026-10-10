@@ -23,8 +23,11 @@ if __name__ == '__main__':
         rows.append({'key':row['key'],'script':row['script'],'dryRunClassification':row['dryRun']['classification'],
             'mode':row['apply']['mode'],'totalChanges':row['apply']['totalChanges'],
             'counts':{name:row['apply'][name] for name in count_fields if name in row['apply']},
+            'blockedWorkItemCount':row['dryRun'].get('releaseInventory',{}).get('blockedWorkItemCount'),
             'memoryLimitBytes':measured['memoryLimitBytes'],'nodeOptions':measured['nodeOptions'],
-            'applyPeakBytes':measured['cgroupMemoryPeak']['releaseCliPeakBytes']})
+            'applyPeakBytes':measured['cgroupMemoryPeak']['releaseCliPeakBytes'],
+            'dryRunPeakBytes':proof['cliMemory'][row['key']+'-dry-container.json']['cgroupMemoryPeak']['releaseCliPeakBytes'],
+            'repeatPeakBytes':proof['cliMemory'][row['key']+'-repeat-container.json']['cgroupMemoryPeak']['releaseCliPeakBytes']})
     dry = proof['attemptDryRun']
     plan = dry['plan']
     summary = {'status':'PASSED_OWNED_COPY_NOT_PRODUCTION','head':proof['head'],

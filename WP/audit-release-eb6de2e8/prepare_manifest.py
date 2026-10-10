@@ -18,6 +18,9 @@ def validate(proof, build, gates):
     assert proof['repeatTotalChanges'] == proof['startupChanges'] == proof['readOnlyProbeChanges'] == 0
     assert proof['repeatedInstallDatabaseBytesPreserved'] is True
     assert [(row['key'], row['script']) for row in proof['installers']] == s.INSTALLERS
+    repeat = next(row for row in proof['installers'] if row['key'] == '191')
+    s.verify_repeat_inventory(repeat['dryRun'])
+    s.verify_repeat_inventory(repeat['apply'])
     assert [row['key'] for row in proof['repeatInstallers']] == [key for key, _ in s.INSTALLERS]
     assert all(row['mode'] == 'NO_OP' and row['totalChanges'] == 0 for row in proof['repeatInstallers'])
     assert [row['event'] for row in proof['startupReady']] == [name + '_STARTUP_READY' for name in s.READY_EVENTS]
