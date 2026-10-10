@@ -238,6 +238,8 @@ function beforeGuards(options) {
             // #211 pin6097077343: exactly six nullable Report fields; the real
             // additive installer adds them after the captured historical DDL.
             expected.push({table:'Report',fields:['supersedesReportId','amendmentId','amendmentReason','issuedBy','approvedBy','amendmentAuthorizedBy']});
+            // #202 adds exactly one credential table; its installer creates it.
+            expected.push({table:'UserBenchCredential',missingTable:true});
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }

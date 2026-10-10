@@ -19,8 +19,9 @@ import ReviewSubmissionView from './ReviewSubmissionView';
 import ActivityReceiptsView from './ActivityReceiptsView';
 import CompletionReceipt from './CompletionReceipt';
 import SpectralIntakeModal from './SpectralIntakeModal';
-import { saveLocalDraft, getLocalDraft, deleteLocalDraft, removePendingDraftOperations } from '../../services/offline/offlineDb';
-import { recordSyncOperation } from '../../services/offline/syncEngine';
+import { mergeLocalDraft, getLocalDraft, deleteLocalDraft, removePendingDraftOperations, getPendingOutboxOperations, purgeUserOfflineState } from '../../services/offline/offlineDb';
+import { recordSyncOperation, triggerSync } from '../../services/offline/syncEngine';
+import BenchMode from './BenchMode';
 
 /**
  * WorkbenchShell
@@ -37,7 +38,7 @@ export default function WorkbenchShell({
     initialRunId = null,
     initialQueue = null
 }) {
-    const { user, hasPermission } = useAuth();
+    const { user, hasPermission, logout } = useAuth();
     const { t } = useLanguage();
     const { clearBlockers } = useHelp();
     const [toast, setToast] = useState(null);
@@ -90,6 +91,12 @@ export default function WorkbenchShell({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const debounceTimers = useRef({});
+    const recordGuard = useRef(() => Promise.resolve(true));
+    const registerRecordGuard = useCallback(guard => { recordGuard.current = guard; }, []);
+    // #202 B15: pending saves are flushed, never dropped, and read live groups.
+    const pendingSaves = useRef({});
+    const groupsRef = useRef(groups);
+    groupsRef.current = groups;
     const hasResolvedDeepLink = useRef(false);
     const activeTargetRef = useRef({
         workItemId: initialWorkItemId,
@@ -125,17 +132,21 @@ export default function WorkbenchShell({
                         for (const item of g.items) {
                             try {
                                 const localDraft = await getLocalDraft(`draft:${user.id}:${item.workItemId}`);
-                                if (localDraft && localDraft.value !== undefined && localDraft.value !== null) {
+                                // #202 B15: texture/checklist drafts carry values/checks without a scalar value.
+                                const hasLocal = localDraft && ((localDraft.value !== undefined && localDraft.value !== null) ||
+                                    localDraft.extra?.values !== undefined || localDraft.extra?.checks !== undefined);
+                                if (hasLocal) {
                                     if (!item.draft || item.draft.value === undefined || item.draft.value === null ||
                                         (localDraft.updatedAt && new Date(localDraft.updatedAt) > new Date(item.draft.updatedAt || 0))) {
                                         item.draft = {
                                             ...(item.draft || {}),
                                             workItemId: item.workItemId,
-                                            value: localDraft.value,
+                                            value: localDraft.value ?? item.draft?.value ?? null,
                                             values: localDraft.extra?.values || item.draft?.values,
                                             checks: localDraft.extra?.checks || item.draft?.checks,
                                             basis: localDraft.extra?.basis || item.draft?.basis || 'AIR_DRY',
                                             replicateNo: localDraft.extra?.replicateNo || item.draft?.replicateNo || 1,
+                                            ...(localDraft.extra?.instrumentId !== undefined && { instrumentId: localDraft.extra.instrumentId }),
                                             draftVersion: localDraft.draftVersion || item.draft?.draftVersion || 1,
                                             updatedAt: localDraft.updatedAt
                                         };
@@ -291,10 +302,21 @@ export default function WorkbenchShell({
     // ─────────────────────────────────────────────────────────────────────────
     // Debounced Draft Persistence
     // ─────────────────────────────────────────────────────────────────────────
+    // Runs a pending debounced save now. Review, pagehide and analyst switch
+    // call this so a typed value is never dropped.
+    const flushDraft = useCallback(async (workItemId) => {
+        clearTimeout(debounceTimers.current[workItemId]);
+        delete debounceTimers.current[workItemId];
+        const pending = pendingSaves.current[workItemId];
+        delete pendingSaves.current[workItemId];
+        if (pending) await pending.save();
+    }, []);
+    const flushAllDrafts = useCallback(() => Promise.all(Object.keys(pendingSaves.current).map(flushDraft)), [flushDraft]);
+
     const handleDraftChange = useCallback((workItemId, value, extra = {}, { localOnly = false } = {}) => {
         // Look up current draft version
         let currentItemSnapshot = null;
-        for (const g of groups) {
+        for (const g of groupsRef.current) {
             const match = g.items?.find(i => i.workItemId === workItemId);
             if (match) {
                 currentItemSnapshot = match;
@@ -331,18 +353,16 @@ export default function WorkbenchShell({
 
         // Persist local offline draft immediately to IndexedDB
         if (user?.id) {
-            saveLocalDraft(`draft:${user.id}:${workItemId}`, {
-                workItemId,
-                value,
-                extra,
-                draftVersion: nextDraftVersion,
-                updatedAt: new Date().toISOString()
-            }).catch(e => console.warn('[workbench] Failed to persist local draft:', e));
+            // #202 B15: a meta change (value null) merges into the stored draft and never erases the typed value.
+            const key = `draft:${user.id}:${workItemId}`;
+            mergeLocalDraft(key, { workItemId, value, extra, draftVersion: nextDraftVersion, updatedAt: new Date().toISOString() })
+                .catch(e => console.warn('[workbench] Failed to persist local draft:', e));
         }
 
         if (localOnly) {
             clearTimeout(debounceTimers.current[workItemId]);
             delete debounceTimers.current[workItemId];
+            delete pendingSaves.current[workItemId];
             // An Escape restoration must not replay a queued draft command.
             if (user?.id) removePendingDraftOperations(workItemId, user.id).catch(() => {});
             return;
@@ -355,10 +375,10 @@ export default function WorkbenchShell({
             clearTimeout(debounceTimers.current[workItemId]);
         }
 
-        debounceTimers.current[workItemId] = setTimeout(async () => {
+        const save = async () => {
             // Find current item snapshot
             let currentItem = null;
-            for (const g of groups) {
+            for (const g of groupsRef.current) {
                 const match = g.items?.find(i => i.workItemId === workItemId);
                 if (match) {
                     currentItem = match;
@@ -444,8 +464,43 @@ export default function WorkbenchShell({
                     }
                 }
             }
-        }, 800);
-    }, [groups, user]);
+        };
+        // The save reads the merged draft from live groups, so earlier unsaved fields ride along.
+        pendingSaves.current[workItemId] = { save };
+        debounceTimers.current[workItemId] = setTimeout(() => flushDraft(workItemId), 800);
+    }, [user, flushDraft]);
+
+
+    useEffect(() => {
+        if (typeof window === 'undefined' || typeof document === 'undefined') return undefined;
+        const onHide = () => { if (typeof document === 'undefined' || document.visibilityState !== 'visible') flushAllDrafts(); };
+        window.addEventListener('pagehide', onHide);
+        document.addEventListener('visibilitychange', onHide);
+        window.addEventListener('soilfer:flush-drafts', onHide);
+        return () => {
+            window.removeEventListener('pagehide', onHide);
+            document.removeEventListener('visibilitychange', onHide);
+            window.removeEventListener('soilfer:flush-drafts', onHide);
+        };
+    }, [flushAllDrafts]);
+
+    // #202 B12: switching analyst saves every pending draft, sends the outbox,
+    // then removes this analyst's local drafts and outbox before signing out.
+    // Anything still unsent stays on the device and the analyst is warned.
+    const handleSwitchAnalyst = useCallback(async () => {
+        await flushAllDrafts().catch(() => {});
+        if (user?.id) {
+            await triggerSync().catch(() => {});
+            const unsent = await getPendingOutboxOperations(user.id).catch(() => []);
+            if (unsent.length) {
+                addToast(t('bench.unsentKept', { count: unsent.length }), 'error');
+                return;
+            }
+            await purgeUserOfflineState(user.id).catch(() => {});
+        }
+        logout();
+        window.location.href = '/login?switch=1';
+    }, [flushAllDrafts, user?.id, logout, addToast, t]);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Update Item Metadata (Basis, Replicate, Instrument)
@@ -527,13 +582,8 @@ export default function WorkbenchShell({
     const handleReviewRecord = async (selectedWorkItemIds) => {
         if (!selectedWorkItemIds || selectedWorkItemIds.length === 0) return;
 
-        // Drain any pending debounces for these items before recording
-        selectedWorkItemIds.forEach(id => {
-            if (debounceTimers.current[id]) {
-                clearTimeout(debounceTimers.current[id]);
-                delete debounceTimers.current[id];
-            }
-        });
+        // #202 B15: save pending debounces for these items before recording, never drop them.
+        await Promise.all(selectedWorkItemIds.map(id => flushDraft(id).catch(() => {})));
 
         try {
             setIsLoading(true);
@@ -569,6 +619,8 @@ export default function WorkbenchShell({
     // Commit Record Determinations (Step 1)
     // ─────────────────────────────────────────────────────────────────────────
     const handleCommitCompletion = async (includedItems) => {
+        // #202: in bench mode the lab may require the analyst's PIN at Record.
+        if (!(await recordGuard.current())) return;
         setIsSubmitting(true);
         const showIncomplete = data => {
             const errors = (data.errors || []).map(error => {
@@ -694,6 +746,8 @@ export default function WorkbenchShell({
 
                 {/* Save / Sync Status Pill */}
                 <div className="flex items-center gap-2">
+                    <BenchMode user={user} t={t} canManage={hasPermission?.('MANAGE_LAB_POLICIES')}
+                        onSwitchAnalyst={handleSwitchAnalyst} registerRecordGuard={registerRecordGuard} />
                     {syncStatus === 'saving' ? (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--sf-blue-bg)] text-[var(--sf-blue)] border border-[var(--sf-blue)]/20">
                             <RefreshCw size={12} className="animate-spin" /> Saving drafts...

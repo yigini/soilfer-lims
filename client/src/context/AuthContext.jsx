@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLanguage } from './LanguageContext';
 import { clearStoredSessionOverride } from '../lib/appearance';
-import { clearUserHelpCache } from '../services/offline/offlineDb';
+import { clearUserHelpCache, getPendingOutboxOperations, purgeUserOfflineState } from '../services/offline/offlineDb';
 import { clearAllPendingGovernance } from '../services/pendingGovernanceStore';
 
 const AuthContext = createContext();
@@ -144,10 +144,24 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // #202: the same analyst re-authenticated in place (expiry or bench unlock);
+    // keep their pending governance and drafts, only swap the token.
+    const resumeSession = (newToken, userData) => {
+        localStorage.setItem('token', newToken);
+        if (userData) localStorage.setItem('user', JSON.stringify(userData));
+        axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+        setToken(newToken);
+        if (userData) setUser(userData);
+    };
+
     const logout = () => {
         clearAllPendingGovernance();
         if (user?.id) {
             clearUserHelpCache({ userId: user.id }).catch(() => {});
+            // #202 B12: drafts and outbox stay only while something is unsent;
+            // otherwise the next analyst on this device must not inherit them.
+            const userId = user.id;
+            getPendingOutboxOperations(userId).then(pending => pending.length ? null : purgeUserOfflineState(userId)).catch(() => {});
         }
         clearStoredSessionOverride();
         try {
@@ -258,7 +272,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, hasAccess, hasPermission, updateUserPreferences }}>
+        <AuthContext.Provider value={{ user, token, login, logout, resumeSession, hasAccess, hasPermission, updateUserPreferences }}>
             {children}
         </AuthContext.Provider>
     );

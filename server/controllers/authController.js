@@ -512,3 +512,26 @@ exports.updateProfile = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+// #202 B12/B14: silent refresh while the analyst is active. Impersonation
+// tokens keep their short fixed lifetime and are never extended.
+exports.refresh = (req, res) => {
+    if (req.isImpersonating) return res.status(403).json({ error: 'Impersonation sessions cannot be refreshed.', code: 'TOKEN_REFRESH_UNAVAILABLE' });
+    const user = req.user;
+    const token = jwt.sign({ id: user.id, username: user.username, role: user.role, tokenVersion: user.tokenVersion || 0 }, SECRET_KEY, { expiresIn: '24h' });
+    return res.json({ token });
+};
+
+const benchCredentialService = require('../services/benchCredentialService');
+const benchRoute = action => async (req, res) => {
+    try {
+        return res.json(await action(req));
+    } catch (err) {
+        if (err.statusCode) return res.status(err.statusCode).json({ error: err.message, code: err.code, ...(err.lockedUntil && { lockedUntil: err.lockedUntil }) });
+        console.error('[AUTH] Bench credential error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.benchSettings = benchRoute(req => benchCredentialService.benchSettings(prisma, req.user));
+exports.setBenchPin = benchRoute(req => benchCredentialService.setPin(prisma, req.user, req.body || {}));
+exports.verifyBenchPin = benchRoute(req => benchCredentialService.verifyPin(prisma, req.user, req.body || {}));

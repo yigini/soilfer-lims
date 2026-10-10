@@ -170,11 +170,11 @@ describe('Audit 0.11: workbench component behavior', () => {
         jest.useFakeTimers();
         const groups = [{ analysis: 'PH_H2O', items: [item('card')] }];
         const axios = { post: jest.fn().mockResolvedValue({ data: { saved: 1 } }) };
-        const offline = { saveLocalDraft: jest.fn().mockResolvedValue(), recordSyncOperation: jest.fn() };
+        const offline = { mergeLocalDraft: jest.fn().mockResolvedValue(), recordSyncOperation: jest.fn() };
         const h = harness('WorkbenchShell', { groups, axios, offline });
         const tree = h.render({ initialAnalysis: 'PH_H2O' });
         child(h, tree, 'WorksheetArea').props.onDraftChange('card', '6.2');
-        expect(offline.saveLocalDraft).toHaveBeenCalledWith('draft:tech:card', expect.objectContaining({ value: '6.2' }));
+        expect(offline.mergeLocalDraft).toHaveBeenCalledWith('draft:tech:card', expect.objectContaining({ value: '6.2' }));
         await jest.advanceTimersByTimeAsync(800);
         expect(axios.post).toHaveBeenCalledWith('/api/workbench/batch-save', expect.objectContaining({ draft: true, entries: [expect.objectContaining({ workItemId: 'card', value: '6.2' })] }));
     });
@@ -211,7 +211,7 @@ describe('Audit 0.11: workbench component behavior', () => {
         jest.useFakeTimers();
         const groups = [{ analysis: 'PH_H2O', items: [item('escape', { draft: { value: '6.2' } })] }];
         const axios = { post: jest.fn().mockResolvedValue({ data: {} }) };
-        const offline = { saveLocalDraft: jest.fn().mockResolvedValue(), removePendingDraftOperations: jest.fn().mockResolvedValue(), recordSyncOperation: jest.fn() };
+        const offline = { mergeLocalDraft: jest.fn().mockResolvedValue(), removePendingDraftOperations: jest.fn().mockResolvedValue(), recordSyncOperation: jest.fn() };
         const h = harness('WorkbenchShell', { groups, axios, offline });
         let tree = h.render({ initialAnalysis: 'PH_H2O' });
         child(h, tree, 'WorksheetArea').props.onDraftChange('escape', '7'); tree = h.render({ initialAnalysis: 'PH_H2O' });

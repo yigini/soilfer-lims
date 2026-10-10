@@ -3521,5 +3521,36 @@
     "publicSuperseded": "Este relatório foi substituído por um relatório emendado. Solicite o relatório vigente ao laboratório.",
     "publicReplacedBy": "Substituído pelo relatório {number}.",
     "revisionRequiresAmendment": "Um relatório emendado requer uma emenda aprovada. Solicite-a e autorize-a primeiro."
+  },
+  "session": {
+    "expiredTitle": "Sessão expirada",
+    "expiredBody": "Digite sua senha para continuar como {name}. Seu trabalho não salvo é mantido.",
+    "password": "Senha",
+    "continue": "Continuar",
+    "signOut": "Sair",
+    "reloginFailed": "Essa senha não funcionou. Tente novamente ou saia."
+  },
+  "bench": {
+    "analyst": "Analista: {name}",
+    "switchAnalyst": "Trocar de analista",
+    "enable": "Ativar modo bancada",
+    "disable": "Desativar modo bancada",
+    "locked": "Digite seu PIN para desbloquear",
+    "lockedFor": "Bloqueado para {name}",
+    "confirmRecord": "Digite seu PIN para registrar",
+    "unlock": "Desbloquear",
+    "pin": "PIN",
+    "password": "Senha",
+    "setPinHelp": "Defina um PIN de bancada de 4 a 8 dígitos. Confirme com sua senha.",
+    "unsentKept": "{count} alteração(ões) ainda não foram enviadas e ficam neste dispositivo. Reconecte e tente novamente.",
+    "errors": {
+      "generic": "Não foi possível verificar o PIN.",
+      "BENCH_PIN_INVALID": "O PIN não está correto.",
+      "BENCH_PIN_LOCKED": "Muitos PINs errados. Tente novamente em alguns minutos.",
+      "BENCH_PIN_NOT_SET": "Defina um PIN de bancada primeiro.",
+      "BENCH_PIN_FORMAT_INVALID": "O PIN deve ter de 4 a 8 dígitos.",
+      "BENCH_PIN_PASSWORD_INVALID": "Sua senha não está correta."
+    },
+    "draftBy": "por {name}"
   }
 }

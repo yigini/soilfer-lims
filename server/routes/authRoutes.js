@@ -9,6 +9,11 @@ router.patch('/preferences', verifyToken, authController.updatePreferences);
 router.patch('/profile', verifyToken, authController.updateProfile);
 router.post('/change-password', verifyToken, authController.changePassword);
 router.post('/impersonate', verifyToken, checkPermission('MANAGE_BRANDING'), authController.impersonate);
+// #202 shared bench terminals: silent refresh, bench settings and the analyst's own PIN.
+router.post('/refresh', verifyToken, authController.refresh);
+router.get('/bench', verifyToken, authController.benchSettings);
+router.put('/bench/pin', verifyToken, authController.setBenchPin);
+router.post('/bench/pin/verify', verifyToken, authController.verifyBenchPin);
 
 // Staff Invitation & Password Recovery Token Endpoints (IR-06)
 const staffLifecycleService = require('../services/staffLifecycleService');

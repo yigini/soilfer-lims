@@ -3521,5 +3521,36 @@
     "publicSuperseded": "Este informe ha sido sustituido por un informe enmendado. Solicite el informe vigente al laboratorio.",
     "publicReplacedBy": "Sustituido por el informe {number}.",
     "revisionRequiresAmendment": "Un informe enmendado requiere una enmienda aprobada. Solicítela y autorícela primero."
+  },
+  "session": {
+    "expiredTitle": "Sesión caducada",
+    "expiredBody": "Introduzca su contraseña para continuar como {name}. Su trabajo sin guardar se conserva.",
+    "password": "Contraseña",
+    "continue": "Continuar",
+    "signOut": "Cerrar sesión",
+    "reloginFailed": "La contraseña no es correcta. Inténtelo de nuevo o cierre sesión."
+  },
+  "bench": {
+    "analyst": "Analista: {name}",
+    "switchAnalyst": "Cambiar de analista",
+    "enable": "Activar modo banco",
+    "disable": "Desactivar modo banco",
+    "locked": "Introduzca su PIN para desbloquear",
+    "lockedFor": "Bloqueado para {name}",
+    "confirmRecord": "Introduzca su PIN para registrar",
+    "unlock": "Desbloquear",
+    "pin": "PIN",
+    "password": "Contraseña",
+    "setPinHelp": "Defina un PIN de banco de 4 a 8 dígitos. Confírmelo con su contraseña.",
+    "unsentKept": "{count} cambio(s) aún no se han enviado y se conservan en este dispositivo. Vuelva a conectarse e inténtelo de nuevo.",
+    "errors": {
+      "generic": "No se pudo comprobar el PIN.",
+      "BENCH_PIN_INVALID": "El PIN no es correcto.",
+      "BENCH_PIN_LOCKED": "Demasiados PIN incorrectos. Inténtelo dentro de unos minutos.",
+      "BENCH_PIN_NOT_SET": "Primero defina un PIN de banco.",
+      "BENCH_PIN_FORMAT_INVALID": "El PIN debe tener de 4 a 8 dígitos.",
+      "BENCH_PIN_PASSWORD_INVALID": "Su contraseña no es correcta."
+    },
+    "draftBy": "por {name}"
   }
 }

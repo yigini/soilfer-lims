@@ -1162,6 +1162,9 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             // #211 adds six nullable Report columns with no backfill.
             expect(require('../../scripts/install_report_revisions').installReportRevisions({dbPath:rehearsalDbPath,apply:true}))
                 .toMatchObject({classification:'COMPLETE_211',previousClassification:'PRE_211',backfilledCount:0});
+            // #202 adds one empty credential table with no backfill.
+            expect(require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:rehearsalDbPath,apply:true}))
+                .toMatchObject({classification:'COMPLETE_202',previousClassification:'PRE_202',backfilledCount:0});
             const verified = new Database(rehearsalDbPath, { readonly: true });
             const originalResultFields = Object.keys(preSnapshots.results.rows[0]).map(field => `"${field}"`).join(',');
             expect(verified.prepare(`SELECT ${originalResultFields} FROM "Result" ORDER BY id`).all()).toEqual(preSnapshots.results.rows);
