@@ -9,7 +9,7 @@ export function PolicyValueEditor({ definition, value, onChange, t }) {
             onChange={event => onChange(event.target.value === 'default' ? null : JSON.parse(JSON.stringify(definition.localizedDefaults)))}>
             <option value="default">{t('policies.amendedDefault')}</option><option value="custom">{t('policies.amendedCustom')}</option>
         </select>
-        <p>{t('policies.amendedHelp')}</p>
+        <p>{t('policies.amendedHelp', { replacedNumber: '{replacedNumber}', replacedRevision: '{replacedRevision}', reason: '{reason}' })}</p>
         {value !== null && definition.allowedLocales.map(locale => <label key={locale} className="block">{locale}
             <textarea required aria-label={locale} value={value[locale] ?? ''} onChange={event => onChange({ ...value, [locale]: event.target.value })} />
         </label>)}
