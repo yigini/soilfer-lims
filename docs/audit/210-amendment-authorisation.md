@@ -47,7 +47,26 @@ tests; no production serving behavior or test timeout is altered. Failed logs,
 browser artifacts and owned copies are retained. Source client build passes
 (19.15 s), and lint passes (zero errors, fourteen existing warnings).
 
-Still unfinished: the corrected complete normal server run, exact-head CI,
-actual Docker readiness, PR and audit. Amendment numbering beyond the full
-retained UUID remains deferred; public replacement navigation belongs to #211.
-No PR readiness, merge, deployment or post-deploy claim.
+At 63892ca, the owned checkout generated its own 91-model Prisma client and
+built its client (9.349 s); lint passed with zero errors and fourteen existing
+warnings. The seven previously failing normal files then passed all 181 tests,
+zero skipped (144.689 s), including actual Chromium, reception, review and
+startup checks. Its Help-only template remained byte-identical.
+
+The subsequent complete normal Windows invocation ended with native process
+exit 3221226505 (0xC0000409) after 1,263.808 s. The retained log has 169 PASS
+suites and zero FAIL suites, no Jest summary, and reception_stage_d as the last
+completed suite. No local full pass or cause for the native failure is claimed.
+Logs, the exit receipt and the unchanged template digest are retained.
+
+Claude's verification pin6095236240 requires a complete exact-head normal Linux
+CI run and both Docker stages as the primary full-suite evidence, with this
+Windows limitation disclosed in the PR. No frozen Windows full run is repeated
+without new diagnostics; no test, mock or timeout is weakened. The branch is
+rebased onto the merged #201 implementation, retaining both actual installers,
+startup gates, migration-source bindings and all predecessor assertions.
+
+Still unfinished: rebased focused verification, exact-head CI, actual Docker
+readiness and audit. Amendment numbering beyond the full retained UUID remains
+deferred; public replacement navigation belongs to #211. Production installation
+and counts remain unrun under the #190 disk hold.
