@@ -261,7 +261,7 @@ def ready_logs(log):
             value = json.loads(line)
         except ValueError:
             continue
-        if str(value.get('event', '')).endswith('_STARTUP_READY'):
+        if isinstance(value, dict) and str(value.get('event', '')).endswith('_STARTUP_READY'):
             assert value.get('totalChanges', 0) == 0
             events.append(value)
     expected = [prefix + '_STARTUP_READY' for prefix in READY_EVENTS]

@@ -39,6 +39,15 @@ class DiskAndPlanGuards(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 s.ready_logs('\n'.join(changed))
 
+    def test_ready_logs_ignore_valid_json_scalars_without_accepting_fake_events(self):
+        lines = [json.dumps({'event':name+'_STARTUP_READY','totalChanges':0}) for name in s.READY_EVENTS]
+        noise = ['"ordinary startup message"','null','true','1','[]',
+            '[{"event":"BENCH_CREDENTIAL_STARTUP_READY","totalChanges":0}]']
+        mixed = [value for line in lines for value in [line,*noise]]
+        self.assertEqual(len(s.ready_logs('\n'.join(mixed))),20)
+        with self.assertRaises(AssertionError):
+            s.ready_logs('\n'.join(lines[:-1]+noise))
+
 class CliLifetimeGuards(unittest.TestCase):
     def test_cli_enforces_original_memory_bound_without_heap_override(self):
         for peak in [805306368, 805306369]:

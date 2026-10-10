@@ -75,6 +75,11 @@ if __name__ == '__main__':
             time.sleep(1)
         else:
             raise RuntimeError('Owned candidate did not become healthy')
+        initial_memory = s.command(ROOT, ['docker', 'exec', NAME, 'node', '-e',
+            "console.log(Number(require('node:fs').readFileSync('/sys/fs/cgroup/memory.peak','utf8')))"], 'startup-memory-at-ready')
+        receipt['startupMemoryAtReady'] = {'limitBytes':805306368,'nodeOptions':None,
+            'peakBytes':int(initial_memory.stdout.strip().splitlines()[-1])}
+        assert 0 < receipt['startupMemoryAtReady']['peakBytes'] <= 805306368
         logs = s.command(ROOT, ['docker', 'logs', NAME], 'startup-ready')
         receipt['startupReady'] = s.ready_logs(logs.stdout + '\n' + logs.stderr)
         assert s.snapshot(database, before) == after, 'Default entrypoint/server startup changed database rows'
