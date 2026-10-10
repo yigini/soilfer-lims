@@ -6,6 +6,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { revertWorksheetCell } from './qcWorksheetNavigation';
 import CalibrationCurvePanel from './CalibrationCurvePanel';
 import CalculationTemplateManager from './CalculationTemplateManager';
+import InstrumentImportPanel from './InstrumentImportPanel';
 
 const LIMIT_FIELDS = ['maxAllowed', 'maxRpd', 'absMax', 'absMaxBelow5LOQ', 'nearLoqMultiplier', 'loq',
     'minRecovery', 'maxRecovery', 'crmAbsWindow', 'lrmWindowPct', 'mode', 'crmMode', 'lrmMode'];
@@ -167,6 +168,7 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
         setLots({}); setCorrecting({}); setReason('');
     });
     return <section className="space-y-3" data-testid="native-qc-run">
+        <InstrumentImportPanel batch={batch} canEdit={canEdit} onChanged={onChanged} setSuccessMsg={setSuccessMsg} />
         <CalculationTemplateManager batch={batch} analyte={analyte} onChanged={onChanged} />
         <CalibrationCurvePanel batch={batch} analyte={analyte} canEdit={canEdit} onChanged={onChanged} onBarcodeRejected={onBarcodeRejected} />
         {batch.analytes.length > 1 && <label className="grid gap-1 text-xs">{t('qcRuns.analysis')}

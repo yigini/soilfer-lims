@@ -74,3 +74,12 @@ server/tests/helpers/fixtures/pre210_full_application_schema.sql -text
 server/tests/helpers/sampleAmendmentHistoricalFixture.js text eol=lf
 server/tests/helpers/fixtures/pre210_after201_full_application_schema.sql -text
 server/tests/helpers/sampleAmendmentMainHistoricalFixture.js text eol=lf
+server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql text eol=lf
+server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json text eol=lf
+server/services/instrumentImportMigrationSource.js text eol=lf
+server/tests/helpers/instrumentImportHistoricalFixture.js text eol=lf
+server/tests/helpers/fixtures/pre200_full_application_schema.sql -text
+server/tests/helpers/fixtures/pre200_after210_full_application_schema.sql -text
+server/tests/helpers/instrumentImportMainHistoricalFixture.js text eol=lf
+server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql text eol=lf
+server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql text eol=lf

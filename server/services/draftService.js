@@ -13,8 +13,62 @@ const { transitionWorkItem } = require('./workItemStateService');
 /**
  * Save or update a draft determination
  */
-async function saveDraft(user, input, db = null) {
-    if (!db) return rules.inTransaction(prisma, tx => saveDraft(user, input, tx));
+function assertNoReceiptFields(value, seen = new WeakSet()) {
+    if (value === null || typeof value !== 'object' || seen.has(value)) return;
+    seen.add(value);
+    for (const [key, child] of Object.entries(value)) {
+        if (/receipt/i.test(key)) throw new rules.TransitionError('Import receipts are attached by the import owner.', 400, 'DRAFT_FIELDS_INVALID');
+        assertNoReceiptFields(child, seen);
+    }
+}
+
+async function readDraftContext(db, user, { workItemId, instrumentId = null }, options = {}) {
+    if (!workItemId) throw new Error('workItemId is required to save a draft');
+    const workItem = await db.workItem.findUnique({ where: { id: workItemId }, include: { sample: true } });
+    if (!workItem) throw new Error(`WorkItem ${workItemId} not found`);
+    const isAssigned = workItem.assignedTo === user.username;
+    const isPrivileged = ['LAB_MANAGER', 'SUPER_ADMIN', 'COUNTRY_ADMIN'].includes(user.role);
+    if (!isAssigned && !isPrivileged) throw new Error('Access denied: You are not assigned to this work item');
+    const scopeGuard = require('../utils/scopeGuard');
+    if (!scopeGuard.canAccessEntity(user, workItem, { entityType: 'WorkItem', labField: 'assignedLab', altLabField: 'labId' }) ||
+        workItem.sample && !scopeGuard.canAccessEntity(user, workItem.sample, { labField: 'assignedLab', altLabField: 'labId' }))
+        throw new Error('Access denied: Work item is outside your laboratory scope');
+    if (!scopeGuard.hasGlobalAccess(user) && user.labId) {
+        const itemLab = workItem.assignedLab || workItem.sample?.assignedLab || workItem.labId;
+        const sampleLab = workItem.sample?.assignedLab || workItem.sample?.labId;
+        if (itemLab && itemLab !== user.labId || sampleLab && sampleLab !== user.labId)
+            throw new Error('Access denied: Work item is in another laboratory');
+    }
+    if (options.importReceiptId) {
+        const receipt = await db.instrumentImportReceipt.findUnique({ where: { id: options.importReceiptId } });
+        const lab = await require('./policyService').resolveLab(workItem.sample?.assignedLab || workItem.sample?.labId || workItem.labId, db);
+        let snapshot;
+        try { snapshot = JSON.parse(receipt?.mappingSnapshot); } catch { /* Refuse unavailable receipt evidence. */ }
+        if (!receipt || receipt.labId !== lab?.id || receipt.instrumentId !== instrumentId ||
+            receipt.importedBy !== user.username || snapshot?.batchId !== workItem.batchId ||
+            !Array.isArray(snapshot.rows) || !snapshot.rows.some(row => row.match?.workItemIdsByAnalysis?.[workItem.analysis] === workItem.id))
+            throw new rules.TransitionError('The import receipt does not bind this draft line.', 400, 'DRAFT_FIELDS_INVALID');
+    }
+    if (options.importReceiptId || options.importing) {
+        if (await db.workItemDraft.findUnique({ where: { workItemId } }))
+            throw new rules.TransitionError('Save or clear the existing draft before importing.', 409, 'IMPORT_DRAFT_EXISTS');
+        if (await db.result.findFirst({ where: { sampleId: workItem.sampleId, param: workItem.analysis, isCurrent: true, supersededBy: null } }))
+            throw new rules.TransitionError('Recorded or sealed work requires its correction workflow.', 409, 'RESULT_WORKITEM_SEALED');
+    }
+    const readiness = await require('./workbenchReadinessService').evaluateExecutionReadiness(db, workItem, user,
+        { selectedEquipmentId: instrumentId || workItem.equipmentId });
+    if (!readiness.isReady) throw new rules.TransitionError(readiness.reasons.join(' '), 409,
+        readiness.blockers.includes('GATE_STATE_MISMATCH') ? 'GATE_STATE_MISMATCH' : 'EXECUTION_BLOCKED');
+    return workItem;
+}
+
+async function saveDraft(user, input, db = null, options = {}) {
+    assertNoReceiptFields(input);
+    if (!options || typeof options !== 'object' || Array.isArray(options) ||
+        Object.keys(options).some(key => key !== 'importReceiptId') ||
+        Object.hasOwn(options, 'importReceiptId') && (typeof options.importReceiptId !== 'string' || !options.importReceiptId))
+        throw new rules.TransitionError('Supply a server-owned import receipt.', 400, 'DRAFT_FIELDS_INVALID');
+    if (!db) return rules.inTransaction(prisma, tx => saveDraft(user, input, tx, options));
     const {
     workItemId,
     sampleId,
@@ -29,47 +83,7 @@ async function saveDraft(user, input, db = null) {
     notes = null,
     baseVersion = 0
     } = input;
-    if (!workItemId) throw new Error('workItemId is required to save a draft');
-
-    // 1. Verify work item existence and ownership/scope
-    const workItem = await db.workItem.findUnique({
-        where: { id: workItemId },
-        include: { sample: true }
-    });
-
-    if (!workItem) {
-        throw new Error(`WorkItem ${workItemId} not found`);
-    }
-
-    // Role check: assigned technician or manager/admin
-    const isAssigned = workItem.assignedTo === user.username;
-    const isPrivileged = ['LAB_MANAGER', 'SUPER_ADMIN', 'COUNTRY_ADMIN'].includes(user.role);
-    if (!isAssigned && !isPrivileged) {
-        throw new Error('Access denied: You are not assigned to this work item');
-    }
-
-    const scopeGuard = require('../utils/scopeGuard');
-    if (!scopeGuard.canAccessEntity(user, workItem, { entityType: 'WorkItem', labField: 'assignedLab', altLabField: 'labId' })) {
-        throw new Error('Access denied: Work item is outside your laboratory scope');
-    }
-    if (workItem.sample && !scopeGuard.canAccessEntity(user, workItem.sample, { labField: 'assignedLab', altLabField: 'labId' })) {
-        throw new Error('Access denied: Work item is outside your laboratory scope');
-    }
-    if (!scopeGuard.hasGlobalAccess(user) && user.labId) {
-        const itemLab = workItem.assignedLab || (workItem.sample?.assignedLab || workItem.labId);
-        if (itemLab && itemLab !== user.labId) {
-            throw new Error('Access denied: Work item is in another laboratory');
-        }
-        const sampleLab = workItem.sample?.assignedLab || workItem.sample?.labId;
-        if (sampleLab && sampleLab !== user.labId) {
-            throw new Error('Access denied: Sample is in another laboratory');
-        }
-    }
-
-    const readiness = await require('./workbenchReadinessService').evaluateExecutionReadiness(db, workItem, user,
-        { selectedEquipmentId: instrumentId || workItem.equipmentId });
-    if (!readiness.isReady) throw new rules.TransitionError(readiness.reasons.join(' '), 409,
-        readiness.blockers.includes('GATE_STATE_MISMATCH') ? 'GATE_STATE_MISMATCH' : 'EXECUTION_BLOCKED');
+    const workItem = await readDraftContext(db, user, input, options);
 
     const sId = sampleId || workItem.sampleId;
     const labId = workItem.sample?.assignedLab || workItem.sample?.labId || workItem.labId || user.labId;
@@ -133,7 +147,8 @@ async function saveDraft(user, input, db = null) {
                 notes: notes || null,
                 baseVersion: Number(baseVersion) || workItem.version || 0,
                 draftVersion: 1,
-                conflictValue: conflictValue
+                conflictValue: conflictValue,
+                ...(options.importReceiptId && { importReceiptId: options.importReceiptId })
             }
         });
     }
@@ -410,6 +425,8 @@ async function resolveConflict(user, workItemId, { resolution, reason }) {
 }
 
 module.exports = {
+    assertNoReceiptFields,
+    readDraftContext,
     saveDraft,
     getDrafts,
     discardDraft,

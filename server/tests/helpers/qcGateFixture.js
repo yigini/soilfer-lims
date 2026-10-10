@@ -8,7 +8,7 @@ const { beforeGuards } = require('./legacyWorkflowDatabase');
 const { createSampleFixture, createWorkItemFixture } = require('./workflowFixtures');
 const { installCalculationReleasePrerequisites } = require('./calculationReleasePrerequisites');
 
-async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true } = {}) {
+async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true } = {}) {
     const labId = randomUUID(), analysisCode = `QC-GATE-${randomUUID()}`, username = 'system:fixture';
     const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES', relatedRows: {
         Lab: [{ id: labId, code: labId, name: 'QC gate fixture', country: 'TEST', updatedAt: Date.now() }],
@@ -32,6 +32,7 @@ async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS',
     installCalculationReleasePrerequisites(file);
     if (installSelectionEvidence) require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({ dbPath: file, apply: true });
     require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:file,apply:true});
+    if (installInstrumentImports) require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     const actor = { username, role: 'SUPER_ADMIN', labId };
     await db.unit.create({ data: { code: 'fixture-unit', display: 'Fixture unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });

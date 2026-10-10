@@ -1,0 +1,23 @@
+{
+  "main": "e0462c85ef67a94297ffcd93f2b29b27141f2c27",
+  "schemaSha256": "a8e2aa335963e709dfc9047166ca775bae948ddaebaf10cb0e07d5cdeb482b33",
+  "modelCount": 92,
+  "prismaVersion": "7.10.0",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\node_modules\\prisma\\build\\index.js",
+    "migrate",
+    "diff",
+    "--from-empty",
+    "--to-schema",
+    "C:\\Users\\yigin\\AppData\\Local\\Temp\\qc200-current-main-after210-predecessor.prisma",
+    "--script",
+    "--config",
+    "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma.config.ts"
+  ],
+  "cwd": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server",
+  "ddlBytes": 79066,
+  "ddlSha256": "d54b007ef4182ed1a08b340228a52b799308349a5cb632a05f7374cb8d5ebfb6",
+  "workingBefore": "490b8c4782bdc5300e729dbcafe9f01dd695995a7d6c69f3002dde9b75cf1835",
+  "workingAfter": "490b8c4782bdc5300e729dbcafe9f01dd695995a7d6c69f3002dde9b75cf1835"
+}

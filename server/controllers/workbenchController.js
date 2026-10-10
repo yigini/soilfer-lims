@@ -674,6 +674,7 @@ exports.batchSave = async (req, res) => {
     }
 
     try {
+        if (draft) draftService.assertNoReceiptFields(req.body);
         const now = new Date();
         const workItemIds = entries.map(e => e.workItemId);
 

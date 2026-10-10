@@ -17,7 +17,7 @@ const failure = (statusCode, code, message, details = {}) => Object.assign(new E
 
 // This transaction is the native arm of the shared write path. The compatibility
 // arm appends isolated rounds; native observations require explicit corrections.
-async function writeNativeMeasurements(db, batchId, actor, input = {}, { correction = false, explicit = false } = {}) {
+async function writeNativeMeasurements(db, batchId, actor, input = {}, { correction = false, explicit = false, entryOnly = false, importReceiptId = null } = {}) {
     if (!hasPermission(actor, 'CHANGE_STATUS')) throw failure(403, 'QC_RUN_PERMISSION_REQUIRED', 'QC entry permission is required.');
     const performedBy = actorName(actor), reason = typeof input.reason === 'string' ? input.reason.trim() : '';
     return inTransaction(db, async tx => {
@@ -28,6 +28,11 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         if (!batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE')) throw failure(409, 'QC_NATIVE_RUN_REQUIRED', 'This entry requires a native run.');
         if (!batch.startedAt) throw failure(409, 'QC_RUN_NOT_STARTED', 'Start the run before entering or evaluating QC.');
         if (batch.status === 'CLOSED') throw failure(400, 'QC_BATCH_LOCKED', 'Closed QC evidence is locked.');
+        if (entryOnly && (entryOnly !== true || correction !== false || explicit !== false ||
+            !input || typeof input !== 'object' || Array.isArray(input) ||
+            Object.keys(input).some(key => !['analysisCode', 'measurements'].includes(key)) ||
+            !Array.isArray(input.measurements) || !input.measurements.length || typeof importReceiptId !== 'string' || !importReceiptId))
+            throw failure(400, 'QC_IMPORT_ENTRY_ONLY_INVALID', 'Import entry accepts new measurements only.');
         if (correction && !reason) throw failure(400, 'QC_CORRECTION_REASON_REQUIRED', 'A correction reason is required.');
         const analysisCode = input.analysisCode || batch.analysis, selected = batch.analytes.find(row => row.analysisCode === analysisCode);
         if (!selected) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
@@ -37,6 +42,18 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         const locked = row => reviewed?.analysisCode !== row.analysisCode && (['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED', 'CLOSED'].includes(row.status) ||
             Boolean(currentAnalyteEvidence(batch, row.analysisCode).disposition));
         if (locked(selected)) throw failure(409, 'QC_BATCH_LOCKED', 'Failed or dispositioned analyte evidence is locked; use batch disposition.');
+        // #200 pin6095469488: the importer uses this same owner to record new
+        // observations, then a user explicitly evaluates through the old route.
+        if (entryOnly) {
+            const invalid = () => { throw failure(400, 'QC_IMPORT_ENTRY_ONLY_INVALID', 'Import entry accepts new measurements only.'); };
+            const receipt = await tx.instrumentImportReceipt.findUnique({ where: { id: importReceiptId } });
+            let snapshot;
+            try { snapshot = JSON.parse(receipt?.mappingSnapshot); } catch { /* Refuse an unavailable receipt. */ }
+            if (!receipt || receipt.labId !== targetLab?.id || receipt.instrumentId !== batch.instrumentId ||
+                receipt.importedBy !== performedBy || snapshot?.batchId !== batch.id) invalid();
+            if (!['IN_RUN', 'QC_PENDING'].includes(selected.status) || currentAnalyteEvidence(batch, analysisCode).evaluation)
+                throw failure(409, 'QC_IMPORT_ANALYTE_EVALUATED', 'Evaluated or dispositioned QC cannot receive imported observations.');
+        }
         const criteria = JSON.parse(selected.criteriaSnapshot), now = new Date();
         if (input.expectedValues !== undefined && (!input.expectedValues || typeof input.expectedValues !== 'object' || Array.isArray(input.expectedValues))) {
             throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Submit expected values by actual position id.');
@@ -83,7 +100,7 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
             throw failure(400, 'QC_POSITION_NOT_IN_ANALYSIS', 'The rebound reference position does not serve this analysis.', { positionId: row.positionId });
         }
         const evaluations = [];
-        for (const code of affected) {
+        for (const code of entryOnly ? [] : affected) {
             const analyte = batch.analytes.find(row => row.analysisCode === code), previousEvidence = currentAnalyteEvidence(batch, code), previous = previousEvidence.evaluation;
             const evaluated = evaluateNativeEvidence(candidate, analyte, { recordedObservations: Boolean(reviewed) }), requested = explicit && (code === analysisCode || input.analysisCode === undefined && evaluated.mode === 'OFF');
             if (!previous && !observations.some(row => row.analysisCode === code) && plans.some(plan =>
@@ -129,7 +146,8 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
             await tx.batchEvent.create({ data: { id: randomUUID(), batchId, type: reviewed ? EVENT : correction ? 'QC_CORRECTED' : 'QC_ENTERED', by: performedBy, at: now,
                 payload: JSON.stringify(reviewed ? reviewedCorrectionPayload(reviewed, replacements, reviewedEvaluationId, criteriaSource)
                     : { analysisCodes: [...affected], measurementIds: observations.map(row => row.id), reason: correction ? reason : null,
-                        evaluations: evaluations.map(row => ({ analysisCode: row.analyte.analysisCode, result: row.evaluated.verdict })) }) } });
+                        evaluations: evaluations.map(row => ({ analysisCode: row.analyte.analysisCode, result: row.evaluated.verdict })),
+                        ...(entryOnly && { entryMode: 'INSTRUMENT_IMPORT', importReceiptId }) }) } });
         }
         return batchApiView(await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE }));
     });
