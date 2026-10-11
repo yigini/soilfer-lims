@@ -1,0 +1,17 @@
+{
+  "source": "206c4dc41a99045ab8a47871ebe8782fda4cba20",
+  "hashes": {
+    "rehearse_runtime.py": "c47ef37880185fa7c8ac565f28fc16fe7040b549ed3bea482ab1c0295478d5f0",
+    "proof_contract.py": "cd190348d332fd12e53694ca080819c2d095bfa5c4ee86eb058686a65a38fb0e",
+    "known_core_disk_guard_proof.py": "49c76b8d0312a38820ea8dff707cdfd6674614c63344bedf2655755b6ca6f1b6",
+    "export_launch_runtime_proof.py": "d4eb6be436f492343f660e5aad14fff87bca8c8d1c5ce161d5184f4c57590a19",
+    "build_candidate.py": "22e2cdc152253c5b85da8120b4c546e828e26262f6c460bec1330354be74a9e1",
+    "prepare_candidate_build.py": "042ba7fb750646cd5edcfa9965b69c26d80a9534f5ce7e2695d82be05562696c",
+    "known_core_disk_guard_v3.py": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+    "known_core_disk_guard_v2.py": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+    "kobo_copy_preservation.py": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+    "capture_kobo_fetch.py": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86"
+  },
+  "failedProofReceiptSha256": "e68a80fbe56b006ef71c3ba8c0d0e13e1165dc0ad035c195e1eb9648749bf707",
+  "policy": "EXACT_HASHED_PROOF_AUTHORITY_LAYOUT"
+}
