@@ -1,0 +1,41 @@
+{
+  "observedUtc": "2026-10-11T21:41:05.728822+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z",
+  "unit": "lims-owned-runtime-kobo-proof-171dd36c-20261011t211630z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=1\nActiveState=failed\nSubState=failed\n",
+  "unit.stdoutTail": "n\", \"utc\": \"2026-10-11T21:31:24.029995+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 109076340736}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:31:54.826561+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 109076217856}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:32:25.641139+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 109049061376}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:32:56.732556+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 109048619008}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:33:27.789887+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 109048422400}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:33:58.485357+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 109048254464}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:34:29.363581+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 109023055872}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:35:00.201518+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 109022580736}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:35:30.898013+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 109022396416}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:36:01.635136+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 109022265344}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:36:32.592149+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 108996734976}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:37:03.551829+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 108996304896}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:37:34.330466+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 108996112384}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:38:05.058816+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 108995981312}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:38:35.785456+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 108970741760}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:39:06.539411+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 108970319872}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:39:37.484357+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 108970131456}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T21:40:08.303063+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 226295808, \"minimumFreeBytes\": 108969967616}\n{\"status\": \"FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF\", \"root\": \"/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z\", \"receiptSha256\": \"d2fe1791af254b17c077b59012bc2e5cd9ba9e087aec10f6c3b752399b39fb4f\"}\n",
+  "unit.stderrTail": "",
+  "files": {
+    "rehearsal-receipt.json": {
+      "bytes": 102341,
+      "sha256": "d2fe1791af254b17c077b59012bc2e5cd9ba9e087aec10f6c3b752399b39fb4f",
+      "mode": "0o400"
+    },
+    "target-pin.json": {
+      "bytes": 789,
+      "sha256": "6614a05633a7309b4b2f09a619fc82933fbfb0a2c7b44ef4ba2cc7e7056aa891",
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 4014,
+      "sha256": "c6b457079e2feba5164b5ae271f7493ccc07de17d7071274defdb10d2ade4606",
+      "mode": "0o400"
+    },
+    "first-sync-preservation.json": {
+      "bytes": 155627,
+      "sha256": "4a79184400faec7bbd81f687d40c43ea80864c6c2833a6c554c550133091f59f",
+      "mode": "0o400"
+    },
+    "upstream-before-start.json": {
+      "bytes": 140394,
+      "sha256": "609762f571ea29d6c796bac758bdcb7f37fe0f8ab2e2ce33c0555b0c66555d06",
+      "mode": "0o400"
+    },
+    "upstream-first-completion.json": {
+      "bytes": 140394,
+      "sha256": "88bd65dcc4a6eff359c8740517cdc9fab4a7bd4c4e031be52721ed0a2e701a6b",
+      "mode": "0o400"
+    }
+  }
+}

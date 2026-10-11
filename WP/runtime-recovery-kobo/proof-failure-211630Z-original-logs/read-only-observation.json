@@ -1,0 +1,47 @@
+{
+  "observedUtc": "2026-10-11T21:41:47.794907+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z",
+  "productionMutations": 0,
+  "containers": [
+    {
+      "name": "lims-owned-runtime-kobo-proof-171dd36c-20261011t211630z-jobs-off",
+      "running": false,
+      "exitCode": 137,
+      "oomKilled": false,
+      "restartCount": 0,
+      "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+      "ownedRoot": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z"
+    },
+    {
+      "name": "lims-owned-runtime-kobo-proof-171dd36c-20261011t211630z-jobs-on",
+      "running": false,
+      "exitCode": 137,
+      "oomKilled": false,
+      "restartCount": 0,
+      "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+      "ownedRoot": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z"
+    }
+  ],
+  "files": {
+    "jobs-on.stdout.log": {
+      "sha256": "afa9312bf20f3266a9810ddd971d7112ea37b23a5e04229a391dbf696c27a16c",
+      "bytes": 202075
+    },
+    "jobs-on.stderr.log": {
+      "sha256": "108edb92232ac4cec5eeb659c1a750025ebd0319e95fcb8ae6079ca860f47e1f",
+      "bytes": 11812
+    },
+    "disk-allocation-observations.jsonl": {
+      "sha256": "eb133c19384c19f87c281f952a1be70a0155545f92cfdbb58e140e9ba38388ed",
+      "bytes": 22891839
+    },
+    "rehearsal-receipt.json": {
+      "sha256": "d2fe1791af254b17c077b59012bc2e5cd9ba9e087aec10f6c3b752399b39fb4f",
+      "bytes": 102341
+    },
+    "candidate-rehearsal-authority.json": {
+      "sha256": "6bea1aa94c0fc17cfa6fa533f7c9ffc83b5e170c12d5339ea8d576575c723a35",
+      "bytes": 16570
+    }
+  }
+}

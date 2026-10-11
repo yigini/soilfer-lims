@@ -1,0 +1,228 @@
+{
+  "diagnosticOnlyNeverCompletedProof": true,
+  "parseAfterOwnedStop": "REFUSED",
+  "error": "Scheduler refusal has no exact bound trigger",
+  "completedSyncs": [
+    {
+      "utc": "2026-10-11T21:23:13.154182424Z",
+      "epochSeconds": 1791753793.154182,
+      "labId": "ZMB-LAB1",
+      "newSamples": 155,
+      "skipped": 1
+    },
+    {
+      "utc": "2026-10-11T21:38:58.048864284Z",
+      "epochSeconds": 1791754738.048864,
+      "labId": "ZMB-LAB1",
+      "newSamples": 0,
+      "skipped": 0
+    }
+  ],
+  "unmatched": [
+    {
+      "event": {
+        "utc": "2026-10-11T21:39:58.001630940Z",
+        "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database."
+      },
+      "nearbySchedulerEvents": [
+        {
+          "utc": "2026-10-11T21:38:58.337682092Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:38:58.337801525Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3"
+        },
+        {
+          "utc": "2026-10-11T21:38:58.340736364Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:38:58.340860099Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8"
+        },
+        {
+          "utc": "2026-10-11T21:38:58.343858720Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001630940Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001743639Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001770178Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001779195Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001850382Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL"
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001871737Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP"
+        }
+      ]
+    },
+    {
+      "event": {
+        "utc": "2026-10-11T21:39:58.001743639Z",
+        "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+      },
+      "nearbySchedulerEvents": [
+        {
+          "utc": "2026-10-11T21:38:58.337801525Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3"
+        },
+        {
+          "utc": "2026-10-11T21:38:58.340736364Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:38:58.340860099Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8"
+        },
+        {
+          "utc": "2026-10-11T21:38:58.343858720Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001630940Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001743639Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001770178Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001779195Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001850382Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL"
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001871737Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP"
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001919453Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3"
+        }
+      ]
+    },
+    {
+      "event": {
+        "utc": "2026-10-11T21:39:58.001770178Z",
+        "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+      },
+      "nearbySchedulerEvents": [
+        {
+          "utc": "2026-10-11T21:38:58.340736364Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:38:58.340860099Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8"
+        },
+        {
+          "utc": "2026-10-11T21:38:58.343858720Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001630940Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001743639Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001770178Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001779195Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001850382Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL"
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001871737Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP"
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001919453Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3"
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001937904Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8"
+        }
+      ]
+    },
+    {
+      "event": {
+        "utc": "2026-10-11T21:39:58.001779195Z",
+        "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+      },
+      "nearbySchedulerEvents": [
+        {
+          "utc": "2026-10-11T21:38:58.340860099Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8"
+        },
+        {
+          "utc": "2026-10-11T21:38:58.343858720Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001630940Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001743639Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001770178Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001779195Z",
+          "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001850382Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL"
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001871737Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP"
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001919453Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3"
+        },
+        {
+          "utc": "2026-10-11T21:39:58.001937904Z",
+          "text": "[KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8"
+        }
+      ]
+    }
+  ],
+  "schedulerEventCount": 158
+}
