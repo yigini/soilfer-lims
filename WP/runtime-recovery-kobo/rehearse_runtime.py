@@ -18,7 +18,7 @@ import time
 
 import release_support as s
 import startup_common as c
-from known_core_disk_guard import KnownCoreDiskGuard
+from known_core_disk_guard_v2 import KnownCoreDiskGuard
 from capture_kobo_fetch import capture
 from kobo_copy_preservation import verify_copy
 from proof_contract import *
@@ -29,6 +29,7 @@ HISTORICAL_RECEIPT_SHA = '35ab0b825a5d52414304d426101863b671ce5d3b92f6d8eb81e8b7
 HELPER_HASHES = {'release_support.py': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
     'startup_common.py': 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00',
     'known_core_disk_guard.py': 'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169',
+    'known_core_disk_guard_v2.py': 'f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c',
     'kobo_copy_preservation.py': '8d9f39681ee912eced2a03b6d159cab9bc8fcd0ad351ed620c48ae7ec1bd5d6c',
     'capture_kobo_fetch.py': '1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86'}
 
@@ -129,6 +130,11 @@ def main():
         require(source['files'][name]['sha256'] == digest, 'Reviewed helper changed: ' + name)
     pin = json.loads((ROOT / 'target-pin.json').read_bytes())
     require((ROOT / 'target-pin.json').stat().st_mode & 0o777 == 0o400, 'Target pin is not frozen')
+    authority = json.loads((ROOT / 'candidate-rehearsal-authority.json').read_bytes())
+    source_review = authority['proofSourceReview']
+    require(source_review['id'] == pin['proofSourceReviewId'], 'Proof-source approval pin differs')
+    source_review_pass(source_review, source['head'], s.sha(__file__),
+        HELPER_HASHES['known_core_disk_guard_v2.py'])
     built_root = pathlib.Path(pin['buildRoot'])
     require(built_root.parent == pathlib.Path('/opt/lims/releases') and
         built_root.name.startswith('runtime-kobo-build-'), 'Unexpected build root')
@@ -161,6 +167,10 @@ def main():
         'head': pin['head'], 'image': pin['image'], 'targetPinSha256': s.sha(ROOT / 'target-pin.json'),
         'sourceIndexSha256': s.sha(ROOT / 'source-index.json'), 'toolingCommit': source['head'],
         'coordinatorSha256': s.sha(__file__), 'buildReceiptSha256': pin['buildReceiptSha256'],
+        'proofSourceReviewId': source_review['id'],
+        'authoritySha256': s.sha(ROOT / 'candidate-rehearsal-authority.json'),
+        'diskMeasurementGuardSha256': HELPER_HASHES['known_core_disk_guard_v2.py'],
+        'coreDeallocationConfirmationDeadlineSeconds': 10,
         'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA, 'productionMutations': 0,
         'separateInstallerCommands': 0, 'scopeCommentIds': [6112209155, 6112305172, 6112436098],
         'existingSampleVerifierPolicy': 'STRICT_ORIGINAL_ROWS', 'effectiveUid': os.geteuid(),

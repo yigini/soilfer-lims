@@ -9,9 +9,16 @@ head = sys.argv[1]
 if len(head) != 40 or any(value not in '0123456789abcdef' for value in head):
     raise RuntimeError('Exact source commit required')
 files = {}
-for name in ['proof_contract', 'kobo_copy_preservation', 'capture_kobo_fetch',
-    'test_proof_contract', 'test_kobo_copy_preservation', 'test_capture_kobo_fetch']:
-    data = subprocess.check_output(['git', 'show', head + ':WP/runtime-recovery-kobo/' + name + '.py'])
+paths = {'release_support': 'WP/forward-ae64f169/release_support.py',
+    'startup_common': 'WP/forward-ae64f169/startup_common.py',
+    'known_core_disk_guard': 'WP/runtime-containment-ae64f169/known_core_disk_guard.py'}
+paths.update({name: 'WP/runtime-recovery-kobo/' + name + '.py' for name in [
+    'proof_contract', 'kobo_copy_preservation', 'capture_kobo_fetch', 'runtime_release_contract',
+    'known_core_disk_guard_v2', 'test_proof_contract', 'test_kobo_copy_preservation',
+    'test_capture_kobo_fetch', 'test_runtime_release_contract', 'test_core_deallocation_confirmation',
+    'test_source_review_pin']})
+for name, path in paths.items():
+    data = subprocess.check_output(['git', 'show', head + ':' + path])
     files[name] = {'data': base64.b64encode(data).decode(), 'sha256': hashlib.sha256(data).hexdigest()}
 payload = base64.b64encode(json.dumps({'head': head, 'files': files}).encode()).decode()
 code = '''import base64,datetime,hashlib,json,sys,time,types,unittest

@@ -15,7 +15,7 @@ import tarfile
 import time
 import release_support as s
 import startup_common as c
-from known_core_disk_guard import KnownCoreDiskGuard
+from known_core_disk_guard_v2 import KnownCoreDiskGuard
 from runtime_release_contract import *
 
 ROOT = pathlib.Path(__file__).resolve().parent

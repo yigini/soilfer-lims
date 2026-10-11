@@ -1,0 +1,225 @@
+{
+  "recordCount": 135,
+  "baseline": {
+    "utc": "2026-10-11T20:02:24.395715+00:00",
+    "freeBytes": {
+      "/opt/lims": 114281668608,
+      "/var/lib/docker": 114281668608
+    },
+    "rootAllocatedBytes": 151552,
+    "coreAllocatedBytes": 3035426816,
+    "active": []
+  },
+  "suspicious": [
+    {
+      "index": 131,
+      "utc": "2026-10-11T20:08:19.256956+00:00",
+      "freeBytes": {
+        "/opt/lims": 111994003456,
+        "/var/lib/docker": 111994003456
+      },
+      "rootGrowth": 1151905792,
+      "explained": {
+        "/opt/lims": 2285195264,
+        "/var/lib/docker": 2285195264
+      },
+      "unexplained": {
+        "/opt/lims": 2469888,
+        "/var/lib/docker": 2469888
+      },
+      "totalCoreBytes": 4168716288,
+      "activeBefore": [
+        {
+          "device": 64769,
+          "inode": 145901,
+          "blocks": 2097160,
+          "allocatedBytes": 1073745920,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "5",
+          "target": "/var/lib/systemd/coredump/#145901 (deleted)"
+        },
+        {
+          "device": 64769,
+          "inode": 145953,
+          "blocks": 11392,
+          "allocatedBytes": 5832704,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "8",
+          "target": "/var/lib/systemd/coredump/#145953 (deleted)"
+        }
+      ],
+      "activeAfter": [
+        {
+          "device": 64769,
+          "inode": 145901,
+          "blocks": 2097160,
+          "allocatedBytes": 1073745920,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "5",
+          "target": "/var/lib/systemd/coredump/#145901 (deleted)"
+        },
+        {
+          "device": 64769,
+          "inode": 145953,
+          "blocks": 13680,
+          "allocatedBytes": 7004160,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "8",
+          "target": "/var/lib/systemd/coredump/#145953 (deleted)"
+        }
+      ],
+      "unstable": []
+    },
+    {
+      "index": 132,
+      "utc": "2026-10-11T20:08:20.528466+00:00",
+      "freeBytes": {
+        "/opt/lims": 111981027328,
+        "/var/lib/docker": 111981027328
+      },
+      "rootGrowth": 1151995904,
+      "explained": {
+        "/opt/lims": 2298187776,
+        "/var/lib/docker": 2298187776
+      },
+      "unexplained": {
+        "/opt/lims": 2453504,
+        "/var/lib/docker": 2453504
+      },
+      "totalCoreBytes": 4181618688,
+      "activeBefore": [
+        {
+          "device": 64769,
+          "inode": 145901,
+          "blocks": 2097160,
+          "allocatedBytes": 1073745920,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "5",
+          "target": "/var/lib/systemd/coredump/#145901 (deleted)"
+        },
+        {
+          "device": 64769,
+          "inode": 145953,
+          "blocks": 36592,
+          "allocatedBytes": 18735104,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "8",
+          "target": "/var/lib/systemd/coredump/#145953 (deleted)"
+        }
+      ],
+      "activeAfter": [
+        {
+          "device": 64769,
+          "inode": 145901,
+          "blocks": 2097160,
+          "allocatedBytes": 1073745920,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "5",
+          "target": "/var/lib/systemd/coredump/#145901 (deleted)"
+        },
+        {
+          "device": 64769,
+          "inode": 145953,
+          "blocks": 38328,
+          "allocatedBytes": 19623936,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "8",
+          "target": "/var/lib/systemd/coredump/#145953 (deleted)"
+        }
+      ],
+      "unstable": []
+    },
+    {
+      "index": 133,
+      "utc": "2026-10-11T20:08:21.807322+00:00",
+      "freeBytes": {
+        "/opt/lims": 111973130240,
+        "/var/lib/docker": 111973130240
+      },
+      "rootGrowth": 1152090112,
+      "explained": {
+        "/opt/lims": 2306453504,
+        "/var/lib/docker": 2306453504
+      },
+      "unexplained": {
+        "/opt/lims": 2084864,
+        "/var/lib/docker": 2084864
+      },
+      "totalCoreBytes": 4189790208,
+      "activeBefore": [
+        {
+          "device": 64769,
+          "inode": 145901,
+          "blocks": 2097160,
+          "allocatedBytes": 1073745920,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "5",
+          "target": "/var/lib/systemd/coredump/#145901 (deleted)"
+        },
+        {
+          "device": 64769,
+          "inode": 145953,
+          "blocks": 52552,
+          "allocatedBytes": 26906624,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "8",
+          "target": "/var/lib/systemd/coredump/#145953 (deleted)"
+        }
+      ],
+      "activeAfter": [
+        {
+          "device": 64769,
+          "inode": 145901,
+          "blocks": 2097160,
+          "allocatedBytes": 1073745920,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "5",
+          "target": "/var/lib/systemd/coredump/#145901 (deleted)"
+        },
+        {
+          "device": 64769,
+          "inode": 145953,
+          "blocks": 52552,
+          "allocatedBytes": 26906624,
+          "kind": "active-systemd-core",
+          "process": 436162,
+          "fd": "8",
+          "target": "/var/lib/systemd/coredump/#145953 (deleted)"
+        }
+      ],
+      "unstable": []
+    },
+    {
+      "index": 134,
+      "utc": "2026-10-11T20:08:23.256269+00:00",
+      "freeBytes": {
+        "/opt/lims": 111972671488,
+        "/var/lib/docker": 111972671488
+      },
+      "rootGrowth": 1152180224,
+      "explained": {
+        "/opt/lims": 1233162240,
+        "/var/lib/docker": 1233162240
+      },
+      "unexplained": {
+        "/opt/lims": 1075834880,
+        "/var/lib/docker": 1075834880
+      },
+      "totalCoreBytes": 3116408832,
+      "activeBefore": [],
+      "activeAfter": [],
+      "unstable": []
+    }
+  ]
+}

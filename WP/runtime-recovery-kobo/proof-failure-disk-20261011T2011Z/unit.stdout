@@ -1,0 +1,4 @@
+{"stage": "candidate-jobs-off", "elapsedSeconds": 40.02620007900259, "pending": true}
+{"stage": "candidate-jobs-off", "elapsedSeconds": 80.2292504649995, "pending": true}
+{"stage": "candidate-jobs-on", "elapsedSeconds": 39.74529256599999, "pending": true}
+{"status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF", "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z", "receiptSha256": "ee68fd53f099a9e68840dae2ff4e8eeabbbc24e8e3b16ffd5a63d4fbf2cb8109"}

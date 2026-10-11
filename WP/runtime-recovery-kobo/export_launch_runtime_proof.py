@@ -11,7 +11,7 @@ import json
 import pathlib
 import subprocess
 import sys
-from proof_contract import AUDITED_PR_HEAD, require
+from proof_contract import AUDITED_PR_HEAD, require, source_review_pass
 
 
 def github(endpoint):
@@ -59,7 +59,8 @@ def main():
         'mainCi': {key: ci[key] for key in ['id', 'head_sha', 'name', 'status', 'conclusion', 'updated_at']},
         'checks': [{key: value[key] for key in ['name', 'status', 'conclusion', 'head_sha']} for value in checks]}
     paths = {name: 'WP/runtime-recovery-kobo/' + name for name in [
-        'rehearse_runtime.py', 'proof_contract.py', 'capture_kobo_fetch.py', 'kobo_copy_preservation.py']}
+        'rehearse_runtime.py', 'proof_contract.py', 'capture_kobo_fetch.py', 'kobo_copy_preservation.py',
+        'known_core_disk_guard_v2.py']}
     paths['known_core_disk_guard.py'] = 'WP/runtime-containment-ae64f169/known_core_disk_guard.py'
     paths.update({name: 'WP/forward-ae64f169/' + name for name in ['release_support.py', 'startup_common.py',
         'postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs', 'postflight-qc-runs.cjs',
@@ -74,6 +75,18 @@ def main():
             'Raw Git blob identity mismatch')
         files[name] = base64.b64encode(data).decode()
         index[name] = {'path': git_path, 'blob': blob, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
+    source_review = github('repos/yigini/soilfer-lims/issues/comments/' + str(pin['proofSourceReviewId']))
+    source_review_pass(source_review, tooling, index['rehearse_runtime.py']['sha256'],
+        index['known_core_disk_guard_v2.py']['sha256'])
+    source_comments = json.loads(subprocess.check_output(['gh', 'api',
+        'repos/yigini/soilfer-lims/issues/162/comments?per_page=100', '--paginate', '--slurp'],
+        text=True, encoding='utf-8'))
+    require(not any(('source review: failed' in comment['body'].lower() or
+        'audit failed' in comment['body'].lower()) and comment['created_at'] > source_review['created_at']
+        for page in source_comments for comment in page), 'Later source audit failure exists')
+    require(github('repos/yigini/soilfer-lims/git/ref/heads/main')['object']['sha'] == pin['head'],
+        'Main changed during proof preparation')
+    authority['proofSourceReview'] = source_review
     payload = base64.b64encode(json.dumps({'root': root, 'unit': unit, 'files': files,
         'pin': base64.b64encode(pin_bytes).decode(), 'authority': authority,
         'index': {'head': tooling, 'files': index}}).encode()).decode()

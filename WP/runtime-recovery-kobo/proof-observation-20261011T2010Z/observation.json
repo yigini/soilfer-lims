@@ -1,0 +1,31 @@
+{
+  "observedUtc": "2026-10-11T20:10:12.049408+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z",
+  "unit": "lims-owned-runtime-kobo-proof-171dd36c-20261011t200210z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=1\nActiveState=failed\nSubState=failed\n",
+  "unit.stdoutTail": "{\"stage\": \"candidate-jobs-off\", \"elapsedSeconds\": 40.02620007900259, \"pending\": true}\n{\"stage\": \"candidate-jobs-off\", \"elapsedSeconds\": 80.2292504649995, \"pending\": true}\n{\"stage\": \"candidate-jobs-on\", \"elapsedSeconds\": 39.74529256599999, \"pending\": true}\n{\"status\": \"FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF\", \"root\": \"/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z\", \"receiptSha256\": \"ee68fd53f099a9e68840dae2ff4e8eeabbbc24e8e3b16ffd5a63d4fbf2cb8109\"}\n",
+  "unit.stderrTail": "",
+  "files": {
+    "rehearsal-receipt.json": {
+      "bytes": 32185,
+      "sha256": "ee68fd53f099a9e68840dae2ff4e8eeabbbc24e8e3b16ffd5a63d4fbf2cb8109",
+      "mode": "0o400"
+    },
+    "target-pin.json": {
+      "bytes": 766,
+      "sha256": "8b6492bdaaa51544bd2a85404aa75bcbabe3a22e39ea2c03bab57658fccaafff",
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 3461,
+      "sha256": "fa3def3e637cd8d407913beaa0bbcea807ee510df075f11b430a98134ab37fc9",
+      "mode": "0o400"
+    },
+    "upstream-before-start.json": {
+      "bytes": 140394,
+      "sha256": "a0eb10f24ccb62a2897af2281bc9765be34b14c812f7f1bc23e2a94ff7239add",
+      "mode": "0o400"
+    }
+  }
+}

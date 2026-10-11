@@ -1,0 +1,77 @@
+{
+  "status": "READ_ONLY_WATCH_COMPLETE",
+  "recordCount": 47,
+  "elapsedSeconds": 151.044149,
+  "observationsSha256": "98651f27de7528fd6d918230c832ba3258fc29d8fa56a0f0351f0c99aaca0404",
+  "firstFreeBytes": {
+    "/opt/lims": 113019785216,
+    "/var/lib/docker": 113019785216
+  },
+  "lastFreeBytes": {
+    "/opt/lims": 112964411392,
+    "/var/lib/docker": 112964411392
+  },
+  "transitions": [
+    {
+      "previousUtc": "2026-10-11T20:12:32.101997+00:00",
+      "utc": "2026-10-11T20:12:35.372855+00:00",
+      "freeDeltaBytes": 1066762240,
+      "coreDeltaBytes": -1066729472,
+      "previousActive": [
+        {
+          "device": 64769,
+          "inode": 145951,
+          "blocks": 39648,
+          "allocatedBytes": 20299776,
+          "kind": "active-systemd-core",
+          "process": 440927,
+          "fd": "8",
+          "target": "/var/lib/systemd/coredump/#145951 (deleted)"
+        },
+        {
+          "device": 64769,
+          "inode": 145954,
+          "blocks": 2097160,
+          "allocatedBytes": 1073745920,
+          "kind": "active-systemd-core",
+          "process": 440927,
+          "fd": "5",
+          "target": "/var/lib/systemd/coredump/#145954 (deleted)"
+        }
+      ],
+      "currentActive": [],
+      "allOpenCurrent": []
+    },
+    {
+      "previousUtc": "2026-10-11T20:14:33.779310+00:00",
+      "utc": "2026-10-11T20:14:37.037026+00:00",
+      "freeDeltaBytes": 1066729472,
+      "coreDeltaBytes": -1067380736,
+      "previousActive": [
+        {
+          "device": 64769,
+          "inode": 145954,
+          "blocks": 41160,
+          "allocatedBytes": 21073920,
+          "kind": "active-systemd-core",
+          "process": 442959,
+          "fd": "8",
+          "target": "/var/lib/systemd/coredump/#145954 (deleted)"
+        },
+        {
+          "device": 64769,
+          "inode": 145955,
+          "blocks": 2097160,
+          "allocatedBytes": 1073745920,
+          "kind": "active-systemd-core",
+          "process": 442959,
+          "fd": "5",
+          "target": "/var/lib/systemd/coredump/#145955 (deleted)"
+        }
+      ],
+      "currentActive": [],
+      "allOpenCurrent": []
+    }
+  ],
+  "productionMutations": 0
+}

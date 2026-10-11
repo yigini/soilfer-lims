@@ -1,0 +1,83 @@
+{
+  "head": "84b4ce497b4b242021f7ce6f4a093ceda7978cd8",
+  "files": {
+    "rehearse_runtime.py": {
+      "path": "WP/runtime-recovery-kobo/rehearse_runtime.py",
+      "blob": "e8bc7c6a55b9608a856eb823eab125488a7cb826",
+      "bytes": 19348,
+      "sha256": "a88223aa90e22253118b56ce72770ec1a219d0a82f71b3c9556a00c79e8f4271"
+    },
+    "proof_contract.py": {
+      "path": "WP/runtime-recovery-kobo/proof_contract.py",
+      "blob": "b375806ddb079764fd590f7c8db8b86200e07ae2",
+      "bytes": 5032,
+      "sha256": "f94a009bad7c89331b1126ab05b7126261fc037c4aabfab3a1e8702ba7960bd6"
+    },
+    "capture_kobo_fetch.py": {
+      "path": "WP/runtime-recovery-kobo/capture_kobo_fetch.py",
+      "blob": "79e2ad45eba9fd6d6e38b37cd36801243dd648d8",
+      "bytes": 4767,
+      "sha256": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86"
+    },
+    "kobo_copy_preservation.py": {
+      "path": "WP/runtime-recovery-kobo/kobo_copy_preservation.py",
+      "blob": "a79b46ec92be60a6d04a31e21e0113328addae64",
+      "bytes": 15147,
+      "sha256": "8d9f39681ee912eced2a03b6d159cab9bc8fcd0ad351ed620c48ae7ec1bd5d6c"
+    },
+    "known_core_disk_guard.py": {
+      "path": "WP/runtime-containment-ae64f169/known_core_disk_guard.py",
+      "blob": "026e2245268324c3157eb186ba747776e7a4b55d",
+      "bytes": 5984,
+      "sha256": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169"
+    },
+    "release_support.py": {
+      "path": "WP/forward-ae64f169/release_support.py",
+      "blob": "8ea639b57cb1eec468e6794e5ccc32ba9a468e99",
+      "bytes": 20330,
+      "sha256": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810"
+    },
+    "startup_common.py": {
+      "path": "WP/forward-ae64f169/startup_common.py",
+      "blob": "757c0d350769ab58b5f0b8e4ba810af8c9bdce0d",
+      "bytes": 13858,
+      "sha256": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+    },
+    "postflight-roles.cjs": {
+      "path": "WP/forward-ae64f169/postflight-roles.cjs",
+      "blob": "bc6fe5f35ccc52e0c7b48a444a9432d05162a4a3",
+      "bytes": 12281,
+      "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da"
+    },
+    "postflight-auth.cjs": {
+      "path": "WP/forward-ae64f169/postflight-auth.cjs",
+      "blob": "6521d1c4a8f04e24641df967de4f674e9907dfb8",
+      "bytes": 2045,
+      "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192"
+    },
+    "postflight-reference.cjs": {
+      "path": "WP/forward-ae64f169/postflight-reference.cjs",
+      "blob": "6155145febed24f58efabfba236bae91f00e46a3",
+      "bytes": 2096,
+      "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526"
+    },
+    "postflight-qc-runs.cjs": {
+      "path": "WP/forward-ae64f169/postflight-qc-runs.cjs",
+      "blob": "ab7fd7f03555f6d5af423d6750e8de908965d53a",
+      "bytes": 4091,
+      "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f"
+    },
+    "postflight-policy.cjs": {
+      "path": "WP/forward-ae64f169/postflight-policy.cjs",
+      "blob": "19e12bb1c77a43f78098eb4af208d05f34f96c46",
+      "bytes": 4035,
+      "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51"
+    },
+    "readonly-smoke.cjs": {
+      "path": "WP/forward-ae64f169/readonly-smoke.cjs",
+      "blob": "555a67e4f125160eba990086fa4d0f60c6085bb8",
+      "bytes": 3255,
+      "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626"
+    }
+  }
+}

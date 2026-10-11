@@ -1,0 +1,54 @@
+{
+  "observedUtc": "2026-10-11T20:10:44.786574+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z",
+  "productionMutations": 0,
+  "files": {
+    "disk-allocation-observations.jsonl": {
+      "sha256": "6e82ce0aef18eddbb0705a4a66891c3204fb63c60ff3654568059667842b8fe4",
+      "bytes": 12032560,
+      "mode": "0o644"
+    },
+    "unit.stdout": {
+      "sha256": "13e49d1a62b8558b58ee4347a33591466e6c2f9d8e7ea0df24da9cbc13ca51fe",
+      "bytes": 470,
+      "mode": "0o644"
+    },
+    "unit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": "0o644"
+    }
+  },
+  "containers": {
+    "jobs-off": {
+      "exists": true,
+      "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+      "restartCount": 0,
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "ExitCode": 137,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-11T20:03:19.627019058Z",
+        "FinishedAt": "2026-10-11T20:06:51.686336219Z"
+      },
+      "health": "unhealthy",
+      "memoryLimit": 805306368
+    },
+    "jobs-on": {
+      "exists": true,
+      "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+      "restartCount": 0,
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "ExitCode": 137,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-11T20:07:21.24705463Z",
+        "FinishedAt": "2026-10-11T20:08:53.599465782Z"
+      },
+      "health": "unhealthy",
+      "memoryLimit": 805306368
+    }
+  }
+}

@@ -14,7 +14,7 @@ def main():
     safe_root(proof, 'runtime-kobo-proof-'); safe_root(package, 'runtime-kobo-package-'); safe_root(target, 'runtime-kobo-release-')
     paths = {name: 'WP/runtime-recovery-kobo/' + name for name in ['rehearse_runtime.py', 'proof_contract.py',
         'kobo_copy_preservation.py', 'capture_kobo_fetch.py', 'runtime_release_contract.py',
-        'deploy_runtime.py', 'freeze_runtime.py', 'collect_runtime_gate.py']}
+        'deploy_runtime.py', 'freeze_runtime.py', 'collect_runtime_gate.py', 'known_core_disk_guard_v2.py']}
     paths['known_core_disk_guard.py'] = 'WP/runtime-containment-ae64f169/known_core_disk_guard.py'
     paths.update({name: 'WP/forward-ae64f169/' + name for name in ['release_support.py', 'startup_common.py',
         'postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs', 'postflight-qc-runs.cjs',

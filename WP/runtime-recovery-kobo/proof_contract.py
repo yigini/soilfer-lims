@@ -49,6 +49,20 @@ def validate_candidate(pin, built, image):
     require(built.get('productionDatabaseMounts') == 0, 'Build had a production data mount')
 
 
+def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None):
+    """A NEW measurement source needs its own explicit exact-byte approval."""
+    require(review['id'] != 6112725472 and review['html_url'] ==
+        'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(review['id']),
+        'New proof-source review missing')
+    tokens = ['Source review: PASS', tooling, coordinator_sha, guard_sha,
+        'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169',
+        'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
+        'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
+    require(all(value in review['body'] for value in tokens), 'Exact corrected source approval missing')
+    now = now or datetime.datetime.now(datetime.timezone.utc)
+    require(utc_seconds(review['created_at']) <= now.timestamp(), 'Source review is future-dated')
+
+
 def completed_syncs(log, lab=TARGET_LAB):
     """Parse only observed completion headers and numeric fields, never JS eval.
 

@@ -1,0 +1,26 @@
+{
+  "observedUtc": "2026-10-11T20:04:28.094396+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z",
+  "unit": "lims-owned-runtime-kobo-proof-171dd36c-20261011t200210z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "unit.stdoutTail": "{\"stage\": \"candidate-jobs-off\", \"elapsedSeconds\": 40.02620007900259, \"pending\": true}\n",
+  "unit.stderrTail": "",
+  "files": {
+    "target-pin.json": {
+      "bytes": 766,
+      "sha256": "8b6492bdaaa51544bd2a85404aa75bcbabe3a22e39ea2c03bab57658fccaafff",
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 3461,
+      "sha256": "fa3def3e637cd8d407913beaa0bbcea807ee510df075f11b430a98134ab37fc9",
+      "mode": "0o400"
+    },
+    "upstream-before-start.json": {
+      "bytes": 140394,
+      "sha256": "a0eb10f24ccb62a2897af2281bc9765be34b14c812f7f1bc23e2a94ff7239add",
+      "mode": "0o400"
+    }
+  }
+}
