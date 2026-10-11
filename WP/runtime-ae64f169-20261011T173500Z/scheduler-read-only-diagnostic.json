@@ -1,0 +1,191 @@
+{
+  "utc": "2026-10-11T17:43:17.685140+00:00",
+  "readOnly": true,
+  "image": "sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a",
+  "restartCount": 46,
+  "status": "running",
+  "health": "unhealthy",
+  "memoryLimitBytes": 805306368,
+  "selectedEnvironment": {
+    "NODE_ENV": "production",
+    "NODE_OPTIONS": "",
+    "DISABLE_BACKGROUND_JOBS": "false"
+  },
+  "database": "/var/lib/docker/volumes/lims_lims-data/_data/dev.db",
+  "koboColumns": [
+    "id",
+    "labId",
+    "projectCode",
+    "isActive",
+    "lastSubmissionId",
+    "lastSyncAt",
+    "syncIntervalMins",
+    "formId",
+    "updatedAt"
+  ],
+  "koboRows": [
+    {
+      "id": "25731264-f02a-4172-8ef1-75512b7607a5",
+      "labId": "GHA-LAB1",
+      "projectCode": "SOILFER-US",
+      "isActive": 1,
+      "lastSubmissionId": "41299",
+      "lastSyncAt": "2026-10-11T15:57:05.090+00:00",
+      "syncIntervalMins": 15,
+      "formId": "aQtvKZHiZmtqVCkQsGw2X4",
+      "updatedAt": "2026-10-11T15:57:05.091+00:00"
+    },
+    {
+      "id": "38744747-1d3f-4f4a-8523-6f251ecd1fba",
+      "labId": "TUN-LAB1",
+      "projectCode": "SOILFER-JPN",
+      "isActive": 1,
+      "lastSubmissionId": "10135",
+      "lastSyncAt": "2026-10-11T15:57:04.946+00:00",
+      "syncIntervalMins": 15,
+      "formId": "aLALh2Lp2HwbC2tTejyAzR",
+      "updatedAt": "2026-10-11T15:57:04.947+00:00"
+    },
+    {
+      "id": "534aec5a-2b3a-49f1-9136-507f624fbf6b",
+      "labId": "GTM-LAB1",
+      "projectCode": "SOILFER-US",
+      "isActive": 1,
+      "lastSubmissionId": "33625",
+      "lastSyncAt": "2026-10-11T17:32:03.471+00:00",
+      "syncIntervalMins": 15,
+      "formId": "aYU8RNGWtCtwTJh2ph6FdM",
+      "updatedAt": "2026-10-11T17:32:03.513+00:00"
+    },
+    {
+      "id": "6e60eebe-5d8d-4e13-8037-efeb8041b24c",
+      "labId": "MOZ-LAB1",
+      "projectCode": "SOILFER-JPN",
+      "isActive": 1,
+      "lastSubmissionId": "40410",
+      "lastSyncAt": "2026-10-11T15:57:04.871+00:00",
+      "syncIntervalMins": 15,
+      "formId": "aKDDwLku3FEU3hHyC8sHUt",
+      "updatedAt": "2026-10-11T15:57:04.873+00:00"
+    },
+    {
+      "id": "78cd0dc8-f04c-4bcf-9451-bc9507ee0623",
+      "labId": "HND-LAB1",
+      "projectCode": "SOILFER-US",
+      "isActive": 1,
+      "lastSubmissionId": "11035",
+      "lastSyncAt": "2026-10-11T17:32:03.635+00:00",
+      "syncIntervalMins": 15,
+      "formId": "akt25hEErmCj2G9LBhs4sS",
+      "updatedAt": "2026-10-11T17:32:03.637+00:00"
+    },
+    {
+      "id": "897c1fb0-d83c-40cd-b513-b3e6e6b78172",
+      "labId": "ZMB-LAB1",
+      "projectCode": "SOILFER-US",
+      "isActive": 1,
+      "lastSubmissionId": "41521",
+      "lastSyncAt": "2026-10-11T15:57:04.801+00:00",
+      "syncIntervalMins": 15,
+      "formId": "aXhpApWo6jKUHmJ43PJMpj",
+      "updatedAt": "2026-10-11T15:57:04.801+00:00"
+    },
+    {
+      "id": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "isActive": 1,
+      "lastSubmissionId": "12729",
+      "lastSyncAt": "2026-02-12T11:16:08.354+00:00",
+      "syncIntervalMins": 15,
+      "formId": "aPxrLnu2gVKu8f7XFUtefT",
+      "updatedAt": "2026-02-12T11:16:08.355+00:00"
+    },
+    {
+      "id": "c630d7b4-5d44-4826-94e5-5851abbd2a46",
+      "labId": "KEN-LAB1",
+      "projectCode": "SOILFER-US",
+      "isActive": 1,
+      "lastSubmissionId": "39774",
+      "lastSyncAt": "2026-10-11T15:57:05.019+00:00",
+      "syncIntervalMins": 15,
+      "formId": "aPV3Fta6MPNt7ZQmcJqw9s",
+      "updatedAt": "2026-10-11T15:57:05.019+00:00"
+    },
+    {
+      "id": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "isActive": 1,
+      "lastSubmissionId": "37371",
+      "lastSyncAt": "2026-09-01T21:15:54.249+00:00",
+      "syncIntervalMins": 15,
+      "formId": "aBVsGjc5q9PxBXk3cbEwQU",
+      "updatedAt": "2026-09-01T21:15:54.266+00:00"
+    },
+    {
+      "id": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "isActive": 1,
+      "lastSubmissionId": "12729",
+      "lastSyncAt": "2026-02-12T11:15:20.306+00:00",
+      "syncIntervalMins": 15,
+      "formId": "aPxrLnu2gVKu8f7XFUtefT",
+      "updatedAt": "2026-02-12T11:15:20.310+00:00"
+    },
+    {
+      "id": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "isActive": 1,
+      "lastSubmissionId": "37371",
+      "lastSyncAt": "2026-09-01T21:15:55.179+00:00",
+      "syncIntervalMins": 15,
+      "formId": "aBVsGjc5q9PxBXk3cbEwQU",
+      "updatedAt": "2026-09-01T21:15:55.180+00:00"
+    }
+  ],
+  "sampleStatistics": {
+    "sampleCount": 38773,
+    "metadataCharacters": 409100756,
+    "maxRowMetadataCharacters": 19456
+  },
+  "protectedCounts": {
+    "Result": 19,
+    "WorkItem": 90,
+    "WorkAttempt": 19,
+    "ReviewDecision": 7,
+    "ResultEvidenceEvent": 0,
+    "Report": 4,
+    "_schema_migrations": 38
+  },
+  "crashTimelineLines": [
+    "2026-10-11T17:39:45.753200484Z [KOBO_SCHEDULER] Starting Kobo background sync scheduler (Tick: 60s)",
+    "2026-10-11T17:39:46.397506341Z [SCHEDULER] Escalation background scheduler initialized",
+    "2026-10-11T17:39:56.125997047Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: ZMB-LAB1, Project: SOILFER-US",
+    "2026-10-11T17:39:56.127719791Z [KOBO] Starting sync for ZMB-LAB1...",
+    "2026-10-11T17:39:56.560798617Z [KOBO] Total 67 submissions fetched from form aXhpApWo6jKUHmJ43PJMpj",
+    "2026-10-11T17:40:13.790761089Z Target Database: /app/server/prisma/dev.db",
+    "2026-10-11T17:40:13.962728491Z [MIGRATE-APPEARANCE] Target DB: /app/server/prisma/dev.db",
+    "2026-10-11T17:40:14.136977072Z [MIGRATE-PROJECT-POLICY] Target DB: /app/server/prisma/dev.db",
+    "2026-10-11T17:40:14.316999326Z [MIGRATE-THEMES] Target DB: /app/server/prisma/dev.db",
+    "2026-10-11T17:40:30.326820720Z 📦 Installing retained raw input column...",
+    "2026-10-11T17:41:49.042516807Z [KOBO_SCHEDULER] Starting Kobo background sync scheduler (Tick: 60s)",
+    "2026-10-11T17:41:49.643477843Z [SCHEDULER] Escalation background scheduler initialized",
+    "2026-10-11T17:41:59.448771969Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: ZMB-LAB1, Project: SOILFER-US",
+    "2026-10-11T17:41:59.451450781Z [KOBO] Starting sync for ZMB-LAB1...",
+    "2026-10-11T17:41:59.890208344Z [KOBO] Total 67 submissions fetched from form aXhpApWo6jKUHmJ43PJMpj",
+    "2026-10-11T17:42:17.050551437Z Target Database: /app/server/prisma/dev.db",
+    "2026-10-11T17:42:17.214504629Z [MIGRATE-APPEARANCE] Target DB: /app/server/prisma/dev.db",
+    "2026-10-11T17:42:17.375865501Z [MIGRATE-PROJECT-POLICY] Target DB: /app/server/prisma/dev.db",
+    "2026-10-11T17:42:17.536868869Z [MIGRATE-THEMES] Target DB: /app/server/prisma/dev.db",
+    "2026-10-11T17:42:32.615931655Z 📦 Installing retained raw input column...",
+    "2026-10-11T17:40:00.435897873Z [1:0x7fcdcb8ee000]    58062 ms: Mark-Compact 380.2 (387.3) -> 375.6 (388.8) MB, pooled: 0 MB, 78.13 / 0.00 ms  (average mu = 0.696, current mu = 0.184) allocation failure; scavenge might not succeed",
+    "2026-10-11T17:40:00.435910623Z [1:0x7fcdcb8ee000]    58147 ms: Mark-Compact 379.6 (388.8) -> 379.6 (392.8) MB, pooled: 0 MB, 67.65 / 0.00 ms  (average mu = 0.599, current mu = 0.201) allocation failure; scavenge might not succeed",
+    "2026-10-11T17:40:00.435928575Z FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory",
+    "2026-10-11T17:42:04.264914238Z [1:0x7fa00a4ae000]    58846 ms: Mark-Compact (reduce) 387.6 (399.8) -> 387.4 (391.6) MB, pooled: 0 MB, 68.34 / 0.00 ms  (+ 1.4 ms in 117 steps since start of marking, biggest step 0.1 ms, walltime since start of marking 133 ms) (average mu = 0.639, curren",
+    "2026-10-11T17:42:04.264924376Z FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory"
+  ],
+  "freeBytes": 121975025664
+}

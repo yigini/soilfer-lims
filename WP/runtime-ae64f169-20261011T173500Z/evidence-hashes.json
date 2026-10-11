@@ -1,0 +1,47 @@
+[
+  {
+    "path": ".gitattributes",
+    "sha256": "e11eaef6f9afea37ce242a4e3c2d850e2157d4f10c498d878a65e4e64a474cc9",
+    "bytes": 33
+  },
+  {
+    "path": "claudio-pr291-repair-pins.json",
+    "sha256": "85bda6522ca7cdcaed9e5ad9141cb8fadca7c951801ca82caad3c8a03d8cd3a3",
+    "bytes": 6979
+  },
+  {
+    "path": "claudio-runtime-plan.json",
+    "sha256": "3c87f3fe8b6c0128f579e3f0f2a877ade0489c1dcb3fc5d2dfe2a546f054972d",
+    "bytes": 7094
+  },
+  {
+    "path": "incident-comment-body.md",
+    "sha256": "5e5d7c065e1ed627c5ccc72318d7eced1e89711bfc506d9a3ac944adeb2e26ac",
+    "bytes": 2071
+  },
+  {
+    "path": "incident-comment.json",
+    "sha256": "4e6c52c76bb4220ef7afde5d1b341632da1763dca99194dadcfd9c295d9ab15e",
+    "bytes": 3665
+  },
+  {
+    "path": "read-only-runtime-diagnostic.json",
+    "sha256": "f0db96ee422e6b7f29aa485b81aa9548eae608f306394bfca6dba351e2e5b1ca",
+    "bytes": 18478
+  },
+  {
+    "path": "README.md",
+    "sha256": "61e64ecd216749bc6fdd222e2e9e1f15247d1ae53ad9e73a8f96cb0377403539",
+    "bytes": 1948
+  },
+  {
+    "path": "restart-log-events.json",
+    "sha256": "8e96f02ddc3d8356fe5525a1872974b4fd25b5b9f1d337db4b01bca6fca1cd08",
+    "bytes": 598343
+  },
+  {
+    "path": "scheduler-read-only-diagnostic.json",
+    "sha256": "06cb9a938211b2d803d93f7616c2316db5d7ca6b083bb18ddea18a54fd679871",
+    "bytes": 7868
+  }
+]
