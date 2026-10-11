@@ -451,7 +451,7 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
 
         const procedureUri = methodObj?.glosisUri || aMeta.glosisUri || null;
         const propertyUri = aMeta.glosisPropertyUri || (aMeta.glosisProperty ? `http://glosis.org/ont/property/${aMeta.glosisProperty}` : null);
-        const qudtUnit = methodObj?.qudtUnit || aMeta.qudtUnit || null;
+        const { qudtUnit, unitDiagnostic } = require('./methodUnitAuthority').analysisQudtUnit(aMeta, methodObj);
 
         const rawUnit = r.unit || aMeta.units || null;
         const norm = normalizeUnit(r.param, r.value, rawUnit);
@@ -506,6 +506,7 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
             },
             controlledUnit,
             qudtUnit,
+            ...(unitDiagnostic ? { unitDiagnostic } : {}),
             lod: lodVal,
             loq: loqVal,
             uncertainty: uncVal,

@@ -312,9 +312,11 @@ async function appendAttemptCorrection(tx, { item, sample, attempt, target, acto
     return row;
 }
 
+// #283: the analysis's controlled unit is the only reporting-unit authority;
+// a method never supplies its own unit.
 function numericReportingUnit(ctx, measurement) {
     const fraction = FRACTIONS.includes(measurement.param) && TEXTURE_ANALYSES.has(ctx.analysis.code);
-    const unit = fraction ? '%' : measurement.unit || ctx.method?.unit || ctx.analysis.units || ctx.analysis.unitCode || null;
+    const unit = fraction ? '%' : measurement.unit || ctx.analysis.units || ctx.analysis.unitCode || null;
     if (!fraction && measurement.unit && ctx.analysis.units && ![ctx.analysis.units, ctx.analysis.unitCode].includes(measurement.unit)) {
         throw new TransitionError('Use the configured reporting unit.', 409, 'RESULT_UNIT_MISMATCH');
     }
@@ -684,6 +686,6 @@ function createRawResultFixture(db, data) {
         .run(...fields.map(field => data[field]));
 }
 
-module.exports = { writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
+module.exports = { numericReportingUnit, writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
     writeResultsExecution, appendAttemptCorrection, recordedExecution, assertRecordedResultSave,
     createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError, resolveResultRunContext, previewResultCalculation, resolveResultValidationContext };
