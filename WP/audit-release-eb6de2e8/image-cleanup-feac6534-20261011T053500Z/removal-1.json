@@ -1,0 +1,38 @@
+{
+  "utc": "2026-10-11T05:36:21.355021+00:00",
+  "command": [
+    "docker",
+    "image",
+    "rm",
+    "sha256:4636304d489ccbb9610f285d3d75cc2be7072aafc6ae819ba35f24f0fb983d9f"
+  ],
+  "exitCode": 0,
+  "stdout": "Untagged: soilfer-lims:audit-combined-eb6de2e8-main-042c04b5-retry-20261010T180200Z\nDeleted: sha256:4636304d489ccbb9610f285d3d75cc2be7072aafc6ae819ba35f24f0fb983d9f\n",
+  "stderr": "",
+  "before": {
+    "reserveBytes": 8589934592,
+    "dbBackupBytes": 563322880,
+    "assetsBytes": 3906103,
+    "logBudgetBytes": 268435456,
+    "backupHeadroomBytes": 835664439,
+    "requiredFreeBytes": 9425599031,
+    "freeBytes": {
+      "/opt/lims": 8556765184,
+      "/var/lib/docker": 8556765184
+    },
+    "utc": "2026-10-11T05:36:19.561186+00:00"
+  },
+  "after": {
+    "reserveBytes": 8589934592,
+    "dbBackupBytes": 563322880,
+    "assetsBytes": 3906103,
+    "logBudgetBytes": 268435456,
+    "backupHeadroomBytes": 835664439,
+    "requiredFreeBytes": 9425599031,
+    "freeBytes": {
+      "/opt/lims": 9832628224,
+      "/var/lib/docker": 9832628224
+    },
+    "utc": "2026-10-11T05:36:21.586411+00:00"
+  }
+}

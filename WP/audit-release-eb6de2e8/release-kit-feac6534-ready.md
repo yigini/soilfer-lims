@@ -1,17 +1,22 @@
-# Combined production kit ready for Claudio's exact review
+# Combined production release in progress
 
 Application: `feac653495d6b8a21e082cec596f1e14672fb389`.
 Last deployed: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
-Kit state: **PREPARED_ONLY_NOT_EXECUTED**, frozen at 2026-10-10 21:37:25 UTC.
-No production install, backfill, review action, quiesce or deployment occurred.
+Reviewed manifest state remains **PREPARED_ONLY_NOT_EXECUTED**, frozen at
+2026-10-10 21:37:25 UTC. Production execution is now **RUNNING** in the single
+unit `lims-release-feac6534-production-20261011t0543z.service`. Ingress was
+quiesced at 2026-10-11T05:43:07.183735Z. Read the live production receipt and
+unit before any continuation; never replay this execution directory or gate.
 
 Claudio's exact-kit audit **PASSED at 2026-10-10 21:42:44 UTC**:
 https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6102481848.
 The unchanged head, manifest/coordinator/PASSED receipt, both plans, YY choice
 hash and workload pins are all bound in the pass. The full API record is
-retained in `kit-audit-feac6534-e6b8b8de.json`. The remaining deployment hold
-is YY's pending storage choice and adequate live reserve including the backup.
-No fresh production execution gate is collected while that hold remains.
+retained in `kit-audit-feac6534-e6b8b8de.json`. YY authorized image-only cleanup
+and deployment in the current user request, with guards in #162 comment
+6105830882. The cleanup and two disk samples passed. Fresh production gate
+`c4e0a8f582526af97b4295080049b6087d5e07584e8a65ee4aaa3ff9b0d33f03`
+was collected at 2026-10-11T05:42:26.104Z and installed once without overwrite.
 
 The NEW complete real Docker rehearsal passed at **2026-10-10 21:33:43 UTC**,
 unit `lims-owned-feac6534-proof-20261010211834z.service`, exit 0. Its retained
@@ -110,18 +115,29 @@ freezing and remains exactly the hash above. Both source commits and the
 original rehearsal root are explicit in the manifest. All 26 frozen files
 were independently hash-verified and have mode 0400. No execution gate exists.
 
-## Production hold and review request
+## Storage clearance and production execution
 
-At 21:37 UTC, free space is **8,454,025,216 B**, below the strict
-**8,589,934,592 B** floor. Builder cache is 0. The stopped-writer DB backup
-needs another 563,322,880 B, plus assets/log headroom. YY's storage choice is
-pending in Claudio's original native card. Pip has not answered it and has
-not moved/deleted proof folders, images, volumes or data. No production
-quiesce will begin with a known failing reserve.
+YY's Remove old images choice at 05:27 UTC is recorded in #162 comment
+6105830882. The current trusted user request explicitly authorized cleanup
+and deployment. Native card navigation failed twice; Pip stopped UI input
+and does not claim fresh inspection of that card. The authorization record
+is `storage-authorization-20261011.md` and the original GitHub API record is
+`storage-choice-6105830882.json`.
 
-Please review this exact kit and the three packaging-only changes. An OK
-outcome must bind the exact application head, manifest/coordinator/PASSED
-receipt, both dry-plan hashes, YY #191 evidence hash, and the current workload
+Three explicitly named, unreferenced LIMS images were removed by digest with
+no force or prune, retaining all 25 other images and all containers. Before
+free: 8,556,904,448 B; first sample at 05:36:55.609918 UTC: 11,210,469,376 B;
+second at 05:42:10.196010 UTC: 11,209,916,416 B. Separation 314.586092 seconds,
+drop 552,960 B. Net cleanup freed 2,653,564,928 B. The conservative required
+free space is 9,425,599,031 B (8 GiB reserve + DB/assets backup + 256 MiB logs).
+Before/after `docker image ls --digests`, `df -B1`, removal results and samples
+are in `image-cleanup-feac6534-20261011T053500Z/` and the corresponding retained
+host directory. No DB/WAL/SHM, volume, backup, proof or receipt was removed.
+
+Read-only verification at 05:39:24 UTC reconfirmed all 26 frozen files, 2,224
+source blobs, 22 installer stages, 66 bounded CLI measurements, 21 end repeats,
+20 zero-change READY events, 31 checks, 6 read-only probes and full preservation.
+The fresh gate binds the unchanged exact-kit pass 6102481848 and both workload
 pins `labAndHubBuildsOwnedByYY=true` and `RELEASE_DAY_DISK_ABORTS_ACCEPTED`.
 
 YY's previously verified Main now / Auto after review authorizes this scope
@@ -137,8 +153,8 @@ old-image start, retry or override.
 #205/draft #288 and #284 remain excluded; Claudio holds new application
 merges. After actual deployment Pip posts exact SHA/UTC/health/receipt on the
 19 included issues in `deployment-issue-targets-feac6534.json` and #162.
-Claudio owns post-deploy checks and issue closures. Live remains healthy #188:
-HTTP 200, `status=ok`, version 1.9.0, zero container restarts, original image
+Claudio owns post-deploy checks and issue closures. Before execution, live was
+healthy #188: HTTP 200, `status=ok`, version 1.9.0, zero restarts, original image
 `sha256:b02ddff8d7549e981edc49215fef2d54ca654adaa2a8924eceb5d4ea0af00394`.
 
 Public metadata is retained beside this document:

@@ -1,0 +1,13 @@
+{
+  "reserveBytes": 8589934592,
+  "dbBackupBytes": 563322880,
+  "assetsBytes": 3906103,
+  "logBudgetBytes": 268435456,
+  "backupHeadroomBytes": 835664439,
+  "requiredFreeBytes": 9425599031,
+  "freeBytes": {
+    "/opt/lims": 11210469376,
+    "/var/lib/docker": 11210469376
+  },
+  "utc": "2026-10-11T05:36:55.609918+00:00"
+}
