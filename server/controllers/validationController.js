@@ -1,5 +1,5 @@
 const prisma = require('../prisma');
-const { calculateUsdaTexture, evaluateCnRatio, evaluateCecAndBases } = require('../utils/soilCalculations');
+const { calculateUsdaTexture } = require('../utils/soilCalculations');
 const { strict, valid } = require('../config/policyRegistry');
 
 exports.validateResult = async (paramId, value, methodologyId = null, db = prisma) => {
@@ -111,8 +111,9 @@ function textureGate(results, tolerancePct, catalogueUnits) {
 }
 
 /**
- * Validate full sample results matrix for cross-parameter scientific integrity.
- * @param {Array<{ param: string, value: any, unit?: string }>} results
+ * Blocking texture-closure gate for a sample's current results (#278). The
+ * advisory cross-parameter checks live in crossParameterEvaluator (#201, #279).
+ * @param {Array<{ param: string, numericValue?: number, unit?: string, censoring?: string, replicateNo?: number }>} results
  * @param {{ textureClosureTolerancePct?: number, catalogueUnits?: Object<string,string> }} [context]
  *   The laboratory's policy tolerance (#278) and the catalogue unit of each
  *   texture fraction, used only when a stored row has no unit.
@@ -123,19 +124,14 @@ exports.validateSampleMatrix = (results, context = {}) => {
     if (!valid('crossCheck.textureClosureTolerancePct', tolerancePct) || !(tolerancePct >= 0)) {
         throw Object.assign(new Error('Texture closure requires a valid laboratory tolerance.'), { statusCode: 409, code: 'CROSS_CHECK_POLICY_REQUIRED' });
     }
-    const resMap = {};
-    results.forEach(r => {
-        const num = parseFloat(String(r.value).replace(',', '.'));
-        if (!isNaN(num)) {
-            resMap[r.param.toUpperCase()] = { value: num, unit: r.unit };
-        }
-    });
-
     const diagnostics = {
         texture: null,
         textureClosure: [],
-        cnRatio: null,
-        basesAndCec: null,
+        // #279 (YY: "retire"): the legacy C:N and base/CEC advisories, with
+        // their text parsing, inferred units and missing-Na = 0 default, are
+        // retired. The #201 crossChecks are the only plausibility source.
+        retiredAdvisories: ['CN_RATIO', 'BASES_CEC'],
+        advisorySuccessor: 'crossChecks',
         warnings: [],
         blockingErrors: [],
         isBlocking: false
@@ -162,32 +158,6 @@ exports.validateSampleMatrix = (results, context = {}) => {
                 tolerancePct
             });
             diagnostics.isBlocking = true;
-        }
-    }
-
-    // 2. C:N Ratio Check - ADVISORY
-    const soc = resMap.SOC?.value ?? resMap.OC?.value ?? resMap.ORGANIC_CARBON?.value;
-    const tn = resMap.TN?.value ?? resMap.TOTAL_N?.value ?? resMap.N_TOT?.value;
-    const socUnit = resMap.SOC?.unit ?? resMap.OC?.unit ?? 'g/kg';
-    const tnUnit = resMap.TN?.unit ?? resMap.TOTAL_N?.unit ?? 'g/kg';
-    if (soc !== undefined && tn !== undefined) {
-        diagnostics.cnRatio = evaluateCnRatio(soc, tn, socUnit, tnUnit);
-        if (diagnostics.cnRatio.warning) {
-            diagnostics.warnings.push(diagnostics.cnRatio.warning);
-        }
-    }
-
-    // 3. Base Saturation & CEC Check - ADVISORY
-    const cec = resMap.CEC?.value;
-    const ca = resMap.EXCH_CA?.value ?? resMap.CA_EXCH?.value;
-    const mg = resMap.EXCH_MG?.value ?? resMap.MG_EXCH?.value;
-    const k = resMap.EXCH_K?.value ?? resMap.K_EXCH?.value;
-    const na = resMap.EXCH_NA?.value ?? resMap.NA_EXCH?.value ?? 0;
-    const ph = resMap.PH_H2O?.value ?? resMap.PH?.value ?? null;
-    if (ca !== undefined && mg !== undefined && k !== undefined) {
-        diagnostics.basesAndCec = evaluateCecAndBases(cec, ca, mg, k, na, ph);
-        if (diagnostics.basesAndCec.warnings.length > 0) {
-            diagnostics.warnings.push(...diagnostics.basesAndCec.warnings);
         }
     }
 
