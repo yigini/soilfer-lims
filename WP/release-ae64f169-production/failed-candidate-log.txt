@@ -1,0 +1,2686 @@
+2026-10-11T14:08:53.065086483Z ╔═══════════════════════════════════════╗
+2026-10-11T14:08:53.065177402Z ║    SoilFER-LIMS Docker Entrypoint     ║
+2026-10-11T14:08:53.065190392Z ╚═══════════════════════════════════════╝
+2026-10-11T14:08:53.523668934Z 📦 Applying versioned lab operations v3 migration...
+2026-10-11T14:08:53.636498845Z ╔══════════════════════════════════════════════════════════════╗
+2026-10-11T14:08:53.637188251Z ║  SoilFER-LIMS Lab Operations v3 Fail-Closed DB Migration    ║
+2026-10-11T14:08:53.637223311Z ╚══════════════════════════════════════════════════════════════╝
+2026-10-11T14:08:53.637336680Z Target Database: /app/server/prisma/dev.db
+2026-10-11T14:08:53.637351839Z Mode:            APPLY (Transactional Execution)
+2026-10-11T14:08:53.637648038Z 
+2026-10-11T14:08:53.677603527Z A94 manual-review candidates: [{"sampleId":"GTM-LAB1","tasks":[{"id":"WI-1789582246595-545","sampleId":"GTM-LAB1","analysis":"SAND","status":"NOT_ASSIGNED","assignedTo":null},{"id":"WI-1789582246600-449","sampleId":"GTM-LAB1","analysis":"SILT","status":"NOT_ASSIGNED","assignedTo":null},{"id":"WI-1789582246606-350","sampleId":"GTM-LAB1","analysis":"CLAY","status":"NOT_ASSIGNED","assignedTo":null}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"EXCH_NA\",\"CEC\",\"SAND\",\"SILT\",\"CLAY\"]","reasons":["COMPLETE_LEGACY_FRACTION_SET","DECLARED_REQUIRED_ANALYSES"]},{"sampleId":"Prueba 1 Arturo","tasks":[{"id":"WI-1789583575821-509","sampleId":"Prueba 1 Arturo","analysis":"SAND","status":"ASSIGNED","assignedTo":"tech_gtm_2"},{"id":"WI-1789583575826-765","sampleId":"Prueba 1 Arturo","analysis":"SILT","status":"ASSIGNED","assignedTo":"tech_gtm_2"},{"id":"WI-1789583575830-22","sampleId":"Prueba 1 Arturo","analysis":"CLAY","status":"ASSIGNED","assignedTo":"tech_gtm_2"}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"EXCH_NA\",\"CEC\",\"SAND\",\"SILT\",\"CLAY\"]","reasons":["COMPLETE_LEGACY_FRACTION_SET","DECLARED_REQUIRED_ANALYSES"]},{"sampleId":"W001","tasks":[{"id":"WI-1789481393069-84","sampleId":"W001","analysis":"SAND","status":"NOT_ASSIGNED","assignedTo":null}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"CEC\",\"SAND\"]","reasons":["EXPLICIT_GROUPED_ORDER"]}]
+2026-10-11T14:08:53.678004477Z ℹ️ [SCHEMA MIGRATIONS] Migration 'v3_lab_operations_20260906' was already applied at 2026-09-06 14:15:52.
+2026-10-11T14:08:53.678026373Z Skipping default re-assertions and data migrations to preserve administrative changes.
+2026-10-11T14:08:53.678036138Z 
+2026-10-11T14:08:53.678214813Z A94_MANUAL_REVIEW_PENDING: 3 candidate sample(s) tracked on #162 for #182/#183
+2026-10-11T14:08:53.678503259Z [{"sampleId":"GTM-LAB1","tasks":[{"id":"WI-1789582246595-545","sampleId":"GTM-LAB1","analysis":"SAND","status":"NOT_ASSIGNED","assignedTo":null},{"id":"WI-1789582246600-449","sampleId":"GTM-LAB1","analysis":"SILT","status":"NOT_ASSIGNED","assignedTo":null},{"id":"WI-1789582246606-350","sampleId":"GTM-LAB1","analysis":"CLAY","status":"NOT_ASSIGNED","assignedTo":null}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"EXCH_NA\",\"CEC\",\"SAND\",\"SILT\",\"CLAY\"]","reasons":["COMPLETE_LEGACY_FRACTION_SET","DECLARED_REQUIRED_ANALYSES"]},{"sampleId":"Prueba 1 Arturo","tasks":[{"id":"WI-1789583575821-509","sampleId":"Prueba 1 Arturo","analysis":"SAND","status":"ASSIGNED","assignedTo":"tech_gtm_2"},{"id":"WI-1789583575826-765","sampleId":"Prueba 1 Arturo","analysis":"SILT","status":"ASSIGNED","assignedTo":"tech_gtm_2"},{"id":"WI-1789583575830-22","sampleId":"Prueba 1 Arturo","analysis":"CLAY","status":"ASSIGNED","assignedTo":"tech_gtm_2"}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"EXCH_NA\",\"CEC\",\"SAND\",\"SILT\",\"CLAY\"]","reasons":["COMPLETE_LEGACY_FRACTION_SET","DECLARED_REQUIRED_ANALYSES"]},{"sampleId":"W001","tasks":[{"id":"WI-1789481393069-84","sampleId":"W001","analysis":"SAND","status":"NOT_ASSIGNED","assignedTo":null}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"CEC\",\"SAND\"]","reasons":["EXPLICIT_GROUPED_ORDER"]}]
+2026-10-11T14:08:53.694837174Z 📦 Applying appearance preference migration...
+2026-10-11T14:08:53.817707866Z [MIGRATE-APPEARANCE] Target DB: /app/server/prisma/dev.db
+2026-10-11T14:08:53.852453867Z [MIGRATE-APPEARANCE] Column themePreference already exists on User table. Skipping ALTER.
+2026-10-11T14:08:53.852808703Z [MIGRATE-APPEARANCE] Verification: 49 users have valid themePreference.
+2026-10-11T14:08:53.858243051Z [MIGRATE-APPEARANCE] Migration completed successfully.
+2026-10-11T14:08:53.869632698Z 📦 Applying project templates and policy migration...
+2026-10-11T14:08:54.135310435Z [MIGRATE-PROJECT-POLICY] Target DB: /app/server/prisma/dev.db
+2026-10-11T14:08:54.190514624Z [MIGRATE-PROJECT-POLICY] All project template & policy columns and indexes already exist. Verification successful (no-op).
+2026-10-11T14:08:54.198476180Z [MIGRATE-PROJECT-POLICY] Process exited normally.
+2026-10-11T14:08:54.213312378Z 📦 Applying sitewide theme library migration...
+2026-10-11T14:08:54.335524558Z [MIGRATE-THEMES] Target DB: /app/server/prisma/dev.db
+2026-10-11T14:08:56.917992110Z [MIGRATE-THEMES] Integrity check: [{"integrity_check":"ok"}]
+2026-10-11T14:08:56.918062457Z [MIGRATE-THEMES] Foreign key errors: 0
+2026-10-11T14:08:56.918469940Z [MIGRATE-THEMES] Global setting: theme=soilfer-classic, mode=light, rev=1
+2026-10-11T14:08:56.918671303Z [MIGRATE-THEMES] Verified 49 users.
+2026-10-11T14:08:56.934445376Z [MIGRATE-THEMES] Migration completed successfully: {"success":true,"integrity":"ok","fkErrors":0,"globalSetting":{"id":"global","themeId":"soilfer-classic","defaultMode":"light","revision":1,"updatedAt":"2026-10-03 11:24:55","updatedBy":null},"userCount":49}
+2026-10-11T14:08:56.946311080Z 📦 Installing workflow-state schema and guards...
+2026-10-11T14:09:01.369784114Z {
+2026-10-11T14:09:01.369868537Z   "mode": "NO_OP",
+2026-10-11T14:09:01.369890108Z   "classification": "COMPLETE",
+2026-10-11T14:09:01.369901291Z   "inventory": {
+2026-10-11T14:09:01.369910298Z     "totals": {
+2026-10-11T14:09:01.369918997Z       "Sample": 38773,
+2026-10-11T14:09:01.369928029Z       "WorkItem": 90
+2026-10-11T14:09:01.369937179Z     },
+2026-10-11T14:09:01.369945932Z     "candidateCount": 0,
+2026-10-11T14:09:01.369954737Z     "unmappedCount": 0,
+2026-10-11T14:09:01.369964054Z     "blockedCount": 0,
+2026-10-11T14:09:01.369996261Z     "fingerprint": "f92b4677e3ce0424471df4cffefe4c4e3138a1557846094059b8af0886129386"
+2026-10-11T14:09:01.370014361Z   },
+2026-10-11T14:09:01.370029011Z   "statements": [],
+2026-10-11T14:09:01.370038524Z   "sources": {
+2026-10-11T14:09:01.370047152Z     "evidenceSha256": "ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552",
+2026-10-11T14:09:01.370055877Z     "guardsSha256": "84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed"
+2026-10-11T14:09:01.370064672Z   },
+2026-10-11T14:09:01.370073123Z   "totalChanges": 0,
+2026-10-11T14:09:01.370081717Z   "postflight": {
+2026-10-11T14:09:01.370091124Z     "counts": {
+2026-10-11T14:09:01.370099719Z       "Sample": 38773,
+2026-10-11T14:09:01.370107954Z       "WorkItem": 90,
+2026-10-11T14:09:01.370116410Z       "Result": 19,
+2026-10-11T14:09:01.370124765Z       "ReviewDecision": 7,
+2026-10-11T14:09:01.370133193Z       "ResultEvidenceEvent": 0
+2026-10-11T14:09:01.370141559Z     },
+2026-10-11T14:09:01.370149864Z     "integrity": "ok",
+2026-10-11T14:09:01.370158206Z     "foreignKeyViolations": [],
+2026-10-11T14:09:01.370166677Z     "guards": [
+2026-10-11T14:09:01.370174916Z       "Sample_status_insert_guard",
+2026-10-11T14:09:01.370183435Z       "Sample_status_update_guard",
+2026-10-11T14:09:01.370191737Z       "WorkItem_status_insert_guard",
+2026-10-11T14:09:01.370200206Z       "WorkItem_status_update_guard",
+2026-10-11T14:09:01.370208611Z       "Batch_status_insert_guard",
+2026-10-11T14:09:01.370217110Z       "Batch_status_update_guard",
+2026-10-11T14:09:01.370227628Z       "ReviewDecision_decision_insert_guard",
+2026-10-11T14:09:01.370248120Z       "ReviewDecision_decision_immutable",
+2026-10-11T14:09:01.370264412Z       "ResultEvidenceEvent_insert_guard",
+2026-10-11T14:09:01.370320833Z       "ResultEvidenceEvent_update_immutable",
+2026-10-11T14:09:01.370331540Z       "ResultEvidenceEvent_delete_immutable"
+2026-10-11T14:09:01.370340248Z     ],
+2026-10-11T14:09:01.370348603Z     "marker": {
+2026-10-11T14:09:01.370357260Z       "id": "179_workflow_state_guards",
+2026-10-11T14:09:01.370365749Z       "appliedAt": "2026-10-05 21:40:40",
+2026-10-11T14:09:01.370374389Z       "details": "{\"evidenceSha256\":\"ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552\",\"guardsSha256\":\"84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed\"}"
+2026-10-11T14:09:01.370383995Z     }
+2026-10-11T14:09:01.370400941Z   }
+2026-10-11T14:09:01.370409870Z }
+2026-10-11T14:09:01.395091529Z 📦 Installing result attempt links...
+2026-10-11T14:09:01.589912260Z {
+2026-10-11T14:09:01.589993011Z   "classification": "COMPLETE",
+2026-10-11T14:09:01.590024078Z   "sources": {
+2026-10-11T14:09:01.590041786Z     "migrationSha256": "aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d"
+2026-10-11T14:09:01.590058089Z   },
+2026-10-11T14:09:01.590074902Z   "guards": [
+2026-10-11T14:09:01.590103943Z     "Result_attempt_insert_guard",
+2026-10-11T14:09:01.590123944Z     "Result_attempt_update_guard",
+2026-10-11T14:09:01.590140361Z     "WorkAttempt_result_reference_guard"
+2026-10-11T14:09:01.590151579Z   ],
+2026-10-11T14:09:01.590165602Z   "counts": {
+2026-10-11T14:09:01.590174069Z     "results": 19,
+2026-10-11T14:09:01.590182344Z     "linked": 19
+2026-10-11T14:09:01.590190745Z   },
+2026-10-11T14:09:01.590198991Z   "backfillCount": 0,
+2026-10-11T14:09:01.590207470Z   "mode": "NO_OP",
+2026-10-11T14:09:01.590216035Z   "totalChanges": 0
+2026-10-11T14:09:01.590234127Z }
+2026-10-11T14:09:01.776118490Z {
+2026-10-11T14:09:01.776179076Z   "classification": "COMPLETE",
+2026-10-11T14:09:01.776189810Z   "sources": {
+2026-10-11T14:09:01.776198846Z     "migrationSha256": "5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8"
+2026-10-11T14:09:01.776208022Z   },
+2026-10-11T14:09:01.776216249Z   "guards": [
+2026-10-11T14:09:01.776224724Z     "SampleHold_insert_guard",
+2026-10-11T14:09:01.776233491Z     "SampleHold_update_guard",
+2026-10-11T14:09:01.776248323Z     "SampleHold_raise_immutable",
+2026-10-11T14:09:01.776273028Z     "SampleHold_resolution_final",
+2026-10-11T14:09:01.776289624Z     "SampleHold_delete_refusal",
+2026-10-11T14:09:01.776338793Z     "WorkItem_cancellation_insert_guard",
+2026-10-11T14:09:01.776358458Z     "WorkItem_cancellation_update_guard"
+2026-10-11T14:09:01.776375672Z   ],
+2026-10-11T14:09:01.776391974Z   "counts": {
+2026-10-11T14:09:01.776409178Z     "workItems": 90,
+2026-10-11T14:09:01.776426035Z     "holds": 9
+2026-10-11T14:09:01.776442767Z   },
+2026-10-11T14:09:01.776483913Z   "backfillCount": 0,
+2026-10-11T14:09:01.776506813Z   "mode": "NO_OP",
+2026-10-11T14:09:01.776523809Z   "totalChanges": 0
+2026-10-11T14:09:01.776536804Z }
+2026-10-11T14:09:01.792071046Z 📦 Installing reference material catalogue...
+2026-10-11T14:09:01.970586682Z {
+2026-10-11T14:09:01.970679425Z   "classification": "COMPLETE",
+2026-10-11T14:09:01.970697590Z   "sources": {
+2026-10-11T14:09:01.970713678Z     "migrationSha256": "5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3",
+2026-10-11T14:09:01.970729744Z     "oracleSha256": "7a626b66bd31a7e7305d8c1b091207f3fb26348345a431fb77b63f875d3b99b5"
+2026-10-11T14:09:01.970743890Z   },
+2026-10-11T14:09:01.970757441Z   "guards": [
+2026-10-11T14:09:01.970773961Z     "ReferenceMaterial_insert_guard",
+2026-10-11T14:09:01.970788042Z     "ReferenceMaterial_update_guard",
+2026-10-11T14:09:01.970801252Z     "ReferenceValue_insert_guard",
+2026-10-11T14:09:01.970817590Z     "ReferenceValue_immutable_guard",
+2026-10-11T14:09:01.970831820Z     "ReferenceValue_delete_guard",
+2026-10-11T14:09:01.970844987Z     "BatchQcResult_reference_insert_guard",
+2026-10-11T14:09:01.970861341Z     "BatchQcResult_reference_update_guard"
+2026-10-11T14:09:01.970875362Z   ],
+2026-10-11T14:09:01.970887919Z   "indexes": [
+2026-10-11T14:09:01.970903274Z     "ReferenceMaterial_labId_code_idx",
+2026-10-11T14:09:01.970917700Z     "ReferenceValue_referenceMaterialId_analysisCode_idx",
+2026-10-11T14:09:01.970931495Z     "ReferenceValue_current_generic",
+2026-10-11T14:09:01.970956863Z     "ReferenceValue_current_method"
+2026-10-11T14:09:01.970970444Z   ],
+2026-10-11T14:09:01.970983053Z   "counts": {
+2026-10-11T14:09:01.970999683Z     "materials": 0,
+2026-10-11T14:09:01.971021734Z     "values": 0,
+2026-10-11T14:09:01.971038892Z     "qcRows": 18,
+2026-10-11T14:09:01.971052838Z     "linked": 0
+2026-10-11T14:09:01.971065816Z   },
+2026-10-11T14:09:01.971081173Z   "backfillCount": 0,
+2026-10-11T14:09:01.971096706Z   "mode": "NO_OP",
+2026-10-11T14:09:01.971110109Z   "totalChanges": 0
+2026-10-11T14:09:01.971155153Z }
+2026-10-11T14:09:01.988002036Z 📦 Installing versioned QC rules...
+2026-10-11T14:09:02.165474158Z {
+2026-10-11T14:09:02.165537940Z   "classification": "COMPLETE",
+2026-10-11T14:09:02.165547836Z   "sources": {
+2026-10-11T14:09:02.165556549Z     "migrationSha256": "4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06",
+2026-10-11T14:09:02.165565513Z     "oracleSha256": "fe0dbc7dbb0a35bc62353de715a48b4263d492917225c7be5b6f969ec3f52819"
+2026-10-11T14:09:02.165574318Z   },
+2026-10-11T14:09:02.165582676Z   "guards": [
+2026-10-11T14:09:02.165591109Z     "QcRule_immutable_update",
+2026-10-11T14:09:02.165599835Z     "QcRule_immutable_delete",
+2026-10-11T14:09:02.165637308Z     "QcRule_version_guard",
+2026-10-11T14:09:02.165649378Z     "QcRule_scope_guard",
+2026-10-11T14:09:02.165657960Z     "QcRule_value_guard"
+2026-10-11T14:09:02.165666298Z   ],
+2026-10-11T14:09:02.165674463Z   "indexes": [
+2026-10-11T14:09:02.165682858Z     "QcRule_labId_analysisCode_methodologyId_effectiveFrom_idx",
+2026-10-11T14:09:02.165691472Z     "QcRule_scope_version_unique"
+2026-10-11T14:09:02.165700054Z   ],
+2026-10-11T14:09:02.165708397Z   "counts": {
+2026-10-11T14:09:02.165717876Z     "rules": 0
+2026-10-11T14:09:02.165726092Z   },
+2026-10-11T14:09:02.165734343Z   "backfillCount": 0,
+2026-10-11T14:09:02.165742855Z   "mode": "NO_OP",
+2026-10-11T14:09:02.165751445Z   "totalChanges": 0
+2026-10-11T14:09:02.165759835Z }
+2026-10-11T14:09:02.181652465Z 📦 Installing normalized QC runs...
+2026-10-11T14:09:04.736158279Z {
+2026-10-11T14:09:04.736268234Z   "classification": "COMPLETE",
+2026-10-11T14:09:04.736292822Z   "sources": {
+2026-10-11T14:09:04.736321560Z     "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+2026-10-11T14:09:04.736340345Z     "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369"
+2026-10-11T14:09:04.736360255Z   },
+2026-10-11T14:09:04.736378324Z   "counts": {
+2026-10-11T14:09:04.736400372Z     "BatchAnalyte": 6,
+2026-10-11T14:09:04.736417106Z     "BatchPosition": 33,
+2026-10-11T14:09:04.736426438Z     "BatchPositionWorkItem": 15,
+2026-10-11T14:09:04.736435198Z     "BatchPositionReference": 0,
+2026-10-11T14:09:04.736444023Z     "QcMeasurement": 24,
+2026-10-11T14:09:04.736452481Z     "QcEvaluation": 6,
+2026-10-11T14:09:04.736475119Z     "BatchDisposition": 1,
+2026-10-11T14:09:04.736520782Z     "BatchEvent": 28
+2026-10-11T14:09:04.736536598Z   },
+2026-10-11T14:09:04.736550189Z   "receipt": {
+2026-10-11T14:09:04.736569129Z     "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+2026-10-11T14:09:04.736583170Z     "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369",
+2026-10-11T14:09:04.736597880Z     "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+2026-10-11T14:09:04.736634824Z     "backfillCounts": {
+2026-10-11T14:09:04.736647053Z       "batches": 6,
+2026-10-11T14:09:04.736659068Z       "analytes": 6,
+2026-10-11T14:09:04.736677462Z       "samplePositions": 15,
+2026-10-11T14:09:04.736695167Z       "qcPositions": 18,
+2026-10-11T14:09:04.736714069Z       "historicalSnapshots": 0,
+2026-10-11T14:09:04.736733019Z       "currentEvaluations": 6,
+2026-10-11T14:09:04.736749480Z       "evaluations": 6,
+2026-10-11T14:09:04.736769153Z       "measurements": 24,
+2026-10-11T14:09:04.736787601Z       "typedRows": 18,
+2026-10-11T14:09:04.736805353Z       "historicalTypedRows": 0,
+2026-10-11T14:09:04.736823593Z       "jsonEntries": 18,
+2026-10-11T14:09:04.736843309Z       "typedFallbackEntries": 0,
+2026-10-11T14:09:04.736863165Z       "typedJsonConflicts": 12,
+2026-10-11T14:09:04.736880851Z       "historyAuditConflicts": 0,
+2026-10-11T14:09:04.736901093Z       "unresolvedMethods": 0,
+2026-10-11T14:09:04.736919096Z       "unresolvedAnalysts": 3,
+2026-10-11T14:09:04.736936046Z       "unresolvedInstruments": 6,
+2026-10-11T14:09:04.736949133Z       "unlinkedReferences": 6,
+2026-10-11T14:09:04.736958049Z       "unresolvedNumbers": 0,
+2026-10-11T14:09:04.736966916Z       "unresolvedDuplicateParents": 6,
+2026-10-11T14:09:04.736975612Z       "unresolvedRackPositions": 15,
+2026-10-11T14:09:04.736984188Z       "missingWorkItems": 16,
+2026-10-11T14:09:04.736992675Z       "malformedHistory": 0,
+2026-10-11T14:09:04.737001257Z       "malformedQcResults": 0,
+2026-10-11T14:09:04.737012494Z       "orphanSnapshots": 0,
+2026-10-11T14:09:04.737021190Z       "multiAttemptMembershipGroups": 0,
+2026-10-11T14:09:04.737029908Z       "refusals": 0,
+2026-10-11T14:09:04.737038376Z       "legacyDispositionMapped": {
+2026-10-11T14:09:04.737047079Z         "REJECT_REANALYSIS": 1,
+2026-10-11T14:09:04.737055569Z         "ACCEPT_OPAQUE": 1
+2026-10-11T14:09:04.737064213Z       },
+2026-10-11T14:09:04.737072707Z       "dispositionAttribution": {
+2026-10-11T14:09:04.737107672Z         "AUDIT_LOG": 0,
+2026-10-11T14:09:04.737118338Z         "BATCH_DISPOSITION_FIELD": 2,
+2026-10-11T14:09:04.737127410Z         "SNAPSHOT_DISPOSITION_FIELD": 0
+2026-10-11T14:09:04.737136211Z       },
+2026-10-11T14:09:04.737144758Z       "dispositionAttributionConflicts": 0,
+2026-10-11T14:09:04.737153570Z       "TEXTURE_ALIAS_MERGED": 0
+2026-10-11T14:09:04.737162180Z     },
+2026-10-11T14:09:04.737170656Z     "bootstrapRebuild": []
+2026-10-11T14:09:04.737179337Z   },
+2026-10-11T14:09:04.737187734Z   "bootstrapRebuild": [],
+2026-10-11T14:09:04.737196251Z   "guards": [
+2026-10-11T14:09:04.737204696Z     "Batch_legacy_qc_immutable",
+2026-10-11T14:09:04.737213334Z     "Batch_first_start_immutable",
+2026-10-11T14:09:04.737225002Z     "BatchQcResult_frozen_insert",
+2026-10-11T14:09:04.737234302Z     "BatchQcResult_frozen_update",
+2026-10-11T14:09:04.737242955Z     "BatchQcResult_frozen_delete",
+2026-10-11T14:09:04.737251433Z     "BatchAnalyte_insert_guard",
+2026-10-11T14:09:04.737260120Z     "BatchAnalyte_update_guard",
+2026-10-11T14:09:04.737276966Z     "BatchAnalyte_identity_immutable",
+2026-10-11T14:09:04.737285561Z     "BatchAnalyte_membership_insert_guard",
+2026-10-11T14:09:04.737294078Z     "BatchAnalyte_membership_delete_guard",
+2026-10-11T14:09:04.737302641Z     "BatchAnalyte_membership_update_guard",
+2026-10-11T14:09:04.737311192Z     "BatchPosition_insert_guard",
+2026-10-11T14:09:04.737319764Z     "BatchPosition_update_guard",
+2026-10-11T14:09:04.737328299Z     "BatchPosition_membership_insert_guard",
+2026-10-11T14:09:04.737339512Z     "BatchPosition_membership_update_guard",
+2026-10-11T14:09:04.737348044Z     "BatchPosition_membership_delete_guard",
+2026-10-11T14:09:04.737356675Z     "BatchPosition_identity_guard",
+2026-10-11T14:09:04.737365308Z     "BatchPositionWorkItem_insert_guard",
+2026-10-11T14:09:04.737374015Z     "BatchPositionWorkItem_immutable",
+2026-10-11T14:09:04.737382528Z     "BatchPositionWorkItem_run_unique_guard",
+2026-10-11T14:09:04.737391238Z     "BatchPositionWorkItem_membership_insert_guard",
+2026-10-11T14:09:04.737402306Z     "BatchPositionWorkItem_membership_delete_guard",
+2026-10-11T14:09:04.737410979Z     "WorkItem_batch_membership_guard",
+2026-10-11T14:09:04.737419622Z     "WorkItem_batch_membership_insert_guard",
+2026-10-11T14:09:04.737428321Z     "BatchPositionReference_insert_guard",
+2026-10-11T14:09:04.737436909Z     "BatchPositionReference_correction_reason_guard",
+2026-10-11T14:09:04.737445569Z     "BatchPositionReference_lot_guard",
+2026-10-11T14:09:04.737495458Z     "BatchPositionReference_supersede_guard",
+2026-10-11T14:09:04.737512431Z     "BatchPositionReference_delete_guard",
+2026-10-11T14:09:04.737525703Z     "QcMeasurement_insert_guard",
+2026-10-11T14:09:04.737539119Z     "QcMeasurement_historical_write_guard",
+2026-10-11T14:09:04.737562232Z     "QcMeasurement_replacement_guard",
+2026-10-11T14:09:04.737574922Z     "BatchPositionReference_replacement_guard",
+2026-10-11T14:09:04.737588104Z     "QcMeasurement_start_guard",
+2026-10-11T14:09:04.737600504Z     "QcMeasurement_supersede_guard",
+2026-10-11T14:09:04.737644154Z     "QcMeasurement_delete_guard",
+2026-10-11T14:09:04.737660450Z     "QcEvaluation_insert_guard",
+2026-10-11T14:09:04.737677326Z     "QcEvaluation_start_guard",
+2026-10-11T14:09:04.737686252Z     "QcEvaluation_frozen_criteria_guard",
+2026-10-11T14:09:04.737695011Z     "QcEvaluation_immutable_update",
+2026-10-11T14:09:04.737703753Z     "QcEvaluation_immutable_delete",
+2026-10-11T14:09:04.737712612Z     "BatchDisposition_immutable_update",
+2026-10-11T14:09:04.737721235Z     "BatchDisposition_immutable_delete",
+2026-10-11T14:09:04.737729696Z     "BatchEvent_immutable_update",
+2026-10-11T14:09:04.737739836Z     "BatchEvent_immutable_delete",
+2026-10-11T14:09:04.737748566Z     "BatchDisposition_insert_guard",
+2026-10-11T14:09:04.737757232Z     "BatchEvent_insert_guard"
+2026-10-11T14:09:04.737765974Z   ],
+2026-10-11T14:09:04.737775987Z   "indexes": [
+2026-10-11T14:09:04.737784623Z     "BatchAnalyte_labId_analysisCode_methodologyId_idx",
+2026-10-11T14:09:04.737793457Z     "BatchAnalyte_batchId_analysisCode_key",
+2026-10-11T14:09:04.737801970Z     "BatchPosition_batchId_position_key",
+2026-10-11T14:09:04.737810595Z     "BatchPositionWorkItem_workItemId_idx",
+2026-10-11T14:09:04.737821014Z     "BatchPositionWorkItem_positionId_analysisCode_key",
+2026-10-11T14:09:04.737830552Z     "BatchPositionReference_positionId_analysisCode_idx",
+2026-10-11T14:09:04.737839335Z     "QcMeasurement_batchId_analysisCode_idx",
+2026-10-11T14:09:04.737848075Z     "QcMeasurement_positionId_analysisCode_replicateNo_idx",
+2026-10-11T14:09:04.737856726Z     "QcEvaluation_batchId_analysisCode_version_key",
+2026-10-11T14:09:04.737865470Z     "BatchDisposition_batchId_analysisCode_idx",
+2026-10-11T14:09:04.737874194Z     "BatchEvent_batchId_at_idx",
+2026-10-11T14:09:04.737882787Z     "BatchAnalyte_crm_ordinal_unique",
+2026-10-11T14:09:04.737900150Z     "BatchPositionReference_current_unique",
+2026-10-11T14:09:04.737914490Z     "QcMeasurement_current_unique"
+2026-10-11T14:09:04.737923274Z   ],
+2026-10-11T14:09:04.737941587Z   "backfillCount": 0,
+2026-10-11T14:09:04.737951170Z   "backfillCounts": {
+2026-10-11T14:09:04.737960061Z     "batches": 6,
+2026-10-11T14:09:04.737968532Z     "analytes": 6,
+2026-10-11T14:09:04.737977152Z     "samplePositions": 15,
+2026-10-11T14:09:04.737985801Z     "qcPositions": 18,
+2026-10-11T14:09:04.737994691Z     "historicalSnapshots": 0,
+2026-10-11T14:09:04.738003368Z     "currentEvaluations": 6,
+2026-10-11T14:09:04.738012057Z     "evaluations": 6,
+2026-10-11T14:09:04.738020677Z     "measurements": 24,
+2026-10-11T14:09:04.738029397Z     "typedRows": 18,
+2026-10-11T14:09:04.738037940Z     "historicalTypedRows": 0,
+2026-10-11T14:09:04.738046568Z     "jsonEntries": 18,
+2026-10-11T14:09:04.738055190Z     "typedFallbackEntries": 0,
+2026-10-11T14:09:04.738063829Z     "typedJsonConflicts": 12,
+2026-10-11T14:09:04.738072358Z     "historyAuditConflicts": 0,
+2026-10-11T14:09:04.738081053Z     "unresolvedMethods": 0,
+2026-10-11T14:09:04.738089614Z     "unresolvedAnalysts": 3,
+2026-10-11T14:09:04.738098318Z     "unresolvedInstruments": 6,
+2026-10-11T14:09:04.738107035Z     "unlinkedReferences": 6,
+2026-10-11T14:09:04.738115650Z     "unresolvedNumbers": 0,
+2026-10-11T14:09:04.738124274Z     "unresolvedDuplicateParents": 6,
+2026-10-11T14:09:04.738133042Z     "unresolvedRackPositions": 15,
+2026-10-11T14:09:04.738141779Z     "missingWorkItems": 16,
+2026-10-11T14:09:04.738150359Z     "malformedHistory": 0,
+2026-10-11T14:09:04.738159225Z     "malformedQcResults": 0,
+2026-10-11T14:09:04.738167856Z     "orphanSnapshots": 0,
+2026-10-11T14:09:04.738176546Z     "multiAttemptMembershipGroups": 0,
+2026-10-11T14:09:04.738188382Z     "refusals": 0,
+2026-10-11T14:09:04.738211305Z     "legacyDispositionMapped": {
+2026-10-11T14:09:04.738229599Z       "REJECT_REANALYSIS": 1,
+2026-10-11T14:09:04.738247123Z       "ACCEPT_OPAQUE": 1
+2026-10-11T14:09:04.738266673Z     },
+2026-10-11T14:09:04.738282755Z     "dispositionAttribution": {
+2026-10-11T14:09:04.738294938Z       "AUDIT_LOG": 0,
+2026-10-11T14:09:04.738303817Z       "BATCH_DISPOSITION_FIELD": 2,
+2026-10-11T14:09:04.738336361Z       "SNAPSHOT_DISPOSITION_FIELD": 0
+2026-10-11T14:09:04.738351511Z     },
+2026-10-11T14:09:04.738359814Z     "dispositionAttributionConflicts": 0,
+2026-10-11T14:09:04.738368312Z     "TEXTURE_ALIAS_MERGED": 0
+2026-10-11T14:09:04.738376762Z   },
+2026-10-11T14:09:04.738384887Z   "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+2026-10-11T14:09:04.738404657Z   "mode": "NO_OP",
+2026-10-11T14:09:04.738414320Z   "totalChanges": 0
+2026-10-11T14:09:04.738422788Z }
+2026-10-11T14:09:04.752052402Z 📦 Installing QC disposition scope guards...
+2026-10-11T14:09:09.392366984Z {
+2026-10-11T14:09:09.392597998Z   "classification": "COMPLETE",
+2026-10-11T14:09:09.392636941Z   "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+2026-10-11T14:09:09.392649057Z   "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+2026-10-11T14:09:09.392658064Z   "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+2026-10-11T14:09:09.392667141Z   "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+2026-10-11T14:09:09.392676205Z   "existingDispositionRows": 1,
+2026-10-11T14:09:09.392684764Z   "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+2026-10-11T14:09:09.392693433Z   "backfillCount": 0,
+2026-10-11T14:09:09.392701700Z   "bootstrapRebuild": [],
+2026-10-11T14:09:09.392710146Z   "totalChanges": 0,
+2026-10-11T14:09:09.392718317Z   "mode": "NO_OP",
+2026-10-11T14:09:09.392741507Z   "receipt": {
+2026-10-11T14:09:09.392749459Z     "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+2026-10-11T14:09:09.392757863Z     "existingDispositionRows": 1,
+2026-10-11T14:09:09.392765962Z     "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+2026-10-11T14:09:09.392774496Z     "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+2026-10-11T14:09:09.392782799Z     "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+2026-10-11T14:09:09.392791185Z     "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+2026-10-11T14:09:09.392799453Z     "backfillCount": 0,
+2026-10-11T14:09:09.392807528Z     "bootstrapRebuild": []
+2026-10-11T14:09:09.392830023Z   }
+2026-10-11T14:09:09.392837774Z }
+2026-10-11T14:09:09.410747955Z 📦 Installing retained raw input column...
+2026-10-11T14:09:09.583417316Z {
+2026-10-11T14:09:09.583485328Z   "classification": "ALREADY_PRESENT",
+2026-10-11T14:09:09.583496395Z   "counts": {
+2026-10-11T14:09:09.583505530Z     "results": 19,
+2026-10-11T14:09:09.583514432Z     "recordedRawInputs": 0
+2026-10-11T14:09:09.583522942Z   },
+2026-10-11T14:09:09.583567882Z   "backfillCount": 0,
+2026-10-11T14:09:09.583577978Z   "sources": {
+2026-10-11T14:09:09.583586815Z     "migrationSha256": "850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc"
+2026-10-11T14:09:09.583595792Z   },
+2026-10-11T14:09:09.583647924Z   "mode": "NO_OP",
+2026-10-11T14:09:09.583662399Z   "totalChanges": 0
+2026-10-11T14:09:09.583671007Z }
+2026-10-11T14:09:09.597235664Z 📦 Installing proficiency evidence...
+2026-10-11T14:09:09.836401515Z {
+2026-10-11T14:09:09.836505915Z   "classification": "COMPLETE_193",
+2026-10-11T14:09:09.836517435Z   "sources": {
+2026-10-11T14:09:09.836526179Z     "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+2026-10-11T14:09:09.836534792Z     "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+2026-10-11T14:09:09.836543581Z   },
+2026-10-11T14:09:09.836565160Z   "receipt": {
+2026-10-11T14:09:09.836573898Z     "sources": {
+2026-10-11T14:09:09.836581611Z       "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+2026-10-11T14:09:09.836590224Z       "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+2026-10-11T14:09:09.836598331Z     },
+2026-10-11T14:09:09.836606211Z     "originalRowsSha256": "82e93589e9ef0d0d6fdd045be02d475670d700b9866bffb96b68832b9d858743",
+2026-10-11T14:09:09.836615881Z     "originalRowsAndFieldsPreserved": true,
+2026-10-11T14:09:09.836659918Z     "newNcrCount": 0,
+2026-10-11T14:09:09.836674298Z     "backfilledCount": 0,
+2026-10-11T14:09:09.836682503Z     "receiptSha256": "cae019cfb890d3b4ad0812dcecc6733148e9b949fc764421928a7b0fd5305c2b"
+2026-10-11T14:09:09.836691069Z   },
+2026-10-11T14:09:09.836698941Z   "roundCount": 0,
+2026-10-11T14:09:09.836708385Z   "pendingRoundIds": [],
+2026-10-11T14:09:09.836716624Z   "ncrCount": 0,
+2026-10-11T14:09:09.836724591Z   "mode": "NO_OP",
+2026-10-11T14:09:09.836732600Z   "totalChanges": 0,
+2026-10-11T14:09:09.836740464Z   "backfilledCount": 0
+2026-10-11T14:09:09.836748520Z }
+2026-10-11T14:09:10.043025608Z {
+2026-10-11T14:09:10.043102354Z   "classification": "COMPLETE",
+2026-10-11T14:09:10.043112481Z   "sources": {
+2026-10-11T14:09:10.043121310Z     "migrationSha256": "bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4"
+2026-10-11T14:09:10.043138462Z   },
+2026-10-11T14:09:10.043146951Z   "bootstrapRebuild": [],
+2026-10-11T14:09:10.043155488Z   "backfillCount": 0,
+2026-10-11T14:09:10.043203932Z   "resultCount": 19,
+2026-10-11T14:09:10.043214033Z   "originalResultSha256": "935e140956349abc9eddbee25b830c9ff041700f6565479a62f16031deb90d26",
+2026-10-11T14:09:10.043223215Z   "mode": "NO_OP",
+2026-10-11T14:09:10.043231752Z   "totalChanges": 0
+2026-10-11T14:09:10.043240737Z }
+2026-10-11T14:09:10.058098962Z 📦 Installing duplicate-marker prerequisite...
+2026-10-11T14:09:10.250530038Z {
+2026-10-11T14:09:10.250682814Z   "classification": "COMPLETE",
+2026-10-11T14:09:10.250696033Z   "sources": [
+2026-10-11T14:09:10.250704886Z     {
+2026-10-11T14:09:10.250712876Z       "id": "20261004190000_add_workitem_duplicate_marker",
+2026-10-11T14:09:10.250721150Z       "sqlSha256": "80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e"
+2026-10-11T14:09:10.250729817Z     },
+2026-10-11T14:09:10.250737645Z     {
+2026-10-11T14:09:10.250745349Z       "id": "20261004190100_unique_active_workitem",
+2026-10-11T14:09:10.250753342Z       "sqlSha256": "a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e"
+2026-10-11T14:09:10.250761614Z     }
+2026-10-11T14:09:10.250769612Z   ],
+2026-10-11T14:09:10.250777358Z   "workItemCount": 90,
+2026-10-11T14:09:10.250785215Z   "duplicateGroupCount": 0,
+2026-10-11T14:09:10.250806208Z   "duplicateGroups": [],
+2026-10-11T14:09:10.250815789Z   "differences": [],
+2026-10-11T14:09:10.250824162Z   "ledgerReady": true,
+2026-10-11T14:09:10.250832279Z   "executionTablesEmpty": false,
+2026-10-11T14:09:10.250840366Z   "mode": "NO_OP",
+2026-10-11T14:09:10.250858017Z   "totalChanges": 0
+2026-10-11T14:09:10.250866138Z }
+2026-10-11T14:09:10.265932883Z 📦 Installing WorkAttempt execution evidence...
+2026-10-11T14:09:11.091647206Z {
+2026-10-11T14:09:11.091725362Z   "classification": "COMPLETE",
+2026-10-11T14:09:11.091736376Z   "sources": {
+2026-10-11T14:09:11.091745763Z     "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+2026-10-11T14:09:11.091754770Z     "contractVersion": "190-v1"
+2026-10-11T14:09:11.091769290Z   },
+2026-10-11T14:09:11.091777645Z   "plan": {
+2026-10-11T14:09:11.091785730Z     "status": "READY",
+2026-10-11T14:09:11.091794059Z     "existingAttemptCount": 19,
+2026-10-11T14:09:11.091802234Z     "resultCount": 19,
+2026-10-11T14:09:11.091810486Z     "alreadyLinkedResultCount": 19,
+2026-10-11T14:09:11.091818851Z     "exemptImportCount": 0,
+2026-10-11T14:09:11.091827173Z     "exemptImports": [],
+2026-10-11T14:09:11.091859972Z     "missingOrderedWorkGroups": [
+2026-10-11T14:09:11.091869747Z       {
+2026-10-11T14:09:11.091877974Z         "labId": "MOZ-LAB1",
+2026-10-11T14:09:11.091886408Z         "param": "SAND",
+2026-10-11T14:09:11.091894608Z         "sampleIds": [
+2026-10-11T14:09:11.091902950Z           "1769086088871"
+2026-10-11T14:09:11.091911251Z         ],
+2026-10-11T14:09:11.091923900Z         "sampleCount": 1
+2026-10-11T14:09:11.091932340Z       },
+2026-10-11T14:09:11.091940712Z       {
+2026-10-11T14:09:11.091948687Z         "labId": "MOZ-LAB1",
+2026-10-11T14:09:11.091956930Z         "param": "SILT",
+2026-10-11T14:09:11.091965127Z         "sampleIds": [
+2026-10-11T14:09:11.091973360Z           "1769086088871"
+2026-10-11T14:09:11.091981628Z         ],
+2026-10-11T14:09:11.091989761Z         "sampleCount": 1
+2026-10-11T14:09:11.091997868Z       },
+2026-10-11T14:09:11.092006095Z       {
+2026-10-11T14:09:11.092014098Z         "labId": "MOZ-LAB1",
+2026-10-11T14:09:11.092022435Z         "param": "CLAY",
+2026-10-11T14:09:11.092030634Z         "sampleIds": [
+2026-10-11T14:09:11.092038893Z           "1769086088871"
+2026-10-11T14:09:11.092047153Z         ],
+2026-10-11T14:09:11.092055314Z         "sampleCount": 1
+2026-10-11T14:09:11.092063496Z       },
+2026-10-11T14:09:11.092071689Z       {
+2026-10-11T14:09:11.092079777Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.092088133Z         "param": "SAND",
+2026-10-11T14:09:11.092096298Z         "sampleIds": [
+2026-10-11T14:09:11.092104520Z           "1769086466918",
+2026-10-11T14:09:11.092112794Z           "1769086467021",
+2026-10-11T14:09:11.092121054Z           "1769464262091",
+2026-10-11T14:09:11.092129701Z           "1769464262872",
+2026-10-11T14:09:11.092137936Z           "1769719118243",
+2026-10-11T14:09:11.092146039Z           "1769719138492",
+2026-10-11T14:09:11.092154231Z           "1769719197975",
+2026-10-11T14:09:11.092162454Z           "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+2026-10-11T14:09:11.092170876Z         ],
+2026-10-11T14:09:11.092179045Z         "sampleCount": 8
+2026-10-11T14:09:11.092187322Z       },
+2026-10-11T14:09:11.092195345Z       {
+2026-10-11T14:09:11.092211217Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.092219447Z         "param": "SILT",
+2026-10-11T14:09:11.092227908Z         "sampleIds": [
+2026-10-11T14:09:11.092243605Z           "1769086466918",
+2026-10-11T14:09:11.092253075Z           "1769086467021",
+2026-10-11T14:09:11.092261427Z           "1769464262091",
+2026-10-11T14:09:11.092269708Z           "1769464262872",
+2026-10-11T14:09:11.092277862Z           "1769719118243",
+2026-10-11T14:09:11.092286064Z           "1769719138492",
+2026-10-11T14:09:11.092294194Z           "1769719197975",
+2026-10-11T14:09:11.092302476Z           "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+2026-10-11T14:09:11.092310788Z         ],
+2026-10-11T14:09:11.092318885Z         "sampleCount": 8
+2026-10-11T14:09:11.092327108Z       },
+2026-10-11T14:09:11.092335310Z       {
+2026-10-11T14:09:11.092343302Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.092351640Z         "param": "CLAY",
+2026-10-11T14:09:11.092359828Z         "sampleIds": [
+2026-10-11T14:09:11.092368099Z           "1769086466918",
+2026-10-11T14:09:11.092376225Z           "1769086467021",
+2026-10-11T14:09:11.092384471Z           "1769464262091",
+2026-10-11T14:09:11.092392629Z           "1769464262872",
+2026-10-11T14:09:11.092400884Z           "1769719118243",
+2026-10-11T14:09:11.092409024Z           "1769719138492",
+2026-10-11T14:09:11.092417230Z           "1769719197975",
+2026-10-11T14:09:11.092425426Z           "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+2026-10-11T14:09:11.092433820Z         ],
+2026-10-11T14:09:11.092441829Z         "sampleCount": 8
+2026-10-11T14:09:11.092450110Z       },
+2026-10-11T14:09:11.092458260Z       {
+2026-10-11T14:09:11.092480560Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.092489070Z         "param": "BD",
+2026-10-11T14:09:11.092497540Z         "sampleIds": [
+2026-10-11T14:09:11.092508431Z           "1769086466918",
+2026-10-11T14:09:11.092517339Z           "1769086467021",
+2026-10-11T14:09:11.092525643Z           "1769464262091",
+2026-10-11T14:09:11.092534106Z           "1769464262872",
+2026-10-11T14:09:11.092542589Z           "1769719118243",
+2026-10-11T14:09:11.092551108Z           "1769719138492",
+2026-10-11T14:09:11.092559348Z           "1769719197975"
+2026-10-11T14:09:11.092567643Z         ],
+2026-10-11T14:09:11.092575703Z         "sampleCount": 7
+2026-10-11T14:09:11.092584070Z       },
+2026-10-11T14:09:11.092592212Z       {
+2026-10-11T14:09:11.092600395Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.092635130Z         "param": "MOIST",
+2026-10-11T14:09:11.092660616Z         "sampleIds": [
+2026-10-11T14:09:11.092672964Z           "1769086466918",
+2026-10-11T14:09:11.092681532Z           "1769086467021",
+2026-10-11T14:09:11.092689784Z           "1769464262091",
+2026-10-11T14:09:11.092698114Z           "1769464262872",
+2026-10-11T14:09:11.092706265Z           "1769719118243",
+2026-10-11T14:09:11.092714511Z           "1769719138492",
+2026-10-11T14:09:11.092722846Z           "1769719197975"
+2026-10-11T14:09:11.092731148Z         ],
+2026-10-11T14:09:11.092739497Z         "sampleCount": 7
+2026-10-11T14:09:11.092747764Z       },
+2026-10-11T14:09:11.092755849Z       {
+2026-10-11T14:09:11.092764014Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.092772451Z         "param": "PSD",
+2026-10-11T14:09:11.092780854Z         "sampleIds": [
+2026-10-11T14:09:11.092789066Z           "1769086466918",
+2026-10-11T14:09:11.092797398Z           "1769086467021",
+2026-10-11T14:09:11.092805818Z           "1769464262091",
+2026-10-11T14:09:11.092814107Z           "1769464262872",
+2026-10-11T14:09:11.092822350Z           "1769719118243",
+2026-10-11T14:09:11.092830667Z           "1769719138492",
+2026-10-11T14:09:11.092838870Z           "1769719197975"
+2026-10-11T14:09:11.092847161Z         ],
+2026-10-11T14:09:11.092855359Z         "sampleCount": 7
+2026-10-11T14:09:11.092863693Z       },
+2026-10-11T14:09:11.092871716Z       {
+2026-10-11T14:09:11.092879896Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.092888179Z         "param": "GRAVEL",
+2026-10-11T14:09:11.092896489Z         "sampleIds": [
+2026-10-11T14:09:11.092904600Z           "1769086466918",
+2026-10-11T14:09:11.092912832Z           "1769086467021",
+2026-10-11T14:09:11.092921075Z           "1769464262091",
+2026-10-11T14:09:11.092929337Z           "1769464262872",
+2026-10-11T14:09:11.092937463Z           "1769719118243",
+2026-10-11T14:09:11.092945683Z           "1769719138492",
+2026-10-11T14:09:11.092953915Z           "1769719197975"
+2026-10-11T14:09:11.092962138Z         ],
+2026-10-11T14:09:11.092970143Z         "sampleCount": 7
+2026-10-11T14:09:11.092985491Z       },
+2026-10-11T14:09:11.092993657Z       {
+2026-10-11T14:09:11.093001849Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.093010054Z         "param": "PH_H2O",
+2026-10-11T14:09:11.093018421Z         "sampleIds": [
+2026-10-11T14:09:11.093034218Z           "1769086466918",
+2026-10-11T14:09:11.093043455Z           "1769086467021",
+2026-10-11T14:09:11.093051925Z           "1769464262091",
+2026-10-11T14:09:11.093060375Z           "1769464262872",
+2026-10-11T14:09:11.093068850Z           "1769719118243",
+2026-10-11T14:09:11.093077253Z           "1769719138492",
+2026-10-11T14:09:11.093085526Z           "1769719197975"
+2026-10-11T14:09:11.093094006Z         ],
+2026-10-11T14:09:11.093102246Z         "sampleCount": 7
+2026-10-11T14:09:11.093110658Z       },
+2026-10-11T14:09:11.093118813Z       {
+2026-10-11T14:09:11.093127161Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.093149937Z         "param": "PH_KCL",
+2026-10-11T14:09:11.093158552Z         "sampleIds": [
+2026-10-11T14:09:11.093166549Z           "1769086466918",
+2026-10-11T14:09:11.093174473Z           "1769086467021",
+2026-10-11T14:09:11.093182345Z           "1769464262091",
+2026-10-11T14:09:11.093190278Z           "1769464262872",
+2026-10-11T14:09:11.093198141Z           "1769719118243",
+2026-10-11T14:09:11.093206050Z           "1769719138492",
+2026-10-11T14:09:11.093229229Z           "1769719197975"
+2026-10-11T14:09:11.093237642Z         ],
+2026-10-11T14:09:11.093245869Z         "sampleCount": 7
+2026-10-11T14:09:11.093254105Z       },
+2026-10-11T14:09:11.093262199Z       {
+2026-10-11T14:09:11.093270337Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.093278537Z         "param": "EC",
+2026-10-11T14:09:11.093292103Z         "sampleIds": [
+2026-10-11T14:09:11.093300390Z           "1769086466918",
+2026-10-11T14:09:11.093308717Z           "1769086467021",
+2026-10-11T14:09:11.093316918Z           "1769464262091",
+2026-10-11T14:09:11.093329341Z           "1769464262872",
+2026-10-11T14:09:11.093337618Z           "1769719118243",
+2026-10-11T14:09:11.093346644Z           "1769719138492",
+2026-10-11T14:09:11.093355452Z           "1769719197975"
+2026-10-11T14:09:11.093363623Z         ],
+2026-10-11T14:09:11.093371767Z         "sampleCount": 7
+2026-10-11T14:09:11.093380042Z       },
+2026-10-11T14:09:11.093388013Z       {
+2026-10-11T14:09:11.093396104Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.093404443Z         "param": "SOC",
+2026-10-11T14:09:11.093412848Z         "sampleIds": [
+2026-10-11T14:09:11.093421054Z           "1769086466918",
+2026-10-11T14:09:11.093436349Z           "1769086467021",
+2026-10-11T14:09:11.093445473Z           "1769464262091",
+2026-10-11T14:09:11.093454044Z           "1769464262872",
+2026-10-11T14:09:11.093474315Z           "1769719118243",
+2026-10-11T14:09:11.093484102Z           "1769719138492",
+2026-10-11T14:09:11.093492494Z           "1769719197975"
+2026-10-11T14:09:11.093500942Z         ],
+2026-10-11T14:09:11.093508902Z         "sampleCount": 7
+2026-10-11T14:09:11.093517115Z       },
+2026-10-11T14:09:11.093525145Z       {
+2026-10-11T14:09:11.093533205Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.093541348Z         "param": "TN",
+2026-10-11T14:09:11.093565057Z         "sampleIds": [
+2026-10-11T14:09:11.093572883Z           "1769086466918",
+2026-10-11T14:09:11.093580713Z           "1769086467021",
+2026-10-11T14:09:11.093588588Z           "1769464262091",
+2026-10-11T14:09:11.093596447Z           "1769464262872",
+2026-10-11T14:09:11.093604349Z           "1769719118243",
+2026-10-11T14:09:11.093628035Z           "1769719138492",
+2026-10-11T14:09:11.093652668Z           "1769719197975"
+2026-10-11T14:09:11.093663265Z         ],
+2026-10-11T14:09:11.093671510Z         "sampleCount": 7
+2026-10-11T14:09:11.093680051Z       },
+2026-10-11T14:09:11.093688094Z       {
+2026-10-11T14:09:11.093696146Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.093704497Z         "param": "P_AVAIL",
+2026-10-11T14:09:11.093712747Z         "sampleIds": [
+2026-10-11T14:09:11.093720894Z           "1769086466918",
+2026-10-11T14:09:11.093729111Z           "1769086467021",
+2026-10-11T14:09:11.093737246Z           "1769464262091",
+2026-10-11T14:09:11.093745434Z           "1769464262872",
+2026-10-11T14:09:11.093753520Z           "1769719118243",
+2026-10-11T14:09:11.093761967Z           "1769719138492",
+2026-10-11T14:09:11.093770133Z           "1769719197975"
+2026-10-11T14:09:11.093778307Z         ],
+2026-10-11T14:09:11.093786192Z         "sampleCount": 7
+2026-10-11T14:09:11.093794381Z       },
+2026-10-11T14:09:11.093802339Z       {
+2026-10-11T14:09:11.093810356Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.093818489Z         "param": "K_EXCH",
+2026-10-11T14:09:11.093826688Z         "sampleIds": [
+2026-10-11T14:09:11.093834932Z           "1769086466918",
+2026-10-11T14:09:11.093843075Z           "1769086467021",
+2026-10-11T14:09:11.093851163Z           "1769464262091",
+2026-10-11T14:09:11.093868103Z           "1769464262872",
+2026-10-11T14:09:11.093877389Z           "1769719118243",
+2026-10-11T14:09:11.093885673Z           "1769719138492",
+2026-10-11T14:09:11.093893961Z           "1769719197975"
+2026-10-11T14:09:11.093902215Z         ],
+2026-10-11T14:09:11.093910550Z         "sampleCount": 7
+2026-10-11T14:09:11.093918824Z       },
+2026-10-11T14:09:11.093926831Z       {
+2026-10-11T14:09:11.093934974Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.093956745Z         "param": "CA_EXCH",
+2026-10-11T14:09:11.093966185Z         "sampleIds": [
+2026-10-11T14:09:11.093974052Z           "1769086466918",
+2026-10-11T14:09:11.093981989Z           "1769086467021",
+2026-10-11T14:09:11.093989943Z           "1769464262091",
+2026-10-11T14:09:11.093997776Z           "1769464262872",
+2026-10-11T14:09:11.094005516Z           "1769719118243",
+2026-10-11T14:09:11.094013351Z           "1769719138492",
+2026-10-11T14:09:11.094021058Z           "1769719197975"
+2026-10-11T14:09:11.094028958Z         ],
+2026-10-11T14:09:11.094036644Z         "sampleCount": 7
+2026-10-11T14:09:11.094044614Z       },
+2026-10-11T14:09:11.094052414Z       {
+2026-10-11T14:09:11.094060192Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.094068057Z         "param": "MG_EXCH",
+2026-10-11T14:09:11.094076041Z         "sampleIds": [
+2026-10-11T14:09:11.094083870Z           "1769086466918",
+2026-10-11T14:09:11.094091673Z           "1769086467021",
+2026-10-11T14:09:11.094099405Z           "1769464262091",
+2026-10-11T14:09:11.094107200Z           "1769464262872",
+2026-10-11T14:09:11.094115078Z           "1769719118243",
+2026-10-11T14:09:11.094125655Z           "1769719138492",
+2026-10-11T14:09:11.094133368Z           "1769719197975"
+2026-10-11T14:09:11.094141203Z         ],
+2026-10-11T14:09:11.094148844Z         "sampleCount": 7
+2026-10-11T14:09:11.094156738Z       },
+2026-10-11T14:09:11.094164366Z       {
+2026-10-11T14:09:11.094172079Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.094185497Z         "param": "NA_EXCH",
+2026-10-11T14:09:11.094194197Z         "sampleIds": [
+2026-10-11T14:09:11.094202067Z           "1769086466918",
+2026-10-11T14:09:11.094210152Z           "1769086467021",
+2026-10-11T14:09:11.094231078Z           "1769464262091",
+2026-10-11T14:09:11.094240678Z           "1769464262872",
+2026-10-11T14:09:11.094256111Z           "1769719118243",
+2026-10-11T14:09:11.094265280Z           "1769719138492",
+2026-10-11T14:09:11.094273807Z           "1769719197975"
+2026-10-11T14:09:11.094290369Z         ],
+2026-10-11T14:09:11.094298469Z         "sampleCount": 7
+2026-10-11T14:09:11.094306691Z       },
+2026-10-11T14:09:11.094314762Z       {
+2026-10-11T14:09:11.094322880Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.094331132Z         "param": "CEC",
+2026-10-11T14:09:11.094339405Z         "sampleIds": [
+2026-10-11T14:09:11.094347688Z           "1769086466918",
+2026-10-11T14:09:11.094355907Z           "1769086467021",
+2026-10-11T14:09:11.094364085Z           "1769464262091",
+2026-10-11T14:09:11.094372322Z           "1769464262872",
+2026-10-11T14:09:11.094380467Z           "1769719118243",
+2026-10-11T14:09:11.094388724Z           "1769719138492",
+2026-10-11T14:09:11.094396853Z           "1769719197975"
+2026-10-11T14:09:11.094405091Z         ],
+2026-10-11T14:09:11.094413221Z         "sampleCount": 7
+2026-10-11T14:09:11.094421550Z       },
+2026-10-11T14:09:11.094429680Z       {
+2026-10-11T14:09:11.094443565Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.094451814Z         "param": "BS",
+2026-10-11T14:09:11.094468955Z         "sampleIds": [
+2026-10-11T14:09:11.094479388Z           "1769086466918",
+2026-10-11T14:09:11.094487888Z           "1769086467021",
+2026-10-11T14:09:11.094496184Z           "1769464262091",
+2026-10-11T14:09:11.094504330Z           "1769464262872",
+2026-10-11T14:09:11.094512467Z           "1769719118243",
+2026-10-11T14:09:11.094520625Z           "1769719138492",
+2026-10-11T14:09:11.094528711Z           "1769719197975"
+2026-10-11T14:09:11.094536865Z         ],
+2026-10-11T14:09:11.094544827Z         "sampleCount": 7
+2026-10-11T14:09:11.094553035Z       },
+2026-10-11T14:09:11.094561147Z       {
+2026-10-11T14:09:11.094569206Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.094577430Z         "param": "CACO3",
+2026-10-11T14:09:11.094585786Z         "sampleIds": [
+2026-10-11T14:09:11.094593923Z           "1769086466918",
+2026-10-11T14:09:11.094602148Z           "1769086467021",
+2026-10-11T14:09:11.094625699Z           "1769464262091",
+2026-10-11T14:09:11.094634832Z           "1769464262872",
+2026-10-11T14:09:11.094643254Z           "1769719118243",
+2026-10-11T14:09:11.094659857Z           "1769719138492",
+2026-10-11T14:09:11.094669017Z           "1769719197975"
+2026-10-11T14:09:11.094677368Z         ],
+2026-10-11T14:09:11.094685417Z         "sampleCount": 7
+2026-10-11T14:09:11.094693957Z       },
+2026-10-11T14:09:11.094701955Z       {
+2026-10-11T14:09:11.094709986Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.094718329Z         "param": "FE",
+2026-10-11T14:09:11.094726614Z         "sampleIds": [
+2026-10-11T14:09:11.094734770Z           "1769086466918",
+2026-10-11T14:09:11.094742886Z           "1769086467021",
+2026-10-11T14:09:11.094750969Z           "1769464262091",
+2026-10-11T14:09:11.094759176Z           "1769464262872",
+2026-10-11T14:09:11.094767270Z           "1769719118243",
+2026-10-11T14:09:11.094775435Z           "1769719138492",
+2026-10-11T14:09:11.094783667Z           "1769719197975"
+2026-10-11T14:09:11.094791874Z         ],
+2026-10-11T14:09:11.094799873Z         "sampleCount": 7
+2026-10-11T14:09:11.094808043Z       },
+2026-10-11T14:09:11.094816040Z       {
+2026-10-11T14:09:11.094824130Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.094832317Z         "param": "MN",
+2026-10-11T14:09:11.094840571Z         "sampleIds": [
+2026-10-11T14:09:11.094848912Z           "1769086466918",
+2026-10-11T14:09:11.094857061Z           "1769086467021",
+2026-10-11T14:09:11.094865163Z           "1769464262091",
+2026-10-11T14:09:11.094873369Z           "1769464262872",
+2026-10-11T14:09:11.094881452Z           "1769719118243",
+2026-10-11T14:09:11.094889584Z           "1769719138492",
+2026-10-11T14:09:11.094897684Z           "1769719197975"
+2026-10-11T14:09:11.094905819Z         ],
+2026-10-11T14:09:11.094913923Z         "sampleCount": 7
+2026-10-11T14:09:11.094922237Z       },
+2026-10-11T14:09:11.094930362Z       {
+2026-10-11T14:09:11.094938434Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.094946638Z         "param": "ZN",
+2026-10-11T14:09:11.094954893Z         "sampleIds": [
+2026-10-11T14:09:11.094963004Z           "1769086466918",
+2026-10-11T14:09:11.094971166Z           "1769086467021",
+2026-10-11T14:09:11.094979379Z           "1769464262091",
+2026-10-11T14:09:11.094988595Z           "1769464262872",
+2026-10-11T14:09:11.094997297Z           "1769719118243",
+2026-10-11T14:09:11.095005539Z           "1769719138492",
+2026-10-11T14:09:11.095013701Z           "1769719197975"
+2026-10-11T14:09:11.095032599Z         ],
+2026-10-11T14:09:11.095041713Z         "sampleCount": 7
+2026-10-11T14:09:11.095050180Z       },
+2026-10-11T14:09:11.095058520Z       {
+2026-10-11T14:09:11.095066697Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.095074901Z         "param": "CU",
+2026-10-11T14:09:11.095083088Z         "sampleIds": [
+2026-10-11T14:09:11.095091241Z           "1769086466918",
+2026-10-11T14:09:11.095099424Z           "1769086467021",
+2026-10-11T14:09:11.095107628Z           "1769464262091",
+2026-10-11T14:09:11.095115804Z           "1769464262872",
+2026-10-11T14:09:11.095124098Z           "1769719118243",
+2026-10-11T14:09:11.095132229Z           "1769719138492",
+2026-10-11T14:09:11.095140467Z           "1769719197975"
+2026-10-11T14:09:11.095148689Z         ],
+2026-10-11T14:09:11.095156787Z         "sampleCount": 7
+2026-10-11T14:09:11.095165015Z       },
+2026-10-11T14:09:11.095173200Z       {
+2026-10-11T14:09:11.095181248Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.095189699Z         "param": "B",
+2026-10-11T14:09:11.095198061Z         "sampleIds": [
+2026-10-11T14:09:11.095206266Z           "1769086466918",
+2026-10-11T14:09:11.095217844Z           "1769086467021",
+2026-10-11T14:09:11.095225939Z           "1769464262091",
+2026-10-11T14:09:11.095234105Z           "1769464262872",
+2026-10-11T14:09:11.095242184Z           "1769719118243",
+2026-10-11T14:09:11.095250472Z           "1769719138492",
+2026-10-11T14:09:11.095258609Z           "1769719197975"
+2026-10-11T14:09:11.095266789Z         ],
+2026-10-11T14:09:11.095274830Z         "sampleCount": 7
+2026-10-11T14:09:11.095283028Z       },
+2026-10-11T14:09:11.095291123Z       {
+2026-10-11T14:09:11.095299223Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.095307600Z         "param": "SOM",
+2026-10-11T14:09:11.095315913Z         "sampleIds": [
+2026-10-11T14:09:11.095324191Z           "1769086466918",
+2026-10-11T14:09:11.095332407Z           "1769086467021",
+2026-10-11T14:09:11.095340589Z           "1769464262091",
+2026-10-11T14:09:11.095348847Z           "1769464262872",
+2026-10-11T14:09:11.095356949Z           "1769719118243",
+2026-10-11T14:09:11.095365194Z           "1769719138492",
+2026-10-11T14:09:11.095373348Z           "1769719197975"
+2026-10-11T14:09:11.095381545Z         ],
+2026-10-11T14:09:11.095396708Z         "sampleCount": 7
+2026-10-11T14:09:11.095405940Z       },
+2026-10-11T14:09:11.095414192Z       {
+2026-10-11T14:09:11.095422251Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.095430516Z         "param": "MBC",
+2026-10-11T14:09:11.095438781Z         "sampleIds": [
+2026-10-11T14:09:11.095446948Z           "1769086466918",
+2026-10-11T14:09:11.095485870Z           "1769086467021",
+2026-10-11T14:09:11.095495102Z           "1769464262091",
+2026-10-11T14:09:11.095503657Z           "1769464262872",
+2026-10-11T14:09:11.095511894Z           "1769719118243",
+2026-10-11T14:09:11.095536628Z           "1769719138492",
+2026-10-11T14:09:11.095545058Z           "1769719197975"
+2026-10-11T14:09:11.095553098Z         ],
+2026-10-11T14:09:11.095560859Z         "sampleCount": 7
+2026-10-11T14:09:11.095568806Z       },
+2026-10-11T14:09:11.095576765Z       {
+2026-10-11T14:09:11.095584527Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.095600889Z         "param": "PMN",
+2026-10-11T14:09:11.095622196Z         "sampleIds": [
+2026-10-11T14:09:11.095631696Z           "1769086466918",
+2026-10-11T14:09:11.095667177Z           "1769086467021",
+2026-10-11T14:09:11.095675681Z           "1769464262091",
+2026-10-11T14:09:11.095683901Z           "1769464262872",
+2026-10-11T14:09:11.095692187Z           "1769719118243",
+2026-10-11T14:09:11.095700516Z           "1769719138492",
+2026-10-11T14:09:11.095708772Z           "1769719197975"
+2026-10-11T14:09:11.095716998Z         ],
+2026-10-11T14:09:11.095725050Z         "sampleCount": 7
+2026-10-11T14:09:11.095733468Z       },
+2026-10-11T14:09:11.095741520Z       {
+2026-10-11T14:09:11.095749649Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.095772971Z         "param": "S_RESP",
+2026-10-11T14:09:11.095780964Z         "sampleIds": [
+2026-10-11T14:09:11.095788865Z           "1769086466918",
+2026-10-11T14:09:11.095796824Z           "1769086467021",
+2026-10-11T14:09:11.095804687Z           "1769464262091",
+2026-10-11T14:09:11.095812455Z           "1769464262872",
+2026-10-11T14:09:11.095835682Z           "1769719118243",
+2026-10-11T14:09:11.095843979Z           "1769719138492",
+2026-10-11T14:09:11.095852181Z           "1769719197975"
+2026-10-11T14:09:11.095866036Z         ],
+2026-10-11T14:09:11.095874035Z         "sampleCount": 7
+2026-10-11T14:09:11.095891081Z       },
+2026-10-11T14:09:11.095900177Z       {
+2026-10-11T14:09:11.095909243Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.095918333Z         "param": "SPEC_VIS_NIR",
+2026-10-11T14:09:11.095926703Z         "sampleIds": [
+2026-10-11T14:09:11.095935193Z           "1769086466918",
+2026-10-11T14:09:11.095943379Z           "1769086467021",
+2026-10-11T14:09:11.095951519Z           "1769464262091",
+2026-10-11T14:09:11.095959583Z           "1769464262872",
+2026-10-11T14:09:11.095967765Z           "1769719118243",
+2026-10-11T14:09:11.095975885Z           "1769719123914",
+2026-10-11T14:09:11.095984023Z           "1769719138492",
+2026-10-11T14:09:11.095992199Z           "1769719197975"
+2026-10-11T14:09:11.096000376Z         ],
+2026-10-11T14:09:11.096008426Z         "sampleCount": 8
+2026-10-11T14:09:11.096016569Z       },
+2026-10-11T14:09:11.096024599Z       {
+2026-10-11T14:09:11.096032575Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.096040915Z         "param": "SPEC_MIR",
+2026-10-11T14:09:11.096049064Z         "sampleIds": [
+2026-10-11T14:09:11.096057256Z           "1769086466918",
+2026-10-11T14:09:11.096065605Z           "1769086467021",
+2026-10-11T14:09:11.096073809Z           "1769464262091",
+2026-10-11T14:09:11.096081889Z           "1769464262872",
+2026-10-11T14:09:11.096090076Z           "1769719118243",
+2026-10-11T14:09:11.096098165Z           "1769719123914",
+2026-10-11T14:09:11.096106301Z           "1769719138492",
+2026-10-11T14:09:11.096114371Z           "1769719197975"
+2026-10-11T14:09:11.096122531Z         ],
+2026-10-11T14:09:11.096130751Z         "sampleCount": 8
+2026-10-11T14:09:11.096138948Z       }
+2026-10-11T14:09:11.096148881Z     ],
+2026-10-11T14:09:11.096156967Z     "missingOrderedWorkCount": 225,
+2026-10-11T14:09:11.096165203Z     "samplesWithMissingOrderedWorkCount": 10,
+2026-10-11T14:09:11.096173544Z     "invalidOrderMetadata": [],
+2026-10-11T14:09:11.096181681Z     "unmappedStatusGroups": [],
+2026-10-11T14:09:11.096189867Z     "newAttempts": [],
+2026-10-11T14:09:11.096198100Z     "links": [],
+2026-10-11T14:09:11.096206187Z     "blockers": [],
+2026-10-11T14:09:11.096214484Z     "duplicateAttemptNumberGroups": [],
+2026-10-11T14:09:11.096222812Z     "currentResultConflicts": [],
+2026-10-11T14:09:11.096231010Z     "historicalEquipmentEvidence": [],
+2026-10-11T14:09:11.096239308Z     "historicalBatchEvidence": [
+2026-10-11T14:09:11.096264374Z       {
+2026-10-11T14:09:11.096274189Z         "attemptId": "att-s02-p-1",
+2026-10-11T14:09:11.096282841Z         "workItemId": "WI-GTM-DEMO-S02-P",
+2026-10-11T14:09:11.096291509Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.096299964Z         "reason": null,
+2026-10-11T14:09:11.096308386Z         "batchId": "BATCH-GTM-2026-P-01"
+2026-10-11T14:09:11.096316947Z       },
+2026-10-11T14:09:11.096325261Z       {
+2026-10-11T14:09:11.096333542Z         "attemptId": "att-s02-p-2",
+2026-10-11T14:09:11.096346590Z         "workItemId": "WI-GTM-DEMO-S02-P",
+2026-10-11T14:09:11.096355093Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.096363475Z         "reason": null,
+2026-10-11T14:09:11.096371903Z         "batchId": "BATCH-GTM-2026-P-02"
+2026-10-11T14:09:11.096380377Z       },
+2026-10-11T14:09:11.096388537Z       {
+2026-10-11T14:09:11.096410799Z         "attemptId": "att190-16df97e9-f3fc-4c15-9432-7b1f3b2169e2",
+2026-10-11T14:09:11.096419161Z         "workItemId": "WI-1789634536059-97",
+2026-10-11T14:09:11.096427362Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.096435585Z         "reason": "BATCH_NOT_RECORDED",
+2026-10-11T14:09:11.096443763Z         "batchId": null
+2026-10-11T14:09:11.096451787Z       },
+2026-10-11T14:09:11.096482336Z       {
+2026-10-11T14:09:11.096494346Z         "attemptId": "att190-2bb701e8-2b43-4da8-9ac3-057a1944948a",
+2026-10-11T14:09:11.096511374Z         "workItemId": "WI-GTM-DEMO-S01-K",
+2026-10-11T14:09:11.096520157Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.096528532Z         "reason": null,
+2026-10-11T14:09:11.096536745Z         "batchId": "BATCH-GTM-2026-K-01"
+2026-10-11T14:09:11.096545070Z       },
+2026-10-11T14:09:11.096553292Z       {
+2026-10-11T14:09:11.096561339Z         "attemptId": "att190-2cefb713-9ee2-4ad3-a03f-b6c768158fe5",
+2026-10-11T14:09:11.096569798Z         "workItemId": "WI-GTM-DEMO-S01-PH",
+2026-10-11T14:09:11.096578216Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.096587371Z         "reason": null,
+2026-10-11T14:09:11.096596095Z         "batchId": "BATCH-GTM-2026-PH-01"
+2026-10-11T14:09:11.096604453Z       },
+2026-10-11T14:09:11.096630474Z       {
+2026-10-11T14:09:11.096638879Z         "attemptId": "att190-32bca60b-2ef7-452e-adaf-50c45ec66236",
+2026-10-11T14:09:11.096647416Z         "workItemId": "WI-GTM-DEMO-S02-K",
+2026-10-11T14:09:11.096655867Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.096679577Z         "reason": null,
+2026-10-11T14:09:11.096688735Z         "batchId": "BATCH-GTM-2026-K-01"
+2026-10-11T14:09:11.096697238Z       },
+2026-10-11T14:09:11.096705493Z       {
+2026-10-11T14:09:11.096713716Z         "attemptId": "att190-3f91ace4-f24f-4baa-813b-5793b860109e",
+2026-10-11T14:09:11.096722314Z         "workItemId": "WI-GTM-DEMO-S03-K",
+2026-10-11T14:09:11.096738493Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.096746761Z         "reason": null,
+2026-10-11T14:09:11.096755134Z         "batchId": "BATCH-GTM-2026-K-01"
+2026-10-11T14:09:11.096763473Z       },
+2026-10-11T14:09:11.096771594Z       {
+2026-10-11T14:09:11.096779890Z         "attemptId": "att190-4b50565c-b26c-4452-81ef-af520f849a77",
+2026-10-11T14:09:11.096802732Z         "workItemId": "WI-GTM-DEMO-S03-EC",
+2026-10-11T14:09:11.096811904Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.096819898Z         "reason": null,
+2026-10-11T14:09:11.096827749Z         "batchId": "BATCH-GTM-2026-EC-01"
+2026-10-11T14:09:11.096835646Z       },
+2026-10-11T14:09:11.096844109Z       {
+2026-10-11T14:09:11.096866140Z         "attemptId": "att190-752364b5-3b74-47f6-92aa-ccd52943caa1",
+2026-10-11T14:09:11.096875742Z         "workItemId": "WI-1789634536011-406",
+2026-10-11T14:09:11.096884165Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.096892552Z         "reason": "BATCH_NOT_RECORDED",
+2026-10-11T14:09:11.096900885Z         "batchId": null
+2026-10-11T14:09:11.096909055Z       },
+2026-10-11T14:09:11.096917180Z       {
+2026-10-11T14:09:11.096925326Z         "attemptId": "att190-781205b4-16d2-480e-a616-5cfaff3b7ae8",
+2026-10-11T14:09:11.096933856Z         "workItemId": "WI-GTM-DEMO-S03-PH",
+2026-10-11T14:09:11.096942593Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.096950906Z         "reason": null,
+2026-10-11T14:09:11.096959089Z         "batchId": "BATCH-GTM-2026-PH-01"
+2026-10-11T14:09:11.096967607Z       },
+2026-10-11T14:09:11.096975688Z       {
+2026-10-11T14:09:11.096983717Z         "attemptId": "att190-8153d483-fb69-4a7c-8dcd-be91073cfd75",
+2026-10-11T14:09:11.096992263Z         "workItemId": "WI-1789634536051-965",
+2026-10-11T14:09:11.097000545Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.097009007Z         "reason": "BATCH_NOT_RECORDED",
+2026-10-11T14:09:11.097017315Z         "batchId": null
+2026-10-11T14:09:11.097025497Z       },
+2026-10-11T14:09:11.097033559Z       {
+2026-10-11T14:09:11.097041598Z         "attemptId": "att190-89438697-6e7d-4795-9dd5-db1fe8a90ef1",
+2026-10-11T14:09:11.097057511Z         "workItemId": "WI-GTM-DEMO-S02-PH",
+2026-10-11T14:09:11.097066943Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.097075421Z         "reason": null,
+2026-10-11T14:09:11.097083778Z         "batchId": "BATCH-GTM-2026-PH-01"
+2026-10-11T14:09:11.097092305Z       },
+2026-10-11T14:09:11.097100511Z       {
+2026-10-11T14:09:11.097108669Z         "attemptId": "att190-96433480-e2ff-406b-ba79-2c5d6706acbf",
+2026-10-11T14:09:11.097117279Z         "workItemId": "WI-GTM-DEMO-S01-P",
+2026-10-11T14:09:11.097125784Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.097134162Z         "reason": null,
+2026-10-11T14:09:11.097142507Z         "batchId": "BATCH-GTM-2026-P-01"
+2026-10-11T14:09:11.097150973Z       },
+2026-10-11T14:09:11.097159232Z       {
+2026-10-11T14:09:11.097167378Z         "attemptId": "att190-a9fd8a80-d29b-482a-b0d5-43f169a3fc95",
+2026-10-11T14:09:11.097175867Z         "workItemId": "WI-GTM-DEMO-S01-SOC",
+2026-10-11T14:09:11.097184325Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.097194162Z         "reason": null,
+2026-10-11T14:09:11.097203012Z         "batchId": "BATCH-GTM-2026-SOC-01"
+2026-10-11T14:09:11.097211572Z       },
+2026-10-11T14:09:11.097223546Z       {
+2026-10-11T14:09:11.097231722Z         "attemptId": "att190-ac045345-d7ea-4002-a3e9-2a60762974f9",
+2026-10-11T14:09:11.097240163Z         "workItemId": "WI-GTM-DEMO-S03-SOC",
+2026-10-11T14:09:11.097248708Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.097256982Z         "reason": null,
+2026-10-11T14:09:11.097279949Z         "batchId": "BATCH-GTM-2026-SOC-01"
+2026-10-11T14:09:11.097288024Z       },
+2026-10-11T14:09:11.097295793Z       {
+2026-10-11T14:09:11.097303630Z         "attemptId": "att190-b322848a-7ad3-4332-9720-81c83a426cad",
+2026-10-11T14:09:11.097311804Z         "workItemId": "WI-GTM-DEMO-S02-EC",
+2026-10-11T14:09:11.097319945Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.097328229Z         "reason": null,
+2026-10-11T14:09:11.097338291Z         "batchId": "BATCH-GTM-2026-EC-01"
+2026-10-11T14:09:11.097361031Z       },
+2026-10-11T14:09:11.097369062Z       {
+2026-10-11T14:09:11.097377144Z         "attemptId": "att190-b6852f8b-1f84-471a-84b0-782faca2c7e9",
+2026-10-11T14:09:11.097385627Z         "workItemId": "WI-GTM-DEMO-S03-P",
+2026-10-11T14:09:11.097394071Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.097402343Z         "reason": null,
+2026-10-11T14:09:11.097410485Z         "batchId": "BATCH-GTM-2026-P-01"
+2026-10-11T14:09:11.097429336Z       },
+2026-10-11T14:09:11.097438587Z       {
+2026-10-11T14:09:11.097447094Z         "attemptId": "att190-d3fa23d7-82fa-45a1-8b3f-2e1b78388af3",
+2026-10-11T14:09:11.097455544Z         "workItemId": "WI-GTM-DEMO-S01-EC",
+2026-10-11T14:09:11.097474673Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.097484138Z         "reason": null,
+2026-10-11T14:09:11.097494719Z         "batchId": "BATCH-GTM-2026-EC-01"
+2026-10-11T14:09:11.097511199Z       },
+2026-10-11T14:09:11.097526011Z       {
+2026-10-11T14:09:11.097538900Z         "attemptId": "att190-f333de96-7ef6-4358-98c0-bf5d76df269d",
+2026-10-11T14:09:11.097555128Z         "workItemId": "WI-GTM-DEMO-S02-SOC",
+2026-10-11T14:09:11.097563491Z         "outcome": "RETAINED",
+2026-10-11T14:09:11.097571794Z         "reason": null,
+2026-10-11T14:09:11.097593827Z         "batchId": "BATCH-GTM-2026-SOC-01"
+2026-10-11T14:09:11.097602712Z       }
+2026-10-11T14:09:11.097610242Z     ],
+2026-10-11T14:09:11.097633231Z     "originalAttemptSha256": "257402af0ae543b070dfd1c114337e7e4c709ce9d73da830f285f893ab8a62c0",
+2026-10-11T14:09:11.097661123Z     "originalResultSha256": "f84d137e1bbd634b764ea3b140a7cc67cb619394ded931acdfb62cf523d0d41c",
+2026-10-11T14:09:11.097670291Z     "matchedWorkItemSourceSha256": "89597e83da2232a8f15c21e13805538497b505faaec4d3b1e0b7b0469815c2bb",
+2026-10-11T14:09:11.097679114Z     "batchReferenceSha256": "b4c51186ea82897dfa1aab7d8e8308d9e6834ef440ed271b7864fbec6aa45701",
+2026-10-11T14:09:11.097687796Z     "totalChanges": 0,
+2026-10-11T14:09:11.097696122Z     "planSha256": "a908d76eb0a644a635a37a23ba4adb7657d561caa5f6fdd813d002973ecb9185"
+2026-10-11T14:09:11.097710759Z   },
+2026-10-11T14:09:11.097718698Z   "duplicateMarkerPrerequisite": {
+2026-10-11T14:09:11.097726952Z     "classification": "COMPLETE",
+2026-10-11T14:09:11.097735103Z     "sources": [
+2026-10-11T14:09:11.097743260Z       {
+2026-10-11T14:09:11.097751165Z         "id": "20261004190000_add_workitem_duplicate_marker",
+2026-10-11T14:09:11.097759675Z         "sqlSha256": "80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e"
+2026-10-11T14:09:11.097768156Z       },
+2026-10-11T14:09:11.097776224Z       {
+2026-10-11T14:09:11.097784141Z         "id": "20261004190100_unique_active_workitem",
+2026-10-11T14:09:11.097793419Z         "sqlSha256": "a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e"
+2026-10-11T14:09:11.097802358Z       }
+2026-10-11T14:09:11.097810438Z     ]
+2026-10-11T14:09:11.097818377Z   },
+2026-10-11T14:09:11.097840420Z   "receipt": {
+2026-10-11T14:09:11.097849714Z     "sources": {
+2026-10-11T14:09:11.097858007Z       "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+2026-10-11T14:09:11.097866588Z       "contractVersion": "190-v1"
+2026-10-11T14:09:11.097874916Z     },
+2026-10-11T14:09:11.097882918Z     "originalPlanSha256": "7ffdb375cab35663d188d6087f02ee81161ec950feae7611bbbad6d8706d57f9",
+2026-10-11T14:09:11.097899845Z     "duplicateMarkerPrerequisite": {
+2026-10-11T14:09:11.097908046Z       "classification": "COMPLETE",
+2026-10-11T14:09:11.097916379Z       "sources": [
+2026-10-11T14:09:11.097924819Z         {
+2026-10-11T14:09:11.097932969Z           "id": "20261004190000_add_workitem_duplicate_marker",
+2026-10-11T14:09:11.097941344Z           "sqlSha256": "80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e"
+2026-10-11T14:09:11.097950141Z         },
+2026-10-11T14:09:11.097958260Z         {
+2026-10-11T14:09:11.097966423Z           "id": "20261004190100_unique_active_workitem",
+2026-10-11T14:09:11.097974778Z           "sqlSha256": "a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e"
+2026-10-11T14:09:11.097983443Z         }
+2026-10-11T14:09:11.097991588Z       ]
+2026-10-11T14:09:11.097999681Z     },
+2026-10-11T14:09:11.098007904Z     "originalAttemptSha256": "356b45f28f94828d9dc705b656d5ddbc2717c3dc1dc1249d0f4378ef1f071786",
+2026-10-11T14:09:11.098016508Z     "originalResultSha256": "07d02a9f76eaf0a06a352d477bdeb416cb69a6694135de9b3f14c004cb4cd437",
+2026-10-11T14:09:11.098030812Z     "matchedWorkItemSourceSha256": "89597e83da2232a8f15c21e13805538497b505faaec4d3b1e0b7b0469815c2bb",
+2026-10-11T14:09:11.098046679Z     "createdAttempts": [
+2026-10-11T14:09:11.098061510Z       {
+2026-10-11T14:09:11.098081933Z         "workItemId": "WI-1789634536051-965",
+2026-10-11T14:09:11.098095490Z         "attemptNo": 1,
+2026-10-11T14:09:11.098104570Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.098112961Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.098121269Z         "resultIds": [
+2026-10-11T14:09:11.098129413Z           "res-1789655582508-vr6tcs"
+2026-10-11T14:09:11.098137740Z         ],
+2026-10-11T14:09:11.098145824Z         "id": "att190-8153d483-fb69-4a7c-8dcd-be91073cfd75",
+2026-10-11T14:09:11.098154351Z         "batchId": null,
+2026-10-11T14:09:11.098162647Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.098171109Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.098179441Z       },
+2026-10-11T14:09:11.098187447Z       {
+2026-10-11T14:09:11.098205245Z         "workItemId": "WI-1789634536059-97",
+2026-10-11T14:09:11.098214813Z         "attemptNo": 1,
+2026-10-11T14:09:11.098223212Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.098231651Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.098239911Z         "resultIds": [
+2026-10-11T14:09:11.098248107Z           "res-1789655713932-8zifo4"
+2026-10-11T14:09:11.098256354Z         ],
+2026-10-11T14:09:11.098264583Z         "id": "att190-16df97e9-f3fc-4c15-9432-7b1f3b2169e2",
+2026-10-11T14:09:11.098273163Z         "batchId": null,
+2026-10-11T14:09:11.098281524Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.098289974Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.098298429Z       },
+2026-10-11T14:09:11.098306545Z       {
+2026-10-11T14:09:11.098314653Z         "workItemId": "WI-1789634536011-406",
+2026-10-11T14:09:11.098322998Z         "attemptNo": 1,
+2026-10-11T14:09:11.098331249Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.098340693Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.098349525Z         "resultIds": [
+2026-10-11T14:09:11.098357750Z           "res-1789656669699-4sqmm1"
+2026-10-11T14:09:11.098366029Z         ],
+2026-10-11T14:09:11.098374048Z         "id": "att190-752364b5-3b74-47f6-92aa-ccd52943caa1",
+2026-10-11T14:09:11.098382393Z         "batchId": null,
+2026-10-11T14:09:11.098390516Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.098398837Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.098407267Z       },
+2026-10-11T14:09:11.098415366Z       {
+2026-10-11T14:09:11.098423379Z         "workItemId": "WI-GTM-DEMO-S01-EC",
+2026-10-11T14:09:11.098431813Z         "attemptNo": 1,
+2026-10-11T14:09:11.098444173Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.098470818Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.098489111Z         "resultIds": [
+2026-10-11T14:09:11.098503448Z           "res-GTM-DEMO-S01-ec"
+2026-10-11T14:09:11.098514179Z         ],
+2026-10-11T14:09:11.098522528Z         "id": "att190-d3fa23d7-82fa-45a1-8b3f-2e1b78388af3",
+2026-10-11T14:09:11.098531055Z         "batchId": "BATCH-GTM-2026-EC-01",
+2026-10-11T14:09:11.098539503Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.098547857Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.098556419Z       },
+2026-10-11T14:09:11.098579446Z       {
+2026-10-11T14:09:11.098587793Z         "workItemId": "WI-GTM-DEMO-S01-K",
+2026-10-11T14:09:11.098605204Z         "attemptNo": 1,
+2026-10-11T14:09:11.098614163Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.098647332Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.098659105Z         "resultIds": [
+2026-10-11T14:09:11.098667397Z           "res-GTM-DEMO-S01-k"
+2026-10-11T14:09:11.098675483Z         ],
+2026-10-11T14:09:11.098683543Z         "id": "att190-2bb701e8-2b43-4da8-9ac3-057a1944948a",
+2026-10-11T14:09:11.098691688Z         "batchId": "BATCH-GTM-2026-K-01",
+2026-10-11T14:09:11.098699621Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.098707643Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.098715616Z       },
+2026-10-11T14:09:11.098723477Z       {
+2026-10-11T14:09:11.098731201Z         "workItemId": "WI-GTM-DEMO-S01-P",
+2026-10-11T14:09:11.098753112Z         "attemptNo": 1,
+2026-10-11T14:09:11.098760654Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.098768575Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.098776092Z         "resultIds": [
+2026-10-11T14:09:11.098783667Z           "res-GTM-DEMO-S01-p"
+2026-10-11T14:09:11.098794405Z         ],
+2026-10-11T14:09:11.098802030Z         "id": "att190-96433480-e2ff-406b-ba79-2c5d6706acbf",
+2026-10-11T14:09:11.098809902Z         "batchId": "BATCH-GTM-2026-P-01",
+2026-10-11T14:09:11.098817646Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.098825426Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.098833206Z       },
+2026-10-11T14:09:11.098840793Z       {
+2026-10-11T14:09:11.098848434Z         "workItemId": "WI-GTM-DEMO-S01-PH",
+2026-10-11T14:09:11.098856268Z         "attemptNo": 1,
+2026-10-11T14:09:11.098863939Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.098871697Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.098879392Z         "resultIds": [
+2026-10-11T14:09:11.098887025Z           "res-GTM-DEMO-S01-ph"
+2026-10-11T14:09:11.098894665Z         ],
+2026-10-11T14:09:11.098902247Z         "id": "att190-2cefb713-9ee2-4ad3-a03f-b6c768158fe5",
+2026-10-11T14:09:11.098910075Z         "batchId": "BATCH-GTM-2026-PH-01",
+2026-10-11T14:09:11.098917875Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.098925576Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.098933330Z       },
+2026-10-11T14:09:11.098940738Z       {
+2026-10-11T14:09:11.098948241Z         "workItemId": "WI-GTM-DEMO-S01-SOC",
+2026-10-11T14:09:11.098964344Z         "attemptNo": 1,
+2026-10-11T14:09:11.098972839Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.098981646Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.098989922Z         "resultIds": [
+2026-10-11T14:09:11.098997684Z           "res-GTM-DEMO-S01-soc"
+2026-10-11T14:09:11.099005432Z         ],
+2026-10-11T14:09:11.099012835Z         "id": "att190-a9fd8a80-d29b-482a-b0d5-43f169a3fc95",
+2026-10-11T14:09:11.099020543Z         "batchId": "BATCH-GTM-2026-SOC-01",
+2026-10-11T14:09:11.099028163Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.099035850Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.099043570Z       },
+2026-10-11T14:09:11.099051060Z       {
+2026-10-11T14:09:11.099058491Z         "workItemId": "WI-GTM-DEMO-S02-EC",
+2026-10-11T14:09:11.099066176Z         "attemptNo": 1,
+2026-10-11T14:09:11.099073633Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.099081163Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.099088633Z         "resultIds": [
+2026-10-11T14:09:11.099104355Z           "res-GTM-DEMO-S02-ec"
+2026-10-11T14:09:11.099111792Z         ],
+2026-10-11T14:09:11.099132494Z         "id": "att190-b322848a-7ad3-4332-9720-81c83a426cad",
+2026-10-11T14:09:11.099140304Z         "batchId": "BATCH-GTM-2026-EC-01",
+2026-10-11T14:09:11.099147684Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.099154998Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.099162404Z       },
+2026-10-11T14:09:11.099169426Z       {
+2026-10-11T14:09:11.099176494Z         "workItemId": "WI-GTM-DEMO-S02-K",
+2026-10-11T14:09:11.099183773Z         "attemptNo": 1,
+2026-10-11T14:09:11.099191053Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.099198569Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.099220240Z         "resultIds": [
+2026-10-11T14:09:11.099227751Z           "res-GTM-DEMO-S02-k"
+2026-10-11T14:09:11.099235286Z         ],
+2026-10-11T14:09:11.099242634Z         "id": "att190-32bca60b-2ef7-452e-adaf-50c45ec66236",
+2026-10-11T14:09:11.099250378Z         "batchId": "BATCH-GTM-2026-K-01",
+2026-10-11T14:09:11.099258317Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.099266028Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.099273702Z       },
+2026-10-11T14:09:11.099281122Z       {
+2026-10-11T14:09:11.099288513Z         "workItemId": "WI-GTM-DEMO-S02-PH",
+2026-10-11T14:09:11.099303296Z         "attemptNo": 1,
+2026-10-11T14:09:11.099311758Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.099319642Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.099327452Z         "resultIds": [
+2026-10-11T14:09:11.099335207Z           "res-GTM-DEMO-S02-ph"
+2026-10-11T14:09:11.099355552Z         ],
+2026-10-11T14:09:11.099364553Z         "id": "att190-89438697-6e7d-4795-9dd5-db1fe8a90ef1",
+2026-10-11T14:09:11.099372514Z         "batchId": "BATCH-GTM-2026-PH-01",
+2026-10-11T14:09:11.099380417Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.099388293Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.099396228Z       },
+2026-10-11T14:09:11.099426431Z       {
+2026-10-11T14:09:11.099435394Z         "workItemId": "WI-GTM-DEMO-S02-SOC",
+2026-10-11T14:09:11.099443207Z         "attemptNo": 1,
+2026-10-11T14:09:11.099451100Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.099458679Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.099498560Z         "resultIds": [
+2026-10-11T14:09:11.099506958Z           "res-GTM-DEMO-S02-soc"
+2026-10-11T14:09:11.099515191Z         ],
+2026-10-11T14:09:11.099523190Z         "id": "att190-f333de96-7ef6-4358-98c0-bf5d76df269d",
+2026-10-11T14:09:11.099531573Z         "batchId": "BATCH-GTM-2026-SOC-01",
+2026-10-11T14:09:11.099539919Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.099548259Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.099556528Z       },
+2026-10-11T14:09:11.099564614Z       {
+2026-10-11T14:09:11.099572543Z         "workItemId": "WI-GTM-DEMO-S03-EC",
+2026-10-11T14:09:11.099580888Z         "attemptNo": 1,
+2026-10-11T14:09:11.099589908Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.099598647Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.099606960Z         "resultIds": [
+2026-10-11T14:09:11.099615274Z           "res-GTM-DEMO-S03-ec"
+2026-10-11T14:09:11.099639526Z         ],
+2026-10-11T14:09:11.099648531Z         "id": "att190-4b50565c-b26c-4452-81ef-af520f849a77",
+2026-10-11T14:09:11.099656816Z         "batchId": "BATCH-GTM-2026-EC-01",
+2026-10-11T14:09:11.099665071Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.099673269Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.099681549Z       },
+2026-10-11T14:09:11.099689570Z       {
+2026-10-11T14:09:11.099697546Z         "workItemId": "WI-GTM-DEMO-S03-K",
+2026-10-11T14:09:11.099727433Z         "attemptNo": 1,
+2026-10-11T14:09:11.099751968Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.099760321Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.099768307Z         "resultIds": [
+2026-10-11T14:09:11.099776451Z           "res-GTM-DEMO-S03-k"
+2026-10-11T14:09:11.099785218Z         ],
+2026-10-11T14:09:11.099793187Z         "id": "att190-3f91ace4-f24f-4baa-813b-5793b860109e",
+2026-10-11T14:09:11.099801396Z         "batchId": "BATCH-GTM-2026-K-01",
+2026-10-11T14:09:11.099809507Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.099817633Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.099825727Z       },
+2026-10-11T14:09:11.099833617Z       {
+2026-10-11T14:09:11.099841362Z         "workItemId": "WI-GTM-DEMO-S03-P",
+2026-10-11T14:09:11.099849469Z         "attemptNo": 1,
+2026-10-11T14:09:11.099857440Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.099868136Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.099876150Z         "resultIds": [
+2026-10-11T14:09:11.099884130Z           "res-GTM-DEMO-S03-p"
+2026-10-11T14:09:11.099892000Z         ],
+2026-10-11T14:09:11.099899895Z         "id": "att190-b6852f8b-1f84-471a-84b0-782faca2c7e9",
+2026-10-11T14:09:11.099907935Z         "batchId": "BATCH-GTM-2026-P-01",
+2026-10-11T14:09:11.099916016Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.099924019Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.099932220Z       },
+2026-10-11T14:09:11.099939922Z       {
+2026-10-11T14:09:11.099947797Z         "workItemId": "WI-GTM-DEMO-S03-PH",
+2026-10-11T14:09:11.099955929Z         "attemptNo": 1,
+2026-10-11T14:09:11.099963958Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.099972058Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.099980663Z         "resultIds": [
+2026-10-11T14:09:11.099988698Z           "res-GTM-DEMO-S03-ph"
+2026-10-11T14:09:11.099996653Z         ],
+2026-10-11T14:09:11.100004373Z         "id": "att190-781205b4-16d2-480e-a616-5cfaff3b7ae8",
+2026-10-11T14:09:11.100012594Z         "batchId": "BATCH-GTM-2026-PH-01",
+2026-10-11T14:09:11.100020567Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.100028677Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.100036677Z       },
+2026-10-11T14:09:11.100044534Z       {
+2026-10-11T14:09:11.100052292Z         "workItemId": "WI-GTM-DEMO-S03-SOC",
+2026-10-11T14:09:11.100068248Z         "attemptNo": 1,
+2026-10-11T14:09:11.100077105Z         "sourceStatus": "ACCEPTED",
+2026-10-11T14:09:11.100085298Z         "status": "ACCEPTED",
+2026-10-11T14:09:11.100111836Z         "resultIds": [
+2026-10-11T14:09:11.100120313Z           "res-GTM-DEMO-S03-soc"
+2026-10-11T14:09:11.100127914Z         ],
+2026-10-11T14:09:11.100135501Z         "id": "att190-ac045345-d7ea-4002-a3e9-2a60762974f9",
+2026-10-11T14:09:11.100143351Z         "batchId": "BATCH-GTM-2026-SOC-01",
+2026-10-11T14:09:11.100151344Z         "equipmentOutcome": "NOT_RECORDED",
+2026-10-11T14:09:11.100171774Z         "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+2026-10-11T14:09:11.100181390Z       }
+2026-10-11T14:09:11.100189245Z     ],
+2026-10-11T14:09:11.100197129Z     "links": [
+2026-10-11T14:09:11.100204948Z       {
+2026-10-11T14:09:11.100216878Z         "resultId": "res-1789655582508-vr6tcs",
+2026-10-11T14:09:11.100225436Z         "workItemId": "WI-1789634536051-965",
+2026-10-11T14:09:11.100233738Z         "newAttemptForWorkItemId": "WI-1789634536051-965",
+2026-10-11T14:09:11.100241955Z         "attemptId": "att190-8153d483-fb69-4a7c-8dcd-be91073cfd75"
+2026-10-11T14:09:11.100250372Z       },
+2026-10-11T14:09:11.100258059Z       {
+2026-10-11T14:09:11.100265829Z         "resultId": "res-1789655713932-8zifo4",
+2026-10-11T14:09:11.100273774Z         "workItemId": "WI-1789634536059-97",
+2026-10-11T14:09:11.100281809Z         "newAttemptForWorkItemId": "WI-1789634536059-97",
+2026-10-11T14:09:11.100290079Z         "attemptId": "att190-16df97e9-f3fc-4c15-9432-7b1f3b2169e2"
+2026-10-11T14:09:11.100298535Z       },
+2026-10-11T14:09:11.100306267Z       {
+2026-10-11T14:09:11.100314103Z         "resultId": "res-1789656669699-4sqmm1",
+2026-10-11T14:09:11.100322068Z         "workItemId": "WI-1789634536011-406",
+2026-10-11T14:09:11.100330160Z         "newAttemptForWorkItemId": "WI-1789634536011-406",
+2026-10-11T14:09:11.100338420Z         "attemptId": "att190-752364b5-3b74-47f6-92aa-ccd52943caa1"
+2026-10-11T14:09:11.100365459Z       },
+2026-10-11T14:09:11.100372952Z       {
+2026-10-11T14:09:11.100380761Z         "resultId": "res-GTM-DEMO-S01-ec",
+2026-10-11T14:09:11.100388356Z         "workItemId": "WI-GTM-DEMO-S01-EC",
+2026-10-11T14:09:11.100396259Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-EC",
+2026-10-11T14:09:11.100404009Z         "attemptId": "att190-d3fa23d7-82fa-45a1-8b3f-2e1b78388af3"
+2026-10-11T14:09:11.100411940Z       },
+2026-10-11T14:09:11.100436072Z       {
+2026-10-11T14:09:11.100449494Z         "resultId": "res-GTM-DEMO-S01-k",
+2026-10-11T14:09:11.100474269Z         "workItemId": "WI-GTM-DEMO-S01-K",
+2026-10-11T14:09:11.100497419Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-K",
+2026-10-11T14:09:11.100507390Z         "attemptId": "att190-2bb701e8-2b43-4da8-9ac3-057a1944948a"
+2026-10-11T14:09:11.100515982Z       },
+2026-10-11T14:09:11.100524042Z       {
+2026-10-11T14:09:11.100532084Z         "resultId": "res-GTM-DEMO-S01-p",
+2026-10-11T14:09:11.100540277Z         "workItemId": "WI-GTM-DEMO-S01-P",
+2026-10-11T14:09:11.100548593Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-P",
+2026-10-11T14:09:11.100556976Z         "attemptId": "att190-96433480-e2ff-406b-ba79-2c5d6706acbf"
+2026-10-11T14:09:11.100565475Z       },
+2026-10-11T14:09:11.100573511Z       {
+2026-10-11T14:09:11.100581617Z         "resultId": "res-GTM-DEMO-S01-ph",
+2026-10-11T14:09:11.100589932Z         "workItemId": "WI-GTM-DEMO-S01-PH",
+2026-10-11T14:09:11.100598093Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-PH",
+2026-10-11T14:09:11.100612714Z         "attemptId": "att190-2cefb713-9ee2-4ad3-a03f-b6c768158fe5"
+2026-10-11T14:09:11.100635923Z       },
+2026-10-11T14:09:11.100646339Z       {
+2026-10-11T14:09:11.100654614Z         "resultId": "res-GTM-DEMO-S01-soc",
+2026-10-11T14:09:11.100663075Z         "workItemId": "WI-GTM-DEMO-S01-SOC",
+2026-10-11T14:09:11.100671444Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-SOC",
+2026-10-11T14:09:11.100679821Z         "attemptId": "att190-a9fd8a80-d29b-482a-b0d5-43f169a3fc95"
+2026-10-11T14:09:11.100688354Z       },
+2026-10-11T14:09:11.100696368Z       {
+2026-10-11T14:09:11.100704423Z         "resultId": "res-GTM-DEMO-S02-ec",
+2026-10-11T14:09:11.100712729Z         "workItemId": "WI-GTM-DEMO-S02-EC",
+2026-10-11T14:09:11.100721135Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-EC",
+2026-10-11T14:09:11.100729447Z         "attemptId": "att190-b322848a-7ad3-4332-9720-81c83a426cad"
+2026-10-11T14:09:11.100738025Z       },
+2026-10-11T14:09:11.100759490Z       {
+2026-10-11T14:09:11.100769529Z         "resultId": "res-GTM-DEMO-S02-k",
+2026-10-11T14:09:11.100777947Z         "workItemId": "WI-GTM-DEMO-S02-K",
+2026-10-11T14:09:11.100786088Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-K",
+2026-10-11T14:09:11.100794111Z         "attemptId": "att190-32bca60b-2ef7-452e-adaf-50c45ec66236"
+2026-10-11T14:09:11.100802347Z       },
+2026-10-11T14:09:11.100810190Z       {
+2026-10-11T14:09:11.100817847Z         "resultId": "res-GTM-DEMO-S02-ph",
+2026-10-11T14:09:11.100825903Z         "workItemId": "WI-GTM-DEMO-S02-PH",
+2026-10-11T14:09:11.100841981Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-PH",
+2026-10-11T14:09:11.100851187Z         "attemptId": "att190-89438697-6e7d-4795-9dd5-db1fe8a90ef1"
+2026-10-11T14:09:11.100859631Z       },
+2026-10-11T14:09:11.100867613Z       {
+2026-10-11T14:09:11.100875402Z         "resultId": "res-GTM-DEMO-S02-soc",
+2026-10-11T14:09:11.100883465Z         "workItemId": "WI-GTM-DEMO-S02-SOC",
+2026-10-11T14:09:11.100891610Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-SOC",
+2026-10-11T14:09:11.100899782Z         "attemptId": "att190-f333de96-7ef6-4358-98c0-bf5d76df269d"
+2026-10-11T14:09:11.100907885Z       },
+2026-10-11T14:09:11.100915649Z       {
+2026-10-11T14:09:11.100923371Z         "resultId": "res-GTM-DEMO-S03-ec",
+2026-10-11T14:09:11.100931466Z         "workItemId": "WI-GTM-DEMO-S03-EC",
+2026-10-11T14:09:11.100939469Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-EC",
+2026-10-11T14:09:11.100947734Z         "attemptId": "att190-4b50565c-b26c-4452-81ef-af520f849a77"
+2026-10-11T14:09:11.100956211Z       },
+2026-10-11T14:09:11.100963902Z       {
+2026-10-11T14:09:11.100971844Z         "resultId": "res-GTM-DEMO-S03-k",
+2026-10-11T14:09:11.100979776Z         "workItemId": "WI-GTM-DEMO-S03-K",
+2026-10-11T14:09:11.100987802Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-K",
+2026-10-11T14:09:11.100995901Z         "attemptId": "att190-3f91ace4-f24f-4baa-813b-5793b860109e"
+2026-10-11T14:09:11.101004212Z       },
+2026-10-11T14:09:11.101012098Z       {
+2026-10-11T14:09:11.101019970Z         "resultId": "res-GTM-DEMO-S03-p",
+2026-10-11T14:09:11.101027942Z         "workItemId": "WI-GTM-DEMO-S03-P",
+2026-10-11T14:09:11.101036111Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-P",
+2026-10-11T14:09:11.101044127Z         "attemptId": "att190-b6852f8b-1f84-471a-84b0-782faca2c7e9"
+2026-10-11T14:09:11.101052415Z       },
+2026-10-11T14:09:11.101060136Z       {
+2026-10-11T14:09:11.101067974Z         "resultId": "res-GTM-DEMO-S03-ph",
+2026-10-11T14:09:11.101075868Z         "workItemId": "WI-GTM-DEMO-S03-PH",
+2026-10-11T14:09:11.101083873Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-PH",
+2026-10-11T14:09:11.101091907Z         "attemptId": "att190-781205b4-16d2-480e-a616-5cfaff3b7ae8"
+2026-10-11T14:09:11.101100189Z       },
+2026-10-11T14:09:11.101107877Z       {
+2026-10-11T14:09:11.101115712Z         "resultId": "res-GTM-DEMO-S03-soc",
+2026-10-11T14:09:11.101123734Z         "workItemId": "WI-GTM-DEMO-S03-SOC",
+2026-10-11T14:09:11.101131789Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-SOC",
+2026-10-11T14:09:11.101146629Z         "attemptId": "att190-ac045345-d7ea-4002-a3e9-2a60762974f9"
+2026-10-11T14:09:11.101155914Z       },
+2026-10-11T14:09:11.101163856Z       {
+2026-10-11T14:09:11.101171738Z         "resultId": "res-s02-p-run1",
+2026-10-11T14:09:11.101179746Z         "workItemId": "WI-GTM-DEMO-S02-P",
+2026-10-11T14:09:11.101202110Z         "attemptId": "att-s02-p-1",
+2026-10-11T14:09:11.101210174Z         "rule": "EXISTING_ATTEMPT_ONE_TO_ONE_BATCH_MATCH",
+2026-10-11T14:09:11.101218147Z         "attemptNo": 1,
+2026-10-11T14:09:11.101226557Z         "attemptStatus": "SUPERSEDED",
+2026-10-11T14:09:11.101234920Z         "attemptQcBatchId": "BATCH-GTM-2026-P-01",
+2026-10-11T14:09:11.101242697Z         "resultBatchId": "BATCH-GTM-2026-P-01",
+2026-10-11T14:09:11.101250558Z         "isCurrent": 0
+2026-10-11T14:09:11.101258135Z       },
+2026-10-11T14:09:11.101282016Z       {
+2026-10-11T14:09:11.101290891Z         "resultId": "res-s02-p-run2",
+2026-10-11T14:09:11.101298912Z         "workItemId": "WI-GTM-DEMO-S02-P",
+2026-10-11T14:09:11.101306929Z         "attemptId": "att-s02-p-2",
+2026-10-11T14:09:11.101314962Z         "rule": "EXISTING_ATTEMPT_ONE_TO_ONE_BATCH_MATCH",
+2026-10-11T14:09:11.101322952Z         "attemptNo": 2,
+2026-10-11T14:09:11.101343407Z         "attemptStatus": "RECORDED",
+2026-10-11T14:09:11.101352488Z         "attemptQcBatchId": "BATCH-GTM-2026-P-02",
+2026-10-11T14:09:11.101360368Z         "resultBatchId": "BATCH-GTM-2026-P-02",
+2026-10-11T14:09:11.101368157Z         "isCurrent": 1
+2026-10-11T14:09:11.101375840Z       }
+2026-10-11T14:09:11.101383283Z     ],
+2026-10-11T14:09:11.101390888Z     "flaggedGroups": [],
+2026-10-11T14:09:11.101412563Z     "exemptImportCount": 0,
+2026-10-11T14:09:11.101420576Z     "exemptImports": [],
+2026-10-11T14:09:11.101428461Z     "missingOrderedWorkGroups": [
+2026-10-11T14:09:11.101436523Z       {
+2026-10-11T14:09:11.101444322Z         "labId": "MOZ-LAB1",
+2026-10-11T14:09:11.101452519Z         "param": "SAND",
+2026-10-11T14:09:11.101491905Z         "sampleIds": [
+2026-10-11T14:09:11.101501485Z           "1769086088871"
+2026-10-11T14:09:11.101510086Z         ],
+2026-10-11T14:09:11.101528975Z         "sampleCount": 1
+2026-10-11T14:09:11.101546539Z       },
+2026-10-11T14:09:11.101559256Z       {
+2026-10-11T14:09:11.101567822Z         "labId": "MOZ-LAB1",
+2026-10-11T14:09:11.101576314Z         "param": "SILT",
+2026-10-11T14:09:11.101594648Z         "sampleIds": [
+2026-10-11T14:09:11.101604117Z           "1769086088871"
+2026-10-11T14:09:11.101632669Z         ],
+2026-10-11T14:09:11.101641443Z         "sampleCount": 1
+2026-10-11T14:09:11.101649779Z       },
+2026-10-11T14:09:11.101657958Z       {
+2026-10-11T14:09:11.101666204Z         "labId": "MOZ-LAB1",
+2026-10-11T14:09:11.101674578Z         "param": "CLAY",
+2026-10-11T14:09:11.101683030Z         "sampleIds": [
+2026-10-11T14:09:11.101691287Z           "1769086088871"
+2026-10-11T14:09:11.101699420Z         ],
+2026-10-11T14:09:11.101712017Z         "sampleCount": 1
+2026-10-11T14:09:11.101720128Z       },
+2026-10-11T14:09:11.101728484Z       {
+2026-10-11T14:09:11.101736583Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.101745046Z         "param": "SAND",
+2026-10-11T14:09:11.101753243Z         "sampleIds": [
+2026-10-11T14:09:11.101761510Z           "1769086466918",
+2026-10-11T14:09:11.101769685Z           "1769086467021",
+2026-10-11T14:09:11.101777932Z           "1769464262091",
+2026-10-11T14:09:11.101786066Z           "1769464262872",
+2026-10-11T14:09:11.101794304Z           "1769719118243",
+2026-10-11T14:09:11.101802492Z           "1769719138492",
+2026-10-11T14:09:11.101810829Z           "1769719197975",
+2026-10-11T14:09:11.101818944Z           "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+2026-10-11T14:09:11.101827342Z         ],
+2026-10-11T14:09:11.101835392Z         "sampleCount": 8
+2026-10-11T14:09:11.101843671Z       },
+2026-10-11T14:09:11.101851666Z       {
+2026-10-11T14:09:11.101859788Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.101868067Z         "param": "SILT",
+2026-10-11T14:09:11.101876443Z         "sampleIds": [
+2026-10-11T14:09:11.101884613Z           "1769086466918",
+2026-10-11T14:09:11.101902222Z           "1769086467021",
+2026-10-11T14:09:11.101910303Z           "1769464262091",
+2026-10-11T14:09:11.101918534Z           "1769464262872",
+2026-10-11T14:09:11.101926650Z           "1769719118243",
+2026-10-11T14:09:11.101934913Z           "1769719138492",
+2026-10-11T14:09:11.101943127Z           "1769719197975",
+2026-10-11T14:09:11.101951420Z           "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+2026-10-11T14:09:11.101959693Z         ],
+2026-10-11T14:09:11.101967884Z         "sampleCount": 8
+2026-10-11T14:09:11.101976044Z       },
+2026-10-11T14:09:11.101992701Z       {
+2026-10-11T14:09:11.102001705Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.102010274Z         "param": "CLAY",
+2026-10-11T14:09:11.102018526Z         "sampleIds": [
+2026-10-11T14:09:11.102027050Z           "1769086466918",
+2026-10-11T14:09:11.102035130Z           "1769086467021",
+2026-10-11T14:09:11.102043315Z           "1769464262091",
+2026-10-11T14:09:11.102051389Z           "1769464262872",
+2026-10-11T14:09:11.102061470Z           "1769719118243",
+2026-10-11T14:09:11.102070392Z           "1769719138492",
+2026-10-11T14:09:11.102078706Z           "1769719197975",
+2026-10-11T14:09:11.102086907Z           "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+2026-10-11T14:09:11.102095376Z         ],
+2026-10-11T14:09:11.102103393Z         "sampleCount": 8
+2026-10-11T14:09:11.102126458Z       },
+2026-10-11T14:09:11.102134144Z       {
+2026-10-11T14:09:11.102141903Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.102149747Z         "param": "BD",
+2026-10-11T14:09:11.102157688Z         "sampleIds": [
+2026-10-11T14:09:11.102165548Z           "1769086466918",
+2026-10-11T14:09:11.102179587Z           "1769086467021",
+2026-10-11T14:09:11.102187399Z           "1769464262091",
+2026-10-11T14:09:11.102195337Z           "1769464262872",
+2026-10-11T14:09:11.102203282Z           "1769719118243",
+2026-10-11T14:09:11.102211261Z           "1769719138492",
+2026-10-11T14:09:11.102219095Z           "1769719197975"
+2026-10-11T14:09:11.102227085Z         ],
+2026-10-11T14:09:11.102248441Z         "sampleCount": 7
+2026-10-11T14:09:11.102257565Z       },
+2026-10-11T14:09:11.102265497Z       {
+2026-10-11T14:09:11.102287352Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.102296165Z         "param": "MOIST",
+2026-10-11T14:09:11.102304726Z         "sampleIds": [
+2026-10-11T14:09:11.102312821Z           "1769086466918",
+2026-10-11T14:09:11.102320918Z           "1769086467021",
+2026-10-11T14:09:11.102329047Z           "1769464262091",
+2026-10-11T14:09:11.102337152Z           "1769464262872",
+2026-10-11T14:09:11.102345151Z           "1769719118243",
+2026-10-11T14:09:11.102353326Z           "1769719138492",
+2026-10-11T14:09:11.102361352Z           "1769719197975"
+2026-10-11T14:09:11.102369652Z         ],
+2026-10-11T14:09:11.102377569Z         "sampleCount": 7
+2026-10-11T14:09:11.102385734Z       },
+2026-10-11T14:09:11.102401795Z       {
+2026-10-11T14:09:11.102411035Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.102419455Z         "param": "PSD",
+2026-10-11T14:09:11.102427748Z         "sampleIds": [
+2026-10-11T14:09:11.102435892Z           "1769086466918",
+2026-10-11T14:09:11.102444083Z           "1769086467021",
+2026-10-11T14:09:11.102452153Z           "1769464262091",
+2026-10-11T14:09:11.102470774Z           "1769464262872",
+2026-10-11T14:09:11.102481461Z           "1769719118243",
+2026-10-11T14:09:11.102489903Z           "1769719138492",
+2026-10-11T14:09:11.102497982Z           "1769719197975"
+2026-10-11T14:09:11.102513574Z         ],
+2026-10-11T14:09:11.102521707Z         "sampleCount": 7
+2026-10-11T14:09:11.102529967Z       },
+2026-10-11T14:09:11.102537974Z       {
+2026-10-11T14:09:11.102546250Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.102554456Z         "param": "GRAVEL",
+2026-10-11T14:09:11.102562735Z         "sampleIds": [
+2026-10-11T14:09:11.102570808Z           "1769086466918",
+2026-10-11T14:09:11.102579050Z           "1769086467021",
+2026-10-11T14:09:11.102587148Z           "1769464262091",
+2026-10-11T14:09:11.102595287Z           "1769464262872",
+2026-10-11T14:09:11.102603387Z           "1769719118243",
+2026-10-11T14:09:11.102629566Z           "1769719138492",
+2026-10-11T14:09:11.102639105Z           "1769719197975"
+2026-10-11T14:09:11.102647560Z         ],
+2026-10-11T14:09:11.102655855Z         "sampleCount": 7
+2026-10-11T14:09:11.102664152Z       },
+2026-10-11T14:09:11.102672188Z       {
+2026-10-11T14:09:11.102680355Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.102688618Z         "param": "PH_H2O",
+2026-10-11T14:09:11.102696906Z         "sampleIds": [
+2026-10-11T14:09:11.102705173Z           "1769086466918",
+2026-10-11T14:09:11.102713468Z           "1769086467021",
+2026-10-11T14:09:11.102721579Z           "1769464262091",
+2026-10-11T14:09:11.102729799Z           "1769464262872",
+2026-10-11T14:09:11.102751942Z           "1769719118243",
+2026-10-11T14:09:11.102760145Z           "1769719138492",
+2026-10-11T14:09:11.102767928Z           "1769719197975"
+2026-10-11T14:09:11.102776072Z         ],
+2026-10-11T14:09:11.102783891Z         "sampleCount": 7
+2026-10-11T14:09:11.102791810Z       },
+2026-10-11T14:09:11.102799495Z       {
+2026-10-11T14:09:11.102831965Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.102841875Z         "param": "PH_KCL",
+2026-10-11T14:09:11.102865320Z         "sampleIds": [
+2026-10-11T14:09:11.102873581Z           "1769086466918",
+2026-10-11T14:09:11.102881765Z           "1769086467021",
+2026-10-11T14:09:11.102889991Z           "1769464262091",
+2026-10-11T14:09:11.102898190Z           "1769464262872",
+2026-10-11T14:09:11.102906486Z           "1769719118243",
+2026-10-11T14:09:11.102914755Z           "1769719138492",
+2026-10-11T14:09:11.102922934Z           "1769719197975"
+2026-10-11T14:09:11.102931168Z         ],
+2026-10-11T14:09:11.102940211Z         "sampleCount": 7
+2026-10-11T14:09:11.102948951Z       },
+2026-10-11T14:09:11.102957047Z       {
+2026-10-11T14:09:11.102965206Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.102973485Z         "param": "EC",
+2026-10-11T14:09:11.102981733Z         "sampleIds": [
+2026-10-11T14:09:11.102989883Z           "1769086466918",
+2026-10-11T14:09:11.102998057Z           "1769086467021",
+2026-10-11T14:09:11.103006145Z           "1769464262091",
+2026-10-11T14:09:11.103014349Z           "1769464262872",
+2026-10-11T14:09:11.103022634Z           "1769719118243",
+2026-10-11T14:09:11.103030825Z           "1769719138492",
+2026-10-11T14:09:11.103038936Z           "1769719197975"
+2026-10-11T14:09:11.103051278Z         ],
+2026-10-11T14:09:11.103059265Z         "sampleCount": 7
+2026-10-11T14:09:11.103067455Z       },
+2026-10-11T14:09:11.103075395Z       {
+2026-10-11T14:09:11.103083519Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.103091789Z         "param": "SOC",
+2026-10-11T14:09:11.103099959Z         "sampleIds": [
+2026-10-11T14:09:11.103107985Z           "1769086466918",
+2026-10-11T14:09:11.103122556Z           "1769086467021",
+2026-10-11T14:09:11.103143761Z           "1769464262091",
+2026-10-11T14:09:11.103153051Z           "1769464262872",
+2026-10-11T14:09:11.103160912Z           "1769719118243",
+2026-10-11T14:09:11.103168941Z           "1769719138492",
+2026-10-11T14:09:11.103176784Z           "1769719197975"
+2026-10-11T14:09:11.103194649Z         ],
+2026-10-11T14:09:11.103215872Z         "sampleCount": 7
+2026-10-11T14:09:11.103223235Z       },
+2026-10-11T14:09:11.103230469Z       {
+2026-10-11T14:09:11.103237708Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.103245048Z         "param": "TN",
+2026-10-11T14:09:11.103274180Z         "sampleIds": [
+2026-10-11T14:09:11.103283315Z           "1769086466918",
+2026-10-11T14:09:11.103290978Z           "1769086467021",
+2026-10-11T14:09:11.103298474Z           "1769464262091",
+2026-10-11T14:09:11.103305991Z           "1769464262872",
+2026-10-11T14:09:11.103313411Z           "1769719118243",
+2026-10-11T14:09:11.103320794Z           "1769719138492",
+2026-10-11T14:09:11.103328201Z           "1769719197975"
+2026-10-11T14:09:11.103335584Z         ],
+2026-10-11T14:09:11.103342999Z         "sampleCount": 7
+2026-10-11T14:09:11.103364198Z       },
+2026-10-11T14:09:11.103372341Z       {
+2026-10-11T14:09:11.103379863Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.103387600Z         "param": "P_AVAIL",
+2026-10-11T14:09:11.103395323Z         "sampleIds": [
+2026-10-11T14:09:11.103402971Z           "1769086466918",
+2026-10-11T14:09:11.103410619Z           "1769086467021",
+2026-10-11T14:09:11.103418284Z           "1769464262091",
+2026-10-11T14:09:11.103428889Z           "1769464262872",
+2026-10-11T14:09:11.103455348Z           "1769719118243",
+2026-10-11T14:09:11.103482602Z           "1769719138492",
+2026-10-11T14:09:11.103494048Z           "1769719197975"
+2026-10-11T14:09:11.103502168Z         ],
+2026-10-11T14:09:11.103524560Z         "sampleCount": 7
+2026-10-11T14:09:11.103532919Z       },
+2026-10-11T14:09:11.103541559Z       {
+2026-10-11T14:09:11.103549745Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.103558136Z         "param": "K_EXCH",
+2026-10-11T14:09:11.103566442Z         "sampleIds": [
+2026-10-11T14:09:11.103574790Z           "1769086466918",
+2026-10-11T14:09:11.103582982Z           "1769086467021",
+2026-10-11T14:09:11.103591336Z           "1769464262091",
+2026-10-11T14:09:11.103599548Z           "1769464262872",
+2026-10-11T14:09:11.103607943Z           "1769719118243",
+2026-10-11T14:09:11.103616258Z           "1769719138492",
+2026-10-11T14:09:11.103644364Z           "1769719197975"
+2026-10-11T14:09:11.103652804Z         ],
+2026-10-11T14:09:11.103661109Z         "sampleCount": 7
+2026-10-11T14:09:11.103669259Z       },
+2026-10-11T14:09:11.103677386Z       {
+2026-10-11T14:09:11.103685413Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.103693833Z         "param": "CA_EXCH",
+2026-10-11T14:09:11.103702103Z         "sampleIds": [
+2026-10-11T14:09:11.103720333Z           "1769086466918",
+2026-10-11T14:09:11.103729783Z           "1769086467021",
+2026-10-11T14:09:11.103738233Z           "1769464262091",
+2026-10-11T14:09:11.103746488Z           "1769464262872",
+2026-10-11T14:09:11.103754841Z           "1769719118243",
+2026-10-11T14:09:11.103763068Z           "1769719138492",
+2026-10-11T14:09:11.103771546Z           "1769719197975"
+2026-10-11T14:09:11.103779854Z         ],
+2026-10-11T14:09:11.103788072Z         "sampleCount": 7
+2026-10-11T14:09:11.103796372Z       },
+2026-10-11T14:09:11.103817982Z       {
+2026-10-11T14:09:11.103827122Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.103835260Z         "param": "MG_EXCH",
+2026-10-11T14:09:11.103843298Z         "sampleIds": [
+2026-10-11T14:09:11.103851503Z           "1769086466918",
+2026-10-11T14:09:11.103860478Z           "1769086467021",
+2026-10-11T14:09:11.103869155Z           "1769464262091",
+2026-10-11T14:09:11.103877024Z           "1769464262872",
+2026-10-11T14:09:11.103884839Z           "1769719118243",
+2026-10-11T14:09:11.103892641Z           "1769719138492",
+2026-10-11T14:09:11.103900519Z           "1769719197975"
+2026-10-11T14:09:11.103923001Z         ],
+2026-10-11T14:09:11.103930545Z         "sampleCount": 7
+2026-10-11T14:09:11.103938170Z       },
+2026-10-11T14:09:11.103945658Z       {
+2026-10-11T14:09:11.103953278Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.103961013Z         "param": "NA_EXCH",
+2026-10-11T14:09:11.103968625Z         "sampleIds": [
+2026-10-11T14:09:11.103976216Z           "1769086466918",
+2026-10-11T14:09:11.103998238Z           "1769086467021",
+2026-10-11T14:09:11.104006139Z           "1769464262091",
+2026-10-11T14:09:11.104014074Z           "1769464262872",
+2026-10-11T14:09:11.104022019Z           "1769719118243",
+2026-10-11T14:09:11.104029920Z           "1769719138492",
+2026-10-11T14:09:11.104037853Z           "1769719197975"
+2026-10-11T14:09:11.104045793Z         ],
+2026-10-11T14:09:11.104053598Z         "sampleCount": 7
+2026-10-11T14:09:11.104061469Z       },
+2026-10-11T14:09:11.104069308Z       {
+2026-10-11T14:09:11.104077070Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.104085021Z         "param": "CEC",
+2026-10-11T14:09:11.104092931Z         "sampleIds": [
+2026-10-11T14:09:11.104100786Z           "1769086466918",
+2026-10-11T14:09:11.104115655Z           "1769086467021",
+2026-10-11T14:09:11.104124414Z           "1769464262091",
+2026-10-11T14:09:11.104132427Z           "1769464262872",
+2026-10-11T14:09:11.104140576Z           "1769719118243",
+2026-10-11T14:09:11.104162294Z           "1769719138492",
+2026-10-11T14:09:11.104172057Z           "1769719197975"
+2026-10-11T14:09:11.104180161Z         ],
+2026-10-11T14:09:11.104188203Z         "sampleCount": 7
+2026-10-11T14:09:11.104196338Z       },
+2026-10-11T14:09:11.104204531Z       {
+2026-10-11T14:09:11.104226224Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.104235424Z         "param": "BS",
+2026-10-11T14:09:11.104243233Z         "sampleIds": [
+2026-10-11T14:09:11.104251159Z           "1769086466918",
+2026-10-11T14:09:11.104258994Z           "1769086467021",
+2026-10-11T14:09:11.104266887Z           "1769464262091",
+2026-10-11T14:09:11.104274682Z           "1769464262872",
+2026-10-11T14:09:11.104282593Z           "1769719118243",
+2026-10-11T14:09:11.104290359Z           "1769719138492",
+2026-10-11T14:09:11.104298423Z           "1769719197975"
+2026-10-11T14:09:11.104306227Z         ],
+2026-10-11T14:09:11.104313998Z         "sampleCount": 7
+2026-10-11T14:09:11.104321789Z       },
+2026-10-11T14:09:11.104329586Z       {
+2026-10-11T14:09:11.104337285Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.104345211Z         "param": "CACO3",
+2026-10-11T14:09:11.104353040Z         "sampleIds": [
+2026-10-11T14:09:11.104361009Z           "1769086466918",
+2026-10-11T14:09:11.104368789Z           "1769086467021",
+2026-10-11T14:09:11.104376634Z           "1769464262091",
+2026-10-11T14:09:11.104384409Z           "1769464262872",
+2026-10-11T14:09:11.104392289Z           "1769719118243",
+2026-10-11T14:09:11.104400045Z           "1769719138492",
+2026-10-11T14:09:11.104407928Z           "1769719197975"
+2026-10-11T14:09:11.104415721Z         ],
+2026-10-11T14:09:11.104423490Z         "sampleCount": 7
+2026-10-11T14:09:11.104431361Z       },
+2026-10-11T14:09:11.104439096Z       {
+2026-10-11T14:09:11.104446728Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.104481204Z         "param": "FE",
+2026-10-11T14:09:11.104503407Z         "sampleIds": [
+2026-10-11T14:09:11.104512968Z           "1769086466918",
+2026-10-11T14:09:11.104521262Z           "1769086467021",
+2026-10-11T14:09:11.104529743Z           "1769464262091",
+2026-10-11T14:09:11.104546075Z           "1769464262872",
+2026-10-11T14:09:11.104569510Z           "1769719118243",
+2026-10-11T14:09:11.104578734Z           "1769719138492",
+2026-10-11T14:09:11.104626731Z           "1769719197975"
+2026-10-11T14:09:11.104636810Z         ],
+2026-10-11T14:09:11.104644847Z         "sampleCount": 7
+2026-10-11T14:09:11.104652742Z       },
+2026-10-11T14:09:11.104660610Z       {
+2026-10-11T14:09:11.104668421Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.104676307Z         "param": "MN",
+2026-10-11T14:09:11.104684203Z         "sampleIds": [
+2026-10-11T14:09:11.104692018Z           "1769086466918",
+2026-10-11T14:09:11.104699897Z           "1769086467021",
+2026-10-11T14:09:11.104707753Z           "1769464262091",
+2026-10-11T14:09:11.104715664Z           "1769464262872",
+2026-10-11T14:09:11.104723616Z           "1769719118243",
+2026-10-11T14:09:11.104731509Z           "1769719138492",
+2026-10-11T14:09:11.104740820Z           "1769719197975"
+2026-10-11T14:09:11.104749369Z         ],
+2026-10-11T14:09:11.104757205Z         "sampleCount": 7
+2026-10-11T14:09:11.104765100Z       },
+2026-10-11T14:09:11.104772860Z       {
+2026-10-11T14:09:11.104780650Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.104788686Z         "param": "ZN",
+2026-10-11T14:09:11.104796701Z         "sampleIds": [
+2026-10-11T14:09:11.104804619Z           "1769086466918",
+2026-10-11T14:09:11.104812471Z           "1769086467021",
+2026-10-11T14:09:11.104833271Z           "1769464262091",
+2026-10-11T14:09:11.104841945Z           "1769464262872",
+2026-10-11T14:09:11.104849565Z           "1769719118243",
+2026-10-11T14:09:11.104857197Z           "1769719138492",
+2026-10-11T14:09:11.104864892Z           "1769719197975"
+2026-10-11T14:09:11.104872587Z         ],
+2026-10-11T14:09:11.104880087Z         "sampleCount": 7
+2026-10-11T14:09:11.104902071Z       },
+2026-10-11T14:09:11.104909910Z       {
+2026-10-11T14:09:11.104917616Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.104925593Z         "param": "CU",
+2026-10-11T14:09:11.104933834Z         "sampleIds": [
+2026-10-11T14:09:11.104941879Z           "1769086466918",
+2026-10-11T14:09:11.104949734Z           "1769086467021",
+2026-10-11T14:09:11.104957622Z           "1769464262091",
+2026-10-11T14:09:11.104965504Z           "1769464262872",
+2026-10-11T14:09:11.104981422Z           "1769719118243",
+2026-10-11T14:09:11.104998187Z           "1769719138492",
+2026-10-11T14:09:11.105006222Z           "1769719197975"
+2026-10-11T14:09:11.105014183Z         ],
+2026-10-11T14:09:11.105022158Z         "sampleCount": 7
+2026-10-11T14:09:11.105030161Z       },
+2026-10-11T14:09:11.105038018Z       {
+2026-10-11T14:09:11.105045861Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.105053891Z         "param": "B",
+2026-10-11T14:09:11.105061853Z         "sampleIds": [
+2026-10-11T14:09:11.105084197Z           "1769086466918",
+2026-10-11T14:09:11.105093335Z           "1769086467021",
+2026-10-11T14:09:11.105101529Z           "1769464262091",
+2026-10-11T14:09:11.105109789Z           "1769464262872",
+2026-10-11T14:09:11.105117882Z           "1769719118243",
+2026-10-11T14:09:11.105126101Z           "1769719138492",
+2026-10-11T14:09:11.105134328Z           "1769719197975"
+2026-10-11T14:09:11.105142596Z         ],
+2026-10-11T14:09:11.105150551Z         "sampleCount": 7
+2026-10-11T14:09:11.105158755Z       },
+2026-10-11T14:09:11.105166931Z       {
+2026-10-11T14:09:11.105174976Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.105183305Z         "param": "SOM",
+2026-10-11T14:09:11.105201355Z         "sampleIds": [
+2026-10-11T14:09:11.105219213Z           "1769086466918",
+2026-10-11T14:09:11.105227491Z           "1769086467021",
+2026-10-11T14:09:11.105235573Z           "1769464262091",
+2026-10-11T14:09:11.105243685Z           "1769464262872",
+2026-10-11T14:09:11.105251771Z           "1769719118243",
+2026-10-11T14:09:11.105259960Z           "1769719138492",
+2026-10-11T14:09:11.105268157Z           "1769719197975"
+2026-10-11T14:09:11.105276498Z         ],
+2026-10-11T14:09:11.105284444Z         "sampleCount": 7
+2026-10-11T14:09:11.105292596Z       },
+2026-10-11T14:09:11.105300567Z       {
+2026-10-11T14:09:11.105308643Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.105316919Z         "param": "MBC",
+2026-10-11T14:09:11.105325142Z         "sampleIds": [
+2026-10-11T14:09:11.105333234Z           "1769086466918",
+2026-10-11T14:09:11.105341434Z           "1769086467021",
+2026-10-11T14:09:11.105349519Z           "1769464262091",
+2026-10-11T14:09:11.105357674Z           "1769464262872",
+2026-10-11T14:09:11.105365963Z           "1769719118243",
+2026-10-11T14:09:11.105381748Z           "1769719138492",
+2026-10-11T14:09:11.105391114Z           "1769719197975"
+2026-10-11T14:09:11.105399566Z         ],
+2026-10-11T14:09:11.105407721Z         "sampleCount": 7
+2026-10-11T14:09:11.105415937Z       },
+2026-10-11T14:09:11.105424150Z       {
+2026-10-11T14:09:11.105432342Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.105440697Z         "param": "PMN",
+2026-10-11T14:09:11.105448946Z         "sampleIds": [
+2026-10-11T14:09:11.105457268Z           "1769086466918",
+2026-10-11T14:09:11.105476041Z           "1769086467021",
+2026-10-11T14:09:11.105484946Z           "1769464262091",
+2026-10-11T14:09:11.105493190Z           "1769464262872",
+2026-10-11T14:09:11.105501401Z           "1769719118243",
+2026-10-11T14:09:11.105509548Z           "1769719138492",
+2026-10-11T14:09:11.105517702Z           "1769719197975"
+2026-10-11T14:09:11.105525961Z         ],
+2026-10-11T14:09:11.105534148Z         "sampleCount": 7
+2026-10-11T14:09:11.105542512Z       },
+2026-10-11T14:09:11.105550743Z       {
+2026-10-11T14:09:11.105558863Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.105567199Z         "param": "S_RESP",
+2026-10-11T14:09:11.105575460Z         "sampleIds": [
+2026-10-11T14:09:11.105584667Z           "1769086466918",
+2026-10-11T14:09:11.105593442Z           "1769086467021",
+2026-10-11T14:09:11.105601624Z           "1769464262091",
+2026-10-11T14:09:11.105626234Z           "1769464262872",
+2026-10-11T14:09:11.105635925Z           "1769719118243",
+2026-10-11T14:09:11.105644279Z           "1769719138492",
+2026-10-11T14:09:11.105652532Z           "1769719197975"
+2026-10-11T14:09:11.105660704Z         ],
+2026-10-11T14:09:11.105668621Z         "sampleCount": 7
+2026-10-11T14:09:11.105676907Z       },
+2026-10-11T14:09:11.105685101Z       {
+2026-10-11T14:09:11.105695548Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.105703991Z         "param": "SPEC_VIS_NIR",
+2026-10-11T14:09:11.105712266Z         "sampleIds": [
+2026-10-11T14:09:11.105720347Z           "1769086466918",
+2026-10-11T14:09:11.105728372Z           "1769086467021",
+2026-10-11T14:09:11.105736452Z           "1769464262091",
+2026-10-11T14:09:11.105744476Z           "1769464262872",
+2026-10-11T14:09:11.105752667Z           "1769719118243",
+2026-10-11T14:09:11.105760787Z           "1769719123914",
+2026-10-11T14:09:11.105787624Z           "1769719138492",
+2026-10-11T14:09:11.105797688Z           "1769719197975"
+2026-10-11T14:09:11.105806168Z         ],
+2026-10-11T14:09:11.105814273Z         "sampleCount": 8
+2026-10-11T14:09:11.105822653Z       },
+2026-10-11T14:09:11.105830817Z       {
+2026-10-11T14:09:11.105839133Z         "labId": "GTM-LAB1",
+2026-10-11T14:09:11.105847504Z         "param": "SPEC_MIR",
+2026-10-11T14:09:11.105855873Z         "sampleIds": [
+2026-10-11T14:09:11.105864195Z           "1769086466918",
+2026-10-11T14:09:11.105872555Z           "1769086467021",
+2026-10-11T14:09:11.105880810Z           "1769464262091",
+2026-10-11T14:09:11.105889091Z           "1769464262872",
+2026-10-11T14:09:11.105897352Z           "1769719118243",
+2026-10-11T14:09:11.105905730Z           "1769719123914",
+2026-10-11T14:09:11.105914054Z           "1769719138492",
+2026-10-11T14:09:11.105922360Z           "1769719197975"
+2026-10-11T14:09:11.105930654Z         ],
+2026-10-11T14:09:11.105938840Z         "sampleCount": 8
+2026-10-11T14:09:11.105947115Z       }
+2026-10-11T14:09:11.105955332Z     ],
+2026-10-11T14:09:11.105963488Z     "missingOrderedWorkCount": 225,
+2026-10-11T14:09:11.105972033Z     "samplesWithMissingOrderedWorkCount": 10,
+2026-10-11T14:09:11.105980474Z     "invalidOrderMetadata": [],
+2026-10-11T14:09:11.105988907Z     "historicalBatchEvidence": [
+2026-10-11T14:09:11.105997274Z       {
+2026-10-11T14:09:11.106005497Z         "attemptId": "att-s02-p-1",
+2026-10-11T14:09:11.106013876Z         "workItemId": "WI-GTM-DEMO-S02-P",
+2026-10-11T14:09:11.106022434Z         "outcome": "COPIED",
+2026-10-11T14:09:11.106030830Z         "reason": null,
+2026-10-11T14:09:11.106039272Z         "batchId": "BATCH-GTM-2026-P-01"
+2026-10-11T14:09:11.106047690Z       },
+2026-10-11T14:09:11.106055963Z       {
+2026-10-11T14:09:11.106064160Z         "attemptId": "att-s02-p-2",
+2026-10-11T14:09:11.106072642Z         "workItemId": "WI-GTM-DEMO-S02-P",
+2026-10-11T14:09:11.106081139Z         "outcome": "COPIED",
+2026-10-11T14:09:11.106089556Z         "reason": null,
+2026-10-11T14:09:11.106097836Z         "batchId": "BATCH-GTM-2026-P-02"
+2026-10-11T14:09:11.106106339Z       },
+2026-10-11T14:09:11.106114523Z       {
+2026-10-11T14:09:11.106122714Z         "newAttemptForWorkItemId": "WI-1789634536051-965",
+2026-10-11T14:09:11.106131252Z         "resultIds": [
+2026-10-11T14:09:11.106139557Z           "res-1789655582508-vr6tcs"
+2026-10-11T14:09:11.106155950Z         ],
+2026-10-11T14:09:11.106178823Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.106188368Z         "reason": "BATCH_NOT_RECORDED",
+2026-10-11T14:09:11.106202848Z         "batchId": null
+2026-10-11T14:09:11.106210853Z       },
+2026-10-11T14:09:11.106218652Z       {
+2026-10-11T14:09:11.106226406Z         "newAttemptForWorkItemId": "WI-1789634536059-97",
+2026-10-11T14:09:11.106248687Z         "resultIds": [
+2026-10-11T14:09:11.106256579Z           "res-1789655713932-8zifo4"
+2026-10-11T14:09:11.106265987Z         ],
+2026-10-11T14:09:11.106273438Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.106281175Z         "reason": "BATCH_NOT_RECORDED",
+2026-10-11T14:09:11.106288832Z         "batchId": null
+2026-10-11T14:09:11.106309360Z       },
+2026-10-11T14:09:11.106317994Z       {
+2026-10-11T14:09:11.106325746Z         "newAttemptForWorkItemId": "WI-1789634536011-406",
+2026-10-11T14:09:11.106334681Z         "resultIds": [
+2026-10-11T14:09:11.106343181Z           "res-1789656669699-4sqmm1"
+2026-10-11T14:09:11.106351258Z         ],
+2026-10-11T14:09:11.106359274Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.106367324Z         "reason": "BATCH_NOT_RECORDED",
+2026-10-11T14:09:11.106390998Z         "batchId": null
+2026-10-11T14:09:11.106399138Z       },
+2026-10-11T14:09:11.106407317Z       {
+2026-10-11T14:09:11.106415461Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-EC",
+2026-10-11T14:09:11.106423820Z         "resultIds": [
+2026-10-11T14:09:11.106432009Z           "res-GTM-DEMO-S01-ec"
+2026-10-11T14:09:11.106440189Z         ],
+2026-10-11T14:09:11.106448221Z         "outcome": "COPIED",
+2026-10-11T14:09:11.106456424Z         "reason": null,
+2026-10-11T14:09:11.106474769Z         "batchId": "BATCH-GTM-2026-EC-01"
+2026-10-11T14:09:11.106484090Z       },
+2026-10-11T14:09:11.106492270Z       {
+2026-10-11T14:09:11.106500306Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-K",
+2026-10-11T14:09:11.106508701Z         "resultIds": [
+2026-10-11T14:09:11.106516865Z           "res-GTM-DEMO-S01-k"
+2026-10-11T14:09:11.106532167Z         ],
+2026-10-11T14:09:11.106540407Z         "outcome": "COPIED",
+2026-10-11T14:09:11.106548611Z         "reason": null,
+2026-10-11T14:09:11.106556811Z         "batchId": "BATCH-GTM-2026-K-01"
+2026-10-11T14:09:11.106564946Z       },
+2026-10-11T14:09:11.106580973Z       {
+2026-10-11T14:09:11.106590061Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-P",
+2026-10-11T14:09:11.106598782Z         "resultIds": [
+2026-10-11T14:09:11.106621627Z           "res-GTM-DEMO-S01-p"
+2026-10-11T14:09:11.106632853Z         ],
+2026-10-11T14:09:11.106641127Z         "outcome": "COPIED",
+2026-10-11T14:09:11.106688046Z         "reason": null,
+2026-10-11T14:09:11.106696796Z         "batchId": "BATCH-GTM-2026-P-01"
+2026-10-11T14:09:11.106705326Z       },
+2026-10-11T14:09:11.106713572Z       {
+2026-10-11T14:09:11.106721714Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-PH",
+2026-10-11T14:09:11.106730086Z         "resultIds": [
+2026-10-11T14:09:11.106738294Z           "res-GTM-DEMO-S01-ph"
+2026-10-11T14:09:11.106746670Z         ],
+2026-10-11T14:09:11.106754810Z         "outcome": "COPIED",
+2026-10-11T14:09:11.106763051Z         "reason": null,
+2026-10-11T14:09:11.106771235Z         "batchId": "BATCH-GTM-2026-PH-01"
+2026-10-11T14:09:11.106779585Z       },
+2026-10-11T14:09:11.106787718Z       {
+2026-10-11T14:09:11.106795832Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-SOC",
+2026-10-11T14:09:11.106804216Z         "resultIds": [
+2026-10-11T14:09:11.106812328Z           "res-GTM-DEMO-S01-soc"
+2026-10-11T14:09:11.106820652Z         ],
+2026-10-11T14:09:11.106828627Z         "outcome": "COPIED",
+2026-10-11T14:09:11.106836884Z         "reason": null,
+2026-10-11T14:09:11.106845039Z         "batchId": "BATCH-GTM-2026-SOC-01"
+2026-10-11T14:09:11.106853337Z       },
+2026-10-11T14:09:11.106861317Z       {
+2026-10-11T14:09:11.106869334Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-EC",
+2026-10-11T14:09:11.106877632Z         "resultIds": [
+2026-10-11T14:09:11.106885953Z           "res-GTM-DEMO-S02-ec"
+2026-10-11T14:09:11.106894155Z         ],
+2026-10-11T14:09:11.106902193Z         "outcome": "COPIED",
+2026-10-11T14:09:11.106910459Z         "reason": null,
+2026-10-11T14:09:11.106918618Z         "batchId": "BATCH-GTM-2026-EC-01"
+2026-10-11T14:09:11.106926846Z       },
+2026-10-11T14:09:11.106934896Z       {
+2026-10-11T14:09:11.106942917Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-K",
+2026-10-11T14:09:11.106951307Z         "resultIds": [
+2026-10-11T14:09:11.106973632Z           "res-GTM-DEMO-S02-k"
+2026-10-11T14:09:11.106981757Z         ],
+2026-10-11T14:09:11.106989463Z         "outcome": "COPIED",
+2026-10-11T14:09:11.107006076Z         "reason": null,
+2026-10-11T14:09:11.107015023Z         "batchId": "BATCH-GTM-2026-K-01"
+2026-10-11T14:09:11.107023446Z       },
+2026-10-11T14:09:11.107031209Z       {
+2026-10-11T14:09:11.107039094Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-PH",
+2026-10-11T14:09:11.107047312Z         "resultIds": [
+2026-10-11T14:09:11.107057989Z           "res-GTM-DEMO-S02-ph"
+2026-10-11T14:09:11.107065962Z         ],
+2026-10-11T14:09:11.107074013Z         "outcome": "COPIED",
+2026-10-11T14:09:11.107081908Z         "reason": null,
+2026-10-11T14:09:11.107089839Z         "batchId": "BATCH-GTM-2026-PH-01"
+2026-10-11T14:09:11.107097813Z       },
+2026-10-11T14:09:11.107105592Z       {
+2026-10-11T14:09:11.107114307Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-SOC",
+2026-10-11T14:09:11.107122765Z         "resultIds": [
+2026-10-11T14:09:11.107130643Z           "res-GTM-DEMO-S02-soc"
+2026-10-11T14:09:11.107141149Z         ],
+2026-10-11T14:09:11.107148933Z         "outcome": "COPIED",
+2026-10-11T14:09:11.107157114Z         "reason": null,
+2026-10-11T14:09:11.107164976Z         "batchId": "BATCH-GTM-2026-SOC-01"
+2026-10-11T14:09:11.107173008Z       },
+2026-10-11T14:09:11.107180652Z       {
+2026-10-11T14:09:11.107188482Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-EC",
+2026-10-11T14:09:11.107196512Z         "resultIds": [
+2026-10-11T14:09:11.107204377Z           "res-GTM-DEMO-S03-ec"
+2026-10-11T14:09:11.107212514Z         ],
+2026-10-11T14:09:11.107220285Z         "outcome": "COPIED",
+2026-10-11T14:09:11.107228198Z         "reason": null,
+2026-10-11T14:09:11.107236033Z         "batchId": "BATCH-GTM-2026-EC-01"
+2026-10-11T14:09:11.107243968Z       },
+2026-10-11T14:09:11.107251721Z       {
+2026-10-11T14:09:11.107259518Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-K",
+2026-10-11T14:09:11.107281207Z         "resultIds": [
+2026-10-11T14:09:11.107290429Z           "res-GTM-DEMO-S03-k"
+2026-10-11T14:09:11.107298059Z         ],
+2026-10-11T14:09:11.107305454Z         "outcome": "COPIED",
+2026-10-11T14:09:11.107313016Z         "reason": null,
+2026-10-11T14:09:11.107320457Z         "batchId": "BATCH-GTM-2026-K-01"
+2026-10-11T14:09:11.107328117Z       },
+2026-10-11T14:09:11.107349337Z       {
+2026-10-11T14:09:11.107357238Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-P",
+2026-10-11T14:09:11.107365166Z         "resultIds": [
+2026-10-11T14:09:11.107391016Z           "res-GTM-DEMO-S03-p"
+2026-10-11T14:09:11.107400774Z         ],
+2026-10-11T14:09:11.107408666Z         "outcome": "COPIED",
+2026-10-11T14:09:11.107416642Z         "reason": null,
+2026-10-11T14:09:11.107424562Z         "batchId": "BATCH-GTM-2026-P-01"
+2026-10-11T14:09:11.107432700Z       },
+2026-10-11T14:09:11.107456069Z       {
+2026-10-11T14:09:11.107474893Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-PH",
+2026-10-11T14:09:11.107484351Z         "resultIds": [
+2026-10-11T14:09:11.107492833Z           "res-GTM-DEMO-S03-ph"
+2026-10-11T14:09:11.107501403Z         ],
+2026-10-11T14:09:11.107509512Z         "outcome": "COPIED",
+2026-10-11T14:09:11.107521284Z         "reason": null,
+2026-10-11T14:09:11.107529511Z         "batchId": "BATCH-GTM-2026-PH-01"
+2026-10-11T14:09:11.107537854Z       },
+2026-10-11T14:09:11.107545887Z       {
+2026-10-11T14:09:11.107554014Z         "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-SOC",
+2026-10-11T14:09:11.107562551Z         "resultIds": [
+2026-10-11T14:09:11.107570826Z           "res-GTM-DEMO-S03-soc"
+2026-10-11T14:09:11.107579073Z         ],
+2026-10-11T14:09:11.107587207Z         "outcome": "COPIED",
+2026-10-11T14:09:11.107595448Z         "reason": null,
+2026-10-11T14:09:11.107603716Z         "batchId": "BATCH-GTM-2026-SOC-01"
+2026-10-11T14:09:11.107631251Z       }
+2026-10-11T14:09:11.107639987Z     ],
+2026-10-11T14:09:11.107648002Z     "historicalEquipmentEvidence": [
+2026-10-11T14:09:11.107656225Z       {
+2026-10-11T14:09:11.107664192Z         "workItemId": "WI-1789634536051-965",
+2026-10-11T14:09:11.107672483Z         "resultIds": [
+2026-10-11T14:09:11.107680590Z           "res-1789655582508-vr6tcs"
+2026-10-11T14:09:11.107688768Z         ],
+2026-10-11T14:09:11.107696670Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.107704816Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.107713064Z         "evidenceData": null,
+2026-10-11T14:09:11.107721308Z         "instrumentId": null
+2026-10-11T14:09:11.107729589Z       },
+2026-10-11T14:09:11.107737730Z       {
+2026-10-11T14:09:11.107760156Z         "workItemId": "WI-1789634536059-97",
+2026-10-11T14:09:11.107768151Z         "resultIds": [
+2026-10-11T14:09:11.107775986Z           "res-1789655713932-8zifo4"
+2026-10-11T14:09:11.107783977Z         ],
+2026-10-11T14:09:11.107791689Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.107808382Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.107817498Z         "evidenceData": null,
+2026-10-11T14:09:11.107825545Z         "instrumentId": null
+2026-10-11T14:09:11.107833642Z       },
+2026-10-11T14:09:11.107844139Z       {
+2026-10-11T14:09:11.107851892Z         "workItemId": "WI-1789634536011-406",
+2026-10-11T14:09:11.107860991Z         "resultIds": [
+2026-10-11T14:09:11.107869381Z           "res-1789656669699-4sqmm1"
+2026-10-11T14:09:11.107877421Z         ],
+2026-10-11T14:09:11.107885044Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.107892957Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.107900994Z         "evidenceData": null,
+2026-10-11T14:09:11.107908885Z         "instrumentId": null
+2026-10-11T14:09:11.107916664Z       },
+2026-10-11T14:09:11.107924358Z       {
+2026-10-11T14:09:11.107932013Z         "workItemId": "WI-GTM-DEMO-S01-EC",
+2026-10-11T14:09:11.107939995Z         "resultIds": [
+2026-10-11T14:09:11.107947750Z           "res-GTM-DEMO-S01-ec"
+2026-10-11T14:09:11.107955568Z         ],
+2026-10-11T14:09:11.107978204Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.107986614Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.107994904Z         "evidenceData": null,
+2026-10-11T14:09:11.108003141Z         "instrumentId": null
+2026-10-11T14:09:11.108011277Z       },
+2026-10-11T14:09:11.108019301Z       {
+2026-10-11T14:09:11.108040996Z         "workItemId": "WI-GTM-DEMO-S01-K",
+2026-10-11T14:09:11.108049043Z         "resultIds": [
+2026-10-11T14:09:11.108056940Z           "res-GTM-DEMO-S01-k"
+2026-10-11T14:09:11.108064855Z         ],
+2026-10-11T14:09:11.108072572Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.108080665Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.108088617Z         "evidenceData": null,
+2026-10-11T14:09:11.108096566Z         "instrumentId": null
+2026-10-11T14:09:11.108104462Z       },
+2026-10-11T14:09:11.108112213Z       {
+2026-10-11T14:09:11.108120031Z         "workItemId": "WI-GTM-DEMO-S01-P",
+2026-10-11T14:09:11.108128107Z         "resultIds": [
+2026-10-11T14:09:11.108151558Z           "res-GTM-DEMO-S01-p"
+2026-10-11T14:09:11.108160019Z         ],
+2026-10-11T14:09:11.108168103Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.108181595Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.108203859Z         "evidenceData": null,
+2026-10-11T14:09:11.108220544Z         "instrumentId": null
+2026-10-11T14:09:11.108235581Z       },
+2026-10-11T14:09:11.108248945Z       {
+2026-10-11T14:09:11.108260726Z         "workItemId": "WI-GTM-DEMO-S01-PH",
+2026-10-11T14:09:11.108269415Z         "resultIds": [
+2026-10-11T14:09:11.108277696Z           "res-GTM-DEMO-S01-ph"
+2026-10-11T14:09:11.108286231Z         ],
+2026-10-11T14:09:11.108294400Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.108302865Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.108325146Z         "evidenceData": null,
+2026-10-11T14:09:11.108334069Z         "instrumentId": null
+2026-10-11T14:09:11.108342012Z       },
+2026-10-11T14:09:11.108349967Z       {
+2026-10-11T14:09:11.108357762Z         "workItemId": "WI-GTM-DEMO-S01-SOC",
+2026-10-11T14:09:11.108365844Z         "resultIds": [
+2026-10-11T14:09:11.108373660Z           "res-GTM-DEMO-S01-soc"
+2026-10-11T14:09:11.108381565Z         ],
+2026-10-11T14:09:11.108389492Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.108397733Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.108405862Z         "evidenceData": null,
+2026-10-11T14:09:11.108413952Z         "instrumentId": null
+2026-10-11T14:09:11.108422163Z       },
+2026-10-11T14:09:11.108430088Z       {
+2026-10-11T14:09:11.108437753Z         "workItemId": "WI-GTM-DEMO-S02-EC",
+2026-10-11T14:09:11.108445751Z         "resultIds": [
+2026-10-11T14:09:11.108480840Z           "res-GTM-DEMO-S02-ec"
+2026-10-11T14:09:11.108490730Z         ],
+2026-10-11T14:09:11.108498952Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.108508682Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.108516938Z         "evidenceData": null,
+2026-10-11T14:09:11.108525133Z         "instrumentId": null
+2026-10-11T14:09:11.108533253Z       },
+2026-10-11T14:09:11.108541363Z       {
+2026-10-11T14:09:11.108549413Z         "workItemId": "WI-GTM-DEMO-S02-K",
+2026-10-11T14:09:11.108557776Z         "resultIds": [
+2026-10-11T14:09:11.108566039Z           "res-GTM-DEMO-S02-k"
+2026-10-11T14:09:11.108574366Z         ],
+2026-10-11T14:09:11.108582317Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.108590582Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.108598756Z         "evidenceData": null,
+2026-10-11T14:09:11.108621025Z         "instrumentId": null
+2026-10-11T14:09:11.108642442Z       },
+2026-10-11T14:09:11.108652855Z       {
+2026-10-11T14:09:11.108661619Z         "workItemId": "WI-GTM-DEMO-S02-PH",
+2026-10-11T14:09:11.108670296Z         "resultIds": [
+2026-10-11T14:09:11.108678716Z           "res-GTM-DEMO-S02-ph"
+2026-10-11T14:09:11.108687136Z         ],
+2026-10-11T14:09:11.108695326Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.108703609Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.108712042Z         "evidenceData": null,
+2026-10-11T14:09:11.108720362Z         "instrumentId": null
+2026-10-11T14:09:11.108728522Z       },
+2026-10-11T14:09:11.108736667Z       {
+2026-10-11T14:09:11.108744722Z         "workItemId": "WI-GTM-DEMO-S02-SOC",
+2026-10-11T14:09:11.108753148Z         "resultIds": [
+2026-10-11T14:09:11.108775464Z           "res-GTM-DEMO-S02-soc"
+2026-10-11T14:09:11.108783498Z         ],
+2026-10-11T14:09:11.108791399Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.108806442Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.108814379Z         "evidenceData": null,
+2026-10-11T14:09:11.108822217Z         "instrumentId": null
+2026-10-11T14:09:11.108829974Z       },
+2026-10-11T14:09:11.108837721Z       {
+2026-10-11T14:09:11.108845392Z         "workItemId": "WI-GTM-DEMO-S03-EC",
+2026-10-11T14:09:11.108853353Z         "resultIds": [
+2026-10-11T14:09:11.108861218Z           "res-GTM-DEMO-S03-ec"
+2026-10-11T14:09:11.108869113Z         ],
+2026-10-11T14:09:11.108876841Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.108884736Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.108892710Z         "evidenceData": null,
+2026-10-11T14:09:11.108900601Z         "instrumentId": null
+2026-10-11T14:09:11.108921842Z       },
+2026-10-11T14:09:11.108931291Z       {
+2026-10-11T14:09:11.108939338Z         "workItemId": "WI-GTM-DEMO-S03-K",
+2026-10-11T14:09:11.108947793Z         "resultIds": [
+2026-10-11T14:09:11.108955962Z           "res-GTM-DEMO-S03-k"
+2026-10-11T14:09:11.108964285Z         ],
+2026-10-11T14:09:11.108972334Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.108980559Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.108988864Z         "evidenceData": null,
+2026-10-11T14:09:11.108997095Z         "instrumentId": null
+2026-10-11T14:09:11.109005298Z       },
+2026-10-11T14:09:11.109020601Z       {
+2026-10-11T14:09:11.109029601Z         "workItemId": "WI-GTM-DEMO-S03-P",
+2026-10-11T14:09:11.109038177Z         "resultIds": [
+2026-10-11T14:09:11.109046804Z           "res-GTM-DEMO-S03-p"
+2026-10-11T14:09:11.109066227Z         ],
+2026-10-11T14:09:11.109074867Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.109083380Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.109091743Z         "evidenceData": null,
+2026-10-11T14:09:11.109100017Z         "instrumentId": null
+2026-10-11T14:09:11.109108218Z       },
+2026-10-11T14:09:11.109116268Z       {
+2026-10-11T14:09:11.109124280Z         "workItemId": "WI-GTM-DEMO-S03-PH",
+2026-10-11T14:09:11.109132582Z         "resultIds": [
+2026-10-11T14:09:11.109140949Z           "res-GTM-DEMO-S03-ph"
+2026-10-11T14:09:11.109149367Z         ],
+2026-10-11T14:09:11.109157534Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.109165878Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.109174101Z         "evidenceData": null,
+2026-10-11T14:09:11.109182423Z         "instrumentId": null
+2026-10-11T14:09:11.109190545Z       },
+2026-10-11T14:09:11.109198648Z       {
+2026-10-11T14:09:11.109206662Z         "workItemId": "WI-GTM-DEMO-S03-SOC",
+2026-10-11T14:09:11.109222829Z         "resultIds": [
+2026-10-11T14:09:11.109231078Z           "res-GTM-DEMO-S03-soc"
+2026-10-11T14:09:11.109239341Z         ],
+2026-10-11T14:09:11.109247404Z         "outcome": "NOT_RECORDED",
+2026-10-11T14:09:11.109255805Z         "reason": "SNAPSHOT_NOT_RECORDED",
+2026-10-11T14:09:11.109264061Z         "evidenceData": null,
+2026-10-11T14:09:11.109272304Z         "instrumentId": null
+2026-10-11T14:09:11.109280439Z       }
+2026-10-11T14:09:11.109288506Z     ],
+2026-10-11T14:09:11.109296617Z     "originalRowsAndFieldsPreserved": true,
+2026-10-11T14:09:11.109305259Z     "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+2026-10-11T14:09:11.109313877Z   },
+2026-10-11T14:09:11.109321990Z   "bootstrapRebuild": [],
+2026-10-11T14:09:11.109330385Z   "mode": "NO_OP",
+2026-10-11T14:09:11.109353495Z   "totalChanges": 0
+2026-10-11T14:09:11.109362971Z }
+2026-10-11T14:09:11.114932014Z 📦 Installing repeat and correction evidence...
+2026-10-11T14:09:12.298242739Z {
+2026-10-11T14:09:12.298304947Z   "classification": "COMPLETE",
+2026-10-11T14:09:12.298315345Z   "sources": {
+2026-10-11T14:09:12.298347298Z     "migrationSha256": "600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd",
+2026-10-11T14:09:12.298357232Z     "contractVersion": "191-v1",
+2026-10-11T14:09:12.298365539Z     "predecessor": {
+2026-10-11T14:09:12.298373944Z       "marker": "190_work_attempt_contract",
+2026-10-11T14:09:12.298382151Z       "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+2026-10-11T14:09:12.298390496Z       "contractVersion": "190-v1",
+2026-10-11T14:09:12.298398521Z       "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+2026-10-11T14:09:12.298406715Z     },
+2026-10-11T14:09:12.298414642Z     "qcPredecessors": {
+2026-10-11T14:09:12.298422442Z       "186_normalized_qc_runs": {
+2026-10-11T14:09:12.298430462Z         "receiptSha256": "d461aab82504feaf91a27b4816e1d4b3abd66c147f32122752d72f4eb842be1a"
+2026-10-11T14:09:12.298438845Z       },
+2026-10-11T14:09:12.298446637Z       "187_qc_gate_scope": {
+2026-10-11T14:09:12.298454561Z         "receiptSha256": "ee802a39b62a9e06ab92677c3c016c461e4d1c8ca43674f077622220ef1fbd04"
+2026-10-11T14:09:12.298475869Z       }
+2026-10-11T14:09:12.298485166Z     }
+2026-10-11T14:09:12.298493143Z   },
+2026-10-11T14:09:12.298500840Z   "receipt": {
+2026-10-11T14:09:12.298508874Z     "sources": {
+2026-10-11T14:09:12.298516925Z       "migrationSha256": "600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd",
+2026-10-11T14:09:12.298525320Z       "contractVersion": "191-v1",
+2026-10-11T14:09:12.298533257Z       "predecessor": {
+2026-10-11T14:09:12.298541265Z         "marker": "190_work_attempt_contract",
+2026-10-11T14:09:12.298549469Z         "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+2026-10-11T14:09:12.298557866Z         "contractVersion": "190-v1",
+2026-10-11T14:09:12.298566668Z         "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+2026-10-11T14:09:12.298574980Z       },
+2026-10-11T14:09:12.298582878Z       "qcPredecessors": {
+2026-10-11T14:09:12.298590929Z         "186_normalized_qc_runs": {
+2026-10-11T14:09:12.298632501Z           "receiptSha256": "d461aab82504feaf91a27b4816e1d4b3abd66c147f32122752d72f4eb842be1a"
+2026-10-11T14:09:12.298641520Z         },
+2026-10-11T14:09:12.298649458Z         "187_qc_gate_scope": {
+2026-10-11T14:09:12.298657502Z           "receiptSha256": "ee802a39b62a9e06ab92677c3c016c461e4d1c8ca43674f077622220ef1fbd04"
+2026-10-11T14:09:12.298665671Z         }
+2026-10-11T14:09:12.298673435Z       }
+2026-10-11T14:09:12.298681345Z     },
+2026-10-11T14:09:12.298698947Z     "originalRowsSha256": "9aef6a87e12e3acada91c01655dcde21bd87e23e9973583f5f1b9011a892e94b",
+2026-10-11T14:09:12.298708566Z     "reasonNotRecordedCount": 1,
+2026-10-11T14:09:12.298716754Z     "reasonNotRecorded": [
+2026-10-11T14:09:12.298724786Z       {
+2026-10-11T14:09:12.298732841Z         "id": "att-s02-p-2",
+2026-10-11T14:09:12.298741045Z         "workItemId": "WI-GTM-DEMO-S02-P",
+2026-10-11T14:09:12.298749267Z         "attemptNo": 2,
+2026-10-11T14:09:12.298757332Z         "status": "ACCEPTED",
+2026-10-11T14:09:12.298765443Z         "reason": null,
+2026-10-11T14:09:12.298773593Z         "description": "reason not recorded"
+2026-10-11T14:09:12.298783502Z       }
+2026-10-11T14:09:12.298805260Z     ],
+2026-10-11T14:09:12.298814104Z     "backfilledCount": 0,
+2026-10-11T14:09:12.298822306Z     "originalReasonFieldsPreserved": true,
+2026-10-11T14:09:12.298830713Z     "originalRowsAndFieldsPreserved": true,
+2026-10-11T14:09:12.298849467Z     "newAttemptCount": 0,
+2026-10-11T14:09:12.298873849Z     "linkedResultCount": 0,
+2026-10-11T14:09:12.298881972Z     "receiptSha256": "09f260ded1080cb03e7af9deea88bebdd76d2c8ab49f9316e38772b69755a479"
+2026-10-11T14:09:12.298890307Z   },
+2026-10-11T14:09:12.298898015Z   "predecessor": {
+2026-10-11T14:09:12.298905908Z     "classification": "COMPLETE",
+2026-10-11T14:09:12.298913753Z     "sources": {
+2026-10-11T14:09:12.298921601Z       "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+2026-10-11T14:09:12.298929707Z       "contractVersion": "190-v1"
+2026-10-11T14:09:12.298937711Z     },
+2026-10-11T14:09:12.298945389Z     "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+2026-10-11T14:09:12.298953506Z   },
+2026-10-11T14:09:12.298961162Z   "plan": {
+2026-10-11T14:09:12.298968988Z     "reasonNotRecordedCount": 1,
+2026-10-11T14:09:12.298976837Z     "reasonNotRecorded": [
+2026-10-11T14:09:12.298984767Z       {
+2026-10-11T14:09:12.298992689Z         "id": "att-s02-p-2",
+2026-10-11T14:09:12.299000680Z         "workItemId": "WI-GTM-DEMO-S02-P",
+2026-10-11T14:09:12.299008632Z         "attemptNo": 2,
+2026-10-11T14:09:12.299016632Z         "status": "ACCEPTED",
+2026-10-11T14:09:12.299024608Z         "reason": null,
+2026-10-11T14:09:12.299032548Z         "description": "reason not recorded"
+2026-10-11T14:09:12.299040546Z       }
+2026-10-11T14:09:12.299048296Z     ],
+2026-10-11T14:09:12.299056026Z     "backfilledCount": 0,
+2026-10-11T14:09:12.299071994Z     "originalReasonFieldsPreserved": true
+2026-10-11T14:09:12.299080929Z   },
+2026-10-11T14:09:12.299088775Z   "releaseInventory": {
+2026-10-11T14:09:12.299096767Z     "blockedWorkItemCount": 0,
+2026-10-11T14:09:12.299104930Z     "blockedWorkItems": [],
+2026-10-11T14:09:12.299127131Z     "totalChanges": 0
+2026-10-11T14:09:12.299134868Z   },
+2026-10-11T14:09:12.299142367Z   "bootstrapRebuild": [],
+2026-10-11T14:09:12.299150065Z   "mode": "NO_OP",
+2026-10-11T14:09:12.299157665Z   "totalChanges": 0
+2026-10-11T14:09:12.299165369Z }
+2026-10-11T14:09:12.323948968Z 📦 Installing reported-value selection evidence...
+2026-10-11T14:09:13.612726176Z {
+2026-10-11T14:09:13.612850377Z   "classification": "COMPLETE",
+2026-10-11T14:09:13.612867815Z   "migrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7",
+2026-10-11T14:09:13.612877442Z   "mode": "NO_OP",
+2026-10-11T14:09:13.612886000Z   "totalChanges": 0,
+2026-10-11T14:09:13.612894636Z   "newSelectionCount": 0
+2026-10-11T14:09:13.612903013Z }
+2026-10-11T14:09:13.649825802Z 📦 Installing retained run reagent links...
+2026-10-11T14:09:13.865437386Z {
+2026-10-11T14:09:13.865568636Z   "classification": "COMPLETE_194",
+2026-10-11T14:09:13.865580288Z   "sources": {
+2026-10-11T14:09:13.865655618Z     "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+2026-10-11T14:09:13.865669256Z   },
+2026-10-11T14:09:13.865698620Z   "linkCount": 0,
+2026-10-11T14:09:13.865707541Z   "receipt": {
+2026-10-11T14:09:13.865737883Z     "sources": {
+2026-10-11T14:09:13.865747588Z       "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+2026-10-11T14:09:13.865756676Z     },
+2026-10-11T14:09:13.865764976Z     "originalRowsSha256": "f79db32ba1d05b87d2e5009954d90ae2dd0f0a960cd51865e0f4b75de0bc4cbe",
+2026-10-11T14:09:13.865773924Z     "originalRowsPreserved": true,
+2026-10-11T14:09:13.865809217Z     "newLinkCount": 0,
+2026-10-11T14:09:13.865820993Z     "backfilledCount": 0,
+2026-10-11T14:09:13.865829745Z     "receiptSha256": "5d737a49f3a62a5accf3c405ae938308b11b4ffe5682e71c0982951ee61715e1"
+2026-10-11T14:09:13.865838899Z   },
+2026-10-11T14:09:13.865847158Z   "mode": "NO_OP",
+2026-10-11T14:09:13.865863595Z   "totalChanges": 0,
+2026-10-11T14:09:13.865872038Z   "backfilledCount": 0
+2026-10-11T14:09:13.865903979Z }
+2026-10-11T14:09:13.881652315Z 📦 Installing inactive calculation references and evidence guards...
+2026-10-11T14:09:16.434870669Z {
+2026-10-11T14:09:16.434978428Z   "classification": "COMPLETE",
+2026-10-11T14:09:16.434989836Z   "sources": {
+2026-10-11T14:09:16.435021863Z     "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+2026-10-11T14:09:16.435030783Z     "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+2026-10-11T14:09:16.435039048Z     "referenceSha256": "57dc4b667dab93606e24673b39a12032e48f3df686b9bd3c593ac04d2fac8491"
+2026-10-11T14:09:16.435047248Z   },
+2026-10-11T14:09:16.435055044Z   "receipt": {
+2026-10-11T14:09:16.435063155Z     "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+2026-10-11T14:09:16.435071355Z     "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+2026-10-11T14:09:16.435099708Z     "guards": [
+2026-10-11T14:09:16.435109212Z       "CalcTemplate_insert_contract",
+2026-10-11T14:09:16.435117341Z       "CalcTemplateActivation_insert_contract",
+2026-10-11T14:09:16.435125249Z       "CalibrationCurve_insert_contract",
+2026-10-11T14:09:16.435141035Z       "CalibrationPoint_insert_contract",
+2026-10-11T14:09:16.435162260Z       "ResultCalculation_insert_contract",
+2026-10-11T14:09:16.435170133Z       "CalcTemplate_update_immutable",
+2026-10-11T14:09:16.435198135Z       "CalcTemplate_delete_immutable",
+2026-10-11T14:09:16.435206342Z       "CalcTemplateActivation_update_immutable",
+2026-10-11T14:09:16.435214021Z       "CalcTemplateActivation_delete_immutable",
+2026-10-11T14:09:16.435221724Z       "CalibrationCurve_update_immutable",
+2026-10-11T14:09:16.435229304Z       "CalibrationCurve_delete_immutable",
+2026-10-11T14:09:16.435237137Z       "CalibrationPoint_update_immutable",
+2026-10-11T14:09:16.435244902Z       "CalibrationPoint_delete_immutable",
+2026-10-11T14:09:16.435252745Z       "ResultCalculation_update_immutable",
+2026-10-11T14:09:16.435279560Z       "ResultCalculation_delete_immutable",
+2026-10-11T14:09:16.435288037Z       "CalibrationCurve_pass_coefficients_guard"
+2026-10-11T14:09:16.435295918Z     ],
+2026-10-11T14:09:16.435303631Z     "backfillCount": 0
+2026-10-11T14:09:16.435311213Z   },
+2026-10-11T14:09:16.435331826Z   "guards": [
+2026-10-11T14:09:16.435339531Z     "CalcTemplate_insert_contract",
+2026-10-11T14:09:16.435346995Z     "CalcTemplateActivation_insert_contract",
+2026-10-11T14:09:16.435372890Z     "CalibrationCurve_insert_contract",
+2026-10-11T14:09:16.435402168Z     "CalibrationPoint_insert_contract",
+2026-10-11T14:09:16.435409753Z     "ResultCalculation_insert_contract",
+2026-10-11T14:09:16.435534923Z     "CalcTemplate_update_immutable",
+2026-10-11T14:09:16.435557209Z     "CalcTemplate_delete_immutable",
+2026-10-11T14:09:16.435572988Z     "CalcTemplateActivation_update_immutable",
+2026-10-11T14:09:16.435655515Z     "CalcTemplateActivation_delete_immutable",
+2026-10-11T14:09:16.435674764Z     "CalibrationCurve_update_immutable",
+2026-10-11T14:09:16.435683675Z     "CalibrationCurve_delete_immutable",
+2026-10-11T14:09:16.435691951Z     "CalibrationPoint_update_immutable",
+2026-10-11T14:09:16.435700032Z     "CalibrationPoint_delete_immutable",
+2026-10-11T14:09:16.435735131Z     "ResultCalculation_update_immutable",
+2026-10-11T14:09:16.435743751Z     "ResultCalculation_delete_immutable",
+2026-10-11T14:09:16.435752073Z     "CalibrationCurve_pass_coefficients_guard"
+2026-10-11T14:09:16.435774306Z   ],
+2026-10-11T14:09:16.435782496Z   "counts": {
+2026-10-11T14:09:16.435790144Z     "CalcTemplate": 8,
+2026-10-11T14:09:16.435798003Z     "CalcTemplateActivation": 0,
+2026-10-11T14:09:16.435825995Z     "CalibrationCurve": 0,
+2026-10-11T14:09:16.435837865Z     "CalibrationPoint": 0,
+2026-10-11T14:09:16.435846283Z     "ResultCalculation": 0
+2026-10-11T14:09:16.435854228Z   },
+2026-10-11T14:09:16.435861824Z   "backfillCount": 0,
+2026-10-11T14:09:16.435884145Z   "unit": {
+2026-10-11T14:09:16.435892223Z     "classification": "ABSENT",
+2026-10-11T14:09:16.435921305Z     "unitCode": "pct_mass",
+2026-10-11T14:09:16.435945436Z     "unitInsertCount": 0,
+2026-10-11T14:09:16.435962065Z     "backfillCount": 0
+2026-10-11T14:09:16.435969761Z   },
+2026-10-11T14:09:16.435977348Z   "references": {
+2026-10-11T14:09:16.435985036Z     "classification": "COMPLETE",
+2026-10-11T14:09:16.436006277Z     "referenceCount": 11,
+2026-10-11T14:09:16.436034813Z     "installedReferenceCount": 8,
+2026-10-11T14:09:16.436042658Z     "missingReferenceIds": [],
+2026-10-11T14:09:16.436050299Z     "deferredReferences": [
+2026-10-11T14:09:16.436071683Z       {
+2026-10-11T14:09:16.436079390Z         "id": "calc-ref-walkley-black-130-v1",
+2026-10-11T14:09:16.436087353Z         "code": "DEFERRED_PREREQUISITE_ABSENT",
+2026-10-11T14:09:16.436095253Z         "missingAnalysisCodes": [],
+2026-10-11T14:09:16.436121836Z         "missingUnitCodes": [
+2026-10-11T14:09:16.436131933Z           "pct_mass"
+2026-10-11T14:09:16.436139833Z         ]
+2026-10-11T14:09:16.436147743Z       },
+2026-10-11T14:09:16.436165785Z       {
+2026-10-11T14:09:16.436174570Z         "id": "calc-ref-walkley-black-133-v1",
+2026-10-11T14:09:16.436182555Z         "code": "DEFERRED_PREREQUISITE_ABSENT",
+2026-10-11T14:09:16.436212866Z         "missingAnalysisCodes": [],
+2026-10-11T14:09:16.436221578Z         "missingUnitCodes": [
+2026-10-11T14:09:16.436229580Z           "pct_mass"
+2026-10-11T14:09:16.436237248Z         ]
+2026-10-11T14:09:16.436244998Z       },
+2026-10-11T14:09:16.436252533Z       {
+2026-10-11T14:09:16.436268393Z         "id": "calc-ref-kjeldahl-nitrogen-v1",
+2026-10-11T14:09:16.436298311Z         "code": "DEFERRED_PREREQUISITE_ABSENT",
+2026-10-11T14:09:16.436306763Z         "missingAnalysisCodes": [],
+2026-10-11T14:09:16.436314713Z         "missingUnitCodes": [
+2026-10-11T14:09:16.436322567Z           "pct_mass"
+2026-10-11T14:09:16.436330152Z         ]
+2026-10-11T14:09:16.436350643Z       }
+2026-10-11T14:09:16.436358401Z     ],
+2026-10-11T14:09:16.436383879Z     "deferredReferenceCount": 3,
+2026-10-11T14:09:16.436393684Z     "referenceInsertCount": 0,
+2026-10-11T14:09:16.436415764Z     "referenceReceiptInsertCount": 0,
+2026-10-11T14:09:16.436423777Z     "activationInsertCount": 0,
+2026-10-11T14:09:16.436431545Z     "backfillCount": 0
+2026-10-11T14:09:16.436439230Z   },
+2026-10-11T14:09:16.436446895Z   "ready": true,
+2026-10-11T14:09:16.436454503Z   "plannedUnitInsertCount": 0,
+2026-10-11T14:09:16.436509054Z   "plannedReferenceInsertCount": 0,
+2026-10-11T14:09:16.436520102Z   "activationInsertCount": 0,
+2026-10-11T14:09:16.436528584Z   "mode": "NO_OP",
+2026-10-11T14:09:16.436550010Z   "totalChanges": 0,
+2026-10-11T14:09:16.436559190Z   "unitInsertCount": 0,
+2026-10-11T14:09:16.436566912Z   "referenceInsertCount": 0,
+2026-10-11T14:09:16.436574803Z   "referenceReceiptInsertCount": 0,
+2026-10-11T14:09:16.436612051Z   "schemaReceiptInsertCount": 0
+2026-10-11T14:09:16.436645707Z }
+2026-10-11T14:09:16.449547859Z 📦 Installing immutable result override requests...
+2026-10-11T14:09:16.633679180Z {
+2026-10-11T14:09:16.633846879Z   "classification": "COMPLETE_197",
+2026-10-11T14:09:16.633873363Z   "sources": {
+2026-10-11T14:09:16.633892717Z     "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+2026-10-11T14:09:16.633962840Z   },
+2026-10-11T14:09:16.633984635Z   "requestCount": 0,
+2026-10-11T14:09:16.634049892Z   "receipt": {
+2026-10-11T14:09:16.634087309Z     "sources": {
+2026-10-11T14:09:16.634096818Z       "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+2026-10-11T14:09:16.634130459Z     },
+2026-10-11T14:09:16.634140667Z     "originalRowsSha256": "6e0207946cd67d4109b3f6e7ff0b23fd8b545b21d2a4f81796e651923db1564b",
+2026-10-11T14:09:16.634149268Z     "originalRowsPreserved": true,
+2026-10-11T14:09:16.634157634Z     "newRequestCount": 0,
+2026-10-11T14:09:16.634165616Z     "backfilledCount": 0,
+2026-10-11T14:09:16.634173661Z     "receiptSha256": "953a236c33e3b37f7a4fe173dc01f17b6d49924a2bfa432877f05b896253b83e"
+2026-10-11T14:09:16.634182039Z   },
+2026-10-11T14:09:16.634209777Z   "mode": "NO_OP",
+2026-10-11T14:09:16.634221221Z   "totalChanges": 0,
+2026-10-11T14:09:16.634229532Z   "backfilledCount": 0
+2026-10-11T14:09:16.634238069Z }
+2026-10-11T14:09:16.648759384Z 📦 Installing immutable cross-check evidence...
+2026-10-11T14:09:20.100697265Z {
+2026-10-11T14:09:20.100789280Z   "classification": "COMPLETE_201",
+2026-10-11T14:09:20.100814299Z   "sources": {
+2026-10-11T14:09:20.100831542Z     "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+2026-10-11T14:09:20.100840426Z     "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+2026-10-11T14:09:20.100849205Z     "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+2026-10-11T14:09:20.100858049Z   },
+2026-10-11T14:09:20.100866172Z   "evaluationCount": 0,
+2026-10-11T14:09:20.100874742Z   "receipt": {
+2026-10-11T14:09:20.100883133Z     "sources": {
+2026-10-11T14:09:20.100896335Z       "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+2026-10-11T14:09:20.100904913Z       "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+2026-10-11T14:09:20.100913543Z       "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+2026-10-11T14:09:20.100922335Z     },
+2026-10-11T14:09:20.100930628Z     "originalRowsSha256": "8559985c861e950fdffe53f6661a48b0e76916edcd4c3f0e51b473d827824d58",
+2026-10-11T14:09:20.100939295Z     "originalRowsPreserved": true,
+2026-10-11T14:09:20.100947832Z     "newEvaluationCount": 0,
+2026-10-11T14:09:20.100956185Z     "backfilledCount": 0,
+2026-10-11T14:09:20.100981594Z     "receiptSha256": "3185df5bbb809f86c7ca8c0689135e6dbd93e227c9dbda66850256b965966a9e"
+2026-10-11T14:09:20.100990618Z   },
+2026-10-11T14:09:20.100998975Z   "mode": "NO_OP",
+2026-10-11T14:09:20.101007348Z   "totalChanges": 0,
+2026-10-11T14:09:20.101046198Z   "newEvaluationCount": 0,
+2026-10-11T14:09:20.101056409Z   "backfilledCount": 0
+2026-10-11T14:09:20.101065296Z }
+2026-10-11T14:09:20.125795322Z 📦 Installing immutable amendment requests, attempt links and report withdrawals...
+2026-10-11T14:09:22.557835876Z {
+2026-10-11T14:09:22.557960171Z   "classification": "COMPLETE_210",
+2026-10-11T14:09:22.557973381Z   "sources": {
+2026-10-11T14:09:22.557982296Z     "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+2026-10-11T14:09:22.557991646Z     "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+2026-10-11T14:09:22.558000707Z     "contractVersion": "210-v1"
+2026-10-11T14:09:22.558009644Z   },
+2026-10-11T14:09:22.558017880Z   "amendmentCount": 1,
+2026-10-11T14:09:22.558026557Z   "amendmentAttemptLinkCount": 0,
+2026-10-11T14:09:22.558040282Z   "withdrawalCount": 0,
+2026-10-11T14:09:22.558048801Z   "receipt": {
+2026-10-11T14:09:22.558057013Z     "sources": {
+2026-10-11T14:09:22.558065483Z       "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+2026-10-11T14:09:22.558074321Z       "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+2026-10-11T14:09:22.558096566Z       "contractVersion": "210-v1"
+2026-10-11T14:09:22.558106054Z     },
+2026-10-11T14:09:22.558114089Z     "originalRowsSha256": "d843166d8ca8117121e56a44fd8eeed47ac92f75f3cd63ea0b466912247241d3",
+2026-10-11T14:09:22.558122679Z     "originalRowsPreserved": true,
+2026-10-11T14:09:22.558130927Z     "newAmendmentCount": 0,
+2026-10-11T14:09:22.558138901Z     "newAttemptLinkCount": 0,
+2026-10-11T14:09:22.558147282Z     "newWithdrawalCount": 0,
+2026-10-11T14:09:22.558163293Z     "backfilledCount": 0,
+2026-10-11T14:09:22.558171525Z     "receiptSha256": "efc085838fcd3c85af095eed605a790b1252d178b52c8e9de9a5eaada223e424"
+2026-10-11T14:09:22.558180107Z   },
+2026-10-11T14:09:22.558188007Z   "mode": "NO_OP",
+2026-10-11T14:09:22.558196163Z   "totalChanges": 0,
+2026-10-11T14:09:22.558204271Z   "newAmendmentCount": 0,
+2026-10-11T14:09:22.558212326Z   "newAttemptLinkCount": 0,
+2026-10-11T14:09:22.558228231Z   "newWithdrawalCount": 0,
+2026-10-11T14:09:22.558236229Z   "backfilledCount": 0
+2026-10-11T14:09:22.558244604Z }
+2026-10-11T14:09:22.577012648Z 📦 Installing immutable report revision evidence...
+2026-10-11T14:09:27.180125127Z {
+2026-10-11T14:09:27.180265356Z   "classification": "COMPLETE_211",
+2026-10-11T14:09:27.180353073Z   "sources": {
+2026-10-11T14:09:27.180369265Z     "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+2026-10-11T14:09:27.180386034Z     "contractVersion": "211-v1"
+2026-10-11T14:09:27.180402666Z   },
+2026-10-11T14:09:27.180457179Z   "reportCount": 4,
+2026-10-11T14:09:27.180568802Z   "receipt": {
+2026-10-11T14:09:27.180584251Z     "sources": {
+2026-10-11T14:09:27.180639686Z       "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+2026-10-11T14:09:27.180663556Z       "contractVersion": "211-v1"
+2026-10-11T14:09:27.180676457Z     },
+2026-10-11T14:09:27.180689004Z     "originalRowsSha256": "2e6e021a9c590b35591f505a0aba09f529839015dfbd49e4ff81a8a29541ba39",
+2026-10-11T14:09:27.180697738Z     "originalRowsPreserved": true,
+2026-10-11T14:09:27.180737411Z     "backfilledCount": 0,
+2026-10-11T14:09:27.180745675Z     "receiptSha256": "7172b9201f5173b63a1a1414b0a18414da150b8366762c868081d1a6d61dc72d"
+2026-10-11T14:09:27.180753885Z   },
+2026-10-11T14:09:27.180761391Z   "mode": "NO_OP",
+2026-10-11T14:09:27.180769372Z   "totalChanges": 0,
+2026-10-11T14:09:27.180777005Z   "backfilledCount": 0
+2026-10-11T14:09:27.180784740Z }
+2026-10-11T14:09:27.199615516Z 📦 Installing bench credential storage...
+2026-10-11T14:09:33.257738320Z {
+2026-10-11T14:09:33.257824651Z   "classification": "COMPLETE_202",
+2026-10-11T14:09:33.257836712Z   "sources": {
+2026-10-11T14:09:33.257845612Z     "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+2026-10-11T14:09:33.257854586Z     "contractVersion": "202-v1"
+2026-10-11T14:09:33.257863208Z   },
+2026-10-11T14:09:33.257880514Z   "receipt": {
+2026-10-11T14:09:33.257889057Z     "sources": {
+2026-10-11T14:09:33.257897449Z       "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+2026-10-11T14:09:33.257906393Z       "contractVersion": "202-v1"
+2026-10-11T14:09:33.257915225Z     },
+2026-10-11T14:09:33.257923950Z     "originalRowsSha256": "a380b9ab2f9dd1ee5533c9266bbed055be9a6802f6bad10ad9462cfeeb30abf7",
+2026-10-11T14:09:33.257932991Z     "originalRowsPreserved": true,
+2026-10-11T14:09:33.257941648Z     "backfilledCount": 0,
+2026-10-11T14:09:33.257950264Z     "receiptSha256": "220eeb9b44b23db3d1176eda595b5fcf1ac67b1f84fe87fbc7be58e12c46e3c6"
+2026-10-11T14:09:33.257959294Z   },
+2026-10-11T14:09:33.257967629Z   "mode": "NO_OP",
+2026-10-11T14:09:33.257976332Z   "totalChanges": 0,
+2026-10-11T14:09:33.258017999Z   "backfilledCount": 0
+2026-10-11T14:09:33.258028548Z }
+2026-10-11T14:09:33.272783905Z 📦 Installing preparation record evidence...
+2026-10-11T14:09:42.248140545Z {
+2026-10-11T14:09:42.248231307Z   "classification": "COMPLETE_205",
+2026-10-11T14:09:42.248250668Z   "sources": {
+2026-10-11T14:09:42.248260461Z     "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+2026-10-11T14:09:42.248269556Z     "contractVersion": "205-v1"
+2026-10-11T14:09:42.248278366Z   },
+2026-10-11T14:09:42.248286745Z   "receipt": {
+2026-10-11T14:09:42.248295324Z     "sources": {
+2026-10-11T14:09:42.248312189Z       "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+2026-10-11T14:09:42.248321137Z       "contractVersion": "205-v1"
+2026-10-11T14:09:42.248329694Z     },
+2026-10-11T14:09:42.248338285Z     "originalRowsSha256": "10f132d31e12b6551a00a48cfd136791d49a70fc9520834df7a5972cd988c57a",
+2026-10-11T14:09:42.248347148Z     "originalRowsPreserved": true,
+2026-10-11T14:09:42.248355805Z     "backfilledCount": 0,
+2026-10-11T14:09:42.248364465Z     "receiptSha256": "01df5c84dc90b6c4be4e91b9d3b05e44af2bc5cc03e0ec5fec5bef6a238c19ae"
+2026-10-11T14:09:42.248377415Z   },
+2026-10-11T14:09:42.248385891Z   "mode": "NO_OP",
+2026-10-11T14:09:42.248394666Z   "totalChanges": 0,
+2026-10-11T14:09:42.248403116Z   "backfilledCount": 0
+2026-10-11T14:09:42.248412133Z }
+2026-10-11T14:09:42.271706136Z 🚀 Starting SoilFER-LIMS...
+2026-10-11T14:09:46.951698422Z {"event":"WORKFLOW_STARTUP_READY","classification":"COMPLETE","inventory":{"totals":{"Sample":38773,"WorkItem":90},"candidateCount":0,"unmappedCount":0,"blockedCount":0,"fingerprint":"f92b4677e3ce0424471df4cffefe4c4e3138a1557846094059b8af0886129386"},"totalChanges":0}
+2026-10-11T14:09:46.988307837Z {"event":"RESULT_ATTEMPT_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d"},"guards":["Result_attempt_insert_guard","Result_attempt_update_guard","WorkAttempt_result_reference_guard"],"counts":{"results":19,"linked":19},"backfillCount":0,"mode":"DRY_RUN","totalChanges":0}
+2026-10-11T14:09:47.027842473Z {"event":"SAMPLE_HOLD_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8"},"guards":["SampleHold_insert_guard","SampleHold_update_guard","SampleHold_raise_immutable","SampleHold_resolution_final","SampleHold_delete_refusal","WorkItem_cancellation_insert_guard","WorkItem_cancellation_update_guard"],"counts":{"workItems":90,"holds":9},"backfillCount":0,"mode":"DRY_RUN","totalChanges":0}
+2026-10-11T14:09:47.083807631Z {"event":"REFERENCE_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3","oracleSha256":"7a626b66bd31a7e7305d8c1b091207f3fb26348345a431fb77b63f875d3b99b5"},"guards":["ReferenceMaterial_insert_guard","ReferenceMaterial_update_guard","ReferenceValue_insert_guard","ReferenceValue_immutable_guard","ReferenceValue_delete_guard","BatchQcResult_reference_insert_guard","BatchQcResult_reference_update_guard"],"indexes":["ReferenceMaterial_labId_code_idx","ReferenceValue_referenceMaterialId_analysisCode_idx","ReferenceValue_current_generic","ReferenceValue_current_method"],"counts":{"materials":0,"values":0,"qcRows":18,"linked":0},"backfillCount":0,"mode":"DRY_RUN","totalChanges":0}
+2026-10-11T14:09:47.123470715Z {"event":"QC_RULE_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06","oracleSha256":"fe0dbc7dbb0a35bc62353de715a48b4263d492917225c7be5b6f969ec3f52819"},"guards":["QcRule_immutable_update","QcRule_immutable_delete","QcRule_version_guard","QcRule_scope_guard","QcRule_value_guard"],"indexes":["QcRule_labId_analysisCode_methodologyId_effectiveFrom_idx","QcRule_scope_version_unique"],"counts":{"rules":0},"backfillCount":0,"mode":"DRY_RUN","totalChanges":0}
+2026-10-11T14:09:49.180961186Z {"event":"QC_RUN_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046","oracleSha256":"2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369"},"counts":{"BatchAnalyte":6,"BatchPosition":33,"BatchPositionWorkItem":15,"BatchPositionReference":0,"QcMeasurement":24,"QcEvaluation":6,"BatchDisposition":1,"BatchEvent":28},"receipt":{"migrationSha256":"2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046","oracleSha256":"2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369","backfillFingerprint":"18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b","backfillCounts":{"batches":6,"analytes":6,"samplePositions":15,"qcPositions":18,"historicalSnapshots":0,"currentEvaluations":6,"evaluations":6,"measurements":24,"typedRows":18,"historicalTypedRows":0,"jsonEntries":18,"typedFallbackEntries":0,"typedJsonConflicts":12,"historyAuditConflicts":0,"unresolvedMethods":0,"unresolvedAnalysts":3,"unresolvedInstruments":6,"unlinkedReferences":6,"unresolvedNumbers":0,"unresolvedDuplicateParents":6,"unresolvedRackPositions":15,"missingWorkItems":16,"malformedHistory":0,"malformedQcResults":0,"orphanSnapshots":0,"multiAttemptMembershipGroups":0,"refusals":0,"legacyDispositionMapped":{"REJECT_REANALYSIS":1,"ACCEPT_OPAQUE":1},"dispositionAttribution":{"AUDIT_LOG":0,"BATCH_DISPOSITION_FIELD":2,"SNAPSHOT_DISPOSITION_FIELD":0},"dispositionAttributionConflicts":0,"TEXTURE_ALIAS_MERGED":0},"bootstrapRebuild":[]},"bootstrapRebuild":[],"guards":["Batch_legacy_qc_immutable","Batch_first_start_immutable","BatchQcResult_frozen_insert","BatchQcResult_frozen_update","BatchQcResult_frozen_delete","BatchAnalyte_insert_guard","BatchAnalyte_update_guard","BatchAnalyte_identity_immutable","BatchAnalyte_membership_insert_guard","BatchAnalyte_membership_delete_guard","BatchAnalyte_membership_update_guard","BatchPosition_insert_guard","BatchPosition_update_guard","BatchPosition_membership_insert_guard","BatchPosition_membership_update_guard","BatchPosition_membership_delete_guard","BatchPosition_identity_guard","BatchPositionWorkItem_insert_guard","BatchPositionWorkItem_immutable","BatchPositionWorkItem_run_unique_guard","BatchPositionWorkItem_membership_insert_guard","BatchPositionWorkItem_membership_delete_guard","WorkItem_batch_membership_guard","WorkItem_batch_membership_insert_guard","BatchPositionReference_insert_guard","BatchPositionReference_correction_reason_guard","BatchPositionReference_lot_guard","BatchPositionReference_supersede_guard","BatchPositionReference_delete_guard","QcMeasurement_insert_guard","QcMeasurement_historical_write_guard","QcMeasurement_replacement_guard","BatchPositionReference_replacement_guard","QcMeasurement_start_guard","QcMeasurement_supersede_guard","QcMeasurement_delete_guard","QcEvaluation_insert_guard","QcEvaluation_start_guard","QcEvaluation_frozen_criteria_guard","QcEvaluation_immutable_update","QcEvaluation_immutable_delete","BatchDisposition_immutable_update","BatchDisposition_immutable_delete","BatchEvent_immutable_update","BatchEvent_immutable_delete","BatchDisposition_insert_guard","BatchEvent_insert_guard"],"indexes":["BatchAnalyte_labId_analysisCode_methodologyId_idx","BatchAnalyte_batchId_analysisCode_key","BatchPosition_batchId_position_key","BatchPositionWorkItem_workItemId_idx","BatchPositionWorkItem_positionId_analysisCode_key","BatchPositionReference_positionId_analysisCode_idx","QcMeasurement_batchId_analysisCode_idx","QcMeasurement_positionId_analysisCode_replicateNo_idx","QcEvaluation_batchId_analysisCode_version_key","BatchDisposition_batchId_analysisCode_idx","BatchEvent_batchId_at_idx","BatchAnalyte_crm_ordinal_unique","BatchPositionReference_current_unique","QcMeasurement_current_unique"],"backfillCount":0,"backfillCounts":{"batches":6,"analytes":6,"samplePositions":15,"qcPositions":18,"historicalSnapshots":0,"currentEvaluations":6,"evaluations":6,"measurements":24,"typedRows":18,"historicalTypedRows":0,"jsonEntries":18,"typedFallbackEntries":0,"typedJsonConflicts":12,"historyAuditConflicts":0,"unresolvedMethods":0,"unresolvedAnalysts":3,"unresolvedInstruments":6,"unlinkedReferences":6,"unresolvedNumbers":0,"unresolvedDuplicateParents":6,"unresolvedRackPositions":15,"missingWorkItems":16,"malformedHistory":0,"malformedQcResults":0,"orphanSnapshots":0,"multiAttemptMembershipGroups":0,"refusals":0,"legacyDispositionMapped":{"REJECT_REANALYSIS":1,"ACCEPT_OPAQUE":1},"dispositionAttribution":{"AUDIT_LOG":0,"BATCH_DISPOSITION_FIELD":2,"SNAPSHOT_DISPOSITION_FIELD":0},"dispositionAttributionConflicts":0,"TEXTURE_ALIAS_MERGED":0},"backfillFingerprint":"18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b","mode":"DRY_RUN","totalChanges":0}
+2026-10-11T14:09:54.217685644Z {"event":"QC_GATE_SCOPE_STARTUP_READY","classification":"COMPLETE","migrationSha256":"fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf","membershipMigrationSha256":"1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572","membershipGuardSha256":"62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067","supersededMembershipGuardSha256":"3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d","existingDispositionRows":1,"originalDispositionFingerprint":"9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338","backfillCount":0,"bootstrapRebuild":[],"totalChanges":0,"mode":"DRY_RUN","receipt":{"migrationSha256":"fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf","existingDispositionRows":1,"membershipMigrationSha256":"1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572","membershipGuardSha256":"62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067","supersededMembershipGuardSha256":"3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d","originalDispositionFingerprint":"9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338","backfillCount":0,"bootstrapRebuild":[]}}
+2026-10-11T14:09:54.265090935Z {"event":"PT_STARTUP_READY","classification":"COMPLETE","successor":"COMPLETE_193","sources":{"migrationSha256":"bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"},"successorSources":{"migrationSha256":"3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47","proficiencyMigrationSha256":"bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"},"bootstrapRebuild":[],"backfillCount":0,"roundCount":0,"scoreOutcomeSha256":"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","mode":"DRY_RUN","totalChanges":0}
+2026-10-11T14:09:54.310804237Z {"event":"NCR_STARTUP_READY","classification":"COMPLETE_193","sources":{"migrationSha256":"3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47","proficiencyMigrationSha256":"bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"},"totalChanges":0}
+2026-10-11T14:09:54.339291350Z {"event":"RESULT_EQUIPMENT_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4"},"bootstrapRebuild":[],"backfillCount":0,"resultCount":19,"originalResultSha256":"935e140956349abc9eddbee25b830c9ff041700f6565479a62f16031deb90d26","mode":"DRY_RUN","totalChanges":0}
+2026-10-11T14:09:54.923929462Z {"event":"WORK_ATTEMPT_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2","contractVersion":"190-v1"},"totalChanges":0}
+2026-10-11T14:09:55.534866731Z {"event":"WORK_REPEAT_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd","contractVersion":"191-v1","predecessor":{"marker":"190_work_attempt_contract","migrationSha256":"7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2","contractVersion":"190-v1","receiptSha256":"ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"},"qcPredecessors":{"186_normalized_qc_runs":{"receiptSha256":"d461aab82504feaf91a27b4816e1d4b3abd66c147f32122752d72f4eb842be1a"},"187_qc_gate_scope":{"receiptSha256":"ee802a39b62a9e06ab92677c3c016c461e4d1c8ca43674f077622220ef1fbd04"}}},"totalChanges":0}
+2026-10-11T14:09:56.146723688Z {"event":"REPORTED_VALUE_STARTUP_READY","classification":"COMPLETE","migrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7","mode":"DRY_RUN","totalChanges":0,"newSelectionCount":0}
+2026-10-11T14:09:56.181758232Z {"event":"REAGENT_LOT_STARTUP_READY","classification":"COMPLETE_194","sources":{"migrationSha256":"6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"},"linkCount":0,"receipt":{"sources":{"migrationSha256":"6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"},"originalRowsSha256":"f79db32ba1d05b87d2e5009954d90ae2dd0f0a960cd51865e0f4b75de0bc4cbe","originalRowsPreserved":true,"newLinkCount":0,"backfilledCount":0,"receiptSha256":"5d737a49f3a62a5accf3c405ae938308b11b4ffe5682e71c0982951ee61715e1"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+2026-10-11T14:09:56.219923811Z {"event":"RESULT_OVERRIDE_STARTUP_READY","classification":"COMPLETE_197","sources":{"migrationSha256":"35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"},"requestCount":0,"receipt":{"sources":{"migrationSha256":"35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"},"originalRowsSha256":"6e0207946cd67d4109b3f6e7ff0b23fd8b545b21d2a4f81796e651923db1564b","originalRowsPreserved":true,"newRequestCount":0,"backfilledCount":0,"receiptSha256":"953a236c33e3b37f7a4fe173dc01f17b6d49924a2bfa432877f05b896253b83e"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+2026-10-11T14:09:58.707885938Z {"event":"CALCULATION_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8","oracleSha256":"684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d","referenceSha256":"57dc4b667dab93606e24673b39a12032e48f3df686b9bd3c593ac04d2fac8491"},"receipt":{"migrationSha256":"84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8","oracleSha256":"684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d","guards":["CalcTemplate_insert_contract","CalcTemplateActivation_insert_contract","CalibrationCurve_insert_contract","CalibrationPoint_insert_contract","ResultCalculation_insert_contract","CalcTemplate_update_immutable","CalcTemplate_delete_immutable","CalcTemplateActivation_update_immutable","CalcTemplateActivation_delete_immutable","CalibrationCurve_update_immutable","CalibrationCurve_delete_immutable","CalibrationPoint_update_immutable","CalibrationPoint_delete_immutable","ResultCalculation_update_immutable","ResultCalculation_delete_immutable","CalibrationCurve_pass_coefficients_guard"],"backfillCount":0},"guards":["CalcTemplate_insert_contract","CalcTemplateActivation_insert_contract","CalibrationCurve_insert_contract","CalibrationPoint_insert_contract","ResultCalculation_insert_contract","CalcTemplate_update_immutable","CalcTemplate_delete_immutable","CalcTemplateActivation_update_immutable","CalcTemplateActivation_delete_immutable","CalibrationCurve_update_immutable","CalibrationCurve_delete_immutable","CalibrationPoint_update_immutable","CalibrationPoint_delete_immutable","ResultCalculation_update_immutable","ResultCalculation_delete_immutable","CalibrationCurve_pass_coefficients_guard"],"counts":{"CalcTemplate":8,"CalcTemplateActivation":0,"CalibrationCurve":0,"CalibrationPoint":0,"ResultCalculation":0},"backfillCount":0,"unit":{"classification":"ABSENT","unitCode":"pct_mass","unitInsertCount":0,"backfillCount":0},"references":{"classification":"COMPLETE","referenceCount":11,"installedReferenceCount":8,"missingReferenceIds":[],"deferredReferences":[{"id":"calc-ref-walkley-black-130-v1","code":"DEFERRED_PREREQUISITE_ABSENT","missingAnalysisCodes":[],"missingUnitCodes":["pct_mass"]},{"id":"calc-ref-walkley-black-133-v1","code":"DEFERRED_PREREQUISITE_ABSENT","missingAnalysisCodes":[],"missingUnitCodes":["pct_mass"]},{"id":"calc-ref-kjeldahl-nitrogen-v1","code":"DEFERRED_PREREQUISITE_ABSENT","missingAnalysisCodes":[],"missingUnitCodes":["pct_mass"]}],"deferredReferenceCount":3,"referenceInsertCount":0,"referenceReceiptInsertCount":0,"activationInsertCount":0,"backfillCount":0},"ready":true,"plannedUnitInsertCount":0,"plannedReferenceInsertCount":0,"activationInsertCount":0,"mode":"DRY_RUN","totalChanges":0,"unitInsertCount":0,"referenceInsertCount":0,"referenceReceiptInsertCount":0,"schemaReceiptInsertCount":0}
+2026-10-11T14:10:02.093218544Z {"event":"CROSS_CHECK_STARTUP_READY","classification":"COMPLETE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"receipt":{"sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"originalRowsSha256":"8559985c861e950fdffe53f6661a48b0e76916edcd4c3f0e51b473d827824d58","originalRowsPreserved":true,"newEvaluationCount":0,"backfilledCount":0,"receiptSha256":"3185df5bbb809f86c7ca8c0689135e6dbd93e227c9dbda66850256b965966a9e"},"mode":"DRY_RUN","totalChanges":0,"newEvaluationCount":0,"backfilledCount":0}
+2026-10-11T14:10:04.288091431Z {"event":"AMENDMENT_STARTUP_READY","classification":"COMPLETE_210","sources":{"migrationSha256":"98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0","oracleSha256":"d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2","contractVersion":"210-v1"},"amendmentCount":1,"amendmentAttemptLinkCount":0,"withdrawalCount":0,"receipt":{"sources":{"migrationSha256":"98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0","oracleSha256":"d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2","contractVersion":"210-v1"},"originalRowsSha256":"d843166d8ca8117121e56a44fd8eeed47ac92f75f3cd63ea0b466912247241d3","originalRowsPreserved":true,"newAmendmentCount":0,"newAttemptLinkCount":0,"newWithdrawalCount":0,"backfilledCount":0,"receiptSha256":"efc085838fcd3c85af095eed605a790b1252d178b52c8e9de9a5eaada223e424"},"mode":"DRY_RUN","totalChanges":0,"newAmendmentCount":0,"newAttemptLinkCount":0,"newWithdrawalCount":0,"backfilledCount":0}
+2026-10-11T14:10:08.680872274Z {"event":"REPORT_REVISION_STARTUP_READY","classification":"COMPLETE_211","sources":{"migrationSha256":"3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52","contractVersion":"211-v1"},"reportCount":4,"receipt":{"sources":{"migrationSha256":"3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52","contractVersion":"211-v1"},"originalRowsSha256":"2e6e021a9c590b35591f505a0aba09f529839015dfbd49e4ff81a8a29541ba39","originalRowsPreserved":true,"backfilledCount":0,"receiptSha256":"7172b9201f5173b63a1a1414b0a18414da150b8366762c868081d1a6d61dc72d"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+2026-10-11T14:10:16.278979402Z {"event":"BENCH_CREDENTIAL_STARTUP_READY","classification":"COMPLETE_202","sources":{"migrationSha256":"954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b","contractVersion":"202-v1"},"receipt":{"sources":{"migrationSha256":"954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b","contractVersion":"202-v1"},"originalRowsSha256":"a380b9ab2f9dd1ee5533c9266bbed055be9a6802f6bad10ad9462cfeeb30abf7","originalRowsPreserved":true,"backfilledCount":0,"receiptSha256":"220eeb9b44b23db3d1176eda595b5fcf1ac67b1f84fe87fbc7be58e12c46e3c6"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+2026-10-11T14:10:24.372589205Z {"event":"PREPARATION_RECORD_STARTUP_READY","classification":"COMPLETE_205","sources":{"migrationSha256":"e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c","contractVersion":"205-v1"},"receipt":{"sources":{"migrationSha256":"e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c","contractVersion":"205-v1"},"originalRowsSha256":"10f132d31e12b6551a00a48cfd136791d49a70fc9520834df7a5972cd988c57a","originalRowsPreserved":true,"backfilledCount":0,"receiptSha256":"01df5c84dc90b6c4be4e91b9d3b05e44af2bc5cc03e0ec5fec5bef6a238c19ae"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+2026-10-11T14:10:24.845172223Z [PRISMA] Using better-sqlite3 adapter — DB: /app/server/prisma/dev.db
+2026-10-11T14:10:25.248795450Z [SCHEDULER] Background schedulers suppressed (writer hold active)
+2026-10-11T14:10:26.286997400Z [WS] WebSocket server initialised on /ws
+2026-10-11T14:10:26.287239387Z [SCHEDULER] Escalation background scheduler suppressed (writer hold active)
+2026-10-11T14:10:26.296915726Z Enterprise Server running on http://localhost:3000
