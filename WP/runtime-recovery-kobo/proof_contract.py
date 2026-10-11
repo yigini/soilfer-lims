@@ -18,7 +18,13 @@ def require(value, message):
 
 
 def utc_seconds(value):
-    instant = datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
+    # Docker retains nanoseconds; host Python accepts microseconds. Preserve
+    # the original timestamp in evidence and truncate only the comparison's
+    # sub-microsecond portion, never change the scheduler's clock.
+    normalized = value.replace('Z', '+00:00')
+    normalized = re.sub(r'(\d\d:\d\d:\d\d)\.(\d+)([+-]\d\d:\d\d)$',
+        lambda match: match[1] + '.' + match[2][:6].ljust(6, '0') + match[3], normalized)
+    instant = datetime.datetime.fromisoformat(normalized)
     require(instant.tzinfo is not None, 'Require an explicit UTC offset')
     return instant.timestamp()
 
