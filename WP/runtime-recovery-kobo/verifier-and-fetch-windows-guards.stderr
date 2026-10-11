@@ -1,0 +1,30 @@
+test_api_token_is_protected (test_kobo_copy_preservation.CopyGuardTests.test_api_token_is_protected) ... ok
+test_deleted_sample_refuses (test_kobo_copy_preservation.CopyGuardTests.test_deleted_sample_refuses) ... ok
+test_foreign_intake_refuses (test_kobo_copy_preservation.CopyGuardTests.test_foreign_intake_refuses) ... ok
+test_hold_on_existing_sample_refuses (test_kobo_copy_preservation.CopyGuardTests.test_hold_on_existing_sample_refuses) ... ok
+test_intake_must_match_upstream_record (test_kobo_copy_preservation.CopyGuardTests.test_intake_must_match_upstream_record) ... ok
+test_kobo_hold_and_immutable_audit_bind_same_row (test_kobo_copy_preservation.CopyGuardTests.test_kobo_hold_and_immutable_audit_bind_same_row) ... ok
+test_no_changes_and_secret_not_serialized (test_kobo_copy_preservation.CopyGuardTests.test_no_changes_and_secret_not_serialized) ... ok
+test_old_receipt_protected (test_kobo_copy_preservation.CopyGuardTests.test_old_receipt_protected) ... ok
+test_original_audit_protected (test_kobo_copy_preservation.CopyGuardTests.test_original_audit_protected) ... ok
+test_original_sample_protected (test_kobo_copy_preservation.CopyGuardTests.test_original_sample_protected) ... ok
+test_schema_change_refuses (test_kobo_copy_preservation.CopyGuardTests.test_schema_change_refuses) ... ok
+test_scientific_result_protected (test_kobo_copy_preservation.CopyGuardTests.test_scientific_result_protected) ... ok
+test_scoped_intake_audit_notification_and_cursor (test_kobo_copy_preservation.CopyGuardTests.test_scoped_intake_audit_notification_and_cursor) ... ok
+test_second_sync_clock_updates_only (test_kobo_copy_preservation.CopyGuardTests.test_second_sync_clock_updates_only) ... ok
+test_second_sync_cursor_without_intake_refuses (test_kobo_copy_preservation.CopyGuardTests.test_second_sync_cursor_without_intake_refuses) ... ok
+test_second_sync_genuine_new_skip_may_advance_cursor (test_kobo_copy_preservation.CopyGuardTests.test_second_sync_genuine_new_skip_may_advance_cursor) ... ok
+test_second_sync_genuinely_new_id_enumerated (test_kobo_copy_preservation.CopyGuardTests.test_second_sync_genuinely_new_id_enumerated) ... ok
+test_second_sync_repeated_intake_refuses (test_kobo_copy_preservation.CopyGuardTests.test_second_sync_repeated_intake_refuses) ... ok
+test_unapproved_audit_refuses (test_kobo_copy_preservation.CopyGuardTests.test_unapproved_audit_refuses) ... ok
+test_wrong_manager_notification_refuses (test_kobo_copy_preservation.CopyGuardTests.test_wrong_manager_notification_refuses) ... ok
+test_cursor_ignored_refuses (test_capture_kobo_fetch.FetchGuardTests.test_cursor_ignored_refuses) ... ok
+test_duplicate_upstream_id_refuses (test_capture_kobo_fetch.FetchGuardTests.test_duplicate_upstream_id_refuses) ... ok
+test_pages_discard_content_and_use_get_actual_cursor (test_capture_kobo_fetch.FetchGuardTests.test_pages_discard_content_and_use_get_actual_cursor) ... ok
+test_redirect_never_forwards_credentials (test_capture_kobo_fetch.FetchGuardTests.test_redirect_never_forwards_credentials) ... ok
+test_unencrypted_origin_refuses_before_fetch (test_capture_kobo_fetch.FetchGuardTests.test_unencrypted_origin_refuses_before_fetch) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 0.372s
+
+OK
