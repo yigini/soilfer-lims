@@ -1,0 +1,25 @@
+Started /usr/bin/python3 /opt/lims/releases/preparation-ae64f169-rehearsal-20261011T134600Z/rehearse.py.
+{"verifiedLegacy": "179", "totalChanges": 0}
+{"verifiedLegacy": "182", "totalChanges": 0}
+{"verifiedLegacy": "183", "totalChanges": 0}
+{"verifiedLegacy": "184", "totalChanges": 0}
+{"verifiedLegacy": "185", "totalChanges": 0}
+{"verifiedLegacy": "186", "totalChanges": 0}
+{"verifiedLegacy": "187", "totalChanges": 0}
+{"verifiedLegacy": "272", "totalChanges": 0}
+{"verifiedLegacy": "193", "totalChanges": 0}
+{"verifiedLegacy": "189", "totalChanges": 0}
+{"verifiedLegacy": "178", "totalChanges": 0}
+{"verifiedLegacy": "190", "totalChanges": 0}
+{"verifiedLegacy": "191", "totalChanges": 0}
+{"verifiedLegacy": "192", "totalChanges": 0}
+{"verifiedLegacy": "194", "totalChanges": 0}
+{"verifiedLegacy": "199", "totalChanges": 0}
+{"verifiedLegacy": "197", "totalChanges": 0}
+{"verifiedLegacy": "201", "totalChanges": 0}
+{"verifiedLegacy": "210", "totalChanges": 0}
+{"verifiedLegacy": "211", "totalChanges": 0}
+{"verifiedLegacy": "202", "totalChanges": 0}
+{"status": "PASSED", "receiptSha256": "05b6a4a90d15c0b0df62b52a7e3536b34dfad99a7b53b8643e1a98de6e78e6c8", "error": null, "preservation": {"originalTableCount": 103, "originalRowsAndFieldsPreserved": true, "originalReceiptsPreserved": 37, "additionalReceiptCount": 1, "newTables": ["PreparationRecord"], "changedSchemaObjects": ["table:WorkItemDraft"], "analyticalChanges": 0, "acceptanceChanges": 0, "integrity": "ok", "foreignKeyViolations": 0}}
+lims-owned-ae64f169-proof-20261011t134600z.service: Deactivated successfully.
+lims-owned-ae64f169-proof-20261011t134600z.service: Consumed 3min 23.375s CPU time, 1.5G memory peak.
