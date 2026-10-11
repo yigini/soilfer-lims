@@ -1,0 +1,26 @@
+FAIL server/tests/contracts/pip_pr291_unit_reproduction.test.js
+  × texture derivation must agree with percent-only gate (g/kg) (1371 ms)
+  √ texture derivation must agree with percent-only gate (%) (1086 ms)
+
+  ● texture derivation must agree with percent-only gate (g/kg)
+
+    expect(received).toBeNull()
+
+    Received: {"analysedAt": 2026-10-11T17:14:41.455Z, "attemptId": "att-24edd7a6-185a-4ced-8cbf-760dc26f0025-58d9c7a7-4a6f-4a67-bfbe-bad340602759", "basis": "AIR_DRY", "batchId": null, "censoring": "NONE", "createdAt": 2026-10-11T17:14:41.455Z, "enteredBy": "system:fixture", "equipmentId": null, "equipmentReadiness": null, "flags": "[\"DERIVED_USDA_12_CLASS\",\"SOURCE_SAND_d1d4c878-6360-4a27-912b-efe06af94e3c\",\"SOURCE_SILT_04e60df1-6809-4999-9222-bb16ec45a0e6\",\"SOURCE_CLAY_578dc2b8-41f6-409b-947c-ea645b949c16\",\"CLOSURE_ERROR_1\"]", "id": "5820097c-32f7-459f-a938-10d9ddfc10c5", "isCurrent": true, "isValid": true, "methodologyId": "8fc6f40f-0b85-4aca-854a-86108474527d", "numericValue": null, "param": "TEXTURE", "provenance": "DERIVED", "rawInput": "{\"sand\":null,\"silt\":null,\"clay\":null}", "replicateNo": 1, "sampleId": "4c0c353f-08ec-4373-943c-86102c2c2cbe", "supersededBy": null, "unit": "USDA_12_CLASS", "updatedAt": 2026-10-11T17:14:41.455Z, "value": "Loam"}
+
+      26 |   const after=await f.db.result.count({where:{sampleId:sample.id,param:'TEXTURE'}});
+      27 |   observed.push({unit,source:source.map(r=>({param:r.param,numericValue:r.numericValue,unit:r.unit})),gate:gate.textureClosure,derived:derived&&{param:derived.param,value:derived.value,flags:derived.flags,attemptId:derived.attemptId},textureRowsBefore:before,textureRowsAfter:after});
+    > 28 |   if(unit==='g/kg'){expect(gate.textureClosure[0]).toMatchObject({outcome:'NOT_EVALUATED',reasonCode:'UNIT_MISMATCH'});expect(derived).toBeNull();expect(after).toBe(before)}else{expect(gate.textureClosure[0].outcome).toBe('PASS');expect(derived).not.toBeNull()}
+         |                                                                                                                                        ^
+      29 |  }finally{await f.close()}
+      30 | });
+      31 |
+
+      at toBeNull (tests/contracts/pip_pr291_unit_reproduction.test.js:28:136)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   0 total
+Time:        2.87 s, estimated 3 s
+Ran all test suites matching server/tests/contracts/pip_pr291_unit_reproduction.test.js.
+Test results written to: independent-stored-unit-reproduction-results.json

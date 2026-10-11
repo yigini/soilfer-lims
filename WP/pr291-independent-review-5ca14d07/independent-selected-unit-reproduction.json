@@ -1,0 +1,89 @@
+{
+  "input": [
+    {
+      "analysisCode": "SAND",
+      "value": 40,
+      "unit": "g/kg",
+      "censoring": "NONE",
+      "mode": "ATTEMPT",
+      "resultIds": [
+        "SAND-source"
+      ]
+    },
+    {
+      "analysisCode": "SILT",
+      "value": 40,
+      "unit": "g/kg",
+      "censoring": "NONE",
+      "mode": "ATTEMPT",
+      "resultIds": [
+        "SILT-source"
+      ]
+    },
+    {
+      "analysisCode": "CLAY",
+      "value": 19,
+      "unit": "g/kg",
+      "censoring": "NONE",
+      "mode": "ATTEMPT",
+      "resultIds": [
+        "CLAY-source"
+      ]
+    }
+  ],
+  "result": {
+    "mode": "DERIVED",
+    "attemptIds": [],
+    "rule": "AUTO_DERIVED_FROM_FRACTIONS",
+    "reason": null,
+    "fractionSelections": [
+      {
+        "analysisCode": "SAND",
+        "value": 40,
+        "unit": "g/kg",
+        "censoring": "NONE",
+        "mode": "ATTEMPT",
+        "resultIds": [
+          "SAND-source"
+        ]
+      },
+      {
+        "analysisCode": "SILT",
+        "value": 40,
+        "unit": "g/kg",
+        "censoring": "NONE",
+        "mode": "ATTEMPT",
+        "resultIds": [
+          "SILT-source"
+        ]
+      },
+      {
+        "analysisCode": "CLAY",
+        "value": 19,
+        "unit": "g/kg",
+        "censoring": "NONE",
+        "mode": "ATTEMPT",
+        "resultIds": [
+          "CLAY-source"
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "analysisCode": "TEXTURE",
+        "value": null,
+        "valueText": "Loam",
+        "unit": null,
+        "censoring": "NONE",
+        "methodologyId": null,
+        "resultIds": [
+          "CLAY-source",
+          "SAND-source",
+          "SILT-source"
+        ],
+        "derivation": "calculateUsdaTexture"
+      }
+    ],
+    "matching": null
+  }
+}

@@ -1,0 +1,7 @@
+# Preserve independent test output and reproduction bytes in the pushed checkpoint.
+* -text
+*.json -text -diff
+*.log -text -diff
+pip_pr291_unit_reproduction.test.js -text -diff
+pr-review-body.md -text -diff
+pr-review-comment-url.txt -text -diff

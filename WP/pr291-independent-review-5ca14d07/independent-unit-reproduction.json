@@ -1,0 +1,96 @@
+[
+  {
+    "unit": "g/kg",
+    "source": [
+      {
+        "param": "CLAY",
+        "numericValue": 19,
+        "unit": "g/kg"
+      },
+      {
+        "param": "SAND",
+        "numericValue": 40,
+        "unit": "g/kg"
+      },
+      {
+        "param": "SILT",
+        "numericValue": 40,
+        "unit": "g/kg"
+      }
+    ],
+    "gate": [
+      {
+        "replicateNo": 1,
+        "outcome": "NOT_EVALUATED",
+        "reasonCode": "UNIT_MISMATCH",
+        "tolerancePct": 2
+      }
+    ],
+    "derived": {
+      "param": "TEXTURE",
+      "value": "Loam",
+      "flags": "[\"DERIVED_USDA_12_CLASS\",\"SOURCE_SAND_d1d4c878-6360-4a27-912b-efe06af94e3c\",\"SOURCE_SILT_04e60df1-6809-4999-9222-bb16ec45a0e6\",\"SOURCE_CLAY_578dc2b8-41f6-409b-947c-ea645b949c16\",\"CLOSURE_ERROR_1\"]",
+      "attemptId": "att-24edd7a6-185a-4ced-8cbf-760dc26f0025-58d9c7a7-4a6f-4a67-bfbe-bad340602759"
+    },
+    "textureRowsBefore": 0,
+    "textureRowsAfter": 1
+  },
+  {
+    "unit": "%",
+    "source": [
+      {
+        "param": "CLAY",
+        "numericValue": 19,
+        "unit": "%"
+      },
+      {
+        "param": "SAND",
+        "numericValue": 40,
+        "unit": "%"
+      },
+      {
+        "param": "SILT",
+        "numericValue": 40,
+        "unit": "%"
+      }
+    ],
+    "gate": [
+      {
+        "replicateNo": 1,
+        "outcome": "PASS",
+        "reasonCode": null,
+        "tolerancePct": 2,
+        "values": {
+          "sand": 40,
+          "silt": 40,
+          "clay": 19
+        },
+        "resultIds": [
+          "d53aadf0-f537-48f8-85d5-78b7731a76b0",
+          "d53a8e55-e807-42b4-9fb4-30cb5177db1f",
+          "853bd37a-4c71-4df9-b2fe-9612305f0d93"
+        ],
+        "texture": {
+          "className": "Loam",
+          "code": "L",
+          "closureError": 1,
+          "isValid": true,
+          "scheme": "USDA_12_CLASS",
+          "fractions": {
+            "sand": 40,
+            "silt": 40,
+            "clay": 19
+          }
+        }
+      }
+    ],
+    "derived": {
+      "param": "TEXTURE",
+      "value": "Loam",
+      "flags": "[\"DERIVED_USDA_12_CLASS\",\"SOURCE_SAND_d53aadf0-f537-48f8-85d5-78b7731a76b0\",\"SOURCE_SILT_d53a8e55-e807-42b4-9fb4-30cb5177db1f\",\"SOURCE_CLAY_853bd37a-4c71-4df9-b2fe-9612305f0d93\",\"CLOSURE_ERROR_1\"]",
+      "attemptId": "att-5480cc06-7941-41a9-b616-eb651b42b77a-24985cbe-6c1f-4824-bfe6-6cd40dbc5cc8"
+    },
+    "textureRowsBefore": 0,
+    "textureRowsAfter": 1
+  }
+]
