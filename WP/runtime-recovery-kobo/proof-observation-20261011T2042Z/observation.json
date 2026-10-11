@@ -1,0 +1,26 @@
+{
+  "observedUtc": "2026-10-11T20:40:48.374024+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+  "unit": "lims-owned-runtime-kobo-proof-171dd36c-20261011t203339z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "unit.stdoutTail": "{\"stage\": \"candidate-jobs-off\", \"elapsedSeconds\": 39.70456591000038, \"pending\": true}\n{\"stage\": \"candidate-jobs-off\", \"elapsedSeconds\": 78.98709977700128, \"pending\": true}\n{\"stage\": \"candidate-jobs-on\", \"elapsedSeconds\": 41.17628448600226, \"pending\": true}\n{\"stage\": \"candidate-jobs-on\", \"elapsedSeconds\": 81.7861401400005, \"pending\": true}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T20:40:34.741511+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 122171392, \"minimumFreeBytes\": 111480799232}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-11T20:40:45.619726+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 229838848, \"minimumFreeBytes\": 111476568064}\n",
+  "unit.stderrTail": "",
+  "files": {
+    "target-pin.json": {
+      "bytes": 789,
+      "sha256": "1a3b00296cd124dcfe63c915c9a56a1a1e5d167b4d82a83e553ff357099bf92b",
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 3737,
+      "sha256": "3ddd159e3531758ff52aea06f0e5cb9cc5715bed018ddb1c27c7f31e24748e36",
+      "mode": "0o400"
+    },
+    "upstream-before-start.json": {
+      "bytes": 140394,
+      "sha256": "9baee8a134f844cab050552be8b15cb903f7674cd21088278e2dad57aa667391",
+      "mode": "0o400"
+    }
+  }
+}
