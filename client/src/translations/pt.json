@@ -2499,7 +2499,31 @@
     "recordingIncomplete": "Registro incompleto",
     "recordedCount": "Registrados",
     "retryFailed": "Tentar novamente os que falharam",
-    "recordingUnconfirmed": "O registro desta linha não foi confirmado."
+    "recordingUnconfirmed": "O registro desta linha não foi confirmado.",
+    "preparationRecord": {
+      "steps": {
+        "DRYING": "Secagem",
+        "SIEVING": "Peneiramento",
+        "GRINDING": "Moagem",
+        "SPLITTING": "Quarteamento"
+      },
+      "methods": {
+        "AIR": "Seco ao ar",
+        "OVEN_40": "Estufa 40 °C",
+        "OVEN_105": "Estufa 105 °C",
+        "OTHER": "Outro método"
+      },
+      "method": "Método",
+      "temperatureC": "Temperatura (°C)",
+      "massBeforeG": "Massa inicial (g)",
+      "massAfterG": "Massa final (g)",
+      "coarseFractionG": "Fração grossa (g)",
+      "sieveMm": "Peneira (mm)",
+      "grindMm": "Moído a (mm)",
+      "startedAt": "Início",
+      "endedAt": "Fim",
+      "equipment": "Equipamento"
+    }
   },
   "batchIntake": {
     "massToApply": "Massa a aplicar (g)",
@@ -2579,6 +2603,7 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Permitir correção revisada de erros de transcrição em CQ reprovado sem decisão",
       "report_uncertaintyMode": "Informar incerteza expandida",
       "report_uncertaintyCoverageFactor": "Fator de abrangência da incerteza",
+      "report_ovenDryConvertible": "Converter para base seca em estufa quando solicitado",
       "crossCheck_basesCecFactor": "Fator máximo de bases trocáveis / CTC",
       "crossCheck_baseSaturationMaxPct": "Saturação máxima por bases (%)",
       "crossCheck_textureClosureTolerancePct": "Tolerância do fechamento da textura (%)",

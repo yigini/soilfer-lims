@@ -59,12 +59,32 @@ function freezeReportEvidence(results, workItems, batches, options = {}) {
             !checks.every(check => check === true) || !Array.isArray(receipt.steps) || receipt.steps.length !== checks.length ||
             !receipt.steps.every(step => typeof step === 'string' && step.trim()) ||
             !['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status)) return [];
+        const records = receipt.receiptId ? (options.preparationRecords || []).filter(row => row.receiptId === receipt.receiptId) : [];
         return [{ workItemId: item.id, analysis: item.analysis, status: item.status, steps: receipt.steps,
-            recordedAt: receipt.recordedAt || null, recordedBy: receipt.recordedBy || null, observations: receipt.observations || null }];
+            recordedAt: receipt.recordedAt || null, recordedBy: receipt.recordedBy || null, observations: receipt.observations || null,
+            ...(records.length && { records }) }];
     });
     return { qc: { withinLimits: results.length > 0 && deviations.length === 0, deviations,
         ...(acknowledgements.length && { acknowledgements }), ...(calibrationBracketRepeats.length && { calibrationBracketRepeats }),
         ...(corrections.size && { reviewedCorrections: [...corrections.values()] }) }, preparation };
+}
+
+const formatNumber = value => Number.isInteger(value) ? String(value) : String(Number(value.toFixed(4)));
+
+/** One printed line per structured preparation record (#205). */
+function describePreparationRecord(row, labels) {
+    const parts = [`${labels.steps[row.gateCode] || row.gateCode}`];
+    if (row.gateCode === 'DRYING') parts.push(`${labels.methods[row.method] || row.method} · ${formatNumber(row.temperatureC)} °C`);
+    if (row.gateCode === 'SIEVING') parts.push(`${labels.sieve}: ${formatNumber(row.sieveMm)} mm`,
+        `${labels.coarseFraction}: ${formatNumber(row.coarseFractionG)} g / ${formatNumber(row.massBeforeG)} g (${formatNumber(row.coarseFractionPct)} %)`);
+    if (row.gateCode === 'GRINDING') parts.push(`${labels.grind}: ${formatNumber(row.grindMm)} mm`);
+    if (row.gateCode !== 'SIEVING' && row.massBeforeG != null) parts.push(`${labels.massBefore}: ${formatNumber(row.massBeforeG)} g`);
+    if (row.massAfterG != null) parts.push(`${labels.massAfter}: ${formatNumber(row.massAfterG)} g`);
+    const hours = Math.floor(row.durationMinutes / 60), minutes = row.durationMinutes % 60;
+    parts.push(`${labels.duration}: ${hours} h ${minutes} min (${row.startedAt.slice(0, 16).replace('T', ' ')} – ${row.endedAt.slice(0, 16).replace('T', ' ')} UTC)`);
+    if (row.equipment) parts.push(`${labels.equipment}: ${row.equipment.name}${row.equipment.internalAssetTag ? ` (${row.equipment.internalAssetTag})` : ''}`);
+    parts.push(`${labels.performedBy}: ${row.performedBy}`);
+    return `  ${parts.join(' · ')}`;
 }
 
 function describeReportEvidence(evidence, locale = 'en') {
@@ -81,7 +101,8 @@ function describeReportEvidence(evidence, locale = 'en') {
     const preparationStatement = ['DRYING', 'PREPARATION'].map(analysis => {
         const records = (evidence?.preparation || []).filter(record => record.analysis === analysis);
         const label = analysis === 'DRYING' ? labels.drying : labels.preparation;
-        return records.length ? records.map(record => `${label}: ${record.status} · ${record.steps.join('; ')}`).join('\n')
+        return records.length ? records.map(record => [`${label}: ${record.status} · ${record.steps.join('; ')}`,
+            ...(record.records || []).map(row => describePreparationRecord(row, labels.preparationRecordText))].join('\n')).join('\n')
             : `${label}: ${labels.notRecorded}`;
     }).join('\n');
     const bracketStatement = (qc?.calibrationBracketRepeats || []).map(row =>

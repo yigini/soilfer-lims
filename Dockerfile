@@ -93,6 +93,7 @@ COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migr
 COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json
 COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql
 COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql
+COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql
 
 # Copy and set entrypoint
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh

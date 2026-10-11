@@ -2499,7 +2499,31 @@
     "recordingIncomplete": "Enregistrement incomplet",
     "recordedCount": "Enregistrés",
     "retryFailed": "Réessayer les échecs",
-    "recordingUnconfirmed": "L’enregistrement de cette ligne n’a pas été confirmé."
+    "recordingUnconfirmed": "L’enregistrement de cette ligne n’a pas été confirmé.",
+    "preparationRecord": {
+      "steps": {
+        "DRYING": "Séchage",
+        "SIEVING": "Tamisage",
+        "GRINDING": "Broyage",
+        "SPLITTING": "Division"
+      },
+      "methods": {
+        "AIR": "Séché à l’air",
+        "OVEN_40": "Étuve 40 °C",
+        "OVEN_105": "Étuve 105 °C",
+        "OTHER": "Autre méthode"
+      },
+      "method": "Méthode",
+      "temperatureC": "Température (°C)",
+      "massBeforeG": "Masse initiale (g)",
+      "massAfterG": "Masse finale (g)",
+      "coarseFractionG": "Fraction grossière (g)",
+      "sieveMm": "Tamis (mm)",
+      "grindMm": "Broyé à (mm)",
+      "startedAt": "Début",
+      "endedAt": "Fin",
+      "equipment": "Équipement"
+    }
   },
   "batchIntake": {
     "massToApply": "Masse à appliquer (g)",
@@ -2579,6 +2603,7 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Autoriser la correction révisée des erreurs de transcription du CQ échoué sans décision",
       "report_uncertaintyMode": "Rapporter l’incertitude élargie",
       "report_uncertaintyCoverageFactor": "Facteur de couverture de l’incertitude",
+      "report_ovenDryConvertible": "Convertir en base séchée à l’étuve sur demande",
       "crossCheck_basesCecFactor": "Facteur maximal des bases échangeables / CEC",
       "crossCheck_baseSaturationMaxPct": "Saturation maximale en bases (%)",
       "crossCheck_textureClosureTolerancePct": "Tolérance de fermeture de la texture (%)",

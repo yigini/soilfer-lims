@@ -10,6 +10,18 @@ const { transitionWorkItem } = require('./workItemStateService');
  * advance operational gates, or reach downstream report readers.
  */
 
+/** #205: unconfirmed preparation records ride with the draft; confirmation validates them. */
+function draftRecords(records) {
+    if (records === null || records === undefined || records === 'null') return null;
+    const text = typeof records === 'string' ? records : JSON.stringify(records);
+    let parsed;
+    try { parsed = JSON.parse(text); } catch { parsed = null; }
+    if (!Array.isArray(parsed) || parsed.length > 8 || text.length > 16000 || parsed.some(record => !record || typeof record !== 'object' || Array.isArray(record))) {
+        throw new rules.TransitionError('Draft preparation records must be a short list of records.', 400, 'PREPARATION_RECORD_INVALID');
+    }
+    return text;
+}
+
 /**
  * Save or update a draft determination
  */
@@ -22,6 +34,7 @@ async function saveDraft(user, input, db = null) {
     value = null,
     values = null,
     checks = null,
+    records = undefined,
     basis = 'AIR_DRY',
     replicateNo = 1,
     instrumentId = null,
@@ -89,6 +102,7 @@ async function saveDraft(user, input, db = null) {
     const checksStr = Array.isArray(checks)
         ? JSON.stringify(checks)
         : (typeof checks === 'string' ? checks : null);
+    const recordsStr = draftRecords(records);
     const rawValue = value !== null && value !== undefined ? String(value) : null;
 
     // 3. Upsert WorkItemDraft
@@ -104,6 +118,8 @@ async function saveDraft(user, input, db = null) {
                 value: rawValue,
                 values: valuesStr,
                 checks: checksStr,
+                // A save that does not carry records keeps the ones already typed.
+                records: records === undefined ? undefined : recordsStr,
                 basis: basis || existingDraft.basis,
                 replicateNo: Number(replicateNo) || existingDraft.replicateNo,
                 instrumentId: instrumentId !== undefined ? instrumentId : existingDraft.instrumentId,
@@ -129,6 +145,7 @@ async function saveDraft(user, input, db = null) {
                 value: rawValue,
                 values: valuesStr,
                 checks: checksStr,
+                records: recordsStr,
                 basis: basis || 'AIR_DRY',
                 replicateNo: Number(replicateNo) || 1,
                 instrumentId: instrumentId || null,
@@ -246,7 +263,8 @@ async function getDrafts(user) {
     return authorizedDrafts.map(d => ({
         ...d,
         values: d.values ? (typeof d.values === 'string' ? JSON.parse(d.values) : d.values) : null,
-        checks: d.checks ? (typeof d.checks === 'string' ? JSON.parse(d.checks) : d.checks) : null
+        checks: d.checks ? (typeof d.checks === 'string' ? JSON.parse(d.checks) : d.checks) : null,
+        records: d.records ? (typeof d.records === 'string' ? JSON.parse(d.records) : d.records) : null
     }));
 }
 
@@ -414,6 +432,7 @@ async function resolveConflict(user, workItemId, { resolution, reason }) {
 }
 
 module.exports = {
+    draftRecords,
     saveDraft,
     getDrafts,
     discardDraft,

@@ -179,6 +179,7 @@ class SyncService {
                         workItemId: workItemId,
                         checklist: op.payload?.checklist,
                         observations: op.payload?.observations,
+                        records: op.payload?.records,
                         idempotencyKey: opId
                     });
                     outcome = confirmRes;
@@ -259,6 +260,7 @@ class SyncService {
                     const incomingChecksStr = op.payload?.checks !== undefined && op.payload?.checks !== null && op.payload?.checks !== 'null'
                         ? (typeof op.payload.checks === 'string' ? op.payload.checks : JSON.stringify(op.payload.checks))
                         : null;
+                    const incomingRecordsStr = require('./draftService').draftRecords(op.payload?.records);
                     const incomingBasis = op.payload?.basis || 'AIR_DRY';
                     const incomingRepNo = Number(op.payload?.replicateNo) || 1;
                     const incomingInstrumentId = op.payload?.equipmentId || op.payload?.instrumentId || null;
@@ -357,7 +359,9 @@ class SyncService {
                             const isRepEqual = (Number(serverNorm?.replicateNo) || 1) === (Number(incomingNorm?.replicateNo) || 1);
                             const isEquipEqual = (serverNorm?.instrumentId || null) === (incomingNorm?.instrumentId || null);
 
-                            const isPayloadEqual = isValueEqual && isValuesEqual && isChecksEqual && isBasisEqual && isRepEqual && isEquipEqual;
+                            const parseRecords = text => { try { return text ? JSON.parse(text) : null; } catch { return text; } };
+                            const isRecordsEqual = incomingRecordsStr === null || deepEqual(parseRecords(existingDraft?.records), parseRecords(incomingRecordsStr));
+                            const isPayloadEqual = isValueEqual && isValuesEqual && isChecksEqual && isRecordsEqual && isBasisEqual && isRepEqual && isEquipEqual;
 
                             if (isServerDraftNewer && !isPayloadEqual) {
                                 // Server draft was saved more recently than this offline operation.
@@ -366,6 +370,7 @@ class SyncService {
                                     attemptedValue: incomingNorm?.value || null,
                                     attemptedValues: op.payload?.values || null,
                                     attemptedChecks: op.payload?.checks || null,
+                                    attemptedRecords: parseRecords(incomingRecordsStr),
                                     attemptedBasis: incomingNorm?.basis || 'AIR_DRY',
                                     attemptedReplicateNo: incomingNorm?.replicateNo || 1,
                                     attemptedEquipmentId: incomingNorm?.instrumentId || null,
@@ -471,6 +476,7 @@ class SyncService {
                                     value: draftVal,
                                     values: incomingValuesStr,
                                     checks: incomingChecksStr,
+                                    records: incomingRecordsStr,
                                     basis: incomingBasis,
                                     replicateNo: incomingRepNo,
                                     instrumentId: incomingInstrumentId,
@@ -482,6 +488,7 @@ class SyncService {
                                     value: draftVal,
                                     values: incomingValuesStr !== null ? incomingValuesStr : undefined,
                                     checks: incomingChecksStr !== null ? incomingChecksStr : undefined,
+                                    records: incomingRecordsStr !== null ? incomingRecordsStr : undefined,
                                     basis: incomingBasis,
                                     replicateNo: incomingRepNo,
                                     instrumentId: incomingInstrumentId !== null ? incomingInstrumentId : undefined,

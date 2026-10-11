@@ -404,6 +404,7 @@ exports.getQueue = async (req, res) => {
                 value: d.value,
                 values: d.values,
                 checks: d.checks,
+                records: d.records,
                 basis: d.basis,
                 replicateNo: d.replicateNo,
                 instrumentId: d.instrumentId,
@@ -492,7 +493,7 @@ exports.getQueue = async (req, res) => {
         // Group by analysis
         const groupsMap = {};
         const numberFormats = new Map();
-        const calculationSelections = new Map();
+        const calculationSelections = new Map(), preparationSteps = new Map();
         for (const item of items) {
             const code = item.analysis;
             const labId = item.sample?.assignedLab || item.assignedLab || item.labId;
@@ -528,6 +529,9 @@ exports.getQueue = async (req, res) => {
                 selectedEquipmentId: selectedEquipId
             });
             groupsMap[code].equipmentRequired ||= readiness.equipmentRequired;
+            const stepsKey = JSON.stringify([labId, code]);
+            if (operationalChecklists[code] && !preparationSteps.has(stepsKey)) preparationSteps.set(stepsKey,
+                await require('../services/preparationRecordService').requiredSteps(prisma, labId, code));
 
             const isSpectral = SPECTRAL_ACQUISITION_CODES.includes(code);
             const isTexture = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(code);
@@ -589,6 +593,7 @@ exports.getQueue = async (req, res) => {
                 dryingStatus: item.sample?.dryingStatus || 'PENDING',
                 preparationStatus: item.sample?.preparationStatus || 'PENDING',
                 sampleStatus: item.sample?.status || null,
+                ...(operationalChecklists[code] && { preparationSteps: preparationSteps.get(JSON.stringify([labId, code])) }),
                 version: item.version,
                 category: groupsMap[code].category,
                 rackPosition: item.rackPosition !== undefined ? item.rackPosition : null,
@@ -979,6 +984,7 @@ exports.batchSave = async (req, res) => {
                         value: value !== undefined && value !== null ? String(value) : null,
                         values: entry.values || null,
                         checks: entry.checks || null,
+                        records: entry.records,
                         basis: entry.basis || 'AIR_DRY',
                         replicateNo: entry.replicateNo || 1,
                         instrumentId: entry.equipmentId || item.equipmentId || null,
@@ -1104,7 +1110,7 @@ exports.batchSave = async (req, res) => {
             if (isOperationalTask) {
                 ops.push(async tx => {
                     const outcome = await require('../services/operationalConfirmationService').confirmOperation({
-                        actor: user, workItemId: item.id, checklist: entry.checks, observations: entry.notes,
+                        actor: user, workItemId: item.id, checklist: entry.checks, observations: entry.notes, records: entry.preparationRecords,
                         verificationRequired: entry.verificationRequired ?? false,
                         expected: { status: item.status, version: expectedVersion }, db: tx
                     });
@@ -1348,6 +1354,7 @@ exports.getDrafts = async (req, res) => {
                 value: d.value,
                 values: d.values,
                 checks: d.checks,
+                records: d.records,
                 basis: d.basis,
                 replicateNo: d.replicateNo,
                 instrumentId: d.instrumentId,
@@ -1978,7 +1985,7 @@ exports.getReceipts = async (req, res) => {
 // Confirms an operational gate task (DRYING / PREPARATION) via checklist
 // ─────────────────────────────────────────────────────────────────────────────
 exports.confirmOperation = async (req, res) => {
-    const { workItemId, checklist, observations, idempotencyKey, runId, verificationRequired } = req.body;
+    const { workItemId, checklist, observations, records, idempotencyKey, runId, verificationRequired, version } = req.body;
     const user = req.user;
 
     try {
@@ -1988,9 +1995,12 @@ exports.confirmOperation = async (req, res) => {
             workItemId,
             checklist,
             observations,
+            records,
             idempotencyKey,
             runId,
-            verificationRequired
+            verificationRequired,
+            // #205 A21: the client's work item version is the confirmation CAS.
+            ...(Number.isInteger(version) && { expected: { version } })
         });
 
         res.json(outcome);
@@ -1998,7 +2008,8 @@ exports.confirmOperation = async (req, res) => {
         console.error('[workbench.confirmOperation] Error:', err);
         res.status(err.status || 500).json({
             error: err.message || 'Failed to confirm operational procedure',
-            code: err.code || 'OPERATION_CONFIRM_FAILED'
+            code: err.code || 'OPERATION_CONFIRM_FAILED',
+            ...(err.details && Object.keys(err.details).length && { details: err.details })
         });
     }
 };

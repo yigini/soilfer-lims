@@ -164,6 +164,9 @@ async function validateChange(change, db) {
         if (!method || method.analysisCode !== analysisCode) throw error(422, 'POLICY_SCOPE_INVALID', 'Methodology must belong to the analysis.');
     }
     if (change.clear !== true && !valid(change.key, change.value)) throw error(400, 'POLICY_VALUE_INVALID', 'Policy value is outside its allowed range.');
+    if (change.clear !== true && analysisCode !== null && d.analysisEligible && !d.analysisEligible(analysisCode, change.value)) {
+        throw error(422, 'POLICY_SCOPE_INVALID', 'This policy cannot be enabled for that analysis.');
+    }
     return { ...change, analysisCode, methodologyId };
 }
 async function mutateInTransaction(actor, reference, request, tx, options = {}) {
