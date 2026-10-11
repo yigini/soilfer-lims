@@ -1,5 +1,28 @@
 # Kobo runtime recovery preparation
 
+Current checkpoint: October 11, 19:29 UTC. Claudio's source review of the NEW
+jobs-ON rehearsal at 533c545190bfedb955386610d20faaf86398ba04 PASSED in #162
+comment 6112725472. This approves the isolated proof source, not the PR292
+application audit or production kit. Both natural scheduled syncs, strict
+existing-row preservation, 660-second healthy observation and 768MiB limit
+remain required. Exact-source Linux guards passed 31/31 with no skips.
+
+The native audit thread showed 174 of 340 test files completed at 19:26 UTC.
+Claudio must rerun the client-component suites after linking their packages
+and post the formal exact-head verdict. PR292 is still open; merge it before
+PR291 so the candidate main tree equals the audited cb79d89b tree.
+An immutable build exporter is ready; it can build after audit/merge while
+main CI runs. The proof launcher still requires main CI to pass first.
+
+Latest read-only production check at 19:17:31 UTC: 93 restarts, HTTP 500,
+same ae64f169/bc2557a5 image and volumes; original receipt unchanged, free
+118445289472 bytes. Protected counts remain, but this is not full-row
+preservation proof. YY's separate live jobs-pause card remains untouched.
+No candidate build, new jobs-ON writer, frozen kit or production gate exists.
+The isolated jobs-OFF proof183405Z is stopped/PASSED and must not replay.
+
+Earlier preparation notes follow:
+
 PR292 cb79d89bfd104466ab7d29a83312dbc7bb48b7a0 independently passed149/149
 tests plus the owned production-scale synthetic regression. CI38161566308
 passed18:29:54UTC. Claudio's exact-head full-suite audit is still required.
