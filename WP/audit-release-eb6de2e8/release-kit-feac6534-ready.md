@@ -1,4 +1,4 @@
-# Combined production release deployed; Claudio handoff pending
+# Combined production release deployed; Claudio handoff complete
 
 Application: `feac653495d6b8a21e082cec596f1e14672fb389`.
 Previous deployed: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
@@ -27,8 +27,21 @@ Original ReviewDecision attemptId remains NULL and published report PUBLISHED.
 Free bytes at independent verification: 10,661,453,824 B, above the 8 GiB floor.
 
 Deployment was posted on #162 comment 6106061276 and all 19 target issues;
-`post-deploy-comments-feac6534.json` retains every comment ID/URL. Claudio owns
-post-deploy checks and closures/ticks. Coordination remains active for handoff.
+`post-deploy-comments-feac6534.json` retains every comment ID/URL. Claudio posted
+18 post-deploy passes and closed all 18 previously open target issues between
+06:45 and 06:47 UTC on October 11. The nineteenth target, CI-only #262, was
+already closed after its October 9 main-CI check. All 19 targets are closed;
+all 15 corresponding #162 checklist entries are ticked. The full GitHub
+snapshot is `claudio-post-deploy-20261011T0655Z.json`; the validated result index
+and native handoff transcription are `claudio-handoff-feac6534.json`.
+
+Claudio's native Lab workflow audit and plan thread was directly read at
+approximately 06:57 UTC after an observed desktop state change and supported
+fresh window selection. His final message confirms the release is live and
+the checks/closures/ticks are complete. His proxy refused direct production
+requests (CONNECT 403); his production findings explicitly rely on Pip's
+retained receipt, not an independent live request. No regression was reported.
+The combined-release handoff is complete and its ten-minute follow-up can end.
 
 Claudio's exact-kit audit **PASSED at 2026-10-10 21:42:44 UTC**:
 https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6102481848.
@@ -173,10 +186,12 @@ jobs. After any installer attempt, including NO_OP/failure, recovery is a
 separately reviewed forward fix with maintenance/jobs held; no DB restore,
 old-image start, retry or override.
 
-#205/draft #288 and #284 remain excluded; Claudio holds new application
-merges. Pip posted exact SHA/UTC/health/receipt on the 19 included issues in
+#205/draft #288 and #284 remain excluded from this completed release. Claudio's
+final native handoff reports the merge freeze lifted and separate preparation
+work resumed; this does not expand this release's scope or authorize Pip to
+change those items. Pip posted exact SHA/UTC/health/receipt on the 19 included issues in
 `deployment-issue-targets-feac6534.json` and #162.
-Claudio owns post-deploy checks and issue closures. Before execution, live was
+Claudio completed the post-deploy checks and issue closures. Before execution, live was
 healthy #188: HTTP 200, `status=ok`, version 1.9.0, zero restarts, original image
 `sha256:b02ddff8d7549e981edc49215fef2d54ca654adaa2a8924eceb5d4ea0af00394`.
 
