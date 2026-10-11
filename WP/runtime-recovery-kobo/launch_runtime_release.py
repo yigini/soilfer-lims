@@ -20,8 +20,8 @@ digest=hashlib.sha256((r/'prepared-manifest.json').read_bytes()).hexdigest()
 execution_preflight(r,digest);verify_gate(m,g,digest)
 assert (r/'production-gate.json').stat().st_mode&0o777==0o400
 result=subprocess.run(['systemd-run','--unit='+p['unit'],'--property=Type=exec','--property=RuntimeMaxSec=2700',
- '--property=KillMode=process','--property=StandardOutput=append:'+str(r/'unit.stdout'),
- '--property=StandardError=append:'+str(r/'unit.stderr'),'/usr/bin/python3','-B',str(r/'deploy_runtime.py'),
+ '--property=KillMode=process','--property=StandardOutput=journal',
+ '--property=StandardError=journal','/usr/bin/python3','-B',str(r/'deploy_runtime.py'),
  '--execute-new-reviewed-runtime-gate'],text=True,capture_output=True,timeout=20)
 assert result.returncode==0,result.stderr
 print(json.dumps({'root':str(r),'unit':p['unit'],'head':m['head'],'image':m['image'],

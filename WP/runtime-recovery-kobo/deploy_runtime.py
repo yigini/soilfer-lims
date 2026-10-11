@@ -15,7 +15,7 @@ import tarfile
 import time
 import release_support as s
 import startup_common as c
-from known_core_disk_guard_v2 import KnownCoreDiskGuard
+from known_core_disk_guard_deploy import KnownCoreDiskGuard
 from runtime_release_contract import *
 
 ROOT = pathlib.Path(__file__).resolve().parent
@@ -140,6 +140,17 @@ def main():
         'proofSourceReviewId': PROOF_SOURCE_REVIEW_ID,
         'proofAuthoritySha256': manifest['files']['proof-authority.json'],
         'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
+        'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
+        'productionBaselineAdapterSha256': DEPLOY_BASELINE_GUARD_SHA,
+        'productionBaselineScopeCommentId': PRODUCTION_BASELINE_SCOPE_ID,
+        'productionBaselineSourceReviewId': manifest['productionBaselineSourceReviewId'],
+        'productionBaselineSourceReviewSha256': manifest['files']['production-baseline-source-review.json'],
+        'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
+        'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
+        'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+        'baselineVanishedProcessPolicy': BASELINE_POLICY,
+        'BASELINE_ATTEMPTS_MAX': BASELINE_ATTEMPTS_MAX,
+        'BASELINE_CONFIRMATION_DEADLINE_SECONDS': BASELINE_CONFIRMATION_SECONDS,
         'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
         'workloadControl': WORKLOAD_PINS, 'effectiveUid': os.geteuid(), 'pythonOptimize': sys.flags.optimize}
     quiesced = False; owned = False; watch = None; guard = None
@@ -163,7 +174,9 @@ def main():
     for sig in [signal.SIGTERM, signal.SIGINT, signal.SIGHUP]:
         signal.signal(sig, interrupted)
     try:
-        guard = KnownCoreDiskGuard(ROOT, readiness['reserveBytes'])
+        guard = KnownCoreDiskGuard(ROOT, readiness['reserveBytes'], manifest, manifest_sha,
+            sha(ROOT / 'production-gate.json'))
+        receipt['baselineAttempt'] = guard.baseline_attempt
         receipt['baselineEnumerationErrorCount'] = len(guard.baseline_errors)
         guard.check(); save('beforeQuiesceGuardsPassed')
         # Recheck gate freshness immediately before the first live mutation.

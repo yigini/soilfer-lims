@@ -17,7 +17,8 @@ paths.update({name: 'WP/runtime-recovery-kobo/' + name + '.py' for name in [
     'known_core_disk_guard_v2', 'test_proof_contract', 'test_kobo_copy_preservation',
     'test_capture_kobo_fetch', 'test_runtime_release_contract', 'test_core_deallocation_confirmation',
     'test_source_review_pin', 'test_scheduler_refusal_scope', 'known_core_disk_guard_v3',
-    'test_baseline_confirmation']})
+    'test_baseline_confirmation', 'known_core_disk_guard_deploy', 'deploy_runtime', 'launch_runtime_release',
+    'test_deploy_baseline_guard']})
 for name, path in paths.items():
     data = subprocess.check_output(['git', 'show', head + ':' + path])
     files[name] = {'data': base64.b64encode(data).decode(), 'sha256': hashlib.sha256(data).hexdigest()}
@@ -26,7 +27,7 @@ code = '''import base64,datetime,hashlib,json,sys,time,types,unittest
 p=json.loads(base64.b64decode(PAYLOAD));start=time.monotonic();tests=[]
 for name,value in p['files'].items():
  data=base64.b64decode(value['data']);assert hashlib.sha256(data).hexdigest()==value['sha256']
- module=types.ModuleType(name);module.__file__='/owned-in-memory-guards/'+name+'.py';module.__raw_sha256__=value['sha256'];sys.modules[name]=module
+ module=types.ModuleType(name);module.__file__='/owned-in-memory-guards/'+name+'.py';module.__raw_sha256__=value['sha256'];module.__raw_source__=data;sys.modules[name]=module
  exec(compile(data,module.__file__,'exec'),module.__dict__)
  if name.startswith('test_'):tests.append(module)
 suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromModule(module) for module in tests)

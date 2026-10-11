@@ -60,6 +60,13 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
     kit_review = github('issues/comments/' + review_id)
     kit_comments = github('issues/162/comments?per_page=100', True)
     source_review = github('issues/comments/' + str(manifest['sourceReviewId']))
+    production_source = github('issues/comments/' + str(manifest['productionBaselineSourceReviewId']))
+    frozen_production_source = json.loads((kit / 'production-baseline-source-review.json').read_bytes())
+    require(production_source['body'] == frozen_production_source['body'] and
+        production_source['created_at'] == frozen_production_source['created_at'], 'Production source verdict changed')
+    later_production_failure = any(('source review: failed' in row['body'].lower() or
+        'audit failed' in row['body'].lower()) and row['created_at'] > production_source['created_at']
+        for row in kit_comments)
     later_source_failure = any(('source review: failed' in row['body'].lower() or
         'audit failed' in row['body'].lower()) and row['created_at'] > source_review['created_at']
         for row in kit_comments)
@@ -77,6 +84,18 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
         'proofAuthoritySha256': manifest['files']['proof-authority.json'],
         'proofSourceIndexSha256': manifest['files']['proof-source-index.json'],
         'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
+        'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
+        'productionBaselineAdapterSha256': DEPLOY_BASELINE_GUARD_SHA,
+        'productionBaselineScopeCommentId': PRODUCTION_BASELINE_SCOPE_ID,
+        'productionBaselineSourceReviewSha256': manifest['files']['production-baseline-source-review.json'],
+        'productionBaselineSourceReview': production_source,
+        'laterProductionSourceAuditFailure': later_production_failure,
+        'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
+        'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
+        'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+        'baselineVanishedProcessPolicy': BASELINE_POLICY,
+        'BASELINE_ATTEMPTS_MAX': BASELINE_ATTEMPTS_MAX,
+        'BASELINE_CONFIRMATION_DEADLINE_SECONDS': BASELINE_CONFIRMATION_SECONDS,
         'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
         'proofSourceReview': source_review, 'laterSourceAuditFailure': later_source_failure,
         'workloadControl': WORKLOAD_PINS, 'readOnlyExecutionReadiness': readiness,

@@ -12,6 +12,15 @@ class RuntimeGateTests(unittest.TestCase):
             'head': '1' * 40, 'image': 'sha256:' + '2' * 64, 'tree': '3' * 40,
             'baseHead': BASE_HEAD, 'workloadControl': WORKLOAD_PINS, 'sourceReviewId': PROOF_SOURCE_REVIEW_ID,
             'proofToolingCommit': REVIEWED_PROOF_SOURCE, 'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
+            'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
+            'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
+            'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
+            'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+            'baselineVanishedProcessPolicy': BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX': BASELINE_ATTEMPTS_MAX,
+            'BASELINE_CONFIRMATION_DEADLINE_SECONDS': BASELINE_CONFIRMATION_SECONDS,
+            'productionBaselineScopeCommentId': PRODUCTION_BASELINE_SCOPE_ID,
+            'productionBaselineAdapterSha256': DEPLOY_BASELINE_GUARD_SHA,
+            'productionBaselineSourceReviewId': 8000000000, 'packagingCommit': 'd' * 40,
             'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
             'separateInstallerCommands': 0, 'files': {name: str(i) * 64 for i, name in enumerate([
                 'deploy_runtime.py', 'rehearsal-receipt.json', 'startup_common.py', 'yy-authorization-evidence.md',
@@ -19,6 +28,12 @@ class RuntimeGateTests(unittest.TestCase):
                 'known_core_disk_guard.py', 'known_core_disk_guard_v2.py'], 1)}}
         self.manifest['files']['known_core_disk_guard.py'] = ORIGINAL_GUARD_SHA
         self.manifest['files']['known_core_disk_guard_v2.py'] = MEASUREMENT_GUARD_SHA
+        self.manifest['files'].update({'known_core_disk_guard_v3.py': BASELINE_GUARD_SHA,
+            'kobo_copy_preservation.py': REVIEWED_VERIFIER_SHA, 'proof_contract.py': REVIEWED_PROOF_CONTRACT_SHA,
+            'known_core_disk_guard_deploy.py': DEPLOY_BASELINE_GUARD_SHA,
+            'production-baseline-source-review.json': 'e' * 64})
+        for name in PRODUCTION_SOURCE_FILES:
+            self.manifest['files'].setdefault(name, 'f' * 64)
         self.manifest_sha = '6' * 64
         review = {'id': 7000000000, 'html_url': 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-7000000000',
             'body': '\n'.join(review_tokens(self.manifest, self.manifest_sha)), 'created_at': '2026-10-11T19:59:00Z'}
@@ -35,14 +50,38 @@ class RuntimeGateTests(unittest.TestCase):
             'kitReview': review, 'laterKitAuditFailure': False, 'yyGo': {'authorizationMode': 'AUTO_AFTER_REVIEW',
                 'evidenceSha256': '4' * 64, 'standingScopeText': 'my go covers all', 'releaseHead': self.manifest['head']}}
         self.gate.update({'proofAuthoritySha256': '6' * 64, 'proofSourceIndexSha256': '7' * 64,
+            'productionBaselineAdapterSha256': DEPLOY_BASELINE_GUARD_SHA,
+            'productionBaselineScopeCommentId': PRODUCTION_BASELINE_SCOPE_ID,
+            'productionBaselineSourceReviewSha256': 'e' * 64, 'laterProductionSourceAuditFailure': False,
             'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
+            'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
+            'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
+            'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
+            'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+            'baselineVanishedProcessPolicy': BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX': BASELINE_ATTEMPTS_MAX,
+            'BASELINE_CONFIRMATION_DEADLINE_SECONDS': BASELINE_CONFIRMATION_SECONDS,
             'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
             'laterSourceAuditFailure': False, 'proofSourceReview': {'id': PROOF_SOURCE_REVIEW_ID,
                 'html_url': 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(PROOF_SOURCE_REVIEW_ID),
                 'created_at': '2026-10-11T19:58:00Z', 'body': '\n'.join(['Source review: PASS',
                     REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA, ORIGINAL_GUARD_SHA,
+                    BASELINE_GUARD_SHA, REVIEWED_VERIFIER_SHA, REVIEWED_PROOF_CONTRACT_SHA,
+                    'baselineVanishedProcessPolicy=' + BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX=3',
+                    'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10', 'refusalScopeCommentId=6113601584',
+                    REFUSAL_POLICY, CARDINALITY_POLICY,
                     'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
                     'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'])}})
+        production_tokens = ['Source review: PASS', self.manifest['packagingCommit'], DEPLOY_BASELINE_GUARD_SHA,
+            BASELINE_GUARD_SHA, MEASUREMENT_GUARD_SHA, ORIGINAL_GUARD_SHA,
+            'productionBaselineScopeCommentId=' + str(PRODUCTION_BASELINE_SCOPE_ID),
+            'REQUIRED_HASHED_MANIFEST_AND_GATE', 'JOURNAL_UNIT_OUTPUT',
+            'baselineVanishedProcessPolicy=' + BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX=3',
+            'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10', 'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
+            'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
+        production_tokens += [self.manifest['files'][name] for name in PRODUCTION_SOURCE_FILES]
+        self.gate['productionBaselineSourceReview'] = {'id': 8000000000,
+            'html_url': 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-8000000000',
+            'created_at': '2026-10-11T19:58:00Z', 'body': '\n'.join(production_tokens)}
 
     def verify(self):
         verify_gate(self.manifest, self.gate, self.manifest_sha, self.now)
@@ -150,15 +189,118 @@ class RuntimeGateTests(unittest.TestCase):
     def test_receipt_source_binding_rejects_stale_or_tampered_proof(self):
         proof = {'toolingCommit': REVIEWED_PROOF_SOURCE, 'proofSourceReviewId': PROOF_SOURCE_REVIEW_ID,
             'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
+            'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
+            'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
+            'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
+            'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+            'baselineVanishedProcessPolicy': BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX': BASELINE_ATTEMPTS_MAX,
+            'BASELINE_CONFIRMATION_DEADLINE_SECONDS': BASELINE_CONFIRMATION_SECONDS, 'baselineAttempt': 2,
             'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
             'authoritySha256': 'a' * 64}
         pin = {'proofSourceReviewId': PROOF_SOURCE_REVIEW_ID}
         proof_source_binding(proof, pin)
         for key, value in [('toolingCommit', 'b' * 40), ('proofSourceReviewId', 6112725472),
                            ('diskMeasurementGuardSha256', ORIGINAL_GUARD_SHA),
+                           ('baselineMeasurementGuardSha256', ORIGINAL_GUARD_SHA), ('copyVerifierSha256', 'c' * 64),
+                           ('proofContractSha256', 'd' * 64), ('refusalScopeCommentId', 1),
+                           ('schedulerRefusalPolicy', 'ANY_ERROR'), ('intakeCardinalityPolicy', 'DISTINCT_IDS'),
+                           ('baselineVanishedProcessPolicy', 'ANY_ERROR'), ('BASELINE_ATTEMPTS_MAX', 4),
+                           ('BASELINE_CONFIRMATION_DEADLINE_SECONDS', 11), ('baselineAttempt', 0),
                            ('coreDeallocationConfirmationDeadlineSeconds', 11), ('authoritySha256', 'invalid')]:
             changed = dict(proof); changed[key] = value
             with self.subTest(key=key), self.assertRaises(RuntimeError): proof_source_binding(changed, pin)
+
+    def test_manifest_and_gate_baseline_refusal_and_cardinality_bindings(self):
+        for key, value in [('baselineMeasurementGuardSha256', ORIGINAL_GUARD_SHA),
+                ('copyVerifierSha256', 'c' * 64), ('proofContractSha256', 'd' * 64),
+                ('refusalScopeCommentId', 1), ('schedulerRefusalPolicy', 'ANY_ERROR'),
+                ('intakeCardinalityPolicy', 'DISTINCT_IDS'), ('baselineVanishedProcessPolicy', 'ANY_ERROR'),
+                ('BASELINE_ATTEMPTS_MAX', 4), ('BASELINE_CONFIRMATION_DEADLINE_SECONDS', 11)]:
+            for location in ['manifest', 'gate']:
+                original = copy.deepcopy((self.manifest, self.gate))
+                (self.manifest if location == 'manifest' else self.gate)[key] = value
+                with self.subTest(key=key, location=location), self.assertRaises(RuntimeError): self.verify()
+                self.manifest, self.gate = original
+
+    def test_production_adapter_source_review_is_separate_and_complete(self):
+        original = copy.deepcopy(self.gate)
+        self.gate['productionBaselineSourceReview'] = self.gate['proofSourceReview']
+        with self.assertRaises(RuntimeError): self.verify()
+        self.gate = copy.deepcopy(original)
+        self.gate['laterProductionSourceAuditFailure'] = True
+        with self.assertRaises(RuntimeError): self.verify()
+        self.gate = copy.deepcopy(original)
+        review = self.gate['productionBaselineSourceReview']; body = review['body']
+        for token in set(body.splitlines()):
+            review['body'] = body.replace(token, '')
+            with self.subTest(token=token), self.assertRaises(RuntimeError): self.verify()
+        review['body'] = body
+
+    def test_production_adapter_hash_review_raw_hash_and_scope_required(self):
+        for key in ['productionBaselineAdapterSha256', 'productionBaselineSourceReviewSha256',
+                    'productionBaselineScopeCommentId']:
+            original = self.gate[key]; self.gate[key] = 'invalid'
+            with self.subTest(key=key), self.assertRaises(RuntimeError): self.verify()
+            self.gate[key] = original
+
+
+class SealedSchedulerTests(unittest.TestCase):
+    def setUp(self):
+        self.expected = [{'configId': key, 'labId': lab, 'projectCode': project, 'message': message}
+            for key, lab, project, message in REFUSAL_TUPLES]
+        lines = []
+        for index, row in enumerate(self.expected):
+            prefix = '2026-10-11T21:00:%02dZ ' % index
+            lines += [prefix + '[KOBO_SCHEDULER] Triggering scheduled sync for Lab: ' + row['labId'] +
+                ', Project: ' + row['projectCode'], prefix + '[KOBO_SCHEDULER] Error syncing lab ' +
+                row['labId'] + ': ' + row['message']]
+        lines += ['2026-10-11T21:00:10Z [KOBO_SCHEDULER] Completed sync for ZMB-LAB1: { newSamples: 2, skipped: 1 }',
+            '2026-10-11T21:15:10Z [KOBO_SCHEDULER] Completed sync for ZMB-LAB1: { newSamples: 0, skipped: 0 }']
+        self.log = '\n'.join(lines)
+        protected = sorted(row['configId'] for row in self.expected)
+        self.first = {'protectedRefusalConfigIds': protected, 'newSampleCount': {TARGET_CONFIG: 2},
+            'newSamplePairs': {TARGET_CONFIG: [{'kobo_id': '7', 'depth': 'D1'}, {'kobo_id': '7', 'depth': 'D2'}]},
+            'newSubmissionIds': {TARGET_CONFIG: ['7']}, 'newSampleDepthSplit': {TARGET_CONFIG: {'D1': 1, 'D2': 1}}}
+        self.second = {'protectedRefusalConfigIds': protected, 'newSampleCount': {TARGET_CONFIG: 0},
+            'newSamplePairs': {TARGET_CONFIG: []}, 'newSubmissionIds': {}, 'newSampleDepthSplit': {TARGET_CONFIG: {}}}
+        self.full = copy.deepcopy(self.first)
+        completions = completed_syncs(self.log); observed = scheduler_refusals(self.log, self.expected)
+        self.proof = {'expectedSchedulerRefusals': self.expected, 'observedSchedulerRefusals': observed,
+            'schedulerRefusalCounts': {row['configId']: 1 for row in self.expected},
+            'firstScheduledSync': completions[0], 'secondScheduledSync': completions[1],
+            'firstIntakeSummary': intake_summary(self.first, completions[0]),
+            'secondIntakeSummary': intake_summary(self.second, completions[1]),
+            'secondGenuinelyNewSubmissionIds': []}
+
+    def check(self): sealed_scheduler_evidence(self.proof, self.expected, self.log, self.first, self.second, self.full)
+
+    def test_original_sealed_log_refusals_and_two_depth_sample_rows_pass(self): self.check()
+
+    def test_changed_baseline_or_observed_refusal_counts_refuse(self):
+        original = copy.deepcopy(self.proof)
+        for key, value in [('expectedSchedulerRefusals', []), ('observedSchedulerRefusals', []),
+                ('schedulerRefusalCounts', {})]:
+            self.proof[key] = value
+            with self.subTest(key=key), self.assertRaises(RuntimeError): self.check()
+            self.proof = copy.deepcopy(original)
+
+    def test_missing_completion_unknown_error_or_weakened_protection_refuse(self):
+        log = self.log
+        for changed in [log.splitlines()[0], log + '\n2026-10-11T21:16:00Z [KOBO_SCHEDULER] Error syncing lab TUR: other']:
+            self.log = changed
+            with self.assertRaises(RuntimeError): self.check()
+        self.log = log
+        for state in [self.first, self.second, self.full]:
+            protected = state['protectedRefusalConfigIds']; state['protectedRefusalConfigIds'] = []
+            with self.assertRaises(RuntimeError): self.check()
+            state['protectedRefusalConfigIds'] = protected
+
+    def test_sample_count_cannot_be_replaced_by_distinct_ids_or_changed_second_ids(self):
+        self.proof['firstIntakeSummary']['newSampleCount'] = 1
+        with self.assertRaises(RuntimeError): self.check()
+        self.proof['firstIntakeSummary']['newSampleCount'] = 2
+        self.proof['secondGenuinelyNewSubmissionIds'] = ['unrecorded']
+        with self.assertRaises(RuntimeError): self.check()
 
 
 if __name__ == '__main__':

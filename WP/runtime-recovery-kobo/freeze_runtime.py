@@ -1,10 +1,12 @@
 """Freeze a NEW kit from the original stopped/PASSED candidate proof only."""
 import fcntl
+import contextlib
 import hashlib
 import json
 import os
 import pathlib
 import shutil
+import sqlite3
 import subprocess
 import sys
 import release_support as s
@@ -50,6 +52,11 @@ def main():
         require(pathlib.PurePosixPath(name).name == name and not (ROOT / name).is_symlink() and
             sha(ROOT / name) == row['sha256'], 'Packaging source differs: ' + name)
         files[name] = (ROOT / name).read_bytes()
+    production_review_bytes = (ROOT / 'production-baseline-source-review.json').read_bytes()
+    production_review = json.loads(production_review_bytes)
+    production_source_review(production_review, package['head'],
+        {name: hashlib.sha256(data).hexdigest() for name, data in files.items()})
+    files['production-baseline-source-review.json'] = production_review_bytes
     for name, row in source['files'].items():
         require(sha(proof / name) == row['sha256'] and files[name] == (proof / name).read_bytes(),
             'A measured proof helper changed during packaging: ' + name)
@@ -84,13 +91,31 @@ def main():
     # The proof receipt binds logical preservation of its final backup, not
     # that backup's raw hash. Independently recheck the retained stopped bytes
     # before assigning their physical hash to the frozen kit.
+    with contextlib.closing(sqlite3.connect((proof / 'fresh-live-backup.db').as_uri() +
+            '?mode=ro&immutable=1', uri=True)) as db:
+        db.row_factory = sqlite3.Row
+        expected_refusal_rows = expected_refusals(
+            [dict(row) for row in db.execute('SELECT id,labId,projectCode,isActive FROM KoboConfig')],
+            [dict(row) for row in db.execute('SELECT id,code,name,isActive FROM Lab')],
+            [dict(row) for row in db.execute('SELECT code FROM Project')])
+    refusal_configs = [row['configId'] for row in expected_refusal_rows]
+    first_fetch = json.loads(files['upstream-first-completion.json'])
+    first_ids = {key: value['submissionIds'] for key, value in first_fetch.items()}
     final_fetch = json.loads(files['upstream-second-completion.json'])
     final_ids = {key: value['submissionIds'] for key, value in final_fetch.items()}
-    require(verify_copy(proof / 'fresh-live-backup.db', proof / 'after-second-sync.db', fetched_ids=final_ids) ==
+    require(verify_copy(proof / 'fresh-live-backup.db', proof / 'after-first-sync.db',
+        fetched_ids=first_ids, refusal_configs=refusal_configs) ==
+        json.loads(files['first-sync-preservation.json']), 'Retained first-sync backup differs from its proof')
+    require(verify_copy(proof / 'fresh-live-backup.db', proof / 'after-second-sync.db',
+        fetched_ids=final_ids, refusal_configs=refusal_configs) ==
         json.loads(files['full-copy-preservation.json']), 'Retained final backup differs from the original full proof')
     require(verify_copy(proof / 'after-first-sync.db', proof / 'after-second-sync.db',
-        prior_fetched_ids=receipt['priorFetchedIds'], fetched_ids=final_ids) ==
+        prior_fetched_ids=receipt['priorFetchedIds'], fetched_ids=final_ids, refusal_configs=refusal_configs) ==
         json.loads(files['second-sync-preservation.json']), 'Retained second-sync backup differs from its proof')
+    sealed_scheduler_evidence(receipt, expected_refusal_rows,
+        (proof / 'candidate-jobs-on-timestamped.log').read_text(encoding='utf-8'),
+        json.loads(files['first-sync-preservation.json']), json.loads(files['second-sync-preservation.json']),
+        json.loads(files['full-copy-preservation.json']))
     files['packaging-source-index.json'] = (ROOT / 'packaging-source-index.json').read_bytes()
     initial = json.loads(files['upstream-before-start.json'])
     require(len(initial[TARGET_CONFIG]['submissionIds']) >= 67, 'Actual original crash workload was not observed')
@@ -131,6 +156,16 @@ def main():
         'originalProofRoot': str(proof), 'originalProofUnit': unit, 'proofReferences': references,
         'sourceReviewId': PROOF_SOURCE_REVIEW_ID, 'proofToolingCommit': REVIEWED_PROOF_SOURCE,
         'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
+        'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
+        'productionBaselineAdapterSha256': DEPLOY_BASELINE_GUARD_SHA,
+        'productionBaselineScopeCommentId': PRODUCTION_BASELINE_SCOPE_ID,
+        'productionBaselineSourceReviewId': production_review['id'],
+        'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
+        'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
+        'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+        'baselineVanishedProcessPolicy': BASELINE_POLICY,
+        'BASELINE_ATTEMPTS_MAX': BASELINE_ATTEMPTS_MAX,
+        'BASELINE_CONFIRMATION_DEADLINE_SECONDS': BASELINE_CONFIRMATION_SECONDS,
         'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
         'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA,
         'separateInstallerCommands': 0, 'deadlineSeconds': 600, 'productionObservationSeconds': 660,
