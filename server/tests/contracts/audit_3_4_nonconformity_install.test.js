@@ -26,7 +26,10 @@ function fresh() {
 afterAll(()=>{for(const file of owned){assertOwnedTestDatabase(file,'system:fixture');for(const suffix of ['','-wal','-shm'])if(fs.existsSync(file+suffix))fs.unlinkSync(file+suffix);}});
 test('PRE_193 upgrades additively with zero NCR/backfill rows, retained evidence and byte-identical repeat apply',()=>{
     const file=historical(),before=raw(file,db=>({rounds:db.prepare('SELECT * FROM ProficiencyRound ORDER BY id').all(),
-        ledger:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()})),initialHash=hash(file);
+        ledger:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all(),
+        originalRowsSha256:createHash('sha256').update(JSON.stringify(Object.fromEntries(db.prepare(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT IN ('NonconformityReport','_schema_migrations') ORDER BY name")
+            .all().map(({name})=>[name,db.prepare('SELECT * FROM "'+name.replace(/"/g,'""')+'" ORDER BY rowid').all()])))).digest('hex')})),initialHash=hash(file);
     expect(installNonconformityReports({dbPath:file})).toMatchObject({classification:'PRE_193',mode:'DRY_RUN',totalChanges:0,roundCount:2,ncrCount:0});
     expect(hash(file)).toBe(initialHash);
     expect(()=>assertNonconformityStartupReady(file)).toThrow(expect.objectContaining({code:'NCR_NOT_INSTALLED'}));
@@ -34,6 +37,8 @@ test('PRE_193 upgrades additively with zero NCR/backfill rows, retained evidence
     raw(file,db=>{
         expect(db.prepare('SELECT * FROM ProficiencyRound ORDER BY id').all()).toEqual(before.rounds.map(row=>({...row,nonconformityId:null})));
         expect(db.prepare("SELECT * FROM _schema_migrations WHERE id!='193_nonconformity_reports' ORDER BY id").all()).toEqual(before.ledger);
+        expect(JSON.parse(db.prepare('SELECT details FROM _schema_migrations WHERE id=?').get('193_nonconformity_reports').details)
+            .originalRowsSha256).toBe(before.originalRowsSha256);
     });
     const completeHash=hash(file);
     expect(installNonconformityReports({dbPath:file,apply:true})).toMatchObject({classification:'COMPLETE_193',mode:'NO_OP',totalChanges:0});

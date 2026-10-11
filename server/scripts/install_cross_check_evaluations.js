@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const path = require('node:path'), { createHash } = require('node:crypto'), Database = require('better-sqlite3');
 const { loadCrossCheckMigrationSource } = require('../services/crossCheckMigrationSource');
+const { fingerprintRows, fingerprintRetainedTables } = require('../services/retainedRowsFingerprint');
 const MARKER = '201_cross_check_evaluations', TABLE = 'CrossCheckEvaluation';
 const fail = (code, message, differences = []) => Object.assign(new Error(message), { statusCode: 409, code, differences, totalChanges: 0 });
 const fingerprint = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -49,8 +50,7 @@ function classify(db, source, predecessor) {
     return { classification, sources, evaluationCount: count, ...(receipt && { receipt }) };
 }
 function retainedRows(db) {
-    const names = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT IN ('CrossCheckEvaluation','_schema_migrations') ORDER BY name").all();
-    return Object.fromEntries(names.map(({ name }) => [name, db.prepare('SELECT * FROM "' + name.replaceAll('"', '""') + '" ORDER BY rowid').all()]));
+    return fingerprintRetainedTables(db, { excludeTables: ['CrossCheckEvaluation', '_schema_migrations'] });
 }
 function installCrossCheckEvaluations({ dbPath, apply = false } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('CROSS_CHECK_DATABASE_REQUIRED', 'Provide an explicit database path.');
@@ -70,16 +70,16 @@ function installCrossCheckEvaluations({ dbPath, apply = false } = {}) {
                 throw fail('CROSS_CHECK_PLAN_STALE', 'The reported-value prerequisite changed after review.');
             const current = classify(db, source, predecessor);
             if (current.classification === 'COMPLETE_201') return { ...current, mode: 'NO_OP', totalChanges: 0, newEvaluationCount: 0, backfilledCount: 0 };
-            const before = fingerprint(retainedRows(db)), ledger = db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all();
+            const before = retainedRows(db), ledger = fingerprintRows(db.prepare('SELECT * FROM _schema_migrations ORDER BY id').iterate());
             const installationSql = loadCrossCheckMigrationSource();
             if (current.classification === 'PRE_201') db.exec(installationSql.schemaSql);
             db.exec(installationSql.guardsSql);
-            if (fingerprint(retainedRows(db)) !== before || db.prepare('SELECT COUNT(*) n FROM CrossCheckEvaluation').get().n !== 0)
+            if (retainedRows(db) !== before || db.prepare('SELECT COUNT(*) n FROM CrossCheckEvaluation').get().n !== 0)
                 throw fail('CROSS_CHECK_PRESERVATION_REFUSED', 'Evidence installation changed retained rows.');
             const receipt = { sources: current.sources, originalRowsSha256: before, originalRowsPreserved: true, newEvaluationCount: 0, backfilledCount: 0 };
             receipt.receiptSha256 = fingerprint(receipt);
             db.prepare('INSERT INTO _schema_migrations(id,details) VALUES(?,?)').run(MARKER, JSON.stringify(receipt));
-            if (fingerprint(db.prepare('SELECT * FROM _schema_migrations WHERE id<>? ORDER BY id').all(MARKER)) !== fingerprint(ledger))
+            if (fingerprintRows(db.prepare('SELECT * FROM _schema_migrations WHERE id<>? ORDER BY id').iterate(MARKER)) !== ledger)
                 throw fail('CROSS_CHECK_PRESERVATION_REFUSED', 'Evidence installation changed a retained receipt.');
             integrity(db);
             return { ...classify(db, source, predecessor), previousClassification: current.classification, mode: 'APPLIED',
