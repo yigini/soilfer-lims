@@ -1,0 +1,9 @@
+{
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z",
+  "unit": "lims-owned-runtime-kobo-proof-171dd36c-20261011t200210z.service",
+  "sourceCommit": "84b4ce497b4b242021f7ce6f4a093ceda7978cd8",
+  "sourceIndexSha256": "fa3def3e637cd8d407913beaa0bbcea807ee510df075f11b430a98134ab37fc9",
+  "coordinatorSha256": "a88223aa90e22253118b56ce72770ec1a219d0a82f71b3c9556a00c79e8f4271",
+  "productionMutations": 0,
+  "productionGateCollected": false
+}

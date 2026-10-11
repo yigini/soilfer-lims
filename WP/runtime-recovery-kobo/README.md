@@ -1,3 +1,7 @@
+Current checkpoint: October11,20:02UTC. Exact merged-main CI38168329149 SUCCESS at20:02:00UTC for171dd36c5b2dbeea8763520dd18fbdb158ffca05, including full server suite/both Docker builds/real boundary/readiness acceptance. ONE NEW isolated candidate proof launched, original root /opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z, unit lims-owned-runtime-kobo-proof-171dd36c-20261011t200210z.service. Raw tooling84b4ce497b4b242021f7ce6f4a093ceda7978cd8 exports unchanged reviewed coordinator a88223aa90e22253118b56ce72770ec1a219d0a82f71b3c9556a00c79e8f4271; source-index fa3def3e637cd8d407913beaa0bbcea807ee510df075f11b430a98134ab37fc9. Proof is RUNNING, not PASSED. Read only the same unit/root; never relaunch/new writer. Candidate build/image/target pin unchanged. No production mutation/gate/frozen kit. Proposed release source f61dc33c is with Claudio for review on162/6112979531; native workspace permission card still awaits YY and is untouched. Keep291/other merges held until292live. Continue samewriter/chat/worktree through actual natural2sync/PASS/stopped proof/freeze/newexactkitreview/freshgate/forwarddeploy; all retained roots/receipts and abort pins unchanged.
+
+Previous19:43 checkpoint follows:
+
 # Kobo runtime recovery preparation
 
 Current checkpoint: October 11, 19:43 UTC. Claudio posted formal PR292 exact-head
