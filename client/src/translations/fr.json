@@ -2334,6 +2334,9 @@
   },
   "dataResults": {
     "reportedValueUnavailable": "Valeur rapportée indisponible",
+    "selectionIdColumn": "ID de sélection de la valeur rapportée",
+    "attemptIdsColumn": "ID des essais",
+    "batchIdsColumn": "ID des lots",
     "title": "Résultats analytiques directeurs",
     "subtitle": "Vue principale de tous les résultats analytiques (Approuvés et En attente).",
     "columns": "Colonnes",

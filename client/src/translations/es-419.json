@@ -2334,6 +2334,9 @@
   },
   "dataResults": {
     "reportedValueUnavailable": "Valor informado no disponible",
+    "selectionIdColumn": "ID de selección del valor informado",
+    "attemptIdsColumn": "IDs de intento",
+    "batchIdsColumn": "IDs de lote",
     "title": "Resultados analíticos maestros",
     "subtitle": "Vista maestra de todos los resultados analíticos (Aprobados y Pendientes).",
     "columns": "Columnas",
