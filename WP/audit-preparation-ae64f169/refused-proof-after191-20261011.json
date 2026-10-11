@@ -1,0 +1,9 @@
+{
+  "root": "/opt/lims/releases/preparation-ae64f169-rehearsal-20261011T132800Z",
+  "receiptSha256": "7fa962d19ae2e85dd7cb45267d48de513fb526e0a3dc4d2d6324ca220d63ad6c",
+  "receiptStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+  "dryLinkError": "{\"error\":\"ACCEPTANCE_LINK_AFTER_191_REFUSED\",\"message\":\"Run this reconciliation before the #191 installer.\",\"plan\":null,\"totalChanges\":0}\n{\"releaseCliPeakBytes\":31014912,\"childStatus\":1,\"childSignal\":null}\n",
+  "freshCopySha256": "88ba8bc1229effe0303f0983c83fb36c4b4111d69f8cd678be2023352967bc39",
+  "ownedCopySha256": "88ba8bc1229effe0303f0983c83fb36c4b4111d69f8cd678be2023352967bc39",
+  "no205Apply": true
+}

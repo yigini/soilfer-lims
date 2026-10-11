@@ -28,6 +28,9 @@ def validate(proof, build, gates):
     assert stage['apply']['mode']=='APPLIED' and stage['apply']['totalChanges']==1
     assert stage['apply']['backfilledCount']==0 and stage['apply']['receipt']['originalRowsPreserved'] is True
     assert proof['repeatInstallers']==[{'key':'205','mode':'NO_OP','totalChanges':0}]
+    assert proof['retainedAcceptance']=={'mode':'READ_ONLY_RETAINED_EVIDENCE','totalChanges':0,
+        'eventId':s.RETAINED_ACCEPTANCE_EVENT_ID,'eventSha256':s.RETAINED_ACCEPTANCE_EVENT_SHA,
+        'attemptStatus':'ACCEPTED','reviewDecisionAttemptId':None,'reportStatus':'PUBLISHED'}
     assert [(row['key'],row['script']) for row in proof['legacyVerifiers']]==s.LEGACY_VERIFIERS
     for row in proof['legacyVerifiers']:
         s.validate_legacy(row['key'],row['dryRun'])

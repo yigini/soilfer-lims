@@ -15,6 +15,11 @@ class ScopeGuards(unittest.TestCase):
                 with self.assertRaisesRegex(AssertionError,'No prior release'):
                     s.cli(pathlib.Path('/owned'),'owned',pathlib.Path('/owned'),script,'--apply','blocked')
                 command.assert_not_called()
+        for mode in ['--dry-run','--apply']:
+            with self.subTest(mode=mode),patch.object(s,'command') as command:
+                with self.assertRaisesRegex(AssertionError,'must never run again'):
+                    s.cli(pathlib.Path('/owned'),'owned',pathlib.Path('/owned'),'link_recorded_acceptance.js',mode,'blocked')
+                command.assert_not_called()
 
     def test_legacy_checks_use_only_dry_run_and_refuse_any_blocker(self):
         observed=[]
@@ -22,8 +27,6 @@ class ScopeGuards(unittest.TestCase):
             root=pathlib.Path(folder)
             def run(root,image,directory,script,mode,label):
                 observed.append((script,mode))
-                if script=='link_recorded_acceptance.js':
-                    return {'mode':'DRY_RUN','totalChanges':0,'blockedWorkItemCount':0,'eligible':[],'unresolved':[]}
                 if script=='install_result_raw_input.js':
                     return {'mode':'DRY_RUN','totalChanges':0,'classification':'ALREADY_PRESENT',
                         'backfillCount':0,'sources':{'migrationSha256':'850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc'}}
@@ -31,7 +34,7 @@ class ScopeGuards(unittest.TestCase):
                     'releaseInventory':{'blockedWorkItemCount':0,'blockedWorkItems':[]}}
             with patch.object(s,'snapshot',return_value={}),patch.object(s,'physical',return_value={}),patch.object(s,'cli',side_effect=run):
                 rows=s.verify_legacy(root,'owned',root)
-            self.assertEqual(len(rows),22)
+            self.assertEqual(len(rows),21)
             self.assertTrue(all(mode=='--dry-run' for _,mode in observed))
             with patch.object(s,'snapshot',return_value={}),patch.object(s,'physical',return_value={}),patch.object(s,'cli',return_value={'mode':'DRY_RUN','totalChanges':1}):
                 with self.assertRaises(AssertionError):s.verify_legacy(root,'owned',root)
@@ -49,7 +52,7 @@ class ScopeGuards(unittest.TestCase):
 
     def test_raw_input_exception_cannot_accept_other_incomplete_schemas(self):
         for key,_ in s.LEGACY_VERIFIERS:
-            if key in ['272','191-link']:continue
+            if key=='272':continue
             for classification in ['ALREADY_PRESENT','ABSENT','PARTIAL','PRE_'+key]:
                 with self.subTest(key=key,classification=classification),self.assertRaises(AssertionError):
                     s.validate_legacy(key,{'mode':'DRY_RUN','totalChanges':0,'classification':classification})
@@ -61,6 +64,46 @@ class ScopeGuards(unittest.TestCase):
         self.assertNotEqual('Main now','PREPARATION_AND_RESULTS_288_290')
 
 class PreservationGuards(unittest.TestCase):
+    def test_deployed_acceptance_evidence_is_read_only_and_every_field_is_pinned(self):
+        event={'id':'0c4a247e-339a-4adc-9ba2-061829eb2fce','entity':'WORK_ATTEMPT',
+            'entityId':'att-s02-p-2','action':'ACCEPTED','details':json.dumps({
+                'from':'RECORDED','to':'ACCEPTED','reason':None,
+                'note':'Links recorded ReviewDecision dec-s02-p-acc (reviewedAt 2026-09-08 15:00:00); acceptance pre-dated attempt review.',
+                'resultId':None,'oldResultIds':[],'newResultIds':[],'reviewDecisionId':'dec-s02-p-acc',
+                'reconciliation':'191-recorded-acceptance-link-v1','workItemId':'WI-GTM-DEMO-S02-P',
+                'linkedResultIds':['res-s02-p-run2']},separators=(',',':')),
+            'performedBy':'system:release-191-acceptance-link','performedByName':'system:release-191-acceptance-link',
+            'timestamp':'2026-10-11T05:47:03.103Z','sampleId':'GTM-DEMO-S02','labId':'GTM-LAB1','analysisCode':'P_OLSEN',
+            'before':'{"status":"RECORDED","resultIds":[]}','after':'{"status":"ACCEPTED","resultIds":[]}'}
+        self.assertEqual(s.fingerprint([event]),'d14c99ff5643a8fe31abef867604ffff2645f63c799e58c62c736937a665dc45')
+        with tempfile.TemporaryDirectory() as folder:
+            root=pathlib.Path(folder);file=root/'dev.db'
+            with sqlite3.connect(file) as db:
+                db.executescript('CREATE TABLE WorkItem(id TEXT,sampleId TEXT,analysis TEXT,status TEXT);'
+                    'CREATE TABLE WorkAttempt(id TEXT,workItemId TEXT,status TEXT);'
+                    'CREATE TABLE Result(id TEXT,attemptId TEXT,isCurrent INTEGER);'
+                    'CREATE TABLE ReviewDecision(id TEXT,workItemId TEXT,decision TEXT,attemptId TEXT);'
+                    'CREATE TABLE Report(id TEXT,sampleId TEXT,status TEXT);')
+                db.execute('CREATE TABLE AuditLog('+','.join(s.quoted(key)+' TEXT' for key in event)+')')
+                db.execute('INSERT INTO AuditLog VALUES('+','.join('?' for _ in event)+')',list(event.values()))
+                db.execute('INSERT INTO WorkItem VALUES(?,?,?,?)',('WI-GTM-DEMO-S02-P','GTM-DEMO-S02','P_OLSEN','ACCEPTED'))
+                db.execute('INSERT INTO WorkAttempt VALUES(?,?,?)',('att-s02-p-2','WI-GTM-DEMO-S02-P','ACCEPTED'))
+                db.execute('INSERT INTO Result VALUES(?,?,?)',('res-s02-p-run2','att-s02-p-2',1))
+                db.execute('INSERT INTO ReviewDecision VALUES(?,?,?,?)',('dec-s02-p-acc','WI-GTM-DEMO-S02-P','ACCEPT',None))
+                db.execute('INSERT INTO Report VALUES(?,?,?)',('RPT-GTM-DEMO-S02-v1','GTM-DEMO-S02','PUBLISHED'))
+            before=s.physical(file)
+            self.assertEqual(s.verify_retained_acceptance(root)['totalChanges'],0)
+            self.assertEqual(s.physical(file),before)
+            faults=["UPDATE WorkAttempt SET status='RECORDED'", "UPDATE ReviewDecision SET attemptId='fabricated'",
+                "UPDATE Result SET isCurrent=0", "UPDATE Report SET status='DRAFT'",
+                "UPDATE WorkItem SET sampleId='other'"]
+            faults += ['UPDATE AuditLog SET '+s.quoted(field)+"='changed'" for field in event]
+            faults += ['INSERT INTO AuditLog SELECT * FROM AuditLog']
+            for index,sql in enumerate(faults):
+                altered=root/str(index);altered.mkdir();shutil.copyfile(file,altered/'dev.db')
+                with sqlite3.connect(altered/'dev.db') as db:db.execute(sql)
+                with self.subTest(sql=sql),self.assertRaises(AssertionError):s.verify_retained_acceptance(altered)
+
     def test_only_additive_schema_and_one_new_receipt_are_allowed(self):
         with tempfile.TemporaryDirectory() as folder:
             file=pathlib.Path(folder)/'dev.db'

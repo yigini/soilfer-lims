@@ -266,6 +266,7 @@ if __name__ == '__main__':
         (ROOT / 'assets-before-combined-release.tar.gz').chmod(0o400)
         receipt['assetsBackupSha256'] = s.sha(ROOT / 'assets-before-combined-release.tar.gz')
         mark('stoppedWriterBackupVerified')
+        receipt['retainedAcceptance'] = s.verify_retained_acceptance(s.LIVE.parent)
         receipt['legacyVerifiers'] = s.verify_legacy(ROOT,image,s.LIVE.parent)
         assert s.snapshot(s.LIVE)==before and s.physical(s.LIVE)==receipt['preApplyFiles']
         receipt['installers'] = s.install_series(ROOT,image,s.LIVE.parent,

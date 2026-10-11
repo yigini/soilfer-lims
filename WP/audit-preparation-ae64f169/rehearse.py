@@ -46,6 +46,7 @@ if __name__ == '__main__':
         before = s.snapshot(database)
         assert before['integrity'] == 'ok' and before['foreignKeyViolations'] == 0
         receipt['originalTables'] = before['tables']
+        receipt['retainedAcceptance'] = s.verify_retained_acceptance(prisma)
         receipt['legacyVerifiers'] = s.verify_legacy(ROOT, image, prisma)
         receipt['installers'] = s.install_series(ROOT, image, prisma)
         after = s.snapshot(database, before)

@@ -20,7 +20,6 @@ LEGACY_VERIFIERS = [
     ('189', 'install_result_equipment_evidence.js'),
     ('178', 'install_workitem_uniqueness.js'),
     ('190', 'install_work_attempt_contract.js'),
-    ('191-link', 'link_recorded_acceptance.js'),
     ('191', 'install_work_repeat_contract.js'),
     ('192', 'install_reported_value_selections.js'),
     ('194', 'install_batch_reagent_lots.js'),
@@ -41,6 +40,8 @@ INCLUDED_PRS = [288,290]
 INSTALLERS = [("205", "install_preparation_records.js")]
 MIGRATION_SHA = "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c"
 RAW_INPUT_MIGRATION_SHA = '850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc'
+RETAINED_ACCEPTANCE_EVENT_ID = '0c4a247e-339a-4adc-9ba2-061829eb2fce'
+RETAINED_ACCEPTANCE_EVENT_SHA = 'd14c99ff5643a8fe31abef867604ffff2645f63c799e58c62c736937a665dc45'
 READY_EVENTS = ['WORKFLOW', 'RESULT_ATTEMPT', 'SAMPLE_HOLD', 'REFERENCE',
     'QC_RULE', 'QC_RUN', 'QC_GATE_SCOPE', 'PT', 'NCR', 'RESULT_EQUIPMENT',
     'WORK_ATTEMPT', 'WORK_REPEAT', 'REPORTED_VALUE', 'REAGENT_LOT',
@@ -164,6 +165,7 @@ def stop_owned_cli(name, owner):
 
 def cli(root, image, database_dir, script, mode, label, extra_args=()):
     assert mode in ['--dry-run', '--apply']
+    assert script != 'link_recorded_acceptance.js', 'The completed acceptance reconciliation must never run again'
     assert mode != '--apply' or script == 'install_preparation_records.js', 'No prior release installer or acceptance may apply'
     mount = 'type=volume,src=lims_lims-data,dst=/app/server/prisma' if database_dir == LIVE.parent else 'type=bind,src=' + str(database_dir) + ',dst=/app/server/prisma'
     assert re.fullmatch('[a-zA-Z0-9_.-]+', label)
@@ -249,9 +251,7 @@ def preserve(before, after):
 
 def validate_legacy(key, value):
     assert value['mode']=='DRY_RUN' and value['totalChanges']==0
-    if key=='191-link':
-        assert value['blockedWorkItemCount']==0 and value['eligible']==value['unresolved']==[]
-    elif key=='272':
+    if key=='272':
         # #272 has no receipt: its read-only classifier verifies the nullable
         # rawInput column and reports ALREADY_PRESENT, never COMPLETE.
         assert value['classification']=='ALREADY_PRESENT', '272 prior schema not complete'
@@ -261,6 +261,40 @@ def validate_legacy(key, value):
         assert value['classification'].startswith('COMPLETE'), key+' prior schema not complete'
     if key=='191':
         assert value['releaseInventory']['blockedWorkItemCount']==0 and value['releaseInventory']['blockedWorkItems']==[]
+
+
+def verify_retained_acceptance(directory):
+    # The pre-#191 reconciliation intentionally refuses even DRY_RUN after
+    # #191. Verify the already-deployed evidence directly through mode=ro.
+    db=sqlite3.connect('file:'+str(directory/'dev.db')+'?mode=ro',uri=True)
+    db.row_factory=sqlite3.Row
+    try:
+        db.execute('BEGIN')
+        item=dict(db.execute('SELECT id,sampleId,analysis,status FROM WorkItem WHERE id=?',
+            (ACCEPTANCE_TUPLE['workItemId'],)).fetchone())
+        assert item=={'id':ACCEPTANCE_TUPLE['workItemId'],'sampleId':ACCEPTANCE_TUPLE['sampleId'],
+            'analysis':ACCEPTANCE_TUPLE['analysis'],'status':'ACCEPTED'}
+        attempt=dict(db.execute('SELECT id,workItemId,status FROM WorkAttempt WHERE id=?',
+            (ACCEPTANCE_TUPLE['attemptId'],)).fetchone())
+        assert attempt=={'id':ACCEPTANCE_TUPLE['attemptId'],'workItemId':ACCEPTANCE_TUPLE['workItemId'],'status':'ACCEPTED'}
+        result=dict(db.execute('SELECT id,attemptId,isCurrent FROM Result WHERE id=?',
+            (ACCEPTANCE_TUPLE['resultIds'][0],)).fetchone())
+        assert result=={'id':ACCEPTANCE_TUPLE['resultIds'][0],'attemptId':ACCEPTANCE_TUPLE['attemptId'],'isCurrent':1}
+        decision=dict(db.execute('SELECT id,workItemId,decision,attemptId FROM ReviewDecision WHERE id=?',
+            (ACCEPTANCE_TUPLE['reviewDecisionId'],)).fetchone())
+        assert decision=={'id':ACCEPTANCE_TUPLE['reviewDecisionId'],'workItemId':ACCEPTANCE_TUPLE['workItemId'],
+            'decision':'ACCEPT','attemptId':None}
+        report=dict(db.execute('SELECT id,sampleId,status FROM Report WHERE id=?',('RPT-GTM-DEMO-S02-v1',)).fetchone())
+        assert report=={'id':'RPT-GTM-DEMO-S02-v1','sampleId':ACCEPTANCE_TUPLE['sampleId'],'status':'PUBLISHED'}
+        events=[dict(row) for row in db.execute('SELECT * FROM AuditLog WHERE entity=? AND action=? AND performedBy=? ORDER BY id',
+            ('WORK_ATTEMPT','ACCEPTED',ACCEPTANCE_ACTOR))]
+        assert len(events)==1 and events[0]['id']==RETAINED_ACCEPTANCE_EVENT_ID
+        assert fingerprint(events)==RETAINED_ACCEPTANCE_EVENT_SHA, 'Original deployed acceptance event changed'
+        return {'mode':'READ_ONLY_RETAINED_EVIDENCE','totalChanges':0,
+            'eventId':RETAINED_ACCEPTANCE_EVENT_ID,'eventSha256':RETAINED_ACCEPTANCE_EVENT_SHA,
+            'attemptStatus':'ACCEPTED','reviewDecisionAttemptId':None,'reportStatus':'PUBLISHED'}
+    finally:
+        db.close()
 
 
 def verify_legacy(root,image,directory,label_prefix='legacy'):
