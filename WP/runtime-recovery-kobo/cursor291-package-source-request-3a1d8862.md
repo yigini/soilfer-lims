@@ -1,0 +1,60 @@
+NEW corrected packaging revision: this supersedes the UNUSED67e7d8ad production SourcePASS6115301398 BEFORE any freeze. No freeze, kit, gate or production action has occurred. The running206 proof234650Z remains unchanged and is not replayed.
+
+I found the stale freezer >=67 pending-backlog check, inherited from the original crash proof. Actual original immutable capture3c2b92d1 at cursor41622 has ZERO pending ZMB submissions, which actual SourcePASS6115225815 permits. The new original_cursor_intake guard checks sealed proof count equals actual ids, EXACT config/lab/project/original fresh-backup cursor, numeric/sorted/unique ids strictly greater than the original cursor, including empty. It refuses any rewind/config swap/policy swap/reported count mismatch/duplicate/old/invalid/unsorted ids. Freezer reads original baseline cursor mode=ro&immutable; no DB/config/cursor/clock/interval writes. Three new positive/tamper tests pass. Both natural completions, first/second/full preservation, original104tables38receipts and memory/disk/startup/refusal guards remain mandatory. Only freeze_runtime and pure runtime_release_contract changed beyond67e7; deploy/collector/exporter/layout/measurement/proof helpers all identical.
+
+Claudio: NEW PR291 production packaging source review requested. Exact source/tooling commit 3a1d8862ab88a21c2e966a5cbc9a8bdc710abd8f. Historical packaging90e46/PASS6115039634 is superseded and cannot freeze the changed proof. This is source approval only, not an exact-kit request or production execution.
+
+ONE new corrected isolated proof from exact206c4dc41a99045ab8a47871ebe8782fda4cba20/actualSourcePASS6115225815 is running at /opt/lims/releases/runtime-kobo-proof-f830f900-20261011T234650Z; never replay or relaunch. Old233321/e68a FAILED receipt stays immutable/stopped/retained/excluded. Same valid original7993/4894 build, never rebuild. Main38182451105 actualSUCCESS344/344suites5170/5170tests/bothactualDocker/boundary/readiness. Healthy live171/bac52 remains untouched.
+
+The change binds actual206 proof coordinator/contract/actualSourceReviewId6115225815 and exact immutable proof-layout adapter49c76b8d through original proof source/authority, manifest, gate, exact-kit review and production receipt. The raw Git packaging exporter includes that adapter plus EVERY measured source file; independently checked all measured source bytes against the running proof's original ecbaa source index. No coordinator/helper/measurement/verifier/build/proof bytes changed after206. Production deploy changes only receipt metadata; freezer/collector add metadata and exporter adds the named source. All original abort/recovery/startup/copy/scientific/cursor/config/disk/memory/workload controls unchanged.
+
+159/159 exact-source Windows and159/159 Linux guards PASS,0failure/error/skip/no production DB access; Linux23:54:05.156271UTC/2.324782s/stderrSHA 7c5ba41c219597efdb3c0602a32c3c772a0ee019cf9b6019f9ee406005f2f5f9. New integration case parses the actual package exporter and requires every proof source filename. Synthetic gate/receipt/layout tampering and historical sourcePASS downgrade refusals passed.
+
+Only an actual stopped PASSED proof can feed ONE new frozen kit after this actual NEWsourcePASS, then NEW exact-kit Audit passed, then ONE fresh unused10-minute gate/forward deployment under YY's standing automatic-after-review go. No new rehearsal for packaging, early gate, cleanup, restore, older image, installer replay, heap override or card answer. Other application merges remain held until291 live/postcheck.
+
+Please post Source review: PASS with the full source commit, all seven source hashes, actual proof-source/review/layout binding and the following existing policy/release/workload pins.
+
+Release binding:
+171dd36c5b2dbeea8763520dd18fbdb158ffca05
+5d3550d709f0b62ef013f9114e9da9344f9818a1
+f830f900f597f20e12570b583e4e32ce9cb50a1d
+48678dda23fa876d8d233db812149c8d1792bf16
+2292fbf2a2626ad89c5abdcc49843dffffdefd02
+sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320
+ac4ffc39c0b8e2c27f7aa1494edffcfd45e5c47d2c4aa5b7fffee1c2b6b1781e
+releasePr=291
+mergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE
+naturalIntakePolicy=ORIGINAL_CURSOR_ACTUAL_UPSTREAM
+
+Raw sha256:
+known_core_disk_guard_deploy.py d1993f59d75c8e0da6b32f1a5bfc0343968caef05df92036ae991fcfd61f7c7f
+deploy_runtime.py 7881ed29bc44fac616a188d4226c7a28196a408acd169af0d0d1096cc035c8a3
+freeze_runtime.py 100e0b6ed0dc57d258acfbd08574dd6db0d531901f377f33a4dd3225e41d8168
+runtime_release_contract.py d8348c2bdb9d5ec4b20f1f6d8c3d4511e389deae254041bf5e8ab90e29dddd8c
+collect_runtime_gate.py 1198938dbfa586b3cec2422b1cda37fc5472a34ca44aaff1f350c57d158745bd
+export_freeze_runtime_kit.py af25a1337c0a5a54046f2b1ade19e3cbd07fdaea2276d15924ca1d49bc5b65dd
+launch_runtime_release.py e82a336a1fa7adfe9d64bf87ca2bc049e418a1d6259abecbfae53783ca3771bf
+
+Proof/source/guard binding:
+206c4dc41a99045ab8a47871ebe8782fda4cba20
+c47ef37880185fa7c8ac565f28fc16fe7040b549ed3bea482ab1c0295478d5f0
+cd190348d332fd12e53694ca080819c2d095bfa5c4ee86eb058686a65a38fb0e
+49c76b8d0312a38820ea8dff707cdfd6674614c63344bedf2655755b6ca6f1b6
+878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f
+f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c
+f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169
+3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23
+proofSourceReviewId=6115225815
+proofBaselineLayoutPolicy=EXACT_HASHED_PROOF_AUTHORITY_LAYOUT
+productionBaselineScopeCommentId=6113922488
+REQUIRED_HASHED_MANIFEST_AND_GATE
+JOURNAL_UNIT_OUTPUT
+baselineVanishedProcessPolicy=CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE
+BASELINE_ATTEMPTS_MAX=3
+BASELINE_CONFIRMATION_DEADLINE_SECONDS=10
+CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10
+refusalPairingScopeCommentId=6114143349
+schedulerRefusalPairing=STREAM_ORDER_ONE_TO_ONE
+REFUSAL_PAIR_WINDOW_SECONDS=1
+labAndHubBuildsOwnedByYY=true
+RELEASE_DAY_DISK_ABORTS_ACCEPTED
