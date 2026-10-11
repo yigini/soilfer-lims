@@ -1,6 +1,6 @@
 {
   "releaseVersion": "v1.0.0",
-  "publishedAt": "2026-10-10T16:42:20.603Z",
+  "publishedAt": "2026-10-11T16:58:13.612Z",
   "provenance": "system-app-review",
   "reviewScope": "Application navigation, UI controls, error recovery, and operational workflows verified against SoilFER LIMS v3.4 controls",
   "scientificBoundary": "Operational workflow guidance only; chemical method protocols and lab-specific policies are managed separately via laboratory-local notes (HelpLabNote) requiring lab manager authorization",
@@ -18,7 +18,7 @@
       "category": "start",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "237ded47-c747-4a5a-9aac-38d0182c0e19",
+      "revisionId": "beb94571-c48d-4355-804b-49cea80af775",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -44,7 +44,7 @@
       "category": "start",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "bdbaac50-710a-402c-bb3f-d27490ce58db",
+      "revisionId": "ea5d09c9-e098-4e37-99b2-05734f4cc73e",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -71,7 +71,7 @@
       "category": "start",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "d2de17a9-a5d9-4f76-9457-3ce9018fb94e",
+      "revisionId": "9c63b336-e160-4a66-ab90-66e6a5b1dc5f",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -97,7 +97,7 @@
       "category": "start",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "ff2515e4-4a7b-4165-9f0d-3cae4bda1053",
+      "revisionId": "0701c7da-4e27-4b50-8220-93afa9717fd7",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -123,7 +123,7 @@
       "category": "start",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "6290f7e6-1dd7-4bab-94ca-efa44d213eb1",
+      "revisionId": "7faad571-6d63-4975-b9ba-c02cf1aa8e42",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -150,7 +150,7 @@
       "category": "start",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "0c973f40-3add-44a8-912b-63a23961506d",
+      "revisionId": "43802c96-1fe7-4b3e-9229-b852431a07c8",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -177,7 +177,7 @@
       "category": "start",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "37fc67ae-74f2-4d06-81e1-e2a0b9f111f2",
+      "revisionId": "63380ddb-7222-4a4a-b248-39e15973cc04",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -205,7 +205,7 @@
       "category": "start",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "41c23278-835c-431e-9e7c-f3d5199d0633",
+      "revisionId": "336081f1-142d-4931-9493-f11eb096b420",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -231,7 +231,7 @@
       "category": "intake",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "3baec521-3ca8-4cfb-8852-1fc83488a58d",
+      "revisionId": "b056486b-07de-4552-a3a4-4a7dd62e4b7d",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -256,7 +256,7 @@
       "category": "intake",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "6ceb4179-5ee5-4193-a34b-fd89b8db9d15",
+      "revisionId": "d570cfb8-feeb-4c0c-a07c-a722b09b870a",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -281,7 +281,7 @@
       "category": "intake",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "671888ae-4f6f-4909-8572-88e81fb1d5bc",
+      "revisionId": "63fa07e2-259d-4178-9b2e-ec850bbfc613",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -306,7 +306,7 @@
       "category": "intake",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "c835cd41-8915-4667-a52c-adfef183a77e",
+      "revisionId": "1422e702-bf60-430a-9289-f0cf2b48e986",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -332,7 +332,7 @@
       "category": "intake",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "fc521931-7836-483a-949b-0ed03ece005e",
+      "revisionId": "6b0e1206-f9ff-42ca-949d-fc6eae5f6e2f",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -357,7 +357,7 @@
       "category": "intake",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "485bc785-0832-4876-96c4-510acd654248",
+      "revisionId": "b52ed877-874b-4e1e-8c55-2d443aa50d59",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -382,7 +382,7 @@
       "category": "intake",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "d62c6e87-6d87-4588-b73b-dfe27f598949",
+      "revisionId": "895adf0f-b1b7-4399-bc52-fc729fb438bd",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -408,7 +408,7 @@
       "category": "intake",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "c94eaa8f-eef1-4868-9efe-326ca1faae83",
+      "revisionId": "804a56a6-65dd-474a-8032-4987b36c809b",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -433,7 +433,7 @@
       "category": "tracking",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "612ae136-1143-455a-859c-212be2d3967b",
+      "revisionId": "a5fd3ef7-03db-4b84-8c25-bd9ce253d5b0",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -460,7 +460,7 @@
       "category": "tracking",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "75c6b579-ab84-4edd-9815-40d24fa235d3",
+      "revisionId": "a96a621a-a65a-4db7-8a2b-341afb265950",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -485,7 +485,7 @@
       "category": "tracking",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "c899898f-b93b-406e-ab57-fde10151318d",
+      "revisionId": "1ad2e4c9-fff6-4663-9543-c0e1d544548f",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -510,7 +510,7 @@
       "category": "tracking",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "9b908382-9e7a-4cdd-95e6-be89ae6901a2",
+      "revisionId": "a10dc5f6-fe09-4650-bc7a-501d4acf47bf",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -536,7 +536,7 @@
       "category": "tracking",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "325cdaae-d274-457d-823e-edc9031c9e83",
+      "revisionId": "1ded7bc0-7731-4676-b7d2-2878e682d25f",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -562,7 +562,7 @@
       "category": "tracking",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "25a96c59-9fae-4eb7-a9ab-c901d05fbc42",
+      "revisionId": "e12f1a7f-d468-4a38-8546-3282b64c0c3b",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -587,7 +587,7 @@
       "category": "preparation",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "84076984-7fe6-4aa9-8cfb-849ae3c0e54f",
+      "revisionId": "24aa7bda-c79c-4c83-9969-c1b866fdbbee",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -613,7 +613,7 @@
       "category": "preparation",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "b9ecfc20-e7f2-46e0-bf94-9fd4b5338b84",
+      "revisionId": "0711654f-7fa7-417e-bb74-5a77f394aa88",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -639,7 +639,7 @@
       "category": "preparation",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "e5b82db1-5684-47f8-bd8e-82de87c4713f",
+      "revisionId": "6af552d7-4df5-464c-b72b-1108b553f10f",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -668,7 +668,7 @@
       "category": "preparation",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "abf94ff6-4205-49e3-a401-169afd1307b0",
+      "revisionId": "f627fe75-4bd4-493c-93c5-e5ecb309a452",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -694,7 +694,7 @@
       "category": "preparation",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "e98ae104-c686-4db6-8c51-c9d546563d82",
+      "revisionId": "745e689f-5338-4610-88e9-042da3b18dd5",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -721,7 +721,7 @@
       "category": "preparation",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "c573112f-e36b-4cdf-a75f-359bf8f6e59b",
+      "revisionId": "a3edc023-2bb9-4447-a724-52dcf5fd328b",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -748,7 +748,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "be593e92-3d88-411c-9db0-82dabb261955",
+      "revisionId": "fd38f578-75f9-4fd8-9dd1-184875b3eb76",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -774,7 +774,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "9991a4e0-d7b9-4af7-bf02-a5b2a8969f3c",
+      "revisionId": "e483b31e-a956-41ef-8c46-1ce6dd6c307c",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -800,7 +800,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "269428e6-7269-44bb-9a48-b9f0f83f98a7",
+      "revisionId": "d09706e3-3f36-4090-b65a-b0cf0694b8d2",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -826,7 +826,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "a19f780f-ae8d-48d4-96e8-1e9463eab682",
+      "revisionId": "1187aff4-4d8b-49e7-8a57-c0d948667834",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -852,7 +852,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "d0951b36-4094-42ef-9735-bdeb6ccbc635",
+      "revisionId": "2219912d-614e-43a3-8cc6-3814241a8814",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -881,7 +881,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "1e31e468-cf0b-4fe3-818e-b66c17452053",
+      "revisionId": "a873be47-9800-416c-8d8f-429ade5dc829",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -907,7 +907,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "58e6b627-1388-4a8b-83ed-3d144deee751",
+      "revisionId": "044ba72f-8090-4f68-a517-74701206008e",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -934,7 +934,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "f6dbb9bb-89d7-41ac-bcc0-7d644fe00036",
+      "revisionId": "f1480f42-9c82-411c-98b3-c613528679e7",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -960,7 +960,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "43333df6-1488-4108-92ac-fe1cc3f5a75e",
+      "revisionId": "a1e046f8-5eb8-4821-bd4a-6c4b691335f6",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -986,7 +986,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "376cf7d6-acee-4ac1-8335-5784dd3a6929",
+      "revisionId": "0f536104-2717-40f6-9032-fad623fa1464",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1012,7 +1012,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "34221eba-0f15-49a7-8ab2-d7decc2d527d",
+      "revisionId": "5baa6b82-1411-4c3a-9bea-ec721a2a5e19",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1040,7 +1040,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "ec69aca7-b473-4695-a32f-251a5ebf2589",
+      "revisionId": "73dffe27-7dcd-4278-8178-c3b5c1d5ec58",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1066,7 +1066,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "1e8a183f-4b80-486a-9468-5431d9ec1533",
+      "revisionId": "ec0dcaa1-14a9-4aad-b3a0-cc580e3a07cd",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1093,7 +1093,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "52a72761-d50d-4946-80c6-2db8e6403849",
+      "revisionId": "1adcb540-0760-4745-a1b5-99ed9244de59",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1120,7 +1120,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "d72cbf94-cd85-4200-a274-5051b30eaafc",
+      "revisionId": "41d863f0-3c93-411d-a2d1-41b23d73ceb4",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1147,7 +1147,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "a4e2a275-d557-41ad-9211-9846abc6ee4b",
+      "revisionId": "cc07b316-fc06-454c-b8f6-ed05476eb582",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1173,7 +1173,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "b10fd482-1e67-46c0-830a-a10be23e6041",
+      "revisionId": "9fd9ffed-eef6-48fb-bb21-f9dc33479f34",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1199,7 +1199,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "c5197de9-7b24-4abd-936d-3612aa60b1f4",
+      "revisionId": "8d60c058-9d30-44c7-9c9e-5c66e8ae46b5",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1226,7 +1226,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "e2ac7676-94e1-4c27-a760-7b8d011f8dfe",
+      "revisionId": "9d3910fd-51bf-4d3d-b2d6-036148b1147e",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1253,7 +1253,7 @@
       "category": "review",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "130a9cce-fbb1-49d0-86ba-10a2fa77b2f7",
+      "revisionId": "1c01129e-a18e-41ac-8c7e-e6785103cb5d",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1278,7 +1278,7 @@
       "category": "review",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "addc31b5-ff47-4725-9aaa-d1b88c6ccc81",
+      "revisionId": "79cd4599-6bed-4770-90c1-6925c8ec2a76",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1303,7 +1303,7 @@
       "category": "review",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "a80b1f9f-8fa8-4ef0-9418-d4f64e2df546",
+      "revisionId": "a854d6bc-b4a1-4933-841c-21f482af3797",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1328,7 +1328,7 @@
       "category": "review",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "61151d37-a737-4e69-aa5d-bc856f7e0fc6",
+      "revisionId": "9a2583eb-3c52-458c-9fc2-7987ca0dda5c",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1353,7 +1353,7 @@
       "category": "review",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "bd643a96-edbd-4565-aa90-19c67905585c",
+      "revisionId": "5c6efb64-9670-4ec0-823b-348eb59df224",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1379,7 +1379,7 @@
       "category": "review",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "fbd5ce15-9e5a-420f-b8a9-c6c52b1445e8",
+      "revisionId": "afe00763-12de-4cbb-8052-f95d2a62e39a",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1406,7 +1406,7 @@
       "category": "review",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "8e110f2d-ec5b-4f31-8e3b-127351781580",
+      "revisionId": "49f6a576-5508-45ad-af08-63c0cd2dc929",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1433,7 +1433,7 @@
       "category": "review",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "d3ef26a0-ed4b-464f-854b-c94f3992fa68",
+      "revisionId": "d29353ea-b60b-4378-8d13-4c8e4351c704",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1460,7 +1460,7 @@
       "category": "review",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "326d048a-d6e8-4fc5-bd84-b4a3208d7fbf",
+      "revisionId": "0c986d08-15d8-4fc1-844e-654a16985666",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1487,7 +1487,7 @@
       "category": "assets",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "fac214cd-d039-40c9-b0e5-e035ee329ee4",
+      "revisionId": "c7a0f9eb-acee-46f1-9aa4-4e6b469b07dd",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1514,7 +1514,7 @@
       "category": "assets",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "d3ae61d8-c323-45a1-942c-df5e9b3c2382",
+      "revisionId": "94492e88-a8b4-47cb-9141-24f25b07472a",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1539,7 +1539,7 @@
       "category": "assets",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "8aee4386-83a3-4e28-9ca4-fb113d98c881",
+      "revisionId": "16b0afe5-43f6-45b0-928d-6e5759af8efe",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1564,7 +1564,7 @@
       "category": "assets",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "90ae1e06-8e83-43cc-88aa-a2846919ddb2",
+      "revisionId": "1d3ce559-d3c1-4f2d-8202-304201daedd8",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1589,7 +1589,7 @@
       "category": "assets",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "26ee0058-07cd-44cc-8263-1a2fa4fb4476",
+      "revisionId": "7f014d45-f4b4-4832-9efd-572d9b9ce956",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1616,7 +1616,7 @@
       "category": "assets",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "e03fe5a8-ef4c-4a04-998f-65ed2f81a998",
+      "revisionId": "8d02ae25-5f9e-42e1-aef0-1210db6a6241",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1641,7 +1641,7 @@
       "category": "assets",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "53952000-5ab2-4930-995c-d9b288764472",
+      "revisionId": "550cd149-f4c0-485c-aecb-8a4a3446f44f",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1666,7 +1666,7 @@
       "category": "assets",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "ba5097c5-3699-49bd-b89d-f6e956d446da",
+      "revisionId": "9f68d109-6d82-4136-848f-c2d5c6f8de83",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1693,7 +1693,7 @@
       "category": "offline",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "37b5894c-f149-4e5c-9c78-3bd9c0baab1c",
+      "revisionId": "e9e603b2-9ebe-4e3d-8bdd-b84758362ef2",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1718,7 +1718,7 @@
       "category": "offline",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "dfafbb4e-b6e6-4bdc-b905-8b739c34b20d",
+      "revisionId": "b2b59950-7fec-48b7-8a00-5c76e6ce237f",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1744,7 +1744,7 @@
       "category": "offline",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "a6340206-03ef-4820-8d9b-d56855c0f508",
+      "revisionId": "19a7c91b-12e3-4922-8d21-8de4c75b4cc8",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1771,7 +1771,7 @@
       "category": "offline",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "d017d836-8750-44e3-89f7-50f0663cec56",
+      "revisionId": "64b5ef01-fd88-4364-b7ed-3c3a7b551967",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1797,7 +1797,7 @@
       "category": "offline",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "400d2511-a2e0-40f8-a400-7512d6bed0fb",
+      "revisionId": "208aec4c-d7b1-4aea-9b2d-e2b051578ae3",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1823,7 +1823,7 @@
       "category": "offline",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "75ec3fec-24a3-475b-ad97-35da610a90e0",
+      "revisionId": "43e07cad-6433-46e0-b04f-d34381a7094b",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1848,7 +1848,7 @@
       "category": "offline",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "f878c356-cbce-4c75-8206-f8b5773c11ef",
+      "revisionId": "112f38f3-506e-4cce-9d7c-6cc26b91730a",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1875,7 +1875,7 @@
       "category": "connect",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "9de0d2ee-42d1-443f-be95-5e2f25a6e943",
+      "revisionId": "6a8521fc-6dea-4bf9-9b9d-86c2ace0219c",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1900,7 +1900,7 @@
       "category": "connect",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "c612664f-3002-4319-9ed2-c4a8eaabeabc",
+      "revisionId": "dec4e032-41a2-4726-a4f1-8d4facc57f8d",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1926,7 +1926,7 @@
       "category": "connect",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "b222bca1-f875-4ba8-a9d6-0203317e4fc9",
+      "revisionId": "9d8fd4e5-ec03-45a3-b443-ab94551de0a6",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1953,7 +1953,7 @@
       "category": "connect",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "5609c097-a400-4530-95ba-bf4158a51cfd",
+      "revisionId": "566f4bcd-7619-46e6-8cf1-8f6a7aef7a88",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -1979,7 +1979,7 @@
       "category": "connect",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "66545b57-288c-4ab3-bc60-a9e8ec51aa11",
+      "revisionId": "3abefcdc-f952-4e45-beea-fb8eb358e151",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2006,7 +2006,7 @@
       "category": "connect",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "8bbc3503-a983-4a1f-9ada-4fb51f9f79cd",
+      "revisionId": "b5f8b8e0-4365-4177-8ae8-637874ea6122",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2032,7 +2032,7 @@
       "category": "connect",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "207ca852-5495-4297-aa5f-5cf920874c5f",
+      "revisionId": "b90ffdff-b5ba-47f7-b50f-dd2ff7b8ff84",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2058,7 +2058,7 @@
       "category": "connect",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "278f9cc1-5b65-4c15-977f-302a360ae732",
+      "revisionId": "69bbafe7-d49c-4699-ac68-011825a35599",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2084,7 +2084,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "82bf1567-44e3-447e-8f0a-6651d1d415e4",
+      "revisionId": "7e63da5b-5eaf-451d-91a0-226bba09e5f6",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2109,7 +2109,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "705b45cb-2d11-45b5-9443-ba3ef6ea2bc0",
+      "revisionId": "62819bcf-8c96-42ee-ad69-d5b927ba25af",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2134,7 +2134,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "4aa8a88c-c5b0-44ff-a92b-3bed0ba00317",
+      "revisionId": "9c013b4f-bfc6-4695-b25c-b594456ba90b",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2160,7 +2160,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "99714eec-b24a-45a3-bceb-450237e7e8fb",
+      "revisionId": "4af269a7-064a-443e-9f9a-4b0f8793649d",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2185,7 +2185,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "d30a923f-7040-4e93-8128-b1644b507b65",
+      "revisionId": "094a7a38-d6c1-42ac-a64b-10ef5914cfbc",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2211,7 +2211,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "cc395607-b6e5-45ec-9c56-c38d858ade0e",
+      "revisionId": "954d713a-c62a-4969-88e3-9a6f368be620",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2236,7 +2236,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "36dfbe8b-5957-43fc-bb22-c1aefb2cddc0",
+      "revisionId": "0fd03f09-109e-434e-8e0d-9ecd480be3b3",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2261,7 +2261,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "a56755c1-63e0-46cd-8c28-2dc6af6de7d7",
+      "revisionId": "f5235866-5986-4935-b248-a9e08e205041",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2286,7 +2286,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "401cdc11-1ac1-481e-8550-1c82da453779",
+      "revisionId": "c01dd8e4-6552-4c7a-8452-cbd2b2c84faf",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2311,7 +2311,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "46d01716-ea52-4c3f-a04f-7165d3bab90d",
+      "revisionId": "fc463fdf-0b68-4108-bbc0-1753d81aa2bd",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2336,7 +2336,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "61beefdc-39a8-48c9-95cc-435c493767af",
+      "revisionId": "2e7e9167-4ac3-4acf-ac3e-71f39b6b1493",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2362,7 +2362,7 @@
       "category": "quality",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "e5438d48-4ad8-4128-8c40-1a46fd9601be",
+      "revisionId": "33847c15-05c8-409f-b493-971c9cfd70fb",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2388,7 +2388,7 @@
       "category": "quality",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "1e39965b-49fa-41dc-9396-5a4ba0ef57ee",
+      "revisionId": "61b42e75-c9b0-4f28-9b06-b6f8d7bdfb0f",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2413,7 +2413,7 @@
       "category": "quality",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "50d20057-79dd-42a3-9694-ecac39c22965",
+      "revisionId": "2fa927db-9b1c-4510-b25f-f183038c4ef4",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2439,7 +2439,7 @@
       "category": "quality",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "13ecb55c-287d-4462-887a-1df780dfb4b1",
+      "revisionId": "377bd1b6-0cbf-4337-a8ca-7839ea96456a",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2466,7 +2466,7 @@
       "category": "quality",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "f8523c6f-1e57-4396-a69b-fc21e33da896",
+      "revisionId": "e089f5f5-2068-4697-8b97-3c4f04f2d3ec",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2493,7 +2493,7 @@
       "category": "quality",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "e27a459d-5f0e-4b74-ab65-706c87832eef",
+      "revisionId": "432ae9ea-db00-4b3f-b465-afc88caf645a",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2518,7 +2518,7 @@
       "category": "start",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "1d96e342-c2e2-4693-b160-f62bd0df30bc",
+      "revisionId": "d85bc838-96c1-499e-9d98-74fb11b1eca5",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2543,7 +2543,7 @@
       "category": "tracking",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "c4f4b255-2896-4b79-9dea-fccbaa9372c9",
+      "revisionId": "14a5e42e-01d4-499c-b2f1-597732088a3f",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2566,7 +2566,7 @@
       "category": "preparation",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "9f96bdac-bd06-46c4-9634-efabfe65a2fb",
+      "revisionId": "69373753-2330-4286-aa27-ebc4b410172b",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2589,7 +2589,7 @@
       "category": "preparation",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "acc6c303-aab4-4444-a16b-6103d1185817",
+      "revisionId": "957d1f2f-7413-4686-9a19-8f00d5e43708",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2612,7 +2612,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "686a4646-91c1-4365-a001-e7948871e18f",
+      "revisionId": "fcafb14c-18b3-4d67-aa85-2040206e0ce8",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2637,7 +2637,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "a6ca57e0-d36c-406b-a2c8-faea2b5f2c41",
+      "revisionId": "1fcf33a6-b8fb-4939-8bcd-ecc0ee3fd5b8",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2662,7 +2662,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "29c19a40-f570-426b-a12f-150d90cc4cc7",
+      "revisionId": "ba27a33c-bc1f-4e90-b4cd-23b85114e07c",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2685,7 +2685,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "49b24d5c-6e6f-4d1e-9571-d8b58e9c4522",
+      "revisionId": "8efb9485-16ea-401f-9bee-574a918efea0",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2708,7 +2708,7 @@
       "category": "review",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "4ac61be3-e4cc-4f27-8d9d-f8990d1a0b68",
+      "revisionId": "9263f77e-5a7c-4140-8886-5dc6ad736d97",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2733,7 +2733,7 @@
       "category": "bench",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "36c085bc-4f28-40d3-bea9-a77f585f9e94",
+      "revisionId": "3e3a1425-0721-4d34-8daf-67d3b87480cd",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2756,7 +2756,7 @@
       "category": "assets",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "16057c3b-e30f-49d5-8e98-179adb379298",
+      "revisionId": "be142525-13c4-40b6-840e-448e185e372c",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2779,7 +2779,7 @@
       "category": "offline",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "38464e9b-90a0-4632-a4a0-a49cddb2da8e",
+      "revisionId": "435003e5-06c5-4d30-a84d-c06e012b2349",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2802,7 +2802,7 @@
       "category": "methods",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "16c99593-7ea4-430b-9788-9d97fd284a64",
+      "revisionId": "fb2770ce-d7ee-46fc-b35c-5430d3863120",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2825,7 +2825,7 @@
       "category": "admin",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "ba2e5d23-2677-4427-8a06-da4e996465af",
+      "revisionId": "c94afc33-3b20-4c36-8a1b-66c3c35a5306",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2848,7 +2848,7 @@
       "category": "start",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "9b4e6761-d9ec-42de-8dec-ceb9fa18720b",
+      "revisionId": "83c23fdd-e880-4b94-a429-6ca3a8664c0f",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2871,7 +2871,7 @@
       "category": "quality",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "2d628c02-a5db-4c40-ac7d-a3ea461b9403",
+      "revisionId": "814ebb8d-9cb1-4d27-81d1-74bd11b1acf7",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",
@@ -2894,7 +2894,7 @@
       "category": "quality",
       "kind": "guide",
       "revisionNumber": 1,
-      "revisionId": "863df927-ecac-48d9-ba2c-8b9854d6c7e0",
+      "revisionId": "c18b4dc4-bf39-4342-bcf5-ee9c0edcce53",
       "sourceLocale": "en",
       "approvedLocales": [
         "en",

@@ -163,9 +163,9 @@ test('an analysis configured in a non-standard unit (SOC in %) keeps its unconve
     const method=await f.db.methodology.create({data:{analysisCode:'SOC',name:'Owned percent method'}});
     await require('../../services/qcRuleService').change(f.actor,{labId:f.labId,analysisCode:'SOC',methodologyId:method.id,
         criteria:{...criteria},expectedVersion:0,reason:'Reviewed fixture criteria'},{db:f.db});
+    const original=await f.result(f.items[0]);await f.choose({mode:'ATTEMPT',attemptIds:[original.attemptId]});
     f.item=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:f.item.sampleId,labId:f.labId,analysis:'SOC',
         methodologyId:method.id,status:'ACCEPTED',result:'1.5',history:'[]'}});
-    await f.db.workItem.update({where:{id:f.items[0].id},data:{status:'CANCELLED'}});
     const row=await createExecutionResultFixture(f.db,{attemptStatus:'ACCEPTED',data:{id:randomUUID(),sampleId:f.item.sampleId,param:'SOC',
         methodologyId:method.id,value:'1.5',numericValue:1.5,isCurrent:true,isValid:true,flags:'[]',unit:'%'}});
     await f.choose({mode:'ATTEMPT',attemptIds:[row.attemptId]});
