@@ -1,0 +1,15 @@
+Post-boot checks passed; resuming the separate ae64f169 release preparation.
+
+Verified 2026-10-11T13:10:38 UTC after YY's disk upgrade/reboot. Disk grew from 120 GiB to 240 GiB (257698037760 B), ext4 partition 257696972288 B, free 130876772352 B. No partition/filesystem resize was needed from Pip.
+
+LIMS retained the same container and exact feac653495d6b8a21e082cec596f1e14672fb389 image sha256:159057d56c456a0c7cdef917fd04f53f9a66d6285cc476d7203d63047bfff8e1, the same lims_lims-data/lims_lims-assets volumes, healthy/0 restarts. Hub and gateway retained their original containers/images/volumes and are running. Lab-admin is stopped; YY explicitly accepted labs on demand in this chat. Its home volume is retained with 25 notebooks (474 regular files now versus 476 before; no historical file manifest to identify that difference, so no full-file preservation claim).
+
+SQLite integrity_check OK/FK violations 0; all 103 table counts match the last retained verified production record, the original feac receipt at 06:00:46 UTC. No immediately-preboot DB snapshot exists. All 37 schema-receipt rows/fields match the recorded hash. The exact recorded acceptance remains ACCEPTED, ReviewDecision attemptId NULL and the published report PUBLISHED. Original production receipt 1f2e2d6621456bc11664ab7800ba0ab9e95d783b4efafde2a1175d3e1fade8c6 and all 26 frozen kit files remain unchanged.
+
+Public health HTTP 200/status ok/version 1.9.0; LIMS root/sign-in and configured training.yigini.net hub sign-in pages HTTPS 200/TLS verified. Anonymous auth/me 401; authenticated read-only auth/me locally/public HTTPS 200 with the reviewed principal. No password-login POST or account/session mutation was attempted.
+
+Fresh consistent ONLINE post-boot DB/assets backup completed 13:12:06 UTC, original retained root /opt/lims/backups/postboot-feac6534-20261011T131200Z, files mode 0400. Database 563322880 B, SHA256 90d3c734d4e9a7ce46f98bd3b36611ab422345b177cbe0b0878176ca100aaae6; assets archive 1815221 B, SHA256 44af91d141e3e07caf3ea15a488c042ff77d3b65c2358d2dee06121c24579694; original backup receipt SHA256 7b748a33546d03e8bfc24c5504219aa5e9668ddbd1c91a9608821ba5a551861b. Backup integrity/counts and assets verification passed. This is not a pre-reboot/stopped-writer backup. Free after backup 130311385088 B, above the conservative 10556150894 B proof/future deployment budget plus remaining allocation. Later production still requires its own stopped-writer backup and all reviewed gates.
+
+Correction: withdraw Pip's earlier attribution of the 12:21 UTC lab stop to Claudio. Claudio explicitly denies host access, host commands and stopping it. The authenticated soilfer-admin hub API stop is established; initiator remains UNKNOWN. No idle-cull cause is established.
+
+Checkpoint 13ddde501b6df16e5ad0fec9090afb789cdf6453 records the read-only checks and backup. Main remains ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf. Reuse only the original valid bc2557a5 build; next is a fresh owned-copy proof, immutable kit and Claudio's exact-kit review. No new production gate, installer, quiesce or deployment has run. Forward-only; no restore/older image/installer replay.

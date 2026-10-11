@@ -1,0 +1,55 @@
+{
+  "utc": "2026-10-11T13:20:28.117106+00:00",
+  "failedReceiptSha256": "e5394133bdc67a7ecdf6e3f4f2a47724bb9589d312aaf849433c0aac872a1b4e",
+  "failedReceiptStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+  "dry272": {
+    "classification": "ALREADY_PRESENT",
+    "counts": {
+      "results": 19,
+      "recordedRawInputs": 0
+    },
+    "backfillCount": 0,
+    "sources": {
+      "migrationSha256": "850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc"
+    },
+    "mode": "DRY_RUN",
+    "totalChanges": 0
+  },
+  "dry272Peak": {
+    "containerName": "lims-owned-cli-b9cc54f33e0976633f740e2d",
+    "memoryLimitBytes": 805306368,
+    "nodeOptions": null,
+    "exitCode": 0,
+    "cgroupMemoryPeak": {
+      "releaseCliPeakBytes": 31031296,
+      "childStatus": 0,
+      "childSignal": null
+    }
+  },
+  "freshCopySha256": "cb7d74acc43078194c930663209395899889c89548c394e6431c3c4ccdc22f53",
+  "ownedCopySha256": "cb7d74acc43078194c930663209395899889c89548c394e6431c3c4ccdc22f53",
+  "candidateUp": [
+    "soilfer-lims",
+    "soil-museum-museum-1",
+    "soilfer-hub",
+    "soilfer-gateway",
+    "alitt-web-1",
+    "alitt-worker-1",
+    "alitt-api-1",
+    "alitt-temporal-1",
+    "alitt-db-1",
+    "alitt-objects-1",
+    "littv2-app",
+    "littv2sub-app",
+    "littv2sub-db",
+    "littv2-db",
+    "littv3-app",
+    "littv3-db"
+  ],
+  "liveImage": "sha256:159057d56c456a0c7cdef917fd04f53f9a66d6285cc476d7203d63047bfff8e1 healthy 0",
+  "publicHealth": {
+    "status": "ok",
+    "version": "1.9.0",
+    "uptime": 1223.869161488
+  }
+}

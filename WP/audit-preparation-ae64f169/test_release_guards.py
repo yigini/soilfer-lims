@@ -24,6 +24,9 @@ class ScopeGuards(unittest.TestCase):
                 observed.append((script,mode))
                 if script=='link_recorded_acceptance.js':
                     return {'mode':'DRY_RUN','totalChanges':0,'blockedWorkItemCount':0,'eligible':[],'unresolved':[]}
+                if script=='install_result_raw_input.js':
+                    return {'mode':'DRY_RUN','totalChanges':0,'classification':'ALREADY_PRESENT',
+                        'backfillCount':0,'sources':{'migrationSha256':'850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc'}}
                 return {'mode':'DRY_RUN','totalChanges':0,'classification':'COMPLETE',
                     'releaseInventory':{'blockedWorkItemCount':0,'blockedWorkItems':[]}}
             with patch.object(s,'snapshot',return_value={}),patch.object(s,'physical',return_value={}),patch.object(s,'cli',side_effect=run):
@@ -32,6 +35,24 @@ class ScopeGuards(unittest.TestCase):
             self.assertTrue(all(mode=='--dry-run' for _,mode in observed))
             with patch.object(s,'snapshot',return_value={}),patch.object(s,'physical',return_value={}),patch.object(s,'cli',return_value={'mode':'DRY_RUN','totalChanges':1}):
                 with self.assertRaises(AssertionError):s.verify_legacy(root,'owned',root)
+
+    def test_recorded_raw_input_contract_refuses_absence_or_unreviewed_source(self):
+        # Exact #272 output retained from the first real owned-copy dry run.
+        recorded={'classification':'ALREADY_PRESENT','counts':{'results':19,'recordedRawInputs':0},
+            'backfillCount':0,'sources':{'migrationSha256':'850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc'},
+            'mode':'DRY_RUN','totalChanges':0}
+        s.validate_legacy('272',recorded)
+        for field,value in [('classification','ABSENT'),('classification','COMPLETE'),
+            ('backfillCount',1),('sources',{'migrationSha256':'0'*64}),('mode','APPLIED'),('totalChanges',1)]:
+            with self.subTest(field=field,value=value),self.assertRaises(AssertionError):
+                s.validate_legacy('272',{**recorded,field:value})
+
+    def test_raw_input_exception_cannot_accept_other_incomplete_schemas(self):
+        for key,_ in s.LEGACY_VERIFIERS:
+            if key in ['272','191-link']:continue
+            for classification in ['ALREADY_PRESENT','ABSENT','PARTIAL','PRE_'+key]:
+                with self.subTest(key=key,classification=classification),self.assertRaises(AssertionError):
+                    s.validate_legacy(key,{'mode':'DRY_RUN','totalChanges':0,'classification':classification})
 
     def test_old_main_scope_does_not_authorize_new_production(self):
         self.assertNotEqual(s.HEAD,s.LAST_DEPLOY)

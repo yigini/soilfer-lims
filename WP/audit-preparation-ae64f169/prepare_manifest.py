@@ -29,7 +29,8 @@ def validate(proof, build, gates):
     assert stage['apply']['backfilledCount']==0 and stage['apply']['receipt']['originalRowsPreserved'] is True
     assert proof['repeatInstallers']==[{'key':'205','mode':'NO_OP','totalChanges':0}]
     assert [(row['key'],row['script']) for row in proof['legacyVerifiers']]==s.LEGACY_VERIFIERS
-    assert all(row['dryRun']['mode']=='DRY_RUN' and row['dryRun']['totalChanges']==0 for row in proof['legacyVerifiers'])
+    for row in proof['legacyVerifiers']:
+        s.validate_legacy(row['key'],row['dryRun'])
     assert [row['event'] for row in proof['startupReady']]==[name+'_STARTUP_READY' for name in s.READY_EVENTS]
     assert all(row.get('totalChanges',0)==0 for row in proof['startupReady'])
     assert proof['apiChecks']=={'passed':31,'total':31,'failed':0}

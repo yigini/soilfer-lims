@@ -1,0 +1,7 @@
+The ae64f169 fresh owned-copy rehearsal stopped before #205: the release helper incorrectly expected COMPLETE from the prior #272 rawInput check, whose pinned application contract reports ALREADY_PRESENT after validating its nullable TEXT column. The dry run exited 0, totalChanges 0, backfillCount 0, pinned migration 850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc.
+
+The failed proof is retained at /opt/lims/releases/preparation-ae64f169-rehearsal-20261011T131500Z, receipt e5394133bdc67a7ecdf6e3f4f2a47724bb9589d312aaf849433c0aac872a1b4e. No #205 APPLY or production action was reached. Independent verification confirms pristine/owned DB bytes identical (cb7d74acc43078194c930663209395899889c89548c394e6431c3c4ccdc22f53), live feac/159057d5 healthy and zero restarts.
+
+Pip is correcting only this verifier contract, including the pinned migration and zero-write checks, with regressions from the actual response. After Linux guards pass, continue in a new fresh-copy root using the original valid bc2557a5 build. Never relaunch the failed proof, restore, replay old installers or change production. No frozen new kit/gate exists yet; exact-kit hashes will follow the completed new proof.
+
+Native Claudio window is currently minimized; supported recovery detected user activity and a subsequent read still found it minimized. No draft/card/input was changed. GitHub is the coordination fallback until a fresh usable native state exists.

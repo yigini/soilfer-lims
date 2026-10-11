@@ -1,0 +1,14 @@
+{
+  "preparedUtc": "2026-10-11T13:16:52.242288+00:00",
+  "root": "/opt/lims/releases/preparation-ae64f169-rehearsal-20261011T131500Z",
+  "sourceCommit": "13ddde501b6df16e5ad0fec9090afb789cdf6453",
+  "scriptCount": 17,
+  "fullReserveBytes": 10556150894,
+  "remainingKnownKitAllocationBytes": 63633302,
+  "freeBytes": {
+    "/opt/lims": 130310668288,
+    "/var/lib/docker": 130310668288
+  },
+  "postBootBackupReceiptSha256": "7b748a33546d03e8bfc24c5504219aa5e9668ddbd1c91a9608821ba5a551861b",
+  "productionInstallerOrQuiesce": false
+}

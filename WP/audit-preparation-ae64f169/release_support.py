@@ -40,6 +40,7 @@ ACCEPTANCE_TUPLE = {'workItemId':'WI-GTM-DEMO-S02-P', 'sampleId':'GTM-DEMO-S02',
 INCLUDED_PRS = [288,290]
 INSTALLERS = [("205", "install_preparation_records.js")]
 MIGRATION_SHA = "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c"
+RAW_INPUT_MIGRATION_SHA = '850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc'
 READY_EVENTS = ['WORKFLOW', 'RESULT_ATTEMPT', 'SAMPLE_HOLD', 'REFERENCE',
     'QC_RULE', 'QC_RUN', 'QC_GATE_SCOPE', 'PT', 'NCR', 'RESULT_EQUIPMENT',
     'WORK_ATTEMPT', 'WORK_REPEAT', 'REPORTED_VALUE', 'REAGENT_LOT',
@@ -246,17 +247,27 @@ def preserve(before, after):
         'integrity':'ok','foreignKeyViolations':0}
 
 
+def validate_legacy(key, value):
+    assert value['mode']=='DRY_RUN' and value['totalChanges']==0
+    if key=='191-link':
+        assert value['blockedWorkItemCount']==0 and value['eligible']==value['unresolved']==[]
+    elif key=='272':
+        # #272 has no receipt: its read-only classifier verifies the nullable
+        # rawInput column and reports ALREADY_PRESENT, never COMPLETE.
+        assert value['classification']=='ALREADY_PRESENT', '272 prior schema not complete'
+        assert value['backfillCount']==0
+        assert value['sources']=={'migrationSha256':RAW_INPUT_MIGRATION_SHA}
+    else:
+        assert value['classification'].startswith('COMPLETE'), key+' prior schema not complete'
+    if key=='191':
+        assert value['releaseInventory']['blockedWorkItemCount']==0 and value['releaseInventory']['blockedWorkItems']==[]
+
+
 def verify_legacy(root,image,directory,label_prefix='legacy'):
     before=snapshot(directory/'dev.db'); files=physical(directory/'dev.db'); rows=[]
     for key,script in LEGACY_VERIFIERS:
         value=cli(root,image,directory,script,'--dry-run',label_prefix+'-'+key+'-dry')
-        assert value['mode']=='DRY_RUN' and value['totalChanges']==0
-        if key=='191-link':
-            assert value['blockedWorkItemCount']==0 and value['eligible']==value['unresolved']==[]
-        else:
-            assert value['classification'].startswith('COMPLETE'), key+' prior schema not complete'
-        if key=='191':
-            assert value['releaseInventory']['blockedWorkItemCount']==0 and value['releaseInventory']['blockedWorkItems']==[]
+        validate_legacy(key,value)
         rows.append({'key':key,'script':script,'dryRun':value})
         print(json.dumps({'verifiedLegacy':key,'totalChanges':0}),flush=True)
     assert snapshot(directory/'dev.db')==before and physical(directory/'dev.db')==files
