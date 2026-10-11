@@ -1,0 +1,38 @@
+test_prequiesce_reserve_refuses_without_production_action (__main__.DiskGuards) ... ok
+test_reserve_floor_scaled_budget_and_unexplained_drop (__main__.DiskGuards) ... ok
+test_changed_frozen_source_refuses (__main__.GateGuards) ... ok
+test_stale_wrong_head_missing_review_scope_and_workload_refuse (__main__.GateGuards) ... ok
+test_deployed_acceptance_evidence_is_read_only_and_every_field_is_pinned (__main__.PreservationGuards) ... ok
+test_only_additive_schema_and_one_new_receipt_are_allowed (__main__.PreservationGuards) ... ok
+test_repeat_requires_zero_changes_and_exact_physical_bytes (__main__.PreservationGuards) ... ok
+test_legacy_checks_use_only_dry_run_and_refuse_any_blocker (__main__.ScopeGuards) ... {"verifiedLegacy": "179", "totalChanges": 0}
+{"verifiedLegacy": "182", "totalChanges": 0}
+{"verifiedLegacy": "183", "totalChanges": 0}
+{"verifiedLegacy": "184", "totalChanges": 0}
+{"verifiedLegacy": "185", "totalChanges": 0}
+{"verifiedLegacy": "186", "totalChanges": 0}
+{"verifiedLegacy": "187", "totalChanges": 0}
+{"verifiedLegacy": "272", "totalChanges": 0}
+{"verifiedLegacy": "193", "totalChanges": 0}
+{"verifiedLegacy": "189", "totalChanges": 0}
+{"verifiedLegacy": "178", "totalChanges": 0}
+{"verifiedLegacy": "190", "totalChanges": 0}
+{"verifiedLegacy": "191", "totalChanges": 0}
+{"verifiedLegacy": "192", "totalChanges": 0}
+{"verifiedLegacy": "194", "totalChanges": 0}
+{"verifiedLegacy": "199", "totalChanges": 0}
+{"verifiedLegacy": "197", "totalChanges": 0}
+{"verifiedLegacy": "201", "totalChanges": 0}
+{"verifiedLegacy": "210", "totalChanges": 0}
+{"verifiedLegacy": "211", "totalChanges": 0}
+{"verifiedLegacy": "202", "totalChanges": 0}
+ok
+test_old_main_scope_does_not_authorize_new_production (__main__.ScopeGuards) ... ok
+test_prior_installers_and_acceptance_can_never_apply (__main__.ScopeGuards) ... ok
+test_raw_input_exception_cannot_accept_other_incomplete_schemas (__main__.ScopeGuards) ... ok
+test_recorded_raw_input_contract_refuses_absence_or_unreviewed_source (__main__.ScopeGuards) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.297s
+
+OK

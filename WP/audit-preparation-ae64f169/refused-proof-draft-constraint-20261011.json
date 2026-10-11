@@ -1,0 +1,37 @@
+{
+  "utc": "2026-10-11T13:44:23.361265+00:00",
+  "diagnosticOnly": true,
+  "failedReceiptStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+  "failedReceiptSha256": "42049da026b9f7649c6897bf94c6515a339f139df7fb84f80fbd78f6e5ed3ad8",
+  "correctedPreservation": {
+    "originalTableCount": 103,
+    "originalRowsAndFieldsPreserved": true,
+    "originalReceiptsPreserved": 37,
+    "additionalReceiptCount": 1,
+    "newTables": [
+      "PreparationRecord"
+    ],
+    "changedSchemaObjects": [
+      "table:WorkItemDraft"
+    ],
+    "analyticalChanges": 0,
+    "acceptanceChanges": 0,
+    "integrity": "ok",
+    "foreignKeyViolations": 0
+  },
+  "actualDraftSql": "CREATE TABLE \"WorkItemDraft\" (\n            \"id\" TEXT NOT NULL PRIMARY KEY,\n            \"workItemId\" TEXT NOT NULL UNIQUE,\n            \"sampleId\" TEXT NOT NULL,\n            \"userId\" TEXT NOT NULL,\n            \"labId\" TEXT,\n            \"analysis\" TEXT NOT NULL,\n            \"value\" TEXT,\n            \"values\" TEXT,\n            \"checks\" TEXT,\n            \"basis\" TEXT DEFAULT 'AIR_DRY',\n            \"replicateNo\" INTEGER NOT NULL DEFAULT 1,\n            \"instrumentId\" TEXT,\n            \"methodologyId\" TEXT,\n            \"notes\" TEXT,\n            \"baseVersion\" INTEGER NOT NULL DEFAULT 0,\n            \"draftVersion\" INTEGER NOT NULL DEFAULT 1,\n            \"conflictValue\" TEXT,\n            \"createdAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n            \"updatedAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, \"records\" TEXT,\n            CONSTRAINT \"WorkItemDraft_workItemId_fkey\" FOREIGN KEY (\"workItemId\") REFERENCES \"WorkItem\" (\"id\") ON DELETE CASCADE ON UPDATE CASCADE\n        )",
+  "expectedDraftSql": "CREATE TABLE \"WorkItemDraft\" (\n            \"id\" TEXT NOT NULL PRIMARY KEY,\n            \"workItemId\" TEXT NOT NULL UNIQUE,\n            \"sampleId\" TEXT NOT NULL,\n            \"userId\" TEXT NOT NULL,\n            \"labId\" TEXT,\n            \"analysis\" TEXT NOT NULL,\n            \"value\" TEXT,\n            \"values\" TEXT,\n            \"checks\" TEXT,\n            \"basis\" TEXT DEFAULT 'AIR_DRY',\n            \"replicateNo\" INTEGER NOT NULL DEFAULT 1,\n            \"instrumentId\" TEXT,\n            \"methodologyId\" TEXT,\n            \"notes\" TEXT,\n            \"baseVersion\" INTEGER NOT NULL DEFAULT 0,\n            \"draftVersion\" INTEGER NOT NULL DEFAULT 1,\n            \"conflictValue\" TEXT,\n            \"createdAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n            \"updatedAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, \"records\" TEXT,\n            CONSTRAINT \"WorkItemDraft_workItemId_fkey\" FOREIGN KEY (\"workItemId\") REFERENCES \"WorkItem\" (\"id\") ON DELETE CASCADE ON UPDATE CASCADE\n        )",
+  "newReceiptCount": 38,
+  "retainedAcceptance": {
+    "mode": "READ_ONLY_RETAINED_EVIDENCE",
+    "totalChanges": 0,
+    "eventId": "0c4a247e-339a-4adc-9ba2-061829eb2fce",
+    "eventSha256": "d14c99ff5643a8fe31abef867604ffff2645f63c799e58c62c736937a665dc45",
+    "attemptStatus": "ACCEPTED",
+    "reviewDecisionAttemptId": null,
+    "reportStatus": "PUBLISHED"
+  },
+  "liveImageState": "sha256:159057d56c456a0c7cdef917fd04f53f9a66d6285cc476d7203d63047bfff8e1 healthy 0",
+  "freshCopySha256": "ab19242a9214a0fdd00a3d10daf55547b36cc4f5f13df85afe0a0cfaeeb950d4",
+  "productionInstallerOrQuiesce": false
+}
