@@ -1,5 +1,34 @@
 # Kobo runtime recovery preparation
 
+Current checkpoint: October 11, 19:43 UTC. Claudio posted formal PR292 exact-head
+audit PASS6112846321. Pip verified unchanged cb79d89b, green exact-head CI and
+main ae64f169, then merged292 at19:30:41UTC as171dd36c5b2dbeea8763520dd18fbdb158ffca05.
+Merged and audited trees both5209112a0c66d8cef8578018b415a7511b4daba7. Main
+CI38168329149 is running. PR291 must remain unmerged until292 is live.
+
+ONE NEW build completed19:37:27.522725UTC, unit inactive/exit0, original root
+`/opt/lims/releases/runtime-kobo-build-171dd36c-20261011T193050Z`. Immutable
+BUILT_ONLY_NOT_DEPLOYED receipt e2437e978eed81244f6860e9a92c0755654e7945137f8c0146852b7d544b2f1d;
+image sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320,
+413547526B/exact revision,2234 raw Git blobs verified, no production DB mount.
+Free114597490688B after build. Original receipt/index bytes and independent
+image inspection are retained under build-observation-20261011T1940Z.
+Target pin is prepared; approved proof source533c5451 remains unchanged.
+No proof writer launches until exact merged-main CI SUCCESS.
+
+New production kit/coordinator/gate/freezer source is PROPOSED_ONLY_NOT_EXECUTED.
+Twelve synthetic Windows contract guards pass; these do not replace actual
+Linux/Docker proof or Claudio's exact-kit review. The freezer independently
+rechecks the original stopped final backup before binding its physical hash.
+Fresh gate collection refuses existing gates/attempts, checks current main,
+formal292 and new exact-kit passes, and requires measured backup headroom first.
+Deployment preserves originals, holds ingress/stops all writers/takes a hashed
+backup, runs only candidate default entrypoint, proves jobs-off zero writes,
+reopens ingress before jobs, then observes660s healthy at768MiB/zero restarts.
+Any post-quiesce failure retains maintenance/stopped jobs; forward recovery only.
+
+Earlier19:29 checkpoint follows:
+
 Current checkpoint: October 11, 19:29 UTC. Claudio's source review of the NEW
 jobs-ON rehearsal at 533c545190bfedb955386610d20faaf86398ba04 PASSED in #162
 comment 6112725472. This approves the isolated proof source, not the PR292

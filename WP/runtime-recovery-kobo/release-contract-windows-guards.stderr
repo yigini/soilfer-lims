@@ -1,0 +1,17 @@
+test_all_exact_kit_tokens_required (test_runtime_release_contract.RuntimeGateTests.test_all_exact_kit_tokens_required) ... ok
+test_complete_synthetic_gate (test_runtime_release_contract.RuntimeGateTests.test_complete_synthetic_gate) ... ok
+test_failed_proof_cannot_feed_kit (test_runtime_release_contract.RuntimeGateTests.test_failed_proof_cannot_feed_kit) ... ok
+test_gate_cannot_move_to_another_root (test_runtime_release_contract.RuntimeGateTests.test_gate_cannot_move_to_another_root) ... ok
+test_historical_kit_reviews_are_rejected (test_runtime_release_contract.RuntimeGateTests.test_historical_kit_reviews_are_rejected) ... ok
+test_later_audit_failure (test_runtime_release_contract.RuntimeGateTests.test_later_audit_failure) ... ok
+test_main_change_or_incomplete_ci (test_runtime_release_contract.RuntimeGateTests.test_main_change_or_incomplete_ci) ... ok
+test_pr291_cannot_replace292 (test_runtime_release_contract.RuntimeGateTests.test_pr291_cannot_replace292) ... ok
+test_safe_remote_roots_refuse_shell_and_traversal (test_runtime_release_contract.RuntimeGateTests.test_safe_remote_roots_refuse_shell_and_traversal) ... ok
+test_stale_and_future_gates (test_runtime_release_contract.RuntimeGateTests.test_stale_and_future_gates) ... ok
+test_tree_equality_required (test_runtime_release_contract.RuntimeGateTests.test_tree_equality_required) ... ok
+test_workload_pins_and_yy_evidence_required (test_runtime_release_contract.RuntimeGateTests.test_workload_pins_and_yy_evidence_required) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.001s
+
+OK

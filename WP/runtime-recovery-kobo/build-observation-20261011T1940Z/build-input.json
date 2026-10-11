@@ -1,0 +1,18 @@
+{
+  "rootName": "runtime-kobo-build-171dd36c-20261011T193050Z",
+  "head": "171dd36c5b2dbeea8763520dd18fbdb158ffca05",
+  "tree": "5209112a0c66d8cef8578018b415a7511b4daba7",
+  "auditedTree": "5209112a0c66d8cef8578018b415a7511b4daba7",
+  "auditedPrHead": "cb79d89bfd104466ab7d29a83312dbc7bb48b7a0",
+  "auditReviewId": 6112846321,
+  "mainCiRunId": 38168329149,
+  "archiveSha256": "538cf5cc57c56a0aa39a64a11bd392973099c8117f37d6334b85a85d8b4ea7bb",
+  "indexSha256": "d8ff825e0a1e31afb726b96441d93c020149a775dd9a4b4185431d8da3a39fc7",
+  "builderSha256": "952a8b657712887057952fc119e58d5204f01a43c06c0509038f112969d314c9",
+  "toolingCommit": "84b4ce497b4b242021f7ce6f4a093ceda7978cd8",
+  "labAndHubBuildsOwnedByYY": true,
+  "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED",
+  "preparedUtc": "2026-10-11T19:31:15.075823+00:00",
+  "mainCiStatusAtBuildPreparation": "in_progress",
+  "mainCiConclusionAtBuildPreparation": null
+}
