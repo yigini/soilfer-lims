@@ -28,7 +28,13 @@ assert r['apiChecks']=={'passed':31,'total':31,'failed':0} and len(r['probes'])=
 for stage in ['jobsOffChecks','jobsOnChecks']:
  assert len(r[stage]['entrypointInstallers'])==22 and r[stage]['startupChanges']==0
  assert all(x['mode']=='NO_OP' and x['totalChanges']==0 for x in r[stage]['entrypointInstallers'])
+ s.ready_logs('\n'.join(json.dumps(x) for x in r[stage]['startupReady']))
  assert 0<r[stage]['startupMemory']['peakBytes']<=c.LIMIT
+ assert r[stage]['startupMemory']['nodeOptions'] is None
+for stage,jobs in [('jobsOffReadiness',False),('jobsOnReadiness',True)]:
+ assert r[stage]['deadlineSeconds']==600 and 0<r[stage]['elapsedSeconds']<600
+ assert r[stage]['sharedReadinessCode']==m['files']['startup_common.py']
+ assert r[stage]['jobsEnabled']==jobs and r[stage]['restartCount']==0 and not r[stage]['oomKilled']
 checks={}
 for path,method,want in [('/api/health','GET',200),('/login','GET',200),('/','GET',200),('/api/v2/data-exchange/receipts','POST',401)]:
  code=run(['curl','-sS','--max-time','15','-o','/dev/null','-w','%{http_code}','-X',method,'https://lims.yigini.net'+path]);assert code==str(want);checks[method+' '+path]=int(code)
@@ -42,5 +48,7 @@ result={'status':'INDEPENDENT_READ_ONLY_PASS','verifiedUtc':s.utc(),'head':s.HEA
  'protectedReceiptCount':expected['tables']['_schema_migrations']['count'],'allProtectedRowsFieldsEqualBeforeJobs':True,'normalJobsBoundary':normal,
  'integrity':'ok','foreignKeyViolations':0,'retainedAcceptance':accept,'physical':physical,'health':health,
  'httpsChecks':checks,'freeBytes':s.disk_free(),'reserveRequiredBytes':r['diskReserveRequiredBytes'],
+ 'startupElapsedSeconds':{stage:r[stage]['elapsedSeconds'] for stage in ['jobsOffReadiness','jobsOnReadiness']},
+ 'startupPeakBytes':{stage:r[stage]['startupMemory']['peakBytes'] for stage in ['jobsOffChecks','jobsOnChecks']},
  'originalFailedReceiptUnchanged':True,'originalFrozenFilesUnchanged':len(old['files'])}
 print(json.dumps(result,indent=2))

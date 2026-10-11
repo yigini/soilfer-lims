@@ -1,0 +1,128 @@
+{
+  "status": "INDEPENDENT_READ_ONLY_PASS",
+  "verifiedUtc": "2026-10-11T15:27:28.685436+00:00",
+  "head": "ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf",
+  "image": "sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a",
+  "productionReceiptSha256": "35ab0b825a5d52414304d426101863b671ce5d3b92f6d8eb81e8b79f34095462",
+  "containerHealthy": true,
+  "restartCount": 0,
+  "oomKilled": false,
+  "sameDataAndAssetsVolumes": true,
+  "jobsEnabled": true,
+  "ingressOpen": true,
+  "autoPushAndSeedDisabled": true,
+  "protectedTableCount": 104,
+  "protectedReceiptCount": 38,
+  "allProtectedRowsFieldsEqualBeforeJobs": true,
+  "normalJobsBoundary": {
+    "scopeCommentId": 6110280460,
+    "allowedFields": [
+      "KoboConfig.lastSyncAt",
+      "KoboConfig.updatedAt"
+    ],
+    "changedClockRows": [
+      {
+        "id": "25731264-f02a-4172-8ef1-75512b7607a5",
+        "fields": [
+          "lastSyncAt",
+          "updatedAt"
+        ]
+      },
+      {
+        "id": "38744747-1d3f-4f4a-8523-6f251ecd1fba",
+        "fields": [
+          "lastSyncAt",
+          "updatedAt"
+        ]
+      },
+      {
+        "id": "534aec5a-2b3a-49f1-9136-507f624fbf6b",
+        "fields": [
+          "lastSyncAt",
+          "updatedAt"
+        ]
+      },
+      {
+        "id": "6e60eebe-5d8d-4e13-8037-efeb8041b24c",
+        "fields": [
+          "lastSyncAt",
+          "updatedAt"
+        ]
+      },
+      {
+        "id": "78cd0dc8-f04c-4bcf-9451-bc9507ee0623",
+        "fields": [
+          "lastSyncAt",
+          "updatedAt"
+        ]
+      },
+      {
+        "id": "897c1fb0-d83c-40cd-b513-b3e6e6b78172",
+        "fields": [
+          "lastSyncAt",
+          "updatedAt"
+        ]
+      },
+      {
+        "id": "c630d7b4-5d44-4826-94e5-5851abbd2a46",
+        "fields": [
+          "lastSyncAt",
+          "updatedAt"
+        ]
+      }
+    ],
+    "rowCountUnchanged": true,
+    "allOther103TablesAndKoboFieldsPreserved": true
+  },
+  "integrity": "ok",
+  "foreignKeyViolations": 0,
+  "retainedAcceptance": {
+    "mode": "READ_ONLY_RETAINED_EVIDENCE",
+    "totalChanges": 0,
+    "eventId": "0c4a247e-339a-4adc-9ba2-061829eb2fce",
+    "eventSha256": "d14c99ff5643a8fe31abef867604ffff2645f63c799e58c62c736937a665dc45",
+    "attemptStatus": "ACCEPTED",
+    "reviewDecisionAttemptId": null,
+    "reportStatus": "PUBLISHED"
+  },
+  "physical": {
+    "": {
+      "sha256": "a36d397aec6868e1429ca4db45d7cc9cbe930ef3a71092851175b4773675fb42",
+      "bytes": 563322880
+    },
+    "-wal": {
+      "sha256": "5c21a0ea4ed4dd772aa52809fd3e16a22611b889ebaaf133da10138e380d0059",
+      "bytes": 28872
+    },
+    "-shm": {
+      "sha256": "7b0beffaedbfadbbb010ffe96a0c8ad311b9ebf0464137a452c7d7b3cb4f3154",
+      "bytes": 32768
+    }
+  },
+  "health": {
+    "status": "ok",
+    "version": "1.9.0",
+    "uptime": 186.376675506
+  },
+  "httpsChecks": {
+    "GET /api/health": 200,
+    "GET /login": 200,
+    "GET /": 200,
+    "POST /api/v2/data-exchange/receipts": 401
+  },
+  "freeBytes": {
+    "/opt/lims": 123191631872,
+    "/var/lib/docker": 123191631872
+  },
+  "reserveRequiredBytes": 10556150894,
+  "startupElapsedSeconds": {
+    "jobsOffReadiness": 102.2631536659992,
+    "jobsOnReadiness": 92.35733877500024
+  },
+  "startupPeakBytes": {
+    "jobsOffChecks": 136982528,
+    "jobsOnChecks": 124043264
+  },
+  "originalFailedReceiptUnchanged": true,
+  "originalFrozenFilesUnchanged": 24
+}

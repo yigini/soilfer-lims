@@ -1,0 +1,17 @@
+Oct 11 17:18:28 server systemd[1]: Starting /usr/bin/python3 /opt/lims/releases/forward-ae64f169-release-20261011T150800Z/startup-forward.py --execute-new-forward-gate...
+Oct 11 17:19:15 server python3[136756]: reviewedForwardPreflightPassed 2026-10-11T15:19:15.190677+00:00
+Oct 11 17:19:50 server python3[136756]: installedStoppedBackupVerified 2026-10-11T15:19:50.666259+00:00
+Oct 11 17:20:23 server python3[136756]: {"stage": "jobs-off", "elapsedSeconds": 32.39864184199905, "pending": true}
+Oct 11 17:20:55 server python3[136756]: {"stage": "jobs-off", "elapsedSeconds": 65.1338644869993, "pending": true}
+Oct 11 17:21:28 server python3[136756]: {"stage": "jobs-off", "elapsedSeconds": 97.88902182099991, "pending": true}
+Oct 11 17:21:59 server python3[136756]: candidateHealthyJobsOff 2026-10-11T15:21:59.489492+00:00
+Oct 11 17:22:36 server python3[136756]: readOnlyChecksPassed 2026-10-11T15:22:36.234830+00:00
+Oct 11 17:22:36 server python3[136756]: ingressReopenedJobsOff 2026-10-11T15:22:36.717514+00:00
+Oct 11 17:24:05 server python3[136756]: {"stage": "jobs-on", "elapsedSeconds": 32.089343245001146, "pending": true}
+Oct 11 17:24:38 server python3[136756]: {"stage": "jobs-on", "elapsedSeconds": 64.90532407800129, "pending": true}
+Oct 11 17:25:06 server python3[136756]: jobsReopened 2026-10-11T15:25:06.146794+00:00
+Oct 11 17:25:10 server python3[136756]: completed 2026-10-11T15:25:10.216928+00:00
+Oct 11 17:25:10 server python3[136756]: {"status": "DEPLOYED_FORWARD", "head": "ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf", "image": "sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a", "receiptSha256": "35ab0b825a5d52414304d426101863b671ce5d3b92f6d8eb81e8b79f34095462"}
+Oct 11 17:25:10 server systemd[1]: lims-forward-ae64f169-production-20261011t1518z.service: Deactivated successfully.
+Oct 11 17:25:10 server systemd[1]: Finished /usr/bin/python3 /opt/lims/releases/forward-ae64f169-release-20261011T150800Z/startup-forward.py --execute-new-forward-gate.
+Oct 11 17:25:10 server systemd[1]: lims-forward-ae64f169-production-20261011t1518z.service: Consumed 2min 31.643s CPU time, 1.0G memory peak.
