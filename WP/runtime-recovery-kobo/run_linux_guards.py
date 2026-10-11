@@ -32,6 +32,7 @@ p=json.loads(base64.b64decode(PAYLOAD));start=time.monotonic();tests=[]
 for name,value in p['files'].items():
  data=base64.b64decode(value['data']);assert hashlib.sha256(data).hexdigest()==value['sha256']
  module=types.ModuleType(name);module.__file__='/owned-in-memory-guards/'+name+'.py';module.__raw_sha256__=value['sha256'];module.__raw_source__=data;sys.modules[name]=module
+ module.__fixture_bytes__={key:base64.b64decode(encoded) for key,encoded in value.get('fixtures',{}).items()}
  exec(compile(data,module.__file__,'exec'),module.__dict__)
  if name.startswith('test_'):tests.append(module)
 suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromModule(module) for module in tests)
