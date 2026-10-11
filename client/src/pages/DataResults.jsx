@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Download, Filter, Search, FlaskConical, Table, CheckCircle, FileText, XCircle, Eye } from 'lucide-react';
+import { Download, Filter, Search, FlaskConical, Table, CheckCircle, FileText, XCircle, Eye, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 import { useNotifications } from '../context/NotificationContext';
@@ -171,6 +171,10 @@ const DataResults = () => {
                     val = `DRAFT: ${val.value} (${val.assignedTo})`;
                 } else if (val && typeof val === 'object' && val.status === 'SUBMITTED') {
                     val = `${val.value} (Pending Review)`;
+                } else if (val && typeof val === 'object' && val.status === 'UNAVAILABLE') {
+                    val = `UNAVAILABLE (${val.code || 'UNKNOWN'})`;
+                } else if (val && typeof val === 'object') {
+                    val = val.value ?? val.status ?? '';
                 }
                 newRow[col.label] = val;
             });
@@ -262,6 +266,16 @@ const DataResults = () => {
             );
         }
 
+        // #192: the reported value cannot be read; show why instead of a number.
+        if (value && typeof value === 'object' && value.status === 'UNAVAILABLE') {
+            return (
+                <div className="flex justify-end" title={value.code}>
+                    <AlertTriangle size={16} className="text-red-500" />
+                    <InfoTooltip text={`${t('dataResults.reportedValueUnavailable', 'Reported value unavailable')}: ${value.code || 'UNKNOWN'}`} position="bottom" />
+                </div>
+            );
+        }
+
         // Legacy/Simple String Pending (Fallback)
         if (value === 'PENDING') {
             return (
@@ -291,6 +305,8 @@ const DataResults = () => {
             );
         }
 
+        // Never hand React an unknown status object.
+        if (value && typeof value === 'object') return <span className="font-mono font-medium text-sf-text">{String(value.value ?? value.status ?? '')}</span>;
         return <span className="font-mono font-medium text-sf-text">{value}</span>;
     };
 
