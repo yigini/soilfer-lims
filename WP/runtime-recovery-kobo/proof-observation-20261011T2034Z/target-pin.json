@@ -1,0 +1,17 @@
+{
+  "head": "171dd36c5b2dbeea8763520dd18fbdb158ffca05",
+  "baseHead": "ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf",
+  "auditedPrHead": "cb79d89bfd104466ab7d29a83312dbc7bb48b7a0",
+  "pr": 292,
+  "tree": "5209112a0c66d8cef8578018b415a7511b4daba7",
+  "auditedTree": "5209112a0c66d8cef8578018b415a7511b4daba7",
+  "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+  "imageBytes": 413547526,
+  "buildRoot": "/opt/lims/releases/runtime-kobo-build-171dd36c-20261011T193050Z",
+  "buildReceiptSha256": "e2437e978eed81244f6860e9a92c0755654e7945137f8c0146852b7d544b2f1d",
+  "auditReviewId": 6112846321,
+  "mainCiRunId": 38168329149,
+  "labAndHubBuildsOwnedByYY": true,
+  "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED",
+  "proofSourceReviewId": 6113431945
+}

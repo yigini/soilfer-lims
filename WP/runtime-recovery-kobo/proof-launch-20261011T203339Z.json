@@ -1,0 +1,13 @@
+{
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+  "unit": "lims-owned-runtime-kobo-proof-171dd36c-20261011t203339z.service",
+  "sourceCommit": "55c18943f569e9b031c8aae008f167ab399473af",
+  "sourceIndexSha256": "3ddd159e3531758ff52aea06f0e5cb9cc5715bed018ddb1c27c7f31e24748e36",
+  "coordinatorSha256": "9f175f1355413fd66c6dbf7082eea64f50a97fea6cec4ee1c6a0055384f70a71",
+  "productionMutations": 0,
+  "productionGateCollected": false,
+  "reviewId": 6113431945,
+  "sourceReviewSha256": "9057d4212ff582d9b190bf54f1dcbe668a455607e989f037ef3549713a36a55c",
+  "targetPinFile": "WP\\runtime-recovery-kobo\\target-pin-171dd36c-reviewed-6113431945.json",
+  "targetPinSha256": "1a3b00296cd124dcfe63c915c9a56a1a1e5d167b4d82a83e553ff357099bf92b"
+}

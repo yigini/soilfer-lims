@@ -1,0 +1,21 @@
+{
+  "observedUtc": "2026-10-11T20:34:09.006471+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+  "unit": "lims-owned-runtime-kobo-proof-171dd36c-20261011t203339z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "unit.stdoutTail": "",
+  "unit.stderrTail": "",
+  "files": {
+    "target-pin.json": {
+      "bytes": 789,
+      "sha256": "1a3b00296cd124dcfe63c915c9a56a1a1e5d167b4d82a83e553ff357099bf92b",
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 3737,
+      "sha256": "3ddd159e3531758ff52aea06f0e5cb9cc5715bed018ddb1c27c7f31e24748e36",
+      "mode": "0o400"
+    }
+  }
+}
