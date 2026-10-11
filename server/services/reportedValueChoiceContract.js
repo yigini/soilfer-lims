@@ -5,9 +5,6 @@ const { TEXTURE_ALIASES } = require('./reportResultGovernance');
 const MODES = new Set(['ATTEMPT', 'MEAN', 'NOT_REPORTABLE']);
 const failure = (code, message, details = {}) => new TransitionError(message, 409, code, details);
 
-function textureOptions(options) {
-    return typeof options.textureTolerancePct === 'number' ? { tolerance: options.textureTolerancePct } : null;
-}
 
 function selectionOutputs(item,context) {
     return context?.layout?.outputParams || (TEXTURE_ALIASES.has(item.analysis) ? ['CLAY', 'SAND', 'SILT', 'TEXTURE'] : [item.analysis]);
@@ -39,9 +36,12 @@ function selectedOutputValues(item, candidates, limits, options = {}) {
             resultIds: rows.map(row => row.id), derivation: null };
     });
     if (composite && averaging) {
-        const values = ['SAND', 'SILT', 'CLAY'].map(param => outputs.find(row => row.analysisCode === param).value);
-        // #278: the laboratory closure tolerance from policyService.
-        const derived = calculateUsdaTexture(...values, textureOptions(options));
+        // #278/#291: the shared texture input authority on the selected means, then the
+        // laboratory closure tolerance from policyService (exact when invalid, #281).
+        const { textureInputs, closureOptions } = require('./textureInputAuthority');
+        const inputs = textureInputs(['SAND', 'SILT', 'CLAY'].map(param => outputs.filter(row => row.analysisCode === param)));
+        if (inputs.reasonCode) throw failure('REPORTED_VALUE_TEXTURE_UNRESOLVED', 'The selected texture means do not produce a valid class.', { reasonCode: inputs.reasonCode });
+        const derived = calculateUsdaTexture(...inputs.values, closureOptions(options.textureTolerancePct));
         if (!derived.isValid) throw failure('REPORTED_VALUE_TEXTURE_UNRESOLVED', derived.error || 'The selected texture means do not produce a valid class.');
         outputs.push({ analysisCode: 'TEXTURE', value: null, valueText: derived.className, unit: null, censoring: 'NONE',
             methodologyId: outputs[0].methodologyId, resultIds: all.filter(row => row.param !== 'TEXTURE').map(row => row.id),

@@ -86,11 +86,12 @@ function fractionOutcome(context) {
         reason:JSON.stringify({code:'FRACTION_NOT_REPORTABLE',fractions:missing.map(row=>({analysisCode:row.analysisCode,selectionId:row.selectionId}))}),
         fractionSelections:proofs,outputs:[{analysisCode:'TEXTURE',value:null,valueText:'',unit:null,censoring:'NONE',
             methodologyId:null,resultIds:[],derivation:'calculateUsdaTexture'}]};
-    const value=require('../utils/soilCalculations').calculateUsdaTexture(...FRACTIONS.map(param=>proofs.find(row=>row.analysisCode===param).value),
-        typeof context.textureTolerancePct==='number' ? {tolerance:context.textureTolerancePct} : null);
-    if(proofs.some(row=>row.censoring!=='NONE' || row.value===null || !Number.isFinite(row.value)) || !value.isValid) {
-        throw fail('REPORTED_VALUE_TEXTURE_UNRESOLVED','The selected fraction values cannot produce a texture class.');
-    }
+    // #278/#291: the shared texture input authority, then the laboratory tolerance (exact when invalid, #281).
+    const {textureInputs,closureOptions}=require('./textureInputAuthority');
+    const inputs=textureInputs(FRACTIONS.map(param=>proofs.filter(row=>row.analysisCode===param)));
+    if(inputs.reasonCode) throw fail('REPORTED_VALUE_TEXTURE_UNRESOLVED','The selected fraction values cannot produce a texture class.',{reasonCode:inputs.reasonCode});
+    const value=require('../utils/soilCalculations').calculateUsdaTexture(...inputs.values,closureOptions(context.textureTolerancePct));
+    if(!value.isValid) throw fail('REPORTED_VALUE_TEXTURE_UNRESOLVED','The selected fraction values cannot produce a texture class.');
     const sourceIds=sorted(fractions.flatMap(row=>row.proof.resultIds));
     if(new Set(sourceIds).size!==sourceIds.length) throw fail('REPORTED_VALUE_SOURCE_SELECTION_REQUIRED','Fraction source sets must be disjoint.');
     const replicas=fractions.map(row=>row.cited.length===1 ? row.cited[0].replicateNo ?? 1 : null);

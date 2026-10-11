@@ -72,12 +72,14 @@ exports.validateResult = async (paramId, value, methodologyId = null, db = prism
 
 const TEXTURE_FRACTIONS = Object.freeze(['SAND', 'SILT', 'CLAY']);
 
-// #278: the blocking closure gate reads the stored numeric value, unit and
-// censoring of each current fraction, never re-parsed text. A replicate is
-// evaluated only when each fraction has exactly one uncensored finite '%'
-// value; anything else is disclosed as not evaluated and does not block.
-function textureGate(results, tolerancePct, catalogueUnits) {
-    const { unitCode } = require('../services/crossParameterEvaluator');
+// #278/#291: the blocking closure gate reads the stored numeric value, unit and
+// censoring of each current fraction through the shared texture input
+// authority, never re-parsed text. A replicate with a non-'%' unit, censored,
+// non-numeric or ambiguous fractions is disclosed as not evaluated and does not
+// block. A fraction with no stored unit is never given a catalogue unit; it is
+// checked with exact closure, never the wider laboratory tolerance.
+function textureGate(results, tolerancePct) {
+    const { textureInputs, closureOptions } = require('../services/textureInputAuthority');
     const replicates = new Map();
     for (const row of results) {
         const param = String(row.param || '').toUpperCase();
@@ -92,21 +94,18 @@ function textureGate(results, tolerancePct, catalogueUnits) {
     for (const [replicateNo, group] of [...replicates].sort((a, b) => a[0] - b[0])) {
         if (TEXTURE_FRACTIONS.some(param => !group.has(param))) continue;
         const rows = TEXTURE_FRACTIONS.map(param => group.get(param));
-        const notEvaluated = reasonCode => ({ replicateNo, outcome: 'NOT_EVALUATED', reasonCode, tolerancePct });
-        if (rows.some(candidates => candidates.length !== 1)) { evaluations.push(notEvaluated('MULTIPLE_CANDIDATES')); continue; }
-        const [sand, silt, clay] = rows.map(candidates => candidates[0]);
-        const fractions = [sand, silt, clay];
-        if (fractions.some(row => (row.censoring ?? 'NONE') !== 'NONE')) { evaluations.push(notEvaluated('INPUT_CENSORED')); continue; }
-        if (fractions.some(row => typeof row.numericValue !== 'number' || !Number.isFinite(row.numericValue))) {
-            evaluations.push(notEvaluated('INPUT_NON_NUMERIC')); continue;
+        const inputs = textureInputs(rows.map(candidates => candidates.map(row => ({ value: row.numericValue, unit: row.unit, censoring: row.censoring }))));
+        if (inputs.reasonCode && inputs.reasonCode !== 'UNIT_MISSING') {
+            evaluations.push({ replicateNo, outcome: 'NOT_EVALUATED', reasonCode: inputs.reasonCode, tolerancePct }); continue;
         }
-        const units = fractions.map((row, index) => row.unit ? unitCode(row.unit) : catalogueUnits?.[TEXTURE_FRACTIONS[index]] ?? null);
-        if (units.some(unit => unit !== '%')) { evaluations.push(notEvaluated('UNIT_MISMATCH')); continue; }
-        // #281: an invalid stored laboratory tolerance falls back to exact closure, never a wider one.
-        const texture = calculateUsdaTexture(sand.numericValue, silt.numericValue, clay.numericValue, tolerancePct === null ? null : { tolerance: tolerancePct });
-        evaluations.push({ replicateNo, outcome: texture.isValid ? 'PASS' : 'BLOCKED', reasonCode: null, tolerancePct,
+        const [sand, silt, clay] = rows.map(candidates => candidates[0]);
+        // #281: an invalid stored laboratory tolerance is exact closure, never a wider one.
+        const applied = inputs.reasonCode === 'UNIT_MISSING' ? null : closureOptions(tolerancePct);
+        const texture = calculateUsdaTexture(sand.numericValue, silt.numericValue, clay.numericValue, applied);
+        evaluations.push({ replicateNo, outcome: texture.isValid ? 'PASS' : 'BLOCKED',
+            reasonCode: inputs.reasonCode === 'UNIT_MISSING' ? 'UNIT_MISSING_EXACT_CLOSURE' : null, tolerancePct: applied ? applied.tolerance : null,
             values: { sand: sand.numericValue, silt: silt.numericValue, clay: clay.numericValue },
-            resultIds: fractions.map(row => row.id ?? null), texture });
+            resultIds: [sand, silt, clay].map(row => row.id ?? null), texture });
     }
     return evaluations;
 }
@@ -115,9 +114,8 @@ function textureGate(results, tolerancePct, catalogueUnits) {
  * Blocking texture-closure gate for a sample's current results (#278). The
  * advisory cross-parameter checks live in crossParameterEvaluator (#201, #279).
  * @param {Array<{ param: string, numericValue?: number, unit?: string, censoring?: string, replicateNo?: number }>} results
- * @param {{ textureClosureTolerancePct?: number, texturePolicyInvalid?: boolean, catalogueUnits?: Object<string,string> }} [context]
- *   The laboratory's policy tolerance (#278) and the catalogue unit of each
- *   texture fraction, used only when a stored row has no unit.
+ * @param {{ textureClosureTolerancePct?: number, texturePolicyInvalid?: boolean }} [context]
+ *   The laboratory's policy tolerance (#278).
  */
 exports.validateSampleMatrix = (results, context = {}) => {
     // #281: a stored tolerance outside the registry bounds is disclosed and the gate
@@ -145,7 +143,7 @@ exports.validateSampleMatrix = (results, context = {}) => {
     }
 
     // 1. Texture Check (Sand, Silt, Clay) - BLOCKING within the lab tolerance
-    diagnostics.textureClosure = textureGate(results, tolerancePct, context.catalogueUnits);
+    diagnostics.textureClosure = textureGate(results, tolerancePct);
     for (const evaluation of diagnostics.textureClosure) {
         const replicate = diagnostics.textureClosure.length > 1 ? ` (replicate ${evaluation.replicateNo})` : '';
         if (evaluation.outcome === 'NOT_EVALUATED') {
@@ -153,16 +151,17 @@ exports.validateSampleMatrix = (results, context = {}) => {
             continue;
         }
         diagnostics.texture ??= evaluation.texture;
+        if (evaluation.reasonCode) diagnostics.warnings.push(`Texture closure${replicate}: ${evaluation.reasonCode}`);
         if (evaluation.outcome === 'BLOCKED') {
             const { sand, silt, clay } = evaluation.values;
-            const msg = `Texture closure failed${replicate}: Sand(${sand}%) + Silt(${silt}%) + Clay(${clay}%) = ${(sand + silt + clay).toFixed(1)}% (must sum to 100% ${tolerancePct === null ? 'exactly' : `± ${tolerancePct}%`})`;
+            const msg = `Texture closure failed${replicate}: Sand(${sand}%) + Silt(${silt}%) + Clay(${clay}%) = ${(sand + silt + clay).toFixed(1)}% (must sum to 100% ${evaluation.tolerancePct === null ? 'exactly' : `± ${evaluation.tolerancePct}%`})`;
             diagnostics.warnings.push(msg);
             diagnostics.blockingErrors.push({
                 check: 'TEXTURE_CLOSURE',
                 severity: 'BLOCKING',
                 message: msg,
                 replicateNo: evaluation.replicateNo,
-                tolerancePct
+                tolerancePct: evaluation.tolerancePct
             });
             diagnostics.isBlocking = true;
         }
@@ -172,20 +171,12 @@ exports.validateSampleMatrix = (results, context = {}) => {
 };
 
 // #278: the laboratory policy tolerance (policyService; an unresolved historical
-// lab gets the profile or registry value) and the catalogue unit of each
-// texture fraction for validateSampleMatrix.
+// lab gets the profile or registry value) for validateSampleMatrix.
 exports.matrixContext = async (db, sample) => {
     const resolved = await require('../services/policyService').resolve(sample.assignedLab || sample.labId,
         'crossCheck.textureClosureTolerancePct', { db });
-    const analyses = await db.analysis.findMany({ where: { code: { in: TEXTURE_FRACTIONS } }, select: { code: true, units: true } });
-    const catalogueUnits = {};
-    const { unitCode } = require('../services/crossParameterEvaluator');
-    for (const code of TEXTURE_FRACTIONS) {
-        const units = new Set(analyses.filter(row => row.code === code).map(row => unitCode(row.units)));
-        if (units.size === 1) catalogueUnits[code] = [...units][0];
-    }
-    return resolved.invalid ? { textureClosureTolerancePct: null, texturePolicyInvalid: true, catalogueUnits }
-        : { textureClosureTolerancePct: resolved.value, catalogueUnits };
+    return resolved.invalid ? { textureClosureTolerancePct: null, texturePolicyInvalid: true }
+        : { textureClosureTolerancePct: resolved.value };
 };
 
 // Also export a route handler helper for ResultsController

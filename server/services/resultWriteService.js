@@ -544,13 +544,17 @@ async function deriveTextureResult(tx, { sampleId, replicateNo = 1, actor, now =
     rules.requireTransaction(tx);
     const rows = await tx.result.findMany({ where: { sampleId, replicateNo, isCurrent: true, param: { in: FRACTIONS } }, orderBy: { createdAt: 'desc' } });
     const fractions = FRACTIONS.map(param => rows.find(row => row.param === param));
-    if (fractions.some(row => !row || row.censoring !== 'NONE' || row.numericValue == null)) return null;
+    // #278/#291: the shared texture input authority (one uncensored finite '%' value per fraction).
+    const { textureInputs, closureOptions } = require('./textureInputAuthority');
+    const inputs = textureInputs(FRACTIONS.map(param => rows.filter(row => row.param === param)
+        .map(row => ({ value: row.numericValue, unit: row.unit, censoring: row.censoring }))));
+    if (inputs.reasonCode) return null;
     const item=await tx.workItem.findFirst({where:canonicalWorkItemWhere(sampleId,'TEXTURE')});
     if (!item) throw new TransitionError('Reconcile the order before recording this parameter.',409,'RESULT_WORKITEM_REQUIRED');
-    // #278: derive within the laboratory closure tolerance from policyService.
+    // #278: derive within the laboratory closure tolerance from policyService; an invalid value (#281) is exact closure.
     const owner = await tx.sample.findUnique({ where: { id: sampleId }, select: { assignedLab: true, labId: true } });
     const tolerance = await require('./policyService').get(owner?.assignedLab || owner?.labId, 'crossCheck.textureClosureTolerancePct', { db: tx });
-    const classification = require('../utils/soilCalculations').calculateUsdaTexture(...fractions.map(row => row.numericValue), { tolerance });
+    const classification = require('../utils/soilCalculations').calculateUsdaTexture(...inputs.values, closureOptions(tolerance));
     if (!classification.isValid) return null;
     const flags = ['DERIVED_USDA_12_CLASS', ...fractions.map(row => `SOURCE_${row.param}_${row.id}`), `CLOSURE_ERROR_${classification.closureError ?? 0}`];
     const ctx = await context(tx, { sampleId, actor, workItemId:item.id,

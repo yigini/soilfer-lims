@@ -57,10 +57,16 @@ describe('#278 texture closure gate (pure)', () => {
         expect(result.warnings).toContain('Texture closure not evaluated: UNIT_MISMATCH');
     });
 
-    test('a row without a unit uses the catalogue unit only when it is unambiguous', () => {
-        const rows = triple(40, 30, 17, { unit: null });
-        expect(gate(rows, { textureClosureTolerancePct: 2, catalogueUnits: { SAND: '%', SILT: '%', CLAY: '%' } }).isBlocking).toBe(true);
-        expect(gate(rows).textureClosure[0]).toMatchObject({ outcome: 'NOT_EVALUATED', reasonCode: 'UNIT_MISMATCH' });
+    test('a row without a stored unit is never given a catalogue unit and closes exactly, never within the lab tolerance', () => {
+        const missing = gate(triple(40, 40, 19, { unit: null }), { textureClosureTolerancePct: 2 });
+        expect(missing.isBlocking).toBe(true);
+        expect(missing.textureClosure[0]).toMatchObject({ outcome: 'BLOCKED', reasonCode: 'UNIT_MISSING_EXACT_CLOSURE', tolerancePct: null });
+        expect(missing.blockingErrors[0].message).toContain('must sum to 100% exactly');
+        expect(gate(triple(40, 30, 17, { unit: '' })).isBlocking).toBe(true);
+        const exact = gate(triple(40, 40, 20, { unit: null }), { textureClosureTolerancePct: 2 });
+        expect(exact).toMatchObject({ isBlocking: false, textureClosure: [expect.objectContaining({ outcome: 'PASS', reasonCode: 'UNIT_MISSING_EXACT_CLOSURE' })] });
+        expect(exact.warnings).toContain('Texture closure: UNIT_MISSING_EXACT_CLOSURE');
+        expect(gate(triple(40, 40, 19), { textureClosureTolerancePct: 2 }).isBlocking).toBe(false);
     });
 
     test.each([
