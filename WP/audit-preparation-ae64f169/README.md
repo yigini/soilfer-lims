@@ -3,7 +3,7 @@
 Target: ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf.
 Current live: feac653495d6b8a21e082cec596f1e14672fb389 / image 159057d5.
 
-Both new PRs merged Oct 11 at 10:58 UTC after independent review, exact-head audit and CI. #288 merged a3614600, tree identical to audited 77e38c21; #290 merged ae64f169 at audited 15a826be. Combined main CI 38133894755 is pending.
+Both new PRs merged Oct 11 at 10:58 UTC after independent review, exact-head audit and CI. #288 merged a3614600, tree identical to audited 77e38c21; #290 merged ae64f169 at audited 15a826be. Combined main CI 38133894755 passed at 11:34:39 UTC.
 
 This kit is under preparation. No production execution gate exists. No production installer/quiesce/deployment has occurred for this release. The completed combined release and all original backups/proofs/receipts remain preserved.
 
@@ -31,4 +31,10 @@ At 11:13 UTC Claudio pointed Pip to YY's later blanket standing go in the origin
 
 Claudio surfaced a new storage card to YY at 11:13 UTC: "Add 5 GB+" (recommended) or "Hold release". It is still pending. Pip only read/scrolled and did not answer the card or alter human drafts. The latest read-only host sample at 11:13:53 UTC was 7,049,670,656 B free; live feac6534 remained healthy with zero restarts. No deletion, cache prune, fresh DB copy, installer or quiesce is authorized or attempted by this checkpoint. The pending two-PR gate snapshot has both exact-head audits/CI green and no ungated PRs; combined main CI still runs. It is not a production execution gate.
 
-Main CI 38133894755 remains running. No fresh production-copy rehearsal, PASSED proof, frozen executable manifest, execution gate or production receipt exists for this new release. No production installer, quiesce or deployment has run. Do not run the incomplete coordinator. Resume from the valid original build only when sufficient authorized headroom exists; complete the fresh-copy proof, freeze unchanged sources and obtain Claudio's exact-kit pass before fresh gate collection.
+## October 11, 12:11 UTC follow-up
+
+Final main CI 38133894755 is fully green at the exact ae64f169 head, completed 11:34:39 UTC: server suite, client production build and both real Docker checks passed. Fresh read-only two-PR/main snapshot `pr-gates-ae64f169-passed.json` has no ungated PRs, SHA256 e223d13512701399467a1976b6988993c1ab86a11d753d42fd2e6a9cbd5ce826. This is not a production execution gate.
+
+Latest read-only host observation 12:11:23 UTC: 7,053,025,280 B free on the common root filesystem; LIMS container healthy and public health status ok/version 1.9.0. Claudio's native storage card remains unselected. No cleanup or new production-copy/install/quiesce action occurred during this follow-up. Deployment remains held by actual disk headroom; the old completed release remains healthy.
+
+No fresh production-copy rehearsal, PASSED proof, frozen executable manifest, execution gate or production receipt exists for this new release. No production installer, quiesce or deployment has run. Do not run the incomplete coordinator. Resume from the valid original build only when sufficient authorized headroom exists; complete the fresh-copy proof, freeze unchanged sources and obtain Claudio's exact-kit pass before fresh gate collection.
