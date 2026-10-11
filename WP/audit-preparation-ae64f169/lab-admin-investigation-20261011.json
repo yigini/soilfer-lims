@@ -6,13 +6,13 @@
     "name": "soilfer-lab-admin",
     "id": "563d2e4b1b6064a23f26928a5467542f68cf8243ee1f0e31943eabd53bc1e828",
     "imageIdRetained": "sha256:bce8e4ddc1c14984ca8fae679540222afafa0db93c0747a336035715dc504173",
-    "currentDockerObjectAbsent": true,
+    "absentAtInitialObservation": true,
     "jupyterHubLogEvents": [
       {"utc": "2026-10-11T12:21:52.736139253Z", "message": "DockerSpawner stopping soilfer-lab-admin (id 563d2e4)"},
       {"utc": "2026-10-11T12:21:54.455956354Z", "message": "DockerSpawner removing container 563d2e4b1b6064a23f26928a5467542f68cf8243ee1f0e31943eabd53bc1e828"},
       {"utc": "2026-10-11T12:21:54.536196221Z", "message": "HTTP 204 DELETE /lab/hub/api/users/admin/server authenticated as soilfer-admin from 127.0.0.1"}
     ],
-    "initiatingPersonOrProcessEstablished": false,
+    "initiatingPersonOrProcessEstablishedByInitialLogRead": false,
     "interpretation": "The notebook session was stopped through JupyterHub's authenticated admin API. JupyterHub then removed its disposable runtime container according to its configured lifecycle. This does not establish removal of notebook files or identify who initiated the API request."
   },
   "hubConfiguration": {
@@ -78,5 +78,37 @@
     "version": "1.9.0",
     "productionReceiptSha256": "1f2e2d6621456bc11664ab7800ba0ab9e95d783b4efafde2a1175d3e1fade8c6"
   },
-  "coordination": "Confirmed findings sent to Claudio's existing native LIMS Audit / Lab workflow audit and plan thread. Reboot clean-stop and hashed-backup preparation remains outstanding."
+  "actorClarification": {
+    "source": "YY's direct message quoting the platform Claude's explicit self-attribution",
+    "reportedActor": "Platform Claude deliberately stopped the admin lab through the hub for reboot preparation",
+    "humanIdentityIndependentlyEstablishedByLogs": false,
+    "deliberateStopReportedRatherThanIdleCull": true,
+    "actualHubIdleTimeoutSeconds": 3600,
+    "idleTimeoutSource": "Filtered read of IDLE_TIMEOUT_SECONDS in the running soilfer-hub Docker configuration"
+  },
+  "recreatedLabObservation": {
+    "observedUtc": "2026-10-11T12:55:31.673186+00:00",
+    "name": "soilfer-lab-admin",
+    "id": "a6c0e4d5c30ac3755b4be0c512c531f0d1d91d2a6bfe8a8a05a66bc2b14baec1",
+    "imageId": "sha256:bce8e4ddc1c14984ca8fae679540222afafa0db93c0747a336035715dc504173",
+    "createdUtc": "2026-10-11T12:39:51.413414437Z",
+    "dockerStartedUtc": "2026-10-11T12:39:51.529542101Z",
+    "hubReadyUtc": "2026-10-11T12:40:06.633694860Z",
+    "status": "running",
+    "restartCount": 0,
+    "restartPolicy": "no",
+    "homeVolume": "soilfer-home-admin",
+    "homeMount": "/home/rstudio",
+    "regularFileCount": 476,
+    "ipynbFileCount": 25,
+    "fullHistoricalContentPreservationVerified": false,
+    "persistentServicesPresent": ["soilfer-hub", "soilfer-gateway", "soilfer-lims"],
+    "protectedVolumesPresent": ["soilfer-home-admin", "soilfer-home-demo01", "soilfer-home-demo02", "soilfer-hub-data"],
+    "limsExactDeployedImageRetained": true,
+    "limsHealth": "healthy",
+    "limsRestartCount": 0,
+    "originalProductionReceiptSha256Unchanged": true,
+    "notPostUpgradeVerification": true
+  },
+  "coordination": "Earlier investigation findings sent to Claudio's existing native LIMS Audit / Lab workflow audit and plan thread. At 12:55 UTC Pip observed YY's upgrade-start message there. No reboot preparation, provider-panel action or server mutation by Pip; recreated lab verified read-only."
 }
