@@ -79,10 +79,11 @@
     "productionReceiptSha256": "1f2e2d6621456bc11664ab7800ba0ab9e95d783b4efafde2a1175d3e1fade8c6"
   },
   "actorClarification": {
-    "source": "YY's direct message quoting the platform Claude's explicit self-attribution",
-    "reportedActor": "Platform Claude deliberately stopped the admin lab through the hub for reboot preparation",
+    "source": "Conflicting relayed statements; Claudio explicitly denies host access, commands or stopping the lab",
+    "reportedActor": "Unknown",
+    "previousAttributionToClaudioWithdrawn": true,
     "humanIdentityIndependentlyEstablishedByLogs": false,
-    "deliberateStopReportedRatherThanIdleCull": true,
+    "deliberateStopOrIdleCullEstablished": false,
     "actualHubIdleTimeoutSeconds": 3600,
     "idleTimeoutSource": "Filtered read of IDLE_TIMEOUT_SECONDS in the running soilfer-hub Docker configuration"
   },

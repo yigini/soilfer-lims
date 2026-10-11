@@ -1,0 +1,322 @@
+{
+  "status": "READ_ONLY_POST_BOOT_CHECKS_PASSED_LABS_ON_DEMAND",
+  "observedUtc": "2026-10-11T13:10:38.043421+00:00",
+  "bootId": "729c1118-1406-4e92-b3f2-0463a35cda46",
+  "uptimeSeconds": 710.16,
+  "disks": {
+    "blockdevices": [
+      {
+        "name": "sr0",
+        "type": "rom",
+        "size": 1073741312,
+        "fstype": null,
+        "mountpoints": [
+          null
+        ]
+      },
+      {
+        "name": "vda",
+        "type": "disk",
+        "size": 257698037760,
+        "fstype": null,
+        "mountpoints": [
+          null
+        ],
+        "children": [
+          {
+            "name": "vda1",
+            "type": "part",
+            "size": 257696972288,
+            "fstype": "ext4",
+            "mountpoints": [
+              "/"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "vdb",
+        "type": "disk",
+        "size": 1073741824,
+        "fstype": null,
+        "mountpoints": [
+          null
+        ],
+        "children": [
+          {
+            "name": "vdb1",
+            "type": "part",
+            "size": 1072693248,
+            "fstype": "swap",
+            "mountpoints": [
+              "[SWAP]"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "freeBytes": {
+    "/opt/lims": 130876772352,
+    "/var/lib/docker": 130876772352
+  },
+  "databaseBytes": 563322880,
+  "assetsBytes": 3906103,
+  "integrityCheck": "ok",
+  "foreignKeyViolations": 0,
+  "tableCount": 103,
+  "allCountsMatch": true,
+  "tableCountDeltas": {},
+  "baseline": "Original feac production receipt installedTables at 06:00:46 UTC; no immediate preboot snapshot",
+  "counts": {
+    "Analysis": 216,
+    "AnalysisCategory": 19,
+    "AnalysisGroup": 23,
+    "ApiKey": 4,
+    "AuditLog": 12696,
+    "Batch": 6,
+    "BatchAnalyte": 6,
+    "BatchDisposition": 1,
+    "BatchEvent": 28,
+    "BatchPosition": 33,
+    "BatchPositionReference": 0,
+    "BatchPositionWorkItem": 15,
+    "BatchQcResult": 18,
+    "BatchReagentLot": 0,
+    "CalcTemplate": 8,
+    "CalcTemplateActivation": 0,
+    "CalibrationCurve": 0,
+    "CalibrationPoint": 0,
+    "CommandReceipt": 1,
+    "Consignment": 1,
+    "CrossCheckEvaluation": 0,
+    "EquipmentAsset": 42,
+    "EquipmentEvent": 4,
+    "EquipmentMethodEligibility": 14,
+    "EquipmentQualification": 42,
+    "EquipmentScheduleRule": 0,
+    "ExternalMapping": 0,
+    "GlobalAppearanceSetting": 1,
+    "HelpArticle": 113,
+    "HelpFeedback": 6,
+    "HelpLabNote": 0,
+    "HelpLocaleRevision": 565,
+    "HelpPublication": 366,
+    "HelpRevision": 113,
+    "HelpSupportConfig": 0,
+    "InventoryItem": 127,
+    "InventoryLocation": 35,
+    "InventoryLot": 5,
+    "InventoryReservation": 0,
+    "InventoryTransaction": 11,
+    "KoboConfig": 11,
+    "Lab": 10,
+    "LabAppearanceSetting": 1,
+    "LabLifecycleState": 1,
+    "LabMethodDefault": 0,
+    "LabPolicy": 0,
+    "LabPolicyOverride": 0,
+    "LabSequence": 0,
+    "Language": 5,
+    "Message": 116,
+    "MethodReference": 73,
+    "MethodRequirement": 0,
+    "Methodology": 590,
+    "NonconformityReport": 0,
+    "Notification": 226,
+    "OperationalGate": 6,
+    "OrderLine": 119,
+    "ProficiencyRound": 0,
+    "Project": 6,
+    "ProjectLab": 10,
+    "QcEvaluation": 6,
+    "QcMeasurement": 24,
+    "QcRule": 0,
+    "ReferenceMaterial": 0,
+    "ReferenceValue": 0,
+    "Report": 4,
+    "ReportAccessLog": 4,
+    "ReportAmendmentWithdrawal": 0,
+    "ReportSequence": 0,
+    "ReportShareLink": 7,
+    "ReportedValueSelection": 0,
+    "Result": 19,
+    "ResultCalculation": 0,
+    "ResultEvidenceEvent": 0,
+    "ResultOverrideRequest": 0,
+    "ReviewDecision": 7,
+    "Sample": 38773,
+    "SampleAmendment": 1,
+    "SampleAmendmentAttempt": 0,
+    "SampleHold": 9,
+    "SampleOrderRevision": 13,
+    "SpectralData": 0,
+    "StaffInvitation": 3,
+    "StaffRecoveryGrant": 0,
+    "Submission": 7,
+    "SystemSetting": 1,
+    "Unit": 36,
+    "User": 49,
+    "UserBenchCredential": 0,
+    "WorkAttempt": 19,
+    "WorkItem": 90,
+    "WorkItemDraft": 1,
+    "WorkItemEquipmentUse": 6,
+    "_exchange_batches": 11,
+    "_exchange_connection_keys": 4,
+    "_exchange_connections": 4,
+    "_exchange_journal": 3,
+    "_exchange_meta": 5,
+    "_exchange_receipts": 0,
+    "_exchange_rotation_operations": 0,
+    "_exchange_snapshot_items": 0,
+    "_exchange_snapshots": 0,
+    "_schema_migrations": 37
+  },
+  "all37SchemaReceiptRowsAndFieldsMatch": true,
+  "acceptance": {
+    "attemptStatus": "ACCEPTED",
+    "reviewDecisionAttemptId": null,
+    "reportStatus": "PUBLISHED"
+  },
+  "containers": [
+    {
+      "name": "soilfer-lims",
+      "exists": true,
+      "id": "b9d7a40b05476a510e7398c42705b2abd3d61748c9bfee8ae38948f59f5d01f2",
+      "image": "sha256:159057d56c456a0c7cdef917fd04f53f9a66d6285cc476d7203d63047bfff8e1",
+      "startedUtc": "2026-10-11T12:59:07.586152916Z",
+      "restartCount": 0,
+      "health": "healthy",
+      "mounts": [
+        {
+          "name": "lims_lims-data",
+          "source": "/var/lib/docker/volumes/lims_lims-data/_data",
+          "destination": "/app/server/prisma"
+        },
+        {
+          "name": "lims_lims-assets",
+          "source": "/var/lib/docker/volumes/lims_lims-assets/_data",
+          "destination": "/app/server/uploads"
+        }
+      ]
+    },
+    {
+      "name": "soilfer-hub",
+      "exists": true,
+      "id": "43c16b88f61ff159f9bad658350a65236cf771e6096a80246eefa2127ffa528f",
+      "image": "sha256:91d4daa9443a7a2c8a11bd6936c4ff194e4a3718e923eaee88c6579f5d914b96",
+      "startedUtc": "2026-10-11T12:59:07.581386499Z",
+      "restartCount": 0,
+      "health": null,
+      "mounts": [
+        {
+          "name": null,
+          "source": "/opt/soilfer-learn/accounts",
+          "destination": "/srv/jupyterhub/accounts"
+        },
+        {
+          "name": "soilfer-hub-data",
+          "source": "/var/lib/docker/volumes/soilfer-hub-data/_data",
+          "destination": "/srv/jupyterhub/data"
+        },
+        {
+          "name": null,
+          "source": "/opt/soilfer-learn/data/handouts",
+          "destination": "/srv/jupyterhub/handouts"
+        },
+        {
+          "name": null,
+          "source": "/var/run/docker.sock",
+          "destination": "/var/run/docker.sock"
+        },
+        {
+          "name": null,
+          "source": "/var/lib/docker/volumes",
+          "destination": "/host-volumes"
+        }
+      ]
+    },
+    {
+      "name": "soilfer-gateway",
+      "exists": true,
+      "id": "7c0995dd4da36a7381dc5d917653a7ee4fe882624d7a2cf6f54acb7ec583b80a",
+      "image": "sha256:ac098fb6c6a553538fa6d4731fcb0479822f10a9e8cbb4985082090f4e57ed0e",
+      "startedUtc": "2026-10-11T12:59:07.58529984Z",
+      "restartCount": 0,
+      "health": null,
+      "mounts": [
+        {
+          "name": "soilfer-caddy-config",
+          "source": "/var/lib/docker/volumes/soilfer-caddy-config/_data",
+          "destination": "/config"
+        },
+        {
+          "name": "soilfer-caddy-data",
+          "source": "/var/lib/docker/volumes/soilfer-caddy-data/_data",
+          "destination": "/data"
+        },
+        {
+          "name": null,
+          "source": "/opt/soilfer-learn/data/manual",
+          "destination": "/srv/manual-root"
+        }
+      ]
+    },
+    {
+      "name": "soilfer-lab-admin",
+      "exists": false,
+      "acceptedOnDemandByYY": true
+    }
+  ],
+  "httpsGetChecks": [
+    {
+      "url": "https://lims.yigini.net/",
+      "httpStatus": 200,
+      "tlsVerificationPassed": true
+    },
+    {
+      "url": "https://lims.yigini.net/login",
+      "httpStatus": 200,
+      "tlsVerificationPassed": true
+    },
+    {
+      "url": "https://lims.yigini.net/api/auth/me",
+      "httpStatus": 401,
+      "tlsVerificationPassed": true
+    },
+    {
+      "url": "https://training.yigini.net/lab/hub/login",
+      "httpStatus": 200,
+      "tlsVerificationPassed": true
+    }
+  ],
+  "authenticatedGetChecks": [
+    {
+      "url": "http://127.0.0.1:3000/api/auth/me",
+      "httpStatus": 200,
+      "principalMatched": true
+    },
+    {
+      "url": "https://lims.yigini.net/api/auth/me",
+      "httpStatus": 200,
+      "principalMatched": true
+    }
+  ],
+  "passwordLoginAttempted": false,
+  "health": {
+    "status": "ok",
+    "version": "1.9.0",
+    "uptime": 624.616636384
+  },
+  "homeAdmin": {
+    "volume": "soilfer-home-admin",
+    "regularFileCount": 474,
+    "notebookCount": 25
+  },
+  "originalProductionReceiptSha256": "1f2e2d6621456bc11664ab7800ba0ab9e95d783b4efafde2a1175d3e1fade8c6",
+  "originalFrozenKitUnchanged": true,
+  "candidateBuildReceiptSha256": "08714c72470839d5cb8011423e1510f08d63a998a97b6e5a1fc25ce4f418a2b1",
+  "candidateImage": "sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a",
+  "productionMutationsByThisProbe": 0
+}
