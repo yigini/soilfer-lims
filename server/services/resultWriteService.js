@@ -545,7 +545,10 @@ async function deriveTextureResult(tx, { sampleId, replicateNo = 1, actor, now =
     if (fractions.some(row => !row || row.censoring !== 'NONE' || row.numericValue == null)) return null;
     const item=await tx.workItem.findFirst({where:canonicalWorkItemWhere(sampleId,'TEXTURE')});
     if (!item) throw new TransitionError('Reconcile the order before recording this parameter.',409,'RESULT_WORKITEM_REQUIRED');
-    const classification = require('../utils/soilCalculations').calculateUsdaTexture(...fractions.map(row => row.numericValue));
+    // #278: derive within the laboratory closure tolerance from policyService.
+    const owner = await tx.sample.findUnique({ where: { id: sampleId }, select: { assignedLab: true, labId: true } });
+    const tolerance = await require('./policyService').get(owner?.assignedLab || owner?.labId, 'crossCheck.textureClosureTolerancePct', { db: tx });
+    const classification = require('../utils/soilCalculations').calculateUsdaTexture(...fractions.map(row => row.numericValue), { tolerance });
     if (!classification.isValid) return null;
     const flags = ['DERIVED_USDA_12_CLASS', ...fractions.map(row => `SOURCE_${row.param}_${row.id}`), `CLOSURE_ERROR_${classification.closureError ?? 0}`];
     const ctx = await context(tx, { sampleId, actor, workItemId:item.id,

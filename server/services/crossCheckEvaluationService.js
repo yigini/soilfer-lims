@@ -98,9 +98,9 @@ async function reviewCrossChecks(db, sampleId, actor) {
             orderBy: [{ evaluatedAt: 'asc' }, { id: 'asc' }] });
         const selectionExists = await tx.reportedValueSelection.findFirst({ where: { workItem: { sampleId } }, select: { id: true } });
         const observations = await tx.result.findMany({ where: { sampleId, isCurrent: true }, orderBy: { id: 'asc' } });
-        // The existing gate deliberately retains its old text parser, units and
-        // implicit tolerance (#201 pin6092909004; correction deferred to #278).
-        const gate = require('../controllers/validationController').validateSampleMatrix(observations);
+        // #278: the blocking gate reads stored numeric values with the lab's tolerance.
+        const validation = require('../controllers/validationController');
+        const gate = validation.validateSampleMatrix(observations, await validation.matrixContext(tx, sample));
         const snapshot = await labSnapshot(tx, sample);
         let current = null, selectionErrors = [];
         if (selectionExists && snapshot) {
@@ -111,6 +111,7 @@ async function reviewCrossChecks(db, sampleId, actor) {
         return { sampleId, current, atSubmission: stored.map(decode), selectionErrors,
             ...(snapshot ? { crossChecks: current?.evaluations || [] } : unavailable()),
             existingTextureGate: { evaluatedFrom: 'CURRENT_OBSERVATIONS', texture: gate.texture,
+                textureClosure: gate.textureClosure,
                 isBlocking: gate.isBlocking, blockingErrors: gate.blockingErrors } };
     });
 }

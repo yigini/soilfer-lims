@@ -111,4 +111,4 @@ function evaluateCrossParameters(rows, snapshot) {
         return result(flagged ? 'FLAGGED' : 'PASS');
     });
 }
-module.exports = { evaluateCrossParameters };
+module.exports = { evaluateCrossParameters, unitCode };

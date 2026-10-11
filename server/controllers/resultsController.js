@@ -192,7 +192,8 @@ exports.saveResults = async (req, res) => {
             const allActiveResults = await tx.result.findMany({
                 where: { sampleId, isCurrent: true }
             });
-            const matrixDiagnostics = validationController.validateSampleMatrix(allActiveResults);
+            const matrixDiagnostics = validationController.validateSampleMatrix(allActiveResults,
+                await validationController.matrixContext(tx, sample));
             const crossCheckOutcome = await require('../services/crossCheckEvaluationService').currentObservationCrossChecks(tx, sampleId, user);
             return { validatedMeasurements, matrixDiagnostics, ...crossCheckOutcome,derivation };
         });
@@ -226,7 +227,7 @@ exports.submitForApproval = async (req, res) => {
             stateRules.assertScope(user, sample);
             const results = await tx.result.findMany({ where: { sampleId, isCurrent: true } });
             if (!results.length) throw Object.assign(new Error('No results entered'), { statusCode: 400 });
-            const matrixDiagnostics = validationController.validateSampleMatrix(results);
+            const matrixDiagnostics = validationController.validateSampleMatrix(results, await validationController.matrixContext(tx, sample));
             if (matrixDiagnostics.isBlocking) throw new stateRules.TransitionError('Scientific matrix validation failed: ' +
                 matrixDiagnostics.blockingErrors.map(error => error.message).join('; '), 422, 'BLOCKING_MATRIX_DIAGNOSTICS', {
                 blockingErrors: matrixDiagnostics.blockingErrors, matrixDiagnostics });

@@ -8,13 +8,13 @@ const { assertReportedSelectionGroup, assertSelectionGroupStructure } = require(
 function choiceFor(item, context, explicit) {
     if(context.layout?.kind==='SEPARATE') return require('./reportedValueTextureService').separateTextureChoice(context,explicit);
     if (explicit != null) {
-        const choice = explicitReportedChoice(item, context.lineage, explicit, context.limits);
+        const choice = explicitReportedChoice(item, context.lineage, explicit, context.limits, context);
         if (!choice.reason && context.lineage.eligible.some(row => row.attempt.status === 'QUESTIONED' && choice.attemptIds.includes(row.attempt.id))) {
             throw new rules.TransitionError('Explain why the retained questioned evidence is being reported.', 409, 'REPORTED_VALUE_REASON_REQUIRED');
         }
         return choice;
     }
-    const automatic = automaticReportedChoice(item, context.lineage, context.policy.value, context.limits);
+    const automatic = automaticReportedChoice(item, context.lineage, context.policy.value, context.limits, context);
     if (!automatic.choice) throw new rules.TransitionError('Choose the reported value for this test before accepting it.', 409,
         'REPORTED_VALUE_SELECTION_REQUIRED', { workItemId: item.id, reasons: automatic.reasons,
             eligibleAttempts: context.lineage.eligible.map(row => ({ attemptId: row.attempt.id, attemptNo: row.attempt.attemptNo,
@@ -22,7 +22,7 @@ function choiceFor(item, context, explicit) {
     return automatic.choice;
 }
 function automaticChoiceFor(item,context) {
-    if(context.layout?.kind!=='SEPARATE') return automaticReportedChoice(item,context.lineage,context.policy.value,context.limits);
+    if(context.layout?.kind!=='SEPARATE') return automaticReportedChoice(item,context.lineage,context.policy.value,context.limits,context);
     try {return {choice:choiceFor(item,context),reasons:[]};}
     catch(error) {
         if(!(error instanceof rules.TransitionError) || !error.code?.startsWith('REPORTED_VALUE_')) throw error;
@@ -119,7 +119,7 @@ async function reviewItem(tx, workItemId, actor) {
 function previewChoice(item, context, choice) {
     try {
         const preview = context.layout?.kind==='SEPARATE' ? require('./reportedValueTextureService').separateTextureChoice(context,choice,{allowMissingReason:true}) :
-            explicitReportedChoice(item, context.lineage, choice, context.limits);
+            explicitReportedChoice(item, context.lineage, choice, context.limits, context);
         return { allowed: true, choice: preview, requiresReason: context.lineage.eligible.some(row =>
             row.attempt.status === 'QUESTIONED' && (preview.attemptIds.includes(row.attempt.id) || preview.matching?.attempt.id===row.attempt.id)) };
     }

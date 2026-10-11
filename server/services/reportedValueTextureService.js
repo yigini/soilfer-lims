@@ -86,7 +86,8 @@ function fractionOutcome(context) {
         reason:JSON.stringify({code:'FRACTION_NOT_REPORTABLE',fractions:missing.map(row=>({analysisCode:row.analysisCode,selectionId:row.selectionId}))}),
         fractionSelections:proofs,outputs:[{analysisCode:'TEXTURE',value:null,valueText:'',unit:null,censoring:'NONE',
             methodologyId:null,resultIds:[],derivation:'calculateUsdaTexture'}]};
-    const value=require('../utils/soilCalculations').calculateUsdaTexture(...FRACTIONS.map(param=>proofs.find(row=>row.analysisCode===param).value));
+    const value=require('../utils/soilCalculations').calculateUsdaTexture(...FRACTIONS.map(param=>proofs.find(row=>row.analysisCode===param).value),
+        typeof context.textureTolerancePct==='number' ? {tolerance:context.textureTolerancePct} : null);
     if(proofs.some(row=>row.censoring!=='NONE' || row.value===null || !Number.isFinite(row.value)) || !value.isValid) {
         throw fail('REPORTED_VALUE_TEXTURE_UNRESOLVED','The selected fraction values cannot produce a texture class.');
     }

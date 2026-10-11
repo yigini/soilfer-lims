@@ -5,11 +5,15 @@ const { TEXTURE_ALIASES } = require('./reportResultGovernance');
 const MODES = new Set(['ATTEMPT', 'MEAN', 'NOT_REPORTABLE']);
 const failure = (code, message, details = {}) => new TransitionError(message, 409, code, details);
 
+function textureOptions(options) {
+    return typeof options.textureTolerancePct === 'number' ? { tolerance: options.textureTolerancePct } : null;
+}
+
 function selectionOutputs(item,context) {
     return context?.layout?.outputParams || (TEXTURE_ALIASES.has(item.analysis) ? ['CLAY', 'SAND', 'SILT', 'TEXTURE'] : [item.analysis]);
 }
 
-function selectedOutputValues(item, candidates, limits) {
+function selectedOutputValues(item, candidates, limits, options = {}) {
     const params = selectionOutputs(item), all = candidates.flatMap(row => row.results);
     const composite = TEXTURE_ALIASES.has(item.analysis);
     for (const candidate of candidates) {
@@ -36,7 +40,8 @@ function selectedOutputValues(item, candidates, limits) {
     });
     if (composite && averaging) {
         const values = ['SAND', 'SILT', 'CLAY'].map(param => outputs.find(row => row.analysisCode === param).value);
-        const derived = calculateUsdaTexture(...values);
+        // #278: the laboratory closure tolerance from policyService.
+        const derived = calculateUsdaTexture(...values, textureOptions(options));
         if (!derived.isValid) throw failure('REPORTED_VALUE_TEXTURE_UNRESOLVED', derived.error || 'The selected texture means do not produce a valid class.');
         outputs.push({ analysisCode: 'TEXTURE', value: null, valueText: derived.className, unit: null, censoring: 'NONE',
             methodologyId: outputs[0].methodologyId, resultIds: all.filter(row => row.param !== 'TEXTURE').map(row => row.id),
@@ -45,7 +50,7 @@ function selectedOutputValues(item, candidates, limits) {
     return { outputs: outputs.sort((a, b) => a.analysisCode < b.analysisCode ? -1 : a.analysisCode > b.analysisCode ? 1 : 0), averaging };
 }
 
-function explicitReportedChoice(item, lineage, choice, limits) {
+function explicitReportedChoice(item, lineage, choice, limits, options = {}) {
     if (!choice || !MODES.has(choice.mode) || Object.keys(choice).some(key => !['mode', 'attemptIds', 'reason'].includes(key))) {
         throw failure('REPORTED_VALUE_SELECTION_INVALID', 'Choose an attempt, a complete mean, or not reportable.');
     }
@@ -63,13 +68,13 @@ function explicitReportedChoice(item, lineage, choice, limits) {
         choice.mode === 'ATTEMPT' && ids.length !== 1) throw failure('REPORTED_VALUE_SELECTION_INVALID', 'Choose complete eligible attempts.');
     const candidates = ids.map(id => lineage.eligible.find(row => row.attempt.id === id));
     if (candidates.some(row => !row)) throw failure('REPORTED_VALUE_SELECTION_INVALID', 'An ineligible attempt cannot supply the reported value.');
-    const values = selectedOutputValues(item, candidates, limits);
+    const values = selectedOutputValues(item, candidates, limits, options);
     if (choice.mode === 'MEAN' && !values.averaging) throw failure('REPORTED_VALUE_SELECTION_INVALID', 'A mean needs more than one final value per output.');
     return { mode: choice.mode, attemptIds: [...ids].sort(), rule: 'REVIEWER', reason: choice.reason?.trim() || null,
         outputs: values.outputs };
 }
 
-function automaticReportedChoice(item, lineage, policyRule, limits) {
+function automaticReportedChoice(item, lineage, policyRule, limits, options = {}) {
     if (!['MEAN_IF_WITHIN_R', 'LATEST_VALID', 'REVIEWER_PICKS'].includes(policyRule)) {
         throw failure('RESULT_POLICY_UNRESOLVED', 'The reported-value policy could not be resolved.');
     }
@@ -98,7 +103,7 @@ function automaticReportedChoice(item, lineage, policyRule, limits) {
             if (selected.results.some(row => row.isCurrent === false || (() => {
                 try { return JSON.parse(row.flags || '[]').includes('REVIEW_RETURNED'); } catch { return true; }
             })())) throw failure('REPORTED_VALUE_REVIEW_REQUIRED', 'Retained non-current or returned evidence needs an explicit reviewer selection.');
-            const values = selectedOutputValues(item, [selected], limits);
+            const values = selectedOutputValues(item, [selected], limits, options);
             return { choice: { mode: 'ATTEMPT', attemptIds: [selected.attempt.id], reason: null,
                 rule: rule || (values.averaging ? 'AUTO_DUPLICATE_MEAN' : 'AUTO_SINGLE'), outputs: values.outputs }, reasons: [] };
         } catch (error) {
