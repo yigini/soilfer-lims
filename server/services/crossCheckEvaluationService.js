@@ -19,7 +19,18 @@ async function labSnapshot(tx, sample) {
     const lab = await policyService.resolveLab(sample.assignedLab || sample.labId, tx);
     return lab ? policyService.snapshot(lab.id, { db: tx }) : null;
 }
-const unavailable = () => ({ crossChecks: [], crossCheckUnavailableReason: 'CROSS_CHECK_LAB_REQUIRED' });
+const unavailable = (reason = 'CROSS_CHECK_LAB_REQUIRED') => ({ crossChecks: [], crossCheckUnavailableReason: reason });
+// #281: a stored value outside the registry bounds (saved before they existed) is
+// never rewritten; the checks are disclosed as unavailable until a manager saves a valid one.
+const { POLICY_KEYS } = require('./crossParameterEvaluator');
+function policyInvalid(snapshot) {
+    return POLICY_KEYS.some(key => snapshot.resolved?.[key]?.invalid) ||
+        snapshot.values['crossCheck.cnMin'] >= snapshot.values['crossCheck.cnMax'];
+}
+function availability(snapshot) {
+    if (!snapshot) return unavailable();
+    return policyInvalid(snapshot) ? unavailable('CROSS_CHECK_POLICY_INVALID') : null;
+}
 function decode(row) {
     try {
         const inputs = JSON.parse(row.inputs), thresholds = JSON.parse(row.thresholds);
@@ -43,7 +54,8 @@ async function currentObservationCrossChecks(tx, sampleId, actor) {
     rules.requireTransaction(tx);
     const sample = await scopedSample(tx, sampleId, actor, 'ENTER_RESULTS');
     const snapshot = await labSnapshot(tx, sample);
-    if (!snapshot) return unavailable();
+    const missing = availability(snapshot);
+    if (missing) return missing;
     const observations = await tx.result.findMany({ where: { sampleId, isCurrent: true }, orderBy: { id: 'asc' } });
     const evaluations = evaluateCrossParameters(observations, snapshot);
     try {
@@ -67,7 +79,8 @@ async function recordSubmissionCrossChecks(tx, sampleId, actor) {
         throw new rules.TransitionError('Cross-check evidence requires the caller submission.', 409, 'CROSS_CHECK_SUBMISSION_REQUIRED');
     }
     const snapshot = await labSnapshot(tx, sample);
-    if (!snapshot) return unavailable();
+    const missing = availability(snapshot);
+    if (missing) return missing;
     const rows = await tx.result.findMany({ where: { sampleId, isCurrent: true }, orderBy: { id: 'asc' } });
     const evaluations = evaluateCrossParameters(rows, snapshot), evaluatedBy = rules.actorName(actor), evaluatedAt = new Date();
     try {
@@ -103,13 +116,14 @@ async function reviewCrossChecks(db, sampleId, actor) {
         const gate = validation.validateSampleMatrix(observations, await validation.matrixContext(tx, sample));
         const snapshot = await labSnapshot(tx, sample);
         let current = null, selectionErrors = [];
-        if (selectionExists && snapshot) {
+        const missing = availability(snapshot);
+        if (selectionExists && !missing) {
             const reported = await readSampleReportedValues(tx, sample, { partial: true });
             current = { evaluations: evaluateCrossParameters(reported.values, snapshot), policyVersion: snapshot.version };
             selectionErrors = reported.errors;
         }
         return { sampleId, current, atSubmission: stored.map(decode), selectionErrors,
-            ...(snapshot ? { crossChecks: current?.evaluations || [] } : unavailable()),
+            ...(missing || { crossChecks: current?.evaluations || [] }),
             existingTextureGate: { evaluatedFrom: 'CURRENT_OBSERVATIONS', texture: gate.texture,
                 textureClosure: gate.textureClosure,
                 isBlocking: gate.isBlocking, blockingErrors: gate.blockingErrors } };

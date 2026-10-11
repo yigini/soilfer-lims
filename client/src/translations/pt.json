@@ -2649,6 +2649,7 @@
     "source": "Origem",
     "difference": "Comparação com a predefinição",
     "differs": "Difere da predefinição",
+    "storedInvalid": "O valor salvo está fora do intervalo e não é usado; salve um valor válido.",
     "edit": "Editar",
     "clear": "Remover substituição",
     "clearExplanation": "Esta configuração herdará o próximo padrão aplicável. O valor anterior permanece no histórico.",
@@ -3499,7 +3500,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "A evidência de verificação requer o envio correspondente."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Verificações cruzadas indisponíveis: a amostra não tem um laboratório registrado"
+      "CROSS_CHECK_LAB_REQUIRED": "Verificações cruzadas indisponíveis: a amostra não tem um laboratório registrado",
+      "CROSS_CHECK_POLICY_INVALID": "Verificações cruzadas indisponíveis: uma configuração de verificação do laboratório está fora do intervalo; um gestor deve salvar um valor válido"
     }
   },
   "amendment": {

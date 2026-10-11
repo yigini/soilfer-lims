@@ -65,12 +65,16 @@ key('results.typicalMin', 'number', null, null, null, { nullable: true, unit: 'm
 key('results.typicalMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
 key('results.calibrationMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
 // #201 scope pin6092380877: all presets expose laboratory-owned thresholds.
-key('crossCheck.basesCecFactor', 'number', 1.1, undefined, undefined, { scope: 'LAB', min: 1 });
-key('crossCheck.baseSaturationMaxPct', 'number', 100, undefined, undefined, { scope: 'LAB', unit: '%' });
-key('crossCheck.textureClosureTolerancePct', 'number', 2, undefined, undefined, { scope: 'LAB', unit: '%' });
-key('crossCheck.cnMin', 'number', 8, undefined, undefined, { scope: 'LAB' });
-key('crossCheck.cnMax', 'number', 25, undefined, undefined, { scope: 'LAB' });
-key('crossCheck.carbonatePhMin', 'number', 7, undefined, undefined, { scope: 'LAB', unit: 'pH' });
+// #281: an out-of-range value stored before these bounds existed is never rewritten.
+// It resolves as invalid (value null) so only the cross-checks become unavailable,
+// instead of failing every policy read for that laboratory.
+const crossCheckBound = { storedInvalid: 'UNAVAILABLE' };
+key('crossCheck.basesCecFactor', 'number', 1.1, undefined, undefined, { scope: 'LAB', min: 1, ...crossCheckBound });
+key('crossCheck.baseSaturationMaxPct', 'number', 100, undefined, undefined, { scope: 'LAB', unit: '%', min: 0, ...crossCheckBound });
+key('crossCheck.textureClosureTolerancePct', 'number', 2, undefined, undefined, { scope: 'LAB', unit: '%', min: 0, max: 100, ...crossCheckBound });
+key('crossCheck.cnMin', 'number', 8, undefined, undefined, { scope: 'LAB', min: 0, ...crossCheckBound });
+key('crossCheck.cnMax', 'number', 25, undefined, undefined, { scope: 'LAB', min: 0, ...crossCheckBound });
+key('crossCheck.carbonatePhMin', 'number', 7, undefined, undefined, { scope: 'LAB', unit: 'pH', min: 0, max: 14, ...crossCheckBound });
 key('repeats.maxAttemptsBeforeNcr', 'integer', 3, 5, 0, integer);
 key('repeats.technicianSelfRepeatBeforeSubmit', 'boolean', true);
 key('review.secondPersonRequired', 'boolean', true, true, false);
