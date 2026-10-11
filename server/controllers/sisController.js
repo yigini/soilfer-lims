@@ -62,6 +62,10 @@ async function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } =
         reportedValueErrors:proof.errors};
 }
 
+// Flat exports name the saved selection and its source attempts and batches.
+const reportedProvenance=(p,obj)=>({[`${p}_selection_id`]:obj.reportedValueSelectionId || null,
+    [`${p}_attempt_ids`]:(obj.attemptIds || []).join(';'),[`${p}_batch_ids`]:(obj.batchIds || []).join(';')});
+
 // ─── 1. GET /api/v1/sis/samples (Paginated Registry) ───
 exports.getSamples = async (req, res, next) => {
     try {
@@ -230,11 +234,12 @@ exports.getGeoJson = async (req, res, next) => {
                 // Add analytical keys (WP-22 dual export schema)
                 Object.entries(formatted.analyticalResults).forEach(([param, resObj]) => {
                     const p = param.toLowerCase();
-                    flatProperties[p] = resObj.normalized !== undefined ? resObj.normalized : resObj.value;
+                    flatProperties[p] = resObj.value;
                     flatProperties[`${p}_as_measured`] = resObj.as_measured !== undefined ? resObj.as_measured : resObj.value;
                     flatProperties[`${p}_unit`] = resObj.unit;
                     flatProperties[`${p}_normalized`] = resObj.normalized !== undefined ? resObj.normalized : resObj.value;
                     flatProperties[`${p}_controlled_unit`] = resObj.controlled_unit;
+                    Object.assign(flatProperties,reportedProvenance(p,resObj));
                 });
 
                 features.push({
@@ -298,7 +303,10 @@ exports.getResultsMatrix = async (req, res, next) => {
             };
 
             Object.entries(formatted.analyticalResults).forEach(([param, obj]) => {
+                const p = param.toLowerCase();
                 row[param] = obj.value;
+                row[`${p}_normalized`] = obj.normalized;
+                Object.assign(row,reportedProvenance(p,obj));
             });
 
             return row;

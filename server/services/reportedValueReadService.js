@@ -24,7 +24,8 @@ async function readSampleReportedValues(db,sample,{partial=false}={}) {
                         param:row.analysisCode,value:row.valueText,numericValue:row.value,unit:row.unit,censoring:row.censoring,
                         methodologyId:row.methodologyId,mode:row.mode,reason:row.reason,rule:row.rule,policyVersion:row.policyVersion,
                         policyRule:row.policyRule,policySource:JSON.parse(row.evidenceSnapshot).policy?.source || null,
-                        sourceResultIds:ids,attemptIds:selection.attemptIds,provenance:provenance.length===1 ? provenance[0] : null,
+                        sourceResultIds:ids,attemptIds:selection.attemptIds,
+                        batchIds:[...new Set(sources.map(source => source.batchId).filter(Boolean))].sort(),provenance:provenance.length===1 ? provenance[0] : null,
                         basis:bases.length===1 ? bases[0] : null,flags:[],isValid:true,
                         ...(row.derivation && {provenance:'DERIVED'}) });
                 }
@@ -50,6 +51,12 @@ function reportedValueText(row,locale='en') {
             messages.fractionNotReportable.replace('{{fraction}}',fraction.analysisCode).replace('{{selectionId}}',fraction.selectionId)).join(' ');
     } catch { /* Reviewer reasons remain their recorded text. */ }
     return messages.notReportable+': '+reason;
+}
+// Exports carry the report item's value unrounded: numeric when its text is a
+// number, otherwise the text itself (censored, categorical or not reportable).
+function reportedExportValue(row,locale='en') {
+    const text=reportedValueText(row,locale);
+    return row.mode!=='NOT_REPORTABLE' && String(text).trim()!=='' && Number.isFinite(Number(text)) ? Number(text) : text;
 }
 // Raw observations disclose membership without changing their row contract or
 // requiring a publishable outcome. Stale or absent selections disclose null.
@@ -78,4 +85,4 @@ async function rawSelectionIds(db,results) {
         return output;
     });
 }
-module.exports = { readSampleReportedValues, reportedValueText, rawSelectionIds };
+module.exports = { readSampleReportedValues, reportedValueText, reportedExportValue, rawSelectionIds };

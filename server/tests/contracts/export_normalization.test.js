@@ -72,8 +72,8 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
         expect(exportedSample['soc_unit']).toBe('%');
         expect(exportedSample['soc_normalized']).toBe(18.0);
         expect(exportedSample['soc_controlled_unit']).toBe('g/kg');
-        // Legacy column alias points to normalized value
-        expect(exportedSample['SOC']).toBe(18.0);
+        // #213: the headline column is the unconverted report value; normalized stays in soc_normalized
+        expect(exportedSample['SOC']).toBe(1.8);
     });
 
     test('2. SIS GeoJSON export emits dual columns in flat properties', async () => {
