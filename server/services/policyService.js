@@ -64,6 +64,9 @@ function resolvedFromState(current, key, context = {}) {
             let value;
             try { value = JSON.parse(rows[0].value); }
             catch (_) { throw error(409, key.startsWith('numbers.') ? 'NUMBER_FORMAT_POLICY_INVALID' : 'POLICY_STORED_VALUE_INVALID', 'Invalid stored policy JSON.'); }
+            if (!valid(key, value) && d.storedInvalid === 'UNAVAILABLE') {
+                return { value: null, invalid: true, source, scope: { analysisCode: analysis, methodologyId: method }, version, overrideId: rows[0].id };
+            }
             if (!valid(key, value)) throw error(409, key.startsWith('numbers.') ? 'NUMBER_FORMAT_POLICY_INVALID' : 'POLICY_STORED_VALUE_INVALID', 'Invalid stored policy value.');
             return { value: clone(value), source, scope: { analysisCode: analysis, methodologyId: method }, version, overrideId: rows[0].id };
         }

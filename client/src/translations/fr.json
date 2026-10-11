@@ -2649,6 +2649,7 @@
     "source": "Source",
     "difference": "Comparaison au préréglage",
     "differs": "Diffère du préréglage",
+    "storedInvalid": "La valeur enregistrée est hors limites et n’est pas utilisée ; enregistrez une valeur valide.",
     "edit": "Modifier",
     "clear": "Retirer la dérogation",
     "clearExplanation": "Ce paramètre héritera de la prochaine valeur applicable. Sa valeur précédente reste dans l’historique.",
@@ -3499,7 +3500,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "Les éléments probants nécessitent la soumission correspondante."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Vérifications croisées indisponibles : aucun laboratoire enregistré pour cet échantillon"
+      "CROSS_CHECK_LAB_REQUIRED": "Vérifications croisées indisponibles : aucun laboratoire enregistré pour cet échantillon",
+      "CROSS_CHECK_POLICY_INVALID": "Vérifications croisées indisponibles : un paramètre de vérification du laboratoire est hors limites ; un responsable doit enregistrer une valeur valide"
     }
   },
   "amendment": {

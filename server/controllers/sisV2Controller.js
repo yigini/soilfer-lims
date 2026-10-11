@@ -113,7 +113,9 @@ exports.getCapabilities = (req, res) => {
             deliveryReceipts: true
         },
         observationFields:{reportedValueSelectionId:{nullable:true,
-            description:'Saved current non-stale reported selection using this raw Result as a source; null otherwise. Raw observation rows, cursors and counts are unchanged.'}}
+            description:'Saved current non-stale reported selection using this raw Result as a source; null otherwise. Raw observation rows, cursors and counts are unchanged.'},
+            unitDiagnostic:{optional:true,values:['METHOD_UNIT_OVERRIDE_IGNORED'],
+            description:'Present only when a method QUDT unit override disagrees with its analysis. qudtUnit is always the analysis unit; values are never converted.'}}
     });
 };
 
@@ -427,7 +429,7 @@ exports.getObservations = async (req, res, next) => {
 
             const procedureUri = methodObj?.glosisUri || aMeta.glosisUri || null;
             const propertyUri = aMeta.glosisPropertyUri || (aMeta.glosisProperty ? `http://glosis.org/ont/property/${aMeta.glosisProperty}` : null);
-            const qudtUnit = methodObj?.qudtUnit || aMeta.qudtUnit || null;
+            const { qudtUnit, unitDiagnostic } = require('../services/methodUnitAuthority').analysisQudtUnit(aMeta, methodObj);
 
             const { normalizeUnit } = require('../services/interpretationService');
             const rawUnit = r.unit || aMeta.units || null;
@@ -473,6 +475,7 @@ exports.getObservations = async (req, res, next) => {
                 },
                 controlledUnit,
                 qudtUnit,
+                ...(unitDiagnostic ? { unitDiagnostic } : {}),
                 lod: lodVal,
                 loq: loqVal,
                 provenance: r.provenance || 'MEASURED',

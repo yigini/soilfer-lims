@@ -2649,6 +2649,7 @@
     "source": "Origen",
     "difference": "Comparación con la configuración",
     "differs": "Difiere de la configuración",
+    "storedInvalid": "El valor guardado está fuera de rango y no se usa; guarde un valor válido.",
     "edit": "Editar",
     "clear": "Quitar ajuste específico",
     "clearExplanation": "Este ajuste heredará el siguiente valor aplicable. Su valor anterior se conserva en el historial.",
@@ -3499,7 +3500,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "La evidencia de comprobación requiere el envío correspondiente."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Comprobaciones cruzadas no disponibles: la muestra no tiene un laboratorio registrado"
+      "CROSS_CHECK_LAB_REQUIRED": "Comprobaciones cruzadas no disponibles: la muestra no tiene un laboratorio registrado",
+      "CROSS_CHECK_POLICY_INVALID": "Comprobaciones cruzadas no disponibles: un ajuste de comprobación del laboratorio está fuera de rango; un responsable debe guardar un valor válido"
     }
   },
   "amendment": {

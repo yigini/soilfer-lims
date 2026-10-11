@@ -1,5 +1,6 @@
 const prisma = require('../prisma');
-const { calculateUsdaTexture, evaluateCnRatio, evaluateCecAndBases } = require('../utils/soilCalculations');
+const { calculateUsdaTexture } = require('../utils/soilCalculations');
+const { strict, valid } = require('../config/policyRegistry');
 
 exports.validateResult = async (paramId, value, methodologyId = null, db = prisma) => {
     if (value === null || value === undefined || String(value).trim() === '') {
@@ -69,73 +70,114 @@ exports.validateResult = async (paramId, value, methodologyId = null, db = prism
     };
 };
 
-/**
- * Validate full sample results matrix for cross-parameter scientific integrity.
- * @param {Array<{ param: string, value: any, unit?: string }>} results
- */
-exports.validateSampleMatrix = (results) => {
-    const resMap = {};
-    results.forEach(r => {
-        const num = parseFloat(String(r.value).replace(',', '.'));
-        if (!isNaN(num)) {
-            resMap[r.param.toUpperCase()] = { value: num, unit: r.unit };
-        }
-    });
+const TEXTURE_FRACTIONS = Object.freeze(['SAND', 'SILT', 'CLAY']);
 
+// #278/#291: the blocking closure gate reads the stored numeric value, unit and
+// censoring of each current fraction through the shared texture input
+// authority, never re-parsed text. A replicate with a non-'%' unit, censored,
+// non-numeric or ambiguous fractions is disclosed as not evaluated and does not
+// block. A fraction with no stored unit or censoring is never given one; it is
+// checked with exact closure, never the wider laboratory tolerance.
+function textureGate(results, tolerancePct) {
+    const { textureInputs, closureOptions } = require('../services/textureInputAuthority');
+    const replicates = new Map();
+    for (const row of results) {
+        const param = String(row.param || '').toUpperCase();
+        if (!TEXTURE_FRACTIONS.includes(param)) continue;
+        const replicateNo = Number(row.replicateNo ?? 1);
+        if (!replicates.has(replicateNo)) replicates.set(replicateNo, new Map());
+        const group = replicates.get(replicateNo);
+        if (!group.has(param)) group.set(param, []);
+        group.get(param).push(row);
+    }
+    const evaluations = [];
+    for (const [replicateNo, group] of [...replicates].sort((a, b) => a[0] - b[0])) {
+        if (TEXTURE_FRACTIONS.some(param => !group.has(param))) continue;
+        const rows = TEXTURE_FRACTIONS.map(param => group.get(param));
+        const inputs = textureInputs(rows.map(candidates => candidates.map(row => ({ value: row.numericValue, unit: row.unit, censoring: row.censoring }))));
+        if (inputs.reasonCode && !inputs.unknown) {
+            evaluations.push({ replicateNo, outcome: 'NOT_EVALUATED', reasonCode: inputs.reasonCode, tolerancePct }); continue;
+        }
+        const [sand, silt, clay] = rows.map(candidates => candidates[0]);
+        // #281: an invalid stored laboratory tolerance is exact closure, never a wider one.
+        // A missing stored unit or censoring is never inferred; it closes exactly, as before #278.
+        const applied = inputs.unknown ? null : closureOptions(tolerancePct);
+        const texture = calculateUsdaTexture(sand.numericValue, silt.numericValue, clay.numericValue, applied);
+        evaluations.push({ replicateNo, outcome: texture.isValid ? 'PASS' : 'BLOCKED',
+            reasonCode: inputs.unknown ? inputs.unknown.join('_AND_') + '_EXACT_CLOSURE' : null, tolerancePct: applied ? applied.tolerance : null,
+            values: { sand: sand.numericValue, silt: silt.numericValue, clay: clay.numericValue },
+            resultIds: [sand, silt, clay].map(row => row.id ?? null), texture });
+    }
+    return evaluations;
+}
+
+/**
+ * Blocking texture-closure gate for a sample's current results (#278). The
+ * advisory cross-parameter checks live in crossParameterEvaluator (#201, #279).
+ * @param {Array<{ param: string, numericValue?: number, unit?: string, censoring?: string, replicateNo?: number }>} results
+ * @param {{ textureClosureTolerancePct?: number, texturePolicyInvalid?: boolean }} [context]
+ *   The laboratory's policy tolerance (#278).
+ */
+exports.validateSampleMatrix = (results, context = {}) => {
+    // #281: a stored tolerance outside the registry bounds is disclosed and the gate
+    // closes exactly (the strictest reading) until a manager saves a valid value.
+    const policyInvalid = context.texturePolicyInvalid === true;
+    const tolerancePct = policyInvalid ? null : context.textureClosureTolerancePct ?? strict('crossCheck.textureClosureTolerancePct');
+    if (!policyInvalid && !valid('crossCheck.textureClosureTolerancePct', tolerancePct)) {
+        throw Object.assign(new Error('Texture closure requires a valid laboratory tolerance.'), { statusCode: 409, code: 'CROSS_CHECK_POLICY_REQUIRED' });
+    }
     const diagnostics = {
         texture: null,
-        cnRatio: null,
-        basesAndCec: null,
+        textureClosure: [],
+        // #279 (YY: "retire"): the legacy C:N and base/CEC advisories, with
+        // their text parsing, inferred units and missing-Na = 0 default, are
+        // retired. The #201 crossChecks are the only plausibility source.
+        retiredAdvisories: ['CN_RATIO', 'BASES_CEC'],
+        advisorySuccessor: 'crossChecks',
         warnings: [],
         blockingErrors: [],
         isBlocking: false
     };
+    if (policyInvalid) {
+        diagnostics.texturePolicyInvalid = true;
+        diagnostics.warnings.push('Texture closure tolerance unavailable: CROSS_CHECK_POLICY_INVALID; exact closure applies');
+    }
 
-    // 1. Texture Check (Sand, Silt, Clay) - BLOCKING
-    const sand = resMap.SAND?.value;
-    const silt = resMap.SILT?.value;
-    const clay = resMap.CLAY?.value;
-    if (sand !== undefined && silt !== undefined && clay !== undefined) {
-        diagnostics.texture = calculateUsdaTexture(sand, silt, clay);
-        if (!diagnostics.texture.isValid) {
-            const msg = `Texture closure failed: Sand(${sand}%) + Silt(${silt}%) + Clay(${clay}%) = ${(sand + silt + clay).toFixed(1)}% (must sum to 100% ± 2.0%)`;
+    // 1. Texture Check (Sand, Silt, Clay) - BLOCKING within the lab tolerance
+    diagnostics.textureClosure = textureGate(results, tolerancePct);
+    for (const evaluation of diagnostics.textureClosure) {
+        const replicate = diagnostics.textureClosure.length > 1 ? ` (replicate ${evaluation.replicateNo})` : '';
+        if (evaluation.outcome === 'NOT_EVALUATED') {
+            diagnostics.warnings.push(`Texture closure not evaluated${replicate}: ${evaluation.reasonCode}`);
+            continue;
+        }
+        diagnostics.texture ??= evaluation.texture;
+        if (evaluation.reasonCode) diagnostics.warnings.push(`Texture closure${replicate}: ${evaluation.reasonCode}`);
+        if (evaluation.outcome === 'BLOCKED') {
+            const { sand, silt, clay } = evaluation.values;
+            const msg = `Texture closure failed${replicate}: Sand(${sand}%) + Silt(${silt}%) + Clay(${clay}%) = ${(sand + silt + clay).toFixed(1)}% (must sum to 100% ${evaluation.tolerancePct === null ? 'exactly' : `± ${evaluation.tolerancePct}%`})`;
             diagnostics.warnings.push(msg);
             diagnostics.blockingErrors.push({
                 check: 'TEXTURE_CLOSURE',
                 severity: 'BLOCKING',
-                message: msg
+                message: msg,
+                replicateNo: evaluation.replicateNo,
+                tolerancePct: evaluation.tolerancePct
             });
             diagnostics.isBlocking = true;
         }
     }
 
-    // 2. C:N Ratio Check - ADVISORY
-    const soc = resMap.SOC?.value ?? resMap.OC?.value ?? resMap.ORGANIC_CARBON?.value;
-    const tn = resMap.TN?.value ?? resMap.TOTAL_N?.value ?? resMap.N_TOT?.value;
-    const socUnit = resMap.SOC?.unit ?? resMap.OC?.unit ?? 'g/kg';
-    const tnUnit = resMap.TN?.unit ?? resMap.TOTAL_N?.unit ?? 'g/kg';
-    if (soc !== undefined && tn !== undefined) {
-        diagnostics.cnRatio = evaluateCnRatio(soc, tn, socUnit, tnUnit);
-        if (diagnostics.cnRatio.warning) {
-            diagnostics.warnings.push(diagnostics.cnRatio.warning);
-        }
-    }
-
-    // 3. Base Saturation & CEC Check - ADVISORY
-    const cec = resMap.CEC?.value;
-    const ca = resMap.EXCH_CA?.value ?? resMap.CA_EXCH?.value;
-    const mg = resMap.EXCH_MG?.value ?? resMap.MG_EXCH?.value;
-    const k = resMap.EXCH_K?.value ?? resMap.K_EXCH?.value;
-    const na = resMap.EXCH_NA?.value ?? resMap.NA_EXCH?.value ?? 0;
-    const ph = resMap.PH_H2O?.value ?? resMap.PH?.value ?? null;
-    if (ca !== undefined && mg !== undefined && k !== undefined) {
-        diagnostics.basesAndCec = evaluateCecAndBases(cec, ca, mg, k, na, ph);
-        if (diagnostics.basesAndCec.warnings.length > 0) {
-            diagnostics.warnings.push(...diagnostics.basesAndCec.warnings);
-        }
-    }
-
     return diagnostics;
+};
+
+// #278: the laboratory policy tolerance (policyService; an unresolved historical
+// lab gets the profile or registry value) for validateSampleMatrix.
+exports.matrixContext = async (db, sample) => {
+    const resolved = await require('../services/policyService').resolve(sample.assignedLab || sample.labId,
+        'crossCheck.textureClosureTolerancePct', { db });
+    return resolved.invalid ? { textureClosureTolerancePct: null, texturePolicyInvalid: true }
+        : { textureClosureTolerancePct: resolved.value };
 };
 
 // Also export a route handler helper for ResultsController

@@ -38,7 +38,7 @@ describe('Sample Matrix Cross-Parameter Validation Contract', () => {
         await assignOrderedWork(sampleId, techToken);
     });
 
-    test('1. saveResults validates matrix integrity and computes USDA texture & C:N diagnostics', async () => {
+    test('1. saveResults validates matrix integrity and computes USDA texture; C:N and bases come from crossChecks', async () => {
         const res = await request(app)
             .post(`/api/results/${sampleId}`)
             .set('Authorization', `Bearer ${techToken}`)
@@ -65,14 +65,16 @@ describe('Sample Matrix Cross-Parameter Validation Contract', () => {
         expect(res.body.matrixDiagnostics.texture.className).toBe('Sandy Loam');
         expect(res.body.matrixDiagnostics.texture.isValid).toBe(true);
 
-        // C:N check (16.0 / 1.33 = 12.0)
-        expect(res.body.matrixDiagnostics.cnRatio).toBeDefined();
-        expect(res.body.matrixDiagnostics.cnRatio.cnRatio).toBe(12.0);
-        expect(res.body.matrixDiagnostics.cnRatio.status).toBe('OPTIMAL');
-
-        // Base saturation & CEC check
-        expect(res.body.matrixDiagnostics.basesAndCec).toBeDefined();
-        expect(res.body.matrixDiagnostics.basesAndCec.sumOfBases).toBe(11.5);
+        // #279 (YY "retire"): the legacy C:N and bases/CEC advisories are retired; the
+        // registry-governed crossChecks are the only advisory source and Na is never assumed 0.
+        expect(res.body.matrixDiagnostics.cnRatio).toBeUndefined();
+        expect(res.body.matrixDiagnostics.basesAndCec).toBeUndefined();
+        expect(res.body.matrixDiagnostics.retiredAdvisories).toEqual(['CN_RATIO', 'BASES_CEC']);
+        expect(res.body.matrixDiagnostics.advisorySuccessor).toBe('crossChecks');
+        const check = code => res.body.crossChecks.find(item => item.ruleCode === code);
+        expect(check('CN_RATIO')).toMatchObject({ outcome: 'PASS', thresholds: { 'crossCheck.cnMin': 8, 'crossCheck.cnMax': 25 } });
+        expect(check('BASES_CEC')).toMatchObject({ outcome: 'NOT_EVALUATED', reasonCode: 'INPUT_MISSING',
+            inputs: { missing: ['EXCH_NA'] } });
     });
 
     test('2. Emits warning when texture fractions fail 100% closure tolerance', async () => {

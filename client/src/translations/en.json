@@ -2649,6 +2649,7 @@
     "source": "Source",
     "difference": "Compared with preset",
     "differs": "Differs from preset",
+    "storedInvalid": "The stored value is out of range and is not used; save a valid value.",
     "edit": "Edit",
     "clear": "Clear override",
     "clearExplanation": "This setting will inherit the next applicable default. Its previous value stays in history.",
@@ -3499,7 +3500,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "Cross-check evidence requires the caller submission."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory"
+      "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory",
+      "CROSS_CHECK_POLICY_INVALID": "Cross-checks unavailable: a laboratory check setting is out of range; a manager must save a valid value"
     }
   },
   "amendment": {
