@@ -1,0 +1,11 @@
+2026-10-11T16:58:40.348728+0200 server systemd[1]: Starting /usr/bin/python3 -u /opt/lims/releases/forward-ae64f169-proof-20261011T145800Z/rehearse-forward.py --owned-post205-copy...
+2026-10-11T16:58:40.349643+0200 server systemd[1]: Started /usr/bin/python3 -u /opt/lims/releases/forward-ae64f169-proof-20261011T145800Z/rehearse-forward.py --owned-post205-copy.
+2026-10-11T17:00:31.005252+0200 server python3[117605]: {"stage": "jobs-off", "elapsedSeconds": 33.82935535599972, "pending": true}
+2026-10-11T17:01:05.127781+0200 server python3[117605]: {"stage": "jobs-off", "elapsedSeconds": 67.9518055969993, "pending": true}
+2026-10-11T17:01:38.637579+0200 server python3[117605]: {"stage": "jobs-off", "elapsedSeconds": 101.46169554199969, "pending": true}
+2026-10-11T17:04:07.159227+0200 server python3[117605]: {"stage": "jobs-on", "elapsedSeconds": 33.122538048000024, "pending": true}
+2026-10-11T17:04:41.183599+0200 server python3[117605]: {"stage": "jobs-on", "elapsedSeconds": 67.14691106600003, "pending": true}
+2026-10-11T17:05:14.879538+0200 server python3[117605]: {"stage": "jobs-on", "elapsedSeconds": 100.84300055099993, "pending": true}
+2026-10-11T17:07:03.701194+0200 server python3[117605]: {"status": "PASSED_FORWARD_STARTUP", "receiptSha256": "db08b6522f4cf036e24e4d26ecc6130e6b239a03ea1cba99203c484ea59c533b"}
+2026-10-11T17:07:03.816585+0200 server systemd[1]: lims-owned-forward-ae64f169-proof-20261011t1458z.service: Deactivated successfully.
+2026-10-11T17:07:03.818142+0200 server systemd[1]: lims-owned-forward-ae64f169-proof-20261011t1458z.service: Consumed 3min 22.466s CPU time, 1.0G memory peak.

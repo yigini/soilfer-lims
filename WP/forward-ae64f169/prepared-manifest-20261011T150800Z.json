@@ -1,0 +1,59 @@
+{
+  "status": "PREPARED_FORWARD_ONLY_NOT_EXECUTED",
+  "head": "ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf",
+  "image": "sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a",
+  "preparedUtc": "2026-10-11T15:09:05.314482+00:00",
+  "toolingCommit": "77b43c8dd5dedb0b799bde30b1958ad20b9cfe87",
+  "proofRoot": "/opt/lims/releases/forward-ae64f169-proof-20261011T145800Z",
+  "originalExecutionRoot": "/opt/lims/releases/preparation-release-ae64f169-20261011T135600Z",
+  "originalFailureReceiptSha256": "02fcf3ee472c68caff8ebe52edc009f3d3d9e2666210c7ba6eac5a03c9de7305",
+  "originalManifestSha256": "4f98943cd0a3ac117c235822ad8b27012968d56a518109d3f1b49f76ebd207f6",
+  "productionStoppedPhysical": {
+    "": {
+      "sha256": "a36d397aec6868e1429ca4db45d7cc9cbe930ef3a71092851175b4773675fb42",
+      "bytes": 563322880
+    },
+    "-wal": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "-shm": {
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "bytes": 32768
+    }
+  },
+  "logicalStateSha256": "1e9670729693f38e4472c24d0be15dd7ee6fcbd73d8235be2a1ac035d17e59a6",
+  "deadlineSeconds": 600,
+  "separateInstallerCommands": 0,
+  "databaseChangesRequiredBeforeJobs": 0,
+  "jobsBoundaryCommentId": 6110280460,
+  "workloadControl": {
+    "labAndHubBuildsOwnedByYY": true,
+    "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+  },
+  "files": {
+    "collect-gates.cjs": "45f318fe58c968fe607d3f6fb5ded40bab964e6d7935ea2ca5c8423693d29b7a",
+    "collect-production-gate.cjs": "bb98c7749ef9c0f4ab158baf32fddbb971d6062d21658f527be4cad586716ee8",
+    "export-kit.cjs": "099cdc0a9caf66d8bbdbfbf387dee316f3c74bb0ba3c6647d32da26a33a34ee8",
+    "gates.py": "96d7dad3ecc2a42e6d914d5c8a4151266b5e87d9a895b55b23364558530d8092",
+    "postflight-auth.cjs": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+    "postflight-policy.cjs": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+    "postflight-qc-runs.cjs": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+    "postflight-reference.cjs": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+    "postflight-roles.cjs": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+    "prepare_forward.py": "995dd08fbef5c5eef74eafd2e8515ae15025fa750c1a4f03d48442f3b1a20414",
+    "readonly-smoke.cjs": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+    "rehearse-forward.py": "4efcaf4b3a012bfc0cfee96570e05c52b6e2d624427912d984671568f52c0a46",
+    "release_support.py": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+    "startup-forward.py": "d6a839878d397a2e28dee5a367abad73734c351dbb39bee487cbcd3302317cd5",
+    "startup_common.py": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+    "test_forward_guards.py": "b781290a8a4292eb897a863226998e4b5dc2d2b19e8f915b37a747e33260023e",
+    "yy-authorization-evidence.md": "02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1",
+    "kit-source-index.json": "e003dbc5c93a61ae85380f72f1def66f445d5a0a917272a2ac3c441d35e30b73",
+    "protected-state.json": "f29697b3d2a2c8c5cd3424848fadf372ef32190fedf1f8001a6909ba62062c74",
+    "normal-jobs-baseline.json": "0dcf99bd0d32dfe2904bca902643238edde36b0a9af51d732e302bc79b3de220",
+    "rehearsal-receipt.json": "db08b6522f4cf036e24e4d26ecc6130e6b239a03ea1cba99203c484ea59c533b",
+    "apache-before.conf": "f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20",
+    "apache-held.conf": "d92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c"
+  }
+}

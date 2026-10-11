@@ -1,3 +1,5 @@
+Current checkpoint: October 11, 15:09 UTC. ae64f169 production remains FAILED_FORWARD_HOLD/stopped/503/jobs held after the original installer succeeded and startup readiness failed. Forward-only. The NEW complete forward proof145800Z PASSED15:07:00.574339UTC; receipt db08b6522f4cf036e24e4d26ecc6130e6b239a03ea1cba99203c484ea59c533b. Exact new forward kit150800Z frozen15:09:05.314482UTC; manifest94dc933ae9a39e8fffd59aed7afe52d33dea1165e61fbac8f9b5aa2cec70c19c, coordinator d6a839878d397a2e28dee5a367abad73734c351dbb39bee487cbcd3302317cd5. All23 frozen files verified,17 rawGit files match77b43c8dd5dedb0b799bde30b1958ad20b9cfe87. No new forward gate/execution yet. Claudio received hashes in native thread and #162 comment6110475046 for exact review. The jobs-off zero-write boundary and normal jobs-on boundary are pinned in6110280460. See WP/forward-ae64f169 for current evidence. All old proofs, original FAILED receipt and consumed gate remain retained; never replay/relabel/restore.
+
 # Separate preparation/results release
 
 Target: ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf.

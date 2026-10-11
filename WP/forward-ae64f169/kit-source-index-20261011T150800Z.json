@@ -1,0 +1,91 @@
+{
+  "status": "RAW_GIT_KIT_EXPORT",
+  "head": "77b43c8dd5dedb0b799bde30b1958ad20b9cfe87",
+  "files": [
+    {
+      "name": "collect-gates.cjs",
+      "bytes": 3107,
+      "sha256": "45f318fe58c968fe607d3f6fb5ded40bab964e6d7935ea2ca5c8423693d29b7a"
+    },
+    {
+      "name": "collect-production-gate.cjs",
+      "bytes": 5053,
+      "sha256": "bb98c7749ef9c0f4ab158baf32fddbb971d6062d21658f527be4cad586716ee8"
+    },
+    {
+      "name": "export-kit.cjs",
+      "bytes": 1798,
+      "sha256": "099cdc0a9caf66d8bbdbfbf387dee316f3c74bb0ba3c6647d32da26a33a34ee8"
+    },
+    {
+      "name": "gates.py",
+      "bytes": 5454,
+      "sha256": "96d7dad3ecc2a42e6d914d5c8a4151266b5e87d9a895b55b23364558530d8092"
+    },
+    {
+      "name": "postflight-auth.cjs",
+      "bytes": 2045,
+      "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192"
+    },
+    {
+      "name": "postflight-policy.cjs",
+      "bytes": 4035,
+      "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51"
+    },
+    {
+      "name": "postflight-qc-runs.cjs",
+      "bytes": 4091,
+      "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f"
+    },
+    {
+      "name": "postflight-reference.cjs",
+      "bytes": 2096,
+      "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526"
+    },
+    {
+      "name": "postflight-roles.cjs",
+      "bytes": 12281,
+      "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da"
+    },
+    {
+      "name": "prepare_forward.py",
+      "bytes": 3207,
+      "sha256": "995dd08fbef5c5eef74eafd2e8515ae15025fa750c1a4f03d48442f3b1a20414"
+    },
+    {
+      "name": "readonly-smoke.cjs",
+      "bytes": 3255,
+      "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626"
+    },
+    {
+      "name": "rehearse-forward.py",
+      "bytes": 5107,
+      "sha256": "4efcaf4b3a012bfc0cfee96570e05c52b6e2d624427912d984671568f52c0a46"
+    },
+    {
+      "name": "release_support.py",
+      "bytes": 20330,
+      "sha256": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810"
+    },
+    {
+      "name": "startup-forward.py",
+      "bytes": 8170,
+      "sha256": "d6a839878d397a2e28dee5a367abad73734c351dbb39bee487cbcd3302317cd5"
+    },
+    {
+      "name": "startup_common.py",
+      "bytes": 13858,
+      "sha256": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+    },
+    {
+      "name": "test_forward_guards.py",
+      "bytes": 8124,
+      "sha256": "b781290a8a4292eb897a863226998e4b5dc2d2b19e8f915b37a747e33260023e"
+    },
+    {
+      "name": "yy-authorization-evidence.md",
+      "bytes": 1938,
+      "sha256": "02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1"
+    }
+  ]
+}
