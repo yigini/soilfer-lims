@@ -1,5 +1,14 @@
 # New same-image jobs-hold containment preparation
 
+NEW current proof183405Z is RUNNING, not yet passed. Claudio source confirmation
+6112305172 covers raw63a352683e2d83aaf5cd531f4b741be0855c6905, guardf4712a7c and
+coordinatorc366cc4e. Seven exact-source Linux guards passed; root/unoptimized
+Python and zero baseline enumeration errors are explicitly enforced/recorded.
+The sole unit/source/root are retained in owned-proof-launch-20261011T183405Z.json.
+Copy is healthy/zero restarts with326467584B peak during its660s soak. Do not
+replay, relaunch or create a concurrent writer. Live jobs-pause card stays for
+YY. No production operation occurred. Earlier failed proof175017Z remains FAILED.
+
 First NEW proof FAILED at17:52:14.396020UTC before healthy: the unchanged
 500MB unexplained disk-growth guard tripped. Root
 /opt/lims/releases/runtime-jobs-off-ae64f169-proof-20261011T175017Z,
