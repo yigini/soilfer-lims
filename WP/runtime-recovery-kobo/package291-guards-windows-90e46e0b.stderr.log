@@ -1,0 +1,4 @@
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\runtime-recovery-kobo\package291-windows-runner-90e46e0b.py", line 1
+    import sys\nsys.argv=['guard-harness','90e46e0b15885afc0112f31ff11e8227e859e86f']\n"""Run exact committed pure/SQLite guards in memory; no production read/write."""
+               ^
+SyntaxError: unexpected character after line continuation character

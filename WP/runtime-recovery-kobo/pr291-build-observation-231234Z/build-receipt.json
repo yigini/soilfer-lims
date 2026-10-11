@@ -1,0 +1,28 @@
+{
+  "status": "BUILT_ONLY_NOT_DEPLOYED",
+  "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+  "tag": "soilfer-lims:audit-runtime-kobo-build-f830f900-20261011T231018Z",
+  "sourceArchiveSha256": "d21016bd92f59aa892aacf22a715d461dfd926ca236859b0a60d65cfdaffed6f",
+  "sourceIndexSha256": "08c4b2df96f21f69a4611f8e0a1d7d8338bd209c9d575333ea707f9ca0a923a9",
+  "verifiedGitBlobCount": 2240,
+  "verifiedUtc": "2026-10-11T23:12:23.600372+00:00",
+  "imageBytes": 413628170,
+  "reserveBytes": 10556150894,
+  "freeBytesBefore": {
+    "/opt/lims": 105956855808,
+    "/var/lib/docker": 105956855808
+  },
+  "freeBytesAfter": {
+    "/opt/lims": 105536315392,
+    "/var/lib/docker": 105536315392
+  },
+  "buildLogSha256": "5f0f14c45f4b1a24e48632d75e675a6e7e4c3ea96acd7feb6ad532a5748090d2",
+  "productionDatabaseMounts": 0,
+  "dockerIgnoredArchiveMembersNotExtracted": [
+    "server/node_modules"
+  ],
+  "auditReviewId": 6113454688,
+  "mainCiRunId": 38182451105,
+  "tree": "48678dda23fa876d8d233db812149c8d1792bf16"
+}

@@ -1,0 +1,61 @@
+NEW #291 production packaging source review requested, separate from approved build/proof4807/6114935703. No proof, kit, production gate or live execution yet. The ONE new f830 image build completed23:12:23.600372UTC, receipt7993c29c156e066242470d0885586f5860a52d426d16041af9272f99ba302236/image4894eabc. Main CI38182451105 is still running; isolated proof waits for actual SUCCESS.
+
+Exact proposed packaging source: 90e46e0b15885afc0112f31ff11e8227e859e86f
+Changes bind the actual approved proof4807/e3a54b3d/contract2bafa409/review6114935703 and live171/bac52/receiptac4 to a new291release. PR291 branch tree2292 and merged union48678 are deliberately distinct; manifest/gate binds both ordered parents and exact union. Gate collector rereads both commits and validates identity. All three raw build/preparer/proof-launcher files are included byte-exact in the kit and bound through original proof authority and gate review. The original-cursor actual-upstream policy is explicitly retained through receipt/manifest/source and exact-kit tokens. The completed #292 kit/gate/proof/build and original receipts are not reused or changed.
+
+The default entrypoint/probes/verifiers, first/second sealed snapshot revalidation, disk adapter/V3/V2/original guards, timing/768MiB/strict104tables38receipts preservation and forward-only failure rules are unchanged. No explicit installer commands, scientific/data changes, cursor/interval/config edits, restore/older image/heap override/prune/cleanup. Before quiesce reserve includes stopped DB/assets backup and allocation; actual unused immutable kit plus NEW exact-kit audit and one fresh <=10-minute single-use gate remain mandatory. Reopen ingress BEFORE jobs; observe660healthy jobs-ON seconds/0restarts. Both workload pins and original verbatim YY evidence remain.
+
+138/138 full proof AND packaging guards now PASS on exact source Linux and Windows. Linux23:12:11.990225UTC/1.464014s/0fail-error-skip/no productionDBaccess/stderr SHA c0d1d6f9dc7d32b978af0306db751a465076ba6ac2e6f4a715046a9df49562c9. Windows23:12:36.148614UTC/138pass; its first attempt had only a generated local harness literal-newline syntax error, retained and corrected without source changes. The previous synthetic production gate suite is restored under NEW source authority; new guards reject reversed/missing merge parents, a PR tree substituted for merged union, old292candidate/review and cursor-policy changes.
+
+Required NEW verdict: Source review: PASS with all exact tokens below. This is production source approval only, not a frozen-kit pass or execution gate.
+171dd36c5b2dbeea8763520dd18fbdb158ffca05
+5d3550d709f0b62ef013f9114e9da9344f9818a1
+f830f900f597f20e12570b583e4e32ce9cb50a1d
+48678dda23fa876d8d233db812149c8d1792bf16
+2292fbf2a2626ad89c5abdcc49843dffffdefd02
+sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320
+ac4ffc39c0b8e2c27f7aa1494edffcfd45e5c47d2c4aa5b7fffee1c2b6b1781e
+releasePr=291
+mergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE
+naturalIntakePolicy=ORIGINAL_CURSOR_ACTUAL_UPSTREAM
+Source review: PASS
+90e46e0b15885afc0112f31ff11e8227e859e86f
+d1993f59d75c8e0da6b32f1a5bfc0343968caef05df92036ae991fcfd61f7c7f
+377fe435f052b5ea25959ae31aead8bc3a4dab45c6fa33543f6133ed3157ef96
+cfd8cebbb39d2074e9bf7832bbbc7c21d89d20b3a362ee7422e91e5e533d4fb1
+0646b6cb517a7c4dc99ef6e2897a702eb88535152a7ba50a2d86f55954cb0cb7
+a75d4a264f30531c416fb67cc509505dafa8ac392c5fcef100784d195b136da3
+b727935761d044e834a7450bd2fa93caeff88a2fce2d0f0cdaefb3130c1753bd
+e82a336a1fa7adfe9d64bf87ca2bc049e418a1d6259abecbfae53783ca3771bf
+known_core_disk_guard_deploy.py: d1993f59d75c8e0da6b32f1a5bfc0343968caef05df92036ae991fcfd61f7c7f
+deploy_runtime.py: 377fe435f052b5ea25959ae31aead8bc3a4dab45c6fa33543f6133ed3157ef96
+freeze_runtime.py: cfd8cebbb39d2074e9bf7832bbbc7c21d89d20b3a362ee7422e91e5e533d4fb1
+runtime_release_contract.py: 0646b6cb517a7c4dc99ef6e2897a702eb88535152a7ba50a2d86f55954cb0cb7
+collect_runtime_gate.py: a75d4a264f30531c416fb67cc509505dafa8ac392c5fcef100784d195b136da3
+export_freeze_runtime_kit.py: b727935761d044e834a7450bd2fa93caeff88a2fce2d0f0cdaefb3130c1753bd
+launch_runtime_release.py: e82a336a1fa7adfe9d64bf87ca2bc049e418a1d6259abecbfae53783ca3771bf
+4807cc600eb4483fa64172fead304ed1a293197e
+e3a54b3d0dbc8bb39bad40f32467be41692b85a72e9cf0bb4a3bbb4f4b2b4950
+2bafa4094ce5bac6e10abd5e347791ee39c047ba3df6b5f99977d863a76b5648
+proofSourceReviewId=6114935703
+878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f
+f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c
+f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169
+3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23
+productionBaselineScopeCommentId=6113922488
+REQUIRED_HASHED_MANIFEST_AND_GATE
+JOURNAL_UNIT_OUTPUT
+baselineVanishedProcessPolicy=CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE
+BASELINE_ATTEMPTS_MAX=3
+BASELINE_CONFIRMATION_DEADLINE_SECONDS=10
+CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10
+refusalPairingScopeCommentId=6114143349
+schedulerRefusalPairing=STREAM_ORDER_ONE_TO_ONE
+REFUSAL_PAIR_WINDOW_SECONDS=1
+refusalScopeCommentId=6113601584
+EXACT_FRESH_COPY_CONFIG_REFUSALS
+SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS
+labAndHubBuildsOwnedByYY=true
+RELEASE_DAY_DISK_ABORTS_ACCEPTED
+
+Only the actual stopped/PASSED original fresh-copy proof may feed ONE unused immutable kit; then send full actual hashes for your NEW exact-kit phrase Audit passed: OK to merge and deploy. No early gate or extra YY go; human cards/four refused configs stay untouched; other application merges held until291live/postcheck. Same writer continues.
