@@ -1,0 +1,11 @@
+{
+  "sourceCommit": "f61dc33cd70bfcbc73dd07f99a2e2e14ab015bff",
+  "moduleSha256": {
+    "proof_contract": "f94a009bad7c89331b1126ab05b7126261fc037c4aabfab3a1e8702ba7960bd6",
+    "runtime_release_contract": "1c9d909d09cb120a9a9e4c6b123bce3e6c42506fa46f2df2fdcf9f696a501682",
+    "test_runtime_release_contract": "e39ac18e3c0946d1f1f9559efd9f735d5a039b06976d110baa1cd47122361893"
+  },
+  "exitCode": 0,
+  "productionDatabaseAccessed": false,
+  "stdoutSha256": "4ed3a0471c332b8a0f1be84bebaa767e42dc52b35049bed06f1bf606278ea8bc"
+}
