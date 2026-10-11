@@ -8,11 +8,13 @@ from proof_contract import *
 
 WORKLOAD_PINS = {'labAndHubBuildsOwnedByYY': True,
     'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}
-REVIEWED_PROOF_SHA = 'e3a54b3d0dbc8bb39bad40f32467be41692b85a72e9cf0bb4a3bbb4f4b2b4950'
-REVIEWED_PROOF_SOURCE = '4807cc600eb4483fa64172fead304ed1a293197e'
-PROOF_SOURCE_REVIEW_ID = 6114935703
+REVIEWED_PROOF_SHA = 'c47ef37880185fa7c8ac565f28fc16fe7040b549ed3bea482ab1c0295478d5f0'
+REVIEWED_PROOF_SOURCE = '206c4dc41a99045ab8a47871ebe8782fda4cba20'
+PROOF_SOURCE_REVIEW_ID = 6115225815
 REVIEWED_VERIFIER_SHA = '3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23'
-REVIEWED_PROOF_CONTRACT_SHA = '2bafa4094ce5bac6e10abd5e347791ee39c047ba3df6b5f99977d863a76b5648'
+REVIEWED_PROOF_CONTRACT_SHA = 'cd190348d332fd12e53694ca080819c2d095bfa5c4ee86eb058686a65a38fb0e'
+PROOF_BASELINE_LAYOUT_SHA = '49c76b8d0312a38820ea8dff707cdfd6674614c63344bedf2655755b6ca6f1b6'
+PROOF_BASELINE_LAYOUT_POLICY = 'EXACT_HASHED_PROOF_AUTHORITY_LAYOUT'
 BASELINE_GUARD_SHA = '878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f'
 BASELINE_POLICY = 'CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE'
 BASELINE_ATTEMPTS_MAX = 3
@@ -98,6 +100,8 @@ def proof_source_binding(proof, pin):
         proof['proofSourceReviewId'] == pin['proofSourceReviewId'] == PROOF_SOURCE_REVIEW_ID and
         proof['diskMeasurementGuardSha256'] == MEASUREMENT_GUARD_SHA and
         proof['baselineMeasurementGuardSha256'] == BASELINE_GUARD_SHA and
+        proof['proofBaselineLayoutGuardSha256'] == PROOF_BASELINE_LAYOUT_SHA and
+        proof['proofBaselineLayoutPolicy'] == PROOF_BASELINE_LAYOUT_POLICY and
         proof['copyVerifierSha256'] == REVIEWED_VERIFIER_SHA and
         proof['proofContractSha256'] == REVIEWED_PROOF_CONTRACT_SHA and
         proof['refusalScopeCommentId'] == REFUSAL_SCOPE_COMMENT_ID and
@@ -156,6 +160,8 @@ def measurement_manifest(manifest):
         manifest['diskMeasurementGuardSha256'] == manifest['files']['known_core_disk_guard_v2.py'] == MEASUREMENT_GUARD_SHA and
         manifest['files']['known_core_disk_guard.py'] == ORIGINAL_GUARD_SHA and
         manifest['baselineMeasurementGuardSha256'] == manifest['files']['known_core_disk_guard_v3.py'] == BASELINE_GUARD_SHA and
+        manifest['proofBaselineLayoutGuardSha256'] == manifest['files']['known_core_disk_guard_proof.py'] == PROOF_BASELINE_LAYOUT_SHA and
+        manifest['proofBaselineLayoutPolicy'] == PROOF_BASELINE_LAYOUT_POLICY and
         manifest['copyVerifierSha256'] == manifest['files']['kobo_copy_preservation.py'] == REVIEWED_VERIFIER_SHA and
         manifest['proofContractSha256'] == manifest['files']['proof_contract.py'] == REVIEWED_PROOF_CONTRACT_SHA and
         manifest['refusalScopeCommentId'] == REFUSAL_SCOPE_COMMENT_ID and
@@ -182,6 +188,7 @@ def production_source_review(review, tooling, files, now=None):
         'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
     tokens += [files[name] for name in PRODUCTION_SOURCE_FILES] + pairing_review_tokens()
     tokens += [REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, REVIEWED_PROOF_CONTRACT_SHA,
+        PROOF_BASELINE_LAYOUT_SHA, 'proofBaselineLayoutPolicy=' + PROOF_BASELINE_LAYOUT_POLICY,
         'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID)]
     require(all(token in review['body'] for token in tokens), 'Exact production baseline source approval missing')
     now = now or datetime.datetime.now(datetime.timezone.utc)
@@ -195,6 +202,7 @@ def proof_authority(proof, pin, source, authority, authority_sha):
         source['files']['known_core_disk_guard_v2.py']['sha256'] == MEASUREMENT_GUARD_SHA and
         source['files']['known_core_disk_guard.py']['sha256'] == ORIGINAL_GUARD_SHA and
         source['files']['known_core_disk_guard_v3.py']['sha256'] == BASELINE_GUARD_SHA and
+        source['files']['known_core_disk_guard_proof.py']['sha256'] == PROOF_BASELINE_LAYOUT_SHA and
         source['files']['kobo_copy_preservation.py']['sha256'] == REVIEWED_VERIFIER_SHA and
         source['files']['proof_contract.py']['sha256'] == REVIEWED_PROOF_CONTRACT_SHA and
         authority_sha == proof['authoritySha256'] and
@@ -202,6 +210,7 @@ def proof_authority(proof, pin, source, authority, authority_sha):
         'Original proof authority or measured source differs')
     source_review_pass(authority['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA,
         verifier_sha=REVIEWED_VERIFIER_SHA, contract_sha=REVIEWED_PROOF_CONTRACT_SHA, baseline_guard_sha=BASELINE_GUARD_SHA, stream_pairing=True,
+        proof_layout_sha=PROOF_BASELINE_LAYOUT_SHA,
         authority_hashes=[source['files'][name]['sha256'] for name in
             ['build_candidate.py', 'prepare_candidate_build.py', 'export_launch_runtime_proof.py']])
 
@@ -214,6 +223,7 @@ def review_tokens(manifest, manifest_sha):
         manifest['files']['proof-authority.json'], manifest['files']['proof-source-index.json'],
         REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA, ORIGINAL_GUARD_SHA,
         BASELINE_GUARD_SHA, REVIEWED_VERIFIER_SHA, REVIEWED_PROOF_CONTRACT_SHA,
+        PROOF_BASELINE_LAYOUT_SHA, 'proofBaselineLayoutPolicy=' + PROOF_BASELINE_LAYOUT_POLICY,
         DEPLOY_BASELINE_GUARD_SHA, 'productionBaselineScopeCommentId=' + str(PRODUCTION_BASELINE_SCOPE_ID),
         'productionBaselineSourceReviewId=' + str(manifest['productionBaselineSourceReviewId']),
         manifest['files']['production-baseline-source-review.json'],
@@ -254,6 +264,7 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
         'Corrected source approval was superseded or timing differs')
     source_review_pass(gate['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA, now,
         verifier_sha=REVIEWED_VERIFIER_SHA, contract_sha=REVIEWED_PROOF_CONTRACT_SHA, baseline_guard_sha=BASELINE_GUARD_SHA, stream_pairing=True,
+        proof_layout_sha=PROOF_BASELINE_LAYOUT_SHA,
         authority_hashes=[manifest['files'][name] for name in
             ['build_candidate.py', 'prepare_candidate_build.py', 'export_launch_runtime_proof.py']])
     require(gate['productionBaselineSourceReview']['id'] == manifest['productionBaselineSourceReviewId'] and
@@ -266,11 +277,15 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
         gate['baselineVanishedProcessPolicy'] == BASELINE_POLICY and gate['BASELINE_ATTEMPTS_MAX'] == BASELINE_ATTEMPTS_MAX and
         gate['BASELINE_CONFIRMATION_DEADLINE_SECONDS'] == BASELINE_CONFIRMATION_SECONDS,
         'Gate baseline/refusal/cardinality contract differs')
+    require(gate['proofBaselineLayoutPolicy'] == PROOF_BASELINE_LAYOUT_POLICY and
+        gate['proofBaselineLayoutGuardSha256'] == PROOF_BASELINE_LAYOUT_SHA,
+        'Gate proof baseline layout authority differs')
     for key, name in [('coordinatorSha256', 'deploy_runtime.py'), ('rehearsalReceiptSha256', 'rehearsal-receipt.json'),
                       ('targetPinSha256', 'target-pin.json'), ('yyEvidenceSha256', 'yy-authorization-evidence.md'),
                       ('proofAuthoritySha256', 'proof-authority.json'), ('proofSourceIndexSha256', 'proof-source-index.json'),
                       ('diskMeasurementGuardSha256', 'known_core_disk_guard_v2.py'),
                       ('baselineMeasurementGuardSha256', 'known_core_disk_guard_v3.py'),
+                      ('proofBaselineLayoutGuardSha256', 'known_core_disk_guard_proof.py'),
                       ('productionBaselineAdapterSha256', 'known_core_disk_guard_deploy.py'),
                       ('productionBaselineSourceReviewSha256', 'production-baseline-source-review.json'),
                       ('copyVerifierSha256', 'kobo_copy_preservation.py'), ('proofContractSha256', 'proof_contract.py')]:

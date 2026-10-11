@@ -15,7 +15,7 @@ paths = {'release_support': 'WP/forward-ae64f169/release_support.py',
 paths.update({name: 'WP/runtime-recovery-kobo/' + name + '.py' for name in [
     'proof_contract', 'kobo_copy_preservation', 'capture_kobo_fetch', 'runtime_release_contract',
     'known_core_disk_guard_v2', 'test_proof_contract', 'test_kobo_copy_preservation',
-    'test_capture_kobo_fetch', 'test_runtime_release_contract', 'test_core_deallocation_confirmation',
+    'test_capture_kobo_fetch', 'export_freeze_runtime_kit', 'test_runtime_release_contract', 'test_core_deallocation_confirmation',
     'test_source_review_pin', 'test_scheduler_refusal_scope', 'known_core_disk_guard_v3',
     'test_baseline_confirmation', 'known_core_disk_guard_proof', 'export_launch_runtime_proof',
     'test_proof_baseline_guard', 'known_core_disk_guard_deploy', 'deploy_runtime', 'launch_runtime_release',
@@ -30,6 +30,7 @@ files['test_scheduler_stream_pairing']['fixtures'] = fixtures
 payload = base64.b64encode(json.dumps({'head': head, 'files': files}).encode()).decode()
 code = '''import base64,datetime,hashlib,json,sys,time,types,unittest
 p=json.loads(base64.b64decode(PAYLOAD));start=time.monotonic();tests=[]
+if sys.platform=='win32':sys.modules['fcntl']=types.ModuleType('fcntl')
 for name,value in p['files'].items():
  data=base64.b64decode(value['data']);assert hashlib.sha256(data).hexdigest()==value['sha256']
  module=types.ModuleType(name);module.__file__='/owned-in-memory-guards/'+name+'.py';module.__raw_sha256__=value['sha256'];module.__raw_source__=data;sys.modules[name]=module
@@ -44,8 +45,9 @@ print(json.dumps({'sourceCommit':p['head'],'sourceHashes':{name:value['sha256'] 
  'elapsedSeconds':time.monotonic()-start,'productionDatabaseAccess':False}))
 sys.exit(0 if result.wasSuccessful() else 1)
 '''.replace('PAYLOAD', repr(payload))
-result = subprocess.run(['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', 'root@46.19.33.37',
-    'python3', '-B', '-'], input=code, text=True, capture_output=True, timeout=60)
+command = ['py', '-X', 'utf8', '-B', '-'] if '--windows' in sys.argv[2:] else [
+    'ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', 'root@46.19.33.37', 'python3', '-B', '-']
+result = subprocess.run(command, input=code, text=True, encoding='utf-8', capture_output=True, timeout=60)
 sys.stdout.write(result.stdout)
 sys.stderr.write(result.stderr)
 sys.exit(result.returncode)

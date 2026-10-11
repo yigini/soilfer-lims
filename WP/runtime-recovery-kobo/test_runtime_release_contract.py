@@ -1,8 +1,10 @@
 """Synthetic gate tampering fixtures; never contact GitHub, Docker or a host."""
 import copy
+import ast
 import datetime
 import unittest
 from runtime_release_contract import *
+import export_freeze_runtime_kit as packaging_exporter
 
 
 class RuntimeGateTests(unittest.TestCase):
@@ -14,6 +16,8 @@ class RuntimeGateTests(unittest.TestCase):
             'baseHead': BASE_HEAD, 'workloadControl': WORKLOAD_PINS, 'sourceReviewId': PROOF_SOURCE_REVIEW_ID,
             'proofToolingCommit': REVIEWED_PROOF_SOURCE, 'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
             'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
+            'proofBaselineLayoutGuardSha256': PROOF_BASELINE_LAYOUT_SHA,
+            'proofBaselineLayoutPolicy': PROOF_BASELINE_LAYOUT_POLICY,
             'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
             'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
             'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
@@ -35,6 +39,7 @@ class RuntimeGateTests(unittest.TestCase):
             'export_launch_runtime_proof.py': 'a' * 64, 'known_core_disk_guard_v3.py': BASELINE_GUARD_SHA,
             'kobo_copy_preservation.py': REVIEWED_VERIFIER_SHA, 'proof_contract.py': REVIEWED_PROOF_CONTRACT_SHA,
             'known_core_disk_guard_deploy.py': DEPLOY_BASELINE_GUARD_SHA,
+            'known_core_disk_guard_proof.py': PROOF_BASELINE_LAYOUT_SHA,
             'production-baseline-source-review.json': 'e' * 64})
         for name in PRODUCTION_SOURCE_FILES:
             self.manifest['files'].setdefault(name, 'f' * 64)
@@ -59,6 +64,8 @@ class RuntimeGateTests(unittest.TestCase):
             'productionBaselineSourceReviewSha256': 'e' * 64, 'laterProductionSourceAuditFailure': False,
             'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
             'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
+            'proofBaselineLayoutGuardSha256': PROOF_BASELINE_LAYOUT_SHA,
+            'proofBaselineLayoutPolicy': PROOF_BASELINE_LAYOUT_POLICY,
             'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
             'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
             'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
@@ -72,6 +79,7 @@ class RuntimeGateTests(unittest.TestCase):
                 'created_at': '2026-10-11T19:58:00Z', 'body': '\n'.join(release_binding_tokens() + ['Source review: PASS',
                     REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA, ORIGINAL_GUARD_SHA,
                     BASELINE_GUARD_SHA, REVIEWED_VERIFIER_SHA, REVIEWED_PROOF_CONTRACT_SHA,
+                    PROOF_BASELINE_LAYOUT_SHA, 'proofBaselineLayoutPolicy=' + PROOF_BASELINE_LAYOUT_POLICY,
                     'baselineVanishedProcessPolicy=' + BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX=3',
                     'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10', 'refusalScopeCommentId=6113601584',
                     REFUSAL_POLICY, CARDINALITY_POLICY, *pairing_review_tokens(),
@@ -88,6 +96,7 @@ class RuntimeGateTests(unittest.TestCase):
             'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
         production_tokens += [self.manifest['files'][name] for name in PRODUCTION_SOURCE_FILES] + pairing_review_tokens()
         production_tokens += [REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, REVIEWED_PROOF_CONTRACT_SHA,
+            PROOF_BASELINE_LAYOUT_SHA, 'proofBaselineLayoutPolicy=' + PROOF_BASELINE_LAYOUT_POLICY,
             'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID)]
         self.gate['productionBaselineSourceReview'] = {'id': 8000000000,
             'html_url': 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-8000000000',
@@ -98,6 +107,24 @@ class RuntimeGateTests(unittest.TestCase):
 
     def test_complete_synthetic_gate(self):
         self.verify()
+
+    def test_actual_package_export_includes_every_proof_source_file(self):
+        raw = getattr(packaging_exporter, '__raw_source__', None)
+        if raw is None: raw = pathlib.Path(packaging_exporter.__file__).read_bytes()
+        tree = ast.parse(raw)
+        exported = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == 'paths' for t in node.targets):
+                exported.update(ast.literal_eval(node.value.generators[0].iter))
+            elif isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Subscript) and isinstance(target.value, ast.Name) and target.value.id == 'paths':
+                        exported.add(ast.literal_eval(target.slice))
+            elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and \
+                    isinstance(node.func.value, ast.Name) and node.func.value.id == 'paths' and node.func.attr == 'update':
+                exported.update(ast.literal_eval(node.args[0].generators[0].iter))
+        from known_core_disk_guard_proof import SOURCE_FILES
+        self.assertTrue(SOURCE_FILES <= exported, sorted(SOURCE_FILES - exported))
 
     def test_stale_and_future_gates(self):
         for time in ['2026-10-11T19:49:59Z', '2026-10-11T20:00:01Z']:
@@ -175,6 +202,28 @@ class RuntimeGateTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             validate_proof({'status': 'FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF'}, {})
 
+    def test_layout_authority_cannot_be_downgraded_or_replaced(self):
+        for key, value in [('proofBaselineLayoutGuardSha256', BASELINE_GUARD_SHA),
+                           ('proofBaselineLayoutPolicy', 'EMPTY_FILES_ONLY')]:
+            for location in ['manifest', 'gate']:
+                original = copy.deepcopy((self.manifest, self.gate))
+                (self.manifest if location == 'manifest' else self.gate)[key] = value
+                with self.subTest(key=key, location=location), self.assertRaises(RuntimeError): self.verify()
+                self.manifest, self.gate = original
+        original = self.manifest['files']['known_core_disk_guard_proof.py']
+        self.manifest['files']['known_core_disk_guard_proof.py'] = BASELINE_GUARD_SHA
+        with self.assertRaises(RuntimeError): self.verify()
+        self.manifest['files']['known_core_disk_guard_proof.py'] = original
+
+    def test_historical_layout_source_passes_cannot_replace_actual_review(self):
+        for identity in [6114935703, 6115039634]:
+            original = copy.deepcopy((self.manifest, self.gate))
+            self.manifest['sourceReviewId'] = identity
+            self.gate['proofSourceReview']['id'] = identity
+            self.gate['proofSourceReview']['html_url'] = 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(identity)
+            with self.subTest(identity=identity), self.assertRaises(RuntimeError): self.verify()
+            self.manifest, self.gate = original
+
     def test_old_source_review_cannot_authorize_new_measurement(self):
         for location in ['manifest', 'gate']:
             original = copy.deepcopy((self.manifest, self.gate))
@@ -215,6 +264,8 @@ class RuntimeGateTests(unittest.TestCase):
         proof = {'toolingCommit': REVIEWED_PROOF_SOURCE, 'proofSourceReviewId': PROOF_SOURCE_REVIEW_ID,
             'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
             'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
+            'proofBaselineLayoutGuardSha256': PROOF_BASELINE_LAYOUT_SHA,
+            'proofBaselineLayoutPolicy': PROOF_BASELINE_LAYOUT_POLICY,
             'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
             'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
             'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
@@ -227,6 +278,8 @@ class RuntimeGateTests(unittest.TestCase):
         pin = {'proofSourceReviewId': PROOF_SOURCE_REVIEW_ID}
         proof_source_binding(proof, pin)
         for key, value in [('toolingCommit', 'b' * 40), ('proofSourceReviewId', 6112725472),
+                           ('proofBaselineLayoutGuardSha256', BASELINE_GUARD_SHA),
+                           ('proofBaselineLayoutPolicy', 'EMPTY_FILES_ONLY'),
                            ('diskMeasurementGuardSha256', ORIGINAL_GUARD_SHA),
                            ('baselineMeasurementGuardSha256', ORIGINAL_GUARD_SHA), ('copyVerifierSha256', 'c' * 64),
                            ('proofContractSha256', 'd' * 64), ('refusalScopeCommentId', 1),

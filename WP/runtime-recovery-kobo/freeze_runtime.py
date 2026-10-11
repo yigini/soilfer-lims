@@ -161,6 +161,8 @@ def main():
         'sourceReviewId': PROOF_SOURCE_REVIEW_ID, 'proofToolingCommit': REVIEWED_PROOF_SOURCE,
         'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
         'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
+        'proofBaselineLayoutGuardSha256': PROOF_BASELINE_LAYOUT_SHA,
+        'proofBaselineLayoutPolicy': PROOF_BASELINE_LAYOUT_POLICY,
         'productionBaselineAdapterSha256': DEPLOY_BASELINE_GUARD_SHA,
         'productionBaselineScopeCommentId': PRODUCTION_BASELINE_SCOPE_ID,
         'productionBaselineSourceReviewId': production_review['id'],

@@ -88,6 +88,8 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
         'proofSourceIndexSha256': manifest['files']['proof-source-index.json'],
         'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
         'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
+        'proofBaselineLayoutGuardSha256': PROOF_BASELINE_LAYOUT_SHA,
+        'proofBaselineLayoutPolicy': PROOF_BASELINE_LAYOUT_POLICY,
         'productionBaselineAdapterSha256': DEPLOY_BASELINE_GUARD_SHA,
         'productionBaselineScopeCommentId': PRODUCTION_BASELINE_SCOPE_ID,
         'productionBaselineSourceReviewSha256': manifest['files']['production-baseline-source-review.json'],
