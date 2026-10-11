@@ -24,7 +24,8 @@ o={'observedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'root'
 names=['build-input.json','build-receipt.json','source-index.json'] if p['mode']=='build' else [
  'rehearsal-receipt.json','target-pin.json','source-index.json','first-sync-preservation.json',
  'second-sync-preservation.json','full-copy-preservation.json','upstream-before-start.json',
- 'upstream-first-completion.json','upstream-second-completion.json']
+ 'upstream-first-completion.json','upstream-second-completion.json','candidate-rehearsal-authority.json',
+ 'candidate-jobs-on-stdout.log','candidate-jobs-on-stderr.log']
 for name in names:
  f=r/name
  if f.exists():
