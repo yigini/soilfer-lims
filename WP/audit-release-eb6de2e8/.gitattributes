@@ -1,0 +1,3 @@
+# Preserve the exact executed gate/receipt bytes and their SHA256 evidence.
+production-gate-c4e0a8f.json -text
+production-receipt-feac6534-1f2e2d66.json -text

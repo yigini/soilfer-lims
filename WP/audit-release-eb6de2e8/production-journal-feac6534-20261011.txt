@@ -1,0 +1,80 @@
+Started Reviewed feac6534 combined production release.
+preflightPassed 2026-10-11T05:43:06.612306+00:00
+ingressQuiesced 2026-10-11T05:43:07.183735+00:00
+jobsQuiesced 2026-10-11T05:43:27.942083+00:00
+stoppedWriterBackupVerified 2026-10-11T05:44:19.699132+00:00
+installerAttempt_179 2026-10-11T05:44:45.454876+00:00
+{"stage": "179", "mode": "NO_OP", "totalChanges": 0}
+installerAttempt_182 2026-10-11T05:44:52.053054+00:00
+{"stage": "182", "mode": "NO_OP", "totalChanges": 0}
+installerAttempt_183 2026-10-11T05:44:54.762422+00:00
+{"stage": "183", "mode": "NO_OP", "totalChanges": 0}
+installerAttempt_184 2026-10-11T05:44:57.094423+00:00
+{"stage": "184", "mode": "NO_OP", "totalChanges": 0}
+installerAttempt_185 2026-10-11T05:44:59.762465+00:00
+{"stage": "185", "mode": "NO_OP", "totalChanges": 0}
+installerAttempt_186 2026-10-11T05:45:04.751928+00:00
+{"stage": "186", "mode": "NO_OP", "totalChanges": 0}
+installerAttempt_187 2026-10-11T05:45:14.201025+00:00
+{"stage": "187", "mode": "NO_OP", "totalChanges": 0}
+installerAttempt_272 2026-10-11T05:45:20.448353+00:00
+{"stage": "272", "mode": "NO_OP", "totalChanges": 0}
+installerAttempt_193 2026-10-11T05:45:23.132239+00:00
+{"stage": "193", "mode": "APPLIED", "totalChanges": 1}
+installerAttempt_189 2026-10-11T05:46:29.551051+00:00
+{"stage": "189", "mode": "NO_OP", "totalChanges": 0}
+installerAttempt_178 2026-10-11T05:46:32.056106+00:00
+{"stage": "178", "mode": "NO_OP", "totalChanges": 0}
+installerAttempt_190 2026-10-11T05:46:35.413170+00:00
+{"stage": "190", "mode": "APPLIED", "totalChanges": 39}
+installerAttempt_191-link 2026-10-11T05:46:42.252427+00:00
+installerAttempt_191-link-repeat 2026-10-11T05:47:30.100737+00:00
+{"stage": "191-link", "mode": "APPLIED", "totalChanges": 2}
+installerAttempt_191 2026-10-11T05:47:36.749729+00:00
+{"stage": "191", "mode": "APPLIED", "totalChanges": 1}
+installerAttempt_192 2026-10-11T05:47:44.894177+00:00
+{"stage": "192", "mode": "APPLIED", "totalChanges": 1}
+installerAttempt_194 2026-10-11T05:48:30.863672+00:00
+{"stage": "194", "mode": "APPLIED", "totalChanges": 1}
+installerAttempt_199 2026-10-11T05:49:21.603627+00:00
+{"stage": "199", "mode": "APPLIED", "totalChanges": 17}
+installerAttempt_197 2026-10-11T05:49:32.920474+00:00
+{"stage": "197", "mode": "APPLIED", "totalChanges": 1}
+installerAttempt_201 2026-10-11T05:50:24.863984+00:00
+{"stage": "201", "mode": "APPLIED", "totalChanges": 1}
+installerAttempt_210 2026-10-11T05:51:20.115563+00:00
+{"stage": "210", "mode": "APPLIED", "totalChanges": 1}
+installerAttempt_211 2026-10-11T05:52:54.792417+00:00
+{"stage": "211", "mode": "APPLIED", "totalChanges": 1}
+installerAttempt_202 2026-10-11T05:54:05.423003+00:00
+{"stage": "202", "mode": "APPLIED", "totalChanges": 1}
+installerAttempt_179-repeat 2026-10-11T05:55:29.740164+00:00
+installerAttempt_182-repeat 2026-10-11T05:55:35.267888+00:00
+installerAttempt_183-repeat 2026-10-11T05:55:37.008246+00:00
+installerAttempt_184-repeat 2026-10-11T05:55:38.811873+00:00
+installerAttempt_185-repeat 2026-10-11T05:55:40.417928+00:00
+installerAttempt_186-repeat 2026-10-11T05:55:42.021837+00:00
+installerAttempt_187-repeat 2026-10-11T05:55:45.706418+00:00
+installerAttempt_272-repeat 2026-10-11T05:55:51.786465+00:00
+installerAttempt_193-repeat 2026-10-11T05:55:53.542594+00:00
+installerAttempt_189-repeat 2026-10-11T05:55:55.425175+00:00
+installerAttempt_178-repeat 2026-10-11T05:55:57.134888+00:00
+installerAttempt_190-repeat 2026-10-11T05:55:58.887090+00:00
+installerAttempt_191-repeat 2026-10-11T05:56:01.332148+00:00
+installerAttempt_192-repeat 2026-10-11T05:56:03.965417+00:00
+installerAttempt_194-repeat 2026-10-11T05:56:06.392071+00:00
+installerAttempt_199-repeat 2026-10-11T05:56:08.297032+00:00
+installerAttempt_197-repeat 2026-10-11T05:56:12.451914+00:00
+installerAttempt_201-repeat 2026-10-11T05:56:14.225323+00:00
+installerAttempt_210-repeat 2026-10-11T05:56:19.147096+00:00
+installerAttempt_211-repeat 2026-10-11T05:56:23.006046+00:00
+installerAttempt_202-repeat 2026-10-11T05:56:29.331649+00:00
+schemaVerified 2026-10-11T05:56:58.287137+00:00
+candidateHealthyJobsOff 2026-10-11T05:58:32.180985+00:00
+readOnlyProbesPassed 2026-10-11T05:59:08.293086+00:00
+ingressReopenedJobsOff 2026-10-11T05:59:09.303695+00:00
+jobsReopened 2026-10-11T06:00:45.169338+00:00
+completed 2026-10-11T06:00:46.036885+00:00
+{"status": "DEPLOYED", "head": "feac653495d6b8a21e082cec596f1e14672fb389", "image": "sha256:159057d56c456a0c7cdef917fd04f53f9a66d6285cc476d7203d63047bfff8e1", "receiptSha256": "1f2e2d6621456bc11664ab7800ba0ab9e95d783b4efafde2a1175d3e1fade8c6", "health": {"status": "ok", "version": "1.9.0", "uptime": 33.496787732}}
+lims-release-feac6534-production-20261011t0543z.service: Deactivated successfully.
+lims-release-feac6534-production-20261011t0543z.service: Consumed 2min 58.118s CPU time, 1.0G memory peak.

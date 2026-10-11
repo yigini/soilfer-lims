@@ -1,12 +1,34 @@
-# Combined production release in progress
+# Combined production release deployed; Claudio handoff pending
 
 Application: `feac653495d6b8a21e082cec596f1e14672fb389`.
-Last deployed: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
+Previous deployed: `283a8bb54b66a2167d34d80ad724bdd6460850b1` (#188).
 Reviewed manifest state remains **PREPARED_ONLY_NOT_EXECUTED**, frozen at
-2026-10-10 21:37:25 UTC. Production execution is now **RUNNING** in the single
-unit `lims-release-feac6534-production-20261011t0543z.service`. Ingress was
-quiesced at 2026-10-11T05:43:07.183735Z. Read the live production receipt and
-unit before any continuation; never replay this execution directory or gate.
+2026-10-10 21:37:25 UTC. Production execution **DEPLOYED successfully at
+2026-10-11T06:00:46.036885Z**, in the single unit
+`lims-release-feac6534-production-20261011t0543z.service` (exit 0, inactive).
+Independent read-only verification passed at 06:01:17 UTC: correct image/head,
+HTTP 200, Docker healthy, zero restarts, ingress open, jobs enabled and denied
+POST 401. Never replay this execution directory/gate or rerun the rehearsal.
+
+Original production receipt SHA256:
+`1f2e2d6621456bc11664ab7800ba0ab9e95d783b4efafde2a1175d3e1fade8c6`.
+The mode-0400 receipt remains in the original frozen execution root and is
+retained locally as `production-receipt-feac6534-1f2e2d66.json`. The verification
+record is `production-readonly-verification-20261011.json` and unit journal is
+`production-journal-feac6534-20261011.txt`.
+
+All 22 installer stages/66 production CLI measurements passed, maximum
+550,875,136 B <=805,306,368 B, no heap override. All 21 end repeats and immediate
+acceptance repeat made zero changes. All 20 startup READY events, 31/31 checks
+and six read-only probes passed with zero startup/probe DB changes. Preservation
+passed: 90 original tables/18 old receipts/all fields retained except exactly
+the approved one-status/one-immutable-event acceptance link; integrity ok/FK0.
+Original ReviewDecision attemptId remains NULL and published report PUBLISHED.
+Free bytes at independent verification: 10,661,453,824 B, above the 8 GiB floor.
+
+Deployment was posted on #162 comment 6106061276 and all 19 target issues;
+`post-deploy-comments-feac6534.json` retains every comment ID/URL. Claudio owns
+post-deploy checks and closures/ticks. Coordination remains active for handoff.
 
 Claudio's exact-kit audit **PASSED at 2026-10-10 21:42:44 UTC**:
 https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6102481848.
@@ -22,7 +44,7 @@ The NEW complete real Docker rehearsal passed at **2026-10-10 21:33:43 UTC**,
 unit `lims-owned-feac6534-proof-20261010211834z.service`, exit 0. Its retained
 original root is
 `/opt/lims/releases/combined-eb6de2e8-rehearsal-feac6534-20261010211834Z`.
-The frozen, non-executed production kit is
+The frozen production kit used for this execution is
 `/opt/lims/releases/combined-release-eb6de2e8-feac6534-20261010T214130Z`.
 The directory suffix is an identifier; actual preparation time is the
 offset-qualified `preparedUtc` in the manifest, converted above to UTC.
@@ -113,7 +135,8 @@ source, coordinator, row plan and original YY transcription is byte-identical
 to the proof. The retained PASSED receipt hash was checked before and after
 freezing and remains exactly the hash above. Both source commits and the
 original rehearsal root are explicit in the manifest. All 26 frozen files
-were independently hash-verified and have mode 0400. No execution gate exists.
+were independently hash-verified and have mode 0400. The gate and production
+receipt now exist; all 26 frozen source/proof files remain unchanged.
 
 ## Storage clearance and production execution
 
@@ -140,8 +163,8 @@ source blobs, 22 installer stages, 66 bounded CLI measurements, 21 end repeats,
 The fresh gate binds the unchanged exact-kit pass 6102481848 and both workload
 pins `labAndHubBuildsOwnedByYY=true` and `RELEASE_DAY_DISK_ABORTS_ACCEPTED`.
 
-YY's previously verified Main now / Auto after review authorizes this scope
-only after every gate passes. Deployment will use a fresh 10-minute GitHub
+YY's previously verified Main now / Auto after review authorized this scope
+after every gate passed. Deployment used the fresh 10-minute GitHub
 gate, the reviewed #189 stopped-writer backup and ingress/jobs hold/reopen
 pattern, the scaled reserve formula with 8 GiB floor, and 500 MB unexplained
 drop aborts. Before any installer, old-image recovery also requires unchanged
@@ -151,8 +174,8 @@ separately reviewed forward fix with maintenance/jobs held; no DB restore,
 old-image start, retry or override.
 
 #205/draft #288 and #284 remain excluded; Claudio holds new application
-merges. After actual deployment Pip posts exact SHA/UTC/health/receipt on the
-19 included issues in `deployment-issue-targets-feac6534.json` and #162.
+merges. Pip posted exact SHA/UTC/health/receipt on the 19 included issues in
+`deployment-issue-targets-feac6534.json` and #162.
 Claudio owns post-deploy checks and issue closures. Before execution, live was
 healthy #188: HTTP 200, `status=ok`, version 1.9.0, zero restarts, original image
 `sha256:b02ddff8d7549e981edc49215fef2d54ca654adaa2a8924eceb5d4ea0af00394`.

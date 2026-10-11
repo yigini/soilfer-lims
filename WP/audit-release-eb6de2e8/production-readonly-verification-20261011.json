@@ -1,0 +1,41 @@
+{
+  "status": "INDEPENDENT_READ_ONLY_PRODUCTION_VERIFICATION_PASSED",
+  "verifiedUtc": "2026-10-11T06:01:17.009905Z",
+  "completedUtc": "2026-10-11T06:00:46.036885Z",
+  "head": "feac653495d6b8a21e082cec596f1e14672fb389",
+  "productionReceiptSha256": "1f2e2d6621456bc11664ab7800ba0ab9e95d783b4efafde2a1175d3e1fade8c6",
+  "gateSha256": "c4e0a8f582526af97b4295080049b6087d5e07584e8a65ee4aaa3ff9b0d33f03",
+  "image": "sha256:159057d56c456a0c7cdef917fd04f53f9a66d6285cc476d7203d63047bfff8e1",
+  "health": {
+    "status": "ok",
+    "version": "1.9.0",
+    "uptime": 65.078107251
+  },
+  "containerHealth": "healthy",
+  "restarts": 0,
+  "jobsEnabled": true,
+  "ingressOpen": true,
+  "deniedPostHttpStatus": 401,
+  "installerStages": 22,
+  "boundedCliMeasurements": 66,
+  "maxCliPeakBytes": 550875136,
+  "endRepeats": 21,
+  "immediateAcceptanceRepeatChanges": 0,
+  "startupReady": 20,
+  "apiChecks": {
+    "passed": 31,
+    "total": 31,
+    "failed": 0
+  },
+  "readOnlyProbes": 6,
+  "originalTableCount": 90,
+  "originalReceiptsPreserved": 18,
+  "createdAttempts": 17,
+  "approvedNullResultLinks": 19,
+  "approvedAttemptStatusChanges": 1,
+  "approvedAcceptanceAuditEvents": 1,
+  "integrity": "ok",
+  "foreignKeyViolations": 0,
+  "freeBytes": 10661453824,
+  "reserveBytes": 8589934592
+}
