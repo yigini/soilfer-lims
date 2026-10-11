@@ -87,9 +87,10 @@ function fractionOutcome(context) {
         fractionSelections:proofs,outputs:[{analysisCode:'TEXTURE',value:null,valueText:'',unit:null,censoring:'NONE',
             methodologyId:null,resultIds:[],derivation:'calculateUsdaTexture'}]};
     // #278/#291: the shared texture input authority, then the laboratory tolerance (exact when invalid, #281).
-    const {textureInputs,closureOptions}=require('./textureInputAuthority');
+    const {textureInputs,textureSourceReason,closureOptions}=require('./textureInputAuthority');
     const inputs=textureInputs(FRACTIONS.map(param=>proofs.filter(row=>row.analysisCode===param)));
-    if(inputs.reasonCode) throw fail('REPORTED_VALUE_TEXTURE_UNRESOLVED','The selected fraction values cannot produce a texture class.',{reasonCode:inputs.reasonCode});
+    const reasonCode=inputs.reasonCode || textureSourceReason(fractions.flatMap(row=>row.cited));
+    if(reasonCode) throw fail('REPORTED_VALUE_TEXTURE_UNRESOLVED','The selected fraction values cannot produce a texture class.',{reasonCode});
     const value=require('../utils/soilCalculations').calculateUsdaTexture(...inputs.values,closureOptions(context.textureTolerancePct));
     if(!value.isValid) throw fail('REPORTED_VALUE_TEXTURE_UNRESOLVED','The selected fraction values cannot produce a texture class.');
     const sourceIds=sorted(fractions.flatMap(row=>row.proof.resultIds));

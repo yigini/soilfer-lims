@@ -69,6 +69,14 @@ describe('#278 texture closure gate (pure)', () => {
         expect(gate(triple(40, 40, 19), { textureClosureTolerancePct: 2 }).isBlocking).toBe(false);
     });
 
+    test('a row without stored censoring is never treated as uncensored and closes exactly, never within the lab tolerance', () => {
+        const unknown = gate(triple(40, 40, 19).map((item, index) => index === 2 ? { ...item, censoring: null } : item), { textureClosureTolerancePct: 2 });
+        expect(unknown.isBlocking).toBe(true);
+        expect(unknown.textureClosure[0]).toMatchObject({ outcome: 'BLOCKED', reasonCode: 'CENSORING_UNKNOWN_EXACT_CLOSURE', tolerancePct: null });
+        const both = gate(triple(40, 40, 20, { unit: null }).map((item, index) => index === 0 ? { ...item, censoring: null } : item), { textureClosureTolerancePct: 2 });
+        expect(both.textureClosure[0]).toMatchObject({ outcome: 'PASS', reasonCode: 'UNIT_MISSING_AND_CENSORING_UNKNOWN_EXACT_CLOSURE' });
+    });
+
     test.each([
         ['censored', triple(40, 40, 19).map((item, index) => index === 2 ? { ...item, censoring: 'BELOW_LOQ' } : item), 'INPUT_CENSORED'],
         ['non-numeric', triple(40, 40, 19).map((item, index) => index === 2 ? { ...item, numericValue: null, value: 'n/a' } : item), 'INPUT_NON_NUMERIC'],

@@ -76,7 +76,7 @@ const TEXTURE_FRACTIONS = Object.freeze(['SAND', 'SILT', 'CLAY']);
 // censoring of each current fraction through the shared texture input
 // authority, never re-parsed text. A replicate with a non-'%' unit, censored,
 // non-numeric or ambiguous fractions is disclosed as not evaluated and does not
-// block. A fraction with no stored unit is never given a catalogue unit; it is
+// block. A fraction with no stored unit or censoring is never given one; it is
 // checked with exact closure, never the wider laboratory tolerance.
 function textureGate(results, tolerancePct) {
     const { textureInputs, closureOptions } = require('../services/textureInputAuthority');
@@ -95,15 +95,16 @@ function textureGate(results, tolerancePct) {
         if (TEXTURE_FRACTIONS.some(param => !group.has(param))) continue;
         const rows = TEXTURE_FRACTIONS.map(param => group.get(param));
         const inputs = textureInputs(rows.map(candidates => candidates.map(row => ({ value: row.numericValue, unit: row.unit, censoring: row.censoring }))));
-        if (inputs.reasonCode && inputs.reasonCode !== 'UNIT_MISSING') {
+        if (inputs.reasonCode && !inputs.unknown) {
             evaluations.push({ replicateNo, outcome: 'NOT_EVALUATED', reasonCode: inputs.reasonCode, tolerancePct }); continue;
         }
         const [sand, silt, clay] = rows.map(candidates => candidates[0]);
         // #281: an invalid stored laboratory tolerance is exact closure, never a wider one.
-        const applied = inputs.reasonCode === 'UNIT_MISSING' ? null : closureOptions(tolerancePct);
+        // A missing stored unit or censoring is never inferred; it closes exactly, as before #278.
+        const applied = inputs.unknown ? null : closureOptions(tolerancePct);
         const texture = calculateUsdaTexture(sand.numericValue, silt.numericValue, clay.numericValue, applied);
         evaluations.push({ replicateNo, outcome: texture.isValid ? 'PASS' : 'BLOCKED',
-            reasonCode: inputs.reasonCode === 'UNIT_MISSING' ? 'UNIT_MISSING_EXACT_CLOSURE' : null, tolerancePct: applied ? applied.tolerance : null,
+            reasonCode: inputs.unknown ? inputs.unknown.join('_AND_') + '_EXACT_CLOSURE' : null, tolerancePct: applied ? applied.tolerance : null,
             values: { sand: sand.numericValue, silt: silt.numericValue, clay: clay.numericValue },
             resultIds: [sand, silt, clay].map(row => row.id ?? null), texture });
     }

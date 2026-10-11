@@ -5,7 +5,6 @@ const { TEXTURE_ALIASES } = require('./reportResultGovernance');
 const MODES = new Set(['ATTEMPT', 'MEAN', 'NOT_REPORTABLE']);
 const failure = (code, message, details = {}) => new TransitionError(message, 409, code, details);
 
-
 function selectionOutputs(item,context) {
     return context?.layout?.outputParams || (TEXTURE_ALIASES.has(item.analysis) ? ['CLAY', 'SAND', 'SILT', 'TEXTURE'] : [item.analysis]);
 }
@@ -38,7 +37,9 @@ function selectedOutputValues(item, candidates, limits, options = {}) {
     if (composite && averaging) {
         // #278/#291: the shared texture input authority on the selected means, then the
         // laboratory closure tolerance from policyService (exact when invalid, #281).
-        const { textureInputs, closureOptions } = require('./textureInputAuthority');
+        const { textureInputs, textureSourceReason, closureOptions } = require('./textureInputAuthority');
+        const sourceReason = textureSourceReason(all.filter(row => ['SAND', 'SILT', 'CLAY'].includes(row.param)));
+        if (sourceReason) throw failure('REPORTED_VALUE_TEXTURE_UNRESOLVED', 'The selected texture means do not produce a valid class.', { reasonCode: sourceReason });
         const inputs = textureInputs(['SAND', 'SILT', 'CLAY'].map(param => outputs.filter(row => row.analysisCode === param)));
         if (inputs.reasonCode) throw failure('REPORTED_VALUE_TEXTURE_UNRESOLVED', 'The selected texture means do not produce a valid class.', { reasonCode: inputs.reasonCode });
         const derived = calculateUsdaTexture(...inputs.values, closureOptions(options.textureTolerancePct));
