@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "4807cc600eb4483fa64172fead304ed1a293197e",
+  "sourceReviewId": 6114935703,
+  "sourceReviewRawSha256": "329332843878d741127ba6b50c8a9d570c8a376de1161b507204342734a7d2e1",
+  "root": "/opt/lims/releases/runtime-kobo-build-f830f900-20261011T231018Z",
+  "unit": "lims-build-runtime-kobo-build-f830f900-20261011t231018z.service",
+  "status": "BUILD_PREPARATION_AUTHORIZED_NOT_YET_LAUNCHED",
+  "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "mainCiRunId": 38182451105
+}

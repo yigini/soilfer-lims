@@ -46,13 +46,16 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
     readiness = remote(preflight)
     require(readiness['productionMutations'] == 0 and readiness['ready'] is True, 'Remote kit is not ready')
     pin = json.loads((kit / 'target-pin.json').read_bytes())
-    pr = github('pulls/292'); current = github('git/ref/heads/main')['object']['sha']
+    pr = github('pulls/291'); current = github('git/ref/heads/main')['object']['sha']
     require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD and
         pr['merge_commit_sha'] == current == pin['head'], 'Exact merged-main head changed')
-    tree = github('git/commits/' + current)['tree']['sha']
-    audited_tree = github('git/commits/' + AUDITED_PR_HEAD)['tree']['sha']
+    merged_commit = github('git/commits/' + current)
+    audited_commit = github('git/commits/' + AUDITED_PR_HEAD)
+    validate_merge_identity(merged_commit, audited_commit)
+    candidate_identity(pin)
+    tree = merged_commit['tree']['sha']; audited_tree = audited_commit['tree']['sha']
     review = github('issues/comments/' + str(pin['auditReviewId'])); formal_pr_review(review)
-    pr_comments = github('issues/292/comments?per_page=100', True)
+    pr_comments = github('issues/291/comments?per_page=100', True)
     later_pr_failure = any('audit failed' in row['body'].lower() and row['created_at'] > review['created_at']
         for row in pr_comments)
     checks = github('commits/' + AUDITED_PR_HEAD + '/check-runs?per_page=100')['check_runs']
@@ -102,8 +105,9 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
         'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
         'proofSourceReview': source_review, 'laterSourceAuditFailure': later_source_failure,
         'workloadControl': WORKLOAD_PINS, 'readOnlyExecutionReadiness': readiness,
-        'pr': {'number': 292, 'merged': pr['merged'], 'head': pr['head']['sha'], 'mergeCommit': current,
-            'tree': tree, 'auditedTree': audited_tree, 'review': review, 'checks': checks,
+        'pr': {'number': PR_NUMBER, 'merged': pr['merged'], 'head': pr['head']['sha'], 'mergeCommit': current,
+            'tree': tree, 'auditedTree': audited_tree, 'mergeParents': MERGE_PARENTS,
+            'review': review, 'checks': checks,
             'laterAuditFailure': later_pr_failure},
         'mainCi': {key: ci[key] for key in ['id', 'head_sha', 'name', 'event', 'status', 'conclusion', 'updated_at']},
         'kitReview': kit_review, 'laterKitAuditFailure': later_kit_failure,

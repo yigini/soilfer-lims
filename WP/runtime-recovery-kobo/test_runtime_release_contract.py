@@ -9,7 +9,8 @@ class RuntimeGateTests(unittest.TestCase):
     def setUp(self):
         self.now = datetime.datetime(2026, 10, 11, 20, 0, tzinfo=datetime.timezone.utc)
         self.manifest = {'status': KIT_STATUS, 'root': '/opt/lims/releases/runtime-kobo-release-fixture',
-            'head': '1' * 40, 'image': 'sha256:' + '2' * 64, 'tree': '3' * 40,
+            'head': CANDIDATE_HEAD, 'image': 'sha256:' + '2' * 64, 'tree': MERGED_TREE,
+            'naturalIntakePolicy': NATURAL_INTAKE_POLICY,
             'baseHead': BASE_HEAD, 'workloadControl': WORKLOAD_PINS, 'sourceReviewId': PROOF_SOURCE_REVIEW_ID,
             'proofToolingCommit': REVIEWED_PROOF_SOURCE, 'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
             'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
@@ -30,7 +31,8 @@ class RuntimeGateTests(unittest.TestCase):
                 'known_core_disk_guard.py', 'known_core_disk_guard_v2.py'], 1)}}
         self.manifest['files']['known_core_disk_guard.py'] = ORIGINAL_GUARD_SHA
         self.manifest['files']['known_core_disk_guard_v2.py'] = MEASUREMENT_GUARD_SHA
-        self.manifest['files'].update({'known_core_disk_guard_v3.py': BASELINE_GUARD_SHA,
+        self.manifest['files'].update({'build_candidate.py': '8' * 64, 'prepare_candidate_build.py': '9' * 64,
+            'export_launch_runtime_proof.py': 'a' * 64, 'known_core_disk_guard_v3.py': BASELINE_GUARD_SHA,
             'kobo_copy_preservation.py': REVIEWED_VERIFIER_SHA, 'proof_contract.py': REVIEWED_PROOF_CONTRACT_SHA,
             'known_core_disk_guard_deploy.py': DEPLOY_BASELINE_GUARD_SHA,
             'production-baseline-source-review.json': 'e' * 64})
@@ -43,9 +45,9 @@ class RuntimeGateTests(unittest.TestCase):
             'head': self.manifest['head'], 'currentMainHead': self.manifest['head'], 'image': self.manifest['image'],
             'manifestSha256': self.manifest_sha, 'workloadControl': WORKLOAD_PINS, 'verifiedUtc': '2026-10-11T19:59:59Z',
             'coordinatorSha256': '1' * 64, 'rehearsalReceiptSha256': '2' * 64, 'targetPinSha256': '5' * 64,
-            'yyEvidenceSha256': '4' * 64, 'pr': {'number': 292, 'merged': True, 'head': AUDITED_PR_HEAD,
-                'mergeCommit': self.manifest['head'], 'tree': self.manifest['tree'], 'auditedTree': self.manifest['tree'],
-                'laterAuditFailure': False, 'review': {'html_url': 'https://github.com/yigini/soilfer-lims/pull/292#issuecomment-1',
+            'yyEvidenceSha256': '4' * 64, 'pr': {'number': PR_NUMBER, 'merged': True, 'head': AUDITED_PR_HEAD,
+                'mergeCommit': self.manifest['head'], 'tree': self.manifest['tree'], 'auditedTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,
+                'laterAuditFailure': False, 'review': {'html_url': 'https://github.com/yigini/soilfer-lims/pull/291#issuecomment-1',
                     'body': PHRASE + '\n' + AUDITED_PR_HEAD},
                 'checks': [{'head_sha': AUDITED_PR_HEAD, 'status': 'completed', 'conclusion': 'success'}]},
             'mainCi': {'head_sha': self.manifest['head'], 'name': 'CI', 'event': 'push', 'status': 'completed', 'conclusion': 'success'},
@@ -74,8 +76,10 @@ class RuntimeGateTests(unittest.TestCase):
                     'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10', 'refusalScopeCommentId=6113601584',
                     REFUSAL_POLICY, CARDINALITY_POLICY, *pairing_review_tokens(),
                     'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
-                    'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'])}})
-        production_tokens = ['Source review: PASS', self.manifest['packagingCommit'], DEPLOY_BASELINE_GUARD_SHA,
+                    'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED',
+                    self.manifest['files']['build_candidate.py'], self.manifest['files']['prepare_candidate_build.py'],
+                    self.manifest['files']['export_launch_runtime_proof.py']])}})
+        production_tokens = release_binding_tokens() + ['Source review: PASS', self.manifest['packagingCommit'], DEPLOY_BASELINE_GUARD_SHA,
             BASELINE_GUARD_SHA, MEASUREMENT_GUARD_SHA, ORIGINAL_GUARD_SHA,
             'productionBaselineScopeCommentId=' + str(PRODUCTION_BASELINE_SCOPE_ID),
             'REQUIRED_HASHED_MANIFEST_AND_GATE', 'JOURNAL_UNIT_OUTPUT',
@@ -115,9 +119,24 @@ class RuntimeGateTests(unittest.TestCase):
             with self.assertRaises(RuntimeError): self.verify()
             self.gate['mainCi'] = original
 
-    def test_pr291_cannot_replace292(self):
-        self.gate['pr']['number'] = 291
+    def test_historical_pr292_cannot_replace291(self):
+        self.gate['pr']['number'] = 292
         with self.assertRaises(RuntimeError): self.verify()
+
+    def test_branch_tree_and_ordered_merge_parents_cannot_be_replaced(self):
+        original = copy.deepcopy(self.gate['pr'])
+        for key, value in [('auditedTree', MERGED_TREE), ('mergeParents', list(reversed(MERGE_PARENTS)))]:
+            self.gate['pr'][key] = value
+            with self.subTest(key=key), self.assertRaises(RuntimeError): self.verify()
+            self.gate['pr'] = copy.deepcopy(original)
+
+    def test_original_cursor_policy_and_live_baseline_cannot_change(self):
+        for key, value in [('baseHead', 'ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf'),
+                ('naturalIntakePolicy', 'REWIND_67'), ('head', BASE_HEAD)]:
+            original = copy.deepcopy(self.manifest)
+            self.manifest[key] = value
+            with self.subTest(key=key), self.assertRaises(RuntimeError): self.verify()
+            self.manifest = original
 
     def test_tree_equality_required(self):
         self.gate['pr']['tree'] = '8' * 40

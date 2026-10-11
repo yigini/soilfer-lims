@@ -15,7 +15,7 @@ from kobo_copy_preservation import verify_copy
 from runtime_release_contract import *
 
 ROOT = pathlib.Path(__file__).resolve().parent
-HISTORICAL_ROOT = pathlib.Path('/opt/lims/releases/forward-ae64f169-release-20261011T150800Z')
+HISTORICAL_ROOT = pathlib.Path(HISTORICAL_ROOT_PATH)
 
 
 def freeze_file(target, name, data):
@@ -154,7 +154,9 @@ def main():
     require(min(s.disk_free().values()) >= FLOOR + sum(map(len, files.values())) + 268435456,
         'Packaging allocation reserve refused')
     manifest = {'status': KIT_STATUS, 'root': str(target), 'head': pin['head'], 'image': pin['image'], 'tree': pin['tree'],
-        'baseHead': BASE_HEAD, 'preparedUtc': s.utc(), 'packagingCommit': package['head'],
+        'baseHead': BASE_HEAD, 'naturalIntakePolicy': NATURAL_INTAKE_POLICY,
+        'auditedPrTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,
+        'preparedUtc': s.utc(), 'packagingCommit': package['head'],
         'originalProofRoot': str(proof), 'originalProofUnit': unit, 'proofReferences': references,
         'sourceReviewId': PROOF_SOURCE_REVIEW_ID, 'proofToolingCommit': REVIEWED_PROOF_SOURCE,
         'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,

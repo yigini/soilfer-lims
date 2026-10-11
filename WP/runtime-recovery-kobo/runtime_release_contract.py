@@ -8,11 +8,11 @@ from proof_contract import *
 
 WORKLOAD_PINS = {'labAndHubBuildsOwnedByYY': True,
     'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}
-REVIEWED_PROOF_SHA = '9d9cea571421c502ed4a5a1c5e2964f2e9470df9a8288a69df35c0770fb5d311'
-REVIEWED_PROOF_SOURCE = '873a021814fd252a082c46a4f5c25a733fe69f65'
-PROOF_SOURCE_REVIEW_ID = 6114217683
+REVIEWED_PROOF_SHA = 'e3a54b3d0dbc8bb39bad40f32467be41692b85a72e9cf0bb4a3bbb4f4b2b4950'
+REVIEWED_PROOF_SOURCE = '4807cc600eb4483fa64172fead304ed1a293197e'
+PROOF_SOURCE_REVIEW_ID = 6114935703
 REVIEWED_VERIFIER_SHA = '3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23'
-REVIEWED_PROOF_CONTRACT_SHA = '4d096b9b7bf3e5d41422f7989869808c06af550480ae39e8d52a99aec0d62a9a'
+REVIEWED_PROOF_CONTRACT_SHA = '2bafa4094ce5bac6e10abd5e347791ee39c047ba3df6b5f99977d863a76b5648'
 BASELINE_GUARD_SHA = '878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f'
 BASELINE_POLICY = 'CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE'
 BASELINE_ATTEMPTS_MAX = 3
@@ -25,8 +25,6 @@ MEASUREMENT_GUARD_SHA = 'f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd34
 ORIGINAL_GUARD_SHA = 'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169'
 CORE_CONFIRMATION_SECONDS = 10
 SHARED_READINESS_SHA = 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00'
-HISTORICAL_RECEIPT_SHA = '35ab0b825a5d52414304d426101863b671ce5d3b92f6d8eb81e8b79f34095462'
-LIVE_IMAGE = 'sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a'
 KIT_STATUS = 'PREPARED_RUNTIME_FORWARD_ONLY_NOT_EXECUTED'
 PHRASE = 'Audit passed: OK to merge and deploy'
 
@@ -48,6 +46,11 @@ def safe_root(value, prefix):
 
 def validate_proof(proof, pin):
     require(proof['status'] == 'PASSED_NEW_CANDIDATE_NATURAL_KOBO_PROOF', 'A failed proof cannot feed a kit')
+    require(PROOF_SOURCE_REVIEW_ID > 0, 'Actual new proof-source review is not bound')
+    candidate_identity(pin)
+    require(proof['naturalIntakePolicy'] == NATURAL_INTAKE_POLICY and proof['baseHead'] == BASE_HEAD and
+        proof['pr'] == PR_NUMBER and proof['tree'] == MERGED_TREE and proof['auditedTree'] == AUDITED_PR_TREE and
+        proof['mergeParents'] == MERGE_PARENTS, 'Proof release or original-cursor workload differs')
     require(proof['head'] == pin['head'] and proof['image'] == pin['image'] and
         proof['buildReceiptSha256'] == pin['buildReceiptSha256'], 'Wrong proof candidate')
     require(proof['coordinatorSha256'] == REVIEWED_PROOF_SHA and
@@ -146,6 +149,7 @@ def sealed_scheduler_evidence(proof, expected, stdout, stderr, first, second, fu
 
 
 def measurement_manifest(manifest):
+    require(PROOF_SOURCE_REVIEW_ID > 0, 'Actual new proof-source review is not bound')
     pairing_contract(manifest)
     require(manifest['sourceReviewId'] == PROOF_SOURCE_REVIEW_ID and
         manifest['proofToolingCommit'] == REVIEWED_PROOF_SOURCE and
@@ -169,7 +173,7 @@ def measurement_manifest(manifest):
 def production_source_review(review, tooling, files, now=None):
     require(review['html_url'] == 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(review['id']),
         'Separate production baseline source review missing')
-    tokens = ['Source review: PASS', tooling, DEPLOY_BASELINE_GUARD_SHA,
+    tokens = release_binding_tokens() + ['Source review: PASS', tooling, DEPLOY_BASELINE_GUARD_SHA,
         BASELINE_GUARD_SHA, MEASUREMENT_GUARD_SHA, ORIGINAL_GUARD_SHA,
         'productionBaselineScopeCommentId=' + str(PRODUCTION_BASELINE_SCOPE_ID),
         'REQUIRED_HASHED_MANIFEST_AND_GATE', 'JOURNAL_UNIT_OUTPUT',
@@ -197,11 +201,13 @@ def proof_authority(proof, pin, source, authority, authority_sha):
         authority['head'] == pin['head'] and authority['proofSourceReview']['id'] == PROOF_SOURCE_REVIEW_ID,
         'Original proof authority or measured source differs')
     source_review_pass(authority['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA,
-        verifier_sha=REVIEWED_VERIFIER_SHA, contract_sha=REVIEWED_PROOF_CONTRACT_SHA, baseline_guard_sha=BASELINE_GUARD_SHA, stream_pairing=True)
+        verifier_sha=REVIEWED_VERIFIER_SHA, contract_sha=REVIEWED_PROOF_CONTRACT_SHA, baseline_guard_sha=BASELINE_GUARD_SHA, stream_pairing=True,
+        authority_hashes=[source['files'][name]['sha256'] for name in
+            ['build_candidate.py', 'prepare_candidate_build.py', 'export_launch_runtime_proof.py']])
 
 
 def review_tokens(manifest, manifest_sha):
-    return pairing_review_tokens() + [PHRASE, manifest['head'], manifest['image'], manifest_sha,
+    return release_binding_tokens() + pairing_review_tokens() + [PHRASE, manifest['head'], manifest['image'], manifest_sha,
         manifest['files']['deploy_runtime.py'], manifest['files']['rehearsal-receipt.json'],
         manifest['files']['startup_common.py'], manifest['files']['yy-authorization-evidence.md'],
         manifest['files']['target-pin.json'], HISTORICAL_RECEIPT_SHA,
@@ -221,9 +227,9 @@ def review_tokens(manifest, manifest_sha):
 
 
 def formal_pr_review(review):
-    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/292#') and
+    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/291#') and
         PHRASE in review['body'] and (AUDITED_PR_HEAD in review['body'] or AUDITED_PR_HEAD[:8] in review['body']),
-        'Formal exact-head PR292 review missing')
+        'Formal exact-head PR291 review missing')
 
 
 def verify_gate(manifest, gate, manifest_sha, now=None):
@@ -231,7 +237,8 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
     measurement_manifest(manifest)
     pairing_contract(gate)
     require(manifest['status'] == KIT_STATUS and manifest['baseHead'] == BASE_HEAD and
-        manifest['head'] != BASE_HEAD and manifest['workloadControl'] == WORKLOAD_PINS and
+        manifest['head'] == CANDIDATE_HEAD and manifest['tree'] == MERGED_TREE and
+        manifest['naturalIntakePolicy'] == NATURAL_INTAKE_POLICY and manifest['workloadControl'] == WORKLOAD_PINS and
         manifest['separateInstallerCommands'] == 0,
         'Wrong or historical release manifest')
     require(gate['status'] == 'FRESH_SINGLE_USE_RUNTIME_GATE' and
@@ -246,7 +253,9 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
         gate['coreDeallocationConfirmationDeadlineSeconds'] == CORE_CONFIRMATION_SECONDS,
         'Corrected source approval was superseded or timing differs')
     source_review_pass(gate['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA, now,
-        verifier_sha=REVIEWED_VERIFIER_SHA, contract_sha=REVIEWED_PROOF_CONTRACT_SHA, baseline_guard_sha=BASELINE_GUARD_SHA, stream_pairing=True)
+        verifier_sha=REVIEWED_VERIFIER_SHA, contract_sha=REVIEWED_PROOF_CONTRACT_SHA, baseline_guard_sha=BASELINE_GUARD_SHA, stream_pairing=True,
+        authority_hashes=[manifest['files'][name] for name in
+            ['build_candidate.py', 'prepare_candidate_build.py', 'export_launch_runtime_proof.py']])
     require(gate['productionBaselineSourceReview']['id'] == manifest['productionBaselineSourceReviewId'] and
         gate['laterProductionSourceAuditFailure'] is False and
         gate['productionBaselineScopeCommentId'] == PRODUCTION_BASELINE_SCOPE_ID,
@@ -266,9 +275,10 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
                       ('productionBaselineSourceReviewSha256', 'production-baseline-source-review.json'),
                       ('copyVerifierSha256', 'kobo_copy_preservation.py'), ('proofContractSha256', 'proof_contract.py')]:
         require(gate[key] == manifest['files'][name], 'Gate file binding differs: ' + name)
-    pr = gate['pr']; require(pr['number'] == 292 and pr['merged'] is True and
-        pr['head'] == AUDITED_PR_HEAD and pr['mergeCommit'] == manifest['head'] and
-        pr['tree'] == pr['auditedTree'] == manifest['tree'] and pr['laterAuditFailure'] is False,
+    pr = gate['pr']; require(pr['number'] == PR_NUMBER and pr['merged'] is True and
+        pr['head'] == AUDITED_PR_HEAD and pr['mergeCommit'] == manifest['head'] == CANDIDATE_HEAD and
+        pr['tree'] == manifest['tree'] == MERGED_TREE and pr['auditedTree'] == AUDITED_PR_TREE and
+        pr['mergeParents'] == MERGE_PARENTS and pr['laterAuditFailure'] is False,
         'Merged application or audit tree differs')
     formal_pr_review(pr['review'])
     require(pr['checks'] and all(row['head_sha'] == AUDITED_PR_HEAD and row['status'] == 'completed' and
@@ -278,7 +288,7 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
         'Exact main CI is not green')
     review = gate['kitReview']; require(review['html_url'] ==
         'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(review['id']) and
-        review['id'] not in [6102481848, 6109804174, 6110472696, 6112725472, PROOF_SOURCE_REVIEW_ID] and
+        review['id'] not in [6102481848, 6109804174, 6110472696, 6112725472, 6114626674, PROOF_SOURCE_REVIEW_ID] and
         all(token in review['body'] for token in review_tokens(manifest, manifest_sha)) and
         gate['laterKitAuditFailure'] is False, 'New exact-kit review missing or superseded')
     require(utc_seconds(review['created_at']) <= now.timestamp(), 'Kit review is future-dated')
@@ -299,6 +309,7 @@ def frozen_files(root, manifest):
         manifest['productionObservationSeconds'] == 660 and manifest['deadlineSeconds'] == 600 and
         manifest['reserveFloorBytes'] == FLOOR, 'Release execution contract changed')
     pin = json.loads((root / 'target-pin.json').read_bytes())
+    candidate_identity(pin)
     require(pin['head'] == manifest['head'] and pin['image'] == manifest['image'] and
         pin['tree'] == manifest['tree'] and pin['auditedPrHead'] == AUDITED_PR_HEAD, 'Frozen target differs')
     proof = json.loads((root / 'rehearsal-receipt.json').read_bytes())

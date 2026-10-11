@@ -19,7 +19,7 @@ from known_core_disk_guard_deploy import KnownCoreDiskGuard
 from runtime_release_contract import *
 
 ROOT = pathlib.Path(__file__).resolve().parent
-HISTORICAL_ROOT = pathlib.Path('/opt/lims/releases/forward-ae64f169-release-20261011T150800Z')
+HISTORICAL_ROOT = pathlib.Path(HISTORICAL_ROOT_PATH)
 
 
 def environment_hash(container):
@@ -137,7 +137,9 @@ def main():
         'productionGateSha256': sha(ROOT / 'production-gate.json'), 'githubGate': gate,
         'separateInstallerCommands': 0, 'anyEntrypointAttempted': False,
         'originalProductionReceiptSha256': HISTORICAL_RECEIPT_SHA, 'preflight': readiness,
-        'proofSourceReviewId': PROOF_SOURCE_REVIEW_ID,
+        'proofSourceReviewId': PROOF_SOURCE_REVIEW_ID, 'baseHead': BASE_HEAD, 'pr': PR_NUMBER,
+        'tree': MERGED_TREE, 'auditedPrTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,
+        'naturalIntakePolicy': NATURAL_INTAKE_POLICY,
         'proofAuthoritySha256': manifest['files']['proof-authority.json'],
         'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
         'baselineMeasurementGuardSha256': BASELINE_GUARD_SHA,
@@ -189,7 +191,7 @@ def main():
         quiesced = True; set_ingress('apache-held.conf')
         for path, method in [('/api/health', 'GET'), ('/ws', 'GET'), ('/api/v2/data-exchange/receipts', 'POST')]:
             http(path, 503, 'held-' + method + '-' + path.strip('/').replace('/', '-'), method)
-        s.command(ROOT, ['docker', 'stop', '-t', '30', 'soilfer-lims'], 'stop-original-crash-writer', timeout=45)
+        s.command(ROOT, ['docker', 'stop', '-t', '30', 'soilfer-lims'], 'stop-original-live-writer', timeout=45)
         require(not c.inspect('soilfer-lims')['State']['Running'] and c.inspect('soilfer-lims')['Image'] == LIVE_IMAGE,
             'Original writer did not stop')
         all_writers_stopped(); guard.check(); save('writersStopped')
