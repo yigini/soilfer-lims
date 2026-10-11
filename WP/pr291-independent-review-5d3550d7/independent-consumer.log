@@ -1,0 +1,1314 @@
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: Choose a current reported value for every texture fraction first.
+        at fail (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:4:43)
+        at Object.fail [as fractionSelections] (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:61:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at loadSelectionEvidence (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueSelectionContext.js:61:62)
+        at loadSelectionContext (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueSelectionContext.js:65:22)
+        at Object.preflightReportedSelection (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueSelectionService.js:38:21)
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:68:34
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\workflowStateRules.js:187:60)
+        at commitReview (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_SOURCE_SELECTION_REQUIRED',
+      details: {
+        workItemIds: [
+          'ee210779-c90b-45ec-a067-0881d779670e',
+          '5087e7cf-ade6-474f-95f0-39d85ab4b549',
+          'f4367648-1fc0-4c9a-bbd1-712c2d9b2b17'
+        ],
+        fraction: 'SAND'
+      }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c2017b38-abd2-4643-a5e2-68880065d433
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c2017b38-abd2-4643-a5e2-68880065d433
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c2017b38-abd2-4643-a5e2-68880065d433
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c2017b38-abd2-4643-a5e2-68880065d433
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b70bc376-0774-400d-981c-702032488ad9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b70bc376-0774-400d-981c-702032488ad9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b70bc376-0774-400d-981c-702032488ad9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b70bc376-0774-400d-981c-702032488ad9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c4166fec-01c0-4ba9-becf-9eb81fa09a0c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c4166fec-01c0-4ba9-becf-9eb81fa09a0c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c4166fec-01c0-4ba9-becf-9eb81fa09a0c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c4166fec-01c0-4ba9-becf-9eb81fa09a0c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b5b2cd6f-cc8b-4189-a048-0ef4e1cae3e6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b5b2cd6f-cc8b-4189-a048-0ef4e1cae3e6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b5b2cd6f-cc8b-4189-a048-0ef4e1cae3e6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b5b2cd6f-cc8b-4189-a048-0ef4e1cae3e6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 35331262-d82e-4cba-a629-59637c4aed3f
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 35331262-d82e-4cba-a629-59637c4aed3f
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 35331262-d82e-4cba-a629-59637c4aed3f
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 35331262-d82e-4cba-a629-59637c4aed3f
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 0c5f0b72-605e-49a5-84f7-c9fb84d6a9d3
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 0c5f0b72-605e-49a5-84f7-c9fb84d6a9d3
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 0c5f0b72-605e-49a5-84f7-c9fb84d6a9d3
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 0c5f0b72-605e-49a5-84f7-c9fb84d6a9d3
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f50cc421-b40a-4639-b7fc-09b063ac2bb1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f50cc421-b40a-4639-b7fc-09b063ac2bb1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f50cc421-b40a-4639-b7fc-09b063ac2bb1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f50cc421-b40a-4639-b7fc-09b063ac2bb1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1c5ebacc-936f-4a35-9550-1deba2924885
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1c5ebacc-936f-4a35-9550-1deba2924885
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1c5ebacc-936f-4a35-9550-1deba2924885
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: Choose the reported texture value explicitly.
+        at fail (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:4:43)
+        at Object.fail [as separateTextureChoice] (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:133:15)
+        at separateTextureChoice (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueSelectionService.js:9:91)
+        at Object.choiceFor [as preflightReportedSelection] (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueSelectionService.js:39:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:68:34
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\workflowStateRules.js:187:60)
+        at commitReview (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_SELECTION_REQUIRED',
+      details: {}
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1c5ebacc-936f-4a35-9550-1deba2924885
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab fb0a9225-9d1e-4f4b-b2f6-9271d045d9d9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab fb0a9225-9d1e-4f4b-b2f6-9271d045d9d9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab fb0a9225-9d1e-4f4b-b2f6-9271d045d9d9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: The selected fraction values cannot produce a texture class.
+        at fail (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:4:43)
+        at fail (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:93:26)
+        at Object.fractionOutcome [as separateTextureChoice] (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:122:19)
+        at separateTextureChoice (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueSelectionService.js:9:91)
+        at Object.choiceFor [as preflightReportedSelection] (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueSelectionService.js:39:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:68:34
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\workflowStateRules.js:187:60)
+        at commitReview (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_TEXTURE_UNRESOLVED',
+      details: { reasonCode: 'INPUT_CENSORED' }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab fb0a9225-9d1e-4f4b-b2f6-9271d045d9d9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2ab5dbb7-b3f9-4a7e-a6fa-e4b7642da9c0
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2ab5dbb7-b3f9-4a7e-a6fa-e4b7642da9c0
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2ab5dbb7-b3f9-4a7e-a6fa-e4b7642da9c0
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: The selected fraction values cannot produce a texture class.
+        at fail (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:4:43)
+        at fail (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:93:26)
+        at Object.fractionOutcome [as separateTextureChoice] (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:122:19)
+        at separateTextureChoice (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueSelectionService.js:9:91)
+        at Object.choiceFor [as preflightReportedSelection] (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueSelectionService.js:39:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:68:34
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\workflowStateRules.js:187:60)
+        at commitReview (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_TEXTURE_UNRESOLVED',
+      details: { reasonCode: 'INPUT_CENSORED' }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2ab5dbb7-b3f9-4a7e-a6fa-e4b7642da9c0
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 639576fe-a7b5-447f-99ad-12620c844c94
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 639576fe-a7b5-447f-99ad-12620c844c94
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 639576fe-a7b5-447f-99ad-12620c844c94
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 639576fe-a7b5-447f-99ad-12620c844c94
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 06fe40d2-cdc1-4fc0-a3be-e65800066f6e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 06fe40d2-cdc1-4fc0-a3be-e65800066f6e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 06fe40d2-cdc1-4fc0-a3be-e65800066f6e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 06fe40d2-cdc1-4fc0-a3be-e65800066f6e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 785b955f-631f-4ddb-996d-2266d058a54b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 785b955f-631f-4ddb-996d-2266d058a54b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 785b955f-631f-4ddb-996d-2266d058a54b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 785b955f-631f-4ddb-996d-2266d058a54b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [Report] Sample PDF error: TransitionError: The texture fraction selections changed.
+        at fail (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:4:43)
+        at Object.fail [as assertFractionSnapshot] (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueTextureService.js:147:84)
+        at assertFractionSnapshot (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueSelectionService.js:106:46)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportedValueReadService.js:11:31
+        at Proxy._transactionWithCallback (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\workflowStateRules.js:187:60)
+        at assembleReport (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\reportAssembly.js:43:70)
+        at getSampleReportPdf (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\controllers\reportController.js:913:31) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_STALE',
+      details: { workItemId: 'ca473fdf-bbcd-4d35-a69d-e447c233d2f4' }
+    }
+
+      925 |         return res.send(pdfBuffer);
+      926 |     } catch (err) {
+    > 927 |         console.error('[Report] Sample PDF error:', err);
+          |                 ^
+      928 |         if(err.statusCode) return res.status(err.statusCode).json({error:err.message,code:err.code,...err.details});
+      929 |         return res.status(500).json({ error: err.message || 'Failed to generate PDF' });
+      930 |     }
+
+      at error (controllers/reportController.js:927:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 19ed6076-1a29-4955-8f74-5eb77e5e96b9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 19ed6076-1a29-4955-8f74-5eb77e5e96b9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 19ed6076-1a29-4955-8f74-5eb77e5e96b9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b0950765-4a49-4704-b876-bacdf06dc246
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 082bec98-2faa-46ac-a29e-c03dfc1ff2e7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 082bec98-2faa-46ac-a29e-c03dfc1ff2e7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 082bec98-2faa-46ac-a29e-c03dfc1ff2e7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 082bec98-2faa-46ac-a29e-c03dfc1ff2e7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab ceb78f61-048d-4395-b214-54794b2b1d3f
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab ceb78f61-048d-4395-b214-54794b2b1d3f
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab ceb78f61-048d-4395-b214-54794b2b1d3f
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab ceb78f61-048d-4395-b214-54794b2b1d3f
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 9930e37e-178a-4f4a-bb37-886ae446d558
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 9930e37e-178a-4f4a-bb37-886ae446d558
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 9930e37e-178a-4f4a-bb37-886ae446d558
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 9930e37e-178a-4f4a-bb37-886ae446d558
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b72fc4ce-036c-4477-9696-5301f18af40c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b72fc4ce-036c-4477-9696-5301f18af40c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b72fc4ce-036c-4477-9696-5301f18af40c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b72fc4ce-036c-4477-9696-5301f18af40c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 0dcf04a8-b428-42cc-85dc-dd879455fc08
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 0dcf04a8-b428-42cc-85dc-dd879455fc08
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 0dcf04a8-b428-42cc-85dc-dd879455fc08
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 0dcf04a8-b428-42cc-85dc-dd879455fc08
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 31527843-6809-4201-a14a-a16a1e73f8ef
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 31527843-6809-4201-a14a-a16a1e73f8ef
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 31527843-6809-4201-a14a-a16a1e73f8ef
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 31527843-6809-4201-a14a-a16a1e73f8ef
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 9338946d-281e-4a44-8537-14edf6b2fa1b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 9338946d-281e-4a44-8537-14edf6b2fa1b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 9338946d-281e-4a44-8537-14edf6b2fa1b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 9338946d-281e-4a44-8537-14edf6b2fa1b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 6b99459f-5bd3-4b72-a535-bdfbf5f0f853
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 6b99459f-5bd3-4b72-a535-bdfbf5f0f853
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 6b99459f-5bd3-4b72-a535-bdfbf5f0f853
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 6b99459f-5bd3-4b72-a535-bdfbf5f0f853
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f3facf81-3b22-4bdd-919b-86138731d980
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f3facf81-3b22-4bdd-919b-86138731d980
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f3facf81-3b22-4bdd-919b-86138731d980
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f3facf81-3b22-4bdd-919b-86138731d980
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab aa9349b6-531a-4585-a69c-97dd79464a79
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab aa9349b6-531a-4585-a69c-97dd79464a79
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab aa9349b6-531a-4585-a69c-97dd79464a79
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab aa9349b6-531a-4585-a69c-97dd79464a79
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS server/tests/contracts/audit_3_3_separate_texture.test.js (45.071 s)
+  √ separate TEXTURE first refuses with zero writes, then chooses the exact matching retained derived Result (2506 ms)
+  √ a fraction MEAN re-derives a single class and retains every one of its four raw source ids (1650 ms)
+  √ a not-reportable fraction propagates its id and localized reason to TEXTURE (en) (1551 ms)
+  √ a not-reportable fraction propagates its id and localized reason to TEXTURE (es) (1503 ms)
+  √ a not-reportable fraction propagates its id and localized reason to TEXTURE (es-419) (1697 ms)
+  √ a not-reportable fraction propagates its id and localized reason to TEXTURE (fr) (1807 ms)
+  √ a not-reportable fraction propagates its id and localized reason to TEXTURE (pt) (1589 ms)
+  √ REVIEWER_PICKS refuses implicit texture, but an explicit DERIVED confirmation is recorded as REVIEWER (1654 ms)
+  √ explicit NOT_REPORTABLE saves three current fraction proofs when CLAY is censored (<15) (1720 ms)
+  √ explicit NOT_REPORTABLE saves three current fraction proofs when CLAY is censored (>15) (1634 ms)
+  √ v2 membership of fraction sources prefers their owning test over a shared TEXTURE derivation (1594 ms)
+  √ a replacement fraction selection makes retained TEXTURE stale without changing it (1552 ms)
+  √ a stale TEXTURE sample cannot hide a good neighboring sample in the grid; its draft PDF still refuses 409 (1809 ms)
+  √ canonical uniqueness prevents a duplicate owner; unresolved retained owners refuse layout with ids and zero writes (1426 ms)
+  √ texture layout validator refuses partial retained facts and makes zero writes (1156 ms)
+  √ texture layout validator refuses mixed retained facts and makes zero writes (1174 ms)
+  √ texture layout validator refuses unresolved retained facts and makes zero writes (1149 ms)
+  √ a complete composite execution still saves one atomic four-output selection group (1326 ms)
+  √ SQL refuses malformed DERIVED attempt shape with zero writes (1582 ms)
+  √ SQL refuses malformed DERIVED tooFew shape with zero writes (1559 ms)
+  √ SQL refuses malformed DERIVED duplicateResult shape with zero writes (1556 ms)
+  √ SQL refuses malformed DERIVED missingProof shape with zero writes (1561 ms)
+  √ SQL refuses malformed DERIVED duplicateProof shape with zero writes (1668 ms)
+  √ SQL refuses malformed DERIVED primitiveProof shape with zero writes (1602 ms)
+  √ SQL refuses malformed DERIVED nullProof shape with zero writes (1670 ms)
+  √ runtime rejects a DERIVED extra source union and makes zero writes (1558 ms)
+  √ runtime rejects a DERIVED missing source union and makes zero writes (1614 ms)
+  √ runtime rejects a DERIVED wrongProof source union and makes zero writes (1737 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab TUN-LAB1
+
+      at log (wsServer.js:305:24)
+
+PASS server/tests/contracts/texture_work_item_atomic.test.js
+  Texture Work Item & Atomic Linked Results Contracts (Mandatory Corrections 3 & 4)
+    Unit: normalizeAnalysisCodes & compound expansion
+      √ maps all texture aliases to canonical TEXTURE (1 ms)
+      √ deduplicates individual fractions (SAND, SILT, CLAY) when TEXTURE is present
+      √ preserves individual fractions if TEXTURE is NOT ordered (1 ms)
+    HTTP & Workflow: Atomic Texture Workbench Execution
+      √ Draft saving: persists { sand, silt, clay } object without skipping (81 ms)
+      √ Queue reload contract: GET /api/workbench/queue returns parsed { sand, silt, clay } without positional array dependency (56 ms)
+      √ Preview completion: fails closed if fractions are missing or closure exceeds tolerance (27 ms)
+      √ Batch completion: rejects direct commit without fractions (16 ms)
+      √ Batch completion: atomically writes 4 linked results and WorkAttempt on valid fractions (185 ms)
+
+PASS server/tests/contracts/texture_boundary_verification.test.js
+  USDA Soil Texture Metrology & 12-Class Boundary Verification (Contract)
+    Mandatory Audit Probes
+      √ Probe 1: 50/35/15 returns Loam under USDA definition (Finding F11) (1 ms)
+      √ Probe 2: 20/50/30 returns Silty Clay Loam under USDA definition (1 ms)
+      √ Probe 3: 45/20/35 returns Clay Loam under USDA definition
+    All 12 USDA Texture Class Centroids (Soil Survey Manual Ch. 3)
+      √ Class Clay (C) at [Sand 20%, Silt 20%, Clay 60%]
+      √ Class Silty Clay (SiC) at [Sand 5%, Silt 45%, Clay 50%]
+      √ Class Sandy Clay (SC) at [Sand 55%, Silt 5%, Clay 40%]
+      √ Class Clay Loam (CL) at [Sand 35%, Silt 32%, Clay 33%]
+      √ Class Silty Clay Loam (SiCL) at [Sand 10%, Silt 60%, Clay 30%]
+      √ Class Sandy Clay Loam (SCL) at [Sand 60%, Silt 15%, Clay 25%] (1 ms)
+      √ Class Sand (S) at [Sand 92%, Silt 5%, Clay 3%]
+      √ Class Loamy Sand (LS) at [Sand 82%, Silt 12%, Clay 6%]
+      √ Class Sandy Loam (SL) at [Sand 65%, Silt 25%, Clay 10%] (1 ms)
+      √ Class Silt (Si) at [Sand 5%, Silt 88%, Clay 7%]
+      √ Class Silt Loam (SiL) at [Sand 20%, Silt 65%, Clay 15%]
+      √ Class Loam (L) at [Sand 40%, Silt 42%, Clay 18%]
+    Method-Specific Closure Policy (Mandatory Correction 2)
+      √ Standard method tolerance allows slight field precision within tolerance (1 ms)
+      √ Fails closed when closure error exceeds method-specific tolerance
+      √ Strict mode requires exact closure to floating point precision
+      √ Rejects gross closure errors without silent normalization
+    Defensive Metrology: Negative, Blank, Censored and Out-of-Bounds Inputs (Finding F12)
+      √ Rejects negative fractions (1 ms)
+      √ Rejects empty / blank fractions
+      √ Rejects fractions greater than 100%
+      √ Rejects censored strings (< or >)
+      √ Parses comma-decimals properly without coercing blanks to zero (1 ms)
+    Ternary Coordinates Mapping
+      √ Maps 100% clay apex, 100% sand base-left, 100% silt base-right
+
+PASS server/tests/contracts/issue_283_one_unit_per_analysis.test.js
+  #283 one unit per analysis
+    √ a method QUDT override that disagrees is ignored and disclosed; an agreeing one changes nothing
+    √ a method never supplies the reporting unit on write (21 ms)
+    √ the V1 export labels the stored value with the analysis unit and never converts it (1 ms)
+  #283 V2 observations
+    √ a disagreeing method override is disclosed, the analysis unit labels the value and nothing stored changes (1053 ms)
+
+PASS server/tests/contracts/audit_4_8_cross_check_policy.test.js
+  Audit 4.8: laboratory cross-check policy contract
+    √ all presets supply the pinned per-lab defaults and finite values (4 ms)
+    √ five server and client locales label every cross-check policy (19 ms)
+    √ profile validation rejects equal and inverted C:N bounds using the stable policy code (13 ms)
+
+Test Suites: 5 passed, 5 total
+Tests:       68 passed, 68 total
+Snapshots:   0 total
+Time:        47.389 s
+Ran all test suites matching server/tests/contracts/audit_3_3_separate_texture.test.js|server/tests/contracts/texture_work_item_atomic.test.js|server/tests/contracts/texture_boundary_verification.test.js|server/tests/contracts/issue_283_one_unit_per_analysis.test.js|server/tests/contracts/audit_4_8_cross_check_policy.test.js.
+Test results written to: independent-consumer-results.json

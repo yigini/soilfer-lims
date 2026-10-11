@@ -1,0 +1,50 @@
+{
+  ".gitattributes": {
+    "bytes": 33,
+    "sha256": "e11eaef6f9afea37ce242a4e3c2d850e2157d4f10c498d878a65e4e64a474cc9"
+  },
+  "expanded-recording-reproduction.test.js": {
+    "bytes": 5155,
+    "sha256": "9e3de5e6a13a4d7ed7b09fe768dc2658adf373f6d1888f5b000c6a7d0f1ef75e"
+  },
+  "independent-consumer-results.json": {
+    "bytes": 36510,
+    "sha256": "98d32dedaac2af89f26b5f6c8c5cd406b8368dc4bf9e92c85ff1868b8535b74d"
+  },
+  "independent-consumer.log": {
+    "bytes": 52894,
+    "sha256": "20db3138dddb0d7ec9f1e07109106c851cb89f9030dfdb0542fd98e15cfe4572"
+  },
+  "independent-focused-results.json": {
+    "bytes": 24755,
+    "sha256": "18375a226661b102d1bdc28179270787739e8849a1ead4b53571767918c7aec0"
+  },
+  "independent-focused.log": {
+    "bytes": 16663,
+    "sha256": "419bdd41c12ab00db7ac5b25c1256b797f619cb65428f99e3da43de55e60e22e"
+  },
+  "independent-recording-guard-matrix.json": {
+    "bytes": 9214,
+    "sha256": "222cb4a94aecb41d83831c2fa7ef60ae849c9168f2a1a5858fcd9c43cfb70b32"
+  },
+  "independent-selection-mean-guard-matrix.cjs": {
+    "bytes": 3796,
+    "sha256": "8518e86c70574726f15deea979dac198b036368b0671c09603277407be6be546"
+  },
+  "independent-selection-mean-guard-matrix.json": {
+    "bytes": 5193,
+    "sha256": "b1bdd7a3dd49e1c0ba4fded3f028a41a0916a88156f0ddaf7433c1c49a9b51e3"
+  },
+  "independent-selection-mean-guard-matrix.log": {
+    "bytes": 1427,
+    "sha256": "dc90f31dffb76d76eff96aa11566ea07b15bd4d618efe6c2d9a58cec647c6b01"
+  },
+  "raw-git-source-index.json": {
+    "bytes": 619571,
+    "sha256": "017f06be1af0ccdf140778f93daa71b476db617a87f4f5d54a636166214a3f46"
+  },
+  "README.md": {
+    "bytes": 1153,
+    "sha256": "0ce6640ee8618811050858ab534f1df1ed9077773f36719cd4a3f6011e23605a"
+  }
+}

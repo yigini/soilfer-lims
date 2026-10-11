@@ -1,0 +1,66 @@
+[
+  {
+    "case": "valid_percent",
+    "expectedDerived": true,
+    "separateDerived": true,
+    "meanDerived": true,
+    "separatePass": true,
+    "meanPass": true
+  },
+  {
+    "case": "non_percent",
+    "expectedDerived": false,
+    "separateDerived": false,
+    "meanDerived": false,
+    "separatePass": true,
+    "meanPass": true
+  },
+  {
+    "case": "missing_unit",
+    "expectedDerived": false,
+    "separateDerived": false,
+    "meanDerived": false,
+    "separatePass": true,
+    "meanPass": true
+  },
+  {
+    "case": "mixed_units",
+    "expectedDerived": false,
+    "separateDerived": false,
+    "meanDerived": false,
+    "separatePass": true,
+    "meanPass": true
+  },
+  {
+    "case": "null_censoring",
+    "expectedDerived": false,
+    "separateDerived": false,
+    "meanDerived": false,
+    "separatePass": true,
+    "meanPass": true
+  },
+  {
+    "case": "censored",
+    "expectedDerived": false,
+    "separateDerived": false,
+    "meanDerived": false,
+    "separatePass": true,
+    "meanPass": true
+  },
+  {
+    "case": "non_finite",
+    "expectedDerived": false,
+    "separateDerived": false,
+    "meanDerived": false,
+    "separatePass": true,
+    "meanPass": true
+  },
+  {
+    "case": "ambiguous_fraction",
+    "expectedDerived": false,
+    "separateDerived": false,
+    "meanDerived": false,
+    "separatePass": true,
+    "meanPass": true
+  }
+]

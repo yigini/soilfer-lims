@@ -1,0 +1,321 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e6a4d3e5-93d7-4d24-bc28-c29d11dd4823 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e6a4d3e5-93d7-4d24-bc28-c29d11dd4823 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0d58500a-f27b-4061-9269-c3dbd01e91d2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0d58500a-f27b-4061-9269-c3dbd01e91d2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Scientific matrix validation failed: Texture closure failed: Sand(40%) + Silt(40%) + Clay(19%) = 99.0% (must sum to 100% ± 0.5%)
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\controllers\resultsController.js:231:53
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\workflowStateRules.js:187:60)
+        at exports.submitForApproval (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\controllers\resultsController.js:224:25) {
+      statusCode: 422,
+      status: 422,
+      code: 'BLOCKING_MATRIX_DIAGNOSTICS',
+      details: {
+        blockingErrors: [ [Object] ],
+        matrixDiagnostics: {
+          texture: [Object],
+          textureClosure: [Array],
+          retiredAdvisories: [Array],
+          advisorySuccessor: 'crossChecks',
+          warnings: [Array],
+          blockingErrors: [Array],
+          isBlocking: true
+        }
+      }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+PASS server/tests/contracts/issue_278_texture_closure_policy.test.js
+  #278 texture closure gate (pure)
+    √ 40 + 40 + 19 passes at the approved ±2 tolerance and classifies the soil (8 ms)
+    √ 40 + 40 + 18 at ±2 blocks: false (boundary is inclusive)
+    √ 40 + 40 + 22 at ±2 blocks: false (boundary is inclusive)
+    √ 40 + 40 + 17.9 at ±2 blocks: true (boundary is inclusive)
+    √ 40 + 40 + 22.1 at ±2 blocks: true (boundary is inclusive) (1 ms)
+    √ the lab tolerance, not a literal, decides
+    √ an invalid tolerance is refused rather than guessed (12 ms)
+    √ stored numericValue is authoritative over the result text
+    √ a non-percent unit is disclosed as not evaluated and does not block (1 ms)
+    √ a row without a stored unit is never given a catalogue unit and closes exactly, never within the lab tolerance (1 ms)
+    √ a row without stored censoring is never treated as uncensored and closes exactly, never within the lab tolerance
+    √ censored fractions are not evaluated and do not block (1 ms)
+    √ non-numeric fractions are not evaluated and do not block
+    √ ambiguous fractions are not evaluated and do not block
+    √ missing fractions skip the check, as before
+    √ each replicate closes on its own (1 ms)
+  #278 laboratory policy and the real submission gate
+    √ each laboratory gets its own tolerance; an unregistered lab gets the registry default (239 ms)
+    √ 40 + 40 + 19 is no longer refused at the default tolerance (466 ms)
+    √ a stricter lab still refuses 40 + 40 + 19 with zero writes (201 ms)
+
+PASS server/tests/contracts/issue_291_texture_input_authority.test.js (7.255 s)
+  √ the shared authority refuses every non-authoritative input and widens only a valid policy value (2 ms)
+  √ a composite texture mean of g/kg fractions refuses; the same percent means derive within the tolerance (13 ms)
+  √ recording g/kg fractions derives no TEXTURE Result or attempt; the percent control derives Loam within the tolerance (2528 ms)
+  √ the selected-fraction derivation refuses g/kg, missing, mixed and duplicate proofs; the percent control is DERIVED Loam (7 ms)
+  √ a stored NULL censoring is unknown, never uncensored: recording derives nothing and the means refuse (2178 ms)
+  √ a stored out-of-range tolerance (#281) derives with exact closure only, never wider (2343 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 573f7ef2-13b6-47fd-af98-f5145927884c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 573f7ef2-13b6-47fd-af98-f5145927884c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 573f7ef2-13b6-47fd-af98-f5145927884c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 573f7ef2-13b6-47fd-af98-f5145927884c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 54f97b58-207e-4eea-9655-860bca29d57c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 54f97b58-207e-4eea-9655-860bca29d57c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 54f97b58-207e-4eea-9655-860bca29d57c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 54f97b58-207e-4eea-9655-860bca29d57c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Scientific matrix validation failed: Texture closure failed: Sand(40%) + Silt(40%) + Clay(19%) = 99.0% (must sum to 100% exactly)
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\controllers\resultsController.js:231:53
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\workflowStateRules.js:187:60)
+        at exports.submitForApproval (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\controllers\resultsController.js:224:25) {
+      statusCode: 422,
+      status: 422,
+      code: 'BLOCKING_MATRIX_DIAGNOSTICS',
+      details: {
+        blockingErrors: [ [Object] ],
+        matrixDiagnostics: {
+          texture: [Object],
+          textureClosure: [Array],
+          retiredAdvisories: [Array],
+          advisorySuccessor: 'crossChecks',
+          warnings: [Array],
+          blockingErrors: [Array],
+          isBlocking: true,
+          texturePolicyInvalid: true
+        }
+      }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7e08ab29-ffa5-4a46-a982-82fe286d9006 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7e08ab29-ffa5-4a46-a982-82fe286d9006 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS server/tests/contracts/issue_281_cross_check_bounds.test.js
+  √ the en server and client locales disclose CROSS_CHECK_POLICY_INVALID (17 ms)
+  √ the es server and client locales disclose CROSS_CHECK_POLICY_INVALID (5 ms)
+  √ the es-419 server and client locales disclose CROSS_CHECK_POLICY_INVALID (4 ms)
+  √ the fr server and client locales disclose CROSS_CHECK_POLICY_INVALID (4 ms)
+  √ the pt server and client locales disclose CROSS_CHECK_POLICY_INVALID (6 ms)
+  #281 registry bounds
+    √ crossCheck.textureClosureTolerancePct accepts its bounds and refuses one step outside them
+    √ crossCheck.baseSaturationMaxPct accepts its bounds and refuses one step outside them (1 ms)
+    √ crossCheck.cnMin accepts its bounds and refuses one step outside them
+    √ crossCheck.cnMax accepts its bounds and refuses one step outside them
+    √ crossCheck.carbonatePhMin accepts its bounds and refuses one step outside them
+    √ crossCheck.basesCecFactor accepts its bounds and refuses one step outside them (1 ms)
+    √ defaults are unchanged (23 ms)
+    √ the policy owner refuses an out-of-range save with POLICY_VALUE_INVALID and writes nothing (83 ms)
+  #281 a stored out-of-range value
+    √ is never rewritten, keeps every other policy readable and disables only the cross-checks (444 ms)
+    √ a stored invalid texture tolerance is disclosed and the blocking gate closes exactly, never wider (451 ms)
+    √ a manager fixes it by saving a valid value as a new policy version (64 ms)
+    √ another laboratory with valid policy still records evidence (358 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9b1e064d-6bb6-4cda-9246-796cf3940188 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9b1e064d-6bb6-4cda-9246-796cf3940188 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9b1e064d-6bb6-4cda-9246-796cf3940188 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9b1e064d-6bb6-4cda-9246-796cf3940188 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9b1e064d-6bb6-4cda-9246-796cf3940188 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9b1e064d-6bb6-4cda-9246-796cf3940188 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS server/tests/contracts/matrix_validation.test.js
+  Sample Matrix Cross-Parameter Validation Contract
+    √ 1. saveResults validates matrix integrity and computes USDA texture; C:N and bases come from crossChecks (311 ms)
+    √ 2. Emits warning when texture fractions fail 100% closure tolerance (118 ms)
+    √ 3. submitForApproval attaches complete matrix diagnostics to response (403 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 232f7955-ab6f-4d48-9687-c57a979ba171 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 232f7955-ab6f-4d48-9687-c57a979ba171 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Scientific matrix validation failed: Texture closure failed: Sand(40%) + Silt(30%) + Clay(17%) = 87.0% (must sum to 100% exactly)
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\controllers\resultsController.js:231:53
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\services\workflowStateRules.js:187:60)
+        at exports.submitForApproval (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-5d3550d7-20261011T181500Z\server\controllers\resultsController.js:224:25) {
+      statusCode: 422,
+      status: 422,
+      code: 'BLOCKING_MATRIX_DIAGNOSTICS',
+      details: {
+        blockingErrors: [ [Object] ],
+        matrixDiagnostics: {
+          texture: [Object],
+          textureClosure: [Array],
+          retiredAdvisories: [Array],
+          advisorySuccessor: 'crossChecks',
+          warnings: [Array],
+          blockingErrors: [Array],
+          isBlocking: true
+        }
+      }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 232f7955-ab6f-4d48-9687-c57a979ba171 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 232f7955-ab6f-4d48-9687-c57a979ba171 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS server/tests/contracts/matrix_blocking_diagnostics.test.js
+  WP-15: Blocking vs Advisory Scientific Matrix Diagnostics
+    √ 1. Invalid texture closure (Sand+Silt+Clay = 87%) is strictly BLOCKED (HTTP 422) (200 ms)
+    √ 2. Valid texture with advisory C:N warning (C:N = 45) SUCCEEDS with a crossChecks C:N flag (303 ms)
+
+PASS server/tests/contracts/pip_expanded_recording_reproduction.test.js (7.657 s)
+  √ real recording input guard: non_percent (1115 ms)
+  √ real recording input guard: missing_unit (1122 ms)
+  √ real recording input guard: mixed_units (1056 ms)
+  √ real recording input guard: censored (1049 ms)
+  √ real recording input guard: null_censoring (1081 ms)
+  √ real recording input guard: stored_numeric_missing (1050 ms)
+  √ real recording input guard: valid_percent (1064 ms)
+
+Test Suites: 6 passed, 6 total
+Tests:       54 passed, 54 total
+Snapshots:   0 total
+Time:        23.161 s
+Ran all test suites matching server/tests/contracts/issue_278_texture_closure_policy.test.js|server/tests/contracts/issue_279_retire_legacy_advisories.test.js|server/tests/contracts/issue_281_cross_check_bounds.test.js|server/tests/contracts/issue_283_analysis_unit_authority.test.js|server/tests/contracts/issue_291_texture_input_authority.test.js|server/tests/contracts/pip_expanded_recording_reproduction.test.js|server/tests/contracts/matrix_validation.test.js|server/tests/contracts/matrix_blocking_diagnostics.test.js.
+Test results written to: independent-focused-results.json
