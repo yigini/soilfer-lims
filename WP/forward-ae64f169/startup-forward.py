@@ -37,7 +37,7 @@ def main():
         failed,physical=c.held_state();assert physical==manifest['productionStoppedPhysical']
         expected=json.loads((ROOT/'protected-state.json').read_bytes())
         assert c.digest(expected)==manifest['logicalStateSha256'] and len(expected['tables'])==104
-        c.exact_state(s.LIVE,expected)
+        c.exact_state(s.LIVE,expected,immutable=True)
         assets=sum(f.stat().st_size for f in s.ASSETS.rglob('*') if f.is_file())
         reserve=max(c.MIN_HEADROOM,s.disk_reserve(s.LIVE.stat().st_size,413546358,assets))
         assert min(s.disk_free().values())>=reserve+s.LIVE.stat().st_size+assets+268435456
@@ -51,8 +51,8 @@ def main():
         for path,method in [('/api/health','GET'),('/ws','GET'),('/api/v2/data-exchange/receipts','POST')]:
             http(path,503,'preflight-held-'+method+'-'+path.strip('/').replace('/','-'),method)
         mark('reviewedForwardPreflightPassed')
-        backup=ROOT/'dev-installed-stopped-backup.db';s.consistent_backup(s.LIVE,backup)
-        c.exact_state(backup,expected);assert s.physical(s.LIVE)==physical
+        backup=ROOT/'dev-installed-stopped-backup.db';s.consistent_backup(s.LIVE,backup,immutable=True)
+        c.exact_state(backup,expected,immutable=True);assert s.physical(s.LIVE)==physical
         with tarfile.open(ROOT/'assets-installed-backup.tar.gz','x:gz') as archive:archive.add(s.ASSETS,arcname='uploads')
         (ROOT/'assets-installed-backup.tar.gz').chmod(0o400)
         receipt['backupSha256']=s.sha(backup);receipt['assetsBackupSha256']=s.sha(ROOT/'assets-installed-backup.tar.gz')

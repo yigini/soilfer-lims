@@ -71,8 +71,8 @@ def fingerprint(rows):
 def quoted(name):
     return '"' + name.replace('"', '""') + '"'
 
-def snapshot(file, original=None):
-    db = sqlite3.connect('file:' + str(file) + '?mode=ro', uri=True)
+def snapshot(file, original=None, immutable=False):
+    db = sqlite3.connect('file:' + str(file) + '?mode=ro' + ('&immutable=1' if immutable else ''), uri=True)
     db.row_factory = sqlite3.Row
     try:
         objects = {row['type'] + ':' + row['name']: dict(row) for row in db.execute(
@@ -105,10 +105,10 @@ def physical(file):
     return {suffix: {'sha256': sha(path), 'bytes': path.stat().st_size} if path.exists() else None
         for suffix in ['', '-wal', '-shm'] for path in [pathlib.Path(str(file) + suffix)]}
 
-def consistent_backup(source, target):
+def consistent_backup(source, target, immutable=False):
     with pathlib.Path(target).open('xb'):
         pass
-    src = sqlite3.connect('file:' + str(source) + '?mode=ro', uri=True)
+    src = sqlite3.connect('file:' + str(source) + '?mode=ro' + ('&immutable=1' if immutable else ''), uri=True)
     dst = sqlite3.connect(str(target))
     try:
         src.backup(dst)
@@ -272,10 +272,10 @@ def validate_legacy(key, value):
         assert value['releaseInventory']['blockedWorkItemCount']==0 and value['releaseInventory']['blockedWorkItems']==[]
 
 
-def verify_retained_acceptance(directory):
+def verify_retained_acceptance(directory, immutable=False):
     # The pre-#191 reconciliation intentionally refuses even DRY_RUN after
     # #191. Verify the already-deployed evidence directly through mode=ro.
-    db=sqlite3.connect('file:'+str(directory/'dev.db')+'?mode=ro',uri=True)
+    db=sqlite3.connect('file:'+str(directory/'dev.db')+'?mode=ro'+('&immutable=1' if immutable else ''),uri=True)
     db.row_factory=sqlite3.Row
     try:
         db.execute('BEGIN')

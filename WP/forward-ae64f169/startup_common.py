@@ -54,17 +54,19 @@ def held_state():
     assert failed['repeatTotalChanges']==0 and failed['repeatedInstallDatabaseBytesPreserved'] is True
     physical=s.physical(s.LIVE)
     assert physical['']==failed['installedDatabaseFiles']['']
-    # The unchanged main DB is pinned. The empty WAL and transient SHM disappeared
-    # on failed-startup shutdown; this observed stopped state is explicit and bound.
-    assert physical['-wal'] is None and physical['-shm'] is None
-    current=s.snapshot(s.LIVE,failed['preApplyState'])
+    # Empty WAL/SHM can appear from SQLite mode=ro opens. Pin the actual stopped
+    # tuple in the manifest, never delete/recreate it. Immutable reads are used
+    # only with writers verified stopped and WAL absent/empty, so no WAL data is skipped.
+    assert physical['-wal'] is None or physical['-wal']['bytes']==0
+    assert physical['-shm'] is None or physical['-shm']['bytes']==32768
+    current=s.snapshot(s.LIVE,failed['preApplyState'],immutable=True)
     assert current['tables']==failed['installedTables']
     assert s.preserve(failed['preApplyState'],current)==failed['preservation']
-    assert s.verify_retained_acceptance(s.LIVE.parent)==failed['retainedAcceptance']
+    assert s.verify_retained_acceptance(s.LIVE.parent,immutable=True)==failed['retainedAcceptance']
     return failed,physical
 
-def exact_state(database, expected):
-    actual=s.snapshot(database)
+def exact_state(database, expected, immutable=False):
+    actual=s.snapshot(database,immutable=immutable)
     assert actual==expected, 'Startup or read-only probes changed database evidence'
     return actual
 

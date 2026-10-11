@@ -17,7 +17,7 @@ def main():
     assert physical==receipt['productionStoppedPhysical']
     expected=json.loads((proof/'protected-state.json').read_bytes())
     assert len(expected['tables'])==104 and expected['tables']['_schema_migrations']['count']==38
-    c.exact_state(s.LIVE,expected)
+    c.exact_state(s.LIVE,expected,immutable=True)
     normal=(c.ORIGIN/'apache-before.conf').read_bytes();held=s.CONF.read_bytes()
     assert b'R=503' not in normal and b'R=503' in held
     files=[row['name'] for row in source['files']]+['kit-source-index.json','protected-state.json','rehearsal-receipt.json']

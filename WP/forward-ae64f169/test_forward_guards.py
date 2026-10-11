@@ -46,6 +46,16 @@ class ForwardGuards(unittest.TestCase):
                 with sqlite3.connect(file) as db:db.execute('INSERT INTO test VALUES (1)')
                 with self.assertRaises(AssertionError):watch.check()
             finally:watch.close()
+    def test_stopped_immutable_backup_does_not_create_sidecars(self):
+        with tempfile.TemporaryDirectory() as folder:
+            file=pathlib.Path(folder)/'data.db'
+            with sqlite3.connect(file) as db:
+                db.execute('PRAGMA journal_mode=WAL');db.execute('CREATE TABLE test(value)')
+            db.close()
+            before=c.s.physical(file)
+            self.assertIsNone(before['-wal']);self.assertIsNone(before['-shm'])
+            c.s.consistent_backup(file,pathlib.Path(folder)/'backup.db',immutable=True)
+            self.assertEqual(c.s.physical(file),before)
     def test_500mb_unexplained_drop(self):
         c.s.check_drop({'x':1000000000},{'x':500000000},{'x':0})
         with self.assertRaises(AssertionError):c.s.check_drop({'x':1000000000},{'x':499999999},{'x':0})

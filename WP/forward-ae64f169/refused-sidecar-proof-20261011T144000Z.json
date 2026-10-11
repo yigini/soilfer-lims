@@ -1,0 +1,29 @@
+{
+  "status": "FAILED_FORWARD_PROOF",
+  "head": "ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf",
+  "image": "sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a",
+  "startedUtc": "2026-10-11T14:37:32.824890+00:00",
+  "originalFailureReceiptSha256": "02fcf3ee472c68caff8ebe52edc009f3d3d9e2666210c7ba6eac5a03c9de7305",
+  "deadlineSeconds": 600,
+  "separateInstallerCommands": 0,
+  "sourceFiles": {
+    "postflight-policy.cjs": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+    "collect-gates.cjs": "45f318fe58c968fe607d3f6fb5ded40bab964e6d7935ea2ca5c8423693d29b7a",
+    "startup-forward.py": "3ab970ac057dc073c2d93fb0a2f9f06fb7b49e42a23afc39c863eb922e510f4a",
+    "postflight-qc-runs.cjs": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+    "postflight-auth.cjs": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+    "readonly-smoke.cjs": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+    "rehearse-forward.py": "932e45098f84ea49ba2b1974f24e45059e26ae1562fdc869f8cba2c34b3cd6e2",
+    "postflight-reference.cjs": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+    "startup_common.py": "d071b37e0bf8f0082dc4b6a3f23d719219e67ef07cf95c765cba034bd081bd75",
+    "release_support.py": "d267612a71cd68fca876affaea529ab1291904e60ff55a89e6834ea0934c4c84",
+    "test_forward_guards.py": "cc95a87e896f9338c0fd2c15b37ba1542bdae3dc1e38ba378b8391d6eae9268c",
+    "collect-production-gate.cjs": "bb98c7749ef9c0f4ab158baf32fddbb971d6062d21658f527be4cad586716ee8",
+    "export-kit.cjs": "099cdc0a9caf66d8bbdbfbf387dee316f3c74bb0ba3c6647d32da26a33a34ee8",
+    "gates.py": "c23199f5204cca43089499d8f5a7597d0ad1ea605c08be237bb176ddea023745",
+    "postflight-roles.cjs": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+    "prepare_forward.py": "c41fde23ff27fa05cddb22201c8ef6160a645401d9843618b2b5b7745f5581c8"
+  },
+  "error": "",
+  "completedUtc": "2026-10-11T14:37:37.480337+00:00"
+}

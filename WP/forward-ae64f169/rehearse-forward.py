@@ -1,5 +1,5 @@
 """One fresh owned post-#205 copy; real default entrypoint, no separate installers."""
-import fcntl, json, pathlib, shutil, signal, sys, tarfile, time
+import fcntl, json, pathlib, shutil, signal, sys, tarfile, time, traceback
 import release_support as s
 import startup_common as c
 
@@ -19,15 +19,15 @@ def main():
     try:
         c.writers_stopped();failed,physical=c.held_state();c.image_check()
         assert not c.inspect('soilfer-lims')['State']['Running'] and 'R=503' in s.CONF.read_text()
-        baseline=s.snapshot(s.LIVE);c.write_new(ROOT/'protected-state.json',baseline)
+        baseline=s.snapshot(s.LIVE,immutable=True);c.write_new(ROOT/'protected-state.json',baseline)
         assets=sum(f.stat().st_size for f in s.ASSETS.rglob('*') if f.is_file())
         reserve=max(c.MIN_HEADROOM,s.disk_reserve(s.LIVE.stat().st_size,413546358,assets))
         assert min(s.disk_free().values())>=reserve+2*s.LIVE.stat().st_size+assets+268435456
         guard=c.DiskGuard(ROOT,reserve)
         database_dir=ROOT/'database';database_dir.mkdir();assets_dir=ROOT/'assets';assets_dir.mkdir()
-        s.consistent_backup(s.LIVE,database_dir/'dev.db');(database_dir/'dev.db').chmod(0o600)
+        s.consistent_backup(s.LIVE,database_dir/'dev.db',immutable=True);(database_dir/'dev.db').chmod(0o600)
         shutil.copytree(s.ASSETS,assets_dir,dirs_exist_ok=True)
-        c.exact_state(database_dir/'dev.db',baseline)
+        c.exact_state(database_dir/'dev.db',baseline,immutable=True)
         owned_before=s.physical(database_dir/'dev.db');assert owned_before['-wal'] is None and owned_before['-shm'] is None
         receipt.update({'productionStoppedPhysical':physical,'logicalStateSha256':c.digest(baseline),
             'protectedStateSha256':s.sha(ROOT/'protected-state.json'),'protectedTableCount':len(baseline['tables']),
@@ -51,7 +51,7 @@ def main():
         receipt.update({'status':'PASSED_FORWARD_STARTUP','completedUtc':s.utc(),'databaseChanges':0,
             'ownedMainBytesPreserved':True,'productionFilesUntouched':True,'freeBytesAfter':s.disk_free()})
     except BaseException as error:
-        receipt.update({'status':'FAILED_FORWARD_PROOF','error':str(error),'completedUtc':s.utc()})
+        receipt.update({'status':'FAILED_FORWARD_PROOF','error':str(error),'traceback':traceback.format_exc(),'completedUtc':s.utc()})
         for name in names:
             try:c.owned_stop(ROOT,name,'failure-stop-'+name[-8:])
             except BaseException as stop_error:receipt.setdefault('stopErrors',[]).append(str(stop_error))
