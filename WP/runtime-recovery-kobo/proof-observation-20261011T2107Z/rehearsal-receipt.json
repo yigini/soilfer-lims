@@ -1,0 +1,41 @@
+{
+  "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T210700Z",
+  "startedUtc": "2026-10-11T21:07:07.743541+00:00",
+  "head": "171dd36c5b2dbeea8763520dd18fbdb158ffca05",
+  "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+  "targetPinSha256": "27e11c8e21f6ede70598a08c96565210b54204ebf6f582d7beed73a5ee3f7b33",
+  "sourceIndexSha256": "7039271e15a52df32aa38e9dd57976a61211cb64a03b4bccb4729e5f2a7bc74e",
+  "toolingCommit": "4c706f813b6dffbd1897a314f1d73e929f59a53a",
+  "coordinatorSha256": "6723d854d708cd02c6c8fc317faf7878d20e58d30fea6c288fb42e039c913492",
+  "buildReceiptSha256": "e2437e978eed81244f6860e9a92c0755654e7945137f8c0146852b7d544b2f1d",
+  "proofSourceReviewId": 6113746528,
+  "authoritySha256": "cb8362b79ccf2fcd52653bffafb3bb9f3ab3cda57950a3b69ab38c9b454cb4df",
+  "diskMeasurementGuardSha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+  "coreDeallocationConfirmationDeadlineSeconds": 10,
+  "historicalReceiptSha256": "35ab0b825a5d52414304d426101863b671ce5d3b92f6d8eb81e8b79f34095462",
+  "productionMutations": 0,
+  "separateInstallerCommands": 0,
+  "scopeCommentIds": [
+    6112209155,
+    6112305172,
+    6112436098,
+    6113601584
+  ],
+  "refusalScopeCommentId": 6113601584,
+  "schedulerRefusalPolicy": "EXACT_FRESH_COPY_CONFIG_REFUSALS",
+  "intakeCardinalityPolicy": "SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS",
+  "copyVerifierSha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+  "proofContractSha256": "9c3c0ef9d16518fffe92bdbdd0d240a09f706a889b74a3a3b163b6a875d0ac38",
+  "existingSampleVerifierPolicy": "STRICT_ORIGINAL_ROWS",
+  "effectiveUid": 0,
+  "pythonOptimize": 0,
+  "reserveBytes": 10556150894,
+  "workloadPins": {
+    "labAndHubBuildsOwnedByYY": true,
+    "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+  },
+  "error": "Unreadable baseline allocation; refuse attribution credit",
+  "diskAllocationObservationsSha256": "336c0ffd75551958a77d242412db1bb98bfdb571db865cd1584033a12ef2f72d",
+  "completedUtc": "2026-10-11T21:07:08.034984+00:00"
+}

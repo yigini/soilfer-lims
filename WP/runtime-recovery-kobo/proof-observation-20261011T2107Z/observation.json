@@ -1,0 +1,26 @@
+{
+  "observedUtc": "2026-10-11T21:07:19.071143+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T210700Z",
+  "unit": "lims-owned-runtime-kobo-proof-171dd36c-20261011t210700z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=1\nActiveState=failed\nSubState=failed\n",
+  "unit.stdoutTail": "{\"status\": \"FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF\", \"root\": \"/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T210700Z\", \"receiptSha256\": \"84524bf95152437db9050c1c0a81aa5dba5246b5675d8acff197ac68a7fa5f1e\"}\n",
+  "unit.stderrTail": "",
+  "files": {
+    "rehearsal-receipt.json": {
+      "bytes": 2129,
+      "sha256": "84524bf95152437db9050c1c0a81aa5dba5246b5675d8acff197ac68a7fa5f1e",
+      "mode": "0o400"
+    },
+    "target-pin.json": {
+      "bytes": 789,
+      "sha256": "27e11c8e21f6ede70598a08c96565210b54204ebf6f582d7beed73a5ee3f7b33",
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 3738,
+      "sha256": "7039271e15a52df32aa38e9dd57976a61211cb64a03b4bccb4729e5f2a7bc74e",
+      "mode": "0o400"
+    }
+  }
+}
