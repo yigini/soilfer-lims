@@ -115,6 +115,23 @@ def proof_source_binding(proof, pin):
         'Corrected proof source authority or measurement contract differs')
 
 
+def original_cursor_intake(proof, record, original_config):
+    """Bind pending identities to the actual immutable baseline cursor, including empty."""
+    require(proof['naturalIntakePolicy'] == NATURAL_INTAKE_POLICY and
+        record['configId'] == original_config['id'] == TARGET_CONFIG and
+        record['labId'] == original_config['labId'] == TARGET_LAB and
+        record['projectCode'] == original_config['projectCode'] == TARGET_PROJECT and
+        record['since'] == original_config['lastSubmissionId'], 'Original intake cursor or config differs')
+    ids = record['submissionIds']
+    require(isinstance(ids, list) and all(isinstance(value, str) and value.isdigit() for value in ids) and
+        len(set(ids)) == len(ids) and ids == sorted(ids, key=int) and
+        (record['since'] is None or str(record['since']).isdigit()) and
+        all(record['since'] is None or int(value) > int(record['since']) for value in ids),
+        'Actual pending submission identities differ')
+    require(type(proof['initialTargetSubmissionCount']) is int and
+        proof['initialTargetSubmissionCount'] == len(ids), 'Actual initial pending count differs')
+
+
 def pairing_contract(row):
     require(row['refusalPairingScopeCommentId'] == REFUSAL_PAIRING_SCOPE_COMMENT_ID and
         row['schedulerRefusalPairing'] == REFUSAL_PAIRING_POLICY and

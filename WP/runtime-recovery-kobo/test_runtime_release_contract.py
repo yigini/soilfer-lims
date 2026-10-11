@@ -326,6 +326,36 @@ class RuntimeGateTests(unittest.TestCase):
             self.gate[key] = original
 
 
+class OriginalCursorIntakeTests(unittest.TestCase):
+    def setUp(self):
+        self.config = {'id': TARGET_CONFIG, 'labId': TARGET_LAB, 'projectCode': TARGET_PROJECT,
+            'lastSubmissionId': '41622'}
+        self.record = {'configId': TARGET_CONFIG, 'labId': TARGET_LAB, 'projectCode': TARGET_PROJECT,
+            'since': '41622', 'submissionIds': []}
+        self.proof = {'naturalIntakePolicy': NATURAL_INTAKE_POLICY, 'initialTargetSubmissionCount': 0}
+
+    def check(self): original_cursor_intake(self.proof, self.record, self.config)
+
+    def test_empty_and_nonempty_actual_pending_sets_pass_without_rewind(self):
+        self.check()
+        self.record['submissionIds'] = ['41623', '41624']; self.proof['initialTargetSubmissionCount'] = 2
+        self.check()
+
+    def test_cursor_config_policy_or_reported_count_changes_refuse(self):
+        for location, key, value in [('record', 'since', '0'), ('config', 'lastSubmissionId', '0'),
+                ('record', 'configId', 'other'), ('record', 'labId', 'other'),
+                ('record', 'projectCode', 'other'), ('proof', 'naturalIntakePolicy', 'REWIND_67'),
+                ('proof', 'initialTargetSubmissionCount', 67), ('proof', 'initialTargetSubmissionCount', False)]:
+            row = getattr(self, location); original = row[key]; row[key] = value
+            with self.subTest(location=location, key=key), self.assertRaises(RuntimeError): self.check()
+            row[key] = original
+
+    def test_duplicate_old_invalid_or_unsorted_ids_refuse(self):
+        for ids in [['41622'], ['41621'], ['41623', '41623'], ['bad'], [41623], ['41624', '41623']]:
+            self.record['submissionIds'] = ids; self.proof['initialTargetSubmissionCount'] = len(ids)
+            with self.subTest(ids=ids), self.assertRaises(RuntimeError): self.check()
+
+
 class SealedSchedulerTests(unittest.TestCase):
     def setUp(self):
         self.expected = [{'configId': key, 'labId': lab, 'projectCode': project, 'message': message}

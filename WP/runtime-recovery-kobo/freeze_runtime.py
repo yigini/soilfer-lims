@@ -98,6 +98,8 @@ def main():
             [dict(row) for row in db.execute('SELECT id,labId,projectCode,isActive FROM KoboConfig')],
             [dict(row) for row in db.execute('SELECT id,code,name,isActive FROM Lab')],
             [dict(row) for row in db.execute('SELECT code FROM Project')])
+        target_config = dict(db.execute('SELECT id,labId,projectCode,lastSubmissionId FROM KoboConfig WHERE id=?',
+            (TARGET_CONFIG,)).fetchone())
     refusal_configs = [row['configId'] for row in expected_refusal_rows]
     first_fetch = json.loads(files['upstream-first-completion.json'])
     first_ids = {key: value['submissionIds'] for key, value in first_fetch.items()}
@@ -119,7 +121,7 @@ def main():
         json.loads(files['full-copy-preservation.json']))
     files['packaging-source-index.json'] = (ROOT / 'packaging-source-index.json').read_bytes()
     initial = json.loads(files['upstream-before-start.json'])
-    require(len(initial[TARGET_CONFIG]['submissionIds']) >= 67, 'Actual original crash workload was not observed')
+    original_cursor_intake(receipt, initial[TARGET_CONFIG], target_config)
     references = {'rehearsal-receipt.json': receipt_sha,
         'fresh-live-backup.db': receipt['freshCopySha256'], 'after-first-sync.db': receipt['firstDatabaseSha256'],
         'after-second-sync.db': sha(proof / 'after-second-sync.db'),
