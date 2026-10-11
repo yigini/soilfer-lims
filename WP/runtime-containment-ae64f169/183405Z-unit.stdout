@@ -1,0 +1,25 @@
+{"stage": "owned-jobs-off", "elapsedSeconds": 39.82431082000039, "pending": true}
+{"stage": "owned-jobs-off", "elapsedSeconds": 78.53524974099855, "pending": true}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:37:38.506388+00:00", "elapsedSeconds": 0.5884438639986911, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118260178944}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:38:09.055076+00:00", "elapsedSeconds": 31.13714899900151, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118951583744}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:38:39.695034+00:00", "elapsedSeconds": 61.777098932001536, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118951469056}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:39:10.310644+00:00", "elapsedSeconds": 92.39273209000021, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118951350272}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:39:41.082806+00:00", "elapsedSeconds": 123.16489419899881, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118926364672}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:40:11.650986+00:00", "elapsedSeconds": 153.7330479500015, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118925967360}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:40:42.492355+00:00", "elapsedSeconds": 184.57443273900208, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118925848576}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:41:13.299644+00:00", "elapsedSeconds": 215.38175613099884, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118925717504}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:41:44.219559+00:00", "elapsedSeconds": 246.30169249000028, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118178590720}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:42:15.157891+00:00", "elapsedSeconds": 277.2399605360006, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118900494336}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:42:46.056014+00:00", "elapsedSeconds": 308.1380711710008, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118900375552}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:43:16.714733+00:00", "elapsedSeconds": 338.7968315370017, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118900232192}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:43:47.354594+00:00", "elapsedSeconds": 369.4366774609989, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118900019200}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:44:17.945368+00:00", "elapsedSeconds": 400.0274309060005, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118874349568}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:44:48.566815+00:00", "elapsedSeconds": 430.64888234799946, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118874210304}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:45:19.340438+00:00", "elapsedSeconds": 461.4225220240005, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118874099712}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:45:50.257886+00:00", "elapsedSeconds": 492.33997609400103, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118396940288}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:46:20.829365+00:00", "elapsedSeconds": 522.9114356169994, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118848794624}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:46:51.408415+00:00", "elapsedSeconds": 553.4904822030003, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118848688128}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:47:22.251815+00:00", "elapsedSeconds": 584.3338776870005, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118848577536}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:47:53.100909+00:00", "elapsedSeconds": 615.1829947980004, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 117766250496}
+{"stage": "owned-jobs-off-soak", "utc": "2026-10-11T18:48:23.688399+00:00", "elapsedSeconds": 645.7704753830003, "restartCount": 0, "healthy": true, "peakBytes": 326467584, "minimumFreeBytes": 118822871040}
+{"status": "PASSED_NEW_OWNED_JOBS_OFF_CONTAINMENT_PROOF", "root": "/opt/lims/releases/runtime-jobs-off-ae64f169-proof-20261011T183405Z", "receiptSha256": "47107490080e1dbf3505f28e6a55d7eb8e4574b07b7111e467f2def5ddf9581b"}
