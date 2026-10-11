@@ -2333,6 +2333,7 @@
     }
   },
   "dataResults": {
+    "reportedValueUnavailable": "Reported value unavailable",
     "title": "Analytical Results Master",
     "subtitle": "Master view of all analytical results (Approved & Pending).",
     "columns": "Columns",

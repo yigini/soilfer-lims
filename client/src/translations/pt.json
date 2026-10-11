@@ -2333,6 +2333,7 @@
     }
   },
   "dataResults": {
+    "reportedValueUnavailable": "Valor relatado indisponível",
     "title": "Resultados analíticos mestres",
     "subtitle": "Vista mestre de todos os resultados analíticos (Aprovados e Pendentes).",
     "columns": "Colunas",

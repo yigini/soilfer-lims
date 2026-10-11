@@ -2333,6 +2333,7 @@
     }
   },
   "dataResults": {
+    "reportedValueUnavailable": "Valeur rapportée indisponible",
     "title": "Résultats analytiques directeurs",
     "subtitle": "Vue principale de tous les résultats analytiques (Approuvés et En attente).",
     "columns": "Colonnes",
