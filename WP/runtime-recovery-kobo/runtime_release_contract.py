@@ -8,7 +8,12 @@ from proof_contract import *
 
 WORKLOAD_PINS = {'labAndHubBuildsOwnedByYY': True,
     'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}
-REVIEWED_PROOF_SHA = 'a88223aa90e22253118b56ce72770ec1a219d0a82f71b3c9556a00c79e8f4271'
+REVIEWED_PROOF_SHA = '9f175f1355413fd66c6dbf7082eea64f50a97fea6cec4ee1c6a0055384f70a71'
+REVIEWED_PROOF_SOURCE = '55c18943f569e9b031c8aae008f167ab399473af'
+PROOF_SOURCE_REVIEW_ID = 6113431945
+MEASUREMENT_GUARD_SHA = 'f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c'
+ORIGINAL_GUARD_SHA = 'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169'
+CORE_CONFIRMATION_SECONDS = 10
 SHARED_READINESS_SHA = 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00'
 HISTORICAL_RECEIPT_SHA = '35ab0b825a5d52414304d426101863b671ce5d3b92f6d8eb81e8b79f34095462'
 LIVE_IMAGE = 'sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a'
@@ -37,6 +42,7 @@ def validate_proof(proof, pin):
         proof['buildReceiptSha256'] == pin['buildReceiptSha256'], 'Wrong proof candidate')
     require(proof['coordinatorSha256'] == REVIEWED_PROOF_SHA and
         proof['historicalReceiptSha256'] == HISTORICAL_RECEIPT_SHA, 'Unreviewed proof or altered history')
+    proof_source_binding(proof, pin)
     require(proof['productionMutations'] == proof['separateInstallerCommands'] == 0 and
         proof['ownedWriterStopped'] is True, 'Proof isolation or stopped-writer evidence missing')
     require(proof['effectiveUid'] == 0 and proof['pythonOptimize'] == 0 and
@@ -73,11 +79,45 @@ def validate_proof(proof, pin):
         0, proof['peakBytes'], proof['healthySoakSeconds'])
 
 
+def proof_source_binding(proof, pin):
+    require(proof['toolingCommit'] == REVIEWED_PROOF_SOURCE and
+        proof['proofSourceReviewId'] == pin['proofSourceReviewId'] == PROOF_SOURCE_REVIEW_ID and
+        proof['diskMeasurementGuardSha256'] == MEASUREMENT_GUARD_SHA and
+        proof['coreDeallocationConfirmationDeadlineSeconds'] == CORE_CONFIRMATION_SECONDS and
+        re.fullmatch(r'[0-9a-f]{64}', proof['authoritySha256']),
+        'Corrected proof source authority or measurement contract differs')
+
+
+def measurement_manifest(manifest):
+    require(manifest['sourceReviewId'] == PROOF_SOURCE_REVIEW_ID and
+        manifest['proofToolingCommit'] == REVIEWED_PROOF_SOURCE and
+        manifest['diskMeasurementGuardSha256'] == manifest['files']['known_core_disk_guard_v2.py'] == MEASUREMENT_GUARD_SHA and
+        manifest['files']['known_core_disk_guard.py'] == ORIGINAL_GUARD_SHA and
+        manifest['coreDeallocationConfirmationDeadlineSeconds'] == CORE_CONFIRMATION_SECONDS,
+        'Frozen source approval or measurement contract differs')
+
+
+def proof_authority(proof, pin, source, authority, authority_sha):
+    proof_source_binding(proof, pin)
+    require(source['head'] == REVIEWED_PROOF_SOURCE and
+        source['files']['rehearse_runtime.py']['sha256'] == REVIEWED_PROOF_SHA and
+        source['files']['known_core_disk_guard_v2.py']['sha256'] == MEASUREMENT_GUARD_SHA and
+        source['files']['known_core_disk_guard.py']['sha256'] == ORIGINAL_GUARD_SHA and
+        authority_sha == proof['authoritySha256'] and
+        authority['head'] == pin['head'] and authority['proofSourceReview']['id'] == PROOF_SOURCE_REVIEW_ID,
+        'Original proof authority or measured source differs')
+    source_review_pass(authority['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA)
+
+
 def review_tokens(manifest, manifest_sha):
     return [PHRASE, manifest['head'], manifest['image'], manifest_sha,
         manifest['files']['deploy_runtime.py'], manifest['files']['rehearsal-receipt.json'],
         manifest['files']['startup_common.py'], manifest['files']['yy-authorization-evidence.md'],
         manifest['files']['target-pin.json'], HISTORICAL_RECEIPT_SHA,
+        manifest['files']['proof-authority.json'], manifest['files']['proof-source-index.json'],
+        REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA, ORIGINAL_GUARD_SHA,
+        'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID),
+        'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
         'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
 
 
@@ -89,9 +129,10 @@ def formal_pr_review(review):
 
 def verify_gate(manifest, gate, manifest_sha, now=None):
     now = now or datetime.datetime.now(datetime.timezone.utc)
+    measurement_manifest(manifest)
     require(manifest['status'] == KIT_STATUS and manifest['baseHead'] == BASE_HEAD and
         manifest['head'] != BASE_HEAD and manifest['workloadControl'] == WORKLOAD_PINS and
-        manifest['sourceReviewId'] == 6112725472 and manifest['separateInstallerCommands'] == 0,
+        manifest['separateInstallerCommands'] == 0,
         'Wrong or historical release manifest')
     require(gate['status'] == 'FRESH_SINGLE_USE_RUNTIME_GATE' and
         gate['executionRoot'] == manifest['root'] and
@@ -100,8 +141,15 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
         'Execution gate identity mismatch')
     age = now.timestamp() - utc_seconds(gate['verifiedUtc'])
     require(0 <= age <= 600, 'Fresh execution gate is stale or future-dated')
+    require(gate['proofSourceReview']['id'] == manifest['sourceReviewId'] and
+        gate['laterSourceAuditFailure'] is False and
+        gate['coreDeallocationConfirmationDeadlineSeconds'] == CORE_CONFIRMATION_SECONDS,
+        'Corrected source approval was superseded or timing differs')
+    source_review_pass(gate['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA, now)
     for key, name in [('coordinatorSha256', 'deploy_runtime.py'), ('rehearsalReceiptSha256', 'rehearsal-receipt.json'),
-                      ('targetPinSha256', 'target-pin.json'), ('yyEvidenceSha256', 'yy-authorization-evidence.md')]:
+                      ('targetPinSha256', 'target-pin.json'), ('yyEvidenceSha256', 'yy-authorization-evidence.md'),
+                      ('proofAuthoritySha256', 'proof-authority.json'), ('proofSourceIndexSha256', 'proof-source-index.json'),
+                      ('diskMeasurementGuardSha256', 'known_core_disk_guard_v2.py')]:
         require(gate[key] == manifest['files'][name], 'Gate file binding differs: ' + name)
     pr = gate['pr']; require(pr['number'] == 292 and pr['merged'] is True and
         pr['head'] == AUDITED_PR_HEAD and pr['mergeCommit'] == manifest['head'] and
@@ -115,7 +163,7 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
         'Exact main CI is not green')
     review = gate['kitReview']; require(review['html_url'] ==
         'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(review['id']) and
-        review['id'] not in [6102481848, 6109804174, 6110472696, 6112725472] and
+        review['id'] not in [6102481848, 6109804174, 6110472696, 6112725472, PROOF_SOURCE_REVIEW_ID] and
         all(token in review['body'] for token in review_tokens(manifest, manifest_sha)) and
         gate['laterKitAuditFailure'] is False, 'New exact-kit review missing or superseded')
     require(utc_seconds(review['created_at']) <= now.timestamp(), 'Kit review is future-dated')
@@ -126,6 +174,7 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
 
 
 def frozen_files(root, manifest):
+    measurement_manifest(manifest)
     for name, digest in manifest['files'].items():
         path = root / name
         require(pathlib.PurePosixPath(name).name == name and not path.is_symlink() and
@@ -137,5 +186,8 @@ def frozen_files(root, manifest):
     pin = json.loads((root / 'target-pin.json').read_bytes())
     require(pin['head'] == manifest['head'] and pin['image'] == manifest['image'] and
         pin['tree'] == manifest['tree'] and pin['auditedPrHead'] == AUDITED_PR_HEAD, 'Frozen target differs')
-    validate_proof(json.loads((root / 'rehearsal-receipt.json').read_bytes()), pin)
+    proof = json.loads((root / 'rehearsal-receipt.json').read_bytes())
+    validate_proof(proof, pin)
+    proof_authority(proof, pin, json.loads((root / 'proof-source-index.json').read_bytes()),
+        json.loads((root / 'proof-authority.json').read_bytes()), sha(root / 'proof-authority.json'))
     return pin

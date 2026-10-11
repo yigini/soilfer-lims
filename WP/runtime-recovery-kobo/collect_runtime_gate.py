@@ -59,6 +59,10 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
     ci = github('actions/runs/' + str(pin['mainCiRunId']))
     kit_review = github('issues/comments/' + review_id)
     kit_comments = github('issues/162/comments?per_page=100', True)
+    source_review = github('issues/comments/' + str(manifest['sourceReviewId']))
+    later_source_failure = any(('source review: failed' in row['body'].lower() or
+        'audit failed' in row['body'].lower()) and row['created_at'] > source_review['created_at']
+        for row in kit_comments)
     later_kit_failure = any('audit failed' in row['body'].lower() and row['created_at'] > kit_review['created_at']
         for row in kit_comments)
     yy = json.loads((kit / 'yy-authorization-evidence.md').read_bytes())
@@ -70,6 +74,11 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
         'rehearsalReceiptSha256': manifest['files']['rehearsal-receipt.json'],
         'targetPinSha256': manifest['files']['target-pin.json'],
         'yyEvidenceSha256': manifest['files']['yy-authorization-evidence.md'],
+        'proofAuthoritySha256': manifest['files']['proof-authority.json'],
+        'proofSourceIndexSha256': manifest['files']['proof-source-index.json'],
+        'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
+        'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
+        'proofSourceReview': source_review, 'laterSourceAuditFailure': later_source_failure,
         'workloadControl': WORKLOAD_PINS, 'readOnlyExecutionReadiness': readiness,
         'pr': {'number': 292, 'merged': pr['merged'], 'head': pr['head']['sha'], 'mergeCommit': current,
             'tree': tree, 'auditedTree': audited_tree, 'review': review, 'checks': checks,

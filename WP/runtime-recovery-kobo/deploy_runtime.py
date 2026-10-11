@@ -137,6 +137,10 @@ def main():
         'productionGateSha256': sha(ROOT / 'production-gate.json'), 'githubGate': gate,
         'separateInstallerCommands': 0, 'anyEntrypointAttempted': False,
         'originalProductionReceiptSha256': HISTORICAL_RECEIPT_SHA, 'preflight': readiness,
+        'proofSourceReviewId': PROOF_SOURCE_REVIEW_ID,
+        'proofAuthoritySha256': manifest['files']['proof-authority.json'],
+        'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
+        'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
         'workloadControl': WORKLOAD_PINS, 'effectiveUid': os.geteuid(), 'pythonOptimize': sys.flags.optimize}
     quiesced = False; owned = False; watch = None; guard = None
     def save(event):

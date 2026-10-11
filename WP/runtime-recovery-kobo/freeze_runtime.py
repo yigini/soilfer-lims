@@ -65,6 +65,8 @@ def main():
         'upstream-second-completion.json': 'upstream-second-completion.json'}
     for name, original in names.items():
         files[name] = (proof / original).read_bytes()
+    proof_authority(receipt, pin, source, json.loads(files['proof-authority.json']),
+        hashlib.sha256(files['proof-authority.json']).hexdigest())
     evidence = {'first-sync-preservation.json': 'firstPreservationSha256',
         'second-sync-preservation.json': 'secondPreservationSha256',
         'full-copy-preservation.json': 'fullPreservationSha256',
@@ -127,7 +129,10 @@ def main():
     manifest = {'status': KIT_STATUS, 'root': str(target), 'head': pin['head'], 'image': pin['image'], 'tree': pin['tree'],
         'baseHead': BASE_HEAD, 'preparedUtc': s.utc(), 'packagingCommit': package['head'],
         'originalProofRoot': str(proof), 'originalProofUnit': unit, 'proofReferences': references,
-        'sourceReviewId': 6112725472, 'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA,
+        'sourceReviewId': PROOF_SOURCE_REVIEW_ID, 'proofToolingCommit': REVIEWED_PROOF_SOURCE,
+        'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,
+        'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
+        'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA,
         'separateInstallerCommands': 0, 'deadlineSeconds': 600, 'productionObservationSeconds': 660,
         'reserveFloorBytes': FLOOR, 'workloadControl': WORKLOAD_PINS,
         'effectiveEnvironmentSha256': environment_hash(live), 'envFileSha256': sha(pathlib.Path('/opt/lims/.env')),
