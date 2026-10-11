@@ -1,4 +1,5 @@
 *.json -text
 *.log -text
+yy-authorization-evidence.md -text
 *.py text eol=lf
 *.cjs text eol=lf
