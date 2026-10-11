@@ -1,0 +1,4 @@
+*.py -text
+*.cjs -text
+*.json -text
+yy-authorization-evidence.md -text
