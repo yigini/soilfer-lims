@@ -65,7 +65,8 @@ def instant(value):
     return round(datetime.datetime.fromisoformat(value.replace('Z', '+00:00')).timestamp() * 1000)
 
 
-def verify_copy(prior_database, current_database, expected_table_count=104, prior_fetched_ids=None, fetched_ids=None):
+def verify_copy(prior_database, current_database, expected_table_count=104, prior_fetched_ids=None, fetched_ids=None,
+                refusal_configs=None):
     """Compare a retained baseline to one consistent current read-only snapshot.
 
     On the second sync prior_fetched_ids maps config ids to a conservative
@@ -91,6 +92,9 @@ def verify_copy(prior_database, current_database, expected_table_count=104, prio
         require(APPEND_TABLES | {'KoboConfig', 'User'} <= set(names), 'Intake tables missing')
         configs = {row['id']: dict(row) for row in db.execute('SELECT * FROM prior.KoboConfig ORDER BY id')}
         active = {key: row for key, row in configs.items() if row['isActive'] and row['projectCode']}
+        protected_configs = set(refusal_configs or [])
+        require(protected_configs <= set(active), 'Expected refusal config is not an original active config')
+        protected_scopes = {(configs[key]['labId'], configs[key]['projectCode']) for key in protected_configs}
         managers = {row['id']: row['labId'] for row in db.execute(
             "SELECT id,labId FROM prior.User WHERE isActive=1 AND role='LAB_MANAGER'")}
         table_records = {}
@@ -126,6 +130,7 @@ def verify_copy(prior_database, current_database, expected_table_count=104, prio
                     before_hash.update(encoded(old) + b'\n')
                     if table == 'KoboConfig':
                         changed = [field for field in columns if old[field] != row[field]]
+                        require(not changed or key not in protected_configs, 'Expected refusal config changed')
                         require(not changed or key in active, 'Inactive/unmapped config changed')
                         require(set(changed) <= CURSORS, 'Protected Kobo config field changed')
                         if changed:
@@ -153,6 +158,9 @@ def verify_copy(prior_database, current_database, expected_table_count=104, prio
 
         sample_scopes = {}
         new_submission_ids = {}
+        sample_pairs = {key: set() for key in active}
+        sample_counts = {key: 0 for key in active}
+        depth_counts = {key: {} for key in active}
         for sample_id, sample in new_samples.items():
             meta = json.loads(sample.get('metadata') or '{}')
             matching = [key for key, config in active.items() if
@@ -160,12 +168,21 @@ def verify_copy(prior_database, current_database, expected_table_count=104, prio
                 config['formId'] == meta.get('sourceFormId') and config['koboServerUrl'] == meta.get('sourceServerUrl')]
             require(len(matching) == 1, 'New Sample lacks exact active config provenance')
             config_id = matching[0]
+            require((sample['assignedLab'], sample['projectCode']) not in protected_scopes,
+                'Intake wrote within an expected refusal scope')
             require(sample['status'] == 'EXPECTED' and sample.get('labId') is None,
                 'Intake invented a sample workflow disposition')
             require(all(sample.get(field) is None for field in ['acceptedBy', 'acceptedAt',
                 'approvedBy', 'approvedAt', 'receivedBy', 'receptionDate']), 'Intake invented scientific/reception authority')
             submission_id = str(meta.get('kobo_id', ''))
             require(submission_id.isdigit(), 'New Sample lacks numeric Kobo submission id')
+            depth = meta.get('depth')
+            require(depth in ['D1', 'D2'], 'New Sample lacks its exact Kobo depth identity')
+            pair = (submission_id, depth)
+            require(pair not in sample_pairs[config_id], 'Duplicate new Kobo submission/depth pair')
+            sample_pairs[config_id].add(pair)
+            sample_counts[config_id] += 1
+            depth_counts[config_id][depth] = depth_counts[config_id].get(depth, 0) + 1
             require(fetched_ids is not None and submission_id in {str(value) for value in fetched_ids.get(config_id, [])},
                 'New Sample not bound to retained upstream fetch ids')
             if prior_fetched_ids is not None:
@@ -249,6 +266,11 @@ def verify_copy(prior_database, current_database, expected_table_count=104, prio
             'schemaPreserved': True, 'allOriginalRowsPreserved': True, 'tables': table_records,
             'additions': enumerated, 'configChanges': config_changes,
             'newSubmissionIds': {key: sorted(values, key=int) for key, values in new_submission_ids.items()},
+            'newSampleCount': sample_counts,
+            'newSamplePairs': {key: [{'kobo_id': pair[0], 'depth': pair[1]} for pair in
+                sorted(values, key=lambda pair: (int(pair[0]), pair[1]))] for key, values in sample_pairs.items()},
+            'newSampleDepthSplit': depth_counts,
+            'protectedRefusalConfigIds': sorted(protected_configs),
             'retainedUpstreamFetchIds': fetched_ids,
             'copySyncIntervalMins': {key: row.get('syncIntervalMins') or 15 for key, row in active.items()},
             'integrity': 'ok', 'foreignKeyViolations': 0}

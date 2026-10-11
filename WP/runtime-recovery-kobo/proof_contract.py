@@ -10,6 +10,18 @@ SOAK_SECONDS = 660
 TARGET_CONFIG = '897c1fb0-d83c-40cd-b513-b3e6e6b78172'
 TARGET_LAB = 'ZMB-LAB1'
 TARGET_PROJECT = 'SOILFER-US'
+REFUSAL_SCOPE_COMMENT_ID = 6113601584
+REFUSAL_POLICY = 'EXACT_FRESH_COPY_CONFIG_REFUSALS'
+CARDINALITY_POLICY = 'SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS'
+REFUSAL_TUPLES = [
+    ('ec5a5a67-3f5a-4682-88df-edb0e07e6485', 'MOZ-LAB1', 'MOZL',
+        "[KOBO] Configured project 'MOZL' does not exist in the database."),
+    ('f24b4f7a-1da7-4320-831e-b9105647f106', 'TUR', 'TEST-TURSAP',
+        "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."),
+    ('a9fc2329-cdfc-408e-aeb2-fa1a9020e66d', 'TUR', 'TEST3',
+        "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."),
+    ('edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0', 'TUR', 'TURSAP8',
+        "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.")]
 
 
 def require(value, message):
@@ -49,7 +61,8 @@ def validate_candidate(pin, built, image):
     require(built.get('productionDatabaseMounts') == 0, 'Build had a production data mount')
 
 
-def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None):
+def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None,
+                       verifier_sha=None, contract_sha=None):
     """A NEW measurement source needs its own explicit exact-byte approval."""
     require(review['id'] != 6112725472 and review['html_url'] ==
         'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(review['id']),
@@ -58,9 +71,81 @@ def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None):
         'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169',
         'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
         'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
+    if verifier_sha is not None or contract_sha is not None:
+        require(verifier_sha is not None and contract_sha is not None, 'Both corrected helper bindings required')
+        tokens += [verifier_sha, contract_sha, 'refusalScopeCommentId=6113601584',
+            REFUSAL_POLICY, CARDINALITY_POLICY]
     require(all(value in review['body'] for value in tokens), 'Exact corrected source approval missing')
     now = now or datetime.datetime.now(datetime.timezone.utc)
     require(utc_seconds(review['created_at']) <= now.timestamp(), 'Source review is future-dated')
+
+
+def expected_refusals(configs, labs, projects):
+    """Bind the whole allowance or none, using only the fresh sealed baseline."""
+    active = [row for row in configs if row['isActive']]
+    for config_id, lab_id, project, _ in REFUSAL_TUPLES:
+        rows = [row for row in active if row['id'] == config_id]
+        if len(rows) != 1 or rows[0]['labId'] != lab_id or rows[0]['projectCode'] != project:
+            return []
+        if len([row for row in active if row['labId'] == lab_id and row['projectCode'] == project]) != 1:
+            return []
+    if any(row['code'] == 'MOZL' for row in projects):
+        return []
+    moz = [row for row in labs if row['id'] == 'MOZ-LAB1' or row['code'] == 'MOZ-LAB1']
+    tur = [row for row in labs if row['id'] == 'TUR' or row['code'] == 'TUR']
+    if len(moz) != 1 or not moz[0]['isActive'] or len(tur) != 1 or tur[0]['isActive'] or tur[0]['name'] != 'TURSAP LAB':
+        return []
+    if {row['id'] for row in active if row['labId'] == 'TUR'} != {row[0] for row in REFUSAL_TUPLES if row[1] == 'TUR'}:
+        return []
+    return [{'configId': key, 'labId': lab, 'projectCode': project, 'message': message}
+        for key, lab, project, message in REFUSAL_TUPLES]
+
+
+def scheduler_refusals(log, expected):
+    """Exact lines only; pair each refusal with an observed mapped trigger.
+
+    Streams are merged by their Docker timestamps, not stdout/stderr arrival.
+    Each per-lab trigger is consumed at most once, so extra refusals fail.
+    """
+    records = []
+    for line in log.splitlines():
+        stamp, separator, message = line.partition(' ')
+        if 'FATAL ERROR' in line or '[KOBO_SCHEDULER] General scheduler error' in line:
+            raise RuntimeError('Owned scheduler/runtime error; retain this failed proof')
+        if separator and re.fullmatch(r'\d{4}-\d\d-\d\dT\S+Z', stamp):
+            records.append((stamp, message))
+        elif '[KOBO_SCHEDULER] Error syncing' in line:
+            raise RuntimeError('Untimestamped scheduler error')
+    pending = {}
+    observed = []
+    for stamp, message in sorted(records, key=lambda row: row[0]):
+        trigger = re.fullmatch(r'\[KOBO_SCHEDULER\] Triggering scheduled sync for Lab: ([^,]+), Project: (.+)', message)
+        if trigger:
+            matches = [row for row in expected if (row['labId'], row['projectCode']) == trigger.groups()]
+            if matches:
+                require(len(matches) == 1, 'Ambiguous bound scheduler trigger')
+                pending.setdefault(trigger[1], []).append((stamp, matches[0]))
+        if '[KOBO_SCHEDULER] Error syncing' not in message:
+            continue
+        error = re.fullmatch(r'\[KOBO_SCHEDULER\] Error syncing lab ([^:]+): (.+)', message)
+        require(error is not None, 'Unexpected scheduler error line')
+        queue = pending.get(error[1], [])
+        require(bool(queue), 'Scheduler refusal has no exact bound trigger')
+        trigger_stamp, row = queue.pop(0)
+        require(error[2] == row['message'], 'Unexpected scheduler error message')
+        observed.append({**row, 'utc': stamp, 'triggerUtc': trigger_stamp, 'text': message})
+    return observed
+
+
+def intake_summary(state, completion, config_id=TARGET_CONFIG):
+    count = state['newSampleCount'][config_id]
+    pairs = state['newSamplePairs'][config_id]
+    ids = state['newSubmissionIds'].get(config_id, [])
+    require(count == completion['newSamples'] == len(pairs), 'Scheduler count differs from sealed Sample rows')
+    require(sum(state['newSampleDepthSplit'][config_id].values()) == count, 'Depth split differs from Sample count')
+    return {'newSamples': completion['newSamples'], 'skipped': completion['skipped'],
+        'distinctSubmissionCount': len(ids), 'newSampleCount': count,
+        'depthSplit': state['newSampleDepthSplit'][config_id]}
 
 
 def completed_syncs(log, lab=TARGET_LAB):

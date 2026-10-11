@@ -77,7 +77,8 @@ def main():
         index[name] = {'path': git_path, 'blob': blob, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
     source_review = github('repos/yigini/soilfer-lims/issues/comments/' + str(pin['proofSourceReviewId']))
     source_review_pass(source_review, tooling, index['rehearse_runtime.py']['sha256'],
-        index['known_core_disk_guard_v2.py']['sha256'])
+        index['known_core_disk_guard_v2.py']['sha256'],
+        verifier_sha=index['kobo_copy_preservation.py']['sha256'], contract_sha=index['proof_contract.py']['sha256'])
     source_comments = json.loads(subprocess.check_output(['gh', 'api',
         'repos/yigini/soilfer-lims/issues/162/comments?per_page=100', '--paginate', '--slurp'],
         text=True, encoding='utf-8'))

@@ -30,7 +30,7 @@ HELPER_HASHES = {'release_support.py': '9db6932a9b1502bc2db65c816a925e7d9f54611d
     'startup_common.py': 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00',
     'known_core_disk_guard.py': 'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169',
     'known_core_disk_guard_v2.py': 'f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c',
-    'kobo_copy_preservation.py': '8d9f39681ee912eced2a03b6d159cab9bc8fcd0ad351ed620c48ae7ec1bd5d6c',
+    'kobo_copy_preservation.py': '3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23',
     'capture_kobo_fetch.py': '1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86'}
 
 
@@ -56,15 +56,16 @@ def effective_environment_hash(container, jobs):
     return c.digest(env)
 
 
-def read_logs(name):
+def read_logs(name, receipt):
     result = subprocess.run(['docker', 'logs', '--timestamps', name],
         text=True, capture_output=True, timeout=20)
     require(result.returncode == 0, 'Cannot observe the owned scheduler')
     log = result.stdout + '\n' + result.stderr
     require(len(log.encode()) <= 8 * 1024 * 1024, 'Owned logs exceed the evidence bound')
-    require('[KOBO_SCHEDULER] Error syncing' not in log and
-        '[KOBO_SCHEDULER] General scheduler error' not in log and 'FATAL ERROR' not in log,
-        'Owned scheduler/runtime error; retain this failed proof')
+    observed = scheduler_refusals(log, receipt['expectedSchedulerRefusals'])
+    receipt['observedSchedulerRefusals'] = observed
+    receipt['schedulerRefusalCounts'] = {row['configId']: sum(value['configId'] == row['configId']
+        for value in observed) for row in receipt['expectedSchedulerRefusals']}
     return log
 
 
@@ -108,7 +109,7 @@ def sample(name, base, guard, watch, env_hash, receipt):
         'peakBytes': peak, 'minimumFreeBytes': min(disk['freeBytes'].values())}
     receipt.setdefault('healthSamples', []).append(row)
     print(json.dumps({'stage': 'candidate-natural-kobo-observation', **row}), flush=True)
-    return read_logs(name)
+    return read_logs(name, receipt)
 
 
 def main():
@@ -134,7 +135,8 @@ def main():
     source_review = authority['proofSourceReview']
     require(source_review['id'] == pin['proofSourceReviewId'], 'Proof-source approval pin differs')
     source_review_pass(source_review, source['head'], s.sha(__file__),
-        HELPER_HASHES['known_core_disk_guard_v2.py'])
+        HELPER_HASHES['known_core_disk_guard_v2.py'],
+        verifier_sha=HELPER_HASHES['kobo_copy_preservation.py'], contract_sha=s.sha(ROOT / 'proof_contract.py'))
     built_root = pathlib.Path(pin['buildRoot'])
     require(built_root.parent == pathlib.Path('/opt/lims/releases') and
         built_root.name.startswith('runtime-kobo-build-'), 'Unexpected build root')
@@ -172,7 +174,11 @@ def main():
         'diskMeasurementGuardSha256': HELPER_HASHES['known_core_disk_guard_v2.py'],
         'coreDeallocationConfirmationDeadlineSeconds': 10,
         'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA, 'productionMutations': 0,
-        'separateInstallerCommands': 0, 'scopeCommentIds': [6112209155, 6112305172, 6112436098],
+        'separateInstallerCommands': 0, 'scopeCommentIds': [6112209155, 6112305172, 6112436098, REFUSAL_SCOPE_COMMENT_ID],
+        'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
+        'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+        'copyVerifierSha256': HELPER_HASHES['kobo_copy_preservation.py'],
+        'proofContractSha256': s.sha(ROOT / 'proof_contract.py'),
         'existingSampleVerifierPolicy': 'STRICT_ORIGINAL_ROWS', 'effectiveUid': os.geteuid(),
         'pythonOptimize': sys.flags.optimize, 'reserveBytes': reserve, 'workloadPins': {
             'labAndHubBuildsOwnedByYY': True, 'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}}
@@ -197,6 +203,14 @@ def main():
         shutil.copytree(s.ASSETS, ROOT / 'assets')
         original_physical = s.physical(database)
         configs = configs_from_backup(ROOT / 'fresh-live-backup.db')
+        with contextlib.closing(sqlite3.connect((ROOT / 'fresh-live-backup.db').as_uri() +
+                '?mode=ro&immutable=1', uri=True)) as db:
+            db.row_factory = sqlite3.Row
+            receipt['expectedSchedulerRefusals'] = expected_refusals(
+                [dict(row) for row in db.execute('SELECT id,labId,projectCode,isActive FROM KoboConfig')],
+                [dict(row) for row in db.execute('SELECT id,code,name,isActive FROM Lab')],
+                [dict(row) for row in db.execute('SELECT code FROM Project')])
+        refusal_configs = [row['configId'] for row in receipt['expectedSchedulerRefusals']]
         require(TARGET_CONFIG in configs and configs[TARGET_CONFIG]['labId'] == TARGET_LAB and
             configs[TARGET_CONFIG]['projectCode'] == TARGET_PROJECT, 'Original crash-path config missing')
         require(len([value for value in configs.values() if value['labId'] == TARGET_LAB]) == 1,
@@ -245,10 +259,10 @@ def main():
         first_ids = {key: value['submissionIds'] for key, value in first_fetch.items()}
         s.consistent_backup(database, ROOT / 'after-first-sync.db')
         receipt['firstDatabaseSha256'] = s.sha(ROOT / 'after-first-sync.db')
-        first_state = verify_copy(ROOT / 'fresh-live-backup.db', ROOT / 'after-first-sync.db', fetched_ids=first_ids)
+        first_state = verify_copy(ROOT / 'fresh-live-backup.db', ROOT / 'after-first-sync.db',
+            fetched_ids=first_ids, refusal_configs=refusal_configs)
         receipt['firstPreservationSha256'] = write_new('first-sync-preservation.json', first_state)
-        require(len(first_state['newSubmissionIds'].get(TARGET_CONFIG, [])) == first['newSamples'],
-            'First completion count differs from sealed scoped intake')
+        receipt['firstIntakeSummary'] = intake_summary(first_state, first)
         # Only configs observed completing have fetched the whole retained set.
         # For other configs, protect every id actually added before this seal.
         prior_ids = {}
@@ -286,12 +300,13 @@ def main():
         receipt['secondUpstreamSha256'] = write_new('upstream-second-completion.json', final_fetch)
         final_ids = {key: value['submissionIds'] for key, value in final_fetch.items()}
         second_state = verify_copy(ROOT / 'after-first-sync.db', ROOT / 'after-second-sync.db',
-            prior_fetched_ids=prior_ids, fetched_ids=final_ids)
+            prior_fetched_ids=prior_ids, fetched_ids=final_ids, refusal_configs=refusal_configs)
         receipt['secondPreservationSha256'] = write_new('second-sync-preservation.json', second_state)
-        full_state = verify_copy(ROOT / 'fresh-live-backup.db', ROOT / 'after-second-sync.db', fetched_ids=final_ids)
+        full_state = verify_copy(ROOT / 'fresh-live-backup.db', ROOT / 'after-second-sync.db',
+            fetched_ids=final_ids, refusal_configs=refusal_configs)
         receipt['fullPreservationSha256'] = write_new('full-copy-preservation.json', full_state)
         target_new_ids = second_state['newSubmissionIds'].get(TARGET_CONFIG, [])
-        require(len(target_new_ids) == second['newSamples'], 'Second completion and real new intake differ')
+        receipt['secondIntakeSummary'] = intake_summary(second_state, second)
         receipt['secondGenuinelyNewSubmissionIds'] = target_new_ids
         receipt['protectedTableCount'] = full_state['protectedTableCount']
         receipt['protectedReceiptCount'] = 38

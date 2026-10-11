@@ -16,7 +16,7 @@ paths.update({name: 'WP/runtime-recovery-kobo/' + name + '.py' for name in [
     'proof_contract', 'kobo_copy_preservation', 'capture_kobo_fetch', 'runtime_release_contract',
     'known_core_disk_guard_v2', 'test_proof_contract', 'test_kobo_copy_preservation',
     'test_capture_kobo_fetch', 'test_runtime_release_contract', 'test_core_deallocation_confirmation',
-    'test_source_review_pin']})
+    'test_source_review_pin', 'test_scheduler_refusal_scope']})
 for name, path in paths.items():
     data = subprocess.check_output(['git', 'show', head + ':' + path])
     files[name] = {'data': base64.b64encode(data).decode(), 'sha256': hashlib.sha256(data).hexdigest()}

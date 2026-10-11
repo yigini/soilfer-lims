@@ -40,6 +40,23 @@ class SourceReviewPin(unittest.TestCase):
         self.review['created_at'] = '2026-10-11T20:00:01Z'
         with self.assertRaises(RuntimeError):self.verify()
 
+    def test_corrected_verifier_and_contract_need_explicit_new_approval(self):
+        extra = ['4' * 64, '5' * 64, 'refusalScopeCommentId=6113601584',
+            'EXACT_FRESH_COPY_CONFIG_REFUSALS', 'SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS']
+        body = self.review['body'] + '\n' + '\n'.join(extra)
+        self.review['body'] = body
+        source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now,
+            verifier_sha='4' * 64, contract_sha='5' * 64)
+        for token in extra:
+            self.review['body'] = body.replace(token, '')
+            with self.subTest(token=token), self.assertRaises(RuntimeError):
+                source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now,
+                    verifier_sha='4' * 64, contract_sha='5' * 64)
+
+    def test_half_corrected_binding_refuses(self):
+        with self.assertRaisesRegex(RuntimeError, 'Both corrected helper bindings required'):
+            source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now, verifier_sha='4' * 64)
+
 
 if __name__ == '__main__':
     unittest.main()

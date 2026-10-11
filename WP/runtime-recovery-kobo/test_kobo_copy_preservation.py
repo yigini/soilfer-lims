@@ -46,7 +46,7 @@ class CopyGuardTests(unittest.TestCase):
             fetched_ids={'cfg': ['7', '8']} if fetched_ids is None else fetched_ids)
 
     def intake(self, submission_id='7', lab='ZMB'):
-        meta = json.dumps({'sourceFormId': 'form', 'sourceServerUrl': 'https://kobo.example', 'kobo_id': submission_id})
+        meta = json.dumps({'sourceFormId': 'form', 'sourceServerUrl': 'https://kobo.example', 'kobo_id': submission_id, 'depth': 'D1'})
         self.mutate("INSERT INTO Sample VALUES('new',?,'P','EXPECTED',NULL,?)", (lab, meta))
         self.mutate("INSERT INTO AuditLog VALUES('new-audit','SAMPLE','new','CREATE_KOBO_SYNC','KOBO_SCHEDULER','new',?,NULL)", (lab,))
 
@@ -159,6 +159,40 @@ class CopyGuardTests(unittest.TestCase):
         self.mutate('ALTER TABLE Result ADD COLUMN override TEXT')
         with self.assertRaisesRegex(RuntimeError, 'schema changed'):
             self.verify()
+
+    def second_depth(self, depth='D2'):
+        meta = json.dumps({'sourceFormId': 'form', 'sourceServerUrl': 'https://kobo.example', 'kobo_id': '7', 'depth': depth})
+        self.mutate("INSERT INTO Sample VALUES('new-d2','ZMB','P','EXPECTED',NULL,?)", (meta,))
+        self.mutate("INSERT INTO AuditLog VALUES('new-d2-audit','SAMPLE','new-d2','CREATE_KOBO_SYNC','KOBO_SCHEDULER','new-d2','ZMB',NULL)")
+
+    def test_two_depths_are_two_samples_from_one_submission(self):
+        self.intake(); self.second_depth()
+        result = self.verify()
+        self.assertEqual(result['newSampleCount'], {'cfg': 2})
+        self.assertEqual(result['newSubmissionIds'], {'cfg': ['7']})
+        self.assertEqual(result['newSampleDepthSplit'], {'cfg': {'D1': 1, 'D2': 1}})
+        self.assertEqual(result['newSamplePairs'], {'cfg': [{'kobo_id': '7', 'depth': 'D1'}, {'kobo_id': '7', 'depth': 'D2'}]})
+
+    def test_duplicate_submission_depth_pair_refuses(self):
+        self.intake(); self.second_depth('D1')
+        with self.assertRaisesRegex(RuntimeError, 'Duplicate new Kobo submission/depth pair'):
+            self.verify()
+
+    def test_missing_depth_refuses(self):
+        self.intake()
+        self.mutate("UPDATE Sample SET metadata=json_remove(metadata,'$.depth') WHERE id='new'")
+        with self.assertRaisesRegex(RuntimeError, 'depth identity'):
+            self.verify()
+
+    def test_failed_config_clocks_are_protected(self):
+        self.mutate("UPDATE KoboConfig SET lastSyncAt='new-clock'")
+        with self.assertRaisesRegex(RuntimeError, 'Expected refusal config changed'):
+            verify_copy(self.prior, self.current, expected_table_count=8, refusal_configs=['cfg'])
+
+    def test_failed_config_scope_cannot_intake(self):
+        self.intake()
+        with self.assertRaisesRegex(RuntimeError, 'expected refusal scope'):
+            verify_copy(self.prior, self.current, expected_table_count=8, refusal_configs=['cfg'], fetched_ids={'cfg': ['7']})
 
 
 if __name__ == '__main__':
