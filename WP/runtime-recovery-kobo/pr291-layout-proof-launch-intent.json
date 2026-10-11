@@ -1,0 +1,14 @@
+{
+  "preparedUtc": "2026-10-11T23:46:50.654333+00:00",
+  "status": "ONE_NEW_LAYOUT_PROOF_AUTHORIZED_NOT_YET_LAUNCHED",
+  "source": "206c4dc41a99045ab8a47871ebe8782fda4cba20",
+  "sourceReviewId": 6115225815,
+  "sourceReviewSha256": "0c4d2cd896f8c3730bbb3349fae073bc335c8af2d2dfdfec11a22dac8be80b64",
+  "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "mainCiRunId": 38182451105,
+  "mainCiStatus": "SUCCESS",
+  "root": "/opt/lims/releases/runtime-kobo-proof-f830f900-20261011T234650Z",
+  "unit": "lims-owned-runtime-kobo-proof-f830f900-20261011t234650z.service",
+  "targetPinFile": "WP\\runtime-recovery-kobo\\target-pin-f830f900-layout.json",
+  "targetPinSha256": "ce54c1222b128a23ee149b4139a3cd40829d5168c78b6b2ed657033565253eed"
+}
