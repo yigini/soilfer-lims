@@ -214,6 +214,16 @@ def normalized_sql(sql):
     return ''.join(token for token in tokens if not token.isspace()).rstrip(';')
 
 
+def expected_draft_sql(original_sql):
+    # SQLite inserts an added column before trailing table constraints, not
+    # necessarily before the final ')'. Reproduce only the reviewed ALTER on
+    # an empty in-memory schema, preserving every original constraint.
+    with sqlite3.connect(':memory:') as db:
+        db.execute(original_sql)
+        db.execute('ALTER TABLE "WorkItemDraft" ADD COLUMN "records" TEXT')
+        return db.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='WorkItemDraft'").fetchone()[0]
+
+
 def preserve(before, after):
     assert before['integrity'] == after['integrity'] == 'ok'
     assert before['foreignKeyViolations'] == after['foreignKeyViolations'] == 0
@@ -235,9 +245,8 @@ def preserve(before, after):
     assert set(before['objects']) <= set(after['objects'])
     changed = [key for key in before['objects'] if before['objects'][key] != after['objects'][key]]
     assert changed==['table:WorkItemDraft'], 'Only nullable draft column may alter original schema'
-    old_sql=before['objects']['table:WorkItemDraft']['sql'].rstrip().rstrip(';')
-    assert old_sql.endswith(')')
-    assert normalized_sql(after['objects']['table:WorkItemDraft']['sql']) == normalized_sql(old_sql[:-1]+', "records" TEXT)')
+    old_sql=before['objects']['table:WorkItemDraft']['sql']
+    assert normalized_sql(after['objects']['table:WorkItemDraft']['sql']) == normalized_sql(expected_draft_sql(old_sql)), 'Draft schema differs from the exact reviewed ALTER'
     columns=after['shapes']['WorkItemDraft']
     assert columns[-1] == {'cid':len(before['shapes']['WorkItemDraft']),'name':'records','type':'TEXT','notnull':0,'dflt_value':None,'pk':0,'hidden':0}
     added=set(after['objects'])-set(before['objects'])

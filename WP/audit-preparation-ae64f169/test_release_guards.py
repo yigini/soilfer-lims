@@ -113,7 +113,7 @@ class PreservationGuards(unittest.TestCase):
                     'CREATE TABLE WorkItem(id TEXT PRIMARY KEY,labId TEXT,assignedLab TEXT);'
                     'CREATE TABLE AuditLog(id TEXT PRIMARY KEY,details TEXT);'
                     'CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT);'
-                    'CREATE TABLE WorkItemDraft(id TEXT PRIMARY KEY,data TEXT);')
+                    'CREATE TABLE WorkItemDraft(id TEXT PRIMARY KEY,data TEXT,CONSTRAINT draft_data_unique UNIQUE(data));')
                 db.execute('INSERT INTO Result VALUES(?,?,?)',('original-result','6.40','original-attempt'))
                 db.execute('INSERT INTO WorkAttempt VALUES(?,?)',('original-attempt','ACCEPTED'))
                 db.execute('INSERT INTO AuditLog VALUES(?,?)',('original-event','retained immutable evidence'))
@@ -133,6 +133,9 @@ class PreservationGuards(unittest.TestCase):
                     'originalRowsPreserved':True,'backfilledCount':0})))
             after=s.snapshot(file,before)
             self.assertEqual(s.preserve(before,after)['additionalReceiptCount'],1)
+            altered_schema=copy.deepcopy(after)
+            altered_schema['objects']['table:WorkItemDraft']['sql']=altered_schema['objects']['table:WorkItemDraft']['sql'].replace('draft_data_unique','changed_constraint')
+            with self.assertRaisesRegex(AssertionError,'exact reviewed ALTER'):s.preserve(before,altered_schema)
             for table,sql in [('Result',"UPDATE Result SET value='changed'"),
                 ('WorkAttempt',"UPDATE WorkAttempt SET status='RECORDED'"),
                 ('AuditLog',"UPDATE AuditLog SET details='changed'"),
@@ -141,6 +144,14 @@ class PreservationGuards(unittest.TestCase):
                 altered=pathlib.Path(folder)/(table+'.db');shutil.copyfile(file,altered)
                 with sqlite3.connect(altered) as db:db.execute(sql)
                 with self.subTest(table=table),self.assertRaises(AssertionError):s.preserve(before,s.snapshot(altered,before))
+
+    def test_draft_foreign_key_and_literal_defaults_survive_exact_alter(self):
+        original='CREATE TABLE "WorkItemDraft" ("id" TEXT NOT NULL PRIMARY KEY,"workItemId" TEXT NOT NULL UNIQUE, "basis" TEXT DEFAULT \'AIR DRY\', CONSTRAINT "draft_item_fk" FOREIGN KEY ("workItemId") REFERENCES "WorkItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE)'
+        expected=s.expected_draft_sql(original)
+        self.assertIn('"records" TEXT, CONSTRAINT',expected)
+        self.assertIn("DEFAULT 'AIR DRY'",expected)
+        self.assertIn('ON DELETE CASCADE ON UPDATE CASCADE',expected)
+        self.assertNotEqual(s.normalized_sql(expected),s.normalized_sql(expected.replace("'AIR DRY'","'AIRDRY'")))
 
     def test_repeat_requires_zero_changes_and_exact_physical_bytes(self):
         with tempfile.TemporaryDirectory() as folder:
