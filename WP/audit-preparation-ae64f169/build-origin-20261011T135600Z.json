@@ -1,0 +1,14 @@
+{
+  "status": "REUSED_ORIGINAL_VALID_BUILD_NOT_REBUILT",
+  "originalBuildRoot": "/opt/lims/releases/preparation-ae64f169-build-20261011T110500Z",
+  "originalBuildReceiptSha256": "08714c72470839d5cb8011423e1510f08d63a998a97b6e5a1fc25ce4f418a2b1",
+  "image": "sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a",
+  "imageBytes": 413546358,
+  "head": "ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf",
+  "sourceArchiveSha256": "1305719cc92601e3c7babe6c074d1f06462a909b924509b74c717943a19ddecd",
+  "sourceIndexSha256": "a9b018930c4206fcea46f54a6db20cddb04c58df4dd938fc41319b2535193f62",
+  "verifiedGitBlobCount": 2234,
+  "originalBuildVerifiedUtc": "2026-10-11T11:06:56.367551+00:00",
+  "reverifiedUtc": "2026-10-11T13:45:25.063778+00:00",
+  "failedProofContributed": false
+}
