@@ -1,0 +1,380 @@
+{
+  "observedUtc": "2026-10-11T23:52:01.724706+00:00",
+  "productionMutations": 0,
+  "unit": "ExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "files": [
+    {
+      "name": "readonly-smoke.stdout",
+      "bytes": 698
+    },
+    {
+      "name": "known_core_disk_guard_v2.py",
+      "bytes": 5278
+    },
+    {
+      "name": "postflight-policy.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "kobo_copy_preservation.py",
+      "bytes": 16701
+    },
+    {
+      "name": "known_core_disk_guard_proof.py",
+      "bytes": 3881
+    },
+    {
+      "name": "proof_contract.py",
+      "bytes": 15922
+    },
+    {
+      "name": "postflight-policy.cjs",
+      "bytes": 4035
+    },
+    {
+      "name": "known_core_disk_guard.py",
+      "bytes": 5984
+    },
+    {
+      "name": "unit.stdout",
+      "bytes": 171
+    },
+    {
+      "name": "capture_kobo_fetch.py",
+      "bytes": 4767
+    },
+    {
+      "name": "postflight-reference.stdout",
+      "bytes": 149
+    },
+    {
+      "name": "candidate-jobs-on-run.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "candidate-jobs-off-readiness.json",
+      "bytes": 629
+    },
+    {
+      "name": "api-postflight.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "postflight-qc-runs.stdout",
+      "bytes": 393
+    },
+    {
+      "name": "build_candidate.py",
+      "bytes": 6202
+    },
+    {
+      "name": "candidate-jobs-off-stop.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "upstream-before-start.json",
+      "bytes": 136941
+    },
+    {
+      "name": "candidate-jobs-off-run.stdout",
+      "bytes": 65
+    },
+    {
+      "name": "unit.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "fresh-protected-state.json",
+      "bytes": 7465051
+    },
+    {
+      "name": "known_core_disk_guard_v3.py",
+      "bytes": 5625
+    },
+    {
+      "name": "readonly-smoke.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "postflight-auth.stdout",
+      "bytes": 150
+    },
+    {
+      "name": "postflight-roles.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "postflight-qc-runs.cjs",
+      "bytes": 4091
+    },
+    {
+      "name": "candidate-jobs-off-run.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "prepare_candidate_build.py",
+      "bytes": 10575
+    },
+    {
+      "name": "postflight-auth.cjs",
+      "bytes": 2045
+    },
+    {
+      "name": "readonly-smoke.cjs",
+      "bytes": 3255
+    },
+    {
+      "name": "fresh-live-backup.db",
+      "bytes": 563322880
+    },
+    {
+      "name": "postflight-roles.stdout",
+      "bytes": 343
+    },
+    {
+      "name": "export_launch_runtime_proof.py",
+      "bytes": 8883
+    },
+    {
+      "name": "postflight-policy.stdout",
+      "bytes": 482
+    },
+    {
+      "name": "candidate-jobs-off-startup.stderr",
+      "bytes": 1598
+    },
+    {
+      "name": "candidate-jobs-off-startup.stdout",
+      "bytes": 98008
+    },
+    {
+      "name": "postflight-reference.cjs",
+      "bytes": 2096
+    },
+    {
+      "name": "disk-allocation-observations.jsonl",
+      "bytes": 11439454
+    },
+    {
+      "name": "startup_common.py",
+      "bytes": 13858
+    },
+    {
+      "name": "candidate-jobs-off-stop.stdout",
+      "bytes": 65
+    },
+    {
+      "name": "release_support.py",
+      "bytes": 20330
+    },
+    {
+      "name": "postflight-reference.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "postflight-qc-runs.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "api-postflight.stdout",
+      "bytes": 2673
+    },
+    {
+      "name": "target-pin.json",
+      "bytes": 909
+    },
+    {
+      "name": "candidate-jobs-off-memory.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "rehearse_runtime.py",
+      "bytes": 23535
+    },
+    {
+      "name": "source-index.json",
+      "bytes": 5111
+    },
+    {
+      "name": "candidate-jobs-off-memory.stdout",
+      "bytes": 10
+    },
+    {
+      "name": "postflight-auth.stderr",
+      "bytes": 0
+    },
+    {
+      "name": "candidate-jobs-on-run.stdout",
+      "bytes": 65
+    },
+    {
+      "name": "candidate-rehearsal-authority.json",
+      "bytes": 18847
+    },
+    {
+      "name": "postflight-roles.cjs",
+      "bytes": 12281
+    }
+  ],
+  "containers": [
+    {
+      "name": "soilfer-lims",
+      "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 615769,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-11T22:39:33.522555111Z",
+        "FinishedAt": "0001-01-01T00:00:00Z",
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-12T01:51:13.361008026+02:00",
+              "End": "2026-10-12T01:51:13.464435619+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T01:51:23.466361417+02:00",
+              "End": "2026-10-12T01:51:23.56496342+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T01:51:33.566334799+02:00",
+              "End": "2026-10-12T01:51:33.686539983+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T01:51:43.68884146+02:00",
+              "End": "2026-10-12T01:51:44.060605146+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T01:51:54.062075571+02:00",
+              "End": "2026-10-12T01:51:54.238469943+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "restartCount": 0,
+      "memoryLimit": 805306368
+    },
+    {
+      "name": "lims-owned-runtime-kobo-proof-f830f900-20261011t234650z-jobs-off",
+      "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 137,
+        "Error": "",
+        "StartedAt": "2026-10-11T23:48:08.488785923Z",
+        "FinishedAt": "2026-10-11T23:51:10.591876962Z",
+        "Health": {
+          "Status": "unhealthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-12T01:50:20.550199653+02:00",
+              "End": "2026-10-12T01:50:20.657806986+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T01:50:30.659663288+02:00",
+              "End": "2026-10-12T01:50:31.067467913+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T01:50:41.070511355+02:00",
+              "End": "2026-10-12T01:50:41.182077443+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T01:50:51.18418555+02:00",
+              "End": "2026-10-12T01:50:51.289325739+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T01:51:01.291499727+02:00",
+              "End": "2026-10-12T01:51:01.379390965+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "restartCount": 0,
+      "memoryLimit": 805306368
+    },
+    {
+      "name": "lims-owned-runtime-kobo-proof-f830f900-20261011t234650z-jobs-on",
+      "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 681760,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-11T23:51:37.429570033Z",
+        "FinishedAt": "0001-01-01T00:00:00Z",
+        "Health": {
+          "Status": "starting",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-12T01:51:42.766371277+02:00",
+              "End": "2026-10-12T01:51:43.093005637+02:00",
+              "ExitCode": 1,
+              "Output": "wget: can't connect to remote host (127.0.0.1): Connection refused\n"
+            },
+            {
+              "Start": "2026-10-12T01:51:48.095204474+02:00",
+              "End": "2026-10-12T01:51:48.181585977+02:00",
+              "ExitCode": 1,
+              "Output": "wget: can't connect to remote host (127.0.0.1): Connection refused\n"
+            },
+            {
+              "Start": "2026-10-12T01:51:53.182892767+02:00",
+              "End": "2026-10-12T01:51:53.270238984+02:00",
+              "ExitCode": 1,
+              "Output": "wget: can't connect to remote host (127.0.0.1): Connection refused\n"
+            },
+            {
+              "Start": "2026-10-12T01:51:58.272159134+02:00",
+              "End": "2026-10-12T01:51:58.375157759+02:00",
+              "ExitCode": 1,
+              "Output": "wget: can't connect to remote host (127.0.0.1): Connection refused\n"
+            }
+          ]
+        }
+      },
+      "restartCount": 0,
+      "memoryLimit": 805306368
+    }
+  ]
+}
