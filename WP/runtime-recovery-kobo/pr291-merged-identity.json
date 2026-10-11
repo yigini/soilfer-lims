@@ -1,0 +1,12 @@
+{
+  "verifiedUtc": "2026-10-11T22:57:32.489653+00:00",
+  "status": "MERGED_REVIEWED_PR_NOT_DEPLOYED",
+  "pr": 291,
+  "auditedHead": "5d3550d709f0b62ef013f9114e9da9344f9818a1",
+  "mergeCommit": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "tree": "48678dda23fa876d8d233db812149c8d1792bf16",
+  "base": "171dd36c5b2dbeea8763520dd18fbdb158ffca05",
+  "mergedAt": "2026-10-11T22:57:30Z",
+  "auditReviewId": 6113454688,
+  "runtimePostDeployPassId": 6114820729
+}
