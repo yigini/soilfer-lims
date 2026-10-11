@@ -18,7 +18,7 @@ import time
 
 import release_support as s
 import startup_common as c
-from known_core_disk_guard_v2 import KnownCoreDiskGuard
+from known_core_disk_guard_v3 import KnownCoreDiskGuard
 from capture_kobo_fetch import capture
 from kobo_copy_preservation import verify_copy
 from proof_contract import *
@@ -26,7 +26,7 @@ from proof_contract import *
 ROOT = pathlib.Path(__file__).resolve().parent
 HISTORICAL_ROOT = pathlib.Path('/opt/lims/releases/forward-ae64f169-release-20261011T150800Z')
 HISTORICAL_RECEIPT_SHA = '35ab0b825a5d52414304d426101863b671ce5d3b92f6d8eb81e8b79f34095462'
-HELPER_HASHES = {'release_support.py': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
+HELPER_HASHES = {'known_core_disk_guard_v3.py': '878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f', 'release_support.py': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
     'startup_common.py': 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00',
     'known_core_disk_guard.py': 'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169',
     'known_core_disk_guard_v2.py': 'f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c',
@@ -136,7 +136,8 @@ def main():
     require(source_review['id'] == pin['proofSourceReviewId'], 'Proof-source approval pin differs')
     source_review_pass(source_review, source['head'], s.sha(__file__),
         HELPER_HASHES['known_core_disk_guard_v2.py'],
-        verifier_sha=HELPER_HASHES['kobo_copy_preservation.py'], contract_sha=s.sha(ROOT / 'proof_contract.py'))
+        verifier_sha=HELPER_HASHES['kobo_copy_preservation.py'], contract_sha=s.sha(ROOT / 'proof_contract.py'),
+        baseline_guard_sha=HELPER_HASHES['known_core_disk_guard_v3.py'])
     built_root = pathlib.Path(pin['buildRoot'])
     require(built_root.parent == pathlib.Path('/opt/lims/releases') and
         built_root.name.startswith('runtime-kobo-build-'), 'Unexpected build root')
@@ -173,6 +174,9 @@ def main():
         'authoritySha256': s.sha(ROOT / 'candidate-rehearsal-authority.json'),
         'diskMeasurementGuardSha256': HELPER_HASHES['known_core_disk_guard_v2.py'],
         'coreDeallocationConfirmationDeadlineSeconds': 10,
+        'baselineMeasurementGuardSha256': HELPER_HASHES['known_core_disk_guard_v3.py'],
+        'baselineVanishedProcessPolicy': 'CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE',
+        'BASELINE_ATTEMPTS_MAX': 3, 'BASELINE_CONFIRMATION_DEADLINE_SECONDS': 10,
         'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA, 'productionMutations': 0,
         'separateInstallerCommands': 0, 'scopeCommentIds': [6112209155, 6112305172, 6112436098, REFUSAL_SCOPE_COMMENT_ID],
         'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
@@ -190,6 +194,7 @@ def main():
     try:
         guard = KnownCoreDiskGuard(ROOT, reserve)
         receipt['baselineEnumerationErrorCount'] = len(guard.baseline_errors)
+        receipt['baselineAttempt'] = guard.baseline_attempt
         s.consistent_backup(s.LIVE, ROOT / 'fresh-live-backup.db')
         receipt['freshCopyUtc'] = s.utc()
         receipt['freshCopySha256'] = s.sha(ROOT / 'fresh-live-backup.db')

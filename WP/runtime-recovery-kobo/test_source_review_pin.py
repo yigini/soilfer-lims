@@ -57,6 +57,25 @@ class SourceReviewPin(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'Both corrected helper bindings required'):
             source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now, verifier_sha='4' * 64)
 
+    def test_v3_requires_all_new_baseline_and_existing_bindings(self):
+        extra = ['4' * 64, '5' * 64, '6' * 64, 'refusalScopeCommentId=6113601584',
+            'EXACT_FRESH_COPY_CONFIG_REFUSALS', 'SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS',
+            'baselineVanishedProcessPolicy=CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE',
+            'BASELINE_ATTEMPTS_MAX=3', 'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10']
+        body = self.review['body'] + '\n' + '\n'.join(extra)
+        self.review['body'] = body
+        source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now,
+            verifier_sha='4' * 64, contract_sha='5' * 64, baseline_guard_sha='6' * 64)
+        for token in self.tokens + extra:
+            self.review['body'] = body.replace(token, '')
+            with self.subTest(token=token), self.assertRaises(RuntimeError):
+                source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now,
+                    verifier_sha='4' * 64, contract_sha='5' * 64, baseline_guard_sha='6' * 64)
+
+    def test_v3_cannot_omit_other_corrected_helpers(self):
+        with self.assertRaises(RuntimeError):
+            source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now, baseline_guard_sha='6' * 64)
+
 
 if __name__ == '__main__':
     unittest.main()

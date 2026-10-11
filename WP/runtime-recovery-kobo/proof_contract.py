@@ -62,7 +62,7 @@ def validate_candidate(pin, built, image):
 
 
 def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None,
-                       verifier_sha=None, contract_sha=None):
+                       verifier_sha=None, contract_sha=None, baseline_guard_sha=None):
     """A NEW measurement source needs its own explicit exact-byte approval."""
     require(review['id'] != 6112725472 and review['html_url'] ==
         'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(review['id']),
@@ -75,6 +75,11 @@ def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None,
         require(verifier_sha is not None and contract_sha is not None, 'Both corrected helper bindings required')
         tokens += [verifier_sha, contract_sha, 'refusalScopeCommentId=6113601584',
             REFUSAL_POLICY, CARDINALITY_POLICY]
+    if baseline_guard_sha is not None:
+        require(verifier_sha is not None and contract_sha is not None, 'Baseline guard requires all corrected bindings')
+        tokens += [baseline_guard_sha,
+            'baselineVanishedProcessPolicy=CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE',
+            'BASELINE_ATTEMPTS_MAX=3', 'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10']
     require(all(value in review['body'] for value in tokens), 'Exact corrected source approval missing')
     now = now or datetime.datetime.now(datetime.timezone.utc)
     require(utc_seconds(review['created_at']) <= now.timestamp(), 'Source review is future-dated')
