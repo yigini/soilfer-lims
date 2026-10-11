@@ -8,6 +8,7 @@ def verify(root,manifest,gate,now=None):
     assert manifest['status']=='PREPARED_FORWARD_ONLY_NOT_EXECUTED'
     assert manifest['head']==gate['head']==s.HEAD and manifest['image']==gate['image']==c.IMAGE
     assert manifest['deadlineSeconds']==600 and manifest['separateInstallerCommands']==0
+    assert manifest['jobsBoundaryCommentId']==c.JOBS_BOUNDARY_COMMENT
     assert manifest['originalFailureReceiptSha256']==c.FAILURE_SHA
     assert gate['manifestSha256']==s.sha(root/'prepared-manifest.json')
     assert gate['coordinatorSha256']==manifest['files']['startup-forward.py']
@@ -49,7 +50,12 @@ def validate_proof(root,manifest):
     assert proof['protectedStateSha256']==manifest['files']['protected-state.json']
     assert proof['logicalStateSha256']==manifest['logicalStateSha256']
     assert proof['productionStoppedPhysical']==manifest['productionStoppedPhysical']
-    assert proof['databaseChanges']==0 and proof['ownedMainBytesPreserved'] and proof['productionFilesUntouched']
+    assert proof['databaseChangesBeforeJobs']==0 and proof['ownedMainBytesPreservedBeforeJobs'] and proof['productionFilesUntouched']
+    assert proof['jobsBoundaryCommentId']==c.JOBS_BOUNDARY_COMMENT
+    boundary=proof['normalJobsBoundary']
+    assert boundary['rowCountUnchanged'] and boundary['allOther103TablesAndKoboFieldsPreserved']
+    assert boundary['allowedFields']==['KoboConfig.lastSyncAt','KoboConfig.updatedAt']
+    assert proof['jobs-onChecks']['ownedJobsBoundary']['allOther103TablesAndKoboFieldsPreserved']
     assert proof['separateInstallerCommands']==0
     for stage in ['jobs-off','jobs-on']:
         readiness=proof[stage+'Readiness'];checks=proof[stage+'Checks']

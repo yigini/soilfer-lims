@@ -86,5 +86,31 @@ class ForwardGuards(unittest.TestCase):
     def test_changed_full_state_aborts(self):
         with patch.object(c.s,'snapshot',return_value={'tables':'changed'}):
             with self.assertRaises(AssertionError):c.exact_state('unused',{'tables':'original'})
+    def test_owned_jobs_allow_only_two_clock_fields(self):
+        with tempfile.TemporaryDirectory() as folder:
+            file=pathlib.Path(folder)/'data.db'
+            with sqlite3.connect(file) as db:
+                db.execute('CREATE TABLE KoboConfig(id TEXT PRIMARY KEY,apiToken TEXT,lastSubmissionId TEXT,lastSyncAt INT,updatedAt INT)')
+                db.execute('INSERT INTO KoboConfig VALUES (?,?,?,?,?)',('one','fixture-private-token','unchanged',1,1))
+            pin=c.kobo_baseline(file);self.assertNotIn('fixture-private-token',json.dumps(pin))
+            expected={'tables':{'KoboConfig':{'count':1,'sha256':'before'},'Result':{'count':1,'sha256':'protected'}}}
+            with sqlite3.connect(file) as db:db.execute('UPDATE KoboConfig SET lastSyncAt=2,updatedAt=2')
+            actual=copy.deepcopy(expected);actual['tables']['KoboConfig']['sha256']='clock-changed'
+            with patch.object(c.s,'snapshot',return_value=actual):
+                changed=c.jobs_copy_state(file,expected,pin);self.assertEqual(changed['changedClockRows'],[{'id':'one','fields':['lastSyncAt','updatedAt']}])
+            with sqlite3.connect(file) as db:db.execute("UPDATE KoboConfig SET lastSubmissionId='new'")
+            with patch.object(c.s,'snapshot',return_value=copy.deepcopy(expected)):
+                with self.assertRaises(AssertionError):c.jobs_copy_state(file,expected,pin)
+    def test_owned_jobs_refuse_other_table_changes(self):
+        pin={'count':1,'fields':['id'],'sha256':'same','clocks':{'one':{'lastSyncAt':1,'updatedAt':1}}}
+        expected={'tables':{'KoboConfig':{'count':1,'sha256':'same'},'Result':{'count':1,'sha256':'protected'}}}
+        actual=copy.deepcopy(expected);actual['tables']['Result']['sha256']='changed'
+        with patch.object(c.s,'snapshot',return_value=actual),patch.object(c,'kobo_baseline',return_value=pin):
+            with self.assertRaises(AssertionError):c.jobs_copy_state('unused',expected,pin)
+    def test_owned_jobs_refuse_added_kobo_row(self):
+        pin={'count':1,'fields':['id'],'sha256':'same','clocks':{'one':{'lastSyncAt':1,'updatedAt':1}}}
+        changed=dict(pin,count=2)
+        with patch.object(c.s,'snapshot',return_value={'tables':{}}),patch.object(c,'kobo_baseline',return_value=changed):
+            with self.assertRaises(AssertionError):c.jobs_copy_state('unused',{},pin)
 
 if __name__=='__main__':unittest.main()

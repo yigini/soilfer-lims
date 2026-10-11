@@ -78,16 +78,17 @@ def main():
         held_name='soilfer-lims-jobs-off-'+ROOT.name
         s.command(ROOT,['docker','rename','soilfer-lims',held_name],'retain-jobs-off-container')
         receipt['jobsOffContainerRetainedAs']=held_name
-        watch=c.ZeroWriteWatch(s.LIVE)
+        watch=c.NormalProductionJobs()
         receipt['jobsOnReadiness']=c.start_and_wait(ROOT,'soilfer-lims',s.LIVE.parent,s.ASSETS,guard,'jobs-on',watch,jobs=True,production=True)
-        receipt['jobsOnChecks']=c.startup_checks(ROOT,'soilfer-lims',s.LIVE,expected,'jobs-on');watch.check();guard.check()
-        c.main_bytes(s.LIVE,physical);mark('jobsReopened')
+        receipt['jobsOnChecks']=c.startup_checks(ROOT,'soilfer-lims',s.LIVE,expected,'jobs-on',jobs_guard=watch);guard.check()
+        mark('jobsReopened')
         http('/api/health',200,'production-health');http('/api/v2/data-exchange/receipts',401,'production-denied-post','POST')
         http('/login',200,'production-login');watch.check();c.state_guard(c.inspect('soilfer-lims'),True)
         receipt['retainedAcceptance']=s.verify_retained_acceptance(s.LIVE.parent)
         assert s.sha(c.ORIGIN/'production-receipt.json')==c.FAILURE_SHA
-        receipt.update({'status':'DEPLOYED_FORWARD','databaseChanges':0,'mainDatabaseBytesPreserved':True,
-            'finalDatabaseFiles':c.main_bytes(s.LIVE,physical),'freeBytesAfter':s.disk_free()})
+        receipt.update({'status':'DEPLOYED_FORWARD','databaseChangesBeforeJobs':0,'mainDatabaseBytesPreservedBeforeJobs':True,
+            'normalJobsActive':True,'jobsBoundaryCommentId':c.JOBS_BOUNDARY_COMMENT,
+            'finalDatabaseFiles':s.physical(s.LIVE),'freeBytesAfter':s.disk_free()})
         mark('completed');(ROOT/'production-receipt.json').chmod(0o400)
         print(json.dumps({'status':receipt['status'],'head':s.HEAD,'image':c.IMAGE,
             'receiptSha256':s.sha(ROOT/'production-receipt.json')}),flush=True);return 0

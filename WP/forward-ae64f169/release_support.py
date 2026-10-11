@@ -75,6 +75,7 @@ def snapshot(file, original=None, immutable=False):
     db = sqlite3.connect('file:' + str(file) + '?mode=ro' + ('&immutable=1' if immutable else ''), uri=True)
     db.row_factory = sqlite3.Row
     try:
+        db.execute('BEGIN') # One consistent read-only snapshot, including runtime observations.
         objects = {row['type'] + ':' + row['name']: dict(row) for row in db.execute(
             'SELECT type,name,tbl_name,sql FROM sqlite_master WHERE sql IS NOT NULL ORDER BY type,name')}
         names = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name")]

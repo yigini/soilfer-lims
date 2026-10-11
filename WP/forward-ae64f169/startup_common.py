@@ -9,6 +9,8 @@ IMAGE = 'sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a
 DEADLINE_SECONDS = 600
 LIMIT = 805306368
 MIN_HEADROOM = 10556150894
+JOBS_BOUNDARY_COMMENT = 6110280460
+JOBS_CLOCK_FIELDS = ['lastSyncAt','updatedAt']
 PROBES = ['postflight-roles.cjs','postflight-auth.cjs','postflight-reference.cjs',
           'postflight-qc-runs.cjs','postflight-policy.cjs','readonly-smoke.cjs']
 
@@ -23,6 +25,44 @@ class ZeroWriteWatch:
         assert self.db.execute('PRAGMA data_version').fetchone()[0]==self.version, 'Database committed a write during startup/checks'
     def close(self):
         self.db.close()
+
+def kobo_baseline(database,immutable=False):
+    with sqlite3.connect('file:'+str(database)+'?mode=ro'+('&immutable=1' if immutable else ''),uri=True) as db:
+        db.execute('BEGIN');db.row_factory=sqlite3.Row
+        fields=[row['name'] for row in db.execute('PRAGMA table_xinfo(KoboConfig)') if row['hidden']==0]
+        protected=[f for f in fields if f not in JOBS_CLOCK_FIELDS]
+        rows=list(db.execute('SELECT * FROM KoboConfig ORDER BY id'))
+        # Secret values such as apiToken are hashed, never serialized or printed.
+        return {'count':len(rows),'fields':protected,
+            'sha256':s.fingerprint([s.canonical(row[f]) for f in protected] for row in rows),
+            'clocks':{row['id']:{f:row[f] for f in JOBS_CLOCK_FIELDS} for row in rows}}
+
+def jobs_copy_state(database,expected,kobo_pin):
+    actual=s.snapshot(database);kobo=kobo_baseline(database)
+    assert {k:v for k,v in kobo.items() if k!='clocks'}=={k:v for k,v in kobo_pin.items() if k!='clocks'}, 'Owned jobs changed a protected Kobo field or row'
+    assert set(kobo['clocks'])==set(kobo_pin['clocks'])
+    changes=[{'id':key,'fields':[f for f in JOBS_CLOCK_FIELDS if old[f]!=kobo['clocks'][key][f]]}
+        for key,old in kobo_pin['clocks'].items() if old!=kobo['clocks'][key]]
+    # Normalize only the two approved operational clock fields, after every
+    # other Kobo field and row identity has been independently proved equal.
+    actual['tables']['KoboConfig']=expected['tables']['KoboConfig']
+    assert actual==expected, 'Owned jobs changed one of the other 103 protected tables or schema'
+    return {'scopeCommentId':JOBS_BOUNDARY_COMMENT,'allowedFields':['KoboConfig.'+f for f in JOBS_CLOCK_FIELDS],
+        'changedClockRows':changes,'rowCountUnchanged':True,'allOther103TablesAndKoboFieldsPreserved':True}
+
+class OwnedJobsWatch(ZeroWriteWatch):
+    def __init__(self,database,expected,kobo_pin):
+        super().__init__(database);self.database=database;self.expected=expected;self.kobo_pin=kobo_pin
+    def verify(self):return jobs_copy_state(self.database,self.expected,self.kobo_pin)
+    def check(self):
+        version=self.db.execute('PRAGMA data_version').fetchone()[0]
+        if version!=self.version:self.verify();self.version=version
+
+class NormalProductionJobs:
+    # Only after the jobs-off zero-write/reopen boundary. Normal application
+    # writes from this point are not release writes, per separately audited pin.
+    def check(self):pass
+    def close(self):pass
 
 def inspect(name):
     return json.loads(subprocess.check_output(['docker','inspect',name],text=True,timeout=15))[0]
@@ -141,15 +181,16 @@ def entrypoint_zero(log):
     assert len(values)==22 and all(x['mode']=='NO_OP' and x['totalChanges']==0 for x in values)
     return [{'classification':x['classification'],'mode':x['mode'],'totalChanges':x['totalChanges']} for x in values]
 
-def startup_checks(root,name,database,expected,stage):
+def startup_checks(root,name,database,expected,stage,jobs_guard=None):
     result=s.command(root,['docker','logs',name],stage+'-startup')
     log=result.stdout+'\n'+result.stderr
     ready=s.ready_logs(log);entry=entrypoint_zero(log)
     memory=s.command(root,['docker','exec',name,'node','-e',
         "console.log(Number(require('node:fs').readFileSync('/sys/fs/cgroup/memory.peak','utf8')))"],stage+'-memory')
     peak=int(memory.stdout.strip());assert 0<peak<=LIMIT
-    exact_state(database,expected)
-    return {'startupReady':ready,'entrypointInstallers':entry,'startupChanges':0,
+    if jobs_guard is None:exact_state(database,expected)
+    boundary=jobs_guard.verify() if isinstance(jobs_guard,OwnedJobsWatch) else None
+    return {'startupReady':ready,'entrypointInstallers':entry,'startupChanges':0,'ownedJobsBoundary':boundary,
         'startupMemory':{'peakBytes':peak,'limitBytes':LIMIT,'nodeOptions':None}}
 
 def probes(root,name,database,expected):

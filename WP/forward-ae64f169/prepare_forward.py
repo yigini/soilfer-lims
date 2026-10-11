@@ -20,12 +20,12 @@ def main():
     c.exact_state(s.LIVE,expected,immutable=True)
     normal=(c.ORIGIN/'apache-before.conf').read_bytes();held=s.CONF.read_bytes()
     assert b'R=503' not in normal and b'R=503' in held
-    files=[row['name'] for row in source['files']]+['kit-source-index.json','protected-state.json','rehearsal-receipt.json']
+    files=[row['name'] for row in source['files']]+['kit-source-index.json','protected-state.json','normal-jobs-baseline.json','rehearsal-receipt.json']
     manifest={'status':'PREPARED_FORWARD_ONLY_NOT_EXECUTED','head':s.HEAD,'image':c.IMAGE,
         'preparedUtc':s.utc(),'toolingCommit':source['head'],'proofRoot':str(proof),'originalExecutionRoot':str(c.ORIGIN),
         'originalFailureReceiptSha256':c.FAILURE_SHA,'originalManifestSha256':c.ORIGINAL_MANIFEST_SHA,
         'productionStoppedPhysical':physical,'logicalStateSha256':c.digest(expected),'deadlineSeconds':600,
-        'separateInstallerCommands':0,'databaseChangesRequired':0,'workloadControl':{
+        'separateInstallerCommands':0,'databaseChangesRequiredBeforeJobs':0,'jobsBoundaryCommentId':c.JOBS_BOUNDARY_COMMENT,'workloadControl':{
             'labAndHubBuildsOwnedByYY':True,'releaseWindowControl':'RELEASE_DAY_DISK_ABORTS_ACCEPTED'},
         'files':{name:s.sha(proof/name) for name in files}}
     gates.validate_proof(proof,manifest)

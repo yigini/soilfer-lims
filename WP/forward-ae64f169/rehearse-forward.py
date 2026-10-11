@@ -20,6 +20,7 @@ def main():
         c.writers_stopped();failed,physical=c.held_state();c.image_check()
         assert not c.inspect('soilfer-lims')['State']['Running'] and 'R=503' in s.CONF.read_text()
         baseline=s.snapshot(s.LIVE,immutable=True);c.write_new(ROOT/'protected-state.json',baseline)
+        kobo_pin=c.kobo_baseline(s.LIVE,immutable=True);c.write_new(ROOT/'normal-jobs-baseline.json',kobo_pin)
         assets=sum(f.stat().st_size for f in s.ASSETS.rglob('*') if f.is_file())
         reserve=max(c.MIN_HEADROOM,s.disk_reserve(s.LIVE.stat().st_size,413546358,assets))
         assert min(s.disk_free().values())>=reserve+2*s.LIVE.stat().st_size+assets+268435456
@@ -37,19 +38,22 @@ def main():
         # production function, bridge network, published loopback port and env.
         for jobs in [False,True]:
             stage='jobs-on' if jobs else 'jobs-off';name='lims-owned-'+ROOT.name+'-'+stage
-            names.append(name);watch=c.ZeroWriteWatch(database_dir/'dev.db')
+            names.append(name);watch=c.OwnedJobsWatch(database_dir/'dev.db',baseline,kobo_pin) if jobs else c.ZeroWriteWatch(database_dir/'dev.db')
             receipt[stage+'Readiness']=c.start_and_wait(ROOT,name,database_dir,assets_dir,guard,stage,watch,jobs=jobs)
-            receipt[stage+'Checks']=c.startup_checks(ROOT,name,database_dir/'dev.db',baseline,stage)
+            receipt[stage+'Checks']=c.startup_checks(ROOT,name,database_dir/'dev.db',baseline,stage,jobs_guard=watch if jobs else None)
             watch.check()
             if not jobs:receipt.update(c.probes(ROOT,name,database_dir/'dev.db',baseline));watch.check()
             c.owned_stop(ROOT,name,stage+'-stop');watch.close();watch=None
-            c.exact_state(database_dir/'dev.db',baseline)
-            assert s.physical(database_dir/'dev.db')['']==owned_before[''], 'Owned main DB bytes changed'
+            if jobs:receipt['normalJobsBoundary']=c.jobs_copy_state(database_dir/'dev.db',baseline,kobo_pin)
+            else:
+                c.exact_state(database_dir/'dev.db',baseline)
+                assert s.physical(database_dir/'dev.db')['']==owned_before[''], 'Owned main DB bytes changed before jobs activation'
             guard.check()
         c.writers_stopped();assert s.physical(s.LIVE)==physical
         assert s.sha(c.ORIGIN/'production-receipt.json')==c.FAILURE_SHA
-        receipt.update({'status':'PASSED_FORWARD_STARTUP','completedUtc':s.utc(),'databaseChanges':0,
-            'ownedMainBytesPreserved':True,'productionFilesUntouched':True,'freeBytesAfter':s.disk_free()})
+        receipt.update({'status':'PASSED_FORWARD_STARTUP','completedUtc':s.utc(),'databaseChangesBeforeJobs':0,
+            'ownedMainBytesPreservedBeforeJobs':True,'productionFilesUntouched':True,'freeBytesAfter':s.disk_free(),
+            'jobsBoundaryCommentId':c.JOBS_BOUNDARY_COMMENT,'ownedAfterJobs':s.physical(database_dir/'dev.db')})
     except BaseException as error:
         receipt.update({'status':'FAILED_FORWARD_PROOF','error':str(error),'traceback':traceback.format_exc(),'completedUtc':s.utc()})
         for name in names:
