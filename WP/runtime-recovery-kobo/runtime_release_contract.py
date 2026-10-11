@@ -90,6 +90,7 @@ def validate_proof(proof, pin):
 
 
 def proof_source_binding(proof, pin):
+    pairing_contract(proof)
     require(proof['toolingCommit'] == REVIEWED_PROOF_SOURCE and
         proof['proofSourceReviewId'] == pin['proofSourceReviewId'] == PROOF_SOURCE_REVIEW_ID and
         proof['diskMeasurementGuardSha256'] == MEASUREMENT_GUARD_SHA and
@@ -107,15 +108,32 @@ def proof_source_binding(proof, pin):
         'Corrected proof source authority or measurement contract differs')
 
 
-def sealed_scheduler_evidence(proof, expected, log, first, second, full):
+def pairing_contract(row):
+    require(row['refusalPairingScopeCommentId'] == REFUSAL_PAIRING_SCOPE_COMMENT_ID and
+        row['schedulerRefusalPairing'] == REFUSAL_PAIRING_POLICY and
+        row['REFUSAL_PAIR_WINDOW_SECONDS'] == REFUSAL_PAIR_WINDOW_SECONDS,
+        'Cross-stream pairing authority or timing differs')
+
+
+def pairing_review_tokens():
+    return ['refusalPairingScopeCommentId=' + str(REFUSAL_PAIRING_SCOPE_COMMENT_ID),
+        'schedulerRefusalPairing=' + REFUSAL_PAIRING_POLICY, 'REFUSAL_PAIR_WINDOW_SECONDS=1']
+
+
+def sealed_scheduler_evidence(proof, expected, stdout, stderr, first, second, full):
     """Recheck the original timestamped log against its sealed copy results."""
     require(proof['expectedSchedulerRefusals'] == expected, 'Fresh baseline refusal scope differs')
-    observed = scheduler_refusals(log, expected)
+    observed = scheduler_refusals(stdout, stderr, expected)
+    pairing_contract(proof)
+    lab_counts = {lab: sum(row['labId'] == lab for row in observed)
+        for lab in sorted({row['labId'] for row in expected})}
+    require(proof['schedulerRefusalLabCounts'] == lab_counts and
+        proof['schedulerRefusalConfigCountsDerivedFromTriggers'] is True, 'Per-lab refusal counts differ')
     counts = {row['configId']: sum(value['configId'] == row['configId'] for value in observed)
         for row in expected}
     require(proof['observedSchedulerRefusals'] == observed and proof['schedulerRefusalCounts'] == counts,
         'Retained scheduler refusal evidence differs')
-    completions = completed_syncs(log)
+    completions = completed_syncs(stdout)
     require(len(completions) >= 2 and proof['firstScheduledSync'] == completions[0] and
         proof['secondScheduledSync'] == completions[1], 'Original natural completion evidence differs')
     protected = sorted(row['configId'] for row in expected)
@@ -128,6 +146,7 @@ def sealed_scheduler_evidence(proof, expected, log, first, second, full):
 
 
 def measurement_manifest(manifest):
+    pairing_contract(manifest)
     require(manifest['sourceReviewId'] == PROOF_SOURCE_REVIEW_ID and
         manifest['proofToolingCommit'] == REVIEWED_PROOF_SOURCE and
         manifest['diskMeasurementGuardSha256'] == manifest['files']['known_core_disk_guard_v2.py'] == MEASUREMENT_GUARD_SHA and
@@ -157,7 +176,9 @@ def production_source_review(review, tooling, files, now=None):
         'baselineVanishedProcessPolicy=' + BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX=3',
         'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10', 'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
         'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
-    tokens += [files[name] for name in PRODUCTION_SOURCE_FILES]
+    tokens += [files[name] for name in PRODUCTION_SOURCE_FILES] + pairing_review_tokens()
+    tokens += [REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, REVIEWED_PROOF_CONTRACT_SHA,
+        'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID)]
     require(all(token in review['body'] for token in tokens), 'Exact production baseline source approval missing')
     now = now or datetime.datetime.now(datetime.timezone.utc)
     require(utc_seconds(review['created_at']) <= now.timestamp(), 'Production source review is future-dated')
@@ -176,11 +197,11 @@ def proof_authority(proof, pin, source, authority, authority_sha):
         authority['head'] == pin['head'] and authority['proofSourceReview']['id'] == PROOF_SOURCE_REVIEW_ID,
         'Original proof authority or measured source differs')
     source_review_pass(authority['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA,
-        verifier_sha=REVIEWED_VERIFIER_SHA, contract_sha=REVIEWED_PROOF_CONTRACT_SHA, baseline_guard_sha=BASELINE_GUARD_SHA)
+        verifier_sha=REVIEWED_VERIFIER_SHA, contract_sha=REVIEWED_PROOF_CONTRACT_SHA, baseline_guard_sha=BASELINE_GUARD_SHA, stream_pairing=True)
 
 
 def review_tokens(manifest, manifest_sha):
-    return [PHRASE, manifest['head'], manifest['image'], manifest_sha,
+    return pairing_review_tokens() + [PHRASE, manifest['head'], manifest['image'], manifest_sha,
         manifest['files']['deploy_runtime.py'], manifest['files']['rehearsal-receipt.json'],
         manifest['files']['startup_common.py'], manifest['files']['yy-authorization-evidence.md'],
         manifest['files']['target-pin.json'], HISTORICAL_RECEIPT_SHA,
@@ -208,6 +229,7 @@ def formal_pr_review(review):
 def verify_gate(manifest, gate, manifest_sha, now=None):
     now = now or datetime.datetime.now(datetime.timezone.utc)
     measurement_manifest(manifest)
+    pairing_contract(gate)
     require(manifest['status'] == KIT_STATUS and manifest['baseHead'] == BASE_HEAD and
         manifest['head'] != BASE_HEAD and manifest['workloadControl'] == WORKLOAD_PINS and
         manifest['separateInstallerCommands'] == 0,
@@ -224,7 +246,7 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
         gate['coreDeallocationConfirmationDeadlineSeconds'] == CORE_CONFIRMATION_SECONDS,
         'Corrected source approval was superseded or timing differs')
     source_review_pass(gate['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA, now,
-        verifier_sha=REVIEWED_VERIFIER_SHA, contract_sha=REVIEWED_PROOF_CONTRACT_SHA, baseline_guard_sha=BASELINE_GUARD_SHA)
+        verifier_sha=REVIEWED_VERIFIER_SHA, contract_sha=REVIEWED_PROOF_CONTRACT_SHA, baseline_guard_sha=BASELINE_GUARD_SHA, stream_pairing=True)
     require(gate['productionBaselineSourceReview']['id'] == manifest['productionBaselineSourceReviewId'] and
         gate['laterProductionSourceAuditFailure'] is False and
         gate['productionBaselineScopeCommentId'] == PRODUCTION_BASELINE_SCOPE_ID,

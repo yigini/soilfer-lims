@@ -22,8 +22,13 @@ class RefusalScopeTests(unittest.TestCase):
                 ', Project: ' + row['projectCode'],
                 '[KOBO_SCHEDULER] Error syncing lab ' + row['labId'] + ': ' + row['message']])
 
+    def parse(self, log, bound):
+        stdout = '\n'.join(line for line in log.splitlines() if 'Error syncing' not in line and 'FATAL ERROR' not in line and 'General scheduler error' not in line)
+        stderr = '\n'.join(line for line in log.splitlines() if line not in stdout.splitlines())
+        return scheduler_refusals(stdout, stderr, bound)
+
     def test_exact_refusals_bound_to_fresh_rows_and_triggers(self):
-        result = scheduler_refusals(self.log(), self.bound())
+        result = self.parse(self.log(), self.bound())
         self.assertEqual([row['configId'] for row in result], [row[0] for row in REFUSAL_TUPLES])
         self.assertTrue(all(row['text'].endswith(row['message']) for row in result))
 
@@ -53,24 +58,24 @@ class RefusalScopeTests(unittest.TestCase):
                 log + '\n2026-10-11T20:41:00Z [KOBO_SCHEDULER] Error syncing lab TUR: unrelated error',
                 log.replace('Intake disallowed.', 'Intake disallowed. extra')]:
             with self.assertRaises(RuntimeError):
-                scheduler_refusals(changed, self.bound())
+                self.parse(changed, self.bound())
 
     def test_missing_trigger_extra_refusal_and_empty_allowance_refuse(self):
         errors = '\n'.join(line for line in self.log().splitlines() if 'Error syncing' in line)
         for log, bound in [(errors, self.bound()), (self.log(), []),
                 (self.log() + '\n' + errors, self.bound())]:
             with self.assertRaises(RuntimeError):
-                scheduler_refusals(log, bound)
+                self.parse(log, bound)
 
     def test_fatal_general_and_untimestamped_errors_refuse(self):
         for text in ['FATAL ERROR: heap exhausted', '[KOBO_SCHEDULER] General scheduler error: failure',
                 '[KOBO_SCHEDULER] Error syncing lab TUR: failure']:
             with self.assertRaises(RuntimeError):
-                scheduler_refusals(self.log() + '\n' + text, self.bound())
+                self.parse(self.log() + '\n' + text, self.bound())
 
     def test_repeat_ticks_record_exact_counts_and_timestamps(self):
         log = self.log() + '\n' + self.log().replace('20:40:', '20:41:')
-        result = scheduler_refusals(log, self.bound())
+        result = self.parse(log, self.bound())
         self.assertEqual(len(result), 8)
         self.assertEqual(len({(row['configId'], row['utc']) for row in result}), 8)
 

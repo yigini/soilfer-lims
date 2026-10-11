@@ -13,6 +13,9 @@ TARGET_PROJECT = 'SOILFER-US'
 REFUSAL_SCOPE_COMMENT_ID = 6113601584
 REFUSAL_POLICY = 'EXACT_FRESH_COPY_CONFIG_REFUSALS'
 CARDINALITY_POLICY = 'SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS'
+REFUSAL_PAIRING_SCOPE_COMMENT_ID = 6114143349
+REFUSAL_PAIRING_POLICY = 'STREAM_ORDER_ONE_TO_ONE'
+REFUSAL_PAIR_WINDOW_SECONDS = 1
 REFUSAL_TUPLES = [
     ('ec5a5a67-3f5a-4682-88df-edb0e07e6485', 'MOZ-LAB1', 'MOZL',
         "[KOBO] Configured project 'MOZL' does not exist in the database."),
@@ -62,7 +65,7 @@ def validate_candidate(pin, built, image):
 
 
 def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None,
-                       verifier_sha=None, contract_sha=None, baseline_guard_sha=None):
+                       verifier_sha=None, contract_sha=None, baseline_guard_sha=None, stream_pairing=False):
     """A NEW measurement source needs its own explicit exact-byte approval."""
     require(review['id'] != 6112725472 and review['html_url'] ==
         'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(review['id']),
@@ -80,6 +83,11 @@ def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None,
         tokens += [baseline_guard_sha,
             'baselineVanishedProcessPolicy=CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE',
             'BASELINE_ATTEMPTS_MAX=3', 'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10']
+    if stream_pairing:
+        require(verifier_sha is not None and contract_sha is not None and baseline_guard_sha is not None,
+            'Stream pairing requires all corrected helper bindings')
+        tokens += ['refusalPairingScopeCommentId=' + str(REFUSAL_PAIRING_SCOPE_COMMENT_ID),
+            'schedulerRefusalPairing=' + REFUSAL_PAIRING_POLICY, 'REFUSAL_PAIR_WINDOW_SECONDS=1']
     require(all(value in review['body'] for value in tokens), 'Exact corrected source approval missing')
     now = now or datetime.datetime.now(datetime.timezone.utc)
     require(utc_seconds(review['created_at']) <= now.timestamp(), 'Source review is future-dated')
@@ -106,39 +114,68 @@ def expected_refusals(configs, labs, projects):
         for key, lab, project, message in REFUSAL_TUPLES]
 
 
-def scheduler_refusals(log, expected):
-    """Exact lines only; pair each refusal with an observed mapped trigger.
+def docker_stamp_ns(stamp):
+    """Keep nanosecond comparisons exact at the inclusive one-second bound."""
+    match = re.fullmatch(r'(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.(\d{1,9}))?Z', stamp)
+    require(match is not None, 'Invalid Docker UTC timestamp')
+    base = datetime.datetime.fromisoformat(match[1] + '+00:00')
+    return int(base.timestamp()) * 1000000000 + int((match[2] or '').ljust(9, '0'))
 
-    Streams are merged by their Docker timestamps, not stdout/stderr arrival.
-    Each per-lab trigger is consumed at most once, so extra refusals fail.
+
+def scheduler_refusals(stdout, stderr, expected):
+    """Pair exact config refusals in each stream's order, never sorted stamps.
+
+    Docker independently timestamps stdout and stderr. A signed skew up to
+    one second is allowed only for the one-to-one exact fresh-bound pairs.
+    Only a bounded trailing trigger suffix may still be in flight.
     """
-    records = []
-    for line in log.splitlines():
-        stamp, separator, message = line.partition(' ')
-        if 'FATAL ERROR' in line or '[KOBO_SCHEDULER] General scheduler error' in line:
-            raise RuntimeError('Owned scheduler/runtime error; retain this failed proof')
-        if separator and re.fullmatch(r'\d{4}-\d\d-\d\dT\S+Z', stamp):
-            records.append((stamp, message))
-        elif '[KOBO_SCHEDULER] Error syncing' in line:
-            raise RuntimeError('Untimestamped scheduler error')
-    pending = {}
-    observed = []
-    for stamp, message in sorted(records, key=lambda row: row[0]):
-        trigger = re.fullmatch(r'\[KOBO_SCHEDULER\] Triggering scheduled sync for Lab: ([^,]+), Project: (.+)', message)
-        if trigger:
-            matches = [row for row in expected if (row['labId'], row['projectCode']) == trigger.groups()]
-            if matches:
-                require(len(matches) == 1, 'Ambiguous bound scheduler trigger')
-                pending.setdefault(trigger[1], []).append((stamp, matches[0]))
-        if '[KOBO_SCHEDULER] Error syncing' not in message:
-            continue
-        error = re.fullmatch(r'\[KOBO_SCHEDULER\] Error syncing lab ([^:]+): (.+)', message)
-        require(error is not None, 'Unexpected scheduler error line')
-        queue = pending.get(error[1], [])
-        require(bool(queue), 'Scheduler refusal has no exact bound trigger')
-        trigger_stamp, row = queue.pop(0)
-        require(error[2] == row['message'], 'Unexpected scheduler error message')
-        observed.append({**row, 'utc': stamp, 'triggerUtc': trigger_stamp, 'text': message})
+    triggers, errors = {}, []
+    for stream, log in [('stdout', stdout), ('stderr', stderr)]:
+        for index, line in enumerate(log.splitlines(), 1):
+            stamp, separator, message = line.partition(' ')
+            if 'FATAL ERROR' in line or '[KOBO_SCHEDULER] General scheduler error' in line:
+                raise RuntimeError('Owned scheduler/runtime error; retain this failed proof')
+            trigger_line = '[KOBO_SCHEDULER] Triggering scheduled sync' in line
+            error_line = '[KOBO_SCHEDULER] Error syncing' in line
+            if not trigger_line and not error_line:
+                continue
+            require(separator and re.fullmatch(r'\d{4}-\d\d-\d\dT\S+Z', stamp),
+                'Untimestamped scheduler trigger or error')
+            ns = docker_stamp_ns(stamp)
+            if trigger_line:
+                require(stream == 'stdout', 'Scheduler trigger is in the wrong stream')
+                trigger = re.fullmatch(r'\[KOBO_SCHEDULER\] Triggering scheduled sync for Lab: ([^,]+), Project: (.+)', message)
+                require(trigger is not None, 'Unexpected scheduler trigger line')
+                matches = [row for row in expected if (row['labId'], row['projectCode']) == trigger.groups()]
+                if matches:
+                    require(len(matches) == 1, 'Ambiguous bound scheduler trigger')
+                    triggers.setdefault(trigger[1], []).append((stamp, ns, index, line, matches[0]))
+            if error_line:
+                require(stream == 'stderr', 'Scheduler refusal is in the wrong stream')
+                error = re.fullmatch(r'\[KOBO_SCHEDULER\] Error syncing lab ([^:]+): (.+)', message)
+                require(error is not None, 'Unexpected scheduler error line')
+                require(any(row['labId'] == error[1] and row['message'] == error[2] for row in expected),
+                    'Unexpected scheduler error message or lab')
+                errors.append((stamp, ns, index, line, message, error[1], error[2]))
+    consumed, observed = {}, []
+    for stamp, ns, index, raw, message, lab, error_message in errors:
+        count = consumed.get(lab, 0)
+        queue = triggers.get(lab, [])
+        require(count < len(queue), 'Scheduler refusal has no exact bound trigger')
+        trigger_stamp, trigger_ns, trigger_index, trigger_raw, row = queue[count]
+        require(error_message == row['message'], 'Unexpected scheduler error message')
+        delta = ns - trigger_ns
+        require(abs(delta) <= REFUSAL_PAIR_WINDOW_SECONDS * 1000000000,
+            'Scheduler refusal pair exceeds the one-second window')
+        consumed[lab] = count + 1
+        observed.append({**row, 'utc': stamp, 'triggerUtc': trigger_stamp, 'text': message,
+            'triggerRawLine': trigger_raw, 'errorRawLine': raw,
+            'stdoutLineIndex': trigger_index, 'stderrLineIndex': index,
+            'signedDeltaSeconds': delta / 1000000000})
+    for lab, queue in triggers.items():
+        bound_count = len([row for row in expected if row['labId'] == lab])
+        require(len(queue) - consumed.get(lab, 0) <= bound_count,
+            'Too many trailing in-flight scheduler triggers')
     return observed
 
 

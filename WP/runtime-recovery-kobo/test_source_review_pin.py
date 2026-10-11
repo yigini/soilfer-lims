@@ -72,6 +72,23 @@ class SourceReviewPin(unittest.TestCase):
                 source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now,
                     verifier_sha='4' * 64, contract_sha='5' * 64, baseline_guard_sha='6' * 64)
 
+    def test_stream_pairing_requires_new_scope_policy_and_window(self):
+        extra = ['4' * 64, '5' * 64, '6' * 64, 'refusalScopeCommentId=6113601584',
+            'EXACT_FRESH_COPY_CONFIG_REFUSALS', 'SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS',
+            'baselineVanishedProcessPolicy=CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE',
+            'BASELINE_ATTEMPTS_MAX=3', 'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10',
+            'refusalPairingScopeCommentId=6114143349', 'schedulerRefusalPairing=STREAM_ORDER_ONE_TO_ONE',
+            'REFUSAL_PAIR_WINDOW_SECONDS=1']
+        body = self.review['body'] + '\n' + '\n'.join(extra)
+        for omitted in [None] + extra:
+            self.review['body'] = body if omitted is None else body.replace(omitted, '')
+            def verify():
+                source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now,
+                    verifier_sha='4' * 64, contract_sha='5' * 64, baseline_guard_sha='6' * 64, stream_pairing=True)
+            if omitted is None: verify()
+            else:
+                with self.subTest(omitted=omitted), self.assertRaises(RuntimeError): verify()
+
     def test_v3_cannot_omit_other_corrected_helpers(self):
         with self.assertRaises(RuntimeError):
             source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now, baseline_guard_sha='6' * 64)

@@ -62,11 +62,17 @@ def read_logs(name, receipt):
     require(result.returncode == 0, 'Cannot observe the owned scheduler')
     log = result.stdout + '\n' + result.stderr
     require(len(log.encode()) <= 8 * 1024 * 1024, 'Owned logs exceed the evidence bound')
-    observed = scheduler_refusals(log, receipt['expectedSchedulerRefusals'])
+    observed = scheduler_refusals(result.stdout, result.stderr, receipt['expectedSchedulerRefusals'])
     receipt['observedSchedulerRefusals'] = observed
+    receipt['schedulerRefusalLabCounts'] = {lab: sum(row['labId'] == lab for row in observed)
+        for lab in sorted({row['labId'] for row in receipt['expectedSchedulerRefusals']})}
+    receipt['schedulerRefusalConfigCountsDerivedFromTriggers'] = True
+    # Preserve stream separation for the final seal; completion parsing uses stdout only.
+    receipt['_schedulerStdout'] = result.stdout
+    receipt['_schedulerStderr'] = result.stderr
     receipt['schedulerRefusalCounts'] = {row['configId']: sum(value['configId'] == row['configId']
         for value in observed) for row in receipt['expectedSchedulerRefusals']}
-    return log
+    return result.stdout
 
 
 class CopyObservation:
@@ -137,7 +143,7 @@ def main():
     source_review_pass(source_review, source['head'], s.sha(__file__),
         HELPER_HASHES['known_core_disk_guard_v2.py'],
         verifier_sha=HELPER_HASHES['kobo_copy_preservation.py'], contract_sha=s.sha(ROOT / 'proof_contract.py'),
-        baseline_guard_sha=HELPER_HASHES['known_core_disk_guard_v3.py'])
+        baseline_guard_sha=HELPER_HASHES['known_core_disk_guard_v3.py'], stream_pairing=True)
     built_root = pathlib.Path(pin['buildRoot'])
     require(built_root.parent == pathlib.Path('/opt/lims/releases') and
         built_root.name.startswith('runtime-kobo-build-'), 'Unexpected build root')
@@ -181,6 +187,9 @@ def main():
         'separateInstallerCommands': 0, 'scopeCommentIds': [6112209155, 6112305172, 6112436098, REFUSAL_SCOPE_COMMENT_ID],
         'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
         'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+        'refusalPairingScopeCommentId': REFUSAL_PAIRING_SCOPE_COMMENT_ID,
+        'schedulerRefusalPairing': REFUSAL_PAIRING_POLICY,
+        'REFUSAL_PAIR_WINDOW_SECONDS': REFUSAL_PAIR_WINDOW_SECONDS,
         'copyVerifierSha256': HELPER_HASHES['kobo_copy_preservation.py'],
         'proofContractSha256': s.sha(ROOT / 'proof_contract.py'),
         'existingSampleVerifierPolicy': 'STRICT_ORIGINAL_ROWS', 'effectiveUid': os.geteuid(),
@@ -291,9 +300,12 @@ def main():
         receipt['healthySoakSeconds'] = utc_seconds(receipt['observedThroughUtc']) - utc_seconds(ready['readyUtc'])
         require_final_observation(first, second, ready['readyUtc'], receipt['observedThroughUtc'], interval,
             c.inspect(name)['RestartCount'], receipt['peakBytes'], receipt['healthySoakSeconds'])
-        with (ROOT / 'candidate-jobs-on-timestamped.log').open('x', encoding='utf-8') as out:
-            out.write(log)
-        receipt['schedulerLogSha256'] = s.sha(ROOT / 'candidate-jobs-on-timestamped.log')
+        for stream in ['Stdout', 'Stderr']:
+            path = ROOT / ('candidate-jobs-on-' + stream.lower() + '.log')
+            with path.open('x', encoding='utf-8', newline='') as out:
+                out.write(receipt.pop('_scheduler' + stream))
+            path.chmod(0o400)
+            receipt['scheduler' + stream + 'Sha256'] = s.sha(path)
         receipt['commitVersionsObserved'] = watch.versions
         watch.close(); watch = None
         c.owned_stop(ROOT, name, 'candidate-jobs-on-stop')
@@ -337,6 +349,7 @@ def main():
         ledger = ROOT / 'disk-allocation-observations.jsonl'
         if ledger.exists():
             receipt['diskAllocationObservationsSha256'] = s.sha(ledger)
+        receipt.pop('_schedulerStdout', None); receipt.pop('_schedulerStderr', None)
         receipt['completedUtc'] = s.utc()
         write_new('rehearsal-receipt.json', receipt)
         lock.close()

@@ -18,10 +18,14 @@ paths.update({name: 'WP/runtime-recovery-kobo/' + name + '.py' for name in [
     'test_capture_kobo_fetch', 'test_runtime_release_contract', 'test_core_deallocation_confirmation',
     'test_source_review_pin', 'test_scheduler_refusal_scope', 'known_core_disk_guard_v3',
     'test_baseline_confirmation', 'known_core_disk_guard_deploy', 'deploy_runtime', 'launch_runtime_release',
-    'test_deploy_baseline_guard']})
+    'test_deploy_baseline_guard', 'test_scheduler_stream_pairing']})
 for name, path in paths.items():
     data = subprocess.check_output(['git', 'show', head + ':' + path])
     files[name] = {'data': base64.b64encode(data).decode(), 'sha256': hashlib.sha256(data).hexdigest()}
+fixtures = {}
+for name in ['jobs-on.stdout.log', 'jobs-on.stderr.log']:
+    fixtures[name] = base64.b64encode(subprocess.check_output(['git', 'show', head + ':WP/runtime-recovery-kobo/proof-failure-211630Z-original-logs/' + name])).decode()
+files['test_scheduler_stream_pairing']['fixtures'] = fixtures
 payload = base64.b64encode(json.dumps({'head': head, 'files': files}).encode()).decode()
 code = '''import base64,datetime,hashlib,json,sys,time,types,unittest
 p=json.loads(base64.b64decode(PAYLOAD));start=time.monotonic();tests=[]

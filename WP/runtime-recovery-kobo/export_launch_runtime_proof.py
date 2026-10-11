@@ -79,7 +79,7 @@ def main():
     source_review_pass(source_review, tooling, index['rehearse_runtime.py']['sha256'],
         index['known_core_disk_guard_v2.py']['sha256'],
         verifier_sha=index['kobo_copy_preservation.py']['sha256'], contract_sha=index['proof_contract.py']['sha256'],
-        baseline_guard_sha=index['known_core_disk_guard_v3.py']['sha256'])
+        baseline_guard_sha=index['known_core_disk_guard_v3.py']['sha256'], stream_pairing=True)
     source_comments = json.loads(subprocess.check_output(['gh', 'api',
         'repos/yigini/soilfer-lims/issues/162/comments?per_page=100', '--paginate', '--slurp'],
         text=True, encoding='utf-8'))

@@ -16,6 +16,8 @@ class RuntimeGateTests(unittest.TestCase):
             'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
             'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
             'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+            'refusalPairingScopeCommentId': REFUSAL_PAIRING_SCOPE_COMMENT_ID,
+            'schedulerRefusalPairing': REFUSAL_PAIRING_POLICY, 'REFUSAL_PAIR_WINDOW_SECONDS': REFUSAL_PAIR_WINDOW_SECONDS,
             'baselineVanishedProcessPolicy': BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX': BASELINE_ATTEMPTS_MAX,
             'BASELINE_CONFIRMATION_DEADLINE_SECONDS': BASELINE_CONFIRMATION_SECONDS,
             'productionBaselineScopeCommentId': PRODUCTION_BASELINE_SCOPE_ID,
@@ -58,6 +60,8 @@ class RuntimeGateTests(unittest.TestCase):
             'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
             'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
             'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+            'refusalPairingScopeCommentId': REFUSAL_PAIRING_SCOPE_COMMENT_ID,
+            'schedulerRefusalPairing': REFUSAL_PAIRING_POLICY, 'REFUSAL_PAIR_WINDOW_SECONDS': REFUSAL_PAIR_WINDOW_SECONDS,
             'baselineVanishedProcessPolicy': BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX': BASELINE_ATTEMPTS_MAX,
             'BASELINE_CONFIRMATION_DEADLINE_SECONDS': BASELINE_CONFIRMATION_SECONDS,
             'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
@@ -68,7 +72,7 @@ class RuntimeGateTests(unittest.TestCase):
                     BASELINE_GUARD_SHA, REVIEWED_VERIFIER_SHA, REVIEWED_PROOF_CONTRACT_SHA,
                     'baselineVanishedProcessPolicy=' + BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX=3',
                     'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10', 'refusalScopeCommentId=6113601584',
-                    REFUSAL_POLICY, CARDINALITY_POLICY,
+                    REFUSAL_POLICY, CARDINALITY_POLICY, *pairing_review_tokens(),
                     'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
                     'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'])}})
         production_tokens = ['Source review: PASS', self.manifest['packagingCommit'], DEPLOY_BASELINE_GUARD_SHA,
@@ -78,7 +82,9 @@ class RuntimeGateTests(unittest.TestCase):
             'baselineVanishedProcessPolicy=' + BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX=3',
             'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10', 'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
             'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
-        production_tokens += [self.manifest['files'][name] for name in PRODUCTION_SOURCE_FILES]
+        production_tokens += [self.manifest['files'][name] for name in PRODUCTION_SOURCE_FILES] + pairing_review_tokens()
+        production_tokens += [REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, REVIEWED_PROOF_CONTRACT_SHA,
+            'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID)]
         self.gate['productionBaselineSourceReview'] = {'id': 8000000000,
             'html_url': 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-8000000000',
             'created_at': '2026-10-11T19:58:00Z', 'body': '\n'.join(production_tokens)}
@@ -193,6 +199,8 @@ class RuntimeGateTests(unittest.TestCase):
             'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
             'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
             'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+            'refusalPairingScopeCommentId': REFUSAL_PAIRING_SCOPE_COMMENT_ID,
+            'schedulerRefusalPairing': REFUSAL_PAIRING_POLICY, 'REFUSAL_PAIR_WINDOW_SECONDS': REFUSAL_PAIR_WINDOW_SECONDS,
             'baselineVanishedProcessPolicy': BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX': BASELINE_ATTEMPTS_MAX,
             'BASELINE_CONFIRMATION_DEADLINE_SECONDS': BASELINE_CONFIRMATION_SECONDS, 'baselineAttempt': 2,
             'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
@@ -204,6 +212,7 @@ class RuntimeGateTests(unittest.TestCase):
                            ('baselineMeasurementGuardSha256', ORIGINAL_GUARD_SHA), ('copyVerifierSha256', 'c' * 64),
                            ('proofContractSha256', 'd' * 64), ('refusalScopeCommentId', 1),
                            ('schedulerRefusalPolicy', 'ANY_ERROR'), ('intakeCardinalityPolicy', 'DISTINCT_IDS'),
+                 ('refusalPairingScopeCommentId', 1), ('schedulerRefusalPairing', 'SORTED'), ('REFUSAL_PAIR_WINDOW_SECONDS', 2),
                            ('baselineVanishedProcessPolicy', 'ANY_ERROR'), ('BASELINE_ATTEMPTS_MAX', 4),
                            ('BASELINE_CONFIRMATION_DEADLINE_SECONDS', 11), ('baselineAttempt', 0),
                            ('coreDeallocationConfirmationDeadlineSeconds', 11), ('authoritySha256', 'invalid')]:
@@ -214,7 +223,8 @@ class RuntimeGateTests(unittest.TestCase):
         for key, value in [('baselineMeasurementGuardSha256', ORIGINAL_GUARD_SHA),
                 ('copyVerifierSha256', 'c' * 64), ('proofContractSha256', 'd' * 64),
                 ('refusalScopeCommentId', 1), ('schedulerRefusalPolicy', 'ANY_ERROR'),
-                ('intakeCardinalityPolicy', 'DISTINCT_IDS'), ('baselineVanishedProcessPolicy', 'ANY_ERROR'),
+                ('intakeCardinalityPolicy', 'DISTINCT_IDS'),
+                 ('refusalPairingScopeCommentId', 1), ('schedulerRefusalPairing', 'SORTED'), ('REFUSAL_PAIR_WINDOW_SECONDS', 2), ('baselineVanishedProcessPolicy', 'ANY_ERROR'),
                 ('BASELINE_ATTEMPTS_MAX', 4), ('BASELINE_CONFIRMATION_DEADLINE_SECONDS', 11)]:
             for location in ['manifest', 'gate']:
                 original = copy.deepcopy((self.manifest, self.gate))
@@ -256,7 +266,8 @@ class SealedSchedulerTests(unittest.TestCase):
                 row['labId'] + ': ' + row['message']]
         lines += ['2026-10-11T21:00:10Z [KOBO_SCHEDULER] Completed sync for ZMB-LAB1: { newSamples: 2, skipped: 1 }',
             '2026-10-11T21:15:10Z [KOBO_SCHEDULER] Completed sync for ZMB-LAB1: { newSamples: 0, skipped: 0 }']
-        self.log = '\n'.join(lines)
+        self.stdout = '\n'.join(line for line in lines if 'Error syncing' not in line)
+        self.stderr = '\n'.join(line for line in lines if 'Error syncing' in line)
         protected = sorted(row['configId'] for row in self.expected)
         self.first = {'protectedRefusalConfigIds': protected, 'newSampleCount': {TARGET_CONFIG: 2},
             'newSamplePairs': {TARGET_CONFIG: [{'kobo_id': '7', 'depth': 'D1'}, {'kobo_id': '7', 'depth': 'D2'}]},
@@ -264,32 +275,37 @@ class SealedSchedulerTests(unittest.TestCase):
         self.second = {'protectedRefusalConfigIds': protected, 'newSampleCount': {TARGET_CONFIG: 0},
             'newSamplePairs': {TARGET_CONFIG: []}, 'newSubmissionIds': {}, 'newSampleDepthSplit': {TARGET_CONFIG: {}}}
         self.full = copy.deepcopy(self.first)
-        completions = completed_syncs(self.log); observed = scheduler_refusals(self.log, self.expected)
+        completions = completed_syncs(self.stdout); observed = scheduler_refusals(self.stdout, self.stderr, self.expected)
         self.proof = {'expectedSchedulerRefusals': self.expected, 'observedSchedulerRefusals': observed,
             'schedulerRefusalCounts': {row['configId']: 1 for row in self.expected},
+            'schedulerRefusalLabCounts': {'MOZ-LAB1': 1, 'TUR': 3},
+            'schedulerRefusalConfigCountsDerivedFromTriggers': True,
+            'refusalPairingScopeCommentId': REFUSAL_PAIRING_SCOPE_COMMENT_ID,
+            'schedulerRefusalPairing': REFUSAL_PAIRING_POLICY, 'REFUSAL_PAIR_WINDOW_SECONDS': REFUSAL_PAIR_WINDOW_SECONDS,
             'firstScheduledSync': completions[0], 'secondScheduledSync': completions[1],
             'firstIntakeSummary': intake_summary(self.first, completions[0]),
             'secondIntakeSummary': intake_summary(self.second, completions[1]),
             'secondGenuinelyNewSubmissionIds': []}
 
-    def check(self): sealed_scheduler_evidence(self.proof, self.expected, self.log, self.first, self.second, self.full)
+    def check(self): sealed_scheduler_evidence(self.proof, self.expected, self.stdout, self.stderr, self.first, self.second, self.full)
 
     def test_original_sealed_log_refusals_and_two_depth_sample_rows_pass(self): self.check()
 
     def test_changed_baseline_or_observed_refusal_counts_refuse(self):
         original = copy.deepcopy(self.proof)
         for key, value in [('expectedSchedulerRefusals', []), ('observedSchedulerRefusals', []),
-                ('schedulerRefusalCounts', {})]:
+                ('schedulerRefusalCounts', {}), ('schedulerRefusalLabCounts', {}),
+                ('schedulerRefusalConfigCountsDerivedFromTriggers', False)]:
             self.proof[key] = value
             with self.subTest(key=key), self.assertRaises(RuntimeError): self.check()
             self.proof = copy.deepcopy(original)
 
     def test_missing_completion_unknown_error_or_weakened_protection_refuse(self):
-        log = self.log
+        log = self.stdout
         for changed in [log.splitlines()[0], log + '\n2026-10-11T21:16:00Z [KOBO_SCHEDULER] Error syncing lab TUR: other']:
-            self.log = changed
+            self.stdout = changed
             with self.assertRaises(RuntimeError): self.check()
-        self.log = log
+        self.stdout = log
         for state in [self.first, self.second, self.full]:
             protected = state['protectedRefusalConfigIds']; state['protectedRefusalConfigIds'] = []
             with self.assertRaises(RuntimeError): self.check()

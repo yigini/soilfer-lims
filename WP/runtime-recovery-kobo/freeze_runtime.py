@@ -113,7 +113,8 @@ def main():
         prior_fetched_ids=receipt['priorFetchedIds'], fetched_ids=final_ids, refusal_configs=refusal_configs) ==
         json.loads(files['second-sync-preservation.json']), 'Retained second-sync backup differs from its proof')
     sealed_scheduler_evidence(receipt, expected_refusal_rows,
-        (proof / 'candidate-jobs-on-timestamped.log').read_text(encoding='utf-8'),
+        (proof / 'candidate-jobs-on-stdout.log').read_text(encoding='utf-8'),
+        (proof / 'candidate-jobs-on-stderr.log').read_text(encoding='utf-8'),
         json.loads(files['first-sync-preservation.json']), json.loads(files['second-sync-preservation.json']),
         json.loads(files['full-copy-preservation.json']))
     files['packaging-source-index.json'] = (ROOT / 'packaging-source-index.json').read_bytes()
@@ -122,7 +123,8 @@ def main():
     references = {'rehearsal-receipt.json': receipt_sha,
         'fresh-live-backup.db': receipt['freshCopySha256'], 'after-first-sync.db': receipt['firstDatabaseSha256'],
         'after-second-sync.db': sha(proof / 'after-second-sync.db'),
-        'candidate-jobs-on-timestamped.log': receipt['schedulerLogSha256'],
+        'candidate-jobs-on-stdout.log': receipt['schedulerStdoutSha256'],
+        'candidate-jobs-on-stderr.log': receipt['schedulerStderrSha256'],
         'disk-allocation-observations.jsonl': receipt['diskAllocationObservationsSha256']}
     require(all(sha(proof / name) == digest for name, digest in references.items()), 'Original retained proof changed')
     require(sha(HISTORICAL_ROOT / 'production-receipt.json') == HISTORICAL_RECEIPT_SHA,
@@ -163,6 +165,9 @@ def main():
         'copyVerifierSha256': REVIEWED_VERIFIER_SHA, 'proofContractSha256': REVIEWED_PROOF_CONTRACT_SHA,
         'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
         'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
+        'refusalPairingScopeCommentId': REFUSAL_PAIRING_SCOPE_COMMENT_ID,
+        'schedulerRefusalPairing': REFUSAL_PAIRING_POLICY,
+        'REFUSAL_PAIR_WINDOW_SECONDS': REFUSAL_PAIR_WINDOW_SECONDS,
         'baselineVanishedProcessPolicy': BASELINE_POLICY,
         'BASELINE_ATTEMPTS_MAX': BASELINE_ATTEMPTS_MAX,
         'BASELINE_CONFIRMATION_DEADLINE_SECONDS': BASELINE_CONFIRMATION_SECONDS,
