@@ -17,7 +17,8 @@ paths.update({name: 'WP/runtime-recovery-kobo/' + name + '.py' for name in [
     'known_core_disk_guard_v2', 'test_proof_contract', 'test_kobo_copy_preservation',
     'test_capture_kobo_fetch', 'test_core_deallocation_confirmation',
     'test_source_review_pin', 'test_scheduler_refusal_scope', 'known_core_disk_guard_v3',
-    'test_baseline_confirmation', 'known_core_disk_guard_deploy', 'deploy_runtime', 'launch_runtime_release',
+    'test_baseline_confirmation', 'known_core_disk_guard_proof', 'export_launch_runtime_proof',
+    'test_proof_baseline_guard', 'known_core_disk_guard_deploy', 'deploy_runtime', 'launch_runtime_release',
     'test_deploy_baseline_guard', 'test_scheduler_stream_pairing']})
 for name, path in paths.items():
     data = subprocess.check_output(['git', 'show', head + ':' + path])

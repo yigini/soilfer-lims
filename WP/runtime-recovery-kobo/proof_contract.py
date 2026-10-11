@@ -94,7 +94,7 @@ def validate_candidate(pin, built, image):
 
 
 def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None,
-                       verifier_sha=None, contract_sha=None, baseline_guard_sha=None, stream_pairing=False, authority_hashes=None):
+                       verifier_sha=None, contract_sha=None, baseline_guard_sha=None, stream_pairing=False, authority_hashes=None, proof_layout_sha=None):
     """A NEW measurement source needs its own explicit exact-byte approval."""
     require(review['id'] not in [6112725472, 6114217683, 6114289486] and review['html_url'] ==
         'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(review['id']),
@@ -121,6 +121,11 @@ def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None,
         require(authority_hashes and all(re.fullmatch(r'[0-9a-f]{64}', value) for value in authority_hashes),
             'Raw launcher/build authority hashes invalid')
         tokens += authority_hashes
+    if proof_layout_sha is not None:
+        require(review['id'] not in [6114935703, 6115039634] and
+            baseline_guard_sha is not None and authority_hashes is not None and stream_pairing and
+            re.fullmatch(r'[0-9a-f]{64}', proof_layout_sha), 'New proof-layout authority missing')
+        tokens += [proof_layout_sha, 'proofBaselineLayoutPolicy=EXACT_HASHED_PROOF_AUTHORITY_LAYOUT']
     require(all(value in review['body'] for value in tokens), 'Exact corrected source approval missing')
     now = now or datetime.datetime.now(datetime.timezone.utc)
     require(utc_seconds(review['created_at']) <= now.timestamp(), 'Source review is future-dated')

@@ -61,7 +61,7 @@ def main():
         'checks': [{key: value[key] for key in ['name', 'status', 'conclusion', 'head_sha']} for value in checks]}
     paths = {name: 'WP/runtime-recovery-kobo/' + name for name in [
         'rehearse_runtime.py', 'proof_contract.py', 'capture_kobo_fetch.py', 'kobo_copy_preservation.py',
-        'known_core_disk_guard_v2.py', 'known_core_disk_guard_v3.py',
+        'known_core_disk_guard_v2.py', 'known_core_disk_guard_v3.py', 'known_core_disk_guard_proof.py',
         'build_candidate.py', 'prepare_candidate_build.py', 'export_launch_runtime_proof.py']}
     paths['known_core_disk_guard.py'] = 'WP/runtime-containment-ae64f169/known_core_disk_guard.py'
     paths.update({name: 'WP/forward-ae64f169/' + name for name in ['release_support.py', 'startup_common.py',
@@ -82,6 +82,7 @@ def main():
         index['known_core_disk_guard_v2.py']['sha256'],
         verifier_sha=index['kobo_copy_preservation.py']['sha256'], contract_sha=index['proof_contract.py']['sha256'],
         baseline_guard_sha=index['known_core_disk_guard_v3.py']['sha256'], stream_pairing=True,
+        proof_layout_sha=index['known_core_disk_guard_proof.py']['sha256'],
         authority_hashes=[index[name]['sha256'] for name in
             ['build_candidate.py', 'prepare_candidate_build.py', 'export_launch_runtime_proof.py']])
     source_comments = json.loads(subprocess.check_output(['gh', 'api',

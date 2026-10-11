@@ -106,3 +106,27 @@ class SourceReviewPin(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+    def test_new_proof_layout_needs_exact_hash_policy_and_new_review(self):
+        extra = ['4' * 64, '5' * 64, '6' * 64, '7' * 64, '8' * 64, '9' * 64, 'a' * 64,
+            'refusalScopeCommentId=6113601584', 'EXACT_FRESH_COPY_CONFIG_REFUSALS',
+            'SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS',
+            'baselineVanishedProcessPolicy=CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE',
+            'BASELINE_ATTEMPTS_MAX=3', 'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10',
+            'refusalPairingScopeCommentId=6114143349', 'schedulerRefusalPairing=STREAM_ORDER_ONE_TO_ONE',
+            'REFUSAL_PAIR_WINDOW_SECONDS=1', 'proofBaselineLayoutPolicy=EXACT_HASHED_PROOF_AUTHORITY_LAYOUT']
+        body = self.review['body'] + '\n' + '\n'.join(extra)
+        self.review['body'] = body
+        def verify():
+            source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now,
+                verifier_sha='4' * 64, contract_sha='5' * 64, baseline_guard_sha='6' * 64,
+                stream_pairing=True, authority_hashes=['8' * 64, '9' * 64, 'a' * 64], proof_layout_sha='7' * 64)
+        verify()
+        for token in ['7' * 64, 'proofBaselineLayoutPolicy=EXACT_HASHED_PROOF_AUTHORITY_LAYOUT']:
+            self.review['body'] = body.replace(token, '')
+            with self.subTest(missing=token), self.assertRaises(RuntimeError): verify()
+        self.review['body'] = body
+        for old in [6114935703, 6115039634]:
+            self.review['id'] = old
+            self.review['html_url'] = 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(old)
+            with self.subTest(old=old), self.assertRaises(RuntimeError): verify()

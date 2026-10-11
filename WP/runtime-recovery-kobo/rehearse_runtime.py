@@ -18,14 +18,14 @@ import time
 
 import release_support as s
 import startup_common as c
-from known_core_disk_guard_v3 import KnownCoreDiskGuard
+from known_core_disk_guard_proof import KnownCoreDiskGuard, POLICY as PROOF_LAYOUT_POLICY
 from capture_kobo_fetch import capture
 from kobo_copy_preservation import verify_copy
 from proof_contract import *
 
 ROOT = pathlib.Path(__file__).resolve().parent
 HISTORICAL_ROOT = pathlib.Path(HISTORICAL_ROOT_PATH)
-HELPER_HASHES = {'known_core_disk_guard_v3.py': '878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f', 'release_support.py': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
+HELPER_HASHES = {'known_core_disk_guard_proof.py': '49c76b8d0312a38820ea8dff707cdfd6674614c63344bedf2655755b6ca6f1b6', 'known_core_disk_guard_v3.py': '878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f', 'release_support.py': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
     'startup_common.py': 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00',
     'known_core_disk_guard.py': 'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169',
     'known_core_disk_guard_v2.py': 'f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c',
@@ -143,6 +143,7 @@ def main():
         HELPER_HASHES['known_core_disk_guard_v2.py'],
         verifier_sha=HELPER_HASHES['kobo_copy_preservation.py'], contract_sha=s.sha(ROOT / 'proof_contract.py'),
         baseline_guard_sha=HELPER_HASHES['known_core_disk_guard_v3.py'], stream_pairing=True,
+        proof_layout_sha=HELPER_HASHES['known_core_disk_guard_proof.py'],
         authority_hashes=[source['files'][name]['sha256'] for name in
             ['build_candidate.py', 'prepare_candidate_build.py', 'export_launch_runtime_proof.py']])
     built_root = pathlib.Path(pin['buildRoot'])
@@ -184,6 +185,8 @@ def main():
         'diskMeasurementGuardSha256': HELPER_HASHES['known_core_disk_guard_v2.py'],
         'coreDeallocationConfirmationDeadlineSeconds': 10,
         'baselineMeasurementGuardSha256': HELPER_HASHES['known_core_disk_guard_v3.py'],
+        'proofBaselineLayoutPolicy': PROOF_LAYOUT_POLICY,
+        'proofBaselineLayoutGuardSha256': HELPER_HASHES['known_core_disk_guard_proof.py'],
         'baselineVanishedProcessPolicy': 'CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE',
         'BASELINE_ATTEMPTS_MAX': 3, 'BASELINE_CONFIRMATION_DEADLINE_SECONDS': 10,
         'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA, 'productionMutations': 0,
@@ -204,7 +207,9 @@ def main():
     for sig in [signal.SIGTERM, signal.SIGINT, signal.SIGHUP]:
         signal.signal(sig, interrupted)
     try:
-        guard = KnownCoreDiskGuard(ROOT, reserve)
+        guard = KnownCoreDiskGuard(ROOT, reserve, source,
+            {name: s.sha(ROOT / name) for name in ['source-index.json', 'target-pin.json',
+                'candidate-rehearsal-authority.json']})
         receipt['baselineEnumerationErrorCount'] = len(guard.baseline_errors)
         receipt['baselineAttempt'] = guard.baseline_attempt
         s.consistent_backup(s.LIVE, ROOT / 'fresh-live-backup.db')
