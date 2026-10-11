@@ -106,7 +106,8 @@
     "reportBasis": {
       "ovenDry": "Exprimé sur base séchée à l’étuve",
       "factor": "facteur de correction d’humidité",
-      "waterContent": "teneur en eau gravimétrique"
+      "waterContent": "teneur en eau gravimétrique",
+      "source": "résultat d’humidité"
     },
     "qcNotRequired": "CQ non requis",
     "qcEvidenceIncomplete": "L’acceptation historique du CQ dispose de preuves enregistrées incomplètes",

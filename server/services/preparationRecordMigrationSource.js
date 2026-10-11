@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),{createHash}=require('node:crypto');
 const DIRECTORY='20261010000400_preparation_records';
-const SHA256='35e6475a7b890bc8a178a63eacdf2af692c43b69ec3d90aadff48a8e337c0d25';
+const SHA256='e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c';
 const mismatch=(message,cause)=>Object.assign(new Error(message,cause&&{cause}),{statusCode:409,code:'PREPARATION_RECORD_SOURCE_MISMATCH'});
 function loadPreparationRecordMigrationSource(){
  const root=path.resolve(__dirname,'..',fs.existsSync('/.dockerenv')?'.migrations-backup/205':'prisma/migrations',DIRECTORY);

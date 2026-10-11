@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 const fs=require('node:fs'),path=require('node:path'),{createHash}=require('node:crypto'),Database=require('better-sqlite3');
 const {loadPreparationRecordMigrationSource}=require('../services/preparationRecordMigrationSource');
-const MARKER='205_preparation_records',TABLE='PreparationRecord';
+const MARKER='205_preparation_records',TABLE='PreparationRecord',DRAFT='WorkItemDraft',COLUMN='records';
 const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
 const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
 
-// #205 is one additive append-only table. Its table and indexes match what
-// Prisma creates, so an empty fresh Prisma table only gains the guards.
+// #205 is one additive append-only table plus one nullable draft column. Both
+// match what Prisma creates, so an empty fresh Prisma table only gains the guards.
 function objects(sql,expected){
  const found=[...[...sql.matchAll(/^CREATE TABLE "([^"]+)"[\s\S]*?^\);/gm)].map(match=>({name:match[1],type:'table',sql:match[0]})),
   ...[...sql.matchAll(/^CREATE (?:UNIQUE )?INDEX "([^"]+)"[^;]*;/gm)].map(match=>({name:match[1],type:'index',sql:match[0]})),
@@ -17,7 +17,7 @@ function objects(sql,expected){
 }
 function classify(db,source){
  if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw fail('PREPARATION_RECORD_INTEGRITY_REFUSED','An intact database is required.');
- for(const [table,column] of [['Sample','id'],['WorkItem','id'],['EquipmentAsset','id'],['_schema_migrations','details']])
+ for(const [table,column] of [['Sample','id'],['WorkItem','id'],['EquipmentAsset','id'],[DRAFT,'workItemId'],['_schema_migrations','details']])
   if(!db.prepare('PRAGMA table_info("'+table+'")').all().some(row=>row.name===column))
    throw fail('PREPARATION_RECORD_PREREQUISITE_REQUIRED','Install the prior application schema first.');
  const differences=[];
@@ -27,7 +27,9 @@ function classify(db,source){
   return Boolean(row);
  };
  const schema=objects(source.schemaSql,4),guards=objects(source.guardsSql,3);
- const schemaPresent=schema.map(check),guardsPresent=guards.map(check);
+ const draftColumn=db.prepare('PRAGMA table_xinfo("'+DRAFT+'")').all().find(row=>row.name===COLUMN);
+ if(draftColumn&&(draftColumn.type!=='TEXT'||draftColumn.notnull||draftColumn.dflt_value!==null||draftColumn.pk||draftColumn.hidden))differences.push(DRAFT+'.'+COLUMN+' differs');
+ const schemaPresent=[...schema.map(check),Boolean(draftColumn)],guardsPresent=guards.map(check);
  const known=new Set([...schema,...guards].map(row=>row.name));
  for(const row of db.prepare("SELECT name FROM sqlite_master WHERE tbl_name=? AND name NOT LIKE 'sqlite_autoindex_%'").all(TABLE))
   if(!known.has(row.name))differences.push(row.name+' is not part of the release');
@@ -49,6 +51,7 @@ function classify(db,source){
  else if(schemaPresent.every(Boolean)&&[...guardsPresent,Boolean(marker)].every(value=>!value)){
   classification='FRESH_PRISMA_205';
   if(!differences.length&&db.prepare('SELECT count(*) n FROM "PreparationRecord"').get().n)differences.push('Unmarked preparation records must not be adopted');
+  if(!differences.length&&db.prepare('SELECT count(*) n FROM "'+DRAFT+'" WHERE "'+COLUMN+'" IS NOT NULL').get().n)differences.push('Unmarked draft preparation records must not be adopted');
  }else if(all.every(Boolean))classification='COMPLETE_205';
  else differences.push('Preparation record installation is partial or unmarked');
  if(differences.length)throw fail('PREPARATION_RECORD_SCHEMA_MISMATCH','Preparation record storage differs from the release.',differences);
@@ -58,7 +61,7 @@ function snapshot(db){
  const tables={};
  for(const {name}of db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name<>? ORDER BY name").all(TABLE)){
   const quoted='"'+name.replace(/"/g,'""')+'"';
-  const columns=db.prepare('PRAGMA table_xinfo('+quoted+')').all().filter(row=>row.hidden===0).map(row=>row.name);
+  const columns=db.prepare('PRAGMA table_xinfo('+quoted+')').all().filter(row=>row.hidden===0&&!(name===DRAFT&&row.name===COLUMN)).map(row=>row.name);
   const selected=columns.map(column=>'"'+column.replace(/"/g,'""')+'"').join(',');
   const hash=createHash('sha256');let rows=0;
   const where=name==='_schema_migrations'?' WHERE id<>?':'';

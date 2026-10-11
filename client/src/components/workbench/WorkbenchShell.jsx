@@ -135,7 +135,8 @@ export default function WorkbenchShell({
                                 const localDraft = await getLocalDraft(`draft:${user.id}:${item.workItemId}`);
                                 // #202 B15: texture/checklist drafts carry values/checks without a scalar value.
                                 const hasLocal = localDraft && ((localDraft.value !== undefined && localDraft.value !== null) ||
-                                    localDraft.extra?.values !== undefined || localDraft.extra?.checks !== undefined);
+                                    localDraft.extra?.values !== undefined || localDraft.extra?.checks !== undefined ||
+                                    localDraft.extra?.records !== undefined);
                                 if (hasLocal) {
                                     if (!item.draft || item.draft.value === undefined || item.draft.value === null ||
                                         (localDraft.updatedAt && new Date(localDraft.updatedAt) > new Date(item.draft.updatedAt || 0))) {
@@ -145,6 +146,7 @@ export default function WorkbenchShell({
                                             value: localDraft.value ?? item.draft?.value ?? null,
                                             values: localDraft.extra?.values || item.draft?.values,
                                             checks: localDraft.extra?.checks || item.draft?.checks,
+                                            records: localDraft.extra?.records || item.draft?.records,
                                             basis: localDraft.extra?.basis || item.draft?.basis || 'AIR_DRY',
                                             replicateNo: localDraft.extra?.replicateNo || item.draft?.replicateNo || 1,
                                             ...(localDraft.extra?.instrumentId !== undefined && { instrumentId: localDraft.extra.instrumentId }),
@@ -403,6 +405,7 @@ export default function WorkbenchShell({
                                 value: draftVal,
                                 values: extra.values || currentItem?.draft?.values,
                                 checks: extra.checks || currentItem?.draft?.checks,
+                                records: extra.records || currentItem?.draft?.records,
                                 basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
                                 replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
                                 equipmentId: entryInstrumentId(currentItem, extra.instrumentId),
@@ -428,6 +431,7 @@ export default function WorkbenchShell({
                             value: draftVal,
                             values: extra.values || currentItem?.draft?.values,
                             checks: extra.checks || currentItem?.draft?.checks,
+                            records: extra.records || currentItem?.draft?.records,
                             basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
                             replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
                             equipmentId: entryInstrumentId(currentItem, extra.instrumentId),
@@ -452,6 +456,7 @@ export default function WorkbenchShell({
                                 value: draftVal,
                                 values: extra.values || currentItem?.draft?.values,
                                 checks: extra.checks || currentItem?.draft?.checks,
+                                records: extra.records || currentItem?.draft?.records,
                                 basis: extra.basis || currentItem?.draft?.basis || 'AIR_DRY',
                                 replicateNo: extra.replicateNo || currentItem?.draft?.replicateNo || 1,
                                 equipmentId: entryInstrumentId(currentItem, extra.instrumentId),

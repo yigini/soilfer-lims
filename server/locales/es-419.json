@@ -106,7 +106,8 @@
     "reportBasis": {
       "ovenDry": "Informado en base seca en estufa",
       "factor": "factor de corrección de humedad",
-      "waterContent": "contenido gravimétrico de agua"
+      "waterContent": "contenido gravimétrico de agua",
+      "source": "resultado de humedad"
     },
     "qcNotRequired": "QC no requerido",
     "qcEvidenceIncomplete": "La aceptación histórica de QC tiene evidencia registrada incompleta",

@@ -6,6 +6,7 @@ const operations = require('../../services/operationalConfirmationService');
 const preparation = require('../../services/preparationRecordService');
 const reportBasis = require('../../services/reportBasisService');
 const policyService = require('../../services/policyService');
+const draftService = require('../../services/draftService');
 const { registry } = require('../../config/policyRegistry');
 const { freezeReportEvidence, describeReportEvidence } = require('../../services/reportTruthfulnessService');
 const { generateReportPdfBuffer } = require('../../services/pdfGenerator');
@@ -181,7 +182,7 @@ describe('#205 report evidence and oven-dry basis', () => {
         jest.spyOn(policyService, 'get').mockImplementation(async (_lab, key, scope) => key === 'report.ovenDryConvertible' && scope.analysisCode !== 'PH');
         try {
             const items = [
-                { param: 'SOC', value: '12.40', basis: 'AIR_DRY', censoring: 'NONE', decimalPlaces: 2, uncertainty: { state: 'EXPANDED', mode: 'EXPANDED_ABSOLUTE', value: 0.4 } },
+                { param: 'SOC', value: '12.40', unit: 'g/kg', basis: 'AIR_DRY', censoring: 'NONE', decimalPlaces: 2, uncertainty: { state: 'EXPANDED', mode: 'EXPANDED_ABSOLUTE', value: 0.4 } },
                 { param: 'PH', value: '6.40', basis: 'AIR_DRY', censoring: 'NONE' },
                 { param: 'P', value: '< 0.5', basis: 'AIR_DRY', censoring: 'LT' },
                 { param: 'SOIL_MOISTURE', value: '5.0', basis: 'AIR_DRY', censoring: 'NONE' },
@@ -191,7 +192,7 @@ describe('#205 report evidence and oven-dry basis', () => {
             expect(items[0]).toMatchObject({ value: '13.02', basis: 'OVEN_DRY', basisConversion: { from: 'AIR_DRY', factor: 1.05, airDryValue: '12.40', sourceResultIds: ['m1'] } });
             expect(items[0].uncertainty.value).toBeCloseTo(0.42);
             expect(items.slice(1).map(item => item.value)).toEqual(['6.40', '< 0.5', '5.0', '1.20']);
-            expect(await reportBasis.applyOvenDryBasis({}, null, [{ param: 'SOC', value: '1.00', basis: 'AIR_DRY', censoring: 'NONE' }], moisture)).toBe(0);
+            expect(await reportBasis.applyOvenDryBasis({}, null, [{ param: 'SOC', value: '1.00', unit: 'g/kg', basis: 'AIR_DRY', censoring: 'NONE' }], moisture)).toBe(0);
         } finally {
             policyService.get.mockRestore();
         }
@@ -210,11 +211,79 @@ describe('#205 report evidence and oven-dry basis', () => {
                 resultGroups: [{ categoryName: 'Carbon', items: [{ param: 'SOC', name: 'Soil organic carbon', value: '13.02', unit: 'g/kg', basis: 'OVEN_DRY' }] }] });
             expect(pdf.subarray(0, 5).toString()).toBe('%PDF-');
             const printed = calls.join('\n');
-            expect(printed).toContain('Reported on an oven-dry basis: moisture correction factor 1.05 (gravimetric water content 5 %) · SOC');
+            expect(printed).toContain('Reported on an oven-dry basis: moisture correction factor 1.05 (gravimetric water content 5 %; moisture result m1) · SOC');
             expect(printed).toContain('Drying oven 2 (OV-02)');
         } finally {
             spy.mockRestore();
         }
+    });
+});
+
+describe('#205 oven-dry eligibility, source printing and draft records', () => {
+    const admin = { role: 'SUPER_ADMIN', username: 'FIXTURE_205', isActive: true };
+    const moisture = { factor: 1.05, waterContentPct: 5, sourceResultIds: ['MOISTURE-REVIEW-SOURCE'] };
+    const reported = () => [
+        { param: 'SOC', value: '6.40', unit: 'g/kg', basis: 'AIR_DRY', censoring: 'NONE' },
+        { param: 'PH_H2O', value: '6.40', unit: 'pH', basis: 'AIR_DRY', censoring: 'NONE' },
+        { param: 'EC', value: '6.40', unit: 'dS/m', basis: 'AIR_DRY', censoring: 'NONE' },
+        { param: 'SAND', value: '6.40', unit: '%', basis: 'AIR_DRY', censoring: 'NONE' },
+        { param: 'CN_RATIO', value: '6.40', unit: '', basis: 'AIR_DRY', censoring: 'NONE' }
+    ];
+    const setPolicy = changes => policyService.change(admin, LAB, { changes, reason: '#205 oven-dry eligibility fixture' });
+    afterEach(async () => {
+        const live = await prisma.labPolicyOverride.findMany({ where: { key: 'report.ovenDryConvertible', revokedAt: null, lab: { id: (await policyService.resolveLab(LAB)).id } } });
+        if (live.length) await setPolicy(live.map(row => ({ key: row.key, analysisCode: row.analysisCode, methodologyId: row.methodologyId, clear: true })));
+    });
+
+    test('a lab-wide enablement converts concentrations but never pH, conductivity, texture fractions or ratios', async () => {
+        await setPolicy([{ key: 'report.ovenDryConvertible', value: true }]);
+        for (const code of ['SOC', 'PH_H2O', 'EC', 'SAND']) expect(await policyService.get(LAB, 'report.ovenDryConvertible', { db: prisma, analysisCode: code })).toBe(true);
+        const items = reported();
+        expect(await reportBasis.applyOvenDryBasis(prisma, (await policyService.resolveLab(LAB)).id, items, moisture)).toBe(1);
+        expect(items[0]).toMatchObject({ value: '6.72', basis: 'OVEN_DRY', basisConversion: { factor: 1.05, sourceResultIds: ['MOISTURE-REVIEW-SOURCE'] } });
+        for (const item of items.slice(1)) expect(item).toMatchObject({ value: '6.40', basis: 'AIR_DRY' }) && expect(item.basisConversion).toBeUndefined();
+    });
+
+    test('enabling conversion for an excluded analysis is refused while concentrations and disabling stay allowed', async () => {
+        for (const analysisCode of ['PH_H2O', 'EC', 'SAND']) {
+            await expect(setPolicy([{ key: 'report.ovenDryConvertible', analysisCode, value: true }]))
+                .rejects.toMatchObject({ statusCode: 422, code: 'POLICY_SCOPE_INVALID' });
+        }
+        await setPolicy([{ key: 'report.ovenDryConvertible', analysisCode: 'SOC', value: true }, { key: 'report.ovenDryConvertible', analysisCode: 'PH_H2O', value: false }]);
+        const items = reported();
+        expect(await reportBasis.applyOvenDryBasis(prisma, (await policyService.resolveLab(LAB)).id, items, moisture)).toBe(1);
+        expect(items.map(item => item.basis)).toEqual(['OVEN_DRY', 'AIR_DRY', 'AIR_DRY', 'AIR_DRY', 'AIR_DRY']);
+    });
+
+    test.each([['en', 'moisture result'], ['es', 'resultado de humedad'], ['es-419', 'resultado de humedad'], ['fr', 'résultat d’humidité'], ['pt', 'resultado de umidade']])(
+        'the %s PDF prints the moisture result the factor came from', async (locale, label) => {
+            const calls = [], original = PDFDocument.prototype.text;
+            const spy = jest.spyOn(PDFDocument.prototype, 'text').mockImplementation(function (value, x, y, options) {
+                calls.push(String(value)); return original.call(this, value, x, y, options);
+            });
+            try {
+                const moistureCorrection = { ...moisture, convertedParams: ['SOC'] };
+                const statement = reportBasis.basisStatement(moistureCorrection, locale);
+                expect(statement).toContain(`${label} MOISTURE-REVIEW-SOURCE`);
+                await generateReportPdfBuffer({ meta: { locale }, sample: { id: 'SMP-205-SOURCE' }, lab: { name: 'Owned laboratory' },
+                    evidence: freezeReportEvidence([], [], [], {}), reportBasis: 'OVEN_DRY', moistureCorrection, basisStatement: statement,
+                    resultGroups: [{ categoryName: 'Carbon', items: [{ param: 'SOC', name: 'SOC', value: '6.72', unit: 'g/kg', basis: 'OVEN_DRY' }] }] });
+                expect(calls.join('\n')).toContain('MOISTURE-REVIEW-SOURCE');
+            } finally {
+                spy.mockRestore();
+            }
+        });
+
+    test('draft preparation records are stored, returned to the queue and bounded', async () => {
+        const { sampleId, item } = await gateFixture();
+        const records = [{ gateCode: 'DRYING', method: 'OVEN_40', temperatureC: '40' }];
+        await prisma.workItemDraft.create({ data: { workItemId: item.id, sampleId, userId: technician.username, labId: LAB, analysis: 'DRYING',
+            checks: JSON.stringify([true, false, false]), records: draftService.draftRecords(records) } });
+        const drafts = await draftService.getDrafts({ ...technician, role: 'SUPER_ADMIN' });
+        expect(drafts.find(draft => draft.workItemId === item.id)).toMatchObject({ checks: [true, false, false], records });
+        expect(draftService.draftRecords(null)).toBeNull();
+        for (const invalid of [{}, ['text'], Array.from({ length: 9 }, () => ({ gateCode: 'DRYING' }))])
+            expect(() => draftService.draftRecords(invalid)).toThrow(expect.objectContaining({ code: 'PREPARATION_RECORD_INVALID' }));
     });
 });
 
@@ -231,11 +300,12 @@ describe('#205 preparation record installer', () => {
         try {
             db.exec('DROP TRIGGER IF EXISTS "PreparationRecord_no_delete"');
             db.exec('DELETE FROM "PreparationRecord"');
+            db.exec('UPDATE "WorkItemDraft" SET "records" = NULL');
             if (shape !== 'COMPLETE') {
                 db.prepare('DELETE FROM _schema_migrations WHERE id=?').run('205_preparation_records');
                 for (const name of ['PreparationRecord_validate_insert', 'PreparationRecord_no_update']) db.exec(`DROP TRIGGER IF EXISTS "${name}"`);
             }
-            if (shape === 'PRE') db.exec('DROP TABLE "PreparationRecord"');
+            if (shape === 'PRE') { db.exec('DROP TABLE "PreparationRecord"'); db.exec('ALTER TABLE "WorkItemDraft" DROP COLUMN "records"'); }
         } finally { db.close(); }
         if (shape === 'COMPLETE') {
             const restore = new Database(file);
@@ -256,6 +326,9 @@ END;`); } finally { restore.close(); }
         const applied = installPreparationRecords({ dbPath: file, apply: true });
         expect(applied).toMatchObject({ classification: 'COMPLETE_205', previousClassification: dry.classification, mode: 'APPLIED', backfilledCount: 0,
             receipt: { originalRowsPreserved: true, backfilledCount: 0 } });
+        const check = new Database(file, { readonly: true });
+        try { expect(check.prepare('PRAGMA table_info("WorkItemDraft")').all().find(row => row.name === 'records')).toMatchObject({ type: 'TEXT', notnull: 0 }); }
+        finally { check.close(); }
         const settled = digest(file);
         expect(installPreparationRecords({ dbPath: file, apply: true })).toMatchObject({ classification: 'COMPLETE_205', mode: 'NO_OP', totalChanges: 0 });
         expect(digest(file)).toBe(settled);
@@ -283,6 +356,26 @@ END;`); } finally { restore.close(); }
         expect(() => installPreparationRecords({ dbPath: partial, apply: true })).toThrow(expect.objectContaining({ code: 'PREPARATION_RECORD_SCHEMA_MISMATCH',
             differences: ['Preparation record installation is partial or unmarked'] }));
         expect(digest(partial)).toBe(before);
+
+        const draftRecords = await database('FRESH');
+        db = new Database(draftRecords);
+        try {
+            const item = db.prepare('SELECT id, sampleId FROM "WorkItem" LIMIT 1').get();
+            db.prepare('INSERT INTO "WorkItemDraft"(id,workItemId,sampleId,userId,analysis,records,updatedAt) VALUES(?,?,?,?,?,?,?)')
+                .run('unreviewed-draft', item.id, item.sampleId, 'someone', 'DRYING', '[]', Date.now());
+        } finally { db.close(); }
+        before = digest(draftRecords);
+        expect(() => installPreparationRecords({ dbPath: draftRecords, apply: true })).toThrow(expect.objectContaining({ code: 'PREPARATION_RECORD_SCHEMA_MISMATCH',
+            differences: ['Unmarked draft preparation records must not be adopted'] }));
+        expect(digest(draftRecords)).toBe(before);
+
+        const missingColumn = await database('COMPLETE');
+        db = new Database(missingColumn);
+        try { db.exec('ALTER TABLE "WorkItemDraft" DROP COLUMN "records"'); } finally { db.close(); }
+        before = digest(missingColumn);
+        expect(() => installPreparationRecords({ dbPath: missingColumn, apply: true })).toThrow(expect.objectContaining({ code: 'PREPARATION_RECORD_SCHEMA_MISMATCH',
+            differences: ['Preparation record installation is partial or unmarked'] }));
+        expect(digest(missingColumn)).toBe(before);
 
         const altered = await database('PRE');
         db = new Database(altered);

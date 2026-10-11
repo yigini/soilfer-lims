@@ -240,8 +240,8 @@ function beforeGuards(options) {
             expected.push({table:'Report',fields:['supersedesReportId','amendmentId','amendmentReason','issuedBy','approvedBy','amendmentAuthorizedBy']});
             // #202 adds exactly one credential table; its installer creates it.
             expected.push({table:'UserBenchCredential',missingTable:true});
-            // #205 adds exactly one append-only evidence table; its installer creates it.
-            expected.push({table:'PreparationRecord',missingTable:true});
+            // #205 adds exactly one append-only evidence table and one nullable draft column; its installer creates both.
+            expected.push({table:'WorkItemDraft',fields:['records']},{table:'PreparationRecord',missingTable:true});
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }

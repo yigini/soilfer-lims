@@ -106,7 +106,8 @@
     "reportBasis": {
       "ovenDry": "Reported on an oven-dry basis",
       "factor": "moisture correction factor",
-      "waterContent": "gravimetric water content"
+      "waterContent": "gravimetric water content",
+      "source": "moisture result"
     },
     "qcNotRequired": "QC not required",
     "qcEvidenceIncomplete": "Historical QC acceptance has incomplete recorded evidence",

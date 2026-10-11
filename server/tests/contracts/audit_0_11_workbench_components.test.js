@@ -41,7 +41,7 @@ function harness(name, { groups, width = 1200, axios, offline } = {}) {
                 if (mod.includes('HelpContext')) return { useHelp: () => ({ clearBlockers() {}, registerBlockers() {} }) };
                 if (mod.includes('NotificationContext')) return { useNotifications: () => ({}) };
                 if (mod.includes('/offline/')) return offline || {};
-                if (['./entryReadiness', './qcWorksheetNavigation', './worksheetReady', '../../utils/soilCalculations', './useRunBarcodeScan', './BarcodeSafeInput', '../../utils/audioCues'].includes(mod))
+                if (['./entryReadiness', './qcWorksheetNavigation', './worksheetReady', '../../utils/soilCalculations', './useRunBarcodeScan', './BarcodeSafeInput', '../../utils/audioCues', './preparationPayload'].includes(mod))
                     return load(path.resolve(path.dirname(filename), mod + (mod === './BarcodeSafeInput' ? '.jsx' : '.js')));
                 if (mod.endsWith('.json')) return require(path.resolve(path.dirname(filename), mod));
                 const childName = path.basename(mod);
@@ -180,6 +180,49 @@ describe('Audit 0.11: workbench component behavior', () => {
         expect(offline.mergeLocalDraft).toHaveBeenCalledWith('draft:tech:card', expect.objectContaining({ value: '6.2' }));
         await jest.advanceTimersByTimeAsync(800);
         expect(axios.post).toHaveBeenCalledWith('/api/workbench/batch-save', expect.objectContaining({ draft: true, entries: [expect.objectContaining({ workItemId: 'card', value: '6.2' })] }));
+    });
+    test('#205 preparation records survive the server save, the outbox and a queue reload before confirmation', async () => {
+        jest.useFakeTimers();
+        const records = [{ gateCode: 'DRYING', method: 'OVEN_40', temperatureC: '40', startedAt: '2026-10-11T07:00:00.000Z', endedAt: '2026-10-11T09:00:00.000Z' }];
+        const dry = (draft = {}) => item('dry', { analysis: 'DRYING', draft });
+        const groups = [{ analysis: 'DRYING', items: [dry()] }];
+        let local = null;
+        const offline = { mergeLocalDraft: jest.fn(async (_key, draft) => { local = { ...draft, extra: { ...(local?.extra || {}), ...draft.extra } }; }),
+            getLocalDraft: jest.fn(async () => local), recordSyncOperation: jest.fn() };
+        const posts = [];
+        const axios = { post: jest.fn(async (url, body) => { posts.push([url, body]); if (posts.length === 2) throw new Error('offline'); return { data: {} }; }),
+            get: jest.fn(async () => ({ data: { groups: [{ analysis: 'DRYING', items: [dry({ checks: [true, true, true], updatedAt: '2026-10-11T06:00:00.000Z' })] }] } })) };
+        const h = harness('WorkbenchShell', { groups, axios, offline });
+        let tree = h.render({ initialAnalysis: 'DRYING' });
+        child(h, tree, 'WorksheetArea').props.onDraftChange('dry', null, { checks: [true, true, true] });
+        tree = h.render({ initialAnalysis: 'DRYING' });
+        child(h, tree, 'WorksheetArea').props.onDraftChange('dry', null, { records });
+        await jest.advanceTimersByTimeAsync(800);
+        expect(posts[0]).toEqual(['/api/workbench/batch-save', expect.objectContaining({ draft: true,
+            entries: [expect.objectContaining({ workItemId: 'dry', checks: [true, true, true], records })] })]);
+        tree = h.render({ initialAnalysis: 'DRYING' });
+        child(h, tree, 'WorksheetArea').props.onDraftChange('dry', null, { checks: [true, false, true] });
+        await jest.advanceTimersByTimeAsync(800);
+        expect(offline.recordSyncOperation).toHaveBeenCalledWith(expect.objectContaining({ type: 'SAVE_WORK_DRAFT',
+            payload: expect.objectContaining({ checks: [true, false, true], records }) }));
+        // A reload whose server draft predates the records restores them from the durable local draft.
+        local.updatedAt = '2026-10-11T08:00:00.000Z';
+        tree = h.render({ initialAnalysis: 'DRYING' });
+        await child(h, tree, 'WorksheetArea').props.onBatchUpdated();
+        await jest.advanceTimersByTimeAsync(0);
+        tree = h.render({ initialAnalysis: 'DRYING' });
+        const reloaded = child(h, tree, 'WorksheetArea').props.activeGroup.items[0].draft;
+        expect(reloaded).toMatchObject({ checks: [true, false, true], records });
+        posts.length = 0; axios.post.mockImplementation(async (url, body) => { posts.push([url, body]); return { data: { receipt: {} } }; });
+        await child(h, tree, 'WorksheetArea').props.onConfirmOperation('dry', [true, true, true], null, reloaded.records, 1);
+        expect(posts[0]).toEqual(['/api/workbench/operations/confirm', expect.objectContaining({ records: [expect.objectContaining({
+            gateCode: 'DRYING', method: 'OVEN_40', temperatureC: 40 })] })]);
+        // Only the local copy held the records before this change.
+        local = { value: null, extra: { records }, updatedAt: '2026-10-11T08:00:00.000Z' };
+        axios.get.mockResolvedValueOnce({ data: { groups: [{ analysis: 'DRYING', items: [dry()] }] } });
+        await child(h, tree, 'WorksheetArea').props.onBatchUpdated();
+        tree = h.render({ initialAnalysis: 'DRYING' });
+        expect(child(h, tree, 'WorksheetArea').props.activeGroup.items[0].draft.records).toEqual(records);
     });
     test.each(['partial', 'all failed'])('%s commit displays failed rows, prevents submission and retries only failures', async kind => {
         jest.useFakeTimers();

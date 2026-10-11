@@ -3,6 +3,7 @@
 // results whose analysis the lab has explicitly marked convertible, using the
 // frozen gravimetric moisture correction factor of the reported SOIL_MOISTURE.
 const { TransitionError } = require('./workflowStateRules');
+const { analysisEligible, unitEligible } = require('./ovenDryEligibility');
 
 const REPORT_BASES = Object.freeze(['AS_RECORDED', 'OVEN_DRY']);
 
@@ -48,7 +49,9 @@ async function applyOvenDryBasis(db, labId, items, moisture) {
     const policyService = require('./policyService');
     let converted = 0;
     for (const item of items) {
-        if (item.basis !== 'AIR_DRY' || item.censoring !== 'NONE' || item.reportedMode === 'NOT_REPORTABLE' || item.param === 'SOIL_MOISTURE') continue;
+        if (item.basis !== 'AIR_DRY' || item.censoring !== 'NONE' || item.reportedMode === 'NOT_REPORTABLE') continue;
+        // Holds whatever scope enabled the policy, including a lab-wide value inherited by every analysis.
+        if (!analysisEligible(item.param) || !unitEligible(item.unit)) continue;
         const decimals = decimalsOf(item.value, item.decimalPlaces);
         if (decimals === null) continue;
         const enabled = labId && await policyService.get(labId, 'report.ovenDryConvertible',
@@ -65,11 +68,11 @@ async function applyOvenDryBasis(db, labId, items, moisture) {
     return converted;
 }
 
-/** The printed basis line: the factor, the water content it came from, and the converted analyses. */
+/** The printed basis line: the factor, the water content and moisture result it came from, and the converted analyses. */
 function basisStatement(moisture, locale = 'en') {
     const canonical = ['en', 'es', 'es-419', 'fr', 'pt'].includes(locale) ? locale : 'en';
     const labels = require(`../locales/${canonical}.json`).resultReports.reportBasis;
-    return `${labels.ovenDry}: ${labels.factor} ${moisture.factor} (${labels.waterContent} ${moisture.waterContentPct} %) · ${moisture.convertedParams.join(', ')}`;
+    return `${labels.ovenDry}: ${labels.factor} ${moisture.factor} (${labels.waterContent} ${moisture.waterContentPct} %; ${labels.source} ${moisture.sourceResultIds.join(', ')}) · ${moisture.convertedParams.join(', ')}`;
 }
 
 module.exports = { REPORT_BASES, normalizeBasis, moistureFactor, applyOvenDryBasis, basisStatement };

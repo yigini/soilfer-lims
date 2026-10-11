@@ -28,6 +28,8 @@ CREATE TABLE "PreparationRecord" (
 CREATE INDEX "PreparationRecord_sampleId_idx" ON "PreparationRecord"("sampleId");
 CREATE INDEX "PreparationRecord_workItemId_idx" ON "PreparationRecord"("workItemId");
 CREATE UNIQUE INDEX "PreparationRecord_receiptId_gateCode_key" ON "PreparationRecord"("receiptId", "gateCode");
+-- Unconfirmed records ride with the bench draft until the gate is confirmed.
+ALTER TABLE "WorkItemDraft" ADD COLUMN "records" TEXT;
 
 -- Contract guards
 CREATE TRIGGER "PreparationRecord_validate_insert" BEFORE INSERT ON "PreparationRecord"

@@ -363,6 +363,7 @@ model WorkItemDraft {
   value         String?   // Raw input string (e.g. "6,42", "<0.5")
   values        String?   // JSON array of strings (e.g. texture: ["40", "40", "20"])
   checks        String?   // JSON array of booleans (operational task checklists)
+  records       String?   // JSON array of unconfirmed #205 preparation records
   basis         String?   @default("AIR_DRY")
   replicateNo   Int       @default(1)
   instrumentId  String?

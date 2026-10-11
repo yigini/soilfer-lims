@@ -106,7 +106,8 @@
     "reportBasis": {
       "ovenDry": "Expresso em base seca em estufa",
       "factor": "fator de correção de umidade",
-      "waterContent": "teor gravimétrico de água"
+      "waterContent": "teor gravimétrico de água",
+      "source": "resultado de umidade"
     },
     "qcNotRequired": "CQ não obrigatório",
     "qcEvidenceIncomplete": "A aceitação histórica do CQ tem evidência registrada incompleta",
