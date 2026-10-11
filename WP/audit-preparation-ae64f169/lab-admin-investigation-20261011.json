@@ -1,0 +1,82 @@
+{
+  "dateUtc": "2026-10-11",
+  "scope": "Read-only investigation of missing notebook container and Antigravity cleanup; no restart, recreation, cleanup, backup, maintenance, reboot or deployment performed by Pip",
+  "userStatement": "YY says he did not remove the container and asked Pip to check Antigravity's cleanup",
+  "container": {
+    "name": "soilfer-lab-admin",
+    "id": "563d2e4b1b6064a23f26928a5467542f68cf8243ee1f0e31943eabd53bc1e828",
+    "imageIdRetained": "sha256:bce8e4ddc1c14984ca8fae679540222afafa0db93c0747a336035715dc504173",
+    "currentDockerObjectAbsent": true,
+    "jupyterHubLogEvents": [
+      {"utc": "2026-10-11T12:21:52.736139253Z", "message": "DockerSpawner stopping soilfer-lab-admin (id 563d2e4)"},
+      {"utc": "2026-10-11T12:21:54.455956354Z", "message": "DockerSpawner removing container 563d2e4b1b6064a23f26928a5467542f68cf8243ee1f0e31943eabd53bc1e828"},
+      {"utc": "2026-10-11T12:21:54.536196221Z", "message": "HTTP 204 DELETE /lab/hub/api/users/admin/server authenticated as soilfer-admin from 127.0.0.1"}
+    ],
+    "initiatingPersonOrProcessEstablished": false,
+    "interpretation": "The notebook session was stopped through JupyterHub's authenticated admin API. JupyterHub then removed its disposable runtime container according to its configured lifecycle. This does not establish removal of notebook files or identify who initiated the API request."
+  },
+  "hubConfiguration": {
+    "path": "/opt/soilfer-learn/hub/jupyterhub_config.py",
+    "sha256": "de81d26e63840e0dcc469fd6592f658fc8bc5fa75603bcccb7310c4b08b56bb8",
+    "removeContainerOnStop": true,
+    "nameTemplate": "soilfer-lab-{username}",
+    "persistentHomeVolumeTemplate": "soilfer-home-{username}",
+    "sourceLines": [48, 49, 84, 101]
+  },
+  "retainedStorageObservation": {
+    "volume": "soilfer-home-admin",
+    "createdAt": "2026-10-06T13:58:40+02:00",
+    "mountpoint": "/var/lib/docker/volumes/soilfer-home-admin/_data",
+    "exists": true,
+    "topLevelEntryCount": 23,
+    "regularFileCount": 476,
+    "ipynbFileCount": 25,
+    "pyFileCount": 3,
+    "csvFileCount": 4,
+    "fullHistoricalContentPreservationVerified": false
+  },
+  "antigravityObservation": {
+    "nativeChat": "LIMS Dashboard Technical Troubleshooting",
+    "nativeProject": "dashboard lims",
+    "conversationId": "07c057d2-7025-4753-9168-b56bf7c6496a",
+    "userRebootRequestDisplayedRomeTime": "2026-10-11 14:20",
+    "confirmedCommandHistory": ["docker builder prune -f", "docker container prune -f"],
+    "additionalHistoryEntry": "Prune dangling images; exact command/result not independently transcribed",
+    "containerPruneReclaimed": "327.7kB",
+    "containerPruneDeletedIds": [
+      "7158a7f3d10486e9f3194cb5cd5b109a38c241a96c7621e7181ec63c00f1da9a",
+      "ae19491e74fca7fbd70ae82b72ba621571b485e7886dadcb65e320bb35759bdc",
+      "ca745828abebc13b10269b39cd1b944653fba5b5a0a3402182878ad0c8617a7f",
+      "3c028cf87383ceb8cb6ba543e65a8f5d9bb1706a2855b93d0ab8cc593b97ec7d",
+      "e149d3ca53d0c2bd2274907ae91aee5cc9dd7c5553db39e8d9b75e9246bcf987",
+      "45d38813f91ec92336e2f8aa420d090eedcb3726aa8d22b4547de55719eb6da7",
+      "97724f0d1c7b92a61fe83e30d07a5aa867fb3f83fa3175e59d188be5a70e753a",
+      "93ebe109e52c37d0bf6abfd664c42a5be54ec395ad32b9a23e663838f386455a",
+      "7a59dcdcd92fe3372709b34f8f5be316bdc2f92c8aeb7a94d5f370d2437e624c",
+      "4570f77c14340b2d24cc3c0a5e87f62b1c904550190c058f362ad03b0c2a0522"
+    ],
+    "labAdminIdInContainerPruneList": false,
+    "savedScriptDirectory": "C:/Users/yigin/Documents/LIMS dashboard",
+    "savedScriptsReviewed": ["audit-reboot-safety.mjs", "check-deep-reboot.mjs", "fix-and-verify-reboot.mjs", "setup-logrotate.mjs", "inspect-lab-admin.mjs", "harden-reboot.mjs", "check-disk-usage.mjs"],
+    "savedScriptsContainAdminServerDeleteCall": false,
+    "scriptsAttemptLabAdminRestartPolicyChange": true,
+    "noAttributionOfNotebookStopToAntigravity": true,
+    "credentialBearingRawCommandLogsNotCopiedToThisRecord": true
+  },
+  "dockerEventHistoryLimit": {
+    "observedUtc": "2026-10-11T12:38:07.043546+00:00",
+    "retainedEventCount": 256,
+    "earlierContainerRemovalEventAvailable": false,
+    "dockerDaemonActiveSince": "2026-10-05 14:10:20 CEST",
+    "dockerDaemonRestartCount": 0
+  },
+  "limsObservation": {
+    "imageId": "sha256:159057d56c456a0c7cdef917fd04f53f9a66d6285cc476d7203d63047bfff8e1",
+    "dockerHealth": "healthy",
+    "restartCount": 0,
+    "publicHealthStatus": "ok",
+    "version": "1.9.0",
+    "productionReceiptSha256": "1f2e2d6621456bc11664ab7800ba0ab9e95d783b4efafde2a1175d3e1fade8c6"
+  },
+  "coordination": "Confirmed findings sent to Claudio's existing native LIMS Audit / Lab workflow audit and plan thread. Reboot clean-stop and hashed-backup preparation remains outstanding."
+}
