@@ -1,0 +1,12 @@
+{
+  "preparedUtc": "2026-10-11T23:33:21.519746+00:00",
+  "status": "ONE_PROOF_AUTHORIZED_NOT_YET_LAUNCHED",
+  "source": "4807cc600eb4483fa64172fead304ed1a293197e",
+  "sourceReviewId": 6114935703,
+  "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "mainCiRunId": 38182451105,
+  "mainCiStatus": "SUCCESS",
+  "root": "/opt/lims/releases/runtime-kobo-proof-f830f900-20261011T233321Z",
+  "unit": "lims-owned-runtime-kobo-proof-f830f900-20261011t233321z.service",
+  "targetPinSha256": "2418665d48550e7737ba5e22ae3ab681602feed1ce8f3af114e1d6be49e97bb4"
+}
