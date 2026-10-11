@@ -9,8 +9,11 @@ import startup_common as c
 
 CORE_ROOT = pathlib.Path('/var/lib/systemd/coredump')
 
-def core_allocations(core_root=CORE_ROOT, proc_root=pathlib.Path('/proc')):
+def core_allocations(core_root=CORE_ROOT, proc_root=pathlib.Path('/proc'), errors=None):
     found = {}
+    def unreadable(path, error):
+        if errors is not None:
+            errors.append({'path':str(path), 'errorType':type(error).__name__})
     def add(path, descriptor):
         try:
             st = path.stat()
@@ -20,8 +23,8 @@ def core_allocations(core_root=CORE_ROOT, proc_root=pathlib.Path('/proc')):
             record = {'device': st.st_dev, 'inode': st.st_ino,
                 'blocks': st.st_blocks, 'allocatedBytes': st.st_blocks * 512, **descriptor}
             found[key] = record
-        except (OSError, PermissionError):
-            pass
+        except OSError as error:
+            unreadable(path, error)
     if core_root.exists():
         for file in core_root.iterdir():
             if file.name.startswith('core.') and not file.is_symlink():
@@ -41,10 +44,10 @@ def core_allocations(core_root=CORE_ROOT, proc_root=pathlib.Path('/proc')):
                     if target.startswith(str(core_root) + '/'):
                         add(fd, {'kind': 'active-systemd-core', 'process': int(process.name),
                             'fd': fd.name, 'target': target})
-                except (OSError, PermissionError):
-                    pass
-        except (OSError, PermissionError):
-            pass
+                except OSError as error:
+                    unreadable(fd, error)
+        except OSError as error:
+            unreadable(process, error)
     # Device/inode de-duplication counts an open compressed output only once
     # when it also appears in the retained core directory.
     return sorted(found.values(), key=lambda row: (row['device'], row['inode']))
@@ -64,14 +67,15 @@ class KnownCoreDiskGuard:
     def __init__(self, root, reserve):
         self.root = root
         self.reserve = reserve
-        first_cores = core_allocations()
+        self.baseline_errors = []
+        first_cores = core_allocations(errors=self.baseline_errors)
         first_root = c.allocation(root)
         self.before = s.disk_free()
         self.root_before = max(first_root, c.allocation(root))
         # Conservatively retain the greater baseline block count per inode from
         # either side of df; a disappearing baseline core cannot create credit.
         baseline = {}
-        for row in first_cores + core_allocations():
+        for row in first_cores + core_allocations(errors=self.baseline_errors):
             key = (row['device'], row['inode'])
             if key not in baseline or baseline[key]['allocatedBytes'] < row['allocatedBytes']:
                 baseline[key] = row
@@ -79,7 +83,11 @@ class KnownCoreDiskGuard:
         self.devices = {path: pathlib.Path(path).stat().st_dev for path in self.before}
         self.root_device = root.stat().st_dev
         self.record({'stage': 'baseline', 'freeBytes': self.before,
-            'rootAllocatedBytes': self.root_before, 'coreAllocations': self.core_before})
+            'rootAllocatedBytes': self.root_before, 'coreAllocations': self.core_before,
+            'baselineEnumerationErrors': self.baseline_errors,
+            'baselineEnumerationErrorCount': len(self.baseline_errors)})
+        if self.baseline_errors:
+            raise RuntimeError('Unreadable baseline allocation; refuse attribution credit')
 
     def record(self, value):
         with (self.root / 'disk-allocation-observations.jsonl').open('a', encoding='utf-8') as out:

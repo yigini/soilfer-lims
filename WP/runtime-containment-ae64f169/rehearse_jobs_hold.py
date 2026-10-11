@@ -38,6 +38,8 @@ def retain_disk_observations(receipt):
         receipt['diskAllocationObservations'] = [json.loads(line) for line in path.read_text().splitlines()]
 
 def main():
+    if os.geteuid() != 0 or sys.flags.optimize != 0 or os.environ.get('PYTHONOPTIMIZE', '') not in ['', '0']:
+        raise RuntimeError('Require root and unoptimized Python for all assertion gates')
     assert sys.argv[1:] == ['--new-owned-proof']
     assert ROOT.parent == pathlib.Path('/opt/lims/releases')
     assert ROOT.name.startswith('runtime-jobs-off-ae64f169-proof-')
@@ -71,6 +73,9 @@ def main():
         'sourceIndexSha256': s.sha(ROOT / 'source-index.json'),
         'coordinatorSha256': s.sha(__file__),
         'diskAccountingGuardSha256': s.sha(ROOT / 'known_core_disk_guard.py'),
+        'effectiveUid': os.geteuid(), 'pythonOptimize': sys.flags.optimize,
+        'pythonOptimizeEnvironment': os.environ.get('PYTHONOPTIMIZE'),
+        'baselineEnumerationErrorCount': len(guard.baseline_errors),
         'liveEnvironmentHashNormalizedJobsOff': before_env_hash,
         'reserveBytes': reserve, 'freeBefore': s.disk_free()}
     name = 'lims-owned-' + ROOT.name.removeprefix('runtime-').lower()

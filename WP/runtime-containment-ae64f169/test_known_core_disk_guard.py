@@ -66,5 +66,20 @@ class CoreAccountingTests(unittest.TestCase):
             [{'device':1,'inode':7,'allocatedBytes':500000000}],
             [{'device':1,'inode':7,'allocatedBytes':1073745920}])[0]['allocatedBytes'],500000000)
 
+    def test_unreadable_baseline_refuses_all_credit(self):
+        error = {'path':'/var/lib/systemd/coredump/core.fixture','errorType':'PermissionError'}
+        def sample(errors):
+            errors.append(error)
+            return []
+        root = pathlib.Path('/owned-test')
+        with patch.object(k, 'core_allocations', side_effect=sample), \
+             patch.object(c, 'allocation', return_value=100), \
+             patch.object(s, 'disk_free', return_value={'/opt/lims':20000000000}), \
+             patch.object(pathlib.Path, 'stat', return_value=types.SimpleNamespace(st_dev=1)), \
+             patch.object(k.KnownCoreDiskGuard, 'record') as record:
+            with self.assertRaisesRegex(RuntimeError, 'Unreadable baseline'):
+                k.KnownCoreDiskGuard(root,10556150894)
+        self.assertEqual(record.call_args.args[0]['baselineEnumerationErrorCount'],2)
+
 if __name__ == '__main__':
     unittest.main()

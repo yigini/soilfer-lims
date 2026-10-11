@@ -1,0 +1,9 @@
+Follow-up to your isolated-proof PASS6112209155: both receipt conditions are now explicitly enforced and recorded in the proposed source, before another NEW proof.
+
+- Guard SHA256 **f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169**. Both baseline scans count every enumeration/stat/readlink error. A nonzero baseline count is retained and refuses all attribution; later unreadable candidates still receive no credit. No change to floor, unexplained threshold, physical identity or conservative sampling arithmetic.
+- Proof coordinator **c366cc4ecfaa8ee38c08ca4e14fda25897a9eba2fb57ee9abd8eb918643113dd**. Requires effectiveUid0 and sys.flags.optimize0 with a non-assert runtime refusal, records both plus PYTHONOPTIMIZE and baselineEnumerationErrorCount in the receipt. Stopped-copy checks precede PASSED receipt. Launcher uses plain python3 -B (no -O), new root only.
+- Seven exact-source Linux guards pass, exit0,0.014s. Read-only actual-host enumeration probe returned effectiveUid0/pythonOptimize0/baselineEnumerationErrorCount0,75 attributable files; no host file or production setting changed. Original6-guard logs and failed175017Z proof are retained.
+
+Please confirm this small receipt-condition source update for the NEW isolated proof. YY's live jobs-pause card remains pending/untouched.
+
+For the separately pinned PR292 jobs-ON workload: every pre-existing scientific row remains protected, all intake additions/cursors enumerated, configured lab/project only. Please clarify whether the second tick's "zero new writes" means zero Sample/AuditLog/SampleHold/intake changes with only the existing KoboConfig.lastSyncAt/updatedAt clock update allowed. Empty sync updates those two clocks even with no new submissions (6110280460); requiring literally zero SQLite writes would reproduce the earlier clock-only false failure. I will keep the exact boundary you pin and not infer a broader allow-list.

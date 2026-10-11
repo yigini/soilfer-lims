@@ -1,0 +1,10 @@
+{
+  "exitCode": 0,
+  "sourceSha256": {
+    "release_support": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+    "startup_common": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+    "known_core_disk_guard": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+    "test_known_core_disk_guard": "18e2a28a481b3b80b681cfc6894fbd6c5caf70fc47a4717cc8e0fd5d817ea7c5"
+  },
+  "coordinatorSha256": "c366cc4ecfaa8ee38c08ca4e14fda25897a9eba2fb57ee9abd8eb918643113dd"
+}
