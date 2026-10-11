@@ -1,0 +1,297 @@
+[
+  {
+    "case": "valid_percent",
+    "expectedDerived": true,
+    "separate": {
+      "derived": true,
+      "outputs": [
+        {
+          "analysisCode": "TEXTURE",
+          "value": null,
+          "valueText": "Loam",
+          "unit": null,
+          "censoring": "NONE",
+          "methodologyId": null,
+          "resultIds": [
+            "CLAY-source",
+            "SAND-source",
+            "SILT-source"
+          ],
+          "derivation": "calculateUsdaTexture"
+        }
+      ]
+    },
+    "mean": {
+      "derived": true,
+      "outputs": [
+        {
+          "analysisCode": "CLAY",
+          "value": 19,
+          "valueText": "19",
+          "unit": "%",
+          "censoring": "NONE",
+          "methodologyId": "method",
+          "resultIds": [
+            "CLAY-1",
+            "CLAY-2"
+          ],
+          "derivation": null
+        },
+        {
+          "analysisCode": "SAND",
+          "value": 40,
+          "valueText": "40",
+          "unit": "%",
+          "censoring": "NONE",
+          "methodologyId": "method",
+          "resultIds": [
+            "SAND-1",
+            "SAND-2"
+          ],
+          "derivation": null
+        },
+        {
+          "analysisCode": "SILT",
+          "value": 40,
+          "valueText": "40",
+          "unit": "%",
+          "censoring": "NONE",
+          "methodologyId": "method",
+          "resultIds": [
+            "SILT-1",
+            "SILT-2"
+          ],
+          "derivation": null
+        },
+        {
+          "analysisCode": "TEXTURE",
+          "value": null,
+          "valueText": "Loam",
+          "unit": null,
+          "censoring": "NONE",
+          "methodologyId": "method",
+          "resultIds": [
+            "SAND-1",
+            "SILT-1",
+            "CLAY-1",
+            "SAND-2",
+            "SILT-2",
+            "CLAY-2"
+          ],
+          "derivation": "calculateUsdaTexture"
+        }
+      ]
+    },
+    "separatePass": true,
+    "meanPass": true
+  },
+  {
+    "case": "non_percent",
+    "expectedDerived": false,
+    "separate": {
+      "derived": true,
+      "outputs": [
+        {
+          "analysisCode": "TEXTURE",
+          "value": null,
+          "valueText": "Loam",
+          "unit": null,
+          "censoring": "NONE",
+          "methodologyId": null,
+          "resultIds": [
+            "CLAY-source",
+            "SAND-source",
+            "SILT-source"
+          ],
+          "derivation": "calculateUsdaTexture"
+        }
+      ]
+    },
+    "mean": {
+      "derived": true,
+      "outputs": [
+        {
+          "analysisCode": "CLAY",
+          "value": 19,
+          "valueText": "19",
+          "unit": "g/kg",
+          "censoring": "NONE",
+          "methodologyId": "method",
+          "resultIds": [
+            "CLAY-1",
+            "CLAY-2"
+          ],
+          "derivation": null
+        },
+        {
+          "analysisCode": "SAND",
+          "value": 40,
+          "valueText": "40",
+          "unit": "g/kg",
+          "censoring": "NONE",
+          "methodologyId": "method",
+          "resultIds": [
+            "SAND-1",
+            "SAND-2"
+          ],
+          "derivation": null
+        },
+        {
+          "analysisCode": "SILT",
+          "value": 40,
+          "valueText": "40",
+          "unit": "g/kg",
+          "censoring": "NONE",
+          "methodologyId": "method",
+          "resultIds": [
+            "SILT-1",
+            "SILT-2"
+          ],
+          "derivation": null
+        },
+        {
+          "analysisCode": "TEXTURE",
+          "value": null,
+          "valueText": "Loam",
+          "unit": null,
+          "censoring": "NONE",
+          "methodologyId": "method",
+          "resultIds": [
+            "SAND-1",
+            "SILT-1",
+            "CLAY-1",
+            "SAND-2",
+            "SILT-2",
+            "CLAY-2"
+          ],
+          "derivation": "calculateUsdaTexture"
+        }
+      ]
+    },
+    "separatePass": false,
+    "meanPass": false
+  },
+  {
+    "case": "missing_unit",
+    "expectedDerived": false,
+    "separate": {
+      "derived": true,
+      "outputs": [
+        {
+          "analysisCode": "TEXTURE",
+          "value": null,
+          "valueText": "Loam",
+          "unit": null,
+          "censoring": "NONE",
+          "methodologyId": null,
+          "resultIds": [
+            "CLAY-source",
+            "SAND-source",
+            "SILT-source"
+          ],
+          "derivation": "calculateUsdaTexture"
+        }
+      ]
+    },
+    "mean": {
+      "derived": false,
+      "code": "REPORTED_VALUE_LIMIT_MISMATCH",
+      "message": "A mean requires the same output, method and controlled unit."
+    },
+    "separatePass": false,
+    "meanPass": true
+  },
+  {
+    "case": "mixed_units",
+    "expectedDerived": false,
+    "separate": {
+      "derived": true,
+      "outputs": [
+        {
+          "analysisCode": "TEXTURE",
+          "value": null,
+          "valueText": "Loam",
+          "unit": null,
+          "censoring": "NONE",
+          "methodologyId": null,
+          "resultIds": [
+            "CLAY-source",
+            "SAND-source",
+            "SILT-source"
+          ],
+          "derivation": "calculateUsdaTexture"
+        }
+      ]
+    },
+    "mean": {
+      "derived": false,
+      "code": "REPORTED_VALUE_LIMIT_MISMATCH",
+      "message": "A mean requires the same output, method and controlled unit."
+    },
+    "separatePass": false,
+    "meanPass": true
+  },
+  {
+    "case": "censored",
+    "expectedDerived": false,
+    "separate": {
+      "derived": false,
+      "code": "REPORTED_VALUE_TEXTURE_UNRESOLVED",
+      "message": "The selected fraction values cannot produce a texture class."
+    },
+    "mean": {
+      "derived": false,
+      "code": "REPORTED_VALUE_CENSORED_MEAN",
+      "message": "Censored values cannot be averaged."
+    },
+    "separatePass": true,
+    "meanPass": true
+  },
+  {
+    "case": "non_finite",
+    "expectedDerived": false,
+    "separate": {
+      "derived": false,
+      "code": "REPORTED_VALUE_TEXTURE_UNRESOLVED",
+      "message": "The selected fraction values cannot produce a texture class."
+    },
+    "mean": {
+      "derived": false,
+      "code": "REPORTED_VALUE_NON_NUMERIC_MEAN",
+      "message": "Only numerical measurements can be averaged."
+    },
+    "separatePass": true,
+    "meanPass": true
+  },
+  {
+    "case": "ambiguous_fraction",
+    "expectedDerived": false,
+    "separate": {
+      "derived": true,
+      "outputs": [
+        {
+          "analysisCode": "TEXTURE",
+          "value": null,
+          "valueText": "Loam",
+          "unit": null,
+          "censoring": "NONE",
+          "methodologyId": null,
+          "resultIds": [
+            "CLAY-source",
+            "SAND-source",
+            "SILT-source",
+            "duplicate-source"
+          ],
+          "derivation": "calculateUsdaTexture"
+        }
+      ]
+    },
+    "mean": {
+      "derived": false,
+      "code": "REPORTED_VALUE_SELECTION_INVALID",
+      "message": "The chosen attempt does not have a complete output set."
+    },
+    "separatePass": false,
+    "meanPass": true
+  }
+]

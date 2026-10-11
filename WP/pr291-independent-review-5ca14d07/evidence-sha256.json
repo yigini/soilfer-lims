@@ -25,6 +25,16 @@
     "sha256": "aa8e24fee59d75a3293d1694c673f8e05b24cc72953ef8100bcdf378a784247c"
   },
   {
+    "name": "independent-selection-mean-guard-matrix.cjs",
+    "bytes": 3499,
+    "sha256": "b11be22b3191ada2efa3efb0a109374f43ea3cb3959b38cbfab5bd03e28577c1"
+  },
+  {
+    "name": "independent-selection-mean-guard-matrix.json",
+    "bytes": 7059,
+    "sha256": "20118928c8a45b51c24e916983a118dde4516fc283222a2023c59e01af27edee"
+  },
+  {
     "name": "independent-stored-unit-reproduction-results.json",
     "bytes": 6229,
     "sha256": "a29273ba4e622277394b83de435094dbc75fe4b0665c6cc2d05215fcf9a3a598"
@@ -56,7 +66,7 @@
   },
   {
     "name": "README.md",
-    "bytes": 4769,
-    "sha256": "6403cc17866938fddae52ad4109b9740f89882b93bb66be6c6b2894aac0006da"
+    "bytes": 5566,
+    "sha256": "fa2ff009c733105ef02758cb2b7502f2e84873a4fea871dff34b85127d2a8f1a"
   }
 ]
