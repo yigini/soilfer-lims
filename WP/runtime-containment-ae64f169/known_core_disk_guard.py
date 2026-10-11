@@ -55,7 +55,9 @@ def allocated_on_device(records, device):
 def stable_allocations(before, after):
     """Credit only blocks observed on the same inode on both sides of df."""
     old = {(row['device'], row['inode']): row for row in before}
-    return [{**row, 'allocatedBytes': min(row['allocatedBytes'], old[key]['allocatedBytes'])}
+    return [{**row, 'allocatedBytes': min(row['allocatedBytes'], old[key]['allocatedBytes']),
+        'blocks': min(row.get('blocks', row['allocatedBytes'] // 512),
+            old[key].get('blocks', old[key]['allocatedBytes'] // 512))}
         for row in after if (key := (row['device'], row['inode'])) in old]
 
 class KnownCoreDiskGuard:

@@ -1,0 +1,12 @@
+{
+  "mode": "Linux in-memory modules and mocked disk/proc inputs; no host file or production change",
+  "exitCode": 0,
+  "sourceSha256": {
+    "release_support": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+    "startup_common": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+    "known_core_disk_guard": "631d994d51d799b6ac2a717ca1ff7b327992835be95dd3561f51715898be026f",
+    "test_known_core_disk_guard": "71a3a40b69b8112178d814262fd4ad0ebb72a84624ba311370cb0a2af7f9c4cb"
+  },
+  "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSha256": "b1cf977b433146a8a34588ddf6ad6267474d14d2b5f7a7d2a010b8c34ac48d9d"
+}

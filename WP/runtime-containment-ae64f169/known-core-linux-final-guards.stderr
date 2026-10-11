@@ -1,0 +1,11 @@
+test_expired_or_new_core_cannot_mask_unexplained_drop (test_known_core_disk_guard.CoreAccountingTests) ... ok
+test_growing_core_credits_only_smaller_observed_allocation (test_known_core_disk_guard.CoreAccountingTests) ... ok
+test_measured_one_gib_core_keeps_original_threshold (test_known_core_disk_guard.CoreAccountingTests) ... ok
+test_other_device_core_does_not_explain_drop (test_known_core_disk_guard.CoreAccountingTests) ... ok
+test_reserve_floor_is_absolute (test_known_core_disk_guard.CoreAccountingTests) ... ok
+test_unexplained_drop_above_500mb_still_aborts (test_known_core_disk_guard.CoreAccountingTests) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.012s
+
+OK
