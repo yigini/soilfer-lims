@@ -1,0 +1,62 @@
+{
+  ".gitattributes": {
+    "bytes": 51,
+    "sha256": "b7b00599738dbd673037c2481c058a2ed4ba0491b8550855d400a646b30f2cea"
+  },
+  "expanded-recording-reproduction.test.js": {
+    "bytes": 5233,
+    "sha256": "76c67c7979c388e2efd16d343ae43113812d19dbbdf893f5770d8fe0d2b4ecaa"
+  },
+  "independent-expanded-recording-results.json": {
+    "bytes": 36022,
+    "sha256": "50eb04ae3497d8ee3eda20b12e4d9be6ac4b93a0c576472756f0c9751b8bbd81"
+  },
+  "independent-expanded-recording.log": {
+    "bytes": 28111,
+    "sha256": "c3fff0201dc6d70e8280cb92def9f837647bf78cff120bffbc9bbad156646022"
+  },
+  "independent-focused-raw-git.log": {
+    "bytes": 62380,
+    "sha256": "c1aa63be55de5934748e142754fdd4cd4cf832b93573fbd395e230ece01d9b19"
+  },
+  "independent-focused-results.json": {
+    "bytes": 56358,
+    "sha256": "0d70099d097cb5b6f6fccc48f6387efaaaef001c37fb9211739530bf2801a247"
+  },
+  "independent-policy-matrix-results.json": {
+    "bytes": 12620,
+    "sha256": "5c24c508cd152d9cbc10743c74b410d8f28d0930f2fb2186363015a1e000791f"
+  },
+  "independent-policy-matrix.log": {
+    "bytes": 11000,
+    "sha256": "21564bcef74af3b38867fb97dc5698b781c01448f08b61bce2a71d7fdcf6601a"
+  },
+  "independent-recording-guard-matrix.json": {
+    "bytes": 9196,
+    "sha256": "2b9e844c600df117ffbf18c57aa09c0bc22d49fd8903509c912d6d2028357ff1"
+  },
+  "independent-selection-mean-guard-matrix.json": {
+    "bytes": 4725,
+    "sha256": "eb8459c116097b7c3be7aef6fd1d37c9e21042682417e7337a24a6d82f662f36"
+  },
+  "independent-selection-mean-guard-matrix.log": {
+    "bytes": 1247,
+    "sha256": "858389821169c4e8fd37ec80b462c6ebaa9a71cd6aa8a948e17add18aabaa13d"
+  },
+  "independent-unit-reproduction.json": {
+    "bytes": 2050,
+    "sha256": "fc0699c9c3ecaff112667b04636f0365117db20081c07afb7b609959c64dca34"
+  },
+  "raw-git-source-index.json": {
+    "bytes": 556605,
+    "sha256": "d1ce22539cc6baad40bd4e6aa6094a95992e1114be15fa17c6dd68fe61876852"
+  },
+  "README.md": {
+    "bytes": 2245,
+    "sha256": "ff81962606b4a874212a8e159cb4dd0737d7c5e103085a79f8f0877e8fb20617"
+  },
+  "review-body.md": {
+    "bytes": 1778,
+    "sha256": "a69b09539f793f1b543920f44c66a517b50cd5cb42bcb1165856ea2e982e82a6"
+  }
+}

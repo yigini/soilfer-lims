@@ -1,0 +1,91 @@
+[
+  {
+    "unit": "g/kg",
+    "source": [
+      {
+        "param": "CLAY",
+        "numericValue": 19,
+        "unit": "g/kg"
+      },
+      {
+        "param": "SAND",
+        "numericValue": 40,
+        "unit": "g/kg"
+      },
+      {
+        "param": "SILT",
+        "numericValue": 40,
+        "unit": "g/kg"
+      }
+    ],
+    "gate": [
+      {
+        "replicateNo": 1,
+        "outcome": "NOT_EVALUATED",
+        "reasonCode": "UNIT_MISMATCH",
+        "tolerancePct": 2
+      }
+    ],
+    "derived": null,
+    "textureRowsBefore": 0,
+    "textureRowsAfter": 0
+  },
+  {
+    "unit": "%",
+    "source": [
+      {
+        "param": "CLAY",
+        "numericValue": 19,
+        "unit": "%"
+      },
+      {
+        "param": "SAND",
+        "numericValue": 40,
+        "unit": "%"
+      },
+      {
+        "param": "SILT",
+        "numericValue": 40,
+        "unit": "%"
+      }
+    ],
+    "gate": [
+      {
+        "replicateNo": 1,
+        "outcome": "PASS",
+        "reasonCode": null,
+        "tolerancePct": 2,
+        "values": {
+          "sand": 40,
+          "silt": 40,
+          "clay": 19
+        },
+        "resultIds": [
+          "af505a9a-1d4f-41bf-9a76-7f4936de4a87",
+          "2ca6b6a0-d5f4-462f-bed9-f626fc829458",
+          "f8604527-932e-48a5-b376-f180affda2fe"
+        ],
+        "texture": {
+          "className": "Loam",
+          "code": "L",
+          "closureError": 1,
+          "isValid": true,
+          "scheme": "USDA_12_CLASS",
+          "fractions": {
+            "sand": 40,
+            "silt": 40,
+            "clay": 19
+          }
+        }
+      }
+    ],
+    "derived": {
+      "param": "TEXTURE",
+      "value": "Loam",
+      "flags": "[\"DERIVED_USDA_12_CLASS\",\"SOURCE_SAND_af505a9a-1d4f-41bf-9a76-7f4936de4a87\",\"SOURCE_SILT_2ca6b6a0-d5f4-462f-bed9-f626fc829458\",\"SOURCE_CLAY_f8604527-932e-48a5-b376-f180affda2fe\",\"CLOSURE_ERROR_1\"]",
+      "attemptId": "att-7566d383-9bd7-44f3-a257-474e1c46cfd1-82fd2dfa-36d9-4486-897a-ea683ad8e6cc"
+    },
+    "textureRowsBefore": 0,
+    "textureRowsAfter": 1
+  }
+]

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/opt/lims/releases/runtime-jobs-off-ae64f169-proof-20261011T175017Z/rehearse_jobs_hold.py", line 158, in <module>
+    sys.exit(main())
+  File "/opt/lims/releases/runtime-jobs-off-ae64f169-proof-20261011T175017Z/rehearse_jobs_hold.py", line 90, in main
+    receipt['readiness'] = c.start_and_wait(ROOT, name, ROOT / 'db', ROOT / 'assets', guard,
+  File "/opt/lims/releases/runtime-jobs-off-ae64f169-proof-20261011T175017Z/startup_common.py", line 157, in start_and_wait
+    c=inspect(name);state_guard(c,jobs); guard.check(); watch.check(); attempts+=1
+  File "/opt/lims/releases/runtime-jobs-off-ae64f169-proof-20261011T175017Z/startup_common.py", line 85, in check
+    drop=s.check_drop(self.before,free,{p:growth if pathlib.Path(p).stat().st_dev==self.root.stat().st_dev else 0 for p in free})
+  File "/opt/lims/releases/runtime-jobs-off-ae64f169-proof-20261011T175017Z/release_support.py", line 132, in check_drop
+    assert max(unexplained.values()) <= 500000000, 'Unexplained disk growth exceeds 500 MB'
+AssertionError: Unexplained disk growth exceeds 500 MB

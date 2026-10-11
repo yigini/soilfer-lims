@@ -1,0 +1,53 @@
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791741909720...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791741909720: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791741909720...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791741909720: 0 new, 67 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+PASS server/tests/contracts/pip_kobo_scale_replay.test.js (12.951 s)
+  Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)
+    √ 20. Independent production-scale idempotent replay stays bounded and preserves all Sample fields (11626 ms)
+    ○ skipped 1. Intra-submission duplicate barcodes are admitted safely without unique constraint crash, preserving duplicate depth provenance in metadata and AuditLog
+    ○ skipped 2. Cross-submission duplicate barcode preserves conflicting field provenance and audit trail without discarding differences
+    ○ skipped 3. Empty submission response updates lastSyncAt to prevent rapid polling spinning
+    ○ skipped 4. Full idempotency on repeat sync with identical submissions
+    ○ skipped 5. Foreign sample collision strictly avoids mutation, reports FOREIGN_SCOPE_COLLISION, and halts cursor
+    ○ skipped 6. Duplicate branch enforces commit gates and rolls back transaction on revoked config
+    ○ skipped 7. Conflict replay idempotency: repeating the conflicting submission does not append duplicate entries or duplicate audit rows
+    ○ skipped 8. Case-insensitive lookup preserves evidence on lowercase existing record in DB, advancing cursor cleanly
+    ○ skipped 9. Ambiguous depth identity retains a durable hold through physical arrival and blocks acceptance
+    ○ skipped 10. Unchanged original primary replay causes zero metadata, audit, or hold changes
+    ○ skipped 11. Cross-form occurrences with same kobo_id and depth are preserved and not silently deduplicated
+    ○ skipped 12. Unknown ownership and historical samples (REJECTED/RECEIVED) are protected from mutation
+    ○ skipped 13. Real isolated reception intake and consignment routes block AMBIGUOUS_PROVENANCE_HOLD with HTTP 409, while normal sample succeeds
+    ○ skipped 14. SampleWorkspaceService blocks canAcceptIntake when AMBIGUOUS_PROVENANCE_HOLD is active
+    ○ skipped 15. Source-B primary record does not suppress source-A submission with same ID and depth (Finding 1)
+    ○ skipped 16. Primary occurrence replayed with changed coordinates or attachments creates revision hold (Finding 2)
+    ○ skipped 17. Conflicting occurrence replayed with changed coordinates preserves revision append-only
+    ○ skipped 18. Repeated revised-primary replay with identical revised evidence is idempotent (da8b561 review regression)
+    ○ skipped malformed hold submissions are skipped and retriable while later healthy submissions commit (mixed=false, history=false)
+    ○ skipped malformed hold submissions are skipped and retriable while later healthy submissions commit (mixed=true, history=false)
+    ○ skipped malformed hold submissions are skipped and retriable while later healthy submissions commit (mixed=false, history=true)
+    ○ skipped malformed hold submissions are skipped and retriable while later healthy submissions commit (mixed=true, history=true)
+    ○ skipped 19. The duplicate index never loads stored metadata for every Sample; only the matched specimen is read, and replay stays idempotent (runtime heap regression)
+
+Test Suites: 1 passed, 1 total
+Tests:       23 skipped, 1 passed, 24 total
+Snapshots:   0 total
+Time:        13.004 s
+Ran all test suites matching server/tests/contracts/pip_kobo_scale_replay.test.js with tests matching "20\. Independent production-scale".
+Test results written to: independent-scale-results.json

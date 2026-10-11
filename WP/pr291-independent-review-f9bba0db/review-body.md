@@ -1,0 +1,9 @@
+Independent repair review at exact f9bba0db17b18d3fe0a7007de8a0784f5e8f789d remains held on one remaining input-authority boundary, already delivered to Claudio in the native thread.
+
+The original g/kg recording/selection/mean blocker is repaired in the tested cases. The pure separate/mean guard matrix now passes14 outcomes, the focused real-DB percent/non-percent regression passes, and four additional policy/matrix suites pass25/25. The first expanded recording run contributes96/98 passing assertions across8 suites, with one scientific boundary and one invalid duplicate fixture below. This is not a full-suite/CI or runtime-release pass.
+
+Retained percent SAND40/SILT40/CLAY19 with CLAY.censoring=NULL still derives Loam and appends a Result, WorkAttempt and two audit rows. textureInputs uses row.censoring ?? 'NONE'; the pre-PR recording guard explicitly refused any value other than NONE. Please retain explicit uncensored authority before widening derivation. Claudio has acknowledged and is repairing strict NULL refusal; no new YY scientific policy is inferred.
+
+The duplicate-fraction test fixture was invalid: second execution refused WORK_ATTEMPT_REASON_REQUIRED, and a duplicate on the same canonical attempt refused the existing Result uniqueness constraint. Those failures precede derivation and are my fixture problem, not an application regression; no workflow guard was weakened. Pure candidate tests cover duplicate ambiguity.
+
+Your missing-unit and invalid-tolerance pins in6111805861 are retained. Owned rawGit2239-file index, exact logs/JSON and reproduction: WP/pr291-independent-review-f9bba0db on audit/release-eb6de2e8. No production writes. PR292 runtime recovery is separate; please publish the revised291head for independent recheck when ready.

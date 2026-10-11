@@ -1,0 +1,32 @@
+{
+  "status": "FAILED_NEW_OWNED_JOBS_OFF_CONTAINMENT_PROOF",
+  "head": "ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf",
+  "image": "sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a",
+  "root": "/opt/lims/releases/runtime-jobs-off-ae64f169-proof-20261011T175017Z",
+  "startedUtc": "2026-10-11T17:50:19.499852+00:00",
+  "productionMutations": 0,
+  "separateInstallerCommands": 0,
+  "historicalReceiptSha256": "35ab0b825a5d52414304d426101863b671ce5d3b92f6d8eb81e8b79f34095462",
+  "sourceIndexSha256": "96e9d16ee1b2f235af218af49f690f7edeb4eea834d8a879f961facdf14c0266",
+  "coordinatorSha256": "0bc2474680a23e1bd1150ffa554d63e7ebeb636c85ab29f70638e94432527641",
+  "liveEnvironmentHashNormalizedJobsOff": "ff176ec36f45b85642fdbc10c884a7a37aa8a73cf7d5f330d57ca5619a0be753",
+  "reserveBytes": 10556150894,
+  "freeBefore": {
+    "/opt/lims": 121866842112,
+    "/var/lib/docker": 121866842112
+  },
+  "freshCopyUtc": "2026-10-11T17:50:23.976119+00:00",
+  "freshCopySha256": "36aeec304f9010d85ca4441e9a13351d53dcd8069996b67a36bab4a91e9a7ef2",
+  "protectedStateSha256": "34e69cb45ff8384f36b2b2ae0f184d68598e285f1d5087afe0b6cfeba2d943c2",
+  "retainedAcceptanceBefore": {
+    "mode": "READ_ONLY_RETAINED_EVIDENCE",
+    "totalChanges": 0,
+    "eventId": "0c4a247e-339a-4adc-9ba2-061829eb2fce",
+    "eventSha256": "d14c99ff5643a8fe31abef867604ffff2645f63c799e58c62c736937a665dc45",
+    "attemptStatus": "ACCEPTED",
+    "reviewDecisionAttemptId": null,
+    "reportStatus": "PUBLISHED"
+  },
+  "error": "Unexplained disk growth exceeds 500 MB",
+  "failedUtc": "2026-10-11T17:52:14.396020+00:00"
+}

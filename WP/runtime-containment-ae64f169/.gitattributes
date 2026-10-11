@@ -1,0 +1,4 @@
+* -text
+*.json -diff
+*.log -diff
+*.jsonl -diff

@@ -1,0 +1,30 @@
+{
+  "head": "cb79d89bfd104466ab7d29a83312dbc7bb48b7a0",
+  "statistics": {
+    "sampleCount": 38773,
+    "metadataCharacters": 409074808
+  },
+  "submissions": 67,
+  "replay": {
+    "newSamples": 0,
+    "skipped": 67,
+    "lastSubmissionId": "41955"
+  },
+  "elapsedMs": 410.3786,
+  "heapBefore": 164183840,
+  "heapAfter": 181095632,
+  "heapLimitBytes": 603979776,
+  "maxRssKiB": 399200,
+  "before": {
+    "samples": "87e71d08c62edb23986b011e2b7c28ae3dded52ac3b23a5752b481ed5be131e4",
+    "audit": "0f289d26c75510eea8092ec036ebe6fd6d9aaeee6e95b94ea49aaaf9d100268e",
+    "holds": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "after": {
+    "samples": "87e71d08c62edb23986b011e2b7c28ae3dded52ac3b23a5752b481ed5be131e4",
+    "audit": "0f289d26c75510eea8092ec036ebe6fd6d9aaeee6e95b94ea49aaaf9d100268e",
+    "holds": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "ownedSyntheticFixture": true,
+  "productionWrites": 0
+}

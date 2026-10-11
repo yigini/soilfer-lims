@@ -1,0 +1,228 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a621afca-2f89-4a7e-a5c9-3202b9b3d188 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a621afca-2f89-4a7e-a5c9-3202b9b3d188 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a621afca-2f89-4a7e-a5c9-3202b9b3d188 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a621afca-2f89-4a7e-a5c9-3202b9b3d188 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c1ab4aea-e46f-4d36-a23d-c3c024cbde37 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c1ab4aea-e46f-4d36-a23d-c3c024cbde37 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c1ab4aea-e46f-4d36-a23d-c3c024cbde37 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c1ab4aea-e46f-4d36-a23d-c3c024cbde37 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Scientific matrix validation failed: Texture closure failed: Sand(40%) + Silt(40%) + Clay(19%) = 99.0% (must sum to 100% exactly)
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-f9bba0db-20261011T173300Z\server\controllers\resultsController.js:231:53
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-f9bba0db-20261011T173300Z\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-f9bba0db-20261011T173300Z\server\services\workflowStateRules.js:187:60)
+        at exports.submitForApproval (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-f9bba0db-20261011T173300Z\server\controllers\resultsController.js:224:25) {
+      statusCode: 422,
+      status: 422,
+      code: 'BLOCKING_MATRIX_DIAGNOSTICS',
+      details: {
+        blockingErrors: [ [Object] ],
+        matrixDiagnostics: {
+          texture: [Object],
+          textureClosure: [Array],
+          retiredAdvisories: [Array],
+          advisorySuccessor: 'crossChecks',
+          warnings: [Array],
+          blockingErrors: [Array],
+          isBlocking: true,
+          texturePolicyInvalid: true
+        }
+      }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6914827f-2890-4755-be4c-f2048d59f186 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6914827f-2890-4755-be4c-f2048d59f186 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS server/tests/contracts/issue_281_cross_check_bounds.test.js
+  √ the en server and client locales disclose CROSS_CHECK_POLICY_INVALID (9 ms)
+  √ the es server and client locales disclose CROSS_CHECK_POLICY_INVALID (6 ms)
+  √ the es-419 server and client locales disclose CROSS_CHECK_POLICY_INVALID (6 ms)
+  √ the fr server and client locales disclose CROSS_CHECK_POLICY_INVALID (6 ms)
+  √ the pt server and client locales disclose CROSS_CHECK_POLICY_INVALID (5 ms)
+  #281 registry bounds
+    √ crossCheck.textureClosureTolerancePct accepts its bounds and refuses one step outside them (1 ms)
+    √ crossCheck.baseSaturationMaxPct accepts its bounds and refuses one step outside them
+    √ crossCheck.cnMin accepts its bounds and refuses one step outside them
+    √ crossCheck.cnMax accepts its bounds and refuses one step outside them
+    √ crossCheck.carbonatePhMin accepts its bounds and refuses one step outside them
+    √ crossCheck.basesCecFactor accepts its bounds and refuses one step outside them (1 ms)
+    √ defaults are unchanged (191 ms)
+    √ the policy owner refuses an out-of-range save with POLICY_VALUE_INVALID and writes nothing (115 ms)
+  #281 a stored out-of-range value
+    √ is never rewritten, keeps every other policy readable and disables only the cross-checks (633 ms)
+    √ a stored invalid texture tolerance is disclosed and the blocking gate closes exactly, never wider (511 ms)
+    √ a manager fixes it by saving a valid value as a new policy version (66 ms)
+    √ another laboratory with valid policy still records evidence (372 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2feeb937-9fbc-4ec6-8d3d-ce7a419eb167 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2feeb937-9fbc-4ec6-8d3d-ce7a419eb167 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2feeb937-9fbc-4ec6-8d3d-ce7a419eb167 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2feeb937-9fbc-4ec6-8d3d-ce7a419eb167 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2feeb937-9fbc-4ec6-8d3d-ce7a419eb167 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2feeb937-9fbc-4ec6-8d3d-ce7a419eb167 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS server/tests/contracts/matrix_validation.test.js
+  Sample Matrix Cross-Parameter Validation Contract
+    √ 1. saveResults validates matrix integrity and computes USDA texture; C:N and bases come from crossChecks (332 ms)
+    √ 2. Emits warning when texture fractions fail 100% closure tolerance (134 ms)
+    √ 3. submitForApproval attaches complete matrix diagnostics to response (436 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3f3b0bb4-4563-43cb-9709-5357c26cd4d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3f3b0bb4-4563-43cb-9709-5357c26cd4d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Scientific matrix validation failed: Texture closure failed: Sand(40%) + Silt(30%) + Clay(17%) = 87.0% (must sum to 100% exactly)
+        at C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-f9bba0db-20261011T173300Z\server\controllers\resultsController.js:231:53
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-f9bba0db-20261011T173300Z\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-f9bba0db-20261011T173300Z\server\services\workflowStateRules.js:187:60)
+        at exports.submitForApproval (C:\Users\yigin\AppData\Local\Temp\lims-pr291-independent-f9bba0db-20261011T173300Z\server\controllers\resultsController.js:224:25) {
+      statusCode: 422,
+      status: 422,
+      code: 'BLOCKING_MATRIX_DIAGNOSTICS',
+      details: {
+        blockingErrors: [ [Object] ],
+        matrixDiagnostics: {
+          texture: [Object],
+          textureClosure: [Array],
+          retiredAdvisories: [Array],
+          advisorySuccessor: 'crossChecks',
+          warnings: [Array],
+          blockingErrors: [Array],
+          isBlocking: true
+        }
+      }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3f3b0bb4-4563-43cb-9709-5357c26cd4d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3f3b0bb4-4563-43cb-9709-5357c26cd4d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS server/tests/contracts/matrix_blocking_diagnostics.test.js
+  WP-15: Blocking vs Advisory Scientific Matrix Diagnostics
+    √ 1. Invalid texture closure (Sand+Silt+Clay = 87%) is strictly BLOCKED (HTTP 422) (203 ms)
+    √ 2. Valid texture with advisory C:N warning (C:N = 45) SUCCEEDS with a crossChecks C:N flag (439 ms)
+
+PASS server/tests/contracts/audit_4_8_cross_check_policy.test.js
+  Audit 4.8: laboratory cross-check policy contract
+    √ all presets supply the pinned per-lab defaults and finite values (5 ms)
+    √ five server and client locales label every cross-check policy (21 ms)
+    √ profile validation rejects equal and inverted C:N bounds using the stable policy code (16 ms)
+
+Test Suites: 4 passed, 4 total
+Tests:       25 passed, 25 total
+Snapshots:   0 total
+Time:        5.327 s
+Ran all test suites matching server/tests/contracts/matrix_validation.test.js|server/tests/contracts/matrix_blocking_diagnostics.test.js|server/tests/contracts/issue_281_cross_check_bounds.test.js|server/tests/contracts/audit_4_8_cross_check_policy.test.js.
+Test results written to: independent-policy-matrix-results.json

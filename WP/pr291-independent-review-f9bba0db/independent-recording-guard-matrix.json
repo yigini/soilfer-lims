@@ -1,0 +1,406 @@
+[
+  {
+    "case": "non_percent",
+    "expectedDerived": false,
+    "source": [
+      {
+        "param": "SILT",
+        "numericValue": 40,
+        "unit": "g/kg",
+        "censoring": "NONE"
+      },
+      {
+        "param": "SAND",
+        "numericValue": 40,
+        "unit": "g/kg",
+        "censoring": "NONE"
+      },
+      {
+        "param": "CLAY",
+        "numericValue": 19,
+        "unit": "g/kg",
+        "censoring": "NONE"
+      }
+    ],
+    "gate": [
+      {
+        "replicateNo": 1,
+        "outcome": "NOT_EVALUATED",
+        "reasonCode": "UNIT_MISMATCH",
+        "tolerancePct": 2
+      }
+    ],
+    "derived": null,
+    "beforeSha256": "2fe55ae3ac6d6c5e1cd6e78fc942b65bec491af3fb3a69c22c5956323ebc4ec5",
+    "afterSha256": "2fe55ae3ac6d6c5e1cd6e78fc942b65bec491af3fb3a69c22c5956323ebc4ec5",
+    "countsBefore": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    },
+    "countsAfter": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    }
+  },
+  {
+    "case": "missing_unit",
+    "expectedDerived": false,
+    "source": [
+      {
+        "param": "SAND",
+        "numericValue": 40,
+        "unit": null,
+        "censoring": "NONE"
+      },
+      {
+        "param": "SILT",
+        "numericValue": 40,
+        "unit": null,
+        "censoring": "NONE"
+      },
+      {
+        "param": "CLAY",
+        "numericValue": 19,
+        "unit": null,
+        "censoring": "NONE"
+      }
+    ],
+    "gate": [
+      {
+        "replicateNo": 1,
+        "outcome": "BLOCKED",
+        "reasonCode": "UNIT_MISSING_EXACT_CLOSURE",
+        "tolerancePct": null,
+        "values": {
+          "sand": 40,
+          "silt": 40,
+          "clay": 19
+        },
+        "resultIds": [
+          "219466fe-1343-40c8-8e58-c0fb62d2f3e1",
+          "6ce2fb54-ba96-4186-a219-f5c8aaf7e984",
+          "874a4efd-a1ba-434d-aed3-a7fa7231b281"
+        ],
+        "texture": {
+          "className": "Unavailable",
+          "code": "UNAVAILABLE",
+          "closureError": 1,
+          "isValid": false,
+          "scheme": "USDA_12_CLASS",
+          "fractions": {
+            "sand": 40,
+            "silt": 40,
+            "clay": 19
+          },
+          "error": "Missing scientific configuration: closure error is 1%, but no closure tolerance is configured."
+        }
+      }
+    ],
+    "derived": null,
+    "beforeSha256": "31c4978f8e8a1c5e3e7ab6c4acad78e214a9832b1442faa5c2921491d4447aeb",
+    "afterSha256": "31c4978f8e8a1c5e3e7ab6c4acad78e214a9832b1442faa5c2921491d4447aeb",
+    "countsBefore": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    },
+    "countsAfter": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    }
+  },
+  {
+    "case": "mixed_units",
+    "expectedDerived": false,
+    "source": [
+      {
+        "param": "SAND",
+        "numericValue": 40,
+        "unit": "%",
+        "censoring": "NONE"
+      },
+      {
+        "param": "CLAY",
+        "numericValue": 19,
+        "unit": "g/kg",
+        "censoring": "NONE"
+      },
+      {
+        "param": "SILT",
+        "numericValue": 40,
+        "unit": "%",
+        "censoring": "NONE"
+      }
+    ],
+    "gate": [
+      {
+        "replicateNo": 1,
+        "outcome": "NOT_EVALUATED",
+        "reasonCode": "UNIT_MISMATCH",
+        "tolerancePct": 2
+      }
+    ],
+    "derived": null,
+    "beforeSha256": "2a72fa74cb35018c667b130e1dc8e15e43c10e527295a213ba1e570a0e8a5ea1",
+    "afterSha256": "2a72fa74cb35018c667b130e1dc8e15e43c10e527295a213ba1e570a0e8a5ea1",
+    "countsBefore": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    },
+    "countsAfter": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    }
+  },
+  {
+    "case": "censored",
+    "expectedDerived": false,
+    "source": [
+      {
+        "param": "SAND",
+        "numericValue": 40,
+        "unit": "%",
+        "censoring": "NONE"
+      },
+      {
+        "param": "CLAY",
+        "numericValue": 19,
+        "unit": "%",
+        "censoring": "BELOW_LOQ"
+      },
+      {
+        "param": "SILT",
+        "numericValue": 40,
+        "unit": "%",
+        "censoring": "NONE"
+      }
+    ],
+    "gate": [
+      {
+        "replicateNo": 1,
+        "outcome": "NOT_EVALUATED",
+        "reasonCode": "INPUT_CENSORED",
+        "tolerancePct": 2
+      }
+    ],
+    "derived": null,
+    "beforeSha256": "a52cdb02460280157fc643b2679302bc003a67aca89d79b445a61cae03b0917b",
+    "afterSha256": "a52cdb02460280157fc643b2679302bc003a67aca89d79b445a61cae03b0917b",
+    "countsBefore": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    },
+    "countsAfter": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    }
+  },
+  {
+    "case": "null_censoring",
+    "expectedDerived": false,
+    "source": [
+      {
+        "param": "SILT",
+        "numericValue": 40,
+        "unit": "%",
+        "censoring": "NONE"
+      },
+      {
+        "param": "SAND",
+        "numericValue": 40,
+        "unit": "%",
+        "censoring": "NONE"
+      },
+      {
+        "param": "CLAY",
+        "numericValue": 19,
+        "unit": "%",
+        "censoring": null
+      }
+    ],
+    "gate": [
+      {
+        "replicateNo": 1,
+        "outcome": "PASS",
+        "reasonCode": null,
+        "tolerancePct": 2,
+        "values": {
+          "sand": 40,
+          "silt": 40,
+          "clay": 19
+        },
+        "resultIds": [
+          "b64a1f93-0fb3-41c0-9944-d102bc2588e8",
+          "a4a1af6b-03b6-4c81-ad37-19f48f686f06",
+          "f5a62799-a367-4eb6-9eca-9a33193492e6"
+        ],
+        "texture": {
+          "className": "Loam",
+          "code": "L",
+          "closureError": 1,
+          "isValid": true,
+          "scheme": "USDA_12_CLASS",
+          "fractions": {
+            "sand": 40,
+            "silt": 40,
+            "clay": 19
+          }
+        }
+      }
+    ],
+    "derived": {
+      "param": "TEXTURE",
+      "value": "Loam",
+      "attemptId": "att-773312dd-3144-4692-883c-47f5006e9b8d-e3ef650a-bd05-4c25-90f5-75166433bb2f"
+    },
+    "beforeSha256": "8d202da4a0c3cab08a5bd3580c69ef5189f720b807a3a916a5e4ea861d5c0f42",
+    "afterSha256": "391420aa9bd18ef9716a3ef67a6565051924608f31b49b274b9e13a99090b91f",
+    "countsBefore": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    },
+    "countsAfter": {
+      "result": 4,
+      "attempt": 4,
+      "item": 4,
+      "audit": 10
+    }
+  },
+  {
+    "case": "stored_numeric_missing",
+    "expectedDerived": false,
+    "source": [
+      {
+        "param": "SAND",
+        "numericValue": 40,
+        "unit": "%",
+        "censoring": "NONE"
+      },
+      {
+        "param": "CLAY",
+        "numericValue": null,
+        "unit": "%",
+        "censoring": "NONE"
+      },
+      {
+        "param": "SILT",
+        "numericValue": 40,
+        "unit": "%",
+        "censoring": "NONE"
+      }
+    ],
+    "gate": [
+      {
+        "replicateNo": 1,
+        "outcome": "NOT_EVALUATED",
+        "reasonCode": "INPUT_NON_NUMERIC",
+        "tolerancePct": 2
+      }
+    ],
+    "derived": null,
+    "beforeSha256": "d55c7d4cf43ac1ef06e4bc110c3c73f6013efff1fb7983dae86eb5722dfd6738",
+    "afterSha256": "d55c7d4cf43ac1ef06e4bc110c3c73f6013efff1fb7983dae86eb5722dfd6738",
+    "countsBefore": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    },
+    "countsAfter": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    }
+  },
+  {
+    "case": "valid_percent",
+    "expectedDerived": true,
+    "source": [
+      {
+        "param": "SAND",
+        "numericValue": 40,
+        "unit": "%",
+        "censoring": "NONE"
+      },
+      {
+        "param": "CLAY",
+        "numericValue": 19,
+        "unit": "%",
+        "censoring": "NONE"
+      },
+      {
+        "param": "SILT",
+        "numericValue": 40,
+        "unit": "%",
+        "censoring": "NONE"
+      }
+    ],
+    "gate": [
+      {
+        "replicateNo": 1,
+        "outcome": "PASS",
+        "reasonCode": null,
+        "tolerancePct": 2,
+        "values": {
+          "sand": 40,
+          "silt": 40,
+          "clay": 19
+        },
+        "resultIds": [
+          "2011a087-0b3f-49f6-bfc1-815a1f5d3fc6",
+          "eaf0d13e-e464-4620-ae2b-e2a1b9034589",
+          "c2255783-b7e6-41ce-b6e5-23d70b6bafcd"
+        ],
+        "texture": {
+          "className": "Loam",
+          "code": "L",
+          "closureError": 1,
+          "isValid": true,
+          "scheme": "USDA_12_CLASS",
+          "fractions": {
+            "sand": 40,
+            "silt": 40,
+            "clay": 19
+          }
+        }
+      }
+    ],
+    "derived": {
+      "param": "TEXTURE",
+      "value": "Loam",
+      "attemptId": "att-4b28473b-6c8c-42ff-97de-092af2776549-31065515-eb60-4f49-88a9-3f4d453220cc"
+    },
+    "beforeSha256": "d1732336220c3cc15b74c5f4ca8333cd037def89c748053813078cc382bd7fec",
+    "afterSha256": "a5a06ad639e1c4324ec7681d54dcce4423ab7e750f72aed912404cb41cd2b516",
+    "countsBefore": {
+      "result": 3,
+      "attempt": 3,
+      "item": 4,
+      "audit": 8
+    },
+    "countsAfter": {
+      "result": 4,
+      "attempt": 4,
+      "item": 4,
+      "audit": 10
+    }
+  }
+]

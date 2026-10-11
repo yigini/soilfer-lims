@@ -1,0 +1,90 @@
+{
+  "utc": "2026-10-11T17:55:41.647274+00:00",
+  "coreFiles": [
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.265525.1791739927000000.zst",
+      "bytes": 27493141,
+      "allocated": 27500544,
+      "modifiedUtc": "2026-10-11T17:32:17.050334+00:00"
+    },
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.267509.1791740044000000.zst",
+      "bytes": 25269247,
+      "allocated": 25276416,
+      "modifiedUtc": "2026-10-11T17:34:14.781793+00:00"
+    },
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.269542.1791740163000000.zst",
+      "bytes": 25128314,
+      "allocated": 25133056,
+      "modifiedUtc": "2026-10-11T17:36:14.041283+00:00"
+    },
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.271672.1791740280000000.zst",
+      "bytes": 27326166,
+      "allocated": 27332608,
+      "modifiedUtc": "2026-10-11T17:38:11.223729+00:00"
+    },
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.273835.1791740400000000.zst",
+      "bytes": 25248399,
+      "allocated": 25255936,
+      "modifiedUtc": "2026-10-11T17:40:12.180254+00:00"
+    },
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.275916.1791740524000000.zst",
+      "bytes": 25125510,
+      "allocated": 25133056,
+      "modifiedUtc": "2026-10-11T17:42:15.424827+00:00"
+    },
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.277953.1791740646000000.zst",
+      "bytes": 26736423,
+      "allocated": 26742784,
+      "modifiedUtc": "2026-10-11T17:44:15.463333+00:00"
+    },
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.280008.1791740767000000.zst",
+      "bytes": 25638614,
+      "allocated": 25645056,
+      "modifiedUtc": "2026-10-11T17:46:18.316898+00:00"
+    },
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.282051.1791740884000000.zst",
+      "bytes": 27280451,
+      "allocated": 27287552,
+      "modifiedUtc": "2026-10-11T17:48:14.419322+00:00"
+    },
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.284165.1791741001000000.zst",
+      "bytes": 26890346,
+      "allocated": 26898432,
+      "modifiedUtc": "2026-10-11T17:50:12.006776+00:00"
+    },
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.286074.1791741130000000.zst",
+      "bytes": 25138853,
+      "allocated": 25145344,
+      "modifiedUtc": "2026-10-11T17:52:20.819465+00:00"
+    },
+    {
+      "name": "core.MainThread.0.729c111814064e92b3f20463a35cda46.289631.1791741250000000.zst",
+      "bytes": 26781404,
+      "allocated": 26787840,
+      "modifiedUtc": "2026-10-11T17:54:21.218974+00:00"
+    }
+  ],
+  "openTemporaryFiles": [
+    {
+      "pid": 291808,
+      "fd": "18",
+      "path": "/app/server/prisma/dev.db",
+      "bytes": 563322880,
+      "allocated": 563326976,
+      "device": 64769,
+      "inode": 1280648
+    }
+  ],
+  "liveRestartCount": 52,
+  "livePid": 291808
+}

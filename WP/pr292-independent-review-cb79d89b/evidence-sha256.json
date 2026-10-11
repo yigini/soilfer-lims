@@ -1,0 +1,38 @@
+{
+  ".gitattributes": {
+    "bytes": 36,
+    "sha256": "03d957ea65a5f58adb52690ed562298542615e0b05162deee46d47e37fef5d0f"
+  },
+  "independent-focused-results.json": {
+    "bytes": 78358,
+    "sha256": "a7e0d2edf74bd63f1d1329f4a6cb0c1cb672ec19fb62d1c292b3adad6a69bb62"
+  },
+  "independent-focused.log": {
+    "bytes": 72939,
+    "sha256": "2cb8fdf36bf21a16e56b3a2a72e8e90cc3aa064be5d8f6dfbfdff0c9b3c1f603"
+  },
+  "independent-scale-replay.json": {
+    "bytes": 968,
+    "sha256": "548510897d76ea9c744590eab74ec8aa7839dbe75d96fd869d8cc3959e94eb24"
+  },
+  "independent-scale-reproduction.test.js": {
+    "bytes": 70215,
+    "sha256": "70f835d64a54cb7419a8be6b60f65c456a4422dd65195a4ced409dba5af0e896"
+  },
+  "independent-scale-results.json": {
+    "bytes": 14937,
+    "sha256": "f0ed97f150115412dc8b09db2d3d87dc121b05cf4b6fd6672f9f390fd7735f8f"
+  },
+  "independent-scale.log": {
+    "bytes": 4154,
+    "sha256": "e6ed986ad3a474f98a91caec70cbdddc018b41561575951f053c433b6c5d3df3"
+  },
+  "raw-git-source-index.json": {
+    "bytes": 535033,
+    "sha256": "9a22d9929ca885c7273a96e6607719e4b001d7c3c8d5f98a95fe06ef31d4e5d3"
+  },
+  "README.md": {
+    "bytes": 1936,
+    "sha256": "9c028def59dec5f02d9a8e03344928364148c54182b93336a252d32b6a32a7ee"
+  }
+}

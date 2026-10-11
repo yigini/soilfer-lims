@@ -2,6 +2,7 @@
 import datetime, hashlib, json, os, pathlib, shutil, sqlite3, subprocess, sys, time
 import release_support as s
 import startup_common as c
+from known_core_disk_guard import KnownCoreDiskGuard
 
 ROOT = pathlib.Path(__file__).resolve().parent
 HEAD = 'ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf'
@@ -30,6 +31,12 @@ def memory_peak(name):
     assert 0 < peak <= LIMIT, 'Memory exceeded the reviewed 768MiB'
     return peak
 
+def retain_disk_observations(receipt):
+    path = ROOT / 'disk-allocation-observations.jsonl'
+    if path.exists():
+        receipt['diskAllocationObservationsSha256'] = s.sha(path)
+        receipt['diskAllocationObservations'] = [json.loads(line) for line in path.read_text().splitlines()]
+
 def main():
     assert sys.argv[1:] == ['--new-owned-proof']
     assert ROOT.parent == pathlib.Path('/opt/lims/releases')
@@ -57,12 +64,14 @@ def main():
     asset_bytes = sum(p.stat().st_size for p in s.ASSETS.rglob('*') if p.is_file())
     reserve = max(MIN_RESERVE, s.disk_reserve(data_bytes, image['size'], asset_bytes))
     assert min(s.disk_free().values()) >= reserve + 2 * data_bytes + asset_bytes + 268435456
-    guard = c.DiskGuard(ROOT, reserve)
+    guard = KnownCoreDiskGuard(ROOT, reserve)
     receipt = {'status': 'OWNED_JOBS_HOLD_PROOF_IN_PROGRESS', 'head': HEAD, 'image': IMAGE,
         'root': str(ROOT), 'startedUtc': s.utc(), 'productionMutations': 0,
         'separateInstallerCommands': 0, 'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA,
         'sourceIndexSha256': s.sha(ROOT / 'source-index.json'),
-        'coordinatorSha256': s.sha(__file__), 'liveEnvironmentHashNormalizedJobsOff': before_env_hash,
+        'coordinatorSha256': s.sha(__file__),
+        'diskAccountingGuardSha256': s.sha(ROOT / 'known_core_disk_guard.py'),
+        'liveEnvironmentHashNormalizedJobsOff': before_env_hash,
         'reserveBytes': reserve, 'freeBefore': s.disk_free()}
     name = 'lims-owned-' + ROOT.name.removeprefix('runtime-').lower()
     owned = False
@@ -132,9 +141,19 @@ def main():
         receipt['completeDatabasePreservation'] = True
         receipt['databaseChanges'] = 0
         receipt['freshCopyBytesPreserved'] = True
+        # A PASSED receipt is written only after the owned writer stops and
+        # stopped-copy preservation is checked. A failed stop remains FAILED.
+        watch.close()
+        watch = None
+        c.owned_stop(ROOT, name, 'retain-owned-proof-stop')
+        owned = False
+        receipt['ownedWriterStopped'] = True
+        c.exact_state(ROOT / 'db/dev.db', expected)
+        c.main_bytes(ROOT / 'db/dev.db', physical)
         receipt['freeAfter'] = s.disk_free()
         guard.check()
         assert s.sha(HISTORICAL_ROOT / 'production-receipt.json') == HISTORICAL_RECEIPT_SHA
+        retain_disk_observations(receipt)
         receipt['status'] = 'PASSED_NEW_OWNED_JOBS_OFF_CONTAINMENT_PROOF'
         receipt['completedUtc'] = s.utc()
         write_new('rehearsal-receipt.json', receipt)
@@ -145,6 +164,7 @@ def main():
         receipt['status'] = 'FAILED_NEW_OWNED_JOBS_OFF_CONTAINMENT_PROOF'
         receipt['error'] = str(error)
         receipt['failedUtc'] = s.utc()
+        retain_disk_observations(receipt)
         if not (ROOT / 'rehearsal-receipt.json').exists():
             write_new('rehearsal-receipt.json', receipt)
         raise
@@ -152,7 +172,7 @@ def main():
         if watch is not None:
             watch.close()
         if owned:
-            c.owned_stop(ROOT, name, 'retain-owned-proof-stop')
+            c.owned_stop(ROOT, name, 'retain-failed-owned-proof-stop')
 
 if __name__ == '__main__':
     sys.exit(main())
