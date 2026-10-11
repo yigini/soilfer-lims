@@ -1,0 +1,67 @@
+{
+  "observedUtc": "2026-10-11T22:34:27.870875+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-release-171dd36c-20261011T222300Z",
+  "unit": "lims-release-runtime-kobo-release-171dd36c-20261011t222300z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "journalTail": "2026-10-12T00:33:56+0200 server systemd[1]: Starting /usr/bin/python3 -B /opt/lims/releases/runtime-kobo-release-171dd36c-20261011T222300Z/deploy_runtime.py --execute-new-reviewed-runtime-gate...\n2026-10-12T00:33:56+0200 server systemd[1]: Started /usr/bin/python3 -B /opt/lims/releases/runtime-kobo-release-171dd36c-20261011T222300Z/deploy_runtime.py --execute-new-reviewed-runtime-gate.\n2026-10-12T00:34:11+0200 server python3[606970]: {\"stage\": \"beforeQuiesceGuardsPassed\", \"utc\": \"2026-10-11T22:34:11.023706+00:00\"}\n",
+  "live": {
+    "image": "sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a",
+    "revision": "ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf",
+    "running": true,
+    "health": "starting",
+    "restartCount": 189,
+    "oomKilled": false,
+    "memoryLimitBytes": 805306368,
+    "nodeOptions": "",
+    "jobsDisabled": "false",
+    "autoPush": "false",
+    "autoSeed": "false",
+    "volumes": [
+      {
+        "destination": "/app/server/prisma",
+        "name": "lims_lims-data",
+        "type": "volume"
+      },
+      {
+        "destination": "/app/server/uploads",
+        "name": "lims_lims-assets",
+        "type": "volume"
+      }
+    ]
+  },
+  "freeBytes": 106625105920,
+  "httpsGet": {
+    "/api/health": {
+      "curlExit": 0,
+      "httpStatus": "503",
+      "health": null
+    },
+    "/login": {
+      "curlExit": 0,
+      "httpStatus": "503"
+    }
+  },
+  "files": {
+    "prepared-manifest.json": {
+      "bytes": 6880,
+      "mode": "0o400",
+      "sha256": "1e32562b5d33fc0f2c3341d0bb848d975a5014e6cfd02b2b55cbfa3173b2745d"
+    },
+    "production-gate.json": {
+      "bytes": 44524,
+      "mode": "0o400",
+      "sha256": "81ab31caf404729d1bf4fdfd36ae0aabadd4a78fdc6b68349c31396dde3f1f6f"
+    },
+    "execution-attempt.json": {
+      "bytes": 184,
+      "mode": "0o400",
+      "sha256": "a8eb8926ef02420bedf7ef4ecca9c89550535dfe7afbdba4673c69ea2d37ed28"
+    },
+    "production-receipt.json": {
+      "bytes": 48745,
+      "mode": "0o644",
+      "sha256": "f5e7fb8052047ea1d0153d5fffc0237a102917814026f3872ac749e2042ef8e2"
+    }
+  }
+}
