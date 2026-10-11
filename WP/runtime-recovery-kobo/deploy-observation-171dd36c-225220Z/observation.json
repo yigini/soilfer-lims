@@ -1,0 +1,76 @@
+{
+  "observedUtc": "2026-10-11T22:52:21.139497+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-release-171dd36c-20261011T222300Z",
+  "unit": "lims-release-runtime-kobo-release-171dd36c-20261011t222300z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=0\nActiveState=inactive\nSubState=dead\n",
+  "journalTail": "2026-10-12T00:33:56+0200 server systemd[1]: Starting /usr/bin/python3 -B /opt/lims/releases/runtime-kobo-release-171dd36c-20261011T222300Z/deploy_runtime.py --execute-new-reviewed-runtime-gate...\n2026-10-12T00:33:56+0200 server systemd[1]: Started /usr/bin/python3 -B /opt/lims/releases/runtime-kobo-release-171dd36c-20261011T222300Z/deploy_runtime.py --execute-new-reviewed-runtime-gate.\n2026-10-12T00:34:11+0200 server python3[606970]: {\"stage\": \"beforeQuiesceGuardsPassed\", \"utc\": \"2026-10-11T22:34:11.023706+00:00\"}\n2026-10-12T00:34:42+0200 server python3[606970]: {\"stage\": \"writersStopped\", \"utc\": \"2026-10-11T22:34:42.882652+00:00\"}\n2026-10-12T00:35:45+0200 server python3[606970]: {\"stage\": \"stoppedHashedBackupVerified\", \"utc\": \"2026-10-11T22:35:45.743308+00:00\"}\n2026-10-12T00:35:45+0200 server python3[606970]: {\"stage\": \"candidateEntrypointAttempted\", \"utc\": \"2026-10-11T22:35:45.819807+00:00\"}\n2026-10-12T00:36:21+0200 server python3[606970]: {\"stage\": \"production-jobs-off\", \"elapsedSeconds\": 35.75013541500084, \"pending\": true}\n2026-10-12T00:36:58+0200 server python3[606970]: {\"stage\": \"production-jobs-off\", \"elapsedSeconds\": 72.59584688399627, \"pending\": true}\n2026-10-12T00:38:32+0200 server python3[606970]: {\"stage\": \"jobsOffPreservationAndProbesPassed\", \"utc\": \"2026-10-11T22:38:32.044669+00:00\"}\n2026-10-12T00:38:36+0200 server python3[606970]: {\"stage\": \"ingressReopenedBeforeJobs\", \"utc\": \"2026-10-11T22:38:36.604534+00:00\"}\n2026-10-12T00:40:08+0200 server python3[606970]: {\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 35.58948466799484, \"pending\": true}\n2026-10-12T00:40:45+0200 server python3[606970]: {\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 72.14638362499682, \"pending\": true}\n2026-10-12T00:41:06+0200 server python3[606970]: {\"stage\": \"normalJobsEnabled\", \"utc\": \"2026-10-11T22:41:06.451142+00:00\"}\n2026-10-12T00:52:07+0200 server python3[606970]: {\"stage\": \"completed\", \"utc\": \"2026-10-11T22:52:07.370484+00:00\"}\n2026-10-12T00:52:07+0200 server python3[606970]: {\"stage\": \"immutableReceiptReady\", \"utc\": \"2026-10-11T22:52:07.528648+00:00\"}\n2026-10-12T00:52:07+0200 server python3[606970]: {\"status\": \"DEPLOYED_NEW_RUNTIME_FORWARD\", \"head\": \"171dd36c5b2dbeea8763520dd18fbdb158ffca05\", \"image\": \"sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320\", \"receiptSha256\": \"ac4ffc39c0b8e2c27f7aa1494edffcfd45e5c47d2c4aa5b7fffee1c2b6b1781e\"}\n2026-10-12T00:52:07+0200 server systemd[1]: lims-release-runtime-kobo-release-171dd36c-20261011t222300z.service: Deactivated successfully.\n2026-10-12T00:52:07+0200 server systemd[1]: lims-release-runtime-kobo-release-171dd36c-20261011t222300z.service: Consumed 2min 45.919s CPU time, 1.1G memory peak.\n",
+  "live": {
+    "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+    "revision": "171dd36c5b2dbeea8763520dd18fbdb158ffca05",
+    "running": true,
+    "health": "healthy",
+    "restartCount": 0,
+    "oomKilled": false,
+    "memoryLimitBytes": 805306368,
+    "nodeOptions": "",
+    "jobsDisabled": "false",
+    "autoPush": "false",
+    "autoSeed": "false",
+    "volumes": [
+      {
+        "destination": "/app/server/prisma",
+        "name": "lims_lims-data",
+        "type": "volume"
+      },
+      {
+        "destination": "/app/server/uploads",
+        "name": "lims_lims-assets",
+        "type": "volume"
+      }
+    ]
+  },
+  "freeBytes": 106022166528,
+  "httpsGet": {
+    "/api/health": {
+      "curlExit": 0,
+      "httpStatus": "200",
+      "health": {
+        "status": "ok",
+        "version": "1.9.0",
+        "uptime": 719.439605377
+      }
+    },
+    "/login": {
+      "curlExit": 0,
+      "httpStatus": "200"
+    }
+  },
+  "files": {
+    "prepared-manifest.json": {
+      "bytes": 6880,
+      "mode": "0o400",
+      "sha256": "1e32562b5d33fc0f2c3341d0bb848d975a5014e6cfd02b2b55cbfa3173b2745d"
+    },
+    "production-gate.json": {
+      "bytes": 44524,
+      "mode": "0o400",
+      "sha256": "81ab31caf404729d1bf4fdfd36ae0aabadd4a78fdc6b68349c31396dde3f1f6f"
+    },
+    "execution-attempt.json": {
+      "bytes": 184,
+      "mode": "0o400",
+      "sha256": "a8eb8926ef02420bedf7ef4ecca9c89550535dfe7afbdba4673c69ea2d37ed28"
+    },
+    "production-receipt.json": {
+      "bytes": 113712,
+      "mode": "0o400",
+      "sha256": "ac4ffc39c0b8e2c27f7aa1494edffcfd45e5c47d2c4aa5b7fffee1c2b6b1781e"
+    },
+    "production-protected-state.json": {
+      "bytes": 7370360,
+      "mode": "0o400",
+      "sha256": "7f8cd26af4f4e72419980fba600d2f15e7a4d06230892ff5a7a1a2c67c40d5cf"
+    }
+  }
+}

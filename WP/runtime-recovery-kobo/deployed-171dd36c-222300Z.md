@@ -1,0 +1,20 @@
+Deployed 171dd36c5b2dbeea8763520dd18fbdb158ffca05 to production
+
+Completed 2026-10-11T22:52:07.370484+00:00; independently verified 2026-10-11T22:52:34.934084+00:00. Release image: sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320.
+
+Public HTTPS health and sign-in page return HTTP 200, health status ok/version 1.9.0. Docker is healthy with zero restarts/OOM false, normal background jobs enabled, 768 MiB limit and blank NODE_OPTIONS; DB auto-push and auto-seed remain disabled. Original lims_lims-data and lims_lims-assets volumes are unchanged. Independent unauthorized receipts POST returned 401.
+
+Both default-entrypoint startups passed 22 NO_OP/0 installer verifiers and 21 READY/0 events each. Jobs-OFF readiness was 103.26 seconds; jobs-ON readiness 92.66 seconds. All 31 API checks and six read-only probes passed, with zero pre-jobs DB changes and main DB bytes preserved. All 104 original tables and 38 receipts were protected before jobs; the original acceptance event, ReviewDecision attemptId=NULL and published report were verified retained at completion. The normal-jobs observation covered 660.522263 seconds and 23 healthy samples with zero restarts; app peak 227688448 B <=805306368 B.
+
+Original immutable mode0400 production receipt:
+/opt/lims/releases/runtime-kobo-release-171dd36c-20261011T222300Z/production-receipt.json
+SHA256: ac4ffc39c0b8e2c27f7aa1494edffcfd45e5c47d2c4aa5b7fffee1c2b6b1781e
+Single completed/inactive unit, exit0: lims-release-runtime-kobo-release-171dd36c-20261011t222300z.service
+
+Stopped DB backup SHA256: 2822c604d0988cc0332f1426aabe9234bd357f9c9d85ea4c995616d6843e7833
+Assets backup SHA256: 406bd5b98a142f98503a7a5ef69d33d976397a5dbd2b6c707b04371af1e4f770
+Both original backups and protected-state hash/mode0400 were independently reverified. Frozen manifest 1e32562b5d33fc0f2c3341d0bb848d975a5014e6cfd02b2b55cbfa3173b2745d, all 37 source/evidence files, original PASSED proof receipt49b0c09a59234b30c6840223a35c1adc29c9e31d71992f9545a4761650c46f9e and historical production receipt35ab0b825a5d52414304d426101863b671ce5d3b92f6d8eb81e8b79f34095462 remain unchanged.
+
+Exact-kit audit PASS6114626674 and single-use gate81ab31caf404729d1bf4fdfd36ae0aabadd4a78fdc6b68349c31396dde3f1f6f (22:33:21.632972 UTC) were consumed by this completed execution. Both workload pins were enforced. Free bytes after independent verification: 106022141952 B, above reserve10556150894 B and11391815333 B including backup/allocation. No installer replay, restore, old-image recovery, heap override, pruning or cleanup. All original failed proofs/backups/receipts remain retained.
+
+Claudio now owns the actual #292 post-deploy check and closure/ticks. #291 remains held until his check passes; #213/#274/#284 remain outside this deployment. No repeat deployment or reused gate.
