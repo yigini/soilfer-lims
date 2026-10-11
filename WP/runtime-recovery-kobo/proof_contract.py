@@ -2,8 +2,18 @@
 import datetime
 import re
 
-BASE_HEAD = 'ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf'
-AUDITED_PR_HEAD = 'cb79d89bfd104466ab7d29a83312dbc7bb48b7a0'
+BASE_HEAD = '171dd36c5b2dbeea8763520dd18fbdb158ffca05'
+AUDITED_PR_HEAD = '5d3550d709f0b62ef013f9114e9da9344f9818a1'
+PR_NUMBER = 291
+CANDIDATE_HEAD = 'f830f900f597f20e12570b583e4e32ce9cb50a1d'
+MERGED_TREE = '48678dda23fa876d8d233db812149c8d1792bf16'
+AUDITED_PR_TREE = '2292fbf2a2626ad89c5abdcc49843dffffdefd02'
+MERGE_PARENTS = [BASE_HEAD, AUDITED_PR_HEAD]
+LIVE_IMAGE = 'sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320'
+HISTORICAL_ROOT_PATH = '/opt/lims/releases/runtime-kobo-release-171dd36c-20261011T222300Z'
+HISTORICAL_RECEIPT_SHA = 'ac4ffc39c0b8e2c27f7aa1494edffcfd45e5c47d2c4aa5b7fffee1c2b6b1781e'
+NATURAL_INTAKE_POLICY = 'ORIGINAL_CURSOR_ACTUAL_UPSTREAM'
+
 LIMIT = 805306368
 FLOOR = 10556150894
 SOAK_SECONDS = 660
@@ -44,12 +54,31 @@ def utc_seconds(value):
     return instant.timestamp()
 
 
+def release_binding_tokens():
+    return [BASE_HEAD, AUDITED_PR_HEAD, CANDIDATE_HEAD, MERGED_TREE, AUDITED_PR_TREE,
+        LIVE_IMAGE, HISTORICAL_RECEIPT_SHA, 'releasePr=291',
+        'mergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE',
+        'naturalIntakePolicy=' + NATURAL_INTAKE_POLICY]
+
+
+def validate_merge_identity(merged, audited):
+    require(merged['sha'] == CANDIDATE_HEAD and merged['tree']['sha'] == MERGED_TREE and
+        [row['sha'] for row in merged['parents']] == MERGE_PARENTS and
+        audited['sha'] == AUDITED_PR_HEAD and audited['tree']['sha'] == AUDITED_PR_TREE,
+        'Merged parent or union-tree authority differs')
+
+
+def candidate_identity(pin):
+    require(pin['head'] == CANDIDATE_HEAD and pin['baseHead'] == BASE_HEAD and
+        pin['auditedPrHead'] == AUDITED_PR_HEAD and pin['pr'] == PR_NUMBER and
+        pin['tree'] == MERGED_TREE and pin['auditedTree'] == AUDITED_PR_TREE and
+        pin['mergeParents'] == MERGE_PARENTS,
+        'Exact reviewed parent/union-tree candidate required')
+
+
 def validate_candidate(pin, built, image):
     require(re.fullmatch(r'[a-f0-9]{40}', pin.get('head', '')), 'Invalid exact application head')
-    require(pin['head'] != BASE_HEAD and pin.get('baseHead') == BASE_HEAD,
-        'Only a new forward candidate based on the deployed head')
-    require(pin.get('auditedPrHead') == AUDITED_PR_HEAD and pin.get('pr') == 292,
-        'Unreviewed PR candidate')
+    candidate_identity(pin)
     require(pin.get('auditReviewId') and pin.get('mainCiRunId'), 'Audit and main CI evidence missing')
     require(pin.get('labAndHubBuildsOwnedByYY') is True and
         pin.get('releaseWindowControl') == 'RELEASE_DAY_DISK_ABORTS_ACCEPTED', 'Workload pins missing')
@@ -60,17 +89,17 @@ def validate_candidate(pin, built, image):
         'Candidate image size mismatch')
     require(image['Config']['Labels'].get('org.opencontainers.image.revision') == pin['head'],
         'Candidate image revision mismatch')
-    require(pin['tree'] == pin['auditedTree'], 'Merged tree differs from the audited tree')
+    require(built['tree'] == MERGED_TREE, 'Build union tree differs')
     require(built.get('productionDatabaseMounts') == 0, 'Build had a production data mount')
 
 
 def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None,
-                       verifier_sha=None, contract_sha=None, baseline_guard_sha=None, stream_pairing=False):
+                       verifier_sha=None, contract_sha=None, baseline_guard_sha=None, stream_pairing=False, authority_hashes=None):
     """A NEW measurement source needs its own explicit exact-byte approval."""
-    require(review['id'] != 6112725472 and review['html_url'] ==
+    require(review['id'] not in [6112725472, 6114217683, 6114289486] and review['html_url'] ==
         'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(review['id']),
         'New proof-source review missing')
-    tokens = ['Source review: PASS', tooling, coordinator_sha, guard_sha,
+    tokens = release_binding_tokens() + ['Source review: PASS', tooling, coordinator_sha, guard_sha,
         'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169',
         'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
         'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
@@ -88,6 +117,10 @@ def source_review_pass(review, tooling, coordinator_sha, guard_sha, now=None,
             'Stream pairing requires all corrected helper bindings')
         tokens += ['refusalPairingScopeCommentId=' + str(REFUSAL_PAIRING_SCOPE_COMMENT_ID),
             'schedulerRefusalPairing=' + REFUSAL_PAIRING_POLICY, 'REFUSAL_PAIR_WINDOW_SECONDS=1']
+    if authority_hashes is not None:
+        require(authority_hashes and all(re.fullmatch(r'[0-9a-f]{64}', value) for value in authority_hashes),
+            'Raw launcher/build authority hashes invalid')
+        tokens += authority_hashes
     require(all(value in review['body'] for value in tokens), 'Exact corrected source approval missing')
     now = now or datetime.datetime.now(datetime.timezone.utc)
     require(utc_seconds(review['created_at']) <= now.timestamp(), 'Source review is future-dated')

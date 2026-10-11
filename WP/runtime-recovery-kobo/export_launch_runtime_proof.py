@@ -11,7 +11,7 @@ import json
 import pathlib
 import subprocess
 import sys
-from proof_contract import AUDITED_PR_HEAD, require, source_review_pass
+from proof_contract import *
 
 
 def github(endpoint):
@@ -27,22 +27,22 @@ def main():
     require(unit == 'lims-owned-' + remote.name.lower() + '.service', 'Unexpected owned unit')
     pin_bytes = pathlib.Path(pin_file).read_bytes()
     pin = json.loads(pin_bytes)
-    pr = github('repos/yigini/soilfer-lims/pulls/292')
+    pr = github('repos/yigini/soilfer-lims/pulls/291')
     require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD and pr['merge_commit_sha'] == pin['head'],
-        'PR292 exact audited head must be merged first')
+        'PR291 exact audited head must be merged first')
     main_ref = github('repos/yigini/soilfer-lims/git/ref/heads/main')
     require(main_ref['object']['sha'] == pin['head'], 'Current main differs from the candidate')
     audited = github('repos/yigini/soilfer-lims/git/commits/' + AUDITED_PR_HEAD)
     merged = github('repos/yigini/soilfer-lims/git/commits/' + pin['head'])
-    require(audited['tree']['sha'] == merged['tree']['sha'] == pin['tree'] == pin['auditedTree'],
-        'Merged tree differs from the audited source')
+    validate_merge_identity(merged, audited)
+    candidate_identity(pin)
     review = github('repos/yigini/soilfer-lims/issues/comments/' + str(pin['auditReviewId']))
-    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/292#') and
+    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/291#') and
         'Audit passed: OK to merge and deploy' in review['body'] and
         (AUDITED_PR_HEAD in review['body'] or AUDITED_PR_HEAD[:8] in review['body']),
         'Formal exact-head PR audit is missing')
     comments = json.loads(subprocess.check_output(['gh', 'api',
-        'repos/yigini/soilfer-lims/issues/292/comments?per_page=100', '--paginate', '--slurp'],
+        'repos/yigini/soilfer-lims/issues/291/comments?per_page=100', '--paginate', '--slurp'],
         text=True, encoding='utf-8'))
     require(not any('audit failed' in comment['body'].lower() and
         comment['created_at'] > review['created_at'] for page in comments for comment in page),
@@ -55,12 +55,14 @@ def main():
         ci['status'] == 'completed' and ci['conclusion'] == 'success', 'Exact merged-main CI is not green')
     # This is rehearsal evidence, not a production execution gate.
     authority = {'observedUtc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        'head': pin['head'], 'auditedPrHead': AUDITED_PR_HEAD, 'review': review,
+        'head': pin['head'], 'baseHead': BASE_HEAD, 'auditedPrHead': AUDITED_PR_HEAD,
+        'tree': MERGED_TREE, 'auditedTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS, 'review': review,
         'mainCi': {key: ci[key] for key in ['id', 'head_sha', 'name', 'status', 'conclusion', 'updated_at']},
         'checks': [{key: value[key] for key in ['name', 'status', 'conclusion', 'head_sha']} for value in checks]}
     paths = {name: 'WP/runtime-recovery-kobo/' + name for name in [
         'rehearse_runtime.py', 'proof_contract.py', 'capture_kobo_fetch.py', 'kobo_copy_preservation.py',
-        'known_core_disk_guard_v2.py', 'known_core_disk_guard_v3.py']}
+        'known_core_disk_guard_v2.py', 'known_core_disk_guard_v3.py',
+        'build_candidate.py', 'prepare_candidate_build.py', 'export_launch_runtime_proof.py']}
     paths['known_core_disk_guard.py'] = 'WP/runtime-containment-ae64f169/known_core_disk_guard.py'
     paths.update({name: 'WP/forward-ae64f169/' + name for name in ['release_support.py', 'startup_common.py',
         'postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs', 'postflight-qc-runs.cjs',
@@ -79,7 +81,9 @@ def main():
     source_review_pass(source_review, tooling, index['rehearse_runtime.py']['sha256'],
         index['known_core_disk_guard_v2.py']['sha256'],
         verifier_sha=index['kobo_copy_preservation.py']['sha256'], contract_sha=index['proof_contract.py']['sha256'],
-        baseline_guard_sha=index['known_core_disk_guard_v3.py']['sha256'], stream_pairing=True)
+        baseline_guard_sha=index['known_core_disk_guard_v3.py']['sha256'], stream_pairing=True,
+        authority_hashes=[index[name]['sha256'] for name in
+            ['build_candidate.py', 'prepare_candidate_build.py', 'export_launch_runtime_proof.py']])
     source_comments = json.loads(subprocess.check_output(['gh', 'api',
         'repos/yigini/soilfer-lims/issues/162/comments?per_page=100', '--paginate', '--slurp'],
         text=True, encoding='utf-8'))

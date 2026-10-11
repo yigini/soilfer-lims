@@ -1,13 +1,13 @@
 """Exact corrected source-review bindings; no GitHub or host access."""
 import datetime
 import unittest
-from proof_contract import source_review_pass
+from proof_contract import source_review_pass, release_binding_tokens
 
 
 class SourceReviewPin(unittest.TestCase):
     def setUp(self):
         self.now = datetime.datetime(2026, 10, 11, 20, 0, tzinfo=datetime.timezone.utc)
-        self.tokens = ['Source review: PASS', '1' * 40, '2' * 64, '3' * 64,
+        self.tokens = release_binding_tokens() + ['Source review: PASS', '1' * 40, '2' * 64, '3' * 64,
             'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169',
             'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
             'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
@@ -52,6 +52,16 @@ class SourceReviewPin(unittest.TestCase):
             with self.subTest(token=token), self.assertRaises(RuntimeError):
                 source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now,
                     verifier_sha='4' * 64, contract_sha='5' * 64)
+
+    def test_raw_launcher_and_builder_hashes_are_mandatory_when_bound(self):
+        hashes = ['8' * 64, '9' * 64, 'a' * 64]
+        body = self.review['body'] + '\n' + '\n'.join(hashes)
+        self.review['body'] = body
+        source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now, authority_hashes=hashes)
+        for missing in hashes:
+            self.review['body'] = body.replace(missing, '')
+            with self.subTest(missing=missing), self.assertRaises(RuntimeError):
+                source_review_pass(self.review, '1' * 40, '2' * 64, '3' * 64, self.now, authority_hashes=hashes)
 
     def test_half_corrected_binding_refuses(self):
         with self.assertRaisesRegex(RuntimeError, 'Both corrected helper bindings required'):

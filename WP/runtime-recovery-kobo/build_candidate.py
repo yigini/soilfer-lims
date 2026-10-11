@@ -32,11 +32,16 @@ def main():
         'Unexpected new build root')
     require(not (ROOT / 'build-receipt.json').exists() and not (ROOT / 'source').exists(), 'Never replay a build')
     spec = json.loads((ROOT / 'build-input.json').read_bytes())
-    require(spec['rootName'] == ROOT.name and spec['auditedPrHead'] ==
-        'cb79d89bfd104466ab7d29a83312dbc7bb48b7a0' and spec['head'] !=
-        'ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf', 'New exact forward source required')
-    require(spec['tree'] == spec['auditedTree'] and spec['auditReviewId'] and spec['mainCiRunId'],
-        'Audited merged-main source evidence required')
+    require(spec['rootName'] == ROOT.name and spec['head'] ==
+        'f830f900f597f20e12570b583e4e32ce9cb50a1d' and spec['auditedPrHead'] ==
+        '5d3550d709f0b62ef013f9114e9da9344f9818a1' and spec['baseHead'] ==
+        '171dd36c5b2dbeea8763520dd18fbdb158ffca05' and spec['pr'] == 291 and
+        spec['mergeParents'] == [spec['baseHead'], spec['auditedPrHead']], 'Exact forward merge required')
+    require(spec['tree'] == '48678dda23fa876d8d233db812149c8d1792bf16' and
+        spec['auditedTree'] == '2292fbf2a2626ad89c5abdcc49843dffffdefd02' and
+        spec['auditReviewId'] and spec['mainCiRunId'], 'Audited merged union evidence required')
+    require(spec['labAndHubBuildsOwnedByYY'] is True and
+        spec['releaseWindowControl'] == 'RELEASE_DAY_DISK_ABORTS_ACCEPTED', 'Both workload pins required')
     archive = ROOT / 'source.tar.gz'
     index_path = ROOT / 'source-index.json'
     require(sha(archive) == spec['archiveSha256'] and sha(index_path) == spec['indexSha256'], 'Raw source hashes differ')

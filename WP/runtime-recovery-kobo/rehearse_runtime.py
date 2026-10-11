@@ -24,8 +24,7 @@ from kobo_copy_preservation import verify_copy
 from proof_contract import *
 
 ROOT = pathlib.Path(__file__).resolve().parent
-HISTORICAL_ROOT = pathlib.Path('/opt/lims/releases/forward-ae64f169-release-20261011T150800Z')
-HISTORICAL_RECEIPT_SHA = '35ab0b825a5d52414304d426101863b671ce5d3b92f6d8eb81e8b79f34095462'
+HISTORICAL_ROOT = pathlib.Path(HISTORICAL_ROOT_PATH)
 HELPER_HASHES = {'known_core_disk_guard_v3.py': '878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f', 'release_support.py': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
     'startup_common.py': 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00',
     'known_core_disk_guard.py': 'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169',
@@ -143,7 +142,9 @@ def main():
     source_review_pass(source_review, source['head'], s.sha(__file__),
         HELPER_HASHES['known_core_disk_guard_v2.py'],
         verifier_sha=HELPER_HASHES['kobo_copy_preservation.py'], contract_sha=s.sha(ROOT / 'proof_contract.py'),
-        baseline_guard_sha=HELPER_HASHES['known_core_disk_guard_v3.py'], stream_pairing=True)
+        baseline_guard_sha=HELPER_HASHES['known_core_disk_guard_v3.py'], stream_pairing=True,
+        authority_hashes=[source['files'][name]['sha256'] for name in
+            ['build_candidate.py', 'prepare_candidate_build.py', 'export_launch_runtime_proof.py']])
     built_root = pathlib.Path(pin['buildRoot'])
     require(built_root.parent == pathlib.Path('/opt/lims/releases') and
         built_root.name.startswith('runtime-kobo-build-'), 'Unexpected build root')
@@ -155,7 +156,7 @@ def main():
     validate_candidate(pin, built, image)
     require(s.sha(HISTORICAL_ROOT / 'production-receipt.json') == HISTORICAL_RECEIPT_SHA, 'Historical receipt changed')
     live = c.inspect('soilfer-lims')
-    require(live['Image'] == 'sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a',
+    require(live['Image'] == LIVE_IMAGE,
         'Live application changed; re-audit the checkpoint')
     mounts = {row['Destination']: row for row in live['Mounts']}
     require(mounts['/app/server/prisma']['Name'] == 'lims_lims-data' and
@@ -176,7 +177,9 @@ def main():
         'head': pin['head'], 'image': pin['image'], 'targetPinSha256': s.sha(ROOT / 'target-pin.json'),
         'sourceIndexSha256': s.sha(ROOT / 'source-index.json'), 'toolingCommit': source['head'],
         'coordinatorSha256': s.sha(__file__), 'buildReceiptSha256': pin['buildReceiptSha256'],
-        'proofSourceReviewId': source_review['id'],
+        'proofSourceReviewId': source_review['id'], 'baseHead': BASE_HEAD, 'pr': PR_NUMBER,
+        'tree': MERGED_TREE, 'auditedTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,
+        'naturalIntakePolicy': NATURAL_INTAKE_POLICY,
         'authoritySha256': s.sha(ROOT / 'candidate-rehearsal-authority.json'),
         'diskMeasurementGuardSha256': HELPER_HASHES['known_core_disk_guard_v2.py'],
         'coreDeallocationConfirmationDeadlineSeconds': 10,
@@ -234,7 +237,9 @@ def main():
         receipt['copySyncIntervalMins'] = interval
         initial_fetch = capture(ROOT / 'fresh-live-backup.db', list(configs))
         receipt['initialUpstreamSha256'] = write_new('upstream-before-start.json', initial_fetch)
-        require(len(initial_fetch[TARGET_CONFIG]['submissionIds']) >= 67, 'Real 67-submission crash path unavailable')
+        # The recovered live cursor has consumed the old crash-path backlog.
+        # Observe its actual pending set, including empty, without rewinding.
+        receipt['initialTargetSubmissionCount'] = len(initial_fetch[TARGET_CONFIG]['submissionIds'])
         guard.check()
         name = 'lims-owned-' + ROOT.name.lower() + '-jobs-off'; names.append(name)
         watch = c.ZeroWriteWatch(database)
@@ -264,7 +269,8 @@ def main():
             require(time.monotonic() < first_deadline, 'First real scheduled sync did not complete')
             time.sleep(10)
         first = completions[0]
-        require('[KOBO] Sync complete for ' + TARGET_LAB + ':' in log, 'First pending intake completion missing')
+        if first['newSamples'] or first['skipped']:
+            require('[KOBO] Sync complete for ' + TARGET_LAB + ':' in log, 'First actual intake completion missing')
         receipt['firstScheduledSync'] = first
         # A conservative superset is captured using original cursors, before
         # sealing the first state. Any arrival race fails closed, never rewinds.

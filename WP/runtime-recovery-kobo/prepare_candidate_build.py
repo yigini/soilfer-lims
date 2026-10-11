@@ -13,7 +13,7 @@ import re
 import subprocess
 import sys
 import tempfile
-from proof_contract import AUDITED_PR_HEAD, require
+from proof_contract import *
 
 
 def github(endpoint):
@@ -21,27 +21,27 @@ def github(endpoint):
 
 
 def main():
-    tooling, review_id, ci_id, remote_root, unit = sys.argv[1:]
+    tooling, review_id, ci_id, remote_root, unit, source_review_id = sys.argv[1:]
     require(len(tooling) == 40 and all(char in '0123456789abcdef' for char in tooling), 'Exact source commit required')
     root = pathlib.PurePosixPath(remote_root)
     require(root.parent == pathlib.PurePosixPath('/opt/lims/releases') and
         re.fullmatch(r'runtime-kobo-build-[A-Za-z0-9_-]+', root.name),
         'Unexpected fresh build root')
     require(unit == 'lims-build-' + root.name.lower() + '.service', 'Unexpected owned build unit')
-    pr = github('repos/yigini/soilfer-lims/pulls/292')
-    require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD, 'Exact audited PR292 must merge first')
+    pr = github('repos/yigini/soilfer-lims/pulls/291')
+    require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD, 'Exact audited PR291 must merge first')
     head = pr['merge_commit_sha']
     require(github('repos/yigini/soilfer-lims/git/ref/heads/main')['object']['sha'] == head, 'Current main changed')
     reviewed_commit = github('repos/yigini/soilfer-lims/git/commits/' + AUDITED_PR_HEAD)
     merged_commit = github('repos/yigini/soilfer-lims/git/commits/' + head)
     tree = merged_commit['tree']['sha']
-    require(reviewed_commit['tree']['sha'] == tree, 'Merged tree differs from the audited source')
+    validate_merge_identity(merged_commit, reviewed_commit)
     review = github('repos/yigini/soilfer-lims/issues/comments/' + review_id)
-    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/292#') and
+    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/291#') and
         'Audit passed: OK to merge and deploy' in review['body'] and
         (AUDITED_PR_HEAD in review['body'] or AUDITED_PR_HEAD[:8] in review['body']), 'Formal audit missing')
     comments = json.loads(subprocess.check_output(['gh', 'api',
-        'repos/yigini/soilfer-lims/issues/292/comments?per_page=100', '--paginate', '--slurp'], text=True, encoding='utf-8'))
+        'repos/yigini/soilfer-lims/issues/291/comments?per_page=100', '--paginate', '--slurp'], text=True, encoding='utf-8'))
     require(not any('audit failed' in row['body'].lower() and row['created_at'] > review['created_at']
         for page in comments for row in page), 'Later audit failure exists')
     checks = github('repos/yigini/soilfer-lims/commits/' + AUDITED_PR_HEAD + '/check-runs')['check_runs']
@@ -53,6 +53,24 @@ def main():
     subprocess.run(['git', 'fetch', 'origin', 'main'], check=True, capture_output=True)
     require(subprocess.check_output(['git', 'rev-parse', head + '^{tree}'], text=True).strip() == tree,
         'Local raw source differs from GitHub tree')
+    union = subprocess.check_output(['git', 'merge-tree', '--write-tree', BASE_HEAD, AUDITED_PR_HEAD], text=True).strip()
+    require(union == MERGED_TREE, 'Independent merge-tree union differs')
+    raw = {name: subprocess.check_output(['git', 'show', tooling + ':WP/runtime-recovery-kobo/' + name])
+        for name in ['rehearse_runtime.py', 'proof_contract.py', 'known_core_disk_guard_v2.py',
+            'known_core_disk_guard_v3.py', 'kobo_copy_preservation.py', 'build_candidate.py',
+            'prepare_candidate_build.py', 'export_launch_runtime_proof.py']}
+    digests = {name: hashlib.sha256(data).hexdigest() for name, data in raw.items()}
+    source_review = github('repos/yigini/soilfer-lims/issues/comments/' + source_review_id)
+    source_review_pass(source_review, tooling, digests['rehearse_runtime.py'], digests['known_core_disk_guard_v2.py'],
+        verifier_sha=digests['kobo_copy_preservation.py'], contract_sha=digests['proof_contract.py'],
+        baseline_guard_sha=digests['known_core_disk_guard_v3.py'], stream_pairing=True,
+        authority_hashes=[digests[name] for name in
+            ['build_candidate.py', 'prepare_candidate_build.py', 'export_launch_runtime_proof.py']])
+    source_comments = json.loads(subprocess.check_output(['gh', 'api',
+        'repos/yigini/soilfer-lims/issues/162/comments?per_page=100', '--paginate', '--slurp'], text=True, encoding='utf-8'))
+    require(not any(('source review: failed' in row['body'].lower() or 'audit failed' in row['body'].lower()) and
+        row['created_at'] > source_review['created_at'] for page in source_comments for row in page),
+        'Later helper source audit failure exists')
     local = pathlib.Path(tempfile.gettempdir()) / ('lims-runtime-build-export-' + root.name)
     require(not local.exists(), 'Never overwrite a local source export')
     local.mkdir(mode=0o700)
@@ -83,11 +101,14 @@ def main():
     index_bytes = (json.dumps(index, indent=2) + '\n').encode()
     (local / 'source-index.json').write_bytes(index_bytes)
     builder = subprocess.check_output(['git', 'show', tooling + ':WP/runtime-recovery-kobo/build_candidate.py'])
-    spec = {'rootName': root.name, 'head': head, 'tree': tree, 'auditedTree': tree,
+    spec = {'rootName': root.name, 'head': head, 'tree': tree, 'auditedTree': AUDITED_PR_TREE,
+        'baseHead': BASE_HEAD, 'pr': PR_NUMBER, 'mergeParents': MERGE_PARENTS,
         'auditedPrHead': AUDITED_PR_HEAD, 'auditReviewId': int(review_id), 'mainCiRunId': int(ci_id),
         'archiveSha256': hashlib.sha256(archive.read_bytes()).hexdigest(),
         'indexSha256': hashlib.sha256(index_bytes).hexdigest(), 'builderSha256': hashlib.sha256(builder).hexdigest(),
-        'toolingCommit': tooling, 'labAndHubBuildsOwnedByYY': True,
+        'toolingCommit': tooling, 'proofSourceReviewId': int(source_review_id),
+        'proofSourceReviewRawSha256': hashlib.sha256(json.dumps(source_review, sort_keys=True).encode()).hexdigest(),
+        'labAndHubBuildsOwnedByYY': True,
         'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED',
         'preparedUtc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
         'mainCiStatusAtBuildPreparation': ci['status'], 'mainCiConclusionAtBuildPreparation': ci['conclusion']}

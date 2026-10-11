@@ -67,7 +67,7 @@ class RuntimeGateTests(unittest.TestCase):
             'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
             'laterSourceAuditFailure': False, 'proofSourceReview': {'id': PROOF_SOURCE_REVIEW_ID,
                 'html_url': 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(PROOF_SOURCE_REVIEW_ID),
-                'created_at': '2026-10-11T19:58:00Z', 'body': '\n'.join(['Source review: PASS',
+                'created_at': '2026-10-11T19:58:00Z', 'body': '\n'.join(release_binding_tokens() + ['Source review: PASS',
                     REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, MEASUREMENT_GUARD_SHA, ORIGINAL_GUARD_SHA,
                     BASELINE_GUARD_SHA, REVIEWED_VERIFIER_SHA, REVIEWED_PROOF_CONTRACT_SHA,
                     'baselineVanishedProcessPolicy=' + BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX=3',
