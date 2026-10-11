@@ -1,0 +1,55 @@
+{
+  "observedUtc": "2026-10-11T20:43:47.724533+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+  "productionMutations": 0,
+  "containers": {
+    "jobs-off": {
+      "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+      "restartCount": 0,
+      "running": false,
+      "exitCode": 137,
+      "oomKilled": false,
+      "health": "unhealthy",
+      "memoryLimit": 805306368,
+      "ownedRoot": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z"
+    },
+    "jobs-on": {
+      "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+      "restartCount": 0,
+      "running": false,
+      "exitCode": 137,
+      "oomKilled": false,
+      "health": "unhealthy",
+      "memoryLimit": 805306368,
+      "ownedRoot": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z"
+    }
+  },
+  "files": {
+    "jobs-off-timestamped.stdout": {
+      "sha256": "315aafd3cdb9299bcb6f4f7aa1436c11e7403f11988757a26a3ee62f22ce037d",
+      "bytes": 188619
+    },
+    "jobs-off-timestamped.stderr": {
+      "sha256": "43fa005c7dbf3f3dcb9dad0d3598afe1630e3f58777a15799845bbdd37446cb2",
+      "bytes": 1889
+    },
+    "jobs-on-timestamped.stdout": {
+      "sha256": "e3867c6ab8ad80b78ed795621406203d38716e22aadd3d89a27f954c6118c44b",
+      "bytes": 185024
+    },
+    "jobs-on-timestamped.stderr": {
+      "sha256": "b9512670086427a552d87346f590af664efc020f5373444d147702d6ce3b8530",
+      "bytes": 2224
+    },
+    "disk-allocation-observations.jsonl": {
+      "sha256": "6f557178a78507b62833b889c49d527153f034bb18f9f7704f8bda98c0ac94e2",
+      "bytes": 17489978,
+      "mode": "0o644"
+    },
+    "candidate-rehearsal-authority.json": {
+      "sha256": "b4d38a7949273cbb6bdfe3747c4a32a6ba43de9811d38d73797ab1ba89c46950",
+      "bytes": 15836,
+      "mode": "0o400"
+    }
+  }
+}

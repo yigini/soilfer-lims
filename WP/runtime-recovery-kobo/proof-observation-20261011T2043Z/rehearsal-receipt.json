@@ -1,0 +1,1719 @@
+{
+  "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+  "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+  "startedUtc": "2026-10-11T20:33:49.641124+00:00",
+  "head": "171dd36c5b2dbeea8763520dd18fbdb158ffca05",
+  "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+  "targetPinSha256": "1a3b00296cd124dcfe63c915c9a56a1a1e5d167b4d82a83e553ff357099bf92b",
+  "sourceIndexSha256": "3ddd159e3531758ff52aea06f0e5cb9cc5715bed018ddb1c27c7f31e24748e36",
+  "toolingCommit": "55c18943f569e9b031c8aae008f167ab399473af",
+  "coordinatorSha256": "9f175f1355413fd66c6dbf7082eea64f50a97fea6cec4ee1c6a0055384f70a71",
+  "buildReceiptSha256": "e2437e978eed81244f6860e9a92c0755654e7945137f8c0146852b7d544b2f1d",
+  "proofSourceReviewId": 6113431945,
+  "authoritySha256": "b4d38a7949273cbb6bdfe3747c4a32a6ba43de9811d38d73797ab1ba89c46950",
+  "diskMeasurementGuardSha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+  "coreDeallocationConfirmationDeadlineSeconds": 10,
+  "historicalReceiptSha256": "35ab0b825a5d52414304d426101863b671ce5d3b92f6d8eb81e8b79f34095462",
+  "productionMutations": 0,
+  "separateInstallerCommands": 0,
+  "scopeCommentIds": [
+    6112209155,
+    6112305172,
+    6112436098
+  ],
+  "existingSampleVerifierPolicy": "STRICT_ORIGINAL_ROWS",
+  "effectiveUid": 0,
+  "pythonOptimize": 0,
+  "reserveBytes": 10556150894,
+  "workloadPins": {
+    "labAndHubBuildsOwnedByYY": true,
+    "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+  },
+  "baselineEnumerationErrorCount": 0,
+  "freshCopyUtc": "2026-10-11T20:33:56.014275+00:00",
+  "freshCopySha256": "7b9613e0935815ded379dcca538d7c05b9f473979ec0f0226dce7aaffe26a0c2",
+  "protectedStateSha256": "1198a7e0bf85039e56f4cc0780ebc116e6bd6a7b7d5e847bf1782e68cefbe3f2",
+  "copySyncIntervalMins": 15,
+  "initialUpstreamSha256": "9baee8a134f844cab050552be8b15cb903f7674cd21088278e2dad57aa667391",
+  "jobsOffReadiness": {
+    "startedUtc": "2026-10-11T20:34:45.573218+00:00",
+    "containerStartedUtc": "2026-10-11T20:34:46.099431285Z",
+    "readyUtc": "2026-10-11T20:36:38.602905+00:00",
+    "elapsedSeconds": 113.02974829000232,
+    "deadlineSeconds": 600,
+    "attempts": 86,
+    "health": {
+      "status": "ok",
+      "version": "1.9.0",
+      "uptime": 54.206864663
+    },
+    "restartCount": 0,
+    "oomKilled": false,
+    "memoryLimitBytes": 805306368,
+    "networkMode": "bridge",
+    "publishedHostIp": "127.0.0.1",
+    "jobsEnabled": false,
+    "baseUrl": "http://127.0.0.1:32776",
+    "sharedReadinessCode": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+  },
+  "jobsOffStartup": {
+    "startupReady": [
+      {
+        "event": "WORKFLOW_STARTUP_READY",
+        "classification": "COMPLETE",
+        "inventory": {
+          "totals": {
+            "Sample": 38773,
+            "WorkItem": 90
+          },
+          "candidateCount": 0,
+          "unmappedCount": 0,
+          "blockedCount": 0,
+          "fingerprint": "f92b4677e3ce0424471df4cffefe4c4e3138a1557846094059b8af0886129386"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "RESULT_ATTEMPT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d"
+        },
+        "guards": [
+          "Result_attempt_insert_guard",
+          "Result_attempt_update_guard",
+          "WorkAttempt_result_reference_guard"
+        ],
+        "counts": {
+          "results": 19,
+          "linked": 19
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "SAMPLE_HOLD_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8"
+        },
+        "guards": [
+          "SampleHold_insert_guard",
+          "SampleHold_update_guard",
+          "SampleHold_raise_immutable",
+          "SampleHold_resolution_final",
+          "SampleHold_delete_refusal",
+          "WorkItem_cancellation_insert_guard",
+          "WorkItem_cancellation_update_guard"
+        ],
+        "counts": {
+          "workItems": 90,
+          "holds": 9
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "REFERENCE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3",
+          "oracleSha256": "7a626b66bd31a7e7305d8c1b091207f3fb26348345a431fb77b63f875d3b99b5"
+        },
+        "guards": [
+          "ReferenceMaterial_insert_guard",
+          "ReferenceMaterial_update_guard",
+          "ReferenceValue_insert_guard",
+          "ReferenceValue_immutable_guard",
+          "ReferenceValue_delete_guard",
+          "BatchQcResult_reference_insert_guard",
+          "BatchQcResult_reference_update_guard"
+        ],
+        "indexes": [
+          "ReferenceMaterial_labId_code_idx",
+          "ReferenceValue_referenceMaterialId_analysisCode_idx",
+          "ReferenceValue_current_generic",
+          "ReferenceValue_current_method"
+        ],
+        "counts": {
+          "materials": 0,
+          "values": 0,
+          "qcRows": 18,
+          "linked": 0
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_RULE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06",
+          "oracleSha256": "fe0dbc7dbb0a35bc62353de715a48b4263d492917225c7be5b6f969ec3f52819"
+        },
+        "guards": [
+          "QcRule_immutable_update",
+          "QcRule_immutable_delete",
+          "QcRule_version_guard",
+          "QcRule_scope_guard",
+          "QcRule_value_guard"
+        ],
+        "indexes": [
+          "QcRule_labId_analysisCode_methodologyId_effectiveFrom_idx",
+          "QcRule_scope_version_unique"
+        ],
+        "counts": {
+          "rules": 0
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_RUN_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+          "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369"
+        },
+        "counts": {
+          "BatchAnalyte": 6,
+          "BatchPosition": 33,
+          "BatchPositionWorkItem": 15,
+          "BatchPositionReference": 0,
+          "QcMeasurement": 24,
+          "QcEvaluation": 6,
+          "BatchDisposition": 1,
+          "BatchEvent": 28
+        },
+        "receipt": {
+          "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+          "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369",
+          "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+          "backfillCounts": {
+            "batches": 6,
+            "analytes": 6,
+            "samplePositions": 15,
+            "qcPositions": 18,
+            "historicalSnapshots": 0,
+            "currentEvaluations": 6,
+            "evaluations": 6,
+            "measurements": 24,
+            "typedRows": 18,
+            "historicalTypedRows": 0,
+            "jsonEntries": 18,
+            "typedFallbackEntries": 0,
+            "typedJsonConflicts": 12,
+            "historyAuditConflicts": 0,
+            "unresolvedMethods": 0,
+            "unresolvedAnalysts": 3,
+            "unresolvedInstruments": 6,
+            "unlinkedReferences": 6,
+            "unresolvedNumbers": 0,
+            "unresolvedDuplicateParents": 6,
+            "unresolvedRackPositions": 15,
+            "missingWorkItems": 16,
+            "malformedHistory": 0,
+            "malformedQcResults": 0,
+            "orphanSnapshots": 0,
+            "multiAttemptMembershipGroups": 0,
+            "refusals": 0,
+            "legacyDispositionMapped": {
+              "REJECT_REANALYSIS": 1,
+              "ACCEPT_OPAQUE": 1
+            },
+            "dispositionAttribution": {
+              "AUDIT_LOG": 0,
+              "BATCH_DISPOSITION_FIELD": 2,
+              "SNAPSHOT_DISPOSITION_FIELD": 0
+            },
+            "dispositionAttributionConflicts": 0,
+            "TEXTURE_ALIAS_MERGED": 0
+          },
+          "bootstrapRebuild": []
+        },
+        "bootstrapRebuild": [],
+        "guards": [
+          "Batch_legacy_qc_immutable",
+          "Batch_first_start_immutable",
+          "BatchQcResult_frozen_insert",
+          "BatchQcResult_frozen_update",
+          "BatchQcResult_frozen_delete",
+          "BatchAnalyte_insert_guard",
+          "BatchAnalyte_update_guard",
+          "BatchAnalyte_identity_immutable",
+          "BatchAnalyte_membership_insert_guard",
+          "BatchAnalyte_membership_delete_guard",
+          "BatchAnalyte_membership_update_guard",
+          "BatchPosition_insert_guard",
+          "BatchPosition_update_guard",
+          "BatchPosition_membership_insert_guard",
+          "BatchPosition_membership_update_guard",
+          "BatchPosition_membership_delete_guard",
+          "BatchPosition_identity_guard",
+          "BatchPositionWorkItem_insert_guard",
+          "BatchPositionWorkItem_immutable",
+          "BatchPositionWorkItem_run_unique_guard",
+          "BatchPositionWorkItem_membership_insert_guard",
+          "BatchPositionWorkItem_membership_delete_guard",
+          "WorkItem_batch_membership_guard",
+          "WorkItem_batch_membership_insert_guard",
+          "BatchPositionReference_insert_guard",
+          "BatchPositionReference_correction_reason_guard",
+          "BatchPositionReference_lot_guard",
+          "BatchPositionReference_supersede_guard",
+          "BatchPositionReference_delete_guard",
+          "QcMeasurement_insert_guard",
+          "QcMeasurement_historical_write_guard",
+          "QcMeasurement_replacement_guard",
+          "BatchPositionReference_replacement_guard",
+          "QcMeasurement_start_guard",
+          "QcMeasurement_supersede_guard",
+          "QcMeasurement_delete_guard",
+          "QcEvaluation_insert_guard",
+          "QcEvaluation_start_guard",
+          "QcEvaluation_frozen_criteria_guard",
+          "QcEvaluation_immutable_update",
+          "QcEvaluation_immutable_delete",
+          "BatchDisposition_immutable_update",
+          "BatchDisposition_immutable_delete",
+          "BatchEvent_immutable_update",
+          "BatchEvent_immutable_delete",
+          "BatchDisposition_insert_guard",
+          "BatchEvent_insert_guard"
+        ],
+        "indexes": [
+          "BatchAnalyte_labId_analysisCode_methodologyId_idx",
+          "BatchAnalyte_batchId_analysisCode_key",
+          "BatchPosition_batchId_position_key",
+          "BatchPositionWorkItem_workItemId_idx",
+          "BatchPositionWorkItem_positionId_analysisCode_key",
+          "BatchPositionReference_positionId_analysisCode_idx",
+          "QcMeasurement_batchId_analysisCode_idx",
+          "QcMeasurement_positionId_analysisCode_replicateNo_idx",
+          "QcEvaluation_batchId_analysisCode_version_key",
+          "BatchDisposition_batchId_analysisCode_idx",
+          "BatchEvent_batchId_at_idx",
+          "BatchAnalyte_crm_ordinal_unique",
+          "BatchPositionReference_current_unique",
+          "QcMeasurement_current_unique"
+        ],
+        "backfillCount": 0,
+        "backfillCounts": {
+          "batches": 6,
+          "analytes": 6,
+          "samplePositions": 15,
+          "qcPositions": 18,
+          "historicalSnapshots": 0,
+          "currentEvaluations": 6,
+          "evaluations": 6,
+          "measurements": 24,
+          "typedRows": 18,
+          "historicalTypedRows": 0,
+          "jsonEntries": 18,
+          "typedFallbackEntries": 0,
+          "typedJsonConflicts": 12,
+          "historyAuditConflicts": 0,
+          "unresolvedMethods": 0,
+          "unresolvedAnalysts": 3,
+          "unresolvedInstruments": 6,
+          "unlinkedReferences": 6,
+          "unresolvedNumbers": 0,
+          "unresolvedDuplicateParents": 6,
+          "unresolvedRackPositions": 15,
+          "missingWorkItems": 16,
+          "malformedHistory": 0,
+          "malformedQcResults": 0,
+          "orphanSnapshots": 0,
+          "multiAttemptMembershipGroups": 0,
+          "refusals": 0,
+          "legacyDispositionMapped": {
+            "REJECT_REANALYSIS": 1,
+            "ACCEPT_OPAQUE": 1
+          },
+          "dispositionAttribution": {
+            "AUDIT_LOG": 0,
+            "BATCH_DISPOSITION_FIELD": 2,
+            "SNAPSHOT_DISPOSITION_FIELD": 0
+          },
+          "dispositionAttributionConflicts": 0,
+          "TEXTURE_ALIAS_MERGED": 0
+        },
+        "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_GATE_SCOPE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+        "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+        "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+        "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+        "existingDispositionRows": 1,
+        "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+        "backfillCount": 0,
+        "bootstrapRebuild": [],
+        "totalChanges": 0,
+        "mode": "DRY_RUN",
+        "receipt": {
+          "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+          "existingDispositionRows": 1,
+          "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+          "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+          "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+          "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+          "backfillCount": 0,
+          "bootstrapRebuild": []
+        }
+      },
+      {
+        "event": "PT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "successor": "COMPLETE_193",
+        "sources": {
+          "migrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "successorSources": {
+          "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+          "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "bootstrapRebuild": [],
+        "backfillCount": 0,
+        "roundCount": 0,
+        "scoreOutcomeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "NCR_STARTUP_READY",
+        "classification": "COMPLETE_193",
+        "sources": {
+          "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+          "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "RESULT_EQUIPMENT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4"
+        },
+        "bootstrapRebuild": [],
+        "backfillCount": 0,
+        "resultCount": 19,
+        "originalResultSha256": "935e140956349abc9eddbee25b830c9ff041700f6565479a62f16031deb90d26",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "WORK_ATTEMPT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+          "contractVersion": "190-v1"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "WORK_REPEAT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd",
+          "contractVersion": "191-v1",
+          "predecessor": {
+            "marker": "190_work_attempt_contract",
+            "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+            "contractVersion": "190-v1",
+            "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+          },
+          "qcPredecessors": {
+            "186_normalized_qc_runs": {
+              "receiptSha256": "d461aab82504feaf91a27b4816e1d4b3abd66c147f32122752d72f4eb842be1a"
+            },
+            "187_qc_gate_scope": {
+              "receiptSha256": "ee802a39b62a9e06ab92677c3c016c461e4d1c8ca43674f077622220ef1fbd04"
+            }
+          }
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "REPORTED_VALUE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "migrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7",
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newSelectionCount": 0
+      },
+      {
+        "event": "REAGENT_LOT_STARTUP_READY",
+        "classification": "COMPLETE_194",
+        "sources": {
+          "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+        },
+        "linkCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+          },
+          "originalRowsSha256": "f79db32ba1d05b87d2e5009954d90ae2dd0f0a960cd51865e0f4b75de0bc4cbe",
+          "originalRowsPreserved": true,
+          "newLinkCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "5d737a49f3a62a5accf3c405ae938308b11b4ffe5682e71c0982951ee61715e1"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "RESULT_OVERRIDE_STARTUP_READY",
+        "classification": "COMPLETE_197",
+        "sources": {
+          "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+        },
+        "requestCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+          },
+          "originalRowsSha256": "6e0207946cd67d4109b3f6e7ff0b23fd8b545b21d2a4f81796e651923db1564b",
+          "originalRowsPreserved": true,
+          "newRequestCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "953a236c33e3b37f7a4fe173dc01f17b6d49924a2bfa432877f05b896253b83e"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "CALCULATION_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+          "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+          "referenceSha256": "57dc4b667dab93606e24673b39a12032e48f3df686b9bd3c593ac04d2fac8491"
+        },
+        "receipt": {
+          "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+          "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+          "guards": [
+            "CalcTemplate_insert_contract",
+            "CalcTemplateActivation_insert_contract",
+            "CalibrationCurve_insert_contract",
+            "CalibrationPoint_insert_contract",
+            "ResultCalculation_insert_contract",
+            "CalcTemplate_update_immutable",
+            "CalcTemplate_delete_immutable",
+            "CalcTemplateActivation_update_immutable",
+            "CalcTemplateActivation_delete_immutable",
+            "CalibrationCurve_update_immutable",
+            "CalibrationCurve_delete_immutable",
+            "CalibrationPoint_update_immutable",
+            "CalibrationPoint_delete_immutable",
+            "ResultCalculation_update_immutable",
+            "ResultCalculation_delete_immutable",
+            "CalibrationCurve_pass_coefficients_guard"
+          ],
+          "backfillCount": 0
+        },
+        "guards": [
+          "CalcTemplate_insert_contract",
+          "CalcTemplateActivation_insert_contract",
+          "CalibrationCurve_insert_contract",
+          "CalibrationPoint_insert_contract",
+          "ResultCalculation_insert_contract",
+          "CalcTemplate_update_immutable",
+          "CalcTemplate_delete_immutable",
+          "CalcTemplateActivation_update_immutable",
+          "CalcTemplateActivation_delete_immutable",
+          "CalibrationCurve_update_immutable",
+          "CalibrationCurve_delete_immutable",
+          "CalibrationPoint_update_immutable",
+          "CalibrationPoint_delete_immutable",
+          "ResultCalculation_update_immutable",
+          "ResultCalculation_delete_immutable",
+          "CalibrationCurve_pass_coefficients_guard"
+        ],
+        "counts": {
+          "CalcTemplate": 8,
+          "CalcTemplateActivation": 0,
+          "CalibrationCurve": 0,
+          "CalibrationPoint": 0,
+          "ResultCalculation": 0
+        },
+        "backfillCount": 0,
+        "unit": {
+          "classification": "ABSENT",
+          "unitCode": "pct_mass",
+          "unitInsertCount": 0,
+          "backfillCount": 0
+        },
+        "references": {
+          "classification": "COMPLETE",
+          "referenceCount": 11,
+          "installedReferenceCount": 8,
+          "missingReferenceIds": [],
+          "deferredReferences": [
+            {
+              "id": "calc-ref-walkley-black-130-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            },
+            {
+              "id": "calc-ref-walkley-black-133-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            },
+            {
+              "id": "calc-ref-kjeldahl-nitrogen-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            }
+          ],
+          "deferredReferenceCount": 3,
+          "referenceInsertCount": 0,
+          "referenceReceiptInsertCount": 0,
+          "activationInsertCount": 0,
+          "backfillCount": 0
+        },
+        "ready": true,
+        "plannedUnitInsertCount": 0,
+        "plannedReferenceInsertCount": 0,
+        "activationInsertCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "unitInsertCount": 0,
+        "referenceInsertCount": 0,
+        "referenceReceiptInsertCount": 0,
+        "schemaReceiptInsertCount": 0
+      },
+      {
+        "event": "CROSS_CHECK_STARTUP_READY",
+        "classification": "COMPLETE_201",
+        "sources": {
+          "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+          "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+          "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+        },
+        "evaluationCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+            "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+            "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+          },
+          "originalRowsSha256": "8559985c861e950fdffe53f6661a48b0e76916edcd4c3f0e51b473d827824d58",
+          "originalRowsPreserved": true,
+          "newEvaluationCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "3185df5bbb809f86c7ca8c0689135e6dbd93e227c9dbda66850256b965966a9e"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newEvaluationCount": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "AMENDMENT_STARTUP_READY",
+        "classification": "COMPLETE_210",
+        "sources": {
+          "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+          "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+          "contractVersion": "210-v1"
+        },
+        "amendmentCount": 1,
+        "amendmentAttemptLinkCount": 0,
+        "withdrawalCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+            "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+            "contractVersion": "210-v1"
+          },
+          "originalRowsSha256": "d843166d8ca8117121e56a44fd8eeed47ac92f75f3cd63ea0b466912247241d3",
+          "originalRowsPreserved": true,
+          "newAmendmentCount": 0,
+          "newAttemptLinkCount": 0,
+          "newWithdrawalCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "efc085838fcd3c85af095eed605a790b1252d178b52c8e9de9a5eaada223e424"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newAmendmentCount": 0,
+        "newAttemptLinkCount": 0,
+        "newWithdrawalCount": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "REPORT_REVISION_STARTUP_READY",
+        "classification": "COMPLETE_211",
+        "sources": {
+          "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+          "contractVersion": "211-v1"
+        },
+        "reportCount": 4,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+            "contractVersion": "211-v1"
+          },
+          "originalRowsSha256": "2e6e021a9c590b35591f505a0aba09f529839015dfbd49e4ff81a8a29541ba39",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "7172b9201f5173b63a1a1414b0a18414da150b8366762c868081d1a6d61dc72d"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "BENCH_CREDENTIAL_STARTUP_READY",
+        "classification": "COMPLETE_202",
+        "sources": {
+          "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+          "contractVersion": "202-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+            "contractVersion": "202-v1"
+          },
+          "originalRowsSha256": "a380b9ab2f9dd1ee5533c9266bbed055be9a6802f6bad10ad9462cfeeb30abf7",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "220eeb9b44b23db3d1176eda595b5fcf1ac67b1f84fe87fbc7be58e12c46e3c6"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "PREPARATION_RECORD_STARTUP_READY",
+        "classification": "COMPLETE_205",
+        "sources": {
+          "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+          "contractVersion": "205-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+            "contractVersion": "205-v1"
+          },
+          "originalRowsSha256": "10f132d31e12b6551a00a48cfd136791d49a70fc9520834df7a5972cd988c57a",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "01df5c84dc90b6c4be4e91b9d3b05e44af2bc5cc03e0ec5fec5bef6a238c19ae"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      }
+    ],
+    "entrypointInstallers": [
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "ALREADY_PRESENT",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_193",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_194",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_197",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_201",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_210",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_211",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_202",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_205",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      }
+    ],
+    "startupChanges": 0,
+    "ownedJobsBoundary": null,
+    "startupMemory": {
+      "peakBytes": 143269888,
+      "limitBytes": 805306368,
+      "nodeOptions": null
+    }
+  },
+  "apiChecks": {
+    "passed": 31,
+    "total": 31,
+    "failed": 0
+  },
+  "probes": [
+    {
+      "file": "postflight-roles.cjs",
+      "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-auth.cjs",
+      "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-reference.cjs",
+      "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-qc-runs.cjs",
+      "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-policy.cjs",
+      "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+      "exitCode": 0
+    },
+    {
+      "file": "readonly-smoke.cjs",
+      "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+      "exitCode": 0
+    }
+  ],
+  "readOnlyProbeChanges": 0,
+  "databaseChangesBeforeJobs": 0,
+  "jobsOnReadiness": {
+    "startedUtc": "2026-10-11T20:38:40.655593+00:00",
+    "containerStartedUtc": "2026-10-11T20:38:41.289637401Z",
+    "readyUtc": "2026-10-11T20:40:33.686284+00:00",
+    "elapsedSeconds": 113.03088313300032,
+    "deadlineSeconds": 600,
+    "attempts": 84,
+    "health": {
+      "status": "ok",
+      "version": "1.9.0",
+      "uptime": 56.327892132
+    },
+    "restartCount": 0,
+    "oomKilled": false,
+    "memoryLimitBytes": 805306368,
+    "networkMode": "bridge",
+    "publishedHostIp": "127.0.0.1",
+    "jobsEnabled": true,
+    "baseUrl": "http://127.0.0.1:32777",
+    "sharedReadinessCode": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+  },
+  "jobsOnStartup": {
+    "startupReady": [
+      {
+        "event": "WORKFLOW_STARTUP_READY",
+        "classification": "COMPLETE",
+        "inventory": {
+          "totals": {
+            "Sample": 38773,
+            "WorkItem": 90
+          },
+          "candidateCount": 0,
+          "unmappedCount": 0,
+          "blockedCount": 0,
+          "fingerprint": "f92b4677e3ce0424471df4cffefe4c4e3138a1557846094059b8af0886129386"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "RESULT_ATTEMPT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d"
+        },
+        "guards": [
+          "Result_attempt_insert_guard",
+          "Result_attempt_update_guard",
+          "WorkAttempt_result_reference_guard"
+        ],
+        "counts": {
+          "results": 19,
+          "linked": 19
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "SAMPLE_HOLD_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8"
+        },
+        "guards": [
+          "SampleHold_insert_guard",
+          "SampleHold_update_guard",
+          "SampleHold_raise_immutable",
+          "SampleHold_resolution_final",
+          "SampleHold_delete_refusal",
+          "WorkItem_cancellation_insert_guard",
+          "WorkItem_cancellation_update_guard"
+        ],
+        "counts": {
+          "workItems": 90,
+          "holds": 9
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "REFERENCE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3",
+          "oracleSha256": "7a626b66bd31a7e7305d8c1b091207f3fb26348345a431fb77b63f875d3b99b5"
+        },
+        "guards": [
+          "ReferenceMaterial_insert_guard",
+          "ReferenceMaterial_update_guard",
+          "ReferenceValue_insert_guard",
+          "ReferenceValue_immutable_guard",
+          "ReferenceValue_delete_guard",
+          "BatchQcResult_reference_insert_guard",
+          "BatchQcResult_reference_update_guard"
+        ],
+        "indexes": [
+          "ReferenceMaterial_labId_code_idx",
+          "ReferenceValue_referenceMaterialId_analysisCode_idx",
+          "ReferenceValue_current_generic",
+          "ReferenceValue_current_method"
+        ],
+        "counts": {
+          "materials": 0,
+          "values": 0,
+          "qcRows": 18,
+          "linked": 0
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_RULE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06",
+          "oracleSha256": "fe0dbc7dbb0a35bc62353de715a48b4263d492917225c7be5b6f969ec3f52819"
+        },
+        "guards": [
+          "QcRule_immutable_update",
+          "QcRule_immutable_delete",
+          "QcRule_version_guard",
+          "QcRule_scope_guard",
+          "QcRule_value_guard"
+        ],
+        "indexes": [
+          "QcRule_labId_analysisCode_methodologyId_effectiveFrom_idx",
+          "QcRule_scope_version_unique"
+        ],
+        "counts": {
+          "rules": 0
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_RUN_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+          "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369"
+        },
+        "counts": {
+          "BatchAnalyte": 6,
+          "BatchPosition": 33,
+          "BatchPositionWorkItem": 15,
+          "BatchPositionReference": 0,
+          "QcMeasurement": 24,
+          "QcEvaluation": 6,
+          "BatchDisposition": 1,
+          "BatchEvent": 28
+        },
+        "receipt": {
+          "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+          "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369",
+          "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+          "backfillCounts": {
+            "batches": 6,
+            "analytes": 6,
+            "samplePositions": 15,
+            "qcPositions": 18,
+            "historicalSnapshots": 0,
+            "currentEvaluations": 6,
+            "evaluations": 6,
+            "measurements": 24,
+            "typedRows": 18,
+            "historicalTypedRows": 0,
+            "jsonEntries": 18,
+            "typedFallbackEntries": 0,
+            "typedJsonConflicts": 12,
+            "historyAuditConflicts": 0,
+            "unresolvedMethods": 0,
+            "unresolvedAnalysts": 3,
+            "unresolvedInstruments": 6,
+            "unlinkedReferences": 6,
+            "unresolvedNumbers": 0,
+            "unresolvedDuplicateParents": 6,
+            "unresolvedRackPositions": 15,
+            "missingWorkItems": 16,
+            "malformedHistory": 0,
+            "malformedQcResults": 0,
+            "orphanSnapshots": 0,
+            "multiAttemptMembershipGroups": 0,
+            "refusals": 0,
+            "legacyDispositionMapped": {
+              "REJECT_REANALYSIS": 1,
+              "ACCEPT_OPAQUE": 1
+            },
+            "dispositionAttribution": {
+              "AUDIT_LOG": 0,
+              "BATCH_DISPOSITION_FIELD": 2,
+              "SNAPSHOT_DISPOSITION_FIELD": 0
+            },
+            "dispositionAttributionConflicts": 0,
+            "TEXTURE_ALIAS_MERGED": 0
+          },
+          "bootstrapRebuild": []
+        },
+        "bootstrapRebuild": [],
+        "guards": [
+          "Batch_legacy_qc_immutable",
+          "Batch_first_start_immutable",
+          "BatchQcResult_frozen_insert",
+          "BatchQcResult_frozen_update",
+          "BatchQcResult_frozen_delete",
+          "BatchAnalyte_insert_guard",
+          "BatchAnalyte_update_guard",
+          "BatchAnalyte_identity_immutable",
+          "BatchAnalyte_membership_insert_guard",
+          "BatchAnalyte_membership_delete_guard",
+          "BatchAnalyte_membership_update_guard",
+          "BatchPosition_insert_guard",
+          "BatchPosition_update_guard",
+          "BatchPosition_membership_insert_guard",
+          "BatchPosition_membership_update_guard",
+          "BatchPosition_membership_delete_guard",
+          "BatchPosition_identity_guard",
+          "BatchPositionWorkItem_insert_guard",
+          "BatchPositionWorkItem_immutable",
+          "BatchPositionWorkItem_run_unique_guard",
+          "BatchPositionWorkItem_membership_insert_guard",
+          "BatchPositionWorkItem_membership_delete_guard",
+          "WorkItem_batch_membership_guard",
+          "WorkItem_batch_membership_insert_guard",
+          "BatchPositionReference_insert_guard",
+          "BatchPositionReference_correction_reason_guard",
+          "BatchPositionReference_lot_guard",
+          "BatchPositionReference_supersede_guard",
+          "BatchPositionReference_delete_guard",
+          "QcMeasurement_insert_guard",
+          "QcMeasurement_historical_write_guard",
+          "QcMeasurement_replacement_guard",
+          "BatchPositionReference_replacement_guard",
+          "QcMeasurement_start_guard",
+          "QcMeasurement_supersede_guard",
+          "QcMeasurement_delete_guard",
+          "QcEvaluation_insert_guard",
+          "QcEvaluation_start_guard",
+          "QcEvaluation_frozen_criteria_guard",
+          "QcEvaluation_immutable_update",
+          "QcEvaluation_immutable_delete",
+          "BatchDisposition_immutable_update",
+          "BatchDisposition_immutable_delete",
+          "BatchEvent_immutable_update",
+          "BatchEvent_immutable_delete",
+          "BatchDisposition_insert_guard",
+          "BatchEvent_insert_guard"
+        ],
+        "indexes": [
+          "BatchAnalyte_labId_analysisCode_methodologyId_idx",
+          "BatchAnalyte_batchId_analysisCode_key",
+          "BatchPosition_batchId_position_key",
+          "BatchPositionWorkItem_workItemId_idx",
+          "BatchPositionWorkItem_positionId_analysisCode_key",
+          "BatchPositionReference_positionId_analysisCode_idx",
+          "QcMeasurement_batchId_analysisCode_idx",
+          "QcMeasurement_positionId_analysisCode_replicateNo_idx",
+          "QcEvaluation_batchId_analysisCode_version_key",
+          "BatchDisposition_batchId_analysisCode_idx",
+          "BatchEvent_batchId_at_idx",
+          "BatchAnalyte_crm_ordinal_unique",
+          "BatchPositionReference_current_unique",
+          "QcMeasurement_current_unique"
+        ],
+        "backfillCount": 0,
+        "backfillCounts": {
+          "batches": 6,
+          "analytes": 6,
+          "samplePositions": 15,
+          "qcPositions": 18,
+          "historicalSnapshots": 0,
+          "currentEvaluations": 6,
+          "evaluations": 6,
+          "measurements": 24,
+          "typedRows": 18,
+          "historicalTypedRows": 0,
+          "jsonEntries": 18,
+          "typedFallbackEntries": 0,
+          "typedJsonConflicts": 12,
+          "historyAuditConflicts": 0,
+          "unresolvedMethods": 0,
+          "unresolvedAnalysts": 3,
+          "unresolvedInstruments": 6,
+          "unlinkedReferences": 6,
+          "unresolvedNumbers": 0,
+          "unresolvedDuplicateParents": 6,
+          "unresolvedRackPositions": 15,
+          "missingWorkItems": 16,
+          "malformedHistory": 0,
+          "malformedQcResults": 0,
+          "orphanSnapshots": 0,
+          "multiAttemptMembershipGroups": 0,
+          "refusals": 0,
+          "legacyDispositionMapped": {
+            "REJECT_REANALYSIS": 1,
+            "ACCEPT_OPAQUE": 1
+          },
+          "dispositionAttribution": {
+            "AUDIT_LOG": 0,
+            "BATCH_DISPOSITION_FIELD": 2,
+            "SNAPSHOT_DISPOSITION_FIELD": 0
+          },
+          "dispositionAttributionConflicts": 0,
+          "TEXTURE_ALIAS_MERGED": 0
+        },
+        "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_GATE_SCOPE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+        "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+        "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+        "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+        "existingDispositionRows": 1,
+        "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+        "backfillCount": 0,
+        "bootstrapRebuild": [],
+        "totalChanges": 0,
+        "mode": "DRY_RUN",
+        "receipt": {
+          "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+          "existingDispositionRows": 1,
+          "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+          "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+          "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+          "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+          "backfillCount": 0,
+          "bootstrapRebuild": []
+        }
+      },
+      {
+        "event": "PT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "successor": "COMPLETE_193",
+        "sources": {
+          "migrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "successorSources": {
+          "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+          "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "bootstrapRebuild": [],
+        "backfillCount": 0,
+        "roundCount": 0,
+        "scoreOutcomeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "NCR_STARTUP_READY",
+        "classification": "COMPLETE_193",
+        "sources": {
+          "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+          "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "RESULT_EQUIPMENT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4"
+        },
+        "bootstrapRebuild": [],
+        "backfillCount": 0,
+        "resultCount": 19,
+        "originalResultSha256": "935e140956349abc9eddbee25b830c9ff041700f6565479a62f16031deb90d26",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "WORK_ATTEMPT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+          "contractVersion": "190-v1"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "WORK_REPEAT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd",
+          "contractVersion": "191-v1",
+          "predecessor": {
+            "marker": "190_work_attempt_contract",
+            "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+            "contractVersion": "190-v1",
+            "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+          },
+          "qcPredecessors": {
+            "186_normalized_qc_runs": {
+              "receiptSha256": "d461aab82504feaf91a27b4816e1d4b3abd66c147f32122752d72f4eb842be1a"
+            },
+            "187_qc_gate_scope": {
+              "receiptSha256": "ee802a39b62a9e06ab92677c3c016c461e4d1c8ca43674f077622220ef1fbd04"
+            }
+          }
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "REPORTED_VALUE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "migrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7",
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newSelectionCount": 0
+      },
+      {
+        "event": "REAGENT_LOT_STARTUP_READY",
+        "classification": "COMPLETE_194",
+        "sources": {
+          "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+        },
+        "linkCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+          },
+          "originalRowsSha256": "f79db32ba1d05b87d2e5009954d90ae2dd0f0a960cd51865e0f4b75de0bc4cbe",
+          "originalRowsPreserved": true,
+          "newLinkCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "5d737a49f3a62a5accf3c405ae938308b11b4ffe5682e71c0982951ee61715e1"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "RESULT_OVERRIDE_STARTUP_READY",
+        "classification": "COMPLETE_197",
+        "sources": {
+          "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+        },
+        "requestCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+          },
+          "originalRowsSha256": "6e0207946cd67d4109b3f6e7ff0b23fd8b545b21d2a4f81796e651923db1564b",
+          "originalRowsPreserved": true,
+          "newRequestCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "953a236c33e3b37f7a4fe173dc01f17b6d49924a2bfa432877f05b896253b83e"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "CALCULATION_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+          "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+          "referenceSha256": "57dc4b667dab93606e24673b39a12032e48f3df686b9bd3c593ac04d2fac8491"
+        },
+        "receipt": {
+          "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+          "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+          "guards": [
+            "CalcTemplate_insert_contract",
+            "CalcTemplateActivation_insert_contract",
+            "CalibrationCurve_insert_contract",
+            "CalibrationPoint_insert_contract",
+            "ResultCalculation_insert_contract",
+            "CalcTemplate_update_immutable",
+            "CalcTemplate_delete_immutable",
+            "CalcTemplateActivation_update_immutable",
+            "CalcTemplateActivation_delete_immutable",
+            "CalibrationCurve_update_immutable",
+            "CalibrationCurve_delete_immutable",
+            "CalibrationPoint_update_immutable",
+            "CalibrationPoint_delete_immutable",
+            "ResultCalculation_update_immutable",
+            "ResultCalculation_delete_immutable",
+            "CalibrationCurve_pass_coefficients_guard"
+          ],
+          "backfillCount": 0
+        },
+        "guards": [
+          "CalcTemplate_insert_contract",
+          "CalcTemplateActivation_insert_contract",
+          "CalibrationCurve_insert_contract",
+          "CalibrationPoint_insert_contract",
+          "ResultCalculation_insert_contract",
+          "CalcTemplate_update_immutable",
+          "CalcTemplate_delete_immutable",
+          "CalcTemplateActivation_update_immutable",
+          "CalcTemplateActivation_delete_immutable",
+          "CalibrationCurve_update_immutable",
+          "CalibrationCurve_delete_immutable",
+          "CalibrationPoint_update_immutable",
+          "CalibrationPoint_delete_immutable",
+          "ResultCalculation_update_immutable",
+          "ResultCalculation_delete_immutable",
+          "CalibrationCurve_pass_coefficients_guard"
+        ],
+        "counts": {
+          "CalcTemplate": 8,
+          "CalcTemplateActivation": 0,
+          "CalibrationCurve": 0,
+          "CalibrationPoint": 0,
+          "ResultCalculation": 0
+        },
+        "backfillCount": 0,
+        "unit": {
+          "classification": "ABSENT",
+          "unitCode": "pct_mass",
+          "unitInsertCount": 0,
+          "backfillCount": 0
+        },
+        "references": {
+          "classification": "COMPLETE",
+          "referenceCount": 11,
+          "installedReferenceCount": 8,
+          "missingReferenceIds": [],
+          "deferredReferences": [
+            {
+              "id": "calc-ref-walkley-black-130-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            },
+            {
+              "id": "calc-ref-walkley-black-133-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            },
+            {
+              "id": "calc-ref-kjeldahl-nitrogen-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            }
+          ],
+          "deferredReferenceCount": 3,
+          "referenceInsertCount": 0,
+          "referenceReceiptInsertCount": 0,
+          "activationInsertCount": 0,
+          "backfillCount": 0
+        },
+        "ready": true,
+        "plannedUnitInsertCount": 0,
+        "plannedReferenceInsertCount": 0,
+        "activationInsertCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "unitInsertCount": 0,
+        "referenceInsertCount": 0,
+        "referenceReceiptInsertCount": 0,
+        "schemaReceiptInsertCount": 0
+      },
+      {
+        "event": "CROSS_CHECK_STARTUP_READY",
+        "classification": "COMPLETE_201",
+        "sources": {
+          "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+          "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+          "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+        },
+        "evaluationCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+            "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+            "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+          },
+          "originalRowsSha256": "8559985c861e950fdffe53f6661a48b0e76916edcd4c3f0e51b473d827824d58",
+          "originalRowsPreserved": true,
+          "newEvaluationCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "3185df5bbb809f86c7ca8c0689135e6dbd93e227c9dbda66850256b965966a9e"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newEvaluationCount": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "AMENDMENT_STARTUP_READY",
+        "classification": "COMPLETE_210",
+        "sources": {
+          "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+          "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+          "contractVersion": "210-v1"
+        },
+        "amendmentCount": 1,
+        "amendmentAttemptLinkCount": 0,
+        "withdrawalCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+            "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+            "contractVersion": "210-v1"
+          },
+          "originalRowsSha256": "d843166d8ca8117121e56a44fd8eeed47ac92f75f3cd63ea0b466912247241d3",
+          "originalRowsPreserved": true,
+          "newAmendmentCount": 0,
+          "newAttemptLinkCount": 0,
+          "newWithdrawalCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "efc085838fcd3c85af095eed605a790b1252d178b52c8e9de9a5eaada223e424"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newAmendmentCount": 0,
+        "newAttemptLinkCount": 0,
+        "newWithdrawalCount": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "REPORT_REVISION_STARTUP_READY",
+        "classification": "COMPLETE_211",
+        "sources": {
+          "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+          "contractVersion": "211-v1"
+        },
+        "reportCount": 4,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+            "contractVersion": "211-v1"
+          },
+          "originalRowsSha256": "2e6e021a9c590b35591f505a0aba09f529839015dfbd49e4ff81a8a29541ba39",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "7172b9201f5173b63a1a1414b0a18414da150b8366762c868081d1a6d61dc72d"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "BENCH_CREDENTIAL_STARTUP_READY",
+        "classification": "COMPLETE_202",
+        "sources": {
+          "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+          "contractVersion": "202-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+            "contractVersion": "202-v1"
+          },
+          "originalRowsSha256": "a380b9ab2f9dd1ee5533c9266bbed055be9a6802f6bad10ad9462cfeeb30abf7",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "220eeb9b44b23db3d1176eda595b5fcf1ac67b1f84fe87fbc7be58e12c46e3c6"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "PREPARATION_RECORD_STARTUP_READY",
+        "classification": "COMPLETE_205",
+        "sources": {
+          "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+          "contractVersion": "205-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+            "contractVersion": "205-v1"
+          },
+          "originalRowsSha256": "10f132d31e12b6551a00a48cfd136791d49a70fc9520834df7a5972cd988c57a",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "01df5c84dc90b6c4be4e91b9d3b05e44af2bc5cc03e0ec5fec5bef6a238c19ae"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      }
+    ],
+    "entrypointInstallers": [
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "ALREADY_PRESENT",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_193",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_194",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_197",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_201",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_210",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_211",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_202",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_205",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      }
+    ],
+    "startupChanges": 0,
+    "ownedJobsBoundary": null,
+    "startupMemory": {
+      "peakBytes": 121397248,
+      "limitBytes": 805306368,
+      "nodeOptions": null
+    }
+  },
+  "peakBytes": 229838848,
+  "healthSamples": [
+    {
+      "utc": "2026-10-11T20:40:34.741511+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 122171392,
+      "minimumFreeBytes": 111480799232
+    },
+    {
+      "utc": "2026-10-11T20:40:45.619726+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 229838848,
+      "minimumFreeBytes": 111476568064
+    }
+  ],
+  "error": "Owned scheduler/runtime error; retain this failed proof",
+  "diskAllocationObservationsSha256": "6f557178a78507b62833b889c49d527153f034bb18f9f7704f8bda98c0ac94e2",
+  "completedUtc": "2026-10-11T20:41:16.504087+00:00"
+}
