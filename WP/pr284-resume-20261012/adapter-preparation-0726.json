@@ -1,0 +1,18 @@
+{
+  "utc": "2026-10-12T07:27:40.1698066Z",
+  "appHead": "217a623bea0766688cd1e76c9344d19ec3f0ed12",
+  "ciRun": 38215041808,
+  "localFullSession": 46491,
+  "validationStatus": "FULL_SUITE_AND_CI_IN_PROGRESS_NOT_AUDIT_READY",
+  "proposedAdapterSource": "ab824ae566c693c6f4b96e1b383f095148383532",
+  "windowsGuards": 64,
+  "linuxGuards": 64,
+  "sourceReview": "NOT_REQUESTED_NOT_EXECUTION_AUTHORITY",
+  "nativeDeliveryObserved": "2026-10-12T07:25Z",
+  "liveReadonlyImage": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+  "liveRestartCount": 0,
+  "liveHealth": "healthy_HTTP200",
+  "freeBytes": 91819892736,
+  "originalReceiptUnchanged": "480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515",
+  "productionMutations": 0
+}

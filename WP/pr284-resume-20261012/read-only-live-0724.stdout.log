@@ -1,0 +1,6 @@
+{"Status":"running","Running":true,"Paused":false,"Restarting":false,"OOMKilled":false,"Dead":false,"Pid":975126,"ExitCode":0,"Error":"","StartedAt":"2026-10-12T05:09:59.386711058Z","FinishedAt":"0001-01-01T00:00:00Z","Health":{"Status":"healthy","FailingStreak":0,"Log":[{"Start":"2026-10-12T09:23:53.825737433+02:00","End":"2026-10-12T09:23:53.915186416+02:00","ExitCode":0,"Output":""},{"Start":"2026-10-12T09:24:03.916670441+02:00","End":"2026-10-12T09:24:04.004178973+02:00","ExitCode":0,"Output":""},{"Start":"2026-10-12T09:24:14.005394677+02:00","End":"2026-10-12T09:24:14.087452773+02:00","ExitCode":0,"Output":""},{"Start":"2026-10-12T09:24:24.088671378+02:00","End":"2026-10-12T09:24:24.1785604+02:00","ExitCode":0,"Output":""},{"Start":"2026-10-12T09:24:34.180208246+02:00","End":"2026-10-12T09:24:34.256298695+02:00","ExitCode":0,"Output":""}]}} sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f 0
+Filesystem        1B-blocks         Used   Available Use% Mounted on
+/dev/vda1      253548216320 151296671744 91819892736  63% /
+/dev/vda1      253548216320 151296671744 91819892736  63% /
+480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515  /opt/lims/releases/runtime-kobo-release-51f67988-20261012T044924Z/production-receipt.json
+{"status":"ok","version":"1.9.0","uptime":8032.329275797}
