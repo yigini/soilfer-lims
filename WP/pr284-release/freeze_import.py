@@ -12,6 +12,7 @@ import pathlib
 import sqlite3
 import subprocess
 import sys
+import time
 
 import release_support as s
 import startup_common as c
@@ -21,6 +22,22 @@ from import_release_contract import *
 from deploy_import import predecessor_ingress_authority, select_entry_state, environment_hash
 
 ROOT = pathlib.Path(__file__).resolve().parent
+VALIDATION_STARTED = time.monotonic()
+
+
+@contextlib.contextmanager
+def validation_stage(name):
+    start = time.monotonic()
+    print(json.dumps({'event': 'START', 'stage': name,
+        'elapsedSeconds': start - VALIDATION_STARTED}), flush=True)
+    try:
+        yield
+    except BaseException:
+        print(json.dumps({'event': 'REFUSED', 'stage': name,
+            'elapsedSeconds': time.monotonic() - start}), flush=True)
+        raise
+    print(json.dumps({'event': 'PASSED', 'stage': name, 'elapsedSeconds': time.monotonic() - start,
+        'totalElapsedSeconds': time.monotonic() - VALIDATION_STARTED}), flush=True)
 
 
 def freeze_file(root, name, data):
@@ -69,6 +86,7 @@ def main():
     require(not target.exists(), 'Never overwrite or refreeze a kit')
     lock = pathlib.Path('/opt/lims/apply.lock').open('a')
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    print(json.dumps({'event': 'START', 'stage': 'stopped-authority-and-retained-file-hashes'}), flush=True)
     receipt_path = safe_reference(proof, 'rehearsal-receipt.json')
     receipt_sha = sha(receipt_path)
     receipt = json.loads(receipt_path.read_bytes())
@@ -167,15 +185,19 @@ def main():
     require(sha(original) == native['beforeBackupSha256'] == receipt['freshCopySha256'] and
         sha(installed) == native['afterBackupSha256'] == receipt['installedBaselineSha256'] and
         sha(first) == receipt['firstDatabaseSha256'], 'Original consistent backup hash differs')
-    require(verify_import_installation(original, installed, ROOT, native['originalRowsSha256']) ==
-        json.loads(files['import-install-preservation.json']), 'Recomputed exact native delta differs')
+    print(json.dumps({'event': 'PASSED', 'stage': 'stopped-authority-and-retained-file-hashes',
+        'elapsedSeconds': time.monotonic() - VALIDATION_STARTED}), flush=True)
+    with validation_stage('native-installation-full104-original-rows'):
+        require(verify_import_installation(original, installed, ROOT, native['originalRowsSha256']) ==
+            json.loads(files['import-install-preservation.json']), 'Recomputed exact native delta differs')
     # Compare parsed complete states, not formatting-dependent JSON byte hashes.
     installed_state = json.loads(files['installed-protected-state.json'])
     require(json.loads((proof / 'after-import-stopped/wal-aware-state.json').read_bytes()) == installed_state and
         json.loads((proof / 'after-repeat-stopped/wal-aware-state.json').read_bytes()) == installed_state and
         json.loads((proof / 'after-jobs-off-stopped/wal-aware-state.json').read_bytes()) == installed_state,
         'Original jobs-OFF full installed state changed')
-    c.exact_state(repeat_backup, installed_state, immutable=True)
+    with validation_stage('repeat-full106-table-state'):
+        c.exact_state(repeat_backup, installed_state, immutable=True)
     with contextlib.closing(sqlite3.connect(original.as_uri() + '?mode=ro&immutable=1', uri=True)) as db:
         db.row_factory = sqlite3.Row
         refusal_rows = expected_refusals([dict(row) for row in db.execute('SELECT id,labId,projectCode,isActive FROM KoboConfig')],
@@ -189,12 +211,17 @@ def main():
     first_state = json.loads(files['first-sync-preservation.json'])
     second_state = json.loads(files['second-sync-preservation.json'])
     full_state = json.loads(files['full-copy-preservation.json'])
-    require(verify_copy(installed, first, expected_table_count=106, fetched_ids=first_ids,
-        refusal_configs=refusal_ids) == first_state, 'First natural backup preservation differs')
-    require(verify_copy(first, final_backup, expected_table_count=106, prior_fetched_ids=receipt['priorFetchedIds'],
-        fetched_ids=final_ids, refusal_configs=refusal_ids) == second_state, 'Second natural backup preservation differs')
-    require(verify_copy(installed, final_backup, expected_table_count=106, fetched_ids=final_ids,
-        refusal_configs=refusal_ids) == full_state, 'Full original installed preservation differs')
+    with validation_stage('first-natural-full106-preservation'):
+        require(verify_copy(installed, first, expected_table_count=106, fetched_ids=first_ids,
+            refusal_configs=refusal_ids) == first_state, 'First natural backup preservation differs')
+    with validation_stage('second-natural-full106-preservation'):
+        require(verify_copy(first, final_backup, expected_table_count=106, prior_fetched_ids=receipt['priorFetchedIds'],
+            fetched_ids=final_ids, refusal_configs=refusal_ids) == second_state, 'Second natural backup preservation differs')
+    with validation_stage('full-installed-to-final106-preservation'):
+        require(verify_copy(installed, final_backup, expected_table_count=106, fetched_ids=final_ids,
+            refusal_configs=refusal_ids) == full_state, 'Full original installed preservation differs')
+    print(json.dumps({'event': 'START', 'stage': 'final-hashes-live-build-and-reserve',
+        'elapsedSeconds': time.monotonic() - VALIDATION_STARTED}), flush=True)
     sealed_scheduler_evidence(receipt, refusal_rows,
         safe_reference(proof, 'candidate-jobs-on-stdout.log').read_text(encoding='utf-8'),
         safe_reference(proof, 'candidate-jobs-on-stderr.log').read_text(encoding='utf-8'), first_state, second_state, full_state)
@@ -254,6 +281,9 @@ def main():
         'schedulerRefusalPairing': REFUSAL_PAIRING_POLICY, 'REFUSAL_PAIR_WINDOW_SECONDS': REFUSAL_PAIR_WINDOW_SECONDS,
         'files': {name: hashlib.sha256(raw).hexdigest() for name, raw in files.items()}}
     measurement_manifest(manifest)
+    print(json.dumps({'event': 'PASSED', 'stage': 'final-hashes-live-build-and-reserve',
+        'totalElapsedSeconds': time.monotonic() - VALIDATION_STARTED,
+        'destinationCreated': False}), flush=True)
     target.mkdir(mode=0o700)
     for name, raw in files.items(): freeze_file(target, name, raw)
     freeze_file(target, 'prepared-manifest.json', (json.dumps(manifest, indent=2) + '\n').encode())

@@ -1,0 +1,37 @@
+{
+  "status": "READ_ONLY_PACKAGING_VALIDATOR_TIMING_PASS",
+  "completedUtc": "2026-10-12T16:06:21.591999+00:00",
+  "proofRoot": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "receiptSha256": "f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce",
+  "stages": [
+    {
+      "stage": "native-installation-full104-original-rows",
+      "elapsedSeconds": 46.8084106699971
+    },
+    {
+      "stage": "repeat-full106-table-state",
+      "elapsedSeconds": 23.232542406010907
+    },
+    {
+      "stage": "first-natural-full106-preservation",
+      "elapsedSeconds": 53.57761022998602
+    },
+    {
+      "stage": "second-natural-full106-preservation",
+      "elapsedSeconds": 55.115042136996635
+    },
+    {
+      "stage": "full-installed-to-final106-preservation",
+      "elapsedSeconds": 49.5988949570019
+    },
+    {
+      "stage": "six-original-backup-hashes-and-attributes",
+      "elapsedSeconds": 25.486821509999572
+    }
+  ],
+  "measuredSeconds": 253.81932190999214,
+  "allOriginalBackupBytesModesAttributesPreserved": true,
+  "freezerInvocations": 0,
+  "newProofs": 0,
+  "productionOperations": 0
+}

@@ -1,0 +1,10 @@
+{
+  "recordedUtc": "2026-10-12T16:04:47.829026+00:00",
+  "status": "PACKAGING_TIMEOUT_NO_KIT_NEW_REVIEW_PENDING",
+  "nativeDeliveryVisuallyVerified": true,
+  "nativeCorrectionConditionsRead": true,
+  "failureCommentId": 6127786378,
+  "rawFailureCommentSha256": "06f4184233b245266627b56c06cc97cc2c4fd841af1dc63430f0d309f58d42d0",
+  "productionOperations": 0,
+  "activeFreezer": false
+}

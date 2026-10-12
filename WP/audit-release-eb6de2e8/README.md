@@ -1,3 +1,15 @@
+PR294 packaging failure / read-only correction boundary 2026-10-12T16:04:47.829026+00:00
+
+The original stopped144000Z first proof remains PASSED, inactive/exit0; immutable0400 receipt f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce unchanged. All31 proof bytes, original135400Z build/image7aeb and retained data/backups remain unchanged. Never replay/restart/retry/rebuild/retag them.
+
+Actual production Source review: PASS6127651539 bound5fa7e65f/all39 hashes. Its ONE first package154640Z FAILED at300-second read-only verification deadline. Local98160 finishedexit1; no freezer process remains. Package154640 retained. Intended execution root instrument-import-release-959d17e1-20261012T154640Z DOES NOT EXIST; permanently excluded and never rerun/reused. No kit/manifest/gate/production operation occurred. Full intent/result/stdout/stderr/diagnosis and failure#162/6127786378 retained; precise timed-out component was unlogged and is not retrospectively claimed.
+
+Actual native Claudio accepts a packaging-only correction subject to read-only immutable originalproof, measured verification times plus margin/per-stage progress, distinct newroot/no reuse of any failed partialoutput, all31 proof bytes/readiness600/productionunit5400/headroom/pins unchanged, no newproof/build. A ONE read-only timing diagnostic measures immutable retained-backup validators, not the freezer, while proposed progress/transport changes are prepared. NO NEW productionSourcePASS or packaging authority yet. Source review is required before a distinct package/kit from the SAME stopped PASS. Old5fa cannot authorize changed source. SAME writer continues.
+
+Read-only15:53:29UTC: productionold51f/d4eb healthy0restart/HTTPShealth+login200TLS/free73517789184B. No quiesce/installer/defaultstartup/deploy/cleanup/card answer. Otherappmerges held until#200live/Clactualpostcheck. Original FAILED105200/134000 and completedPR293 artifacts remain excluded/preserved. Both workloadpins and absolute/scaled reserve/500MB unexplained-growth guard unchanged.
+
+Previous checkpoint follows:
+
 PR294 stopped first PASS / production-source review boundary 2026-10-12T15:44:32.895415+00:00
 
 The original reviewed144000Z first proof completed 2026-10-12T15:40:30.271703+00:00, PASSED_NEW_IMPORT_NATURAL_KOBO_PROOF, unit inactive/dead/exit0 and all owned writers stopped/retained. Immutable0400 receipt SHA256 f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce. Never replay/restart/retry/rebuild/retag this completed proof or its original135400Z build. Failed105200Z/134000Z roots remain permanently excluded.

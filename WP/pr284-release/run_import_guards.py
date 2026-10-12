@@ -13,7 +13,8 @@ names = ['import_source_graph', 'import_preservation', 'import_startup_checks',
     'test_import_preservation', 'test_import_startup_checks', 'test_import_installation', 'test_import_stage',
     'test_import_sealing', 'test_import_authority', 'test_import_layout',
     'import_release_contract', 'test_import_release',
-    'known_core_disk_guard_import_deploy', 'test_import_deploy_layout']
+    'known_core_disk_guard_import_deploy', 'test_import_deploy_layout',
+    'export_freeze_import_kit', 'test_import_packaging_transport']
 files = {name: subprocess.check_output(['git', 'show', head + ':WP/pr284-release/' + name + '.py']) for name in names}
 helpers = {'release_support': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
     'startup_common': 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00'}
