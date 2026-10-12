@@ -1,0 +1,40 @@
+{
+  "recordedUtc": "2026-10-12T19:39:21.799127+00:00",
+  "actualLaunch": {
+    "finishedUtc": "2026-10-12T19:37:54.492417+00:00",
+    "exitCode": 0,
+    "actualLaunch": {
+      "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+      "unit": "lims-release-instrument-import-release-959d17e1-20261012t161000z.service",
+      "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+      "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+      "manifestSha256": "5392cab2c224e68e74694950336ec1fad638eb4c0bf282e6614009f58cb5c7c8",
+      "gateSha256": "14ddeac6b483c5f67856c4f507049fef4e43e5d4597870b075aebcf648b3b557",
+      "status": "SINGLE_NEW_RELEASE_LAUNCHED_NOT_YET_DEPLOYED"
+    }
+  },
+  "actualGate": {
+    "finishedUtc": "2026-10-12T19:36:56.446060+00:00",
+    "exitCode": 0,
+    "productionOperations": 0,
+    "actualGate": {
+      "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+      "gateSha256": "14ddeac6b483c5f67856c4f507049fef4e43e5d4597870b075aebcf648b3b557",
+      "verifiedUtc": "2026-10-12T19:36:06.395171+00:00",
+      "status": "FRESH_GATE_CREATED_NOT_EXECUTED"
+    }
+  },
+  "actualKitReview": {
+    "status": "ACTUAL_NEW_EXACT_KIT_PASS_VERIFIED_NOT_EXECUTED",
+    "observedUtc": "2026-10-12T19:34:56.796028+00:00",
+    "reviewId": 6131228500,
+    "reviewUrl": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6131228500",
+    "reviewApiSha256": "5ce54085a704da7789d21216557a8ae70cc37ffa0f92c5ade46a6140ca0581a4",
+    "manifestSha256": "5392cab2c224e68e74694950336ec1fad638eb4c0bf282e6614009f58cb5c7c8",
+    "verifiedTokenCount": 129,
+    "currentMainHead": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "mainCiConclusion": "success",
+    "productionOperations": 0
+  },
+  "status": "SAME_SINGLE_REMOTE_PRODUCTION_UNIT_IN_PROGRESS_NOT_DEPLOYED"
+}
