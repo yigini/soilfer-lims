@@ -5,7 +5,7 @@ const SHA256 = '68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8
 const ORACLE_SHA256 = '9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df';
 const PRE_DRAFT_SHA256 = 'a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af';
 const UPGRADED_DRAFT_SHA256 = '4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b';
-const POST205_DRAFTS_SHA256 = 'ac0d64b16a25ae4498634c72593ac0bcb53240247be2153e140f147092d931b5';
+const POST205_DRAFTS_SHA256 = '208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const mismatch = cause => Object.assign(new Error('Instrument import release evidence differs from the reviewed source.', { cause }),
     { statusCode: 409, code: 'IMPORT_SOURCE_MISMATCH' });
@@ -19,7 +19,7 @@ function loadInstrumentImportMigrationSource() {
     };
     const sql = read('migration.sql', SHA256), freshTables = JSON.parse(read('fresh-prisma-tables.json', ORACLE_SHA256));
     const post205Drafts = JSON.parse(read('post205-draft-tables.json', POST205_DRAFTS_SHA256));
-    if (Object.keys(post205Drafts).join(',') !== 'preFresh,preUpgraded,postFresh,postUpgradedFresh,postUpgradedLegacy,postOlderImportThen205') throw mismatch();
+    if (Object.keys(post205Drafts).join(',') !== 'preFresh,preUpgraded,postFresh,postUpgradedFresh,postUpgradedLegacy,postOlderImportThen205,preNativeWorkbench,postNativeWorkbench') throw mismatch();
     const boundary = sql.indexOf('-- Contract guards');
     if (boundary < 0 || Object.keys(freshTables).join(',') !== 'ImportTemplate,InstrumentImportReceipt,WorkItemDraft' ||
         (sql.match(/^CREATE TRIGGER /gm) || []).length !== 6) throw mismatch();

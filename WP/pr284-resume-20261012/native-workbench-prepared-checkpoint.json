@@ -1,0 +1,36 @@
+{
+  "observedUtc": "2026-10-12T11:16:10.704588+00:00",
+  "application": {
+    "base": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+    "head": "d1509febd010a12f14adfef147aa7f88c369119a",
+    "tree": "f05031f800af670ddcb2215f06fa34f684c695bd",
+    "branch": "codex/native-workbench-import-forward-fix",
+    "files": {
+      "server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad",
+      "server/services/instrumentImportMigrationSource.js": "28a152d18f76578509c52e2865bbea1f0b3c2154427945fc8151909b9d216688",
+      "server/services/instrumentImportSchemaService.js": "897cd427cf8f16cc9199269d259232cc34395049b75d7fb119aa3a15c3fbec41",
+      "server/tests/contracts/audit_4_7_instrument_import_install.test.js": "c3b636da166986d2a4cbb93ee74c886f784bd193ce07bfd93504ce58247d23b5",
+      "server/tests/helpers/workflowWriteScanner.js": "ecbcfed96847a1c864476c624f8074ef05b6a791bf35ffec2c239f9da6345c28"
+    },
+    "focusedSuites": 4,
+    "focusedTestsPassed": 120,
+    "pullRequestCreated": false,
+    "checkoutBranchUnchanged": true,
+    "humanCheckoutUntouched": true,
+    "productionMutations": 0
+  },
+  "focusedPass": {
+    "suites": 4,
+    "tests": 120,
+    "logSha256": "7f9a0927f5a57dc2d4d6621e3c2111ad18cb742215003ab66b269de1c0882067"
+  },
+  "purePreservationPass": {
+    "tests": 33,
+    "logSha256": "baf5c686190712c7254771aeae7316fb198f1d9f8dac14b2a7c45b1faff08f94"
+  },
+  "fullSuiteSession": 59467,
+  "fullSuiteStatus": "IN_PROGRESS",
+  "newPrQuestionPending": true,
+  "failedProofNeverRetry": true,
+  "productionMutations": 0
+}

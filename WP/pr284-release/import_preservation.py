@@ -20,7 +20,7 @@ ASSETS = {
     'fresh-prisma-tables.json': '9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df',
     'pre-prisma-draft-table.sql': 'a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af',
     'upgraded-prisma-draft-table.sql': '4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b',
-    'post205-draft-tables.json': 'ac0d64b16a25ae4498634c72593ac0bcb53240247be2153e140f147092d931b5',
+    'post205-draft-tables.json': '208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad',
 }
 SOURCES = dict(zip(
     ['migrationSha256', 'oracleSha256', 'preDraftSha256',
@@ -119,7 +119,8 @@ def verify_import_installation(before, after, source_directory, original_rows_sh
                 'Original receipt inventory differs')
         draft = next(row[3] for row in prior_objects if row[0] == 'table' and row[1] == 'WorkItemDraft')
         oracle = json.loads(source['post205-draft-tables.json'])
-        require(draft in (oracle['preFresh'], oracle['preUpgraded']), 'Exact #205 draft predecessor differs')
+        require(draft in (oracle['preFresh'], oracle['preUpgraded'], oracle['preNativeWorkbench']),
+                'Exact #205 draft predecessor differs')
         # Construct only the schema delta in memory from the immutable native
         # ALTER source. All other original objects remain byte-for-byte bound.
         model = sqlite3.connect(':memory:')

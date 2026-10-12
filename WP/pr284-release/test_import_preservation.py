@@ -24,7 +24,7 @@ class ImportPreservationGuards(unittest.TestCase):
     def tearDown(self):
         self.owned.cleanup()
 
-    def make_pair(self, variant='preFresh'):
+    def make_pair(self, variant='preFresh', draft_sql=None):
         db = sqlite3.connect(self.before)
         db.executescript('''CREATE TABLE Lab(id TEXT PRIMARY KEY, code TEXT);
             CREATE TABLE EquipmentAsset(id TEXT PRIMARY KEY, labId TEXT);
@@ -33,7 +33,8 @@ class ImportPreservationGuards(unittest.TestCase):
             INSERT INTO WorkItem VALUES ('owned-work');
             INSERT INTO Lab VALUES ('owned-lab','OWNED');
             INSERT INTO EquipmentAsset VALUES ('owned-equipment','owned-lab');''')
-        db.executescript(json.loads(self.source['post205-draft-tables.json'])[variant])
+        db.executescript(draft_sql if draft_sql is not None else
+            json.loads(self.source['post205-draft-tables.json'])[variant])
         db.execute('''INSERT INTO WorkItemDraft(id,workItemId,sampleId,userId,analysis,value,records,updatedAt)
             VALUES ('owned-draft','owned-work','owned-sample','owned-user','P','1.20',?, 'owned-time')''',
             ('{"literal":"é\\n中","null":null}',))
@@ -86,6 +87,51 @@ class ImportPreservationGuards(unittest.TestCase):
         self.after = self.root / 'upgraded-after.db'
         self.make_pair('preUpgraded')
         self.assertEqual(self.verify()['scientificChanges'], 0)
+
+    def test_exact_native_workbench_pair_preserves_unique_default_rows_and_bytes(self):
+        self.before = self.root / 'workbench-before.db'
+        self.after = self.root / 'workbench-after.db'
+        self.make_pair('preNativeWorkbench')
+        before, after = verifier.digest(self.before), verifier.digest(self.after)
+        result = self.verify()
+        self.assertEqual(len(result['originalRows']), 104)
+        self.assertEqual(result['scientificChanges'], 0)
+        db = sqlite3.connect(self.after)
+        try:
+            self.assertEqual(db.execute("SELECT sql FROM sqlite_master WHERE name='WorkItemDraft'").fetchone()[0],
+                json.loads(self.source['post205-draft-tables.json'])['postNativeWorkbench'])
+            self.assertEqual(next(row[4] for row in db.execute('PRAGMA table_xinfo(WorkItemDraft)')
+                if row[1] == 'updatedAt'), 'CURRENT_TIMESTAMP')
+            self.assertTrue(any(row[2] == 1 and row[3] == 'u' for row in db.execute('PRAGMA index_list(WorkItemDraft)')))
+        finally:
+            db.close()
+        self.assertEqual((verifier.digest(self.before), verifier.digest(self.after)), (before, after))
+
+    def test_native_workbench_changed_original_records_still_refuses(self):
+        self.before = self.root / 'workbench-records-before.db'
+        self.after = self.root / 'workbench-records-after.db'
+        self.make_pair('preNativeWorkbench')
+        self.mutate("UPDATE WorkItemDraft SET records='[]'")
+        self.refused('Original rows changed')
+
+    def test_native_workbench_unknown_column_still_refuses(self):
+        self.before = self.root / 'workbench-column-before.db'
+        self.after = self.root / 'workbench-column-after.db'
+        self.make_pair('preNativeWorkbench')
+        self.mutate('ALTER TABLE WorkItemDraft ADD COLUMN unknownImportAuthority TEXT')
+        self.refused('Schema changed beyond')
+
+    def test_uncaptured_native_default_or_unique_hybrids_refuse_even_with_matching_rows(self):
+        native = json.loads(self.source['post205-draft-tables.json'])['preNativeWorkbench']
+        for label, before_text, after_text in [
+                ('default', '"updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP',
+                    '"updatedAt" DATETIME NOT NULL'),
+                ('unique', '"workItemId" TEXT NOT NULL UNIQUE', '"workItemId" TEXT NOT NULL')]:
+            with self.subTest(label=label):
+                self.before = self.root / ('foreign-' + label + '-before.db')
+                self.after = self.root / ('foreign-' + label + '-after.db')
+                self.make_pair(draft_sql=native.replace(before_text, after_text))
+                self.refused('Exact #205 draft predecessor differs')
 
     def test_original_value_change_refuses(self):
         self.mutate("UPDATE owned_0 SET value='changed'")
