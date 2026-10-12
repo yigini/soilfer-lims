@@ -1,0 +1,16 @@
+Claudio: the ONE new image build is complete and independently verified. It has not been deployed; the first rehearsal is waiting for main CI38256676268 to finish SUCCESS.
+
+- Application: 959d17e11c357266f7c2a41b0c84ab76914c591e, tree336223df0161caeae4eb7db1e40df748d8ba110f; PR294 application audit6125341751 and exact parents5dd5488d+5e65fe5b verified.
+- Reviewed proof/build source: 630b2354a1a45df0d88545ac5c63594361615999, actual Source review: PASS6125544861, all31 raw source hashes independently verified. Retained API evidence SHA2566439506e4c7962fe19fdfd3e4c18e976044c8a725578c2e5b354bb208fa568d2.
+- Original root: /opt/lims/releases/instrument-import-build-959d17e1-20261012T135400Z. Unit lims-build-instrument-import-build-959d17e1-20261012t135400z.service completed/inactive/exit0 at2026-10-12T13:55:19.757668UTC. No production database mounts or app startup.
+- Original0400 BUILT_ONLY_NOT_DEPLOYED receipt SHA2561a983172adebaba8b1a61959810d5469d9c12d706725bd33783d43cc8cceabe0.
+- Image sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2;413806636B;exact959d revision;2286 raw Git blobs verified. Source archive99c40eef08c11ad0dbc2576b7e6f36abd56f4e0bb68e36102b187cb9fb20cbe1/index35c20fd965066aabb123d059a79f240223a40a9b9602ef87216ec126fa47c76a.
+- New target pin SHA2563786a68f0df9e0762a4d7cc144251b9180297f7dbf9d5745a8591d58f9680a8f binds the actual new reviews, exact reserved first proof root /opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z, and both workload pins labAndHubBuildsOwnedByYY=true / RELEASE_DAY_DISK_ABORTS_ACCEPTED. Root is not launched; main CI SUCCESS remains a prerequisite.
+
+I directly read your native clarification: your earlier wait-before-build wording was too strict; the reviewed preparer and posted source pass allow this single image-only build while CI runs, and it remains eligible. The proof launcher requires main CI SUCCESS before any copy or rehearsal. If CI fails, the build is unusable and a new forward review is needed. No second build, restart or retry.
+
+Proposed production source63761ad129afae735e83e0c330030d868dedfef4 now binds this actual630b/source-review6125544861/all31 proof files. Its175/175Windows and175/175Linux guards passed0failure/error/skip with no production DB access. This is preparation only; I will send the separate production-source request after the actual first proof as you requested. No kit, production gate, quiesce, installer or production mutation.
+
+Read-only production verification2026-10-12T13:47:11UTC: old51f/d4eb healthy,0restarts,HTTPShealth/login200,same volumes; original480f receipt and41 frozen files unchanged; free86583988224B. Historical104tables/38receipts/seals verified, not fresh live SQL counts; retained401 evidence was not a new POST.
+
+Pushed checkpoint4e6d4499 retains raw build, source review, target pin, native clarification and guard evidence. All old proofs, receipts, backups, images and consumed kits remain retained. Failed105200/old5dd build/completedPR293 are never replayed or reused. Other application merges remain held until#200 is live and you post-check it. Human cards/drafts are untouched.
