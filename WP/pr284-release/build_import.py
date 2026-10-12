@@ -55,7 +55,10 @@ def main():
         CANDIDATE_HEAD and spec['auditedPrHead'] ==
         AUDITED_PR_HEAD and spec['baseHead'] ==
         BASE_HEAD and spec['pr'] == PR_NUMBER and
-        spec['mergeParents'] == [spec['baseHead'], spec['auditedPrHead']], 'Exact forward merge required')
+        spec['mergeBaseHead'] == MERGE_BASE_HEAD and
+        spec['mergeParents'] == [MERGE_BASE_HEAD, spec['auditedPrHead']] and
+        type(spec['auditReviewId']) is int and spec['auditReviewId'] == AUDIT_REVIEW_ID and
+        spec['originalProofRoot'] == EXPECTED_PROOF_ROOT and spec['firstProofPolicy'] == FIRST_PROOF_POLICY, 'Exact forward merge required')
     require(spec['tree'] == MERGED_TREE and
         spec['auditedTree'] == MERGED_TREE and
         spec['auditReviewId'] and spec['mainCiRunId'], 'Audited merged union evidence required')

@@ -29,7 +29,7 @@ def main():
         re.fullmatch(r'instrument-import-build-[A-Za-z0-9_-]+', root.name),
         'Unexpected fresh build root')
     require(unit == 'lims-build-' + root.name.lower() + '.service', 'Unexpected owned build unit')
-    pr = github('repos/yigini/soilfer-lims/pulls/284')
+    pr = github('repos/yigini/soilfer-lims/pulls/' + str(PR_NUMBER))
     require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD, 'Exact audited PR284 must merge first')
     head = pr['merge_commit_sha']
     require(github('repos/yigini/soilfer-lims/git/ref/heads/main')['object']['sha'] == head, 'Current main changed')
@@ -40,7 +40,7 @@ def main():
     review = github('repos/yigini/soilfer-lims/issues/comments/' + review_id)
     require_pr_review(review)
     comments = json.loads(subprocess.check_output(['gh', 'api',
-        'repos/yigini/soilfer-lims/issues/284/comments?per_page=100', '--paginate', '--slurp'], text=True, encoding='utf-8'))
+        'repos/yigini/soilfer-lims/issues/' + str(PR_NUMBER) + '/comments?per_page=100', '--paginate', '--slurp'], text=True, encoding='utf-8'))
     require(not any('audit failed' in row['body'].lower() and row['created_at'] > review['created_at']
         for page in comments for row in page), 'Later audit failure exists')
     checks = github('repos/yigini/soilfer-lims/commits/' + AUDITED_PR_HEAD + '/check-runs')['check_runs']
@@ -52,7 +52,7 @@ def main():
     subprocess.run(['git', 'fetch', 'origin', 'main'], check=True, capture_output=True)
     require(subprocess.check_output(['git', 'rev-parse', head + '^{tree}'], text=True).strip() == tree,
         'Local raw source differs from GitHub tree')
-    union = subprocess.check_output(['git', 'merge-tree', '--write-tree', BASE_HEAD, AUDITED_PR_HEAD], text=True).strip()
+    union = subprocess.check_output(['git', 'merge-tree', '--write-tree', MERGE_BASE_HEAD, AUDITED_PR_HEAD], text=True).strip()
     require(union == MERGED_TREE, 'Independent merge-tree union differs')
     tooling_files, tooling_index = git_source(tooling, lambda *args: subprocess.check_output(['git', *args]))
     require_executed_sources({name: item['sha256'] for name, item in tooling_index['files'].items()}, __file__)
@@ -97,8 +97,9 @@ def main():
     (local / 'source-index.json').write_bytes(index_bytes)
     builder = subprocess.check_output(['git', 'show', tooling + ':WP/pr284-release/build_import.py'])
     spec = {'rootName': root.name, 'head': head, 'tree': tree, 'auditedTree': AUDITED_PR_TREE,
-        'baseHead': BASE_HEAD, 'pr': PR_NUMBER, 'mergeParents': MERGE_PARENTS,
-        'auditedPrHead': AUDITED_PR_HEAD, 'auditReviewId': int(review_id), 'mainCiRunId': int(ci_id),
+        'baseHead': BASE_HEAD, 'mergeBaseHead': MERGE_BASE_HEAD, 'pr': PR_NUMBER, 'mergeParents': MERGE_PARENTS,
+        'auditedPrHead': AUDITED_PR_HEAD, 'originalProofRoot': EXPECTED_PROOF_ROOT,
+        'firstProofPolicy': FIRST_PROOF_POLICY, 'auditReviewId': int(review_id), 'mainCiRunId': int(ci_id),
         'archiveSha256': hashlib.sha256(archive.read_bytes()).hexdigest(),
         'indexSha256': hashlib.sha256(index_bytes).hexdigest(), 'builderSha256': hashlib.sha256(builder).hexdigest(),
         'toolingCommit': tooling, 'proofSourceReviewId': int(source_review_id),

@@ -18,13 +18,17 @@ class AuthorityTests(unittest.TestCase):
             contract.AUDITED_PR_TREE, contract.MERGED_TREE, contract.MERGE_PARENTS)
         for name, value in [('AUDITED_PR_HEAD', 'a' * 40), ('CANDIDATE_HEAD', 'b' * 40),
                 ('AUDITED_PR_TREE', 'c' * 40), ('MERGED_TREE', 'c' * 40),
-                ('MERGE_PARENTS', [contract.BASE_HEAD, 'a' * 40])]:
+                ('MERGE_PARENTS', [contract.MERGE_BASE_HEAD, 'a' * 40]),
+                ('PR_NUMBER', 999), ('AUDIT_REVIEW_ID', 123),
+                ('EXPECTED_PROOF_ROOT', '/opt/lims/releases/instrument-import-proof-owned')]:
             patcher = patch.object(contract, name, value)
             patcher.start()
             self.addCleanup(patcher.stop)
         self.files = {name: hashlib.sha256(raw).hexdigest() for name, raw in RAW_TOOLING.items()}
         self.pin = {'head': contract.CANDIDATE_HEAD, 'baseHead': contract.BASE_HEAD,
-            'auditedPrHead': contract.AUDITED_PR_HEAD, 'pr': 284, 'tree': contract.MERGED_TREE,
+            'mergeBaseHead': contract.MERGE_BASE_HEAD,
+            'originalProofRoot': contract.EXPECTED_PROOF_ROOT, 'firstProofPolicy': contract.FIRST_PROOF_POLICY,
+            'auditedPrHead': contract.AUDITED_PR_HEAD, 'pr': contract.PR_NUMBER, 'tree': contract.MERGED_TREE,
             'auditedTree': contract.AUDITED_PR_TREE, 'mergeParents': contract.MERGE_PARENTS,
             'auditReviewId': 123, 'mainCiRunId': 456, 'image': 'sha256:' + 'd' * 64, 'imageBytes': 400,
             'labAndHubBuildsOwnedByYY': True, 'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}
@@ -62,6 +66,34 @@ class AuthorityTests(unittest.TestCase):
                 ('labAndHubBuildsOwnedByYY', False), ('releaseWindowControl', 'OTHER')]:
             with self.subTest(key=key, value=value), self.assertRaises(RuntimeError):
                 contract.validate_candidate({**self.pin, key: value}, self.built, self.image)
+
+    def test_live_predecessor_and_application_merge_base_are_separately_bound(self):
+        self.assertNotEqual(contract.BASE_HEAD, contract.MERGE_BASE_HEAD)
+        for key, value in [('baseHead', contract.MERGE_BASE_HEAD),
+                ('mergeBaseHead', contract.BASE_HEAD), ('auditReviewId', 124),
+                ('auditReviewId', True), ('firstProofPolicy', 'ANY_PASSED_PROOF'),
+                ('originalProofRoot', '/opt/lims/releases/instrument-import-proof-another')]:
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                contract.candidate_identity({**self.pin, key: value})
+
+    def test_only_reviewed_first_root_allowed_and_failed_original_always_refuses(self):
+        contract.require_first_proof_root(contract.EXPECTED_PROOF_ROOT)
+        for root in [None, '/opt/lims/releases/instrument-import-proof-another',
+                '/opt/lims/releases/../releases/instrument-import-proof-owned',
+                '/opt/lims/releases/instrument-import-proof-owned/',
+                '/tmp/instrument-import-proof-owned', *contract.FAILED_PROOF_ROOTS]:
+            with self.subTest(root=root), self.assertRaises(RuntimeError):
+                contract.require_first_proof_root(root)
+        failed = next(iter(contract.FAILED_PROOF_ROOTS))
+        with patch.object(contract, 'EXPECTED_PROOF_ROOT', failed), self.assertRaises(RuntimeError):
+            contract.require_first_proof_root(failed)
+
+    def test_unbound_new_pr_review_and_first_root_refuse_without_any_operation(self):
+        for name, value in [('PR_NUMBER', 0), ('PR_NUMBER', 284), ('PR_NUMBER', True),
+                ('AUDIT_REVIEW_ID', 0), ('AUDIT_REVIEW_ID', 6121933894),
+                ('AUDIT_REVIEW_ID', True), ('EXPECTED_PROOF_ROOT', 'UNREVIEWED_FIRST_PROOF_REFUSE')]:
+            with self.subTest(name=name), patch.object(contract, name, value), self.assertRaises(RuntimeError):
+                contract.release_binding_tokens()
 
     def test_failed_old_or_production_mounted_build_cannot_feed_proof(self):
         for key, value in [('status', 'FAILED'), ('head', contract.BASE_HEAD), ('productionDatabaseMounts', 1)]:
@@ -107,13 +139,13 @@ class AuthorityTests(unittest.TestCase):
                 contract.source_review_pass({**positive, key: value}, '1' * 40, self.files)
 
     def test_primary_exact_pr_verdict_required(self):
-        row = {'id': 123, 'html_url': 'https://github.com/yigini/soilfer-lims/pull/284#issuecomment-123',
+        row = {'id': 123, 'html_url': 'https://github.com/yigini/soilfer-lims/pull/999#issuecomment-123',
             'body': 'Audit passed: OK to merge and deploy\n' + contract.AUDITED_PR_HEAD}
         contract.require_pr_review(row)
         for key, value in [('body', '> ' + row['body']), ('body', 'Pending\n' + row['body']),
                 ('body', row['body'] + '\nAudit failed'), ('id', True),
                 ('body', row['body'].replace(contract.AUDITED_PR_HEAD, contract.BASE_HEAD)),
-                ('html_url', row['html_url'].replace('/284#', '/293#'))]:
+                ('html_url', row['html_url'].replace('/999#', '/284#'))]:
             with self.subTest(key=key), self.assertRaises(RuntimeError): contract.require_pr_review({**row, key: value})
 
     def test_source_graph_missing_extra_wrong_shape_or_changed_historical_helper_refuses(self):

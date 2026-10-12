@@ -64,6 +64,7 @@ def main():
     require(os.geteuid() == 0 and sys.flags.optimize == 0 and
         os.environ.get('PYTHONOPTIMIZE', '') in ['', '0'], 'Root/plain Python required')
     proof, target = map(pathlib.Path, sys.argv[1:])
+    require_first_proof_root(str(proof))
     safe_root(str(proof), 'instrument-import-proof-'); safe_root(str(target), 'instrument-import-release-')
     require(not target.exists(), 'Never overwrite or refreeze a kit')
     lock = pathlib.Path('/opt/lims/apply.lock').open('a')
@@ -213,7 +214,9 @@ def main():
     require(min(s.disk_free().values()) >= FLOOR + sum(map(len, files.values())) + 268435456,
         'Packaging allocation reserve refused')
     manifest = {'status': KIT_STATUS, 'root': str(target), 'head': pin['head'], 'image': pin['image'], 'tree': pin['tree'],
-        'baseHead': BASE_HEAD, 'auditedPrTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,
+        'baseHead': BASE_HEAD, 'mergeBaseHead': MERGE_BASE_HEAD,
+        'auditReviewId': AUDIT_REVIEW_ID, 'firstProofPolicy': FIRST_PROOF_POLICY,
+        'auditedPrTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,
         'preparedUtc': s.utc(), 'packagingCommit': package['head'], 'originalProofRoot': str(proof),
         'originalProofUnit': unit, 'proofReferences': references, 'sourceReviewId': PROOF_SOURCE_REVIEW_ID,
         'proofToolingCommit': REVIEWED_PROOF_SOURCE, 'productionBaselineSourceReviewId': production_review['id'],

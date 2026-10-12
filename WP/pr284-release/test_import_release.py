@@ -55,7 +55,9 @@ class ReleaseTests(unittest.TestCase):
         for module in [proof_contract, release]:
             for key, value in [('AUDITED_PR_HEAD', 'a' * 40), ('CANDIDATE_HEAD', 'b' * 40),
                 ('AUDITED_PR_TREE', 'c' * 40), ('MERGED_TREE', 'c' * 40),
-                ('MERGE_PARENTS', [release.BASE_HEAD, 'a' * 40])]:
+                ('MERGE_PARENTS', [release.MERGE_BASE_HEAD, 'a' * 40]),
+                ('PR_NUMBER', 999), ('AUDIT_REVIEW_ID', 999900004),
+                ('EXPECTED_PROOF_ROOT', '/opt/lims/releases/instrument-import-proof-owned')]:
                 patcher = patch.object(module, key, value); patcher.start(); self.addCleanup(patcher.stop)
         self.proof_files = {name: hashlib.sha256(raw).hexdigest() for name, raw in RAW_TOOLING.items()}
         self.files = {name: hashlib.sha256(raw).hexdigest() for name, raw in RAW_PACKAGE.items()}
@@ -72,6 +74,8 @@ class ReleaseTests(unittest.TestCase):
             'root': '/opt/lims/releases/instrument-import-release-owned',
             'originalProofRoot': '/opt/lims/releases/instrument-import-proof-owned',
             'head': release.CANDIDATE_HEAD, 'baseHead': release.BASE_HEAD,
+            'mergeBaseHead': release.MERGE_BASE_HEAD, 'auditReviewId': release.AUDIT_REVIEW_ID,
+            'firstProofPolicy': release.FIRST_PROOF_POLICY,
             'tree': release.MERGED_TREE, 'auditedPrTree': release.AUDITED_PR_TREE,
             'mergeParents': release.MERGE_PARENTS, 'sourceReviewId': release.PROOF_SOURCE_REVIEW_ID,
             'proofToolingCommit': release.REVIEWED_PROOF_SOURCE,
@@ -301,7 +305,7 @@ class ReleaseTests(unittest.TestCase):
             'created_at': '2026-10-12T00:00:00Z', 'body': '\n'.join(release.review_tokens(manifest, 'a' * 64))}
         # The actual verdict must be the first line, regardless of token order.
         kit_review['body'] = release.PHRASE + '\n' + kit_review['body']
-        pr_review = {'id': 999900004, 'html_url': 'https://github.com/yigini/soilfer-lims/pull/284#issuecomment-999900004',
+        pr_review = {'id': 999900004, 'html_url': 'https://github.com/yigini/soilfer-lims/pull/999#issuecomment-999900004',
             'body': release.PHRASE + '\n' + release.AUDITED_PR_HEAD, 'created_at': '2026-10-12T00:00:00Z'}
         gate = {'status': 'FRESH_SINGLE_USE_IMPORT_GATE', 'executionRoot': manifest['root'],
             'head': manifest['head'], 'currentMainHead': manifest['head'], 'image': manifest['image'],
@@ -313,7 +317,7 @@ class ReleaseTests(unittest.TestCase):
             'readOnlyExecutionReadiness': {'ready': True, 'productionMutations': 0,
                 'freeBytes': {'/opt/lims': release.FLOOR + 100, '/var/lib/docker': release.FLOOR + 100},
                 'requiredIncludingBackupBytes': release.FLOOR + 50, 'reserveBytes': release.FLOOR, 'entryState': entry},
-            'pr': {'number': 284, 'merged': True, 'head': release.AUDITED_PR_HEAD,
+            'pr': {'number': release.PR_NUMBER, 'merged': True, 'head': release.AUDITED_PR_HEAD,
                 'mergeCommit': release.CANDIDATE_HEAD, 'tree': release.MERGED_TREE,
                 'auditedTree': release.AUDITED_PR_TREE, 'mergeParents': release.MERGE_PARENTS,
                 'laterAuditFailure': False, 'review': pr_review,
@@ -370,7 +374,10 @@ class ReleaseTests(unittest.TestCase):
             'protectedTableCount': 106, 'protectedReceiptCount': 39, 'matchesExpected': True}
         proof = {'status': 'PASSED_NEW_IMPORT_NATURAL_KOBO_PROOF', 'head': release.CANDIDATE_HEAD,
             'image': 'sha256:' + '9' * 64, 'buildReceiptSha256': '8' * 64,
-            'baseHead': release.BASE_HEAD, 'pr': 284, 'tree': release.MERGED_TREE,
+            'baseHead': release.BASE_HEAD, 'mergeBaseHead': release.MERGE_BASE_HEAD,
+            'auditReviewId': release.AUDIT_REVIEW_ID, 'root': release.EXPECTED_PROOF_ROOT,
+            'originalProofRoot': release.EXPECTED_PROOF_ROOT, 'firstProofPolicy': release.FIRST_PROOF_POLICY,
+            'pr': release.PR_NUMBER, 'tree': release.MERGED_TREE,
             'auditedTree': release.AUDITED_PR_TREE, 'mergeParents': release.MERGE_PARENTS,
             'naturalIntakePolicy': release.NATURAL_INTAKE_POLICY, 'toolingCommit': release.REVIEWED_PROOF_SOURCE,
             'proofSourceReviewId': release.PROOF_SOURCE_REVIEW_ID,
@@ -401,8 +408,11 @@ class ReleaseTests(unittest.TestCase):
             'apiChecks': {'passed': 31, 'total': 31, 'failed': 0}, 'probes': [{'exitCode': 0} for _ in range(6)],
             'readOnlyProbeChanges': 0, 'firstScheduledSync': first, 'secondScheduledSync': second,
             'observedThroughUtc': '2026-10-12T00:18:00Z', 'copySyncIntervalMins': 15, 'healthySoakSeconds': 1080}
-        pin = {'head': release.CANDIDATE_HEAD, 'baseHead': release.BASE_HEAD, 'auditedPrHead': release.AUDITED_PR_HEAD,
-            'pr': 284, 'tree': release.MERGED_TREE, 'auditedTree': release.AUDITED_PR_TREE,
+        pin = {'head': release.CANDIDATE_HEAD, 'baseHead': release.BASE_HEAD,
+            'mergeBaseHead': release.MERGE_BASE_HEAD, 'auditReviewId': release.AUDIT_REVIEW_ID,
+            'firstProofPolicy': release.FIRST_PROOF_POLICY, 'auditedPrHead': release.AUDITED_PR_HEAD,
+            'pr': release.PR_NUMBER, 'originalProofRoot': release.EXPECTED_PROOF_ROOT,
+            'tree': release.MERGED_TREE, 'auditedTree': release.AUDITED_PR_TREE,
             'mergeParents': release.MERGE_PARENTS, 'image': proof['image'], 'buildReceiptSha256': proof['buildReceiptSha256'],
             'proofSourceReviewId': release.PROOF_SOURCE_REVIEW_ID}
         return proof, pin
@@ -417,4 +427,21 @@ class ReleaseTests(unittest.TestCase):
                 release.validate_proof(dict(proof, **{key: value}), pin)
         altered = copy.deepcopy(proof); altered['secondScheduledSync']['epochSeconds'] = 61
         with self.assertRaises(RuntimeError): release.validate_proof(altered, pin)
+
+    def test_other_stopped_pass_cannot_substitute_for_original_first_root(self):
+        proof, pin = self.complete_proof()
+        for key, value in [('root', '/opt/lims/releases/instrument-import-proof-rerun'),
+                ('originalProofRoot', '/opt/lims/releases/instrument-import-proof-rerun'),
+                ('firstProofPolicy', 'ANY_STOPPED_PASS'), ('auditReviewId', 123),
+                ('mergeBaseHead', release.BASE_HEAD)]:
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                release.validate_proof({**proof, key: value}, pin)
+
+    def test_manifest_binds_first_root_exact_audit_and_application_base(self):
+        manifest = self.manifest()
+        for key, value in [('originalProofRoot', '/opt/lims/releases/instrument-import-proof-rerun'),
+                ('firstProofPolicy', 'ANY_STOPPED_PASS'), ('auditReviewId', 123),
+                ('auditReviewId', True), ('mergeBaseHead', release.BASE_HEAD)]:
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                release.measurement_manifest({**manifest, key: value})
 

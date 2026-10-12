@@ -17,33 +17,57 @@ from runtime_proof_policies import (LIMIT, FLOOR, SOAK_SECONDS, TARGET_CONFIG, T
     require_final_observation)
 
 BASE_HEAD = '51f6798806f630773786a08432290c1b21a841da'
+MERGE_BASE_HEAD = '5dd5488d138514351fffd54d0b0232ae19fcb64d'
 LIVE_IMAGE = 'sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f'
 HISTORICAL_ROOT_PATH = '/opt/lims/releases/runtime-kobo-release-51f67988-20261012T044924Z'
 HISTORICAL_RECEIPT_SHA = '480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515'
-PR_NUMBER = 284
-AUDITED_PR_HEAD = 'c26591698c1e974a3bf771e5c333578755aef315'
-CANDIDATE_HEAD = '5dd5488d138514351fffd54d0b0232ae19fcb64d'
-AUDITED_PR_TREE = '9b3b77496c3aa2cdad7c7594a0b258ec4b491753'
-MERGED_TREE = '9b3b77496c3aa2cdad7c7594a0b258ec4b491753'
-MERGE_PARENTS = [BASE_HEAD, AUDITED_PR_HEAD]
+PR_NUMBER = 0  # YY's no-new-PR exception and actual application audit are pending.
+AUDIT_REVIEW_ID = 0
+AUDITED_PR_HEAD = 'd1509febd010a12f14adfef147aa7f88c369119a'
+CANDIDATE_HEAD = 'UNMERGED_REFUSE'
+AUDITED_PR_TREE = 'f05031f800af670ddcb2215f06fa34f684c695bd'
+MERGED_TREE = 'UNMERGED_REFUSE'
+MERGE_PARENTS = [MERGE_BASE_HEAD, AUDITED_PR_HEAD]
+EXPECTED_PROOF_ROOT = 'UNREVIEWED_FIRST_PROOF_REFUSE'
+FAILED_PROOF_ROOTS = {'/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z'}
+FIRST_PROOF_POLICY = 'EXACT_REVIEWED_FIRST_PROOF_ROOT_NO_REPLAY'
 NATIVE_DELTA_POLICY = 'ONLY_200_EMPTY_ADDITIVE_IMPORT_10438_TO_10639'
 RECOVERY_POLICY = 'SEPARATELY_AUDITED_FORWARD_FIX_ONLY'
 RETAINED_DATABASE_ALLOCATION_COUNT = 13
 HISTORICAL_SOURCE_REVIEWS = {6112725472, 6114217683, 6114289486, 6114935703,
-    6115039634, 6115225815, 6115334499, 6117398054, 6117551195}
+    6115039634, 6115225815, 6115334499, 6117398054, 6117551195,
+    6122670828, 6122904371}
 
 
 def bound_candidate():
     require(all(re.fullmatch('[a-f0-9]{40}', value) for value in
-        [AUDITED_PR_HEAD, CANDIDATE_HEAD, AUDITED_PR_TREE, MERGED_TREE]) and
-        AUDITED_PR_TREE == MERGED_TREE and MERGE_PARENTS == [BASE_HEAD, AUDITED_PR_HEAD],
+        [BASE_HEAD, MERGE_BASE_HEAD, AUDITED_PR_HEAD, CANDIDATE_HEAD, AUDITED_PR_TREE, MERGED_TREE]) and
+        AUDITED_PR_TREE == MERGED_TREE and MERGE_PARENTS == [MERGE_BASE_HEAD, AUDITED_PR_HEAD] and
+        type(PR_NUMBER) is int and PR_NUMBER > 0 and PR_NUMBER != 284 and
+        type(AUDIT_REVIEW_ID) is int and AUDIT_REVIEW_ID > 0 and AUDIT_REVIEW_ID != 6121933894,
         'Unreviewed/unmerged #200 target deliberately refuses execution')
+
+
+def require_first_proof_root(root):
+    """Bind the single root before any copy/CLI and again when freezing a kit."""
+    import pathlib
+    bound_candidate()
+    require(isinstance(root, str), 'First proof root must be an exact absolute path')
+    path = pathlib.PurePosixPath(root)
+    require(str(path) == root and
+        path.parent == pathlib.PurePosixPath('/opt/lims/releases') and
+        re.fullmatch(r'instrument-import-proof-[A-Za-z0-9_-]+', path.name) and
+        root == EXPECTED_PROOF_ROOT and root not in FAILED_PROOF_ROOTS,
+        'Only the exact NEW source-reviewed first proof root is permitted')
 
 
 def release_binding_tokens():
     bound_candidate()
-    return [BASE_HEAD, AUDITED_PR_HEAD, CANDIDATE_HEAD, AUDITED_PR_TREE, MERGED_TREE,
-        LIVE_IMAGE, HISTORICAL_RECEIPT_SHA, 'releasePr=284',
+    require_first_proof_root(EXPECTED_PROOF_ROOT)
+    return [BASE_HEAD, MERGE_BASE_HEAD, AUDITED_PR_HEAD, CANDIDATE_HEAD, AUDITED_PR_TREE, MERGED_TREE,
+        LIVE_IMAGE, HISTORICAL_RECEIPT_SHA, 'releasePr=' + str(PR_NUMBER),
+        'auditReviewId=' + str(AUDIT_REVIEW_ID), 'mergeBaseHead=' + MERGE_BASE_HEAD,
+        'originalProofRoot=' + EXPECTED_PROOF_ROOT, 'firstProofPolicy=' + FIRST_PROOF_POLICY,
         'mergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE',
         'naturalIntakePolicy=' + NATURAL_INTAKE_POLICY, 'importDeltaPolicy=' + NATIVE_DELTA_POLICY,
         'originalState=104tables/38receipts', 'installedState=106tables/39receipts',
@@ -57,18 +81,23 @@ def require_pr_review(review):
     bound_candidate()
     identifier = review.get('id')
     first = next((line.strip().strip('*_# ') for line in review.get('body', '').splitlines() if line.strip()), '')
-    require(type(identifier) is int and identifier > 0 and
-        review.get('html_url') == 'https://github.com/yigini/soilfer-lims/pull/284#issuecomment-' + str(identifier) and
+    require(type(identifier) is int and identifier == AUDIT_REVIEW_ID and
+        review.get('html_url') == 'https://github.com/yigini/soilfer-lims/pull/' + str(PR_NUMBER) + '#issuecomment-' + str(identifier) and
         first == 'Audit passed: OK to merge and deploy' and AUDITED_PR_HEAD in review['body'] and
-        'audit failed' not in review['body'].lower(), 'NEW primary exact-head PR284 audit required')
+        'audit failed' not in review['body'].lower(), 'NEW primary exact-head correction audit required')
 
 
 def candidate_identity(pin):
     bound_candidate()
     require(pin.get('head') == CANDIDATE_HEAD and pin.get('baseHead') == BASE_HEAD and
+        pin.get('mergeBaseHead') == MERGE_BASE_HEAD and
+        type(pin.get('auditReviewId')) is int and pin['auditReviewId'] == AUDIT_REVIEW_ID and
         pin.get('auditedPrHead') == AUDITED_PR_HEAD and type(pin.get('pr')) is int and pin['pr'] == PR_NUMBER and
         pin.get('tree') == MERGED_TREE and pin.get('auditedTree') == AUDITED_PR_TREE and
-        pin.get('mergeParents') == MERGE_PARENTS, 'Exact newly reviewed #200 candidate required')
+        pin.get('mergeParents') == MERGE_PARENTS and
+        pin.get('originalProofRoot') == EXPECTED_PROOF_ROOT and
+        pin.get('firstProofPolicy') == FIRST_PROOF_POLICY, 'Exact newly reviewed #200 candidate required')
+    require_first_proof_root(pin['originalProofRoot'])
 
 
 def validate_merge_identity(merged, audited):

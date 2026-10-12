@@ -17,8 +17,8 @@ from import_startup_checks import READY_EVENTS, import_zero
 
 WORKLOAD_PINS = {'labAndHubBuildsOwnedByYY': True,
     'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}
-REVIEWED_PROOF_SOURCE = 'f5e59428c1bbf19247db2555f5158bc3a2ac5fad'
-PROOF_SOURCE_REVIEW_ID = 6122670828
+REVIEWED_PROOF_SOURCE = 'UNREVIEWED_NATIVE_FORWARD_REFUSE'
+PROOF_SOURCE_REVIEW_ID = 0
 REVIEWED_PROOF_FILES = {
     'build_import.py': '70bf42a356dc7716c76b5f935585defd50f23d8bd0e7e670fab32d51dae1000c',
     'capture_kobo_fetch.py': '1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86',
@@ -238,6 +238,12 @@ def startup_evidence(readiness, checks, jobs):
 def validate_proof(proof, pin):
     require_bound_proof_source()
     candidate_identity(pin)
+    require_first_proof_root(proof.get('root'))
+    require(proof.get('originalProofRoot') == EXPECTED_PROOF_ROOT and
+        proof.get('firstProofPolicy') == FIRST_PROOF_POLICY and
+        proof.get('mergeBaseHead') == MERGE_BASE_HEAD and
+        type(proof.get('auditReviewId')) is int and proof['auditReviewId'] == AUDIT_REVIEW_ID,
+        'Original first proof/application review binding differs')
     require(all(type(proof[key]) is int for key in ['productionMutations', 'separateInstallerCommands',
         'effectiveUid', 'pythonOptimize', 'baselineEnumerationErrorCount', 'retainedDatabaseAllocationCount',
         'originalProtectedTableCount', 'originalProtectedReceiptCount', 'protectedTableCount',
@@ -350,7 +356,9 @@ def measurement_manifest(manifest):
         {name: manifest['files'][name] for name in SOURCE_FILES} == REVIEWED_PROOF_FILES,
         'Exact complete frozen file set differs')
     require(manifest['status'] == KIT_STATUS and manifest['head'] == CANDIDATE_HEAD and
-        manifest['baseHead'] == BASE_HEAD and manifest['tree'] == MERGED_TREE and
+        manifest['baseHead'] == BASE_HEAD and manifest.get('mergeBaseHead') == MERGE_BASE_HEAD and
+        type(manifest.get('auditReviewId')) is int and manifest['auditReviewId'] == AUDIT_REVIEW_ID and
+        manifest.get('firstProofPolicy') == FIRST_PROOF_POLICY and manifest['tree'] == MERGED_TREE and
         manifest['auditedPrTree'] == AUDITED_PR_TREE and manifest['mergeParents'] == MERGE_PARENTS and
         manifest['sourceReviewId'] == PROOF_SOURCE_REVIEW_ID and
         manifest['proofToolingCommit'] == REVIEWED_PROOF_SOURCE and manifest['entryBinding'] == entry_binding() and
@@ -365,7 +373,7 @@ def measurement_manifest(manifest):
         manifest['files']['apache-held.conf'] == HELD_INGRESS_SHA, 'Frozen execution policy differs')
     pairing_contract(manifest)
     safe_root(manifest['root'], 'instrument-import-release-')
-    safe_root(manifest['originalProofRoot'], 'instrument-import-proof-')
+    require_first_proof_root(manifest['originalProofRoot'])
 
 
 def formal_pr_review(review):
@@ -412,7 +420,7 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
         'Frozen production source approval differs')
     production_source_review(gate['productionBaselineSourceReview'], manifest['packagingCommit'], manifest['files'], now)
     pr = gate['pr']
-    require(pr['number'] == 284 and pr['merged'] is True and pr['head'] == AUDITED_PR_HEAD and
+    require(type(pr['number']) is int and pr['number'] == PR_NUMBER and pr['merged'] is True and pr['head'] == AUDITED_PR_HEAD and
         pr['mergeCommit'] == CANDIDATE_HEAD and pr['tree'] == MERGED_TREE and pr['auditedTree'] == AUDITED_PR_TREE and
         pr['mergeParents'] == MERGE_PARENTS and pr['laterAuditFailure'] is False,
         'Actual merged PR284 differs')

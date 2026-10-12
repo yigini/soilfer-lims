@@ -22,13 +22,14 @@ def github(endpoint):
 def main():
     tooling, pin_file, root, unit = sys.argv[1:]
     require(len(tooling) == 40 and all(character in '0123456789abcdef' for character in tooling), 'Exact tooling commit required')
+    require_first_proof_root(root)
     remote = pathlib.PurePosixPath(root)
     require(remote.parent == pathlib.PurePosixPath('/opt/lims/releases') and
         remote.name.startswith('instrument-import-proof-'), 'Unexpected new proof root')
     require(unit == 'lims-owned-' + remote.name.lower() + '.service', 'Unexpected owned unit')
     pin_bytes = pathlib.Path(pin_file).read_bytes()
     pin = json.loads(pin_bytes)
-    pr = github('repos/yigini/soilfer-lims/pulls/284')
+    pr = github('repos/yigini/soilfer-lims/pulls/' + str(PR_NUMBER))
     require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD and pr['merge_commit_sha'] == pin['head'],
         'PR284 exact audited head must be merged first')
     main_ref = github('repos/yigini/soilfer-lims/git/ref/heads/main')
@@ -40,7 +41,7 @@ def main():
     review = github('repos/yigini/soilfer-lims/issues/comments/' + str(pin['auditReviewId']))
     require_pr_review(review)
     comments = json.loads(subprocess.check_output(['gh', 'api',
-        'repos/yigini/soilfer-lims/issues/284/comments?per_page=100', '--paginate', '--slurp'],
+        'repos/yigini/soilfer-lims/issues/' + str(PR_NUMBER) + '/comments?per_page=100', '--paginate', '--slurp'],
         text=True, encoding='utf-8'))
     require(not any('audit failed' in comment['body'].lower() and
         comment['created_at'] > review['created_at'] for page in comments for comment in page),
@@ -53,7 +54,9 @@ def main():
         ci['status'] == 'completed' and ci['conclusion'] == 'success', 'Exact merged-main CI is not green')
     # This is rehearsal evidence, not a production execution gate.
     authority = {'observedUtc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        'head': pin['head'], 'baseHead': BASE_HEAD, 'auditedPrHead': AUDITED_PR_HEAD,
+        'head': pin['head'], 'baseHead': BASE_HEAD, 'mergeBaseHead': MERGE_BASE_HEAD,
+        'originalProofRoot': EXPECTED_PROOF_ROOT, 'firstProofPolicy': FIRST_PROOF_POLICY,
+        'auditedPrHead': AUDITED_PR_HEAD,
         'tree': MERGED_TREE, 'auditedTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS, 'review': review,
         'mainCi': {key: ci[key] for key in ['id', 'head_sha', 'name', 'status', 'conclusion', 'updated_at']},
         'checks': [{key: value[key] for key in ['name', 'status', 'conclusion', 'head_sha']} for value in checks]}

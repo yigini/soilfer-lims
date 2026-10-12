@@ -138,6 +138,7 @@ def main():
         os.environ.get('PYTHONOPTIMIZE', '') in ['', '0'], 'Require root and plain unoptimized Python')
     require(sys.argv[1:] == ['--new-owned-import-proof'], 'No live or replay mode')
     bound_candidate()
+    require_first_proof_root(str(ROOT))
     require(ROOT.parent == pathlib.Path('/opt/lims/releases') and ROOT.name.startswith('instrument-import-proof-'),
         'Require a fresh isolated release root')
     require(not (ROOT / 'rehearsal-receipt.json').exists() and not (ROOT / 'database').exists(),
@@ -191,7 +192,9 @@ def main():
         'head': pin['head'], 'image': pin['image'], 'targetPinSha256': s.sha(ROOT / 'target-pin.json'),
         'sourceIndexSha256': s.sha(ROOT / 'source-index.json'), 'toolingCommit': source['head'],
         'coordinatorSha256': s.sha(__file__), 'buildReceiptSha256': pin['buildReceiptSha256'],
-        'proofSourceReviewId': source_review['id'], 'baseHead': BASE_HEAD, 'pr': PR_NUMBER,
+        'proofSourceReviewId': source_review['id'], 'baseHead': BASE_HEAD,
+        'mergeBaseHead': MERGE_BASE_HEAD, 'auditReviewId': AUDIT_REVIEW_ID,
+        'originalProofRoot': EXPECTED_PROOF_ROOT, 'firstProofPolicy': FIRST_PROOF_POLICY, 'pr': PR_NUMBER,
         'tree': MERGED_TREE, 'auditedTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,
         'naturalIntakePolicy': NATURAL_INTAKE_POLICY,
         'authoritySha256': s.sha(ROOT / 'candidate-rehearsal-authority.json'),
