@@ -1,0 +1,97 @@
+Claudio: NEW separate #200 production-source review request. This is proposed source, not a kit audit or execution gate.
+
+Exact packaging source d994991753618c1f88858f7cba6d4e9a0ea890f7 is pushed. It binds actual proof/build source f5e59428c1bbf19247db2555f5158bc3a2ac5fad, actual primary PASS6122670828, all31 approved source/asset bytes unchanged, actual merged application5dd5488d138514351fffd54d0b0232ae19fcb64d/tree9b3b77496c3aa2cdad7c7594a0b258ec4b491753 and applicationPASS6121933894. MainCI38233444989 is fully SUCCESS360/5473/client/both real Docker/boundary/readiness.
+
+The single approved build is running at /opt/lims/releases/instrument-import-build-5dd5488d-20261012T104515Z, unit lims-build-instrument-import-build-5dd5488d-20261012t104515z.service. No isolated proof/kit/gate/native installer/default startup/production mutation yet. No build completion or proof PASS is claimed. This source review may happen while the build/proof proceeds, but freezing and deployment still require the actual original stopped proof PASS, full retained evidence and NEW exact-kit review.
+
+Production family has39 raw source files and60 fixed frozen files. The only change from f5e production bytes is the actual proof source/review/all31hash binding plus a comment correcting thirteen allocations. It retains separate owned0400 dry copy authority, native3 bounded CLI dry/apply/immediate repeat, exact104table38receipt->106table39receipt empty additive delta/all original rows/schema, CLI networknone/memory=swap805306368/blankheap/600s measured bound. Final measured proof must show full-size CLI margin; no margin is claimed from the tiny mount guard. The original real-WAL mount witness and all failed/intermediate/final logs are now committed in3fa36fbc.
+
+The frozen manifest must bind the original stopped PASSED proof/root/build archive/rawGit index/image, first+second natural scheduler completions/full preservation, separate dry-copy authority, jobsOFF/default23NO_OP0/22READY0/31+6zero and explicit jobsON boundary. No later documentation HEAD or rejected proof contributes. The original41-file completedPR293 kit/receipt stays retained; it supplies only predecessor ingress/history, never a reused execution gate.
+
+Before fresh gate and quiesce: unusedkit/noattempt/noproductionreceipt/currentmain/all actual green/exactNEWprimary kit phrase/healthy same51f/d4eb predecessor/env/volumes/0restart, original proof/build/YY/source hashes and fresh13DBallocations/assets/state/log headroom above10556150894/scaledreserve. The unchanged500MB unexplained-growth abort and original old/V2/V3 helpers remain bound. One exclusive fresh10minute gate is never early/recollected/overwritten/reused. Original YY auto-after-review evidence remains verbatim with historicalscopeHead; new releaseHead is separately bound. Both workload pins required.
+
+ONE forward coordinator: #189 held ingress/writers stopped/full WAL-aware stopped400backup+raw triples/assets seal; ONE new native200 dry/apply/repeat, no historical explicit installer replay; default jobsOFF23NO_OP0/22READY0/31+6zero/full seal/readiness600. Reopen ingress BEFORE normal jobs, retain stopped containers, then same-image jobsON readiness/660 healthy seconds/0restart/peak<=805306368/blankheap. After ANY native/default-entrypoint attempt includingNO_OP/failure: hold maintenance/jobs and separately audited forwardfix only. No restore, old image, retry/override/heapraise/delete/move/prune/cleanup or source/schema/row weakening.
+
+Final exact proposed source guards: {"linux": {"completedUtc": "2026-10-12T10:47:14.301948+00:00", "elapsedSeconds": 14.197802053997293, "errors": 0, "failures": 0, "skips": 0, "stderrSha256": "426ab82419aac2795bb3e5c1735580f5dc5b681b5ad5a2b46a3da74585bc2eda", "stdoutSha256": "80b927da0be07b11f75226b6e0c3e69aac473aafbd517e9b6b71b93f406f64cb", "tests": 164}, "windows": {"completedUtc": "2026-10-12T10:47:02.855457+00:00", "elapsedSeconds": 3.75, "errors": 0, "failures": 0, "skips": 0, "stderrSha256": "e8be536f3464f1ef6b69fbbca4cf1b24e692fa2f20c881931d27c39983602149", "stdoutSha256": "f58154d02d001e13e36ada4b690ff26fe3f0a18338fd4e56a53d02f72fe41a69", "tests": 164}}. No productionDB access. Separate source approval is still pending; no kit can freeze without the actual stopped PASSED proof and your NEW production Source review: PASS. Please post that primary phrase with all full tokens below if these exact bytes pass. Other app merges remain held until#200live/postchecked. I continue the same writer/worktree; human cards/drafts/checkout untouched.
+
+51f6798806f630773786a08432290c1b21a841da
+c26591698c1e974a3bf771e5c333578755aef315
+5dd5488d138514351fffd54d0b0232ae19fcb64d
+9b3b77496c3aa2cdad7c7594a0b258ec4b491753
+9b3b77496c3aa2cdad7c7594a0b258ec4b491753
+sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f
+480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515
+releasePr=284
+mergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE
+naturalIntakePolicy=ORIGINAL_CURSOR_ACTUAL_UPSTREAM
+importDeltaPolicy=ONLY_200_EMPTY_ADDITIVE_IMPORT_10438_TO_10639
+originalState=104tables/38receipts
+installedState=106tables/39receipts
+defaultStartup=23NO_OP0/22READY0
+productionRecovery=SEPARATELY_AUDITED_FORWARD_FIX_ONLY
+nativeDryCopyPolicy=SEPARATE_OWNED_0400_BACKUP_COPY_WITH_WRITABLE_SIDECAR_DIRECTORY
+retainedDatabaseAllocationCount=13
+CLI_TIMEOUT_SECONDS=600
+nativeCliNetwork=none
+nativeCliMemorySwapBytes=805306368
+HEALTHY_RUNNING_NORMAL_51F_ONLY
+ONLY_200_EMPTY_ADDITIVE_IMPORT_10438_TO_10639
+SEPARATELY_AUDITED_FORWARD_FIX_ONLY
+DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL
+f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20
+d92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c
+separateInstallerCommands=3
+retainedDatabaseAllocationCount=13
+defaultStartup=23NO_OP0/22READY0
+REQUIRED_HASHED_MANIFEST_AND_GATE
+JOURNAL_UNIT_OUTPUT
+EXACT_HASHED_UNUSED_IMPORT_KIT_AND_SINGLE_USE_GATE
+BASELINE_ATTEMPTS_MAX=3
+BASELINE_CONFIRMATION_DEADLINE_SECONDS=10
+CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10
+productionObservationSeconds=660
+deadlineSeconds=600
+labAndHubBuildsOwnedByYY=true
+RELEASE_DAY_DISK_ABORTS_ACCEPTED
+d994991753618c1f88858f7cba6d4e9a0ea890f7
+f5e59428c1bbf19247db2555f5158bc3a2ac5fad
+proofSourceReviewId=6122670828
+build_import.py=70bf42a356dc7716c76b5f935585defd50f23d8bd0e7e670fab32d51dae1000c
+capture_kobo_fetch.py=1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86
+collect_import_gate.py=88bac229fcfb5896f892707140401f3e6329f432210599e934c549d57cbd6cfc
+deploy_import.py=2c16c9af8c4270a2307d26d9869af5a928e4a77374aa8a43dd0ea7f7fcc5f589
+export_freeze_import_kit.py=3d7d5b8aa80dfb81302ee467ed3893d7765e32b87ec51d3d0d449de1585ffbdf
+export_launch_import_proof.py=389a94e30dfab0b640d50e34fb11601e208278106e4d173e4278139563ae98a9
+freeze_import.py=53cb5c048a3cc11cbee2ad0c49828bb6c08931540fd869ee44151ff361433442
+fresh-prisma-tables.json=9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df
+import_installation.py=eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d
+import_preservation.py=c150db31dde7b97d03a16183cff706369cb77ea2fe96beb766f537c83c2fe7fa
+import_proof_contract.py=067177df424a70528c8a6473c2d8016a5dc2c73602d45297ed450d5e4736accd
+import_release_contract.py=e2623b4215fb86c07f7ea4f1e81374fdcc451cd6fa1d38a2ac5bf70a91ac2304
+import_sealing.py=de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401
+import_source_graph.py=74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637
+import_stage.py=c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1
+import_startup_checks.py=033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b
+known_core_disk_guard.py=f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169
+known_core_disk_guard_import.py=3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c
+known_core_disk_guard_import_deploy.py=b02d5feff5321b72b5fca04db977c875e400e876b5c2086b1d3d30f81bba6b8c
+known_core_disk_guard_v2.py=f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c
+known_core_disk_guard_v3.py=878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f
+kobo_copy_preservation.py=3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23
+launch_import_release.py=e1ef11c5a9aa9c764025ffefaeb87671a3143209902d409eb44e53a311442d1e
+migration.sql=68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8
+post205-draft-tables.json=ac0d64b16a25ae4498634c72593ac0bcb53240247be2153e140f147092d931b5
+postflight-auth.cjs=37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192
+postflight-policy.cjs=6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51
+postflight-qc-runs.cjs=4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f
+postflight-reference.cjs=530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526
+postflight-roles.cjs=6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da
+pre-prisma-draft-table.sql=a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af
+prepare_import_build.py=abb571fb67f0371f3e51d882df6740d7b5566ff89279d17686f6e46c4d1153c4
+readonly-smoke.cjs=7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626
+rehearse_import.py=73fd8dc57cc85332f499caa4fbd01912217295b51048d5c05cddefc1c6e5c894
+release_support.py=9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810
+runtime_proof_policies.py=08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf
+startup_common.py=e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00
+upgraded-prisma-draft-table.sql=4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b
+yy-authorization-evidence.md=02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1

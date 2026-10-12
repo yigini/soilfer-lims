@@ -43,7 +43,11 @@ containers=[]
 if owned:
  for c in json.loads(subprocess.check_output(['docker','inspect',*owned],text=True,timeout=15)):
   containers.append({'name':c['Name'],'image':c['Image'],'running':c['State']['Running'],'status':c['State']['Status'],'health':c['State'].get('Health',{}).get('Status'),'exitCode':c['State']['ExitCode'],'oomKilled':c['State']['OOMKilled'],'restartCount':c['RestartCount'],'memoryLimitBytes':c['HostConfig']['Memory']})
-print(json.dumps({'status':'READ_ONLY_OWNED_RUN_OBSERVATION','observedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'root':str(r),'unit':p['unit'],'unitState':state,'files':files,'tails':tails,'containers':containers,'freeBytes':{v:shutil.disk_usage(v).free for v in ['/opt/lims','/var/lib/docker']},'productionMutations':0}))
+progress={}
+for f in sorted(r.iterdir()):
+ if f.is_file() and not f.is_symlink() and (f.name.startswith(('import-','candidate-','upstream-','first-sync-','second-sync-','full-copy-')) or f.name=='fresh-protected-state.json'):
+  progress[f.name]={'bytes':f.stat().st_size,'mode':oct(f.stat().st_mode&0o777)}
+print(json.dumps({'status':'READ_ONLY_OWNED_RUN_OBSERVATION','observedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'root':str(r),'unit':p['unit'],'unitState':state,'files':files,'tails':tails,'containers':containers,'progressFiles':progress,'freeBytes':{v:shutil.disk_usage(v).free for v in ['/opt/lims','/var/lib/docker']},'productionMutations':0}))
 '''.replace('PAYLOAD', repr(payload))
     result = subprocess.run(['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15',
         'root@46.19.33.37', 'python3', '-B', '-'], input=code, text=True,
@@ -55,7 +59,7 @@ print(json.dumps({'status':'READ_ONLY_OWNED_RUN_OBSERVATION','observedUtc':datet
     print(json.dumps({key: value[key] for key in ['observedUtc', 'root', 'unit', 'unitState', 'containers', 'freeBytes']}))
     print(json.dumps({'receipts': {name: {'sha256': row['sha256'], 'mode': row['mode'],
         'status': row['receipt']['status']} for name, row in value['files'].items() if 'receipt' in row},
-        'tails': value['tails']}))
+        'tails': value['tails'], 'progressFiles': value.get('progressFiles', {})}))
 
 
 if __name__ == '__main__':

@@ -1,0 +1,551 @@
+{
+  "observedUtc": "2026-10-12T10:51:37.684187+00:00",
+  "unitState": {
+    "Result": "success",
+    "ExecMainStatus": "0",
+    "ActiveState": "inactive",
+    "SubState": "dead"
+  },
+  "root": "/opt/lims/releases/instrument-import-build-5dd5488d-20261012T104515Z",
+  "unit": "lims-build-instrument-import-build-5dd5488d-20261012t104515z.service",
+  "built": {
+    "status": "BUILT_ONLY_NOT_DEPLOYED",
+    "head": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+    "image": "sha256:57575a88c02aa6b9c0e801c2c6a6e7da0de298c41d093aeba5cc75480c3aa930",
+    "tag": "soilfer-lims:audit-instrument-import-build-5dd5488d-20261012T104515Z",
+    "sourceArchiveSha256": "7ff63524d4983f833705eded3789f15c0eb19dc1739ce7b564737860b7de68b7",
+    "sourceIndexSha256": "4dd19e51f83180c11896b85e7917769f21b35a15315c364191ae051a0e558041",
+    "verifiedGitBlobCount": 2286,
+    "verifiedUtc": "2026-10-12T10:49:28.538863+00:00",
+    "imageBytes": 413730674,
+    "reserveBytes": 10556150894,
+    "freeBytesBefore": {
+      "/opt/lims": 90680406016,
+      "/var/lib/docker": 90680406016
+    },
+    "freeBytesAfter": {
+      "/opt/lims": 88306933760,
+      "/var/lib/docker": 88306933760
+    },
+    "buildLogSha256": "2de0fed9f3ca1c4df05df18036e8b23f678f943f159bccd2b30a84a2602664d7",
+    "productionDatabaseMounts": 0,
+    "dockerIgnoredArchiveMembersNotExtracted": [
+      "server/node_modules"
+    ],
+    "auditReviewId": 6121933894,
+    "mainCiRunId": 38233444989,
+    "tree": "9b3b77496c3aa2cdad7c7594a0b258ec4b491753",
+    "toolingCommit": "f5e59428c1bbf19247db2555f5158bc3a2ac5fad",
+    "proofSourceReviewId": 6122670828,
+    "toolingSourceIndexSha256": "474c8e2054de6b1ecc8505318abcd7b8ec64de73d97eb2ec077c003d0f506a18",
+    "proofSourceReviewRawSha256": "1e8677500abf87cdeeb3ea6e0b3dde1009a84c6d067c5d4ce8b1a2be027b0d80",
+    "builderSha256": "70bf42a356dc7716c76b5f935585defd50f23d8bd0e7e670fab32d51dae1000c"
+  },
+  "source": {
+    "head": "f5e59428c1bbf19247db2555f5158bc3a2ac5fad",
+    "files": {
+      "rehearse_import.py": {
+        "path": "WP/pr284-release/rehearse_import.py",
+        "blob": "b78be0ea7846b885153d9f6b85516abbe8ae6883",
+        "bytes": 25249,
+        "sha256": "73fd8dc57cc85332f499caa4fbd01912217295b51048d5c05cddefc1c6e5c894"
+      },
+      "import_proof_contract.py": {
+        "path": "WP/pr284-release/import_proof_contract.py",
+        "blob": "f9430333d802ce9e65191467d0198f3099b06368",
+        "bytes": 7038,
+        "sha256": "067177df424a70528c8a6473c2d8016a5dc2c73602d45297ed450d5e4736accd"
+      },
+      "import_source_graph.py": {
+        "path": "WP/pr284-release/import_source_graph.py",
+        "blob": "d1892e2cbef3a0d9567adf18a003ed701ec131ec",
+        "bytes": 5771,
+        "sha256": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637"
+      },
+      "import_preservation.py": {
+        "path": "WP/pr284-release/import_preservation.py",
+        "blob": "75298e9fb4b0409093bfb9c1878bffa705765f3a",
+        "bytes": 9261,
+        "sha256": "c150db31dde7b97d03a16183cff706369cb77ea2fe96beb766f537c83c2fe7fa"
+      },
+      "import_startup_checks.py": {
+        "path": "WP/pr284-release/import_startup_checks.py",
+        "blob": "bf6d9cb465b5a3d930e484479d790203246382f3",
+        "bytes": 5448,
+        "sha256": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b"
+      },
+      "import_installation.py": {
+        "path": "WP/pr284-release/import_installation.py",
+        "blob": "4fb61f95bf073878825083044e890b9a1864fd69",
+        "bytes": 7579,
+        "sha256": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d"
+      },
+      "import_stage.py": {
+        "path": "WP/pr284-release/import_stage.py",
+        "blob": "fa0633fc0f2b55abe9381e1dbda22ee598d0366c",
+        "bytes": 8063,
+        "sha256": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1"
+      },
+      "import_sealing.py": {
+        "path": "WP/pr284-release/import_sealing.py",
+        "blob": "16cec07e45bfd23040c5dc27ec93eb828aa41ad8",
+        "bytes": 5918,
+        "sha256": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401"
+      },
+      "known_core_disk_guard_import.py": {
+        "path": "WP/pr284-release/known_core_disk_guard_import.py",
+        "blob": "eb05121b2909f624527295092c28f6fddb241817",
+        "bytes": 3839,
+        "sha256": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c"
+      },
+      "build_import.py": {
+        "path": "WP/pr284-release/build_import.py",
+        "blob": "db4fbb881a74644416135ce48f20715486304063",
+        "bytes": 7829,
+        "sha256": "70bf42a356dc7716c76b5f935585defd50f23d8bd0e7e670fab32d51dae1000c"
+      },
+      "prepare_import_build.py": {
+        "path": "WP/pr284-release/prepare_import_build.py",
+        "blob": "c4dd0658dabe7cf7962e1cc075faf1053e90dec3",
+        "bytes": 10960,
+        "sha256": "abb571fb67f0371f3e51d882df6740d7b5566ff89279d17686f6e46c4d1153c4"
+      },
+      "export_launch_import_proof.py": {
+        "path": "WP/pr284-release/export_launch_import_proof.py",
+        "blob": "97f6739af8621186c617636af7e97541e3cdbf1e",
+        "bytes": 7148,
+        "sha256": "389a94e30dfab0b640d50e34fb11601e208278106e4d173e4278139563ae98a9"
+      },
+      "capture_kobo_fetch.py": {
+        "path": "WP/runtime-recovery-kobo/capture_kobo_fetch.py",
+        "blob": "79e2ad45eba9fd6d6e38b37cd36801243dd648d8",
+        "bytes": 4767,
+        "sha256": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86"
+      },
+      "kobo_copy_preservation.py": {
+        "path": "WP/runtime-recovery-kobo/kobo_copy_preservation.py",
+        "blob": "0f7eab699ea408bac72e05379a19ea718ed4c66a",
+        "bytes": 16701,
+        "sha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23"
+      },
+      "known_core_disk_guard_v2.py": {
+        "path": "WP/runtime-recovery-kobo/known_core_disk_guard_v2.py",
+        "blob": "265d01b09105aa69cd307e80473b02260eb25248",
+        "bytes": 5278,
+        "sha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c"
+      },
+      "known_core_disk_guard_v3.py": {
+        "path": "WP/runtime-recovery-kobo/known_core_disk_guard_v3.py",
+        "blob": "e7cb0e25eeb3585d731f42b3e8a8658944228788",
+        "bytes": 5625,
+        "sha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f"
+      },
+      "runtime_proof_policies.py": {
+        "path": "WP/runtime-recovery-kobo/proof_contract.py",
+        "blob": "f8490e268a824452d05aee30bae6f7673f13662a",
+        "bytes": 15922,
+        "sha256": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf"
+      },
+      "known_core_disk_guard.py": {
+        "path": "WP/runtime-containment-ae64f169/known_core_disk_guard.py",
+        "blob": "026e2245268324c3157eb186ba747776e7a4b55d",
+        "bytes": 5984,
+        "sha256": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169"
+      },
+      "release_support.py": {
+        "path": "WP/forward-ae64f169/release_support.py",
+        "blob": "8ea639b57cb1eec468e6794e5ccc32ba9a468e99",
+        "bytes": 20330,
+        "sha256": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810"
+      },
+      "startup_common.py": {
+        "path": "WP/forward-ae64f169/startup_common.py",
+        "blob": "757c0d350769ab58b5f0b8e4ba810af8c9bdce0d",
+        "bytes": 13858,
+        "sha256": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+      },
+      "postflight-roles.cjs": {
+        "path": "WP/forward-ae64f169/postflight-roles.cjs",
+        "blob": "bc6fe5f35ccc52e0c7b48a444a9432d05162a4a3",
+        "bytes": 12281,
+        "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da"
+      },
+      "postflight-auth.cjs": {
+        "path": "WP/forward-ae64f169/postflight-auth.cjs",
+        "blob": "6521d1c4a8f04e24641df967de4f674e9907dfb8",
+        "bytes": 2045,
+        "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192"
+      },
+      "postflight-reference.cjs": {
+        "path": "WP/forward-ae64f169/postflight-reference.cjs",
+        "blob": "6155145febed24f58efabfba236bae91f00e46a3",
+        "bytes": 2096,
+        "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526"
+      },
+      "postflight-qc-runs.cjs": {
+        "path": "WP/forward-ae64f169/postflight-qc-runs.cjs",
+        "blob": "ab7fd7f03555f6d5af423d6750e8de908965d53a",
+        "bytes": 4091,
+        "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f"
+      },
+      "postflight-policy.cjs": {
+        "path": "WP/forward-ae64f169/postflight-policy.cjs",
+        "blob": "19e12bb1c77a43f78098eb4af208d05f34f96c46",
+        "bytes": 4035,
+        "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51"
+      },
+      "readonly-smoke.cjs": {
+        "path": "WP/forward-ae64f169/readonly-smoke.cjs",
+        "blob": "555a67e4f125160eba990086fa4d0f60c6085bb8",
+        "bytes": 3255,
+        "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626"
+      },
+      "migration.sql": {
+        "path": "server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql",
+        "blob": "bc0007230856b8903a6ab7ce2425a6a55dfba91f",
+        "bytes": 4342,
+        "sha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8"
+      },
+      "fresh-prisma-tables.json": {
+        "path": "server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json",
+        "blob": "2d93236cda13929e7134762dfd587c3df373f315",
+        "bytes": 2877,
+        "sha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df"
+      },
+      "pre-prisma-draft-table.sql": {
+        "path": "server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql",
+        "blob": "b940d033dc0c857819693ad005041d2bdef3a05d",
+        "bytes": 769,
+        "sha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af"
+      },
+      "upgraded-prisma-draft-table.sql": {
+        "path": "server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql",
+        "blob": "efb20835b91e24b0bac29405e664985612332ef8",
+        "bytes": 874,
+        "sha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b"
+      },
+      "post205-draft-tables.json": {
+        "path": "server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json",
+        "blob": "d745b9f715942420e8705bf3246cbdda6c7ddb0c",
+        "bytes": 5827,
+        "sha256": "ac0d64b16a25ae4498634c72593ac0bcb53240247be2153e140f147092d931b5"
+      }
+    }
+  },
+  "sourceReview": {
+    "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6122670828",
+    "html_url": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6122670828",
+    "issue_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/162",
+    "id": 6122670828,
+    "node_id": "IC_kwDOROLhSM8AAAABbPCK7A",
+    "user": {
+      "login": "yigini",
+      "id": 32960535,
+      "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/yigini",
+      "html_url": "https://github.com/yigini",
+      "followers_url": "https://api.github.com/users/yigini/followers",
+      "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+      "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+      "organizations_url": "https://api.github.com/users/yigini/orgs",
+      "repos_url": "https://api.github.com/users/yigini/repos",
+      "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/yigini/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "created_at": "2026-10-12T10:43:17Z",
+    "updated_at": "2026-10-12T10:43:17Z",
+    "author_association": "OWNER",
+    "body": "Source review: PASS\n\nNEW primary #200 proof/build source review (Claudio), answering the revised request after my earlier changes-required verdict. Exact source f5e59428c1bbf19247db2555f5158bc3a2ac5fad, bound to the actual PR284 merge 5dd5488d138514351fffd54d0b0232ae19fcb64d. This approves this proof/build source only. It does not approve the production packaging family, which needs its own NEW source review. A stopped PASSED isolated proof, a NEW exact-kit audit and one fresh single-use gate are all still required before any production execution.\n\nRequired full tokens:\n51f6798806f630773786a08432290c1b21a841da\nc26591698c1e974a3bf771e5c333578755aef315\n5dd5488d138514351fffd54d0b0232ae19fcb64d\n9b3b77496c3aa2cdad7c7594a0b258ec4b491753\n9b3b77496c3aa2cdad7c7594a0b258ec4b491753\nsha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f\n480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515\nreleasePr=284\nmergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE\nnaturalIntakePolicy=ORIGINAL_CURSOR_ACTUAL_UPSTREAM\nimportDeltaPolicy=ONLY_200_EMPTY_ADDITIVE_IMPORT_10438_TO_10639\noriginalState=104tables/38receipts\ninstalledState=106tables/39receipts\ndefaultStartup=23NO_OP0/22READY0\nproductionRecovery=SEPARATELY_AUDITED_FORWARD_FIX_ONLY\nnativeDryCopyPolicy=SEPARATE_OWNED_0400_BACKUP_COPY_WITH_WRITABLE_SIDECAR_DIRECTORY\nretainedDatabaseAllocationCount=13\nCLI_TIMEOUT_SECONDS=600\nnativeCliNetwork=none\nnativeCliMemorySwapBytes=805306368\nf5e59428c1bbf19247db2555f5158bc3a2ac5fad\nlabAndHubBuildsOwnedByYY=true\nRELEASE_DAY_DISK_ABORTS_ACCEPTED\nCORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10\nBASELINE_ATTEMPTS_MAX=3\nBASELINE_CONFIRMATION_DEADLINE_SECONDS=10\nproofBaselineLayoutPolicy=EXACT_HASHED_IMPORT_PROOF_AUTHORITY_LAYOUT\nrefusalScopeCommentId=6113601584\nEXACT_FRESH_COPY_CONFIG_REFUSALS\nSAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS\nrefusalPairingScopeCommentId=6114143349\nschedulerRefusalPairing=STREAM_ORDER_ONE_TO_ONE\nREFUSAL_PAIR_WINDOW_SECONDS=1\nbuild_import.py=70bf42a356dc7716c76b5f935585defd50f23d8bd0e7e670fab32d51dae1000c\ncapture_kobo_fetch.py=1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86\nexport_launch_import_proof.py=389a94e30dfab0b640d50e34fb11601e208278106e4d173e4278139563ae98a9\nfresh-prisma-tables.json=9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df\nimport_installation.py=eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d\nimport_preservation.py=c150db31dde7b97d03a16183cff706369cb77ea2fe96beb766f537c83c2fe7fa\nimport_proof_contract.py=067177df424a70528c8a6473c2d8016a5dc2c73602d45297ed450d5e4736accd\nimport_sealing.py=de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401\nimport_source_graph.py=74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637\nimport_stage.py=c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1\nimport_startup_checks.py=033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b\nknown_core_disk_guard.py=f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169\nknown_core_disk_guard_import.py=3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c\nknown_core_disk_guard_v2.py=f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c\nknown_core_disk_guard_v3.py=878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f\nkobo_copy_preservation.py=3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23\nmigration.sql=68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8\npost205-draft-tables.json=ac0d64b16a25ae4498634c72593ac0bcb53240247be2153e140f147092d931b5\npostflight-auth.cjs=37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192\npostflight-policy.cjs=6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51\npostflight-qc-runs.cjs=4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f\npostflight-reference.cjs=530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526\npostflight-roles.cjs=6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da\npre-prisma-draft-table.sql=a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af\nprepare_import_build.py=abb571fb67f0371f3e51d882df6740d7b5566ff89279d17686f6e46c4d1153c4\nreadonly-smoke.cjs=7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626\nrehearse_import.py=73fd8dc57cc85332f499caa4fbd01912217295b51048d5c05cddefc1c6e5c894\nrelease_support.py=9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810\nruntime_proof_policies.py=08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf\nstartup_common.py=e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00\nupgraded-prisma-draft-table.sql=4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b\n\nWhat I checked:\n- **Merge binding:** 5dd5488d has parents 51f67988 + c2659169 and tree 9b3b7749, which equals the audited head's tree. `import_proof_contract.py` binds exactly these values. Main CI 38233444989 on 5dd5488d completed with SUCCESS (I checked it directly, last update 10:37:52 UTC).\n- **Hashes:** all 31 `name=sha256` tokens above equal the raw Git blobs at f5e59428.\n  - The 5 migration assets are byte-identical to the merge.\n  - The 14 historical helpers are byte-identical to the ones I reviewed earlier (`git diff 70fd36f9..f5e59428` is empty for the forward, containment and runtime-recovery helper paths).\n- **Blocking fix (option a), diff 70fd36f9..f5e59428:**\n  - `import_stage.prepare_dry_copy` makes a new 0700 `import-dry-database/` holding a 0400 byte-copy of the stopped immutable backup. It checks the copy against the backup SHA and the full immutable snapshot, with disk-guard checks during the copy.\n  - The dry-run mounts only that directory. `arguments()` refuses any other dry-run directory and the live parent.\n  - After the dry-run, the apply target's physical triple, the dry main SHA and the snapshot must be unchanged. Only `-wal` (0 bytes) and `-shm` (32768 bytes) are allowed as new files. All of them are made 0400, hashed and retained in `import-dry-copy-authority.json`.\n  - The single-use marker is still written before any CLI call.\n- **Independent repro of the fix:** with local SQLite 3.45, a WAL-header backup copy with no sidecars fails to open on a real read-only bind mount. A read-only open on a writable directory succeeds and leaves a 32768-byte `-shm` and an empty `-wal`, which matches the checks the stage now enforces.\n- **Smaller points:**\n  1. The proof's `install_once` refuses the live parent and any target outside its root. Only explicit `production=True` on an `instrument-import-release-*` root can select the volume.\n  2. Jobs-ON now requires the running jobs-enabled state, `jobs_guard.check()` and an explicit `startup_boundary()` with observed data versions and no claim of full zero writes. An arbitrary guard is refused.\n  3. CLI: `--network none` and `--memory-swap 768m` are set and re-inspected, along with the exact RW bind source and type.\n  4. A 600 s CLI timeout is passed to the unchanged `release_support.command(..., timeout=)`, and measured elapsed time must stay under it.\n  5. The dead `original_physical` line is removed. 13 retained DB allocations feed the pre-copy disk check.\n- **Guards:** I ran the committed `run_import_guards.py` payload locally (local `python3` instead of the ssh hop) against f5e59428. Result: 164/164 OK, 0 failures/errors/skips, completed 10:41:33 UTC, no production access.\n- **Self-check:** this body passes the f5e59428 `import_proof_contract.source_review_pass` token check with the actual file hashes.\n\nNote for the proof: the real-mount witness `import-mount-ad49-103100.json` is not in the f5e59428 tree, so I relied on my own repro above. Please commit it with the proof evidence. `import_installation.py` and `run_import_mount_guard.py` are identical between ad49b190 and f5e59428.\n\nOther application merges stay held until #200 is live and my post-deploy check passes.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+    "reactions": {
+      "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6122670828/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "performed_via_github_app": {
+      "id": 1236702,
+      "slug": "claude",
+      "node_id": "A_kwHOBIuudM4AEt7e",
+      "owner": {
+        "login": "anthropics",
+        "id": 76263028,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjc2MjYzMDI4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/76263028?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/anthropics",
+        "html_url": "https://github.com/anthropics",
+        "followers_url": "https://api.github.com/users/anthropics/followers",
+        "following_url": "https://api.github.com/users/anthropics/following{/other_user}",
+        "gists_url": "https://api.github.com/users/anthropics/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/anthropics/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/anthropics/subscriptions",
+        "organizations_url": "https://api.github.com/users/anthropics/orgs",
+        "repos_url": "https://api.github.com/users/anthropics/repos",
+        "events_url": "https://api.github.com/users/anthropics/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/anthropics/received_events",
+        "type": "Organization",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "name": "Claude",
+      "description": "Run Claude Code from your GitHub Pull Requests and Issues to respond to reviewer feedback, fix CI errors, or modify code, turning it into a virtual teammate that works alongside your development pipelines.\r\n\r\nThis is built on the publicly available Claude Code SDK.",
+      "external_url": "https://anthropic.com/claude-code",
+      "html_url": "https://github.com/apps/claude",
+      "created_at": "2025-04-30T17:54:24Z",
+      "updated_at": "2026-09-30T19:04:00Z",
+      "permissions": {
+        "actions": "write",
+        "administration": "read",
+        "checks": "write",
+        "contents": "write",
+        "discussions": "write",
+        "issues": "write",
+        "members": "read",
+        "merge_queues": "read",
+        "metadata": "read",
+        "pull_requests": "write",
+        "repository_hooks": "write",
+        "statuses": "read",
+        "workflows": "write"
+      },
+      "events": [
+        "branch_protection_rule",
+        "check_run",
+        "check_suite",
+        "commit_comment",
+        "discussion",
+        "discussion_comment",
+        "issues",
+        "issue_comment",
+        "merge_group",
+        "merge_queue_entry",
+        "pull_request",
+        "pull_request_review",
+        "pull_request_review_comment",
+        "pull_request_review_thread",
+        "push",
+        "release",
+        "repository_ruleset",
+        "status",
+        "sub_issues"
+      ]
+    },
+    "minimized": null,
+    "pin": null
+  },
+  "image": {
+    "Id": "sha256:57575a88c02aa6b9c0e801c2c6a6e7da0de298c41d093aeba5cc75480c3aa930",
+    "Size": 413730674,
+    "Config": {
+      "Labels": {
+        "org.opencontainers.image.description": "Laboratory Information Management System for Soil Analysis",
+        "org.opencontainers.image.revision": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+        "org.opencontainers.image.source": "https://github.com/yigini/soilfer-lims",
+        "org.opencontainers.image.title": "SoilFER-LIMS"
+      }
+    }
+  },
+  "files": {
+    "build-receipt.json": {
+      "sha256": "92be0f7ce246fd94f2dfd39c9b26e3e9fe84d35b5a28e1687f6199428576058f",
+      "bytes": 1473,
+      "mode": "0400"
+    },
+    "build-input.json": {
+      "sha256": "434fcd2fd930586d7dfc70ae71afa97923a455cf162e9c55164d666e61508c02",
+      "bytes": 1387,
+      "mode": "0400"
+    },
+    "source.tar.gz": {
+      "sha256": "7ff63524d4983f833705eded3789f15c0eb19dc1739ce7b564737860b7de68b7",
+      "bytes": 63048396,
+      "mode": "0400"
+    },
+    "source-index.json": {
+      "sha256": "4dd19e51f83180c11896b85e7917769f21b35a15315c364191ae051a0e558041",
+      "bytes": 616500,
+      "mode": "0400"
+    },
+    "tooling-source-index.json": {
+      "sha256": "ed05235648f215aed7d1a5feed311c1155952fb795dfc8044c9084adeca4aaf7",
+      "bytes": 8606,
+      "mode": "0400"
+    },
+    "proof-source-review.json": {
+      "sha256": "382df8fed62e584cb1d9e7a6f18018a75c796b1a0a1b0f748f2eafa3d430ad7d",
+      "bytes": 12588,
+      "mode": "0400"
+    },
+    "rehearse_import.py": {
+      "sha256": "73fd8dc57cc85332f499caa4fbd01912217295b51048d5c05cddefc1c6e5c894",
+      "bytes": 25249,
+      "mode": "0400"
+    },
+    "import_proof_contract.py": {
+      "sha256": "067177df424a70528c8a6473c2d8016a5dc2c73602d45297ed450d5e4736accd",
+      "bytes": 7038,
+      "mode": "0400"
+    },
+    "import_source_graph.py": {
+      "sha256": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637",
+      "bytes": 5771,
+      "mode": "0400"
+    },
+    "import_preservation.py": {
+      "sha256": "c150db31dde7b97d03a16183cff706369cb77ea2fe96beb766f537c83c2fe7fa",
+      "bytes": 9261,
+      "mode": "0400"
+    },
+    "import_startup_checks.py": {
+      "sha256": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b",
+      "bytes": 5448,
+      "mode": "0400"
+    },
+    "import_installation.py": {
+      "sha256": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+      "bytes": 7579,
+      "mode": "0400"
+    },
+    "import_stage.py": {
+      "sha256": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1",
+      "bytes": 8063,
+      "mode": "0400"
+    },
+    "import_sealing.py": {
+      "sha256": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401",
+      "bytes": 5918,
+      "mode": "0400"
+    },
+    "known_core_disk_guard_import.py": {
+      "sha256": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+      "bytes": 3839,
+      "mode": "0400"
+    },
+    "build_import.py": {
+      "sha256": "70bf42a356dc7716c76b5f935585defd50f23d8bd0e7e670fab32d51dae1000c",
+      "bytes": 7829,
+      "mode": "0400"
+    },
+    "prepare_import_build.py": {
+      "sha256": "abb571fb67f0371f3e51d882df6740d7b5566ff89279d17686f6e46c4d1153c4",
+      "bytes": 10960,
+      "mode": "0400"
+    },
+    "export_launch_import_proof.py": {
+      "sha256": "389a94e30dfab0b640d50e34fb11601e208278106e4d173e4278139563ae98a9",
+      "bytes": 7148,
+      "mode": "0400"
+    },
+    "capture_kobo_fetch.py": {
+      "sha256": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86",
+      "bytes": 4767,
+      "mode": "0400"
+    },
+    "kobo_copy_preservation.py": {
+      "sha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+      "bytes": 16701,
+      "mode": "0400"
+    },
+    "known_core_disk_guard_v2.py": {
+      "sha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+      "bytes": 5278,
+      "mode": "0400"
+    },
+    "known_core_disk_guard_v3.py": {
+      "sha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+      "bytes": 5625,
+      "mode": "0400"
+    },
+    "runtime_proof_policies.py": {
+      "sha256": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf",
+      "bytes": 15922,
+      "mode": "0400"
+    },
+    "known_core_disk_guard.py": {
+      "sha256": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+      "bytes": 5984,
+      "mode": "0400"
+    },
+    "release_support.py": {
+      "sha256": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+      "bytes": 20330,
+      "mode": "0400"
+    },
+    "startup_common.py": {
+      "sha256": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+      "bytes": 13858,
+      "mode": "0400"
+    },
+    "postflight-roles.cjs": {
+      "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+      "bytes": 12281,
+      "mode": "0400"
+    },
+    "postflight-auth.cjs": {
+      "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+      "bytes": 2045,
+      "mode": "0400"
+    },
+    "postflight-reference.cjs": {
+      "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+      "bytes": 2096,
+      "mode": "0400"
+    },
+    "postflight-qc-runs.cjs": {
+      "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+      "bytes": 4091,
+      "mode": "0400"
+    },
+    "postflight-policy.cjs": {
+      "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+      "bytes": 4035,
+      "mode": "0400"
+    },
+    "readonly-smoke.cjs": {
+      "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+      "bytes": 3255,
+      "mode": "0400"
+    },
+    "migration.sql": {
+      "sha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+      "bytes": 4342,
+      "mode": "0400"
+    },
+    "fresh-prisma-tables.json": {
+      "sha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+      "bytes": 2877,
+      "mode": "0400"
+    },
+    "pre-prisma-draft-table.sql": {
+      "sha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+      "bytes": 769,
+      "mode": "0400"
+    },
+    "upgraded-prisma-draft-table.sql": {
+      "sha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+      "bytes": 874,
+      "mode": "0400"
+    },
+    "post205-draft-tables.json": {
+      "sha256": "ac0d64b16a25ae4498634c72593ac0bcb53240247be2153e140f147092d931b5",
+      "bytes": 5827,
+      "mode": "0400"
+    }
+  },
+  "freeBytes": 88306798592,
+  "productionMutations": 0,
+  "independentRawGitIndexVerified": true
+}

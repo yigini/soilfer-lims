@@ -1,0 +1,73 @@
+{
+  "status": "READ_ONLY_OWNED_RUN_OBSERVATION",
+  "observedUtc": "2026-10-12T10:50:11.756557+00:00",
+  "root": "/opt/lims/releases/instrument-import-build-5dd5488d-20261012T104515Z",
+  "unit": "lims-build-instrument-import-build-5dd5488d-20261012t104515z.service",
+  "unitState": "Result=success\nExecMainStatus=0\nActiveState=inactive\nSubState=dead\n",
+  "files": {
+    "build-receipt.json": {
+      "bytes": 1473,
+      "sha256": "92be0f7ce246fd94f2dfd39c9b26e3e9fe84d35b5a28e1687f6199428576058f",
+      "mode": "0o400",
+      "receipt": {
+        "status": "BUILT_ONLY_NOT_DEPLOYED",
+        "head": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+        "image": "sha256:57575a88c02aa6b9c0e801c2c6a6e7da0de298c41d093aeba5cc75480c3aa930",
+        "tag": "soilfer-lims:audit-instrument-import-build-5dd5488d-20261012T104515Z",
+        "sourceArchiveSha256": "7ff63524d4983f833705eded3789f15c0eb19dc1739ce7b564737860b7de68b7",
+        "sourceIndexSha256": "4dd19e51f83180c11896b85e7917769f21b35a15315c364191ae051a0e558041",
+        "verifiedGitBlobCount": 2286,
+        "verifiedUtc": "2026-10-12T10:49:28.538863+00:00",
+        "imageBytes": 413730674,
+        "reserveBytes": 10556150894,
+        "freeBytesBefore": {
+          "/opt/lims": 90680406016,
+          "/var/lib/docker": 90680406016
+        },
+        "freeBytesAfter": {
+          "/opt/lims": 88306933760,
+          "/var/lib/docker": 88306933760
+        },
+        "buildLogSha256": "2de0fed9f3ca1c4df05df18036e8b23f678f943f159bccd2b30a84a2602664d7",
+        "productionDatabaseMounts": 0,
+        "dockerIgnoredArchiveMembersNotExtracted": [
+          "server/node_modules"
+        ],
+        "auditReviewId": 6121933894,
+        "mainCiRunId": 38233444989,
+        "tree": "9b3b77496c3aa2cdad7c7594a0b258ec4b491753",
+        "toolingCommit": "f5e59428c1bbf19247db2555f5158bc3a2ac5fad",
+        "proofSourceReviewId": 6122670828,
+        "toolingSourceIndexSha256": "474c8e2054de6b1ecc8505318abcd7b8ec64de73d97eb2ec077c003d0f506a18",
+        "proofSourceReviewRawSha256": "1e8677500abf87cdeeb3ea6e0b3dde1009a84c6d067c5d4ce8b1a2be027b0d80",
+        "builderSha256": "70bf42a356dc7716c76b5f935585defd50f23d8bd0e7e670fab32d51dae1000c"
+      }
+    },
+    "build-input.json": {
+      "bytes": 1387,
+      "sha256": "434fcd2fd930586d7dfc70ae71afa97923a455cf162e9c55164d666e61508c02",
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 616500,
+      "sha256": "4dd19e51f83180c11896b85e7917769f21b35a15315c364191ae051a0e558041",
+      "mode": "0o400"
+    },
+    "tooling-source-index.json": {
+      "bytes": 8606,
+      "sha256": "ed05235648f215aed7d1a5feed311c1155952fb795dfc8044c9084adeca4aaf7",
+      "mode": "0o400"
+    }
+  },
+  "tails": {
+    "unit.stdout": "{\"status\": \"BUILT_ONLY_NOT_DEPLOYED\", \"head\": \"5dd5488d138514351fffd54d0b0232ae19fcb64d\", \"image\": \"sha256:57575a88c02aa6b9c0e801c2c6a6e7da0de298c41d093aeba5cc75480c3aa930\", \"tag\": \"soilfer-lims:audit-instrument-import-build-5dd5488d-20261012T104515Z\", \"sourceArchiveSha256\": \"7ff63524d4983f833705eded3789f15c0eb19dc1739ce7b564737860b7de68b7\", \"sourceIndexSha256\": \"4dd19e51f83180c11896b85e7917769f21b35a15315c364191ae051a0e558041\", \"verifiedGitBlobCount\": 2286, \"verifiedUtc\": \"2026-10-12T10:49:28.538863+00:00\", \"imageBytes\": 413730674, \"reserveBytes\": 10556150894, \"freeBytesBefore\": {\"/opt/lims\": 90680406016, \"/var/lib/docker\": 90680406016}, \"freeBytesAfter\": {\"/opt/lims\": 88306933760, \"/var/lib/docker\": 88306933760}, \"buildLogSha256\": \"2de0fed9f3ca1c4df05df18036e8b23f678f943f159bccd2b30a84a2602664d7\", \"productionDatabaseMounts\": 0, \"dockerIgnoredArchiveMembersNotExtracted\": [\"server/node_modules\"], \"auditReviewId\": 6121933894, \"mainCiRunId\": 38233444989, \"tree\": \"9b3b77496c3aa2cdad7c7594a0b258ec4b491753\", \"toolingCommit\": \"f5e59428c1bbf19247db2555f5158bc3a2ac5fad\", \"proofSourceReviewId\": 6122670828, \"toolingSourceIndexSha256\": \"474c8e2054de6b1ecc8505318abcd7b8ec64de73d97eb2ec077c003d0f506a18\", \"proofSourceReviewRawSha256\": \"1e8677500abf87cdeeb3ea6e0b3dde1009a84c6d067c5d4ce8b1a2be027b0d80\", \"builderSha256\": \"70bf42a356dc7716c76b5f935585defd50f23d8bd0e7e670fab32d51dae1000c\"}\n",
+    "unit.stderr": "",
+    "docker-build.log": "52] COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql\n#42 DONE 0.0s\n\n#43 [stage-1 29/52] COPY server/prisma/migrations/20261009000100_nonconformity_reports/migration.sql /app/server/.migrations-backup/193/20261009000100_nonconformity_reports/migration.sql\n#43 DONE 0.0s\n\n#44 [stage-1 30/52] COPY server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql /app/server/.migrations-backup/178/20261004190000_add_workitem_duplicate_marker/migration.sql\n#44 DONE 0.0s\n\n#45 [stage-1 31/52] COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql /app/server/.migrations-backup/178/20261004190100_unique_active_workitem/migration.sql\n#45 DONE 0.0s\n\n#46 [stage-1 32/52] COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql\n#46 DONE 0.0s\n\n#47 [stage-1 33/52] COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql\n#47 DONE 0.0s\n\n#48 [stage-1 34/52] COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql\n#48 DONE 0.0s\n\n#49 [stage-1 35/52] COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql\n#49 DONE 0.0s\n\n#50 [stage-1 36/52] COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql\n#50 DONE 0.0s\n\n#51 [stage-1 37/52] COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql\n#51 DONE 0.0s\n\n#52 [stage-1 38/52] COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json\n#52 DONE 0.0s\n\n#53 [stage-1 39/52] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql\n#53 DONE 0.0s\n\n#54 [stage-1 40/52] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json\n#54 DONE 0.0s\n\n#55 [stage-1 41/52] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql\n#55 DONE 0.0s\n\n#56 [stage-1 42/52] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json\n#56 DONE 0.1s\n\n#57 [stage-1 43/52] COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql\n#57 DONE 0.0s\n\n#58 [stage-1 44/52] COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql\n#58 DONE 0.0s\n\n#59 [stage-1 45/52] COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql\n#59 DONE 0.0s\n\n#60 [stage-1 46/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/migration.sql\n#60 DONE 0.0s\n\n#61 [stage-1 47/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/fresh-prisma-tables.json\n#61 DONE 0.0s\n\n#62 [stage-1 48/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql\n#62 DONE 0.0s\n\n#63 [stage-1 49/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql\n#63 DONE 0.0s\n\n#64 [stage-1 50/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/post205-draft-tables.json\n#64 DONE 0.0s\n\n#65 [stage-1 51/52] COPY docker-entrypoint.sh /app/docker-entrypoint.sh\n#65 DONE 0.0s\n\n#66 [stage-1 52/52] RUN sed -i 's/\\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh\n#66 DONE 0.3s\n\n#67 exporting to image\n#67 exporting layers\n#67 exporting layers 50.9s done\n#67 exporting manifest sha256:e22087db674135f545e7ed992fa32977b2a5464d913baf0f4a8e9520bf21c9ec 0.0s done\n#67 exporting config sha256:86c2962167653a14bdb29c5fdec81154f256cc17c06ba9f48dd95b52df338ac9 0.0s done\n#67 exporting attestation manifest sha256:bfe095ae000105e606790a50b58bcb67a7be60c4613ba417ad72a01ee963fd78 0.0s done\n#67 exporting manifest list sha256:57575a88c02aa6b9c0e801c2c6a6e7da0de298c41d093aeba5cc75480c3aa930 0.0s done\n#67 naming to docker.io/library/soilfer-lims:audit-instrument-import-build-5dd5488d-20261012T104515Z done\n#67 unpacking to docker.io/library/soilfer-lims:audit-instrument-import-build-5dd5488d-20261012T104515Z\n#67 unpacking to docker.io/library/soilfer-lims:audit-instrument-import-build-5dd5488d-20261012T104515Z 17.1s done\n#67 DONE 68.2s\n"
+  },
+  "containers": [],
+  "freeBytes": {
+    "/opt/lims": 88306642944,
+    "/var/lib/docker": 88306642944
+  },
+  "productionMutations": 0
+}

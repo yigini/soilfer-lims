@@ -1,0 +1,27 @@
+{
+  "rootName": "instrument-import-build-5dd5488d-20261012T104515Z",
+  "head": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+  "tree": "9b3b77496c3aa2cdad7c7594a0b258ec4b491753",
+  "auditedTree": "9b3b77496c3aa2cdad7c7594a0b258ec4b491753",
+  "baseHead": "51f6798806f630773786a08432290c1b21a841da",
+  "pr": 284,
+  "mergeParents": [
+    "51f6798806f630773786a08432290c1b21a841da",
+    "c26591698c1e974a3bf771e5c333578755aef315"
+  ],
+  "auditedPrHead": "c26591698c1e974a3bf771e5c333578755aef315",
+  "auditReviewId": 6121933894,
+  "mainCiRunId": 38233444989,
+  "archiveSha256": "7ff63524d4983f833705eded3789f15c0eb19dc1739ce7b564737860b7de68b7",
+  "indexSha256": "4dd19e51f83180c11896b85e7917769f21b35a15315c364191ae051a0e558041",
+  "builderSha256": "70bf42a356dc7716c76b5f935585defd50f23d8bd0e7e670fab32d51dae1000c",
+  "toolingCommit": "f5e59428c1bbf19247db2555f5158bc3a2ac5fad",
+  "proofSourceReviewId": 6122670828,
+  "toolingSourceIndexSha256": "474c8e2054de6b1ecc8505318abcd7b8ec64de73d97eb2ec077c003d0f506a18",
+  "proofSourceReviewRawSha256": "1e8677500abf87cdeeb3ea6e0b3dde1009a84c6d067c5d4ce8b1a2be027b0d80",
+  "labAndHubBuildsOwnedByYY": true,
+  "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED",
+  "preparedUtc": "2026-10-12T10:45:28.726490+00:00",
+  "mainCiStatusAtBuildPreparation": "completed",
+  "mainCiConclusionAtBuildPreparation": "success"
+}
