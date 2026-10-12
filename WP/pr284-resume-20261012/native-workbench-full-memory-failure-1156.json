@@ -1,0 +1,25 @@
+{
+  "observedUtc": "2026-10-12T11:56:56.975452+00:00",
+  "head": "5e65fe5b587747efc717f167f9b61469effa9afe",
+  "session": 79434,
+  "sessionExitCode": 1,
+  "status": "FULL_LOCAL_VALIDATION_INCOMPLETE_NODE_DEFAULT_HEAP_EXHAUSTED_NOT_A_PASS",
+  "logSha256": "d1ac0343988112db0cbe7d932c668bbd2975f439e6f7dcc9248b5ddf1fb71b6f",
+  "jestResultFileProduced": false,
+  "completedPassingSuites": 91,
+  "completedFailingSuites": 0,
+  "nodeFatalError": "Ineffective mark-compacts near heap limit; JavaScript heap out of memory",
+  "replacementRunner": {
+    "maxWorkers": 1,
+    "workerIdleMemoryLimitBytes": 512000000,
+    "runInBand": false,
+    "applicationEdits": 0,
+    "heapLimitRaised": false,
+    "singleSequentialTestChildRecycledBetweenSuites": true,
+    "fullTestInventory": 360,
+    "normalGlobalAndSuiteHooksRetained": true,
+    "configSha256": "2b6b66094d0ae6f79c2aff2e317b6162ef85c100efa9072c0c41e223b1895a4a"
+  },
+  "productionMutations": 0,
+  "failedProductionProofReplayed": false
+}

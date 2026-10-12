@@ -1,0 +1,38 @@
+
+> client@1.9.0 lint
+> eslint .
+
+
+C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\client\scripts\test-appearance-resolver.js
+  12:5  warning  'STORAGE_KEY_SESSION_V1' is defined but never used  no-unused-vars
+
+C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\client\src\hooks\useRealtimeData.js
+   50:12  warning  'dataHash' is assigned a value but never used                                                                                                                                                                                                                                        no-unused-vars
+   80:32  warning  The ref value 'activeRequestIdRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'activeRequestIdRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  222:8   warning  React Hook useEffect has a missing dependency: 'wsEvents'. Either include it or remove the dependency array                                                                                                                                                                          react-hooks/exhaustive-deps
+  222:27  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                                                                                             react-hooks/exhaustive-deps
+
+C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\client\src\services\helpClientService.js
+    3:5   warning  'saveOfflineHelpPack' is defined but never used  no-unused-vars
+  135:46  warning  'user' is assigned a value but never used        no-unused-vars
+  517:28  warning  'user' is assigned a value but never used        no-unused-vars
+
+C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\client\src\services\offline\syncEngine.js
+   14:5   warning  'getAllOutboxOperations' is defined but never used  no-unused-vars
+  154:17  warning  Empty block statement                               no-empty
+
+C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\client\src\services\offline\workPackManager.js
+  11:5  warning  'getAllOfflineSamples' is defined but never used          no-unused-vars
+  12:5  warning  'getOfflineSample' is defined but never used              no-unused-vars
+  13:5  warning  'getOfflineWorkItemsForSample' is defined but never used  no-unused-vars
+
+C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\client\src\utils\workflowMapper.js
+  460:36  warning  'filters' is defined but never used  no-unused-vars
+
+✖ 14 problems (0 errors, 14 warnings)
+
+npm notice
+npm notice New minor version of npm available! 11.6.2 -> 11.21.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.21.0
+npm notice To update run: npm install -g npm@11.21.0
+npm notice
