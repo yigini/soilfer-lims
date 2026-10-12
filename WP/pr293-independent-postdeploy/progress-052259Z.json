@@ -1,0 +1,179 @@
+{
+  "observedUtc": "2026-10-12T05:22:58.850728+00:00",
+  "unitState": "ExecMainStatus=0\nActiveState=inactive\nSubState=dead\n",
+  "freeBytes": 91830882304,
+  "journalTail": "2026-10-12T07:10:36+0200 server python3[964257]: {\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 36.941449986996304, \"pending\": true}\n2026-10-12T07:11:12+0200 server python3[964257]: {\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 73.64142520499445, \"pending\": true}\n2026-10-12T07:11:42+0200 server python3[964257]: {\"stage\": \"normalJobsEnabled\", \"utc\": \"2026-10-12T05:11:42.348047+00:00\"}\n2026-10-12T07:22:43+0200 server python3[964257]: {\"stage\": \"completed\", \"utc\": \"2026-10-12T05:22:43.349919+00:00\"}\n2026-10-12T07:22:43+0200 server python3[964257]: {\"stage\": \"immutableReceiptReady\", \"utc\": \"2026-10-12T05:22:43.585648+00:00\"}\n2026-10-12T07:22:43+0200 server python3[964257]: {\"status\": \"DEPLOYED_NEW_RUNTIME_FORWARD\", \"head\": \"51f6798806f630773786a08432290c1b21a841da\", \"image\": \"sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f\", \"receiptSha256\": \"480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515\"}\n2026-10-12T07:22:43+0200 server systemd[1]: lims-release-runtime-kobo-release-51f67988-20261012t044924z.service: Deactivated successfully.\n2026-10-12T07:22:43+0200 server systemd[1]: lims-release-runtime-kobo-release-51f67988-20261012t044924z.service: Consumed 5min 23.007s CPU time, 3.9G memory peak.\n",
+  "receipt": {
+    "status": "DEPLOYED_NEW_RUNTIME_FORWARD",
+    "head": "51f6798806f630773786a08432290c1b21a841da",
+    "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+    "timesUtc": {
+      "beforeQuiesceGuardsPassed": "2026-10-12T05:01:19.532485+00:00",
+      "writersStopped": "2026-10-12T05:01:51.314858+00:00",
+      "stoppedHashedBackupVerified": "2026-10-12T05:03:49.803678+00:00",
+      "candidateEntrypointAttempted": "2026-10-12T05:03:49.893763+00:00",
+      "jobsOffPreservationAndProbesPassed": "2026-10-12T05:06:53.015583+00:00",
+      "ingressReopenedBeforeJobs": "2026-10-12T05:07:17.377776+00:00",
+      "jobsOffStoppedFullLogicalPreservationPassed": "2026-10-12T05:09:59.049883+00:00",
+      "normalJobsEnabled": "2026-10-12T05:11:42.348047+00:00",
+      "completed": "2026-10-12T05:22:43.349919+00:00",
+      "immutableReceiptReady": "2026-10-12T05:22:43.585648+00:00"
+    },
+    "peakBytes": 210878464,
+    "protectedTableCount": 104,
+    "protectedReceiptCount": 38,
+    "databaseChangesBeforeJobs": 0,
+    "normalJobsHealthSamples": [
+      {
+        "utc": "2026-10-12T05:11:42.868507+00:00",
+        "restartCount": 0,
+        "peakBytes": 141484032,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:12:13.447818+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:12:44.078443+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:13:14.626831+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:13:45.173839+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:14:15.762040+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:14:46.316397+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:15:16.902694+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:15:47.468798+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:16:18.045199+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:16:48.631117+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:17:19.296551+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:17:49.842112+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:18:20.407799+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:18:51.036327+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:19:21.602373+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:19:52.234298+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:20:22.831042+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:20:53.412731+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:21:24.021069+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:21:54.624979+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:22:25.218290+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      },
+      {
+        "utc": "2026-10-12T05:22:42.918993+00:00",
+        "restartCount": 0,
+        "peakBytes": 210878464,
+        "healthy": true
+      }
+    ],
+    "sha256": "480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515",
+    "mode": "0o400"
+  },
+  "productionMutations": 0,
+  "live": {
+    "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+    "running": true,
+    "health": "healthy",
+    "restartCount": 0,
+    "oomKilled": false,
+    "jobsDisabled": "false",
+    "memory": 805306368
+  }
+}
