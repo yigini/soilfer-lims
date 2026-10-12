@@ -1,0 +1,20 @@
+{
+  "observedUtc": "2026-10-12T05:34:38.393614+00:00",
+  "status": "CLAUDIO_ACTUAL_POSTCHECK_PASS_CLOSURE_TICK_HANDOFF_COMPLETE",
+  "head": "51f6798806f630773786a08432290c1b21a841da",
+  "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+  "postcheckId": 6118328736,
+  "prCommentId": 6118329190,
+  "issueCommentId": 6118329522,
+  "rawFiles": {
+    "comment-6118328736.json": "307d7d3342c8e460b1b62e385f3e56d93ab483e98380673d6602c7fe2c32adc9",
+    "comment-6118329190.json": "a51c0993e37868fe8085413cce9abdab47e5e44a9b00d42cd6b99d72fddad227",
+    "comment-6118329522.json": "7fbb2f74eb3cbacc6ccd612e025f9100bf5e07115684e05a68da0ab8648fb535",
+    "issue-162.json": "3676c04816f2fbc1c63c8d10ce670bf352c337802f51207ef15f9092643b116f",
+    "issue-200.json": "0fc1a746110bf6e09ef47913c22c6a67c5951d84b80aa8a8132e062f21b3f1a4",
+    "issue-284.json": "bc928fa282feefafad7aaaf73b727c3357ee87f0e0696469716987c12cbd27ef"
+  },
+  "nativeObserved": "Actual postcheck done; #213 closed; #162 ticked; merge hold released; next #200 with #284 explicitly still parked. Pip asked for the reason or whether existing PR should resume; fresh empty composer focused, literal sent, sent bubble and empty composer verified. No human cards or drafts touched.",
+  "next": "Resume existing PR284 on SAME release worktree/writer, no new PR/worker/worktree.",
+  "nativeResumeClarification": "Fresh native screenshot: Claudio says resume existing PR284 now; no remaining scope blocker. Parked only meant queued behind runtime recovery/PR291/PR293, now live and postchecked. Existing parser and disk approvals stand. Resolve current-main conflicts, revalidate full suite/export selection path, CI/Docker, mark ready and request exact-head audit; same release chain/source/proof/kit/fresh gate follows only after review."
+}

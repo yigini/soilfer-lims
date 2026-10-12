@@ -1,0 +1,89 @@
+7b1b6f97f5853d314ab1c4c44931083894b2eec8
+100644 d5a591e89e83e94187c3c19bfdf6c9c9890f4b4d 1	Dockerfile
+100644 b1cb375c44c3533c46e5d1337835e03e5a31db7f 2	Dockerfile
+100644 df189fb270860916bab80f49b1509c953b07c716 3	Dockerfile
+100644 bb8c4005407d2145ced8dd9058eb1db7f33c7b76 1	client/src/translations/en.json
+100644 e962b087639f658f42a6512baa70fc701e07b009 2	client/src/translations/en.json
+100644 a7c452acdf155de8205af411ebfb715508188b8f 3	client/src/translations/en.json
+100644 a3ec2eb91f455eff3a520677b092e0b44dfa2fc1 1	client/src/translations/es-419.json
+100644 30e381e6dd61340b340eb3aa8b137bafea11ada3 2	client/src/translations/es-419.json
+100644 8cb87acc070d087fafa8086db3dc30e551a78953 3	client/src/translations/es-419.json
+100644 33b044fec24d343f408ce9a104bd2d8895194d47 1	client/src/translations/es.json
+100644 b2a26fff8ed59c2bcaaaad2fe2fcd4631fba0227 2	client/src/translations/es.json
+100644 b2fd9e869599d5185ad731b8c08c944a59258019 3	client/src/translations/es.json
+100644 b479e4fcfff99ab89edcd6c429acdc9ee21ed723 1	client/src/translations/fr.json
+100644 54a99e4b3371d5e4c7edb2350ed499bcf7226270 2	client/src/translations/fr.json
+100644 c58eb50d4cb573f94855fce92b83d16f5dfce154 3	client/src/translations/fr.json
+100644 8ba6f4a162d5ebb3d02846a77e22b8ca33ffe209 1	client/src/translations/pt.json
+100644 e1e05e0b50fb6fffaefec5619e8e8ed6d3fc9eba 2	client/src/translations/pt.json
+100644 72d7aa821b490c621f9ecc50ab6dacecc106545f 3	client/src/translations/pt.json
+100644 bc9cc5879f1812b09f159c47d306e8ba076dabf8 1	server/index.js
+100644 8a57d1d5164437f6d25e58e12a752b0c3dcef9ef 2	server/index.js
+100644 3100184451af60c7ce1e7ec016c5ba4581e43e0b 3	server/index.js
+100644 92789f762ef44943d36dee40bc9f64b3455dc6bd 1	server/prisma/schema.prisma
+100644 ef81112f261a8157becad0b2518d33f9ab91618a 2	server/prisma/schema.prisma
+100644 4e6f8ba96ed34b259c8e897b31c17852ce77c4af 3	server/prisma/schema.prisma
+100644 ce15af6c36eb6146d771450f13eb54a1cfbfa868 1	server/services/draftService.js
+100644 d2cc75c01ca0baa48100dc5775c0951b72d421ae 2	server/services/draftService.js
+100644 1f84d79f21377e0f5d24e5fe80057b83dead3229 3	server/services/draftService.js
+100644 3fa4f0f15376e397c3e94eedc7026cda99a66188 1	server/services/resultWriteService.js
+100644 c1df9ad3297eb33855f0ffd7f4ecd6f12b218554 2	server/services/resultWriteService.js
+100644 6baa55dc6ac6b45532925810076c4c2114ab867e 3	server/services/resultWriteService.js
+100644 67def5f3c76158e615a0a774478b5c5f01b1f0be 1	server/tests/contracts/audit_1_2_guard_installer.test.js
+100644 0a6980b620774a35b59d2575c6eded35cbd7b75e 2	server/tests/contracts/audit_1_2_guard_installer.test.js
+100644 331e7993596d7e65b4cfe193f6b6e73e0533a779 3	server/tests/contracts/audit_1_2_guard_installer.test.js
+100644 6ffcc365d418309b34c34ec0d5441fe942d8e26b 1	server/tests/contracts/audit_3_1_attempt_sql_guards.test.js
+100644 0df67c4e7410876edee4cc89d55689b88c42f2c3 2	server/tests/contracts/audit_3_1_attempt_sql_guards.test.js
+100644 65b23121be83fd5c890ef3610a4ac18bbce3a132 3	server/tests/contracts/audit_3_1_attempt_sql_guards.test.js
+100644 d84d281c908ddbaa93189ca2ae798280fa6590ea 1	server/tests/contracts/deployment_readiness_bootstrap.test.js
+100644 fd9ac834ab32c70cc90c6228374973c0ebd25192 2	server/tests/contracts/deployment_readiness_bootstrap.test.js
+100644 d197af817ce2b084a772a94a15a61ff2508083c7 3	server/tests/contracts/deployment_readiness_bootstrap.test.js
+100644 3deb209b31edf8782eefc71b708afe8a4bcb5f4c 1	server/tests/globalSetup.js
+100644 6fb25a86e6a7cf5044e0f17cc261942a2293fca0 2	server/tests/globalSetup.js
+100644 8b2858a9b4d2fcec952ec26f471f8ae967cdb99c 3	server/tests/globalSetup.js
+100644 0ade0bb44e54d7b370f20216c7c23aa085a34c7d 1	server/tests/helpers/legacyWorkflowDatabase.js
+100644 95c4f322f546be1a65b58fdf0febb3ae6e2bcb37 2	server/tests/helpers/legacyWorkflowDatabase.js
+100644 e4cd35bf188c4f4a2e2fb77f130d802bf19159af 3	server/tests/helpers/legacyWorkflowDatabase.js
+100644 3ef3b733e97906fd943aca19433f13eb8b5ddeba 1	server/tests/helpers/qcGateFixture.js
+100644 87f88f0456277a1bdcd4cf74a431d6a4c97bfedb 2	server/tests/helpers/qcGateFixture.js
+100644 b210ee21dc3d8f76f29bd9f01ab6b19d499b1a9d 3	server/tests/helpers/qcGateFixture.js
+100644 400c2228c3c236770445bcb9356137cd07a8f375 1	server/tests/helpers/workflowWriteScanner.js
+100644 be05fdbae938763ffd567ff80f94d458a5bd96dd 2	server/tests/helpers/workflowWriteScanner.js
+100644 63acede61a74ecd2799d39cf3aae9b4c8f506331 3	server/tests/helpers/workflowWriteScanner.js
+
+Auto-merging Dockerfile
+CONFLICT (content): Merge conflict in Dockerfile
+Auto-merging client/src/translations/en.json
+CONFLICT (content): Merge conflict in client/src/translations/en.json
+Auto-merging client/src/translations/es-419.json
+CONFLICT (content): Merge conflict in client/src/translations/es-419.json
+Auto-merging client/src/translations/es.json
+CONFLICT (content): Merge conflict in client/src/translations/es.json
+Auto-merging client/src/translations/fr.json
+CONFLICT (content): Merge conflict in client/src/translations/fr.json
+Auto-merging client/src/translations/pt.json
+CONFLICT (content): Merge conflict in client/src/translations/pt.json
+Auto-merging docker-entrypoint.sh
+Auto-merging server/controllers/workbenchController.js
+Auto-merging server/index.js
+CONFLICT (content): Merge conflict in server/index.js
+Auto-merging server/prisma/schema.prisma
+CONFLICT (content): Merge conflict in server/prisma/schema.prisma
+Auto-merging server/services/draftService.js
+CONFLICT (content): Merge conflict in server/services/draftService.js
+Auto-merging server/services/resultWriteService.js
+CONFLICT (content): Merge conflict in server/services/resultWriteService.js
+Auto-merging server/tests/contracts/audit_1_2_guard_installer.test.js
+CONFLICT (content): Merge conflict in server/tests/contracts/audit_1_2_guard_installer.test.js
+Auto-merging server/tests/contracts/audit_3_1_attempt_sql_guards.test.js
+CONFLICT (content): Merge conflict in server/tests/contracts/audit_3_1_attempt_sql_guards.test.js
+Auto-merging server/tests/contracts/deployment_readiness_bootstrap.test.js
+CONFLICT (content): Merge conflict in server/tests/contracts/deployment_readiness_bootstrap.test.js
+Auto-merging server/tests/globalSetup.js
+CONFLICT (content): Merge conflict in server/tests/globalSetup.js
+Auto-merging server/tests/helpers/legacyWorkflowDatabase.js
+CONFLICT (content): Merge conflict in server/tests/helpers/legacyWorkflowDatabase.js
+Auto-merging server/tests/helpers/qcGateFixture.js
+CONFLICT (content): Merge conflict in server/tests/helpers/qcGateFixture.js
+Auto-merging server/tests/helpers/workflowWriteScanner.js
+CONFLICT (content): Merge conflict in server/tests/helpers/workflowWriteScanner.js
