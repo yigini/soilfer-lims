@@ -66,7 +66,7 @@ describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
         expect(s.status).toBe('PROCESSING');
     });
 
-    test('2. Valid texture with advisory C:N warning (C:N = 45) SUCCEEDS with warnings', async () => {
+    test('2. Valid texture with advisory C:N warning (C:N = 45) SUCCEEDS with a crossChecks C:N flag', async () => {
         // Seed valid texture (40 + 40 + 20 = 100%) and high C:N (SOC=90, TN=2 -> C:N=45)
         for (const data of [
             { id: `r1-${Date.now()}`, sampleId: testSampleId, param: 'SAND', value: '40', numericValue: 40, isCurrent: true },
@@ -82,7 +82,11 @@ describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
 
         expect(res.status).toBe(200);
         expect(res.body.status).toBe('SUBMITTED_FULL');
-        expect(res.body.matrixDiagnostics.warnings.length).toBeGreaterThan(0);
+        expect(res.body.matrixDiagnostics.cnRatio).toBeUndefined();
+        expect(res.body.matrixDiagnostics.retiredAdvisories).toEqual(['CN_RATIO', 'BASES_CEC']);
+        // #279: the C:N advisory now comes only from the registry-governed crossChecks.
+        expect(res.body.crossChecks.find(item => item.ruleCode === 'CN_RATIO')).toMatchObject({
+            outcome: 'FLAGGED', flagCode: 'CROSS_CHECK_CN_OUT_OF_RANGE', severity: 'ADVISORY' });
 
         // Verify sample status moved to SUBMITTED_FULL
         const s = await prisma.sample.findUnique({ where: { id: testSampleId } });

@@ -18,13 +18,16 @@ function raw(f, execute) {
 afterEach(() => { for (const f of owned.splice(0)) f.close(); });
 test('PRE_194 dry default and atomic install retain actual historical PT evidence; COMPLETE repeats are byte-identical', () => {
     const f = fixture(), before = hash(f.file), rounds = raw(f, db => db.prepare('SELECT * FROM ProficiencyRound ORDER BY id').all());
+    const originalRowsSha256 = raw(f, db => createHash('sha256').update(JSON.stringify(Object.fromEntries(db.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT IN ('BatchReagentLot','_schema_migrations') ORDER BY name")
+        .all().map(({name}) => [name, db.prepare('SELECT * FROM "'+name.replace(/"/g,'""')+'" ORDER BY rowid').all()])))).digest('hex'));
     expect(installBatchReagentLots({ dbPath: f.file })).toMatchObject({ classification: 'PRE_194', mode: 'DRY_RUN', totalChanges: 0, backfilledCount: 0 });
     expect(hash(f.file)).toBe(before);
     expect(() => assertBatchReagentLotsStartupReady(f.file)).toThrow(expect.objectContaining({ code: 'REAGENT_LOT_NOT_INSTALLED' }));
     expect(hash(f.file)).toBe(before);
     const applied = installBatchReagentLots({ dbPath: f.file, apply: true });
     expect(applied).toMatchObject({ classification: 'COMPLETE_194', previousClassification: 'PRE_194', mode: 'APPLIED', newLinkCount: 0, backfilledCount: 0,
-        receipt: { originalRowsPreserved: true, newLinkCount: 0 } });
+        receipt: { originalRowsPreserved: true, newLinkCount: 0, originalRowsSha256 } });
     expect(raw(f, db => db.prepare('SELECT * FROM ProficiencyRound ORDER BY id').all())).toEqual(rounds);
     const completed = hash(f.file);
     expect(assertBatchReagentLotsStartupReady(f.file).classification).toBe('COMPLETE_194');

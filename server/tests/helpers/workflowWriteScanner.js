@@ -52,6 +52,11 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         loaderSha256:'41e67eb28895cc0fdd3a9f41b5ff4e651dd36bbaded46d59179e2673938b0422',
         directory:'20261010000300_bench_credentials',sqlSha256:'954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b',
         wholeSql:true}),
+    // #205: inspect the exact additive preparation record source; no writer exception.
+    Object.freeze({functionName:'loadPreparationRecordMigrationSource',loader:'services/preparationRecordMigrationSource.js',
+        loaderSha256:'cd8fed9a632c118a7d3f0b50a6227ec273ea9ed78f92506a302580a9ff01fd0f',
+        directory:'20261010000400_preparation_records',sqlSha256:'e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c',
+        boundary:'-- Contract guards'}),
     // Inspect both exact #197 assets. Existing writer restrictions are unchanged.
     Object.freeze({functionName:'loadResultOverrideMigrationSource',loader:'services/resultOverrideMigrationSource.js',
         loaderSha256:'f59d8614213b1949216d172fd32589da7f1c733c2a63ae2b23a18f41f8365026',

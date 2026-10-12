@@ -52,6 +52,8 @@ function append(db, f) {
 
 test('PRE_201 upgrades additively with every original analytical/QC/audit field, object, FK and receipt retained', async () => {
     const f = await fixture(), before = state(f.file), originalHash = hash(f.file);
+    const originalRowsSha256 = createHash('sha256').update(JSON.stringify(Object.fromEntries(Object.entries(before.rows)
+        .filter(([name]) => !['CrossCheckEvaluation','_schema_migrations'].includes(name))))).digest('hex');
     expect(before.rows.Result).toHaveLength(1);
     expect(before.rows.Result[0]).toMatchObject({ rawInput: '6.7500', numericValue: 6.75, flags: '["RETAINED_QC_FLAG"]' });
     expect(before.rows.AuditLog.length).toBeGreaterThan(0);
@@ -59,7 +61,7 @@ test('PRE_201 upgrades additively with every original analytical/QC/audit field,
     expect(state(f.file)).toEqual(before); expect(hash(f.file)).toBe(originalHash);
     const applied = install({ dbPath: f.file, apply: true });
     expect(applied).toMatchObject({ classification: 'COMPLETE_201', previousClassification: 'PRE_201', mode: 'APPLIED',
-        newEvaluationCount: 0, backfilledCount: 0, receipt: { originalRowsPreserved: true } });
+        newEvaluationCount: 0, backfilledCount: 0, receipt: { originalRowsPreserved: true, originalRowsSha256 } });
     const after = state(f.file);
     for (const [name, rows] of Object.entries(before.rows)) {
         expect(after.rows[name].filter(row => name !== '_schema_migrations' || row.id !== marker)).toEqual(rows);

@@ -2333,6 +2333,10 @@
     }
   },
   "dataResults": {
+    "reportedValueUnavailable": "Reported value unavailable",
+    "selectionIdColumn": "Reported value selection ID",
+    "attemptIdsColumn": "Attempt IDs",
+    "batchIdsColumn": "Batch IDs",
     "title": "Analytical Results Master",
     "subtitle": "Master view of all analytical results (Approved & Pending).",
     "columns": "Columns",
@@ -2499,7 +2503,31 @@
     "recordingIncomplete": "Recording incomplete",
     "recordedCount": "Recorded",
     "retryFailed": "Retry failed",
-    "recordingUnconfirmed": "Recording was not confirmed for this row."
+    "recordingUnconfirmed": "Recording was not confirmed for this row.",
+    "preparationRecord": {
+      "steps": {
+        "DRYING": "Drying",
+        "SIEVING": "Sieving",
+        "GRINDING": "Grinding",
+        "SPLITTING": "Splitting"
+      },
+      "methods": {
+        "AIR": "Air dried",
+        "OVEN_40": "Oven 40 °C",
+        "OVEN_105": "Oven 105 °C",
+        "OTHER": "Other method"
+      },
+      "method": "Method",
+      "temperatureC": "Temperature (°C)",
+      "massBeforeG": "Mass before (g)",
+      "massAfterG": "Mass after (g)",
+      "coarseFractionG": "Coarse fraction (g)",
+      "sieveMm": "Sieve (mm)",
+      "grindMm": "Ground to (mm)",
+      "startedAt": "Started",
+      "endedAt": "Ended",
+      "equipment": "Equipment"
+    }
   },
   "batchIntake": {
     "massToApply": "Mass to apply (g)",
@@ -2579,6 +2607,7 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC",
       "report_uncertaintyMode": "Report expanded uncertainty",
       "report_uncertaintyCoverageFactor": "Uncertainty coverage factor",
+      "report_ovenDryConvertible": "Convert to oven-dry basis on request",
       "crossCheck_basesCecFactor": "Maximum exchangeable bases / CEC factor",
       "crossCheck_baseSaturationMaxPct": "Maximum base saturation (%)",
       "crossCheck_textureClosureTolerancePct": "Texture closure tolerance (%)",
@@ -2623,6 +2652,7 @@
     "source": "Source",
     "difference": "Compared with preset",
     "differs": "Differs from preset",
+    "storedInvalid": "The stored value is out of range and is not used; save a valid value.",
     "edit": "Edit",
     "clear": "Clear override",
     "clearExplanation": "This setting will inherit the next applicable default. Its previous value stays in history.",
@@ -3473,7 +3503,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "Cross-check evidence requires the caller submission."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory"
+      "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory",
+      "CROSS_CHECK_POLICY_INVALID": "Cross-checks unavailable: a laboratory check setting is out of range; a manager must save a valid value"
     }
   },
   "amendment": {

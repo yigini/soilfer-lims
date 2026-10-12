@@ -1437,4 +1437,41 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         expect(await prisma.sampleHold.count({ where: { sampleId: existing.id } })).toBe(1);
         expect(await prisma.sample.count({ where: { originalId: healthySample.original_id } })).toBe(1);
     });
+    test('19. The duplicate index never loads stored metadata for every Sample; only the matched specimen is read, and replay stays idempotent (runtime heap regression)', async () => {
+        const barcode = 'GHA-HEAP-' + SUFFIX, subId = 41901;
+        const submission = () => [{ _id: subId, _uuid: 'uuid-heap-' + SUFFIX, _submission_time: '2026-10-11T17:00:00',
+            surveyor_name: 'heap_surveyor', _attachments: [{ filename: 'heap.jpg' }] }];
+        const specimen = () => [{ original_id: barcode, depth: 'D1', site_id: 'SITE-HEAP', lat: 6.1, lng: -0.3,
+            collected_at: '2026-10-11', kobo_submission_id: subId }];
+        koboService.fetchSubmissions.mockResolvedValueOnce(submission());
+        koboService.transformSubmission.mockReturnValueOnce(specimen());
+        expect((await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC')).newSamples).toBe(1);
+        const before = await prisma.sample.findUnique({ where: { originalId: barcode } });
+        const auditsBefore = await prisma.auditLog.count({ where: { entityId: before.id } });
+
+        const findMany = jest.spyOn(prisma.sample, 'findMany'), findUnique = jest.spyOn(prisma.sample, 'findUnique');
+        try {
+            koboService.fetchSubmissions.mockResolvedValueOnce(submission());
+            koboService.transformSubmission.mockReturnValueOnce(specimen());
+            const replay = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+            expect(replay).toMatchObject({ newSamples: 0, skipped: 1 });
+            const unscoped = findMany.mock.calls.map(([args]) => args).filter(args => !args?.where);
+            expect(unscoped.length).toBeGreaterThan(0);
+            for (const args of unscoped) {
+                expect(args.select).toBeDefined();
+                expect(args.select.metadata).toBeUndefined();
+                expect(args.select.fieldMetadata).toBeUndefined();
+            }
+            const metadataReads = findUnique.mock.calls.map(([args]) => args).filter(args => args?.select?.metadata);
+            expect(metadataReads).toEqual([{ where: { id: before.id }, select: { metadata: true, fieldMetadata: true } }]);
+        } finally {
+            findMany.mockRestore();
+            findUnique.mockRestore();
+        }
+        const after = await prisma.sample.findUnique({ where: { originalId: barcode } });
+        expect(after.metadata).toBe(before.metadata);
+        expect(after.fieldMetadata).toBe(before.fieldMetadata);
+        expect(after.updatedAt).toEqual(before.updatedAt);
+        expect(await prisma.auditLog.count({ where: { entityId: before.id } })).toBe(auditsBefore);
+    });
 });

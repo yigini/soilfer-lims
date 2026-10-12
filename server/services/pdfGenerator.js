@@ -45,7 +45,8 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             const evidenceText = describeReportEvidence(reportContent.evidence, locale);
             const qcStatement = reportContent.qcStatement || (reportContent.evidence ? evidenceText.qcStatement
                 : reportContent.qcWarnings?.length ? reportContent.qcWarningStatement : evidenceText.qcStatement);
-            const preparationStatement = reportContent.preparationStatement || evidenceText.preparationStatement;
+            const preparationStatement = [reportContent.preparationStatement || evidenceText.preparationStatement,
+                reportContent.basisStatement].filter(Boolean).join('\n');
             const number = publication.reportNumber || reportContent.reportNumber || labels.notRecorded;
             const issuedAt = publication.publishedAt || reportContent.publication?.publishedAt;
             const issuedDate = issuedAt ? new Date(issuedAt).toISOString().split('T')[0] : labels.notRecorded;

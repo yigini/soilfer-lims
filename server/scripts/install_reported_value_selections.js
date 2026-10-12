@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 const path = require('node:path'), Database = require('better-sqlite3');
 const { loadReportedValueMigrationSource } = require('../services/reportedValueMigrationSource');
-const { normalize, fingerprint } = require('../services/workRepeatInstallationEvidence');
+const { normalize } = require('../services/workRepeatInstallationEvidence');
+const { fingerprintRetainedTables } = require('../services/retainedRowsFingerprint');
 const MARKER = '192_reported_value_selection';
 const fail = (message, differences = []) => Object.assign(new Error(message), { code: 'REPORTED_VALUE_SCHEMA_MISMATCH', differences, totalChanges: 0 });
 function releaseObjects(source) {
@@ -38,8 +39,7 @@ function classify(db, source) {
     return { classification, migrationSha256: source.sha256 };
 }
 function retained(db) {
-    const names = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name<>'ReportedValueSelection' ORDER BY name").all();
-    return Object.fromEntries(names.map(({ name }) => [name, db.prepare('SELECT * FROM "'+name.replace(/"/g,'""')+'" ORDER BY rowid').all()]));
+    return fingerprintRetainedTables(db, { excludeTables: ['ReportedValueSelection'] });
 }
 function installReportedValueSelections({ dbPath, apply = false } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('An explicit database path is required.');
@@ -54,11 +54,11 @@ function installReportedValueSelections({ dbPath, apply = false } = {}) {
         return db.transaction(() => {
             const current = classify(db, source);
             if (current.classification === 'COMPLETE') return { ...current, mode: 'NO_OP', totalChanges: 0, newSelectionCount: 0 };
-            const saved = fingerprint(retained(db));
+            const saved = retained(db);
             const installationSql = loadReportedValueMigrationSource();
             if (current.classification === 'PRE_192') db.exec(installationSql.schemaSql);
             db.exec(installationSql.guardsSql);
-            if (fingerprint(retained(db)) !== saved) throw fail('Reported-value installation changed retained rows.');
+            if (retained(db) !== saved) throw fail('Reported-value installation changed retained rows.');
             db.prepare('INSERT INTO "_schema_migrations"(id,details) VALUES (?,?)').run(MARKER, JSON.stringify({ migrationSha256: source.sha256,
                 predecessorReceiptSha256: predecessor.receipt.receiptSha256, retainedRowsSha256: saved, newSelectionCount: 0 }));
             const after = classify(db, source);

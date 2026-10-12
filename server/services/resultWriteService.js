@@ -312,9 +312,11 @@ async function appendAttemptCorrection(tx, { item, sample, attempt, target, acto
     return row;
 }
 
+// #283: the analysis's controlled unit is the only reporting-unit authority;
+// a method never supplies its own unit.
 function numericReportingUnit(ctx, measurement) {
     const fraction = FRACTIONS.includes(measurement.param) && TEXTURE_ANALYSES.has(ctx.analysis.code);
-    const unit = fraction ? '%' : measurement.unit || ctx.method?.unit || ctx.analysis.units || ctx.analysis.unitCode || null;
+    const unit = fraction ? '%' : measurement.unit || ctx.analysis.units || ctx.analysis.unitCode || null;
     if (!fraction && measurement.unit && ctx.analysis.units && ![ctx.analysis.units, ctx.analysis.unitCode].includes(measurement.unit)) {
         throw new TransitionError('Use the configured reporting unit.', 409, 'RESULT_UNIT_MISMATCH');
     }
@@ -542,10 +544,17 @@ async function deriveTextureResult(tx, { sampleId, replicateNo = 1, actor, now =
     rules.requireTransaction(tx);
     const rows = await tx.result.findMany({ where: { sampleId, replicateNo, isCurrent: true, param: { in: FRACTIONS } }, orderBy: { createdAt: 'desc' } });
     const fractions = FRACTIONS.map(param => rows.find(row => row.param === param));
-    if (fractions.some(row => !row || row.censoring !== 'NONE' || row.numericValue == null)) return null;
+    // #278/#291: the shared texture input authority (one uncensored finite '%' value per fraction).
+    const { textureInputs, closureOptions } = require('./textureInputAuthority');
+    const inputs = textureInputs(FRACTIONS.map(param => rows.filter(row => row.param === param)
+        .map(row => ({ value: row.numericValue, unit: row.unit, censoring: row.censoring }))));
+    if (inputs.reasonCode) return null;
     const item=await tx.workItem.findFirst({where:canonicalWorkItemWhere(sampleId,'TEXTURE')});
     if (!item) throw new TransitionError('Reconcile the order before recording this parameter.',409,'RESULT_WORKITEM_REQUIRED');
-    const classification = require('../utils/soilCalculations').calculateUsdaTexture(...fractions.map(row => row.numericValue));
+    // #278: derive within the laboratory closure tolerance from policyService; an invalid value (#281) is exact closure.
+    const owner = await tx.sample.findUnique({ where: { id: sampleId }, select: { assignedLab: true, labId: true } });
+    const tolerance = await require('./policyService').get(owner?.assignedLab || owner?.labId, 'crossCheck.textureClosureTolerancePct', { db: tx });
+    const classification = require('../utils/soilCalculations').calculateUsdaTexture(...inputs.values, closureOptions(tolerance));
     if (!classification.isValid) return null;
     const flags = ['DERIVED_USDA_12_CLASS', ...fractions.map(row => `SOURCE_${row.param}_${row.id}`), `CLOSURE_ERROR_${classification.closureError ?? 0}`];
     const ctx = await context(tx, { sampleId, actor, workItemId:item.id,
@@ -681,6 +690,6 @@ function createRawResultFixture(db, data) {
         .run(...fields.map(field => data[field]));
 }
 
-module.exports = { writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
+module.exports = { numericReportingUnit, writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
     writeResultsExecution, appendAttemptCorrection, recordedExecution, assertRecordedResultSave,
     createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError, resolveResultRunContext, previewResultCalculation, resolveResultValidationContext };

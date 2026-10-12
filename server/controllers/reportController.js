@@ -179,7 +179,8 @@ async function generateReport(req, res) {
             const identity = await allocateReportIdentity(tx, { sampleId, lab, publishedAt,
                 resolveFormat: () => policyService.get(lab.id, 'report.numberFormat', { db: tx }) });
             const policySnapshot = await policyService.snapshot(lab.id, { db: tx });
-            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes, qcModeEvidence, qcGates, qcAcknowledgements, reportedSelectionProof });
+            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes, qcModeEvidence, qcGates, qcAcknowledgements, reportedSelectionProof,
+                basis: req.body?.basis });
             content.policy = { version: policySnapshot.version, presetCode: policySnapshot.presetCode,
                 reportNumberFormat: policySnapshot.values['report.numberFormat'], qcModes, qcModeEvidence };
             content.reportNumber = displayNumber(identity.reportNumberBase, identity.revision);

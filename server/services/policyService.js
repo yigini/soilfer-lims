@@ -64,6 +64,9 @@ function resolvedFromState(current, key, context = {}) {
             let value;
             try { value = JSON.parse(rows[0].value); }
             catch (_) { throw error(409, key.startsWith('numbers.') ? 'NUMBER_FORMAT_POLICY_INVALID' : 'POLICY_STORED_VALUE_INVALID', 'Invalid stored policy JSON.'); }
+            if (!valid(key, value) && d.storedInvalid === 'UNAVAILABLE') {
+                return { value: null, invalid: true, source, scope: { analysisCode: analysis, methodologyId: method }, version, overrideId: rows[0].id };
+            }
             if (!valid(key, value)) throw error(409, key.startsWith('numbers.') ? 'NUMBER_FORMAT_POLICY_INVALID' : 'POLICY_STORED_VALUE_INVALID', 'Invalid stored policy value.');
             return { value: clone(value), source, scope: { analysisCode: analysis, methodologyId: method }, version, overrideId: rows[0].id };
         }
@@ -164,6 +167,9 @@ async function validateChange(change, db) {
         if (!method || method.analysisCode !== analysisCode) throw error(422, 'POLICY_SCOPE_INVALID', 'Methodology must belong to the analysis.');
     }
     if (change.clear !== true && !valid(change.key, change.value)) throw error(400, 'POLICY_VALUE_INVALID', 'Policy value is outside its allowed range.');
+    if (change.clear !== true && analysisCode !== null && d.analysisEligible && !d.analysisEligible(analysisCode, change.value)) {
+        throw error(422, 'POLICY_SCOPE_INVALID', 'This policy cannot be enabled for that analysis.');
+    }
     return { ...change, analysisCode, methodologyId };
 }
 async function mutateInTransaction(actor, reference, request, tx, options = {}) {

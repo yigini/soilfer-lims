@@ -81,6 +81,34 @@
     "see": "ver",
     "replaces": "Substitui",
     "preparationRecords": "Registros de preparação",
+    "preparationRecordText": {
+      "steps": {
+        "DRYING": "Secagem",
+        "SIEVING": "Peneiramento",
+        "GRINDING": "Moagem",
+        "SPLITTING": "Quarteamento"
+      },
+      "methods": {
+        "AIR": "Seco ao ar",
+        "OVEN_40": "Estufa 40 °C",
+        "OVEN_105": "Estufa 105 °C",
+        "OTHER": "Outro método"
+      },
+      "sieve": "Peneira",
+      "coarseFraction": "Fração grossa",
+      "grind": "Moído a",
+      "massBefore": "Massa inicial",
+      "massAfter": "Massa final",
+      "duration": "Duração",
+      "equipment": "Equipamento",
+      "performedBy": "Realizado por"
+    },
+    "reportBasis": {
+      "ovenDry": "Expresso em base seca em estufa",
+      "factor": "fator de correção de umidade",
+      "waterContent": "teor gravimétrico de água",
+      "source": "resultado de umidade"
+    },
     "qcNotRequired": "CQ não obrigatório",
     "qcEvidenceIncomplete": "A aceitação histórica do CQ tem evidência registrada incompleta",
     "qcAcknowledgedBy": "Aceito por",
@@ -1019,6 +1047,7 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Permitir correção revisada de erros de transcrição em CQ reprovado sem decisão",
       "report_uncertaintyMode": "Informar incerteza expandida",
       "report_uncertaintyCoverageFactor": "Fator de abrangência da incerteza",
+      "report_ovenDryConvertible": "Converter para base seca em estufa quando solicitado",
       "crossCheck_basesCecFactor": "Fator máximo de bases trocáveis / CTC",
       "crossCheck_baseSaturationMaxPct": "Saturação máxima por bases (%)",
       "crossCheck_textureClosureTolerancePct": "Tolerância do fechamento da textura (%)",
@@ -1063,6 +1092,7 @@
     "source": "Origem",
     "difference": "Comparação com a predefinição",
     "differs": "Difere da predefinição",
+    "storedInvalid": "O valor salvo está fora do intervalo e não é usado; salve um valor válido.",
     "edit": "Editar",
     "clear": "Remover substituição",
     "clearExplanation": "Esta configuração herdará o próximo padrão aplicável. O valor anterior permanece no histórico.",
@@ -1891,7 +1921,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "A evidência de verificação requer o envio correspondente."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Verificações cruzadas indisponíveis: a amostra não tem um laboratório registrado"
+      "CROSS_CHECK_LAB_REQUIRED": "Verificações cruzadas indisponíveis: a amostra não tem um laboratório registrado",
+      "CROSS_CHECK_POLICY_INVALID": "Verificações cruzadas indisponíveis: uma configuração de verificação do laboratório está fora do intervalo; um gestor deve salvar um valor válido"
     }
   },
   "amendment": {

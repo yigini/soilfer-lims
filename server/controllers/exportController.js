@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const prisma = require('../prisma');
 const { normalizeUnit } = require('../services/interpretationService');
-const { readSampleReportedValues, reportedValueText } = require('../services/reportedValueReadService');
+const { readSampleReportedValues, reportedValueText, reportedExportValue } = require('../services/reportedValueReadService');
 const { hasPermission } = require('../config/roles');
 
 // Helper: Scoping
@@ -167,7 +167,7 @@ exports.getExportData = async (req, res) => {
 
             const samples = await prisma.sample.findMany({
                 where,
-                include: { results: true, workItems:true }
+                include: { workItems:true }
             });
 
             // Metadata map...
@@ -197,55 +197,51 @@ exports.getExportData = async (req, res) => {
                     } catch (e) { }
                 }
 
-                const reported = type==='WET_CHEM' ? await readSampleReportedValues(prisma,sample,{partial:true}) : null;
-                if(reported) reportedValueErrors.push(...reported.errors);
-                if (sample.results || reported) {
-                    const groups = (reported?.values || sample.results).map(result=>[result]);
-                    for (const replicates of groups) {
-                        const r = replicates[0];
-                        const colKey = r.param;
-                        const pLower = colKey.toLowerCase();
-                        const rawUnit = r.unit || (analysesMap[colKey] ? analysesMap[colKey].units : '');
-                        const norm = normalizeUnit(colKey, r.value, rawUnit);
-                        let asMeasured = isNaN(Number(r.value)) ? r.value : Number(r.value);
-                        let normalized = norm.normalizedValue !== null ? norm.normalizedValue : asMeasured;
-                        let controlledUnit = norm.standardUnit || rawUnit;
-                        let measuredUnit = rawUnit;
-                        if (type === 'WET_CHEM') {
-                            selectionPolicies.set(r.selectionId,{labId:sample.assignedLab || sample.labId,analysisCode:colKey,
-                                methodologyId:r.methodologyId,version:r.policyVersion,rule:r.policyRule,source:r.policySource,
-                                selectionRule:r.rule,reportedValueSelectionId:r.selectionId});
-                            row[`${pLower}_n`] = r.sourceResultIds.length;
-                            row[`${pLower}_flag`] = r.mode==='NOT_REPORTABLE'?'NOT_REPORTABLE':r.rule;
-                            row[`${pLower}_selection_id`] = r.selectionId;
-                            if(r.numericValue!==null && r.sourceResultIds.length>1)asMeasured='';
-                            if(r.mode==='NOT_REPORTABLE') { asMeasured=reportedValueText(r,user.language);normalized=asMeasured;controlledUnit='';measuredUnit=''; }
-                            headerNotes.add('Reported values: saved reviewer selection with its recorded source evidence and policy version.');
-                        }
+                const reported = await readSampleReportedValues(prisma,sample,{partial:true});
+                reportedValueErrors.push(...reported.errors);
+                for (const r of reported.values) {
+                    const colKey = r.param;
+                    const pLower = colKey.toLowerCase();
+                    const rawUnit = r.unit || (analysesMap[colKey] ? analysesMap[colKey].units : '');
+                    const norm = normalizeUnit(colKey, r.value, rawUnit);
+                    let asMeasured = isNaN(Number(r.value)) ? r.value : Number(r.value);
+                    let normalized = norm.normalizedValue !== null ? norm.normalizedValue : asMeasured;
+                    let controlledUnit = norm.standardUnit || rawUnit;
+                    let measuredUnit = rawUnit;
+                    selectionPolicies.set(r.selectionId,{labId:sample.assignedLab || sample.labId,analysisCode:colKey,
+                        methodologyId:r.methodologyId,version:r.policyVersion,rule:r.policyRule,source:r.policySource,
+                        selectionRule:r.rule,reportedValueSelectionId:r.selectionId});
+                    row[`${pLower}_n`] = r.sourceResultIds.length;
+                    row[`${pLower}_flag`] = r.mode==='NOT_REPORTABLE'?'NOT_REPORTABLE':r.rule;
+                    row[`${pLower}_selection_id`] = r.selectionId;
+                    row[`${pLower}_attempt_ids`] = r.attemptIds.join(';');
+                    row[`${pLower}_batch_ids`] = r.batchIds.join(';');
+                    if(r.numericValue!==null && r.sourceResultIds.length>1)asMeasured='';
+                    if(r.mode==='NOT_REPORTABLE') { asMeasured=reportedValueText(r,user.language);normalized=asMeasured;controlledUnit='';measuredUnit=''; }
+                    headerNotes.add('Reported values: saved reviewer selection with its recorded source evidence and policy version.');
 
-                        // Legacy column points to normalized value
-                        row[colKey] = normalized;
+                    // The headline column is the report value in the analysis's own unit.
+                    row[colKey] = reportedExportValue(r,user.language);
 
-                        // WP-22: Dual export representation
-                        row[`${pLower}_as_measured`] = asMeasured;
-                        row[`${pLower}_unit`] = measuredUnit;
-                        row[`${pLower}_normalized`] = normalized;
-                        row[`${pLower}_controlled_unit`] = controlledUnit;
+                    // WP-22: Dual export representation
+                    row[`${pLower}_as_measured`] = asMeasured;
+                    row[`${pLower}_unit`] = measuredUnit;
+                    row[`${pLower}_normalized`] = normalized;
+                    row[`${pLower}_controlled_unit`] = controlledUnit;
 
-                        const newCols = [colKey, `${pLower}_as_measured`, `${pLower}_unit`, `${pLower}_normalized`, `${pLower}_controlled_unit`];
-                        if (type === 'WET_CHEM') newCols.push(`${pLower}_n`, `${pLower}_flag`,`${pLower}_selection_id`);
-                        newCols.forEach(c => {
-                            if (!columns.includes(c)) columns.push(c);
-                        });
+                    const newCols = [colKey, `${pLower}_as_measured`, `${pLower}_unit`, `${pLower}_normalized`, `${pLower}_controlled_unit`,
+                        `${pLower}_n`, `${pLower}_flag`,`${pLower}_selection_id`,`${pLower}_attempt_ids`,`${pLower}_batch_ids`];
+                    newCols.forEach(c => {
+                        if (!columns.includes(c)) columns.push(c);
+                    });
 
-                        if (!analysisMetadata[colKey]) {
-                            const config = analysesMap[colKey] || {};
-                            analysisMetadata[colKey] = {
-                                name: config.name || colKey,
-                                unit: controlledUnit,
-                                method: 'Internal'
-                            };
-                        }
+                    if (!analysisMetadata[colKey]) {
+                        const config = analysesMap[colKey] || {};
+                        analysisMetadata[colKey] = {
+                            name: config.name || colKey,
+                            unit: rawUnit,
+                            method: 'Internal'
+                        };
                     }
                 }
                 return row;
@@ -287,7 +283,7 @@ exports.getExportData = async (req, res) => {
                 details: JSON.stringify({
                     filters: { project, lab, startDate, endDate, viewFilters },
                     count: data.length,
-                    ...(type === 'WET_CHEM' ? { ambiguousCellCount, reportedValueErrors, headerNotes: [...headerNotes], selectionPolicies: [...selectionPolicies.values()] } : {}),
+                    ...(['WET_CHEM','SPECTRAL'].includes(type) ? { ambiguousCellCount, reportedValueErrors, headerNotes: [...headerNotes], selectionPolicies: [...selectionPolicies.values()] } : {}),
                     signOff: { name: signOffName, reason: signOffReason }
                 })
             }
@@ -301,7 +297,7 @@ exports.getExportData = async (req, res) => {
                 generatedBy: signOffName || user.name,
                 recordCount: data.length,
                 analysisMetadata,
-                ...(type === 'WET_CHEM' ? { ambiguousCellCount, reportedValueErrors, headerNotes: [...headerNotes], selectionPolicies: [...selectionPolicies.values()] } : {})
+                ...(['WET_CHEM','SPECTRAL'].includes(type) ? { ambiguousCellCount, reportedValueErrors, headerNotes: [...headerNotes], selectionPolicies: [...selectionPolicies.values()] } : {})
             },
             columns,
             data

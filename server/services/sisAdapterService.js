@@ -451,7 +451,7 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
 
         const procedureUri = methodObj?.glosisUri || aMeta.glosisUri || null;
         const propertyUri = aMeta.glosisPropertyUri || (aMeta.glosisProperty ? `http://glosis.org/ont/property/${aMeta.glosisProperty}` : null);
-        const qudtUnit = methodObj?.qudtUnit || aMeta.qudtUnit || null;
+        const { qudtUnit, unitDiagnostic } = require('./methodUnitAuthority').analysisQudtUnit(aMeta, methodObj);
 
         const rawUnit = r.unit || aMeta.units || null;
         const norm = normalizeUnit(r.param, r.value, rawUnit);
@@ -506,6 +506,7 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
             },
             controlledUnit,
             qudtUnit,
+            ...(unitDiagnostic ? { unitDiagnostic } : {}),
             lod: lodVal,
             loq: loqVal,
             uncertainty: uncVal,
@@ -515,6 +516,8 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
             basis: (r.basis !== undefined && r.basis !== null && r.basis !== '') ? r.basis : 'AIR_DRY',
             censoring: (r.censoring !== undefined && r.censoring !== null && r.censoring !== '') ? r.censoring : 'NONE',
             replicateNo: (r.replicateNo !== undefined && r.replicateNo !== null && !isNaN(Number(r.replicateNo))) ? Number(r.replicateNo) : 1,
+            attemptId: r.attemptId || null,
+            batchId: r.batchId || null,
             isValid: r.isValid !== false,
             method: {
                 id: r.methodologyId || null,
@@ -544,12 +547,13 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
 // V1 communicates a reported outcome. V2 continues to call extractObservations
 // directly and retains its raw Result ids, replicas, order and numeric fields.
 function extractReportedObservations(sample,values,maps={},locale='en') {
-    const rows=values.map(row=>({...row,value:require('./reportedValueReadService').reportedValueText(row,locale)}));
-    return extractObservations({...sample,results:rows},maps).map(observation=>{
+    const {reportedValueText,reportedExportValue}=require('./reportedValueReadService');
+    const rows=values.map(row=>({...row,value:reportedValueText(row,locale),reportedValue:reportedExportValue(row,locale)}));
+    return extractObservations({...sample,results:rows},maps).map(({attemptId,batchId,...observation})=>{
         const row=rows.find(value=>value.id===observation.observationId);
         if(row.mode==='NOT_REPORTABLE') {observation.asMeasured.value=row.value;observation.normalized.value=row.value;}
-        return {...observation,reportedValueSelectionId:row.selectionId,reportedMode:row.mode,selectionReason:row.reason,
-            sourceResultIds:row.sourceResultIds,attemptIds:row.attemptIds};
+        return {...observation,reportedValue:row.reportedValue,reportedValueSelectionId:row.selectionId,reportedMode:row.mode,
+            selectionReason:row.reason,sourceResultIds:row.sourceResultIds,attemptIds:row.attemptIds,batchIds:row.batchIds};
     });
 }
 
@@ -560,7 +564,7 @@ function buildLegacyAnalyticalResultsMap(observations = []) {
     const map = {};
     observations.forEach(obs => {
         map[obs.parameter] = {
-            value: obs.normalized.value !== null ? obs.normalized.value : obs.asMeasured.value,
+            value: obs.reportedValueSelectionId ? obs.reportedValue : obs.normalized.value !== null ? obs.normalized.value : obs.asMeasured.value,
             as_measured: obs.asMeasured.value,
             unit: obs.asMeasured.unit,
             normalized: obs.normalized.value,
@@ -580,7 +584,8 @@ function buildLegacyAnalyticalResultsMap(observations = []) {
             updatedAt: obs.updatedAt
         };
         if(obs.reportedValueSelectionId) Object.assign(map[obs.parameter],{reportedValueSelectionId:obs.reportedValueSelectionId,
-            reportedMode:obs.reportedMode,selectionReason:obs.selectionReason,sourceResultIds:obs.sourceResultIds});
+            reportedMode:obs.reportedMode,selectionReason:obs.selectionReason,sourceResultIds:obs.sourceResultIds,
+            attemptIds:obs.attemptIds,batchIds:obs.batchIds});
     });
     return map;
 }
