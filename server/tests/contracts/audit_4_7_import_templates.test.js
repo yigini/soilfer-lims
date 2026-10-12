@@ -1,3 +1,4 @@
+const { randomUUID } = require('node:crypto');
 const service = require('../../services/instrumentImportTemplateService');
 const { qcGateFixture } = require('../helpers/qcGateFixture');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
@@ -69,4 +70,16 @@ test('mounted template routes save and list through actual token, scope and perm
         expect(forged.status).toBe(422); expect(forged.body.code).toBe('IMPORT_TEMPLATE_INVALID');
         expect(await f.db.importTemplate.count()).toBe(1);
     }, { workbench: true });
+});
+
+
+test('a same-lab different-instrument revision refuses with its exact code and no mapping or audit writes', async () => {
+    const f = await fixture(), root = await service.saveTemplate(f.db, f.actor, input(f));
+    const instrument = await f.db.equipmentAsset.create({ data: { id: randomUUID(), labId: f.labId,
+        name: 'Other owned revision instrument', assetType: 'OTHER', status: 'IN_SERVICE', criticality: 'NON_CRITICAL' } });
+    const state = () => Promise.all([f.db.importTemplate.findMany(), f.db.auditLog.findMany(), f.snapshot()]);
+    const before = await state();
+    await expect(service.saveTemplate(f.db, f.actor, input(f, { instrumentId: instrument.id, supersedesId: root.id, expectedVersion: root.version })))
+        .rejects.toMatchObject({ statusCode: 409, code: 'IMPORT_TEMPLATE_INSTRUMENT_MISMATCH' });
+    expect(await state()).toEqual(before);
 });

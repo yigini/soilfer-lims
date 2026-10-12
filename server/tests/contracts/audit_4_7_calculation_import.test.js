@@ -14,8 +14,8 @@ const importer = require('../../services/instrumentImportService');
 const { readInstrumentImportContext } = require('../../services/instrumentImportPreviewService');
 let owned;
 afterEach(async () => { if (owned) await owned.close(); owned = null; });
-async function fixture() {
-    const criteria = { blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0, ccvEvery: 0, curveMinPoints: 3, curveMinR: 0.995 };
+async function fixture({ qc = false } = {}) {
+    const criteria = { blankPerBatch: qc ? 1 : 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0, ccvEvery: 0, curveMinPoints: 3, curveMinR: 0.995 };
     const f = owned = await qcGateFixture({ criteria });
     await f.setPolicy([{ key: 'numbers.decimalSeparator', value: ',' }, { key: 'numbers.thousandsSeparator', value: '.' }]);
     await f.db.equipmentQualification.create({ data: { id: randomUUID(), equipmentId: f.instrument.id, labId: f.labId,
@@ -115,5 +115,30 @@ test('a calculation deactivation after preview refuses before any receipt, raw d
         expectedVersion: row.template.version, expectedActivationId: row.activation.id, action: 'DEACTIVATE', verifiedAgainstSop: true, reason: 'Owned future-input SOP decision' });
     const before = await f.state();
     await expect(importer.commit(f.db, f.actor, { ...f.input, previewToken: preview.previewToken })).rejects.toMatchObject({ code: 'IMPORT_TEMPLATE_ACTIVATION_CHANGED' });
+    expect(await f.state()).toEqual(before);
+});
+
+
+test('QC under an input-only mapping refuses the whole file before any draft, receipt or scientific writes', async () => {
+    const f = await fixture({ qc: true }), blank = f.run.positions.find(row => row.kind === 'BLANK');
+    expect(blank).toBeDefined();
+    const positionColumn = f.cells.length;
+    const mapping = { ...f.mapping, qcDetector: { positionColumn, prefixes: [{ prefix: 'BLK', kind: 'BLANK' }] } };
+    const template = await f.save(mapping);
+    const cells = (row, number) => row.map((value, column) => column === 0
+        ? `<c r="A${number}" t="inlineStr"><is><t>${xmlAttribute(value)}</t></is></c>`
+        : `<c r="${String.fromCharCode(65 + column)}${number}"><v>${value}</v></c>`).join('');
+    const samplePosition = f.run.positions.find(row => row.sampleId === f.sample.id).position;
+    const sample = cells([...f.cells, String(samplePosition)], 1), qc = cells(['BLK-input-only', ...f.cells.slice(1), String(blank.position)], 2);
+    const input = { ...f.input, templateId: template.id, bytes: xlsxWorkbook({ sheets: [{ name: 'Raw',
+        xml: `<sheetData><row r="1">${sample}</row><row r="2">${qc}</row></sheetData>` }] }) };
+    const before = await f.state(), preview = await importer.preview(f.db, f.actor, input);
+    expect(preview.canCommit).toBe(false);
+    expect(preview.rows[0].errors).toEqual([]);
+    expect(preview.rows[0].plans).toHaveLength(2);
+    expect(preview.refusals).toEqual(f.calculated.map(row => expect.objectContaining({ rowNumber: 2,
+        analysisCode: row.code, statusCode: 400, code: 'IMPORT_TEMPLATE_MAPPING_INVALID' })));
+    await expect(importer.commit(f.db, f.actor, { ...input, previewToken: preview.previewToken }))
+        .rejects.toMatchObject({ statusCode: 400, code: 'IMPORT_TEMPLATE_MAPPING_INVALID', details: { refusedRows: preview.refusals } });
     expect(await f.state()).toEqual(before);
 });
