@@ -1,0 +1,27 @@
+{
+  "status": "INDEPENDENT_ORIGINAL_PROOF_VALIDATION_PASSED",
+  "completedUtc": "2026-10-12T00:19:48.823434+00:00",
+  "receiptSha256": "257196f530a0494ca0ba43023091febe670bc894c063d4bdd99e98f23d979c0d",
+  "firstScheduledSync": {
+    "utc": "2026-10-12T00:00:14.465783998Z",
+    "epochSeconds": 1791763214.465783,
+    "labId": "ZMB-LAB1",
+    "newSamples": 0,
+    "skipped": 0
+  },
+  "secondScheduledSync": {
+    "utc": "2026-10-12T00:16:14.390704118Z",
+    "epochSeconds": 1791764174.390704,
+    "labId": "ZMB-LAB1",
+    "newSamples": 0,
+    "skipped": 0
+  },
+  "healthySoakSeconds": 1434.3276870250702,
+  "peakBytes": 205242368,
+  "protectedTableCount": 104,
+  "protectedReceiptCount": 38,
+  "firstPreservationSha256": "b57bcc97a184a87b65bcf3ed9dfdb1ff2262ee5cb3f6e17e85d1a043ee14721e",
+  "secondPreservationSha256": "4bd8b50203bf179f445a9396496160ae46d10a232af7cb2d85b8539eca897016",
+  "fullPreservationSha256": "fcc427061b1133c7dcb9f7df40efb3ef8c97583c790fb9f3224bdee4e637df62",
+  "ownedWriterStopped": true
+}
