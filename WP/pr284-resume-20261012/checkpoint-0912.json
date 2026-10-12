@@ -1,0 +1,28 @@
+{
+  "updatedUtc": "2026-10-12T09:13:21.843274+00:00",
+  "applicationHead": "c26591698c1e974a3bf771e5c333578755aef315",
+  "tree": "9b3b77496c3aa2cdad7c7594a0b258ec4b491753",
+  "draft": false,
+  "ciRun": 38224227228,
+  "ciStatus": "SUCCESS",
+  "ciCompletedUtc": "2026-10-12T09:09:17Z",
+  "fullSuites": 360,
+  "fullTests": 5473,
+  "fullSeconds": 1673.574,
+  "realDockerGatesPassed": true,
+  "readyCommentId": 6121215409,
+  "formalAudit": "PENDING",
+  "sourceCommit": "62851828f9ed4744364f3e434c10a091122b6b83",
+  "sourceGuardWindows": 121,
+  "sourceGuardLinux": 121,
+  "sourceAuthority": "UNREVIEWED_UNMERGED_REFUSE",
+  "productionMutations": 0,
+  "evidenceHashes": {
+    "ci-c2659169-success.log": "3ef1335adde6bd52a64afbf63304a633bde563f8bdc740465e263769e1a73953",
+    "ci-c2659169-success-run.json": "d4bc078770c068ef3cdebdd7742f40273b087a05420218a4e08dea97ca80aa26",
+    "import-authority-windows-0910.stdout.log": "0662f76b52afa74df1e8aa31c02e9664ebab110c91c048725eca29da75380d5c",
+    "import-authority-windows-0910.stderr.log": "d34801dd0c594b6c85a877a3f63c03490d3942abf57b9357ace59a10e6b23b90",
+    "import-authority-linux-0910.stdout.log": "29b7d71cd51624151bce19bdabb877455d090c28e35b631dfe7c229e405a20b0",
+    "import-authority-linux-0910.stderr.log": "91392f8ef09c64435871aca425df8d0e2e07968bdbea727bb8d972b6dc55b116"
+  }
+}
