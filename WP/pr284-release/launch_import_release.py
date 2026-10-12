@@ -5,6 +5,11 @@ import subprocess
 import sys
 from import_release_contract import safe_root, require
 
+# The same complete physical preflight precedes dispatch. Allow its bounded
+# 180 s transport budget, the unchanged 20 s systemd dispatch, and 10 s overhead.
+# The remote production unit still has its independently enforced 5400 s limit.
+LAUNCH_TRANSPORT_TIMEOUT_SECONDS = 210
+
 
 def main():
     root, unit = sys.argv[1:]
@@ -29,7 +34,8 @@ print(json.dumps({'root':str(r),'unit':p['unit'],'head':m['head'],'image':m['ima
  'status':'SINGLE_NEW_RELEASE_LAUNCHED_NOT_YET_DEPLOYED'}))
 '''.replace('PAYLOAD', repr(payload))
     result = subprocess.run(['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', 'root@46.19.33.37',
-        'python3', '-B', '-'], input=code, text=True, capture_output=True, timeout=90)
+        'python3', '-B', '-'], input=code, text=True, capture_output=True,
+        timeout=LAUNCH_TRANSPORT_TIMEOUT_SECONDS)
     require(result.returncode == 0, 'Single NEW production launch refused: ' + result.stderr)
     print(result.stdout, end='')
 

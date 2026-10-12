@@ -12,6 +12,11 @@ import subprocess
 import sys
 from import_release_contract import *
 
+# Measured unchanged physical preflight plus SSH overhead took 60.156 s.
+# Keep a bounded transport budget with more than 60 s of measured headroom.
+# This changes neither the 600 s gate age nor any production stage deadline.
+GATE_TRANSPORT_TIMEOUT_SECONDS = 180
+
 
 def local_frozen_reference(root, name):
     """Hash-bound downloaded copy; remote originals still require exact 0400.
@@ -40,7 +45,8 @@ def github(endpoint, pages=False):
 
 def remote(code):
     result = subprocess.run(['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', 'root@46.19.33.37',
-        'python3', '-B', '-'], input=code, text=True, capture_output=True, timeout=60)
+        'python3', '-B', '-'], input=code, text=True, capture_output=True,
+        timeout=GATE_TRANSPORT_TIMEOUT_SECONDS)
     require(result.returncode == 0, 'Fresh gate readiness refused: ' + result.stderr)
     return json.loads(result.stdout)
 

@@ -341,6 +341,73 @@ class ReleaseTests(unittest.TestCase):
             for name in ['../owned.json', './owned.json', '/owned.json', 'nested/owned.json', None]:
                 with self.assertRaises(RuntimeError): namespace['local_frozen_reference'](root, name)
 
+    def test_gate_transport_preserves_single_call_and_refuses_timeout_error_or_invalid_response(self):
+        import ast
+        import json
+        import subprocess
+        from unittest.mock import Mock
+        tree = ast.parse(RAW_PACKAGE['collect_import_gate.py'])
+        selected = [node for node in tree.body if
+            isinstance(node, ast.FunctionDef) and node.name == 'remote' or
+            isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and
+                target.id == 'GATE_TRANSPORT_TIMEOUT_SECONDS' for target in node.targets)]
+        runner = Mock()
+        namespace = {'require': release.require, 'subprocess': runner, 'json': json}
+        exec(compile(ast.Module(body=selected, type_ignores=[]), '/owned-gate-transport.py', 'exec'), namespace)
+        def completed(*args, **kwargs):
+            self.assertEqual(kwargs['timeout'], 180)
+            self.assertGreaterEqual(kwargs['timeout'] - 60.156, 60)
+            self.assertEqual(args[0][-3:], ['python3', '-B', '-'])
+            self.assertEqual(kwargs['input'], 'owned-read-only-query')
+            return types.SimpleNamespace(returncode=0, stdout='{"ready":true}', stderr='')
+        runner.run.side_effect = completed
+        self.assertEqual(namespace['remote']('owned-read-only-query'), {'ready': True})
+        self.assertEqual(runner.run.call_count, 1)
+        for kind in ['timeout', 'refused', 'invalid-json']:
+            runner.reset_mock()
+            runner.run.side_effect = subprocess.TimeoutExpired('owned', 180) if kind == 'timeout' else None
+            runner.run.return_value = types.SimpleNamespace(returncode=1 if kind == 'refused' else 0,
+                stdout='invalid', stderr='owned refusal')
+            exception = subprocess.TimeoutExpired if kind == 'timeout' else RuntimeError if kind == 'refused' else json.JSONDecodeError
+            with self.subTest(kind=kind), self.assertRaises(exception):
+                namespace['remote']('owned-read-only-query')
+            self.assertEqual(runner.run.call_count, 1, 'No retry on any transport/refusal outcome')
+
+    def test_launch_transport_keeps_preflight_before_single_dispatch_and_production_limits(self):
+        import ast
+        import base64
+        import io
+        import json
+        import subprocess
+        from unittest.mock import Mock
+        tree = ast.parse(RAW_PACKAGE['launch_import_release.py'])
+        selected = [node for node in tree.body if
+            isinstance(node, ast.FunctionDef) and node.name == 'main' or
+            isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and
+                target.id == 'LAUNCH_TRANSPORT_TIMEOUT_SECONDS' for target in node.targets)]
+        root = '/opt/lims/releases/instrument-import-release-owned'
+        runner = Mock()
+        namespace = {'require': release.require, 'subprocess': runner, 'base64': base64, 'json': json,
+            'safe_root': pathlib.PurePosixPath,
+            'sys': types.SimpleNamespace(argv=['owned', root, 'lims-release-instrument-import-release-owned.service'])}
+        exec(compile(ast.Module(body=selected, type_ignores=[]), '/owned-launch-transport.py', 'exec'), namespace)
+        def completed(*args, **kwargs):
+            self.assertEqual(kwargs['timeout'], 210)
+            self.assertGreaterEqual(kwargs['timeout'] - 60.156 - 20, 60)
+            self.assertEqual(args[0][-3:], ['python3', '-B', '-'])
+            payload = kwargs['input']
+            self.assertLess(payload.index('actual=execution_preflight'), payload.index('result=subprocess.run'))
+            self.assertIn('RuntimeMaxSec=5400', payload)
+            self.assertIn('timeout=20', payload)
+            self.assertIn('verify_gate(m,g,digest);verify_entry_readiness', payload)
+            return types.SimpleNamespace(returncode=0, stdout='owned launched', stderr='')
+        runner.run.side_effect = completed
+        with patch('sys.stdout', new_callable=io.StringIO): namespace['main']()
+        self.assertEqual(runner.run.call_count, 1)
+        runner.reset_mock(); runner.run.side_effect = subprocess.TimeoutExpired('owned', 210)
+        with self.assertRaises(subprocess.TimeoutExpired): namespace['main']()
+        self.assertEqual(runner.run.call_count, 1, 'Never dispatch again after unknown transport outcome')
+
     def test_nested_proof_references_refuse_traversal_or_symlink(self):
         with tempfile.TemporaryDirectory(prefix='owned-reference-') as directory:
             root = pathlib.Path(directory); (root / 'after-second-stopped').mkdir()
