@@ -1,0 +1,9 @@
+Error: Jest: Got error running globalSetup - C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\globalSetup.js, reason: Test template lacks the published help release. Run the existing seed_help_content.cjs and publish_help_release.cjs with NODE_ENV=test against the owned server/prisma/dev.db template.
+    at globalSetup (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\globalSetup.js:39:76)
+    at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:3166:17
+    at ScriptTransformer.requireAndTranspileModule (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\transform\build\index.js:623:24)
+    at async runGlobalHook (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:3162:9)
+    at async runJest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:3429:5)
+    at async _run10000 (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:1543:5)
+    at async runCLI (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:1444:3)
+    at async Object.run (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\jest-cli\build\index.js:656:9)

@@ -1,0 +1,134 @@
+  console.info
+    IMPORT_POPULATED_PRESERVATION {"originalTableCount":97,"counts":{"Analysis":11,"AnalysisCategory":0,"AnalysisGroup":0,"ApiKey":0,"AuditLog":9,"Batch":1,"BatchAnalyte":1,"BatchDisposition":0,"BatchEvent":6,"BatchPosition":3,"BatchPositionReference":0,"BatchPositionWorkItem":2,"BatchQcResult":0,"BatchReagentLot":0,"CalcTemplate":11,"CalcTemplateActivation":0,"CalibrationCurve":0,"CalibrationPoint":0,"CommandReceipt":0,"Consignment":0,"CrossCheckEvaluation":0,"EquipmentAsset":1,"EquipmentEvent":0,"EquipmentMethodEligibility":0,"EquipmentQualification":0,"EquipmentScheduleRule":0,"ExternalMapping":0,"GlobalAppearanceSetting":1,"HelpArticle":0,"HelpFeedback":0,"HelpLabNote":0,"HelpLocaleRevision":0,"HelpPublication":0,"HelpRevision":0,"HelpSupportConfig":0,"InventoryItem":0,"InventoryLocation":0,"InventoryLot":0,"InventoryReservation":0,"InventoryTransaction":0,"KoboConfig":0,"Lab":1,"LabAppearanceSetting":0,"LabLifecycleState":0,"LabMethodDefault":0,"LabPolicy":0,"LabPolicyOverride":0,"LabSequence":0,"Language":0,"Message":0,"MethodReference":0,"MethodRequirement":0,"Methodology":1,"NonconformityReport":0,"Notification":0,"OperationalGate":0,"OrderLine":0,"PreparationRecord":0,"ProficiencyRound":0,"Project":0,"ProjectLab":0,"QcEvaluation":1,"QcMeasurement":1,"QcRule":1,"ReferenceMaterial":0,"ReferenceValue":0,"Report":0,"ReportAccessLog":0,"ReportAmendmentWithdrawal":0,"ReportSequence":0,"ReportShareLink":0,"ReportedValueSelection":0,"Result":1,"ResultCalculation":0,"ResultEvidenceEvent":0,"ResultOverrideRequest":0,"ReviewDecision":0,"Sample":2,"SampleAmendment":0,"SampleAmendmentAttempt":0,"SampleHold":0,"SampleOrderRevision":0,"SpectralData":0,"StaffInvitation":0,"StaffRecoveryGrant":0,"Submission":0,"SystemSetting":0,"Unit":6,"User":1,"UserBenchCredential":0,"WorkAttempt":1,"WorkItem":2,"WorkItemDraft":1,"WorkItemEquipmentUse":0,"_exchange_connection_keys":0,"_exchange_connections":0,"_schema_migrations":31},"beforeHash":"e36d2754267c6ba96ea4ef80248403a9879be1b1da3508bb416839afe50ee39e","afterHash":"191f5380ac94ba2dcc03c30e5c9e5236ecab855b3e4efc15bc983292255dbe85","totalChanges":1,"newTemplateCount":0,"newReceiptCount":0,"backfilledCount":0}
+
+      at info (tests/contracts/audit_4_7_instrument_import_install.test.js:228:17)
+
+  console.info
+    IMPORT_POPULATED_PRESERVATION {"originalTableCount":97,"counts":{"Analysis":11,"AnalysisCategory":0,"AnalysisGroup":0,"ApiKey":0,"AuditLog":9,"Batch":1,"BatchAnalyte":1,"BatchDisposition":0,"BatchEvent":6,"BatchPosition":3,"BatchPositionReference":0,"BatchPositionWorkItem":2,"BatchQcResult":0,"BatchReagentLot":0,"CalcTemplate":11,"CalcTemplateActivation":0,"CalibrationCurve":0,"CalibrationPoint":0,"CommandReceipt":0,"Consignment":0,"CrossCheckEvaluation":0,"EquipmentAsset":1,"EquipmentEvent":0,"EquipmentMethodEligibility":0,"EquipmentQualification":0,"EquipmentScheduleRule":0,"ExternalMapping":0,"GlobalAppearanceSetting":1,"HelpArticle":0,"HelpFeedback":0,"HelpLabNote":0,"HelpLocaleRevision":0,"HelpPublication":0,"HelpRevision":0,"HelpSupportConfig":0,"InventoryItem":0,"InventoryLocation":0,"InventoryLot":0,"InventoryReservation":0,"InventoryTransaction":0,"KoboConfig":0,"Lab":1,"LabAppearanceSetting":0,"LabLifecycleState":0,"LabMethodDefault":0,"LabPolicy":0,"LabPolicyOverride":0,"LabSequence":0,"Language":0,"Message":0,"MethodReference":0,"MethodRequirement":0,"Methodology":1,"NonconformityReport":0,"Notification":0,"OperationalGate":0,"OrderLine":0,"PreparationRecord":0,"ProficiencyRound":0,"Project":0,"ProjectLab":0,"QcEvaluation":1,"QcMeasurement":1,"QcRule":1,"ReferenceMaterial":0,"ReferenceValue":0,"Report":0,"ReportAccessLog":0,"ReportAmendmentWithdrawal":0,"ReportSequence":0,"ReportShareLink":0,"ReportedValueSelection":0,"Result":1,"ResultCalculation":0,"ResultEvidenceEvent":0,"ResultOverrideRequest":0,"ReviewDecision":0,"Sample":2,"SampleAmendment":0,"SampleAmendmentAttempt":0,"SampleHold":0,"SampleOrderRevision":0,"SpectralData":0,"StaffInvitation":0,"StaffRecoveryGrant":0,"Submission":0,"SystemSetting":0,"Unit":6,"User":1,"UserBenchCredential":0,"WorkAttempt":1,"WorkItem":2,"WorkItemDraft":1,"WorkItemEquipmentUse":0,"_exchange_connection_keys":0,"_exchange_connections":0,"_schema_migrations":31},"beforeHash":"30779606f8f48f2f27f1d4acd61f3ffb3a27a8d544d8e22a90a6d038c1e1ba74","afterHash":"35b8195e0e21717c681d54c91e97d49694e7936aa820172908cb04fa03543bf0","totalChanges":1,"newTemplateCount":0,"newReceiptCount":0,"backfilledCount":0}
+
+      at info (tests/contracts/audit_4_7_instrument_import_install.test.js:228:17)
+
+PASS tests/contracts/audit_4_7_instrument_import_install.test.js
+  √ the additional current-main schema-only factory is closed and digest-bound without changing the old fixture (12 ms)
+  √ a populated Prisma predecessor retains every analytical, QC, audit and raw draft row across dry-run, apply and repeated apply (2130 ms)
+  √ a populated native workbench predecessor retains every analytical, QC, audit and raw draft row across dry-run, apply and repeated apply (1487 ms)
+  retained historical89-model main
+    √ every template column is immutable: id (12 ms)
+    √ every template column is immutable: labId (7 ms)
+    √ every template column is immutable: instrumentId (7 ms)
+    √ every template column is immutable: name (7 ms)
+    √ every template column is immutable: version (7 ms)
+    √ every template column is immutable: mapping (8 ms)
+    √ every template column is immutable: createdBy (7 ms)
+    √ every template column is immutable: createdAt (7 ms)
+    √ every template column is immutable: supersedesId (7 ms)
+    √ every receipt column is immutable: id (7 ms)
+    √ every receipt column is immutable: labId (8 ms)
+    √ every receipt column is immutable: instrumentId (8 ms)
+    √ every receipt column is immutable: templateId (8 ms)
+    √ every receipt column is immutable: templateVersion (8 ms)
+    √ every receipt column is immutable: sourceSha256 (8 ms)
+    √ every receipt column is immutable: sourceName (7 ms)
+    √ every receipt column is immutable: mappingSnapshot (8 ms)
+    √ every receipt column is immutable: importedBy (7 ms)
+    √ every receipt column is immutable: importedAt (8 ms)
+    √ deletion of ImportTemplate is refused with its retained rows unchanged (10 ms)
+    √ deletion of InstrumentImportReceipt is refused with its retained rows unchanged (8 ms)
+    √ append-only revisions advance exactly once and preserve the original raw mapping (8 ms)
+    √ invalid template binding or revision refuses without a row: {"version":2} (8 ms)
+    √ invalid template binding or revision refuses without a row: {"instrumentId":"other-instrument"} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"mapping":"not JSON"} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"labId":"other-lab","supersedesId":"mapping-v1","version":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"templateVersion":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"instrumentId":"other-instrument"} (8 ms)
+    √ invalid source receipt refuses without a row: {"sourceSha256":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} (8 ms)
+    √ invalid source receipt refuses without a row: {"mappingSnapshot":"not JSON"} (7 ms)
+    √ the new draft pointer is nullable and restrictive, with no historical backfill or analytical writes (9 ms)
+    √ the schema-only factory is source-bound and unavailable to runtime or another caller (37 ms)
+    √ literal pre-200 classification is read-only and does not invent a receipt (21 ms)
+    √ an unmarked upgraded schema is refused without adopting its rows (11 ms)
+    √ a foreign object in the managed import namespace is refused (8 ms)
+    √ a forged receipt refuses without changing any imported evidence (8 ms)
+    √ installer CLI refuses malformed arguments: [] (10 ms)
+    √ installer CLI refuses malformed arguments: ["--apply"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db"] (8 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--dry-run"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--apply"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--unknown"] (7 ms)
+    √ installer CLI accepts an explicit existing-path argument and one mode (6 ms)
+    √ startup refuses a missing database without creating it (7 ms)
+  actual current92-model main after210
+    √ every template column is immutable: id (7 ms)
+    √ every template column is immutable: labId (7 ms)
+    √ every template column is immutable: instrumentId (8 ms)
+    √ every template column is immutable: name (7 ms)
+    √ every template column is immutable: version (7 ms)
+    √ every template column is immutable: mapping (7 ms)
+    √ every template column is immutable: createdBy (7 ms)
+    √ every template column is immutable: createdAt (7 ms)
+    √ every template column is immutable: supersedesId (7 ms)
+    √ every receipt column is immutable: id (8 ms)
+    √ every receipt column is immutable: labId (8 ms)
+    √ every receipt column is immutable: instrumentId (7 ms)
+    √ every receipt column is immutable: templateId (8 ms)
+    √ every receipt column is immutable: templateVersion (7 ms)
+    √ every receipt column is immutable: sourceSha256 (7 ms)
+    √ every receipt column is immutable: sourceName (7 ms)
+    √ every receipt column is immutable: mappingSnapshot (8 ms)
+    √ every receipt column is immutable: importedBy (7 ms)
+    √ every receipt column is immutable: importedAt (7 ms)
+    √ deletion of ImportTemplate is refused with its retained rows unchanged (7 ms)
+    √ deletion of InstrumentImportReceipt is refused with its retained rows unchanged (7 ms)
+    √ append-only revisions advance exactly once and preserve the original raw mapping (8 ms)
+    √ invalid template binding or revision refuses without a row: {"version":2} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"instrumentId":"other-instrument"} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"mapping":"not JSON"} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"labId":"other-lab","supersedesId":"mapping-v1","version":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"templateVersion":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"instrumentId":"other-instrument"} (8 ms)
+    √ invalid source receipt refuses without a row: {"sourceSha256":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} (8 ms)
+    √ invalid source receipt refuses without a row: {"mappingSnapshot":"not JSON"} (7 ms)
+    √ the new draft pointer is nullable and restrictive, with no historical backfill or analytical writes (8 ms)
+    √ the schema-only factory is source-bound and unavailable to runtime or another caller (14 ms)
+    √ literal pre-200 classification is read-only and does not invent a receipt (21 ms)
+    √ an unmarked upgraded schema is refused without adopting its rows (13 ms)
+    √ a foreign object in the managed import namespace is refused (7 ms)
+    √ a forged receipt refuses without changing any imported evidence (8 ms)
+    √ installer CLI refuses malformed arguments: [] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--apply"] (6 ms)
+    √ installer CLI refuses malformed arguments: ["--db"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--dry-run"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--apply"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--unknown"] (7 ms)
+    √ installer CLI accepts an explicit existing-path argument and one mode (6 ms)
+    √ startup refuses a missing database without creating it (7 ms)
+  the released #293 predecessor keeps #205 records inside the exact import boundary
+    √ native workbench refuses the nearby foreign variant: records type (19 ms)
+    √ native workbench refuses the nearby foreign variant: unknown column (17 ms)
+    √ native workbench refuses the nearby foreign variant: updatedAt default (16 ms)
+    √ native workbench refuses the nearby foreign variant: workItem uniqueness (16 ms)
+    √ the additional current release schema-only fixture is closed and digest-bound (5 ms)
+    √ main51f schema and its native import ALTER are recognized without row writes or adoption (17 ms)
+    √ exact records predecessor preFresh refuses a changed type or unknown column (33 ms)
+    √ exact records predecessor preUpgraded refuses a changed type or unknown column (35 ms)
+    √ the complete installer contract has no unresolved or unauthorized SQL (39 ms)
+
+FAIL tests/security/workflow_write_scanner.test.js
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open 'C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\workflow_write_scanner.test.js'
+
+      at runTestInternal (node_modules/jest-runner/build/index.js:133:27)
+
+FAIL tests/security/workflow_write_guard.test.js
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open 'C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\workflow_write_guard.test.js'
+
+      at runTestInternal (node_modules/jest-runner/build/index.js:133:27)
+
+Test Suites: 2 failed, 1 passed, 3 total
+Tests:       100 passed, 100 total
+Snapshots:   0 total
+Time:        4.949 s, estimated 6 s
+Ran all test suites within paths "tests/contracts/audit_4_7_instrument_import_install.test.js", "tests/security/workflow_write_guard.test.js", "tests/security/workflow_write_scanner.test.js".

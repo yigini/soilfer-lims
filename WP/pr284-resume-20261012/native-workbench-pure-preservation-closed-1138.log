@@ -1,0 +1,38 @@
+test_added_original_row_refuses (test_import_preservation.ImportPreservationGuards.test_added_original_row_refuses) ... ok
+test_after_has_unsealed_journal_refuses (test_import_preservation.ImportPreservationGuards.test_after_has_unsealed_journal_refuses) ... ok
+test_before_has_unsealed_wal_refuses (test_import_preservation.ImportPreservationGuards.test_before_has_unsealed_wal_refuses) ... ok
+test_changed_asset_refuses (test_import_preservation.ImportPreservationGuards.test_changed_asset_refuses) ... ok
+test_deleted_original_row_refuses (test_import_preservation.ImportPreservationGuards.test_deleted_original_row_refuses) ... ok
+test_duplicate_receipt_key_refuses (test_import_preservation.ImportPreservationGuards.test_duplicate_receipt_key_refuses) ... ok
+test_exact_additive_delta_passes_and_preserves_raw_bytes (test_import_preservation.ImportPreservationGuards.test_exact_additive_delta_passes_and_preserves_raw_bytes) ... ok
+test_exact_native_workbench_pair_preserves_unique_default_rows_and_bytes (test_import_preservation.ImportPreservationGuards.test_exact_native_workbench_pair_preserves_unique_default_rows_and_bytes) ... ok
+test_extra_original_column_refuses (test_import_preservation.ImportPreservationGuards.test_extra_original_column_refuses) ... ok
+test_extra_original_index_refuses (test_import_preservation.ImportPreservationGuards.test_extra_original_index_refuses) ... ok
+test_extra_pointer_constraint_refuses (test_import_preservation.ImportPreservationGuards.test_extra_pointer_constraint_refuses) ... ok
+test_extra_receipt_refuses (test_import_preservation.ImportPreservationGuards.test_extra_receipt_refuses) ... ok
+test_extra_schema_table_refuses (test_import_preservation.ImportPreservationGuards.test_extra_schema_table_refuses) ... ok
+test_historical_pointer_link_refuses_fk (test_import_preservation.ImportPreservationGuards.test_historical_pointer_link_refuses_fk) ... ok
+test_missing_bound_hash_refuses (test_import_preservation.ImportPreservationGuards.test_missing_bound_hash_refuses) ... ok
+test_missing_immutable_guard_refuses (test_import_preservation.ImportPreservationGuards.test_missing_immutable_guard_refuses) ... ok
+test_missing_install_receipt_refuses (test_import_preservation.ImportPreservationGuards.test_missing_install_receipt_refuses) ... ok
+test_missing_original_table_refuses (test_import_preservation.ImportPreservationGuards.test_missing_original_table_refuses) ... ok
+test_native_upgraded_records_predecessor_passes (test_import_preservation.ImportPreservationGuards.test_native_upgraded_records_predecessor_passes) ... ok
+test_native_workbench_changed_original_records_still_refuses (test_import_preservation.ImportPreservationGuards.test_native_workbench_changed_original_records_still_refuses) ... ok
+test_native_workbench_unknown_column_still_refuses (test_import_preservation.ImportPreservationGuards.test_native_workbench_unknown_column_still_refuses) ... ok
+test_nonempty_import_template_refuses (test_import_preservation.ImportPreservationGuards.test_nonempty_import_template_refuses) ... ok
+test_original_blob_change_refuses (test_import_preservation.ImportPreservationGuards.test_original_blob_change_refuses) ... ok
+test_original_receipt_change_refuses (test_import_preservation.ImportPreservationGuards.test_original_receipt_change_refuses) ... ok
+test_original_records_change_refuses (test_import_preservation.ImportPreservationGuards.test_original_records_change_refuses) ... ok
+test_original_value_change_refuses (test_import_preservation.ImportPreservationGuards.test_original_value_change_refuses) ... ok
+test_receipt_boolean_count_refuses (test_import_preservation.ImportPreservationGuards.test_receipt_boolean_count_refuses) ... ok
+test_receipt_fingerprint_mismatch_refuses (test_import_preservation.ImportPreservationGuards.test_receipt_fingerprint_mismatch_refuses) ... ok
+test_receipt_original_hash_mismatch_refuses (test_import_preservation.ImportPreservationGuards.test_receipt_original_hash_mismatch_refuses) ... ok
+test_receipt_sources_mismatch_refuses (test_import_preservation.ImportPreservationGuards.test_receipt_sources_mismatch_refuses) ... ok
+test_same_snapshot_refuses (test_import_preservation.ImportPreservationGuards.test_same_snapshot_refuses) ... ok
+test_uncaptured_native_default_or_unique_hybrids_refuse_even_with_matching_rows (test_import_preservation.ImportPreservationGuards.test_uncaptured_native_default_or_unique_hybrids_refuse_even_with_matching_rows) ... ok
+test_wrong_marker_refuses (test_import_preservation.ImportPreservationGuards.test_wrong_marker_refuses) ... ok
+
+----------------------------------------------------------------------
+Ran 33 tests in 1.937s
+
+OK
