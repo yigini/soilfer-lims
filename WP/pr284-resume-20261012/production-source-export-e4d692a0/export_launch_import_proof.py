@@ -1,0 +1,117 @@
+"""Export reviewed bytes and launch ONE new isolated candidate proof.
+
+This launcher cannot deploy, change production settings, restart a retained
+proof or use the historical jobs-off writer. A valid merged-main candidate
+and its actual audited build are prerequisites, verified read-only first.
+"""
+import base64
+import datetime
+import hashlib
+import json
+import pathlib
+import subprocess
+import sys
+from import_proof_contract import *
+from import_source_graph import git_source, require_executed_sources
+
+
+def github(endpoint):
+    return json.loads(subprocess.check_output(['gh', 'api', endpoint], text=True, encoding='utf-8'))
+
+
+def main():
+    tooling, pin_file, root, unit = sys.argv[1:]
+    require(len(tooling) == 40 and all(character in '0123456789abcdef' for character in tooling), 'Exact tooling commit required')
+    require_first_proof_root(root)
+    remote = pathlib.PurePosixPath(root)
+    require(remote.parent == pathlib.PurePosixPath('/opt/lims/releases') and
+        remote.name.startswith('instrument-import-proof-'), 'Unexpected new proof root')
+    require(unit == 'lims-owned-' + remote.name.lower() + '.service', 'Unexpected owned unit')
+    pin_bytes = pathlib.Path(pin_file).read_bytes()
+    pin = json.loads(pin_bytes)
+    pr = github('repos/yigini/soilfer-lims/pulls/' + str(PR_NUMBER))
+    require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD and pr['merge_commit_sha'] == pin['head'],
+        'PR284 exact audited head must be merged first')
+    main_ref = github('repos/yigini/soilfer-lims/git/ref/heads/main')
+    require(main_ref['object']['sha'] == pin['head'], 'Current main differs from the candidate')
+    audited = github('repos/yigini/soilfer-lims/git/commits/' + AUDITED_PR_HEAD)
+    merged = github('repos/yigini/soilfer-lims/git/commits/' + pin['head'])
+    validate_merge_identity(merged, audited)
+    candidate_identity(pin)
+    require_build_reuse(pin)
+    review = github('repos/yigini/soilfer-lims/issues/comments/' + str(pin['auditReviewId']))
+    require_pr_review(review)
+    comments = json.loads(subprocess.check_output(['gh', 'api',
+        'repos/yigini/soilfer-lims/issues/' + str(PR_NUMBER) + '/comments?per_page=100', '--paginate', '--slurp'],
+        text=True, encoding='utf-8'))
+    require(not any('audit failed' in comment['body'].lower() and
+        comment['created_at'] > review['created_at'] for page in comments for comment in page),
+        'Later PR audit failure exists')
+    checks = github('repos/yigini/soilfer-lims/commits/' + AUDITED_PR_HEAD + '/check-runs')['check_runs']
+    require(checks and all(check['status'] == 'completed' and check['conclusion'] == 'success' for check in checks),
+        'Exact PR CI is not fully green')
+    ci = github('repos/yigini/soilfer-lims/actions/runs/' + str(pin['mainCiRunId']))
+    require(ci['head_sha'] == pin['head'] and ci['name'] == 'CI' and
+        ci['status'] == 'completed' and ci['conclusion'] == 'success', 'Exact merged-main CI is not green')
+    # This is rehearsal evidence, not a production execution gate.
+    authority = {'observedUtc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        'buildReuseBinding': build_reuse_binding(), 'repeatPhysicalPolicy': REPEAT_POLICY,
+        'head': pin['head'], 'baseHead': BASE_HEAD, 'mergeBaseHead': MERGE_BASE_HEAD,
+        'originalProofRoot': EXPECTED_PROOF_ROOT, 'firstProofPolicy': FIRST_PROOF_POLICY,
+        'auditedPrHead': AUDITED_PR_HEAD,
+        'tree': MERGED_TREE, 'auditedTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS, 'review': review,
+        'mainCi': {key: ci[key] for key in ['id', 'head_sha', 'name', 'status', 'conclusion', 'updated_at']},
+        'checks': [{key: value[key] for key in ['name', 'status', 'conclusion', 'head_sha']} for value in checks]}
+    raw_files, source_index = git_source(tooling, lambda *args: subprocess.check_output(['git', *args]))
+    require_executed_sources({name: item['sha256'] for name, item in source_index['files'].items()}, __file__)
+    files = {name: base64.b64encode(data).decode() for name, data in raw_files.items()}
+    index = source_index['files']
+    source_review = github('repos/yigini/soilfer-lims/issues/comments/' + str(pin['proofSourceReviewId']))
+    source_review_pass(source_review, tooling, {name: item['sha256'] for name, item in index.items()})
+    source_comments = json.loads(subprocess.check_output(['gh', 'api',
+        'repos/yigini/soilfer-lims/issues/162/comments?per_page=100', '--paginate', '--slurp'],
+        text=True, encoding='utf-8'))
+    require(not any(('source review: failed' in comment['body'].lower() or
+        'source review: changes required' in comment['body'].lower() or
+        'audit failed' in comment['body'].lower()) and comment['created_at'] > source_review['created_at']
+        for page in source_comments for comment in page), 'Later source audit failure exists')
+    require(github('repos/yigini/soilfer-lims/git/ref/heads/main')['object']['sha'] == pin['head'],
+        'Main changed during proof preparation')
+    authority['proofSourceReview'] = source_review
+    payload = base64.b64encode(json.dumps({'root': root, 'unit': unit, 'files': files,
+        'pin': base64.b64encode(pin_bytes).decode(), 'authority': authority,
+        'index': {'head': tooling, 'files': index}}).encode()).decode()
+    code = '''import base64,hashlib,json,pathlib,subprocess
+p=json.loads(base64.b64decode(PAYLOAD));r=pathlib.Path(p['root']);u=p['unit']
+assert r.parent.resolve()==pathlib.Path('/opt/lims/releases').resolve() and not r.exists()
+names=subprocess.check_output(['docker','ps','--format','{{.Names}}'],text=True).splitlines()
+assert not any(name.startswith('lims-owned-') for name in names), 'An owned writer is already active'
+r.mkdir(mode=0o700)
+for name,encoded in p['files'].items():
+ assert pathlib.PurePosixPath(name).name==name
+ data=base64.b64decode(encoded);assert hashlib.sha256(data).hexdigest()==p['index']['files'][name]['sha256']
+ with (r/name).open('xb') as out:out.write(data)
+ (r/name).chmod(0o400)
+for name,value in [('source-index.json',p['index']),('candidate-rehearsal-authority.json',p['authority'])]:
+ with (r/name).open('x',encoding='utf-8') as out:json.dump(value,out,indent=2)
+ (r/name).chmod(0o400)
+with (r/'target-pin.json').open('xb') as out:out.write(base64.b64decode(p['pin']))
+(r/'target-pin.json').chmod(0o400)
+args=['systemd-run','--unit='+u,'--property=Type=exec','--property=RuntimeMaxSec=7200',
+ '--property=KillMode=process','--property=StandardOutput=append:'+str(r/'unit.stdout'),
+ '--property=StandardError=append:'+str(r/'unit.stderr'),'/usr/bin/python3','-B',
+ str(r/'rehearse_import.py'),'--new-owned-import-proof']
+result=subprocess.run(args,text=True,capture_output=True,timeout=20);assert result.returncode==0,result.stderr
+print(json.dumps({'root':str(r),'unit':u,'sourceCommit':p['index']['head'],
+ 'sourceIndexSha256':hashlib.sha256((r/'source-index.json').read_bytes()).hexdigest(),
+ 'coordinatorSha256':p['index']['files']['rehearse_import.py']['sha256'],
+ 'productionMutations':0,'productionGateCollected':False}))
+'''.replace('PAYLOAD', repr(payload))
+    result = subprocess.run(['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', 'root@46.19.33.37',
+        'python3', '-B', '-'], input=code, text=True, capture_output=True, timeout=40)
+    require(result.returncode == 0, 'New proof launch refused: ' + result.stderr)
+    print(result.stdout, end='')
+
+
+if __name__ == '__main__':
+    main()

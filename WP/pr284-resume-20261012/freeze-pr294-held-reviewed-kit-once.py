@@ -6,9 +6,9 @@ import subprocess
 import sys
 
 review_id = sys.argv[1]
-assert review_id.isdigit() and int(review_id) not in [6127651539, 6126765238, 6130963561, 6131228500]
+assert review_id.isdigit() and int(review_id) not in [6127651539, 6126765238, 6130963561, 6131228500, 6132133647]
 d = Path(__file__).resolve().parent
-source = 'a2a1694ef3956aea0fbe12d21dfaa8f5473ac947'
+source = 'e4d692a0c0eaed34017f4419172dfcf8db563be0'
 verified = json.loads((d / ('production-source-pass-' + review_id + '-verified.json')).read_bytes())
 assert verified['status'] == 'ACTUAL_NEW_PRODUCTION_SOURCE_PASS_VERIFIED_NO_EXECUTION'
 assert verified['sourceCommit'] == source and verified['reviewId'] == int(review_id)
@@ -28,7 +28,7 @@ intent = {'startedUtc': datetime.datetime.now(datetime.timezone.utc).isoformat()
 with (d / 'pr294-freeze-held-202400-intent.json').open('x', encoding='utf-8', newline='\n') as out:
     json.dump(intent, out, indent=2)
 result = subprocess.run([sys.executable, '-B', '-X', 'utf8',
-    str(d / 'production-source-export-a2a1694e/export_freeze_import_kit.py'),
+    str(d / 'production-source-export-e4d692a0/export_freeze_import_kit.py'),
     source, proof, package, target, review_id], cwd=d.parent.parent, capture_output=True, timeout=1100)
 for label, value in [('stdout', result.stdout), ('stderr', result.stderr)]:
     with (d / ('pr294-freeze-held-202400.' + label)).open('xb') as out: out.write(value)

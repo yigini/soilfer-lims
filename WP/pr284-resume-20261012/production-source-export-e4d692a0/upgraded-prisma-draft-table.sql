@@ -1,0 +1,22 @@
+CREATE TABLE "WorkItemDraft" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "workItemId" TEXT NOT NULL,
+    "sampleId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "labId" TEXT,
+    "analysis" TEXT NOT NULL,
+    "value" TEXT,
+    "values" TEXT,
+    "checks" TEXT,
+    "basis" TEXT DEFAULT 'AIR_DRY',
+    "replicateNo" INTEGER NOT NULL DEFAULT 1,
+    "instrumentId" TEXT,
+    "methodologyId" TEXT,
+    "notes" TEXT,
+    "baseVersion" INTEGER NOT NULL DEFAULT 0,
+    "draftVersion" INTEGER NOT NULL DEFAULT 1,
+    "conflictValue" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL, "importReceiptId" TEXT REFERENCES "InstrumentImportReceipt"("id") ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT "WorkItemDraft_workItemId_fkey" FOREIGN KEY ("workItemId") REFERENCES "WorkItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);

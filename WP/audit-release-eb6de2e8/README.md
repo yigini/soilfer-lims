@@ -1,3 +1,13 @@
+PR294 Windows mirror amendment awaiting NEW source review 2026-10-12T20:40UTC
+
+Actual Claudio Source review: PASS #162/6132133647 at20:33:16UTC independently verified exacta2a1694/all43files/all118tokens/currentmain/no laterfailure. This approval is retained but cannot authorise subsequent changed collector e4d692a0c0eaed34017f4419172dfcf8db563be0. No a2a freezer was run, no202400 package/kit/gate exists.
+
+Exact e4 amendment changes ONLY collect_import_gate.py among43 production files: hash-bound safe local Windows read-only mirror accepts native0444; POSIX mirrors and ALL remote original frozen evidence keep strict0400. All other42 production source files, closed namespace/cataloga763, deploy/freezer/entry/timing policies and all31 original201bb proof bytes unchanged. Windows204/204 PASS20:35:08UTC and Linux204/204 PASS20:36:02UTC,0errors/fail/skips/no productionDB. Original raw stdout/stderr and exact-source index retained. NEW exact e4SourcePASS still REQUIRED before ONE202400 freezer. Wrapper now refuses priora2a reviewID. Original144000PASS/135400build remain sole authority; no newproof/rebuild/cleanup/replay.
+
+LIMS maintenance/jobsHOLD; YY original B Stay in maintenance choice directly verified, no remaining human entry decision. Independent read-only20:27:16.122416UTC PASS proves exact originalDB/WAL/SHM bytes+attributes, stoppedbackup,62oldfrozenfiles/originalproof unchanged; allwritersstopped/original51fimagestopped/heldingress/DRY0/noAPPLYrepeat; HTTPShealth/login503TLS. Free71187468288B. Failed161000root/unit/gate/receipt/outputs remain burned/stopped/retained, neverretry/reuse. SAMEwriter continues NEWsourcePASS -> ONEunused202400kit -> NEWexactkitreview -> freshsingleusegate -> ONEreviewedforwarddeployment -> actualClhandoff under existinggo/BOTHpins. Otherappmergeshelduntil#200live/postchecked.
+
+Previous checkpoint follows:
+
 PR294 corrected source ready for NEW review 2026-10-12T20:27UTC
 
 Exact proposed production source a2a1694ef3956aea0fbe12d21dfaa8f5473ac947:203/203 Windows and203/203 exact-source Linux guards PASS,0failure/error/skip/no productionDB. All43 rawGit files compile and all31 original201bb proof bytes remain identical. Windows completed20:24:59.019867UTC/11.453s; Linux20:26:05.867542UTC/16.779993s/stderrSHAd14cefb052a513d03ef143c61ed9463acf6a5c386f8749bec1f61d28d92e49ba. Complete held-entry/namespace/localproduction=True end-repeat guards pass. Final cross-check corrected an obsolete freezer healthy-entry placeholder before any request or host operation; freezer now uses the same full held-entry observation as gate/deploy before creating a destination. Earlier6b0 locally prepared proposal is NOT posted or approved.

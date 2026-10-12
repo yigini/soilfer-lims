@@ -9,6 +9,8 @@ import sys
 d = Path(__file__).resolve().parent
 w = d.parent.parent
 source = sys.argv[1]
+guard_count = int(sys.argv[2])
+assert guard_count in [203, 204]
 assert len(source) == 40 and all(character in '0123456789abcdef' for character in source)
 short = source[:8]
 export = d / ('production-source-export-' + short)
@@ -50,7 +52,7 @@ for platform in ['windows', 'linux']:
     row = json.loads((d / ('production-isolation-guards-' + short + '-' + platform) / 'result.json').read_bytes())
     assert row['sourceCommit'] == source and row['exitCode'] == 0
     result = row['summary']
-    assert result['tests'] == 203 and result['failures'] == result['errors'] == result['skips'] == 0
+    assert result['tests'] == guard_count and result['failures'] == result['errors'] == result['skips'] == 0
     assert result['productionDatabaseAccess'] is False
     guards[platform] = row
 tokens = c.release_binding_tokens() + c.source_policy_tokens() + [source, c.REVIEWED_PROOF_SOURCE,
@@ -80,7 +82,7 @@ The original161000Z production failed after DRY and before APPLY because exclusi
 
 Frozen sources and evidence now live exclusively in frozen/. Generated CLI/probe/readiness/seal/receipt/log outputs remain at the execution root. Every corresponding reader uses explicit hash-bound frozen paths. production_output_paths.py lists finite paths, nested seal/scratch/raw/backup/SQLite sidecars and anchored timestamped log families; its complete catalog is in the manifest and gate. The closed unused-root check refuses ALL existing prospective or unknown outputs, including hidden paths and symlinks. It runs after freeze, before collecting/installing the gate, before execution intent, and again immediately before quiesce (allowing only just-created intent/receipt/ledger). No collision is deferred until after stopping writers.
 
-203/203 exact-source Windows and203/203 exact-source Linux guards PASS,0failure/error/skip/no production DB access. The local end-to-end test executes the real unchanged install_once with production=True, owned synthetic SQLite, all62 retained historical frozen names and stubbed CLI/seals. It reaches completed repeat with zero repeat changes and every frozen byte unchanged. Entry tests reject running, renamed, OOM, other container/image/ingress/physical triple, unauthorised card choice, old scope and changed receipt/backup authority. A freezer regression checks the same full held-entry observation before any destination creation; the obsolete healthy-entry placeholder is removed. Raw logs and source hashes are retained under WP/pr284-resume-20261012/production-isolation-guards-{short}-{{windows,linux}}. The earlier6b0 proposal was prepared locally and NOT posted; a final cross-check found its obsolete freezer call, corrected here. No host operation occurred.
+{guard_count}/{guard_count} exact-source Windows and{guard_count}/{guard_count} exact-source Linux guards PASS,0failure/error/skip/no production DB access. The local end-to-end test executes the real unchanged install_once with production=True, owned synthetic SQLite, all62 retained historical frozen names and stubbed CLI/seals. It reaches completed repeat with zero repeat changes and every frozen byte unchanged. Entry tests reject running, renamed, OOM, other container/image/ingress/physical triple, unauthorised card choice, old scope and changed receipt/backup authority. A freezer regression checks the same full held-entry observation before any destination creation; the obsolete healthy-entry placeholder is removed. Raw logs and source hashes are retained under WP/pr284-resume-20261012/production-isolation-guards-{short}-{{windows,linux}}. No host operation occurred.
 
 YY's original native card B Stay in maintenance/You chose10:07PM Europe/Rome was directly read, never answered by Pip. The corrected source accepts ONLY STOPPED_HELD_UNAPPLIED: original51f container977334bc stopped/notrenamed, held ingressd926, exact original raw triple3dcf and backup70ee, no APPLY/repeat/startup outputs and no other writer. RUNNING_NORMAL is unreachable. Raw choice, your actual6131752416 API record and exact failed receipt2a03 are hash-bound sources, manifest/gate/review tokens. That failed receipt is held-entry evidence ONLY, never proof or replay authority.
 
@@ -91,6 +93,12 @@ Production remains maintenance/jobsHOLD. Latest independent full physical observ
 Please post NEW primary Source review: PASS with this full source commit, all43 raw name=sha256 tokens and the policy/entry/release bindings below. Prior source/kit approvals cannot authorise this changed source.
 
 ''' + '\n'.join(tokens) + '\n'
+if guard_count == 204:
+    request = f'''NEW source-review amendment: local Windows read-only mirror
+
+Exact source {source}. Actual a2a SourcePASS6132133647/203guards is retained, but cannot authorise this changed local collector. No freezer, kit or gate has run. ONLY collect_import_gate.py changes in the43-file production package: explicit safe/hash-bound local mirror reads recognise Windows read-only0444, while POSIXlocalmirror remains exact0400. All remote originals continue using unchanged safe_reference/frozen_files exact0400; no remote mode relaxation. Contract/deploy/freezer/namespace catalog/entry/timing/pins and all31 proof bytes are identical to a2a. One additional owned guard covers both local platforms and writable/traversal refusal and confirms unchanged remote400 refusal for Windows444. ALL204/204 Windows and204/204 Linux PASS. Actual owned Windows chmod0400/stat0444 was observed before this proposal; this prevents a local gate refusal before any gate or production action. Native amendment notice was delivered. The unused202400 package/kit roots remain proposed after your NEW exact source pass. Full inherited scope and all43 updated rawhashes follow; this request supersedes a2a for execution.
+
+''' + request
 with (d / ('production-source-' + short + '-request.md')).open('x', encoding='utf-8', newline='\n') as out:
     out.write(request)
 print(json.dumps({'status': preparation['status'], 'sourceCommit': source,

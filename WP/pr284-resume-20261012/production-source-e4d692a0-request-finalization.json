@@ -1,0 +1,8 @@
+{
+  "finalizedUtc": "2026-10-12T20:40:36.002116+00:00",
+  "sourceCommit": "e4d692a0c0eaed34017f4419172dfcf8db563be0",
+  "originalPreparedRequestSha256": "d8007321460e5743108de486c9f38ed92600761f7548204cca4403a1849bf36b",
+  "postedRequestSha256": "b78c83f70999626b1ebb9270257fcb4c9ccfcec4d5b3e115b8aebf19fc64d207",
+  "change": "Correct latest physical observation timestamp to actual retained20:27:16UTC; no source or token change",
+  "productionOperations": 0
+}
