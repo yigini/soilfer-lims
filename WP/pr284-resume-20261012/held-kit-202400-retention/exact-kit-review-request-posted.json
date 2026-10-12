@@ -1,0 +1,10 @@
+{
+  "status": "NEW_EXACT_KIT_REQUEST_POSTED_NOT_APPROVAL",
+  "commentId": 6132447186,
+  "url": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6132447186",
+  "createdUtc": "2026-10-12T20:54:59Z",
+  "rawSha256": "643580e89b1c9fe4013f4cb78099356d7d2b42108dd1d0c7e39482fb9b5bbe25",
+  "bodySha256": "fc983f082079d44735f7b0bcfd500d6f09b87e9534acdb0943eb118cd70b055a",
+  "manifestSha256": "02d67dede9fd160f723ff1949353b7a36991d41a34e6c255884282ed07da8bad",
+  "productionOperations": 0
+}

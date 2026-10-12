@@ -1,0 +1,17 @@
+{
+  "startedUtc": "2026-10-12T21:03:20.991288+00:00",
+  "role": "READ_ONLY_DIAGNOSTIC_NO_GATE_NO_EXECUTION",
+  "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T202400Z",
+  "manifestSha256": "02d67dede9fd160f723ff1949353b7a36991d41a34e6c255884282ed07da8bad",
+  "diagnosticTransportLimitSeconds": 180,
+  "reviewedCollectorTransportLimitSeconds": 60,
+  "priorReadOnlyCall": "LOCAL_SSH_TIMEOUT_AFTER_60_SECONDS_NO_JSON_RESULT",
+  "priorCallRemoteProcessEnded": true,
+  "productionMutations": 0,
+  "finishedUtc": "2026-10-12T21:04:21.131854+00:00",
+  "elapsedSeconds": 60.15599999995902,
+  "status": "COMPLETED_READ_ONLY_DIAGNOSIS",
+  "exitCode": 0,
+  "stdoutSha256": "e2ed5d3bf986446cace89934a347973283d480bf1f7bb8ce437ac25db97d6176",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

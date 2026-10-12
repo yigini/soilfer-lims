@@ -1,0 +1,11 @@
+{
+  "startedUtc": "2026-10-12T21:03:20.991288+00:00",
+  "role": "READ_ONLY_DIAGNOSTIC_NO_GATE_NO_EXECUTION",
+  "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T202400Z",
+  "manifestSha256": "02d67dede9fd160f723ff1949353b7a36991d41a34e6c255884282ed07da8bad",
+  "diagnosticTransportLimitSeconds": 180,
+  "reviewedCollectorTransportLimitSeconds": 60,
+  "priorReadOnlyCall": "LOCAL_SSH_TIMEOUT_AFTER_60_SECONDS_NO_JSON_RESULT",
+  "priorCallRemoteProcessEnded": true,
+  "productionMutations": 0
+}

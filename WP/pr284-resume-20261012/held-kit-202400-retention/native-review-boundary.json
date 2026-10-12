@@ -1,0 +1,11 @@
+{
+  "recordedUtc": "2026-10-12T20:57:09.004279+00:00",
+  "nativeTarget": "LIMS Audit / Lab workflow audit and plan",
+  "actualDeliveryVisuallyVerified": true,
+  "requestId": 6132447186,
+  "manifestSha256": "02d67dede9fd160f723ff1949353b7a36991d41a34e6c255884282ed07da8bad",
+  "sourceReviewId": 6132295413,
+  "cardsOrHumanDraftActions": 0,
+  "status": "ACTUAL_KIT_SENT_NEW_VERDICT_PENDING",
+  "productionOperations": 0
+}
