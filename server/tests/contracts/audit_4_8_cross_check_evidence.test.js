@@ -85,7 +85,10 @@ test('an unregistered historical lab saves and submits through the real HTTP wor
         const save = await require('supertest')(app).post(`/api/results/${sampleId}`).set('Authorization', 'Bearer ' + token)
             .send({ measurements: [{ param: 'SOC', value: '90', unit: unit.code }, { param: 'TN', value: '2', unit: unit.code }] });
         expect(save.status).toBe(200); expect(save.body).toMatchObject({ success: true, crossChecks: [], crossCheckUnavailableReason: 'CROSS_CHECK_LAB_REQUIRED' });
-        expect(save.body.matrixDiagnostics.cnRatio.cnRatio).toBe(45);
+        // #279: the legacy C:N advisory is retired, so an unregistered lab sees no hidden fallback,
+        // only the disclosed CROSS_CHECK_LAB_REQUIRED reason.
+        expect(save.body.matrixDiagnostics).toMatchObject({ retiredAdvisories: ['CN_RATIO', 'BASES_CEC'], advisorySuccessor: 'crossChecks' });
+        expect(save.body.matrixDiagnostics.cnRatio).toBeUndefined();
         const current = await f.db.result.findMany({ where: { sampleId, isCurrent: true }, orderBy: { param: 'asc' } });
         expect(current.map(row => [row.param, row.value, row.numericValue])).toEqual([['SOC', '90', 90], ['TN', '2', 2]]);
         const submit = await require('supertest')(app).post(`/api/results/${sampleId}/submit`).set('Authorization', 'Bearer ' + token);

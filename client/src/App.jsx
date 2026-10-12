@@ -229,6 +229,7 @@ const Layout = ({ children }) => {
 };
 
 import ForcePasswordChangeModal from './components/ForcePasswordChangeModal';
+import SessionKeeper from './components/auth/SessionKeeper';
 
 import { NotificationProvider } from './context/NotificationContext';
 import NotificationDrawer from './components/NotificationDrawer';
@@ -283,6 +284,7 @@ function App() {
     return (
         <>
             <AppearancePreviewNotice />
+            <SessionKeeper />
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/activate" element={<React.Suspense fallback={<LazyFallback />}><ActivateAccount /></React.Suspense>} />

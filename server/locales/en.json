@@ -81,6 +81,34 @@
     "see": "see",
     "replaces": "Replaces",
     "preparationRecords": "Preparation records",
+    "preparationRecordText": {
+      "steps": {
+        "DRYING": "Drying",
+        "SIEVING": "Sieving",
+        "GRINDING": "Grinding",
+        "SPLITTING": "Splitting"
+      },
+      "methods": {
+        "AIR": "Air dried",
+        "OVEN_40": "Oven 40 °C",
+        "OVEN_105": "Oven 105 °C",
+        "OTHER": "Other method"
+      },
+      "sieve": "Sieve",
+      "coarseFraction": "Coarse fraction",
+      "grind": "Ground to",
+      "massBefore": "Mass before",
+      "massAfter": "Mass after",
+      "duration": "Duration",
+      "equipment": "Equipment",
+      "performedBy": "Performed by"
+    },
+    "reportBasis": {
+      "ovenDry": "Reported on an oven-dry basis",
+      "factor": "moisture correction factor",
+      "waterContent": "gravimetric water content",
+      "source": "moisture result"
+    },
     "qcNotRequired": "QC not required",
     "qcEvidenceIncomplete": "Historical QC acceptance has incomplete recorded evidence",
     "qcAcknowledgedBy": "Acknowledged by",
@@ -107,7 +135,13 @@
     "issuedAt": "Issued at",
     "approvalNotRecorded": "Approval: not recorded",
     "filterWithdrawn": "Withdrawn",
-    "withdrawnPendingAmendment": "Withdrawn pending amendment {{amendmentId}}"
+    "withdrawnPendingAmendment": "Withdrawn pending amendment {{amendmentId}}",
+    "amendedStatement": "Amended report — replaces {replacedNumber} revision {replacedRevision}; reason: {reason}.",
+    "amendmentChangedMark": "†",
+    "amendmentChangedLegend": "changed in this amendment",
+    "amendmentAddedMark": "‡",
+    "amendmentAddedLegend": "added in this amendment",
+    "amendmentRemoved": "Removed in this amendment"
   },
   "common": {
     "save": "Save",
@@ -1013,12 +1047,14 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC",
       "report_uncertaintyMode": "Report expanded uncertainty",
       "report_uncertaintyCoverageFactor": "Uncertainty coverage factor",
+      "report_ovenDryConvertible": "Convert to oven-dry basis on request",
       "crossCheck_basesCecFactor": "Maximum exchangeable bases / CEC factor",
       "crossCheck_baseSaturationMaxPct": "Maximum base saturation (%)",
       "crossCheck_textureClosureTolerancePct": "Texture closure tolerance (%)",
       "crossCheck_cnMin": "Minimum C:N ratio",
       "crossCheck_cnMax": "Maximum C:N ratio",
-      "crossCheck_carbonatePhMin": "Minimum water pH for carbonate"
+      "crossCheck_carbonatePhMin": "Minimum water pH for carbonate",
+      "report_amendedStatement": "Amended report statement"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -1056,6 +1092,7 @@
     "source": "Source",
     "difference": "Compared with preset",
     "differs": "Differs from preset",
+    "storedInvalid": "The stored value is out of range and is not used; save a valid value.",
     "edit": "Edit",
     "clear": "Clear override",
     "clearExplanation": "This setting will inherit the next applicable default. Its previous value stays in history.",
@@ -1158,7 +1195,10 @@
     "ptLimits": {
       "questionable": "Questionable boundary",
       "unsatisfactory": "Unsatisfactory boundary"
-    }
+    },
+    "amendedDefault": "Use localized defaults",
+    "amendedCustom": "Customize all five languages",
+    "amendedHelp": "Each language must contain {replacedNumber}, {replacedRevision} and {reason} exactly once. The text is frozen when the report is issued."
   },
   "referenceMaterials": {
     "title": "Reference materials",
@@ -1881,7 +1921,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "Cross-check evidence requires the caller submission."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory"
+      "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory",
+      "CROSS_CHECK_POLICY_INVALID": "Cross-checks unavailable: a laboratory check setting is out of range; a manager must save a valid value"
     }
   },
   "amendment": {

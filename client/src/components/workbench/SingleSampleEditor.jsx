@@ -242,7 +242,11 @@ export default function SingleSampleEditor({
                         analysis={currentItem.analysis}
                         checks={draft?.checks || savedReceipt?.checklist || [false, false, false]}
                         onChange={checks => onDraftChange(currentItem.workItemId, null, { checks })}
-                        onConfirm={() => onConfirmOperation?.(currentItem.workItemId, draft?.checks || [])}
+                        onConfirm={() => onConfirmOperation?.(currentItem.workItemId, draft?.checks || [], null, draft?.records, currentItem.version)}
+                        preparationSteps={currentItem.preparationSteps}
+                        records={draft?.records || []}
+                        onRecordsChange={records => onDraftChange(currentItem.workItemId, null, { records })}
+                        equipment={currentItem.eligibleEquipment || []}
                         disabled={disabled}
                         savedReceipt={savedReceipt}
                         isEvidenceGap={currentItem.status === 'COMPLETED' && !savedReceipt}

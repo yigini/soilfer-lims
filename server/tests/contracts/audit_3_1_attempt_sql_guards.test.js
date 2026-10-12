@@ -265,6 +265,9 @@ test('the authenticated workspace returns linked and unlinked attempt metadata w
     // additive schema without changing this predecessor's attempt guards.
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({dbPath:file,apply:true});
     require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:file,apply:true});
+    require('../../scripts/install_report_revisions').installReportRevisions({dbPath:file,apply:true});
+    require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:file,apply:true});
+    require('../../scripts/install_preparation_records').installPreparationRecords({dbPath:file,apply:true});
     // Current workspace reads include the nullable draft import pointer. Prepare
     // this one owned predecessor through the actual prerequisite and import
     // installers; all retained raw Result/attempt assertions stay unchanged.

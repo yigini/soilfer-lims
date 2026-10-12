@@ -1,3 +1,4 @@
+const { gateRecords } = require('../helpers/preparationRecords');
 const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
@@ -69,7 +70,7 @@ describe('8.1 Section B: Gate Enforcement (Clean Flow)', () => {
         await request(app)
             .put(`/api/samples/${sampleId}/phase`)
             .set('Authorization', `Bearer ${managerToken}`)
-            .send({ phase: 'DRYING', status: 'DONE', checklist: [true, true, true] });
+            .send({ phase: 'DRYING', status: 'DONE', checklist: [true, true, true], records: gateRecords('DRYING') });
 
         // 4. Now Prep update to IN_PROGRESS should be allowed
         const prepAllowed = await request(app)

@@ -3,6 +3,7 @@ const path=require('node:path'), Database=require('better-sqlite3');
 const {loadNonconformityMigrationSource}=require('../services/nonconformityMigrationSource');
 const {loadProficiencyMigrationSource}=require('../services/proficiencyMigrationSource');
 const e=require('../services/nonconformityInstallationEvidence');
+const {fingerprintRows,fingerprintRetainedTables}=require('../services/retainedRowsFingerprint');
 function counts(db,hasNcr) {
     return {roundCount:db.prepare('SELECT count(*) n FROM ProficiencyRound').get().n,
         pendingRoundIds:db.prepare("SELECT id FROM ProficiencyRound WHERE ncrStatus='PENDING' ORDER BY id").all().map(row=>row.id),
@@ -31,9 +32,8 @@ function classify(db) {
         [...invalidIds.map(id=>`ProficiencyRound ${id}`),...ncrIds.map(id=>`NonconformityReport ${id}`)]),{invalidRoundIds:invalidIds,ncrIds});
     return {classification:'FRESH_PRISMA_193',sources:e.sources(),...counts(db,true)};
 }
-function retainedRows(db) {
-    const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT IN ('NonconformityReport','_schema_migrations') ORDER BY name").all().map(row=>row.name);
-    return Object.fromEntries(names.map(name=>[name,db.prepare(`SELECT * FROM "${name.replace(/"/g,'""')}" ORDER BY rowid`).all()]));
+function retainedFingerprint(db,transformRow) {
+    return fingerprintRetainedTables(db,{excludeTables:['NonconformityReport','_schema_migrations'],transformRow});
 }
 function installNonconformityReports({dbPath,apply=false}={}) {
     if(typeof dbPath!=='string'||!dbPath.trim())throw e.fail('NCR_DATABASE_REQUIRED','Provide an explicit database path.');
@@ -46,21 +46,24 @@ function installNonconformityReports({dbPath,apply=false}={}) {
         require('../services/exchangeDbFunctions').registerDbFunctions(db);db.pragma('foreign_keys=ON');
         return db.transaction(()=>{
             const current=classify(db);if(current.classification==='COMPLETE_193')return {...current,mode:'NO_OP',totalChanges:0,backfilledCount:0};
-            const before=retainedRows(db),ledger=db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all();
+            const before=retainedFingerprint(db);
+            const expected=current.classification==='PRE_193'?retainedFingerprint(db,(name,row)=>
+                name==='ProficiencyRound'?{...row,nonconformityId:null}:row):before;
+            const retainedLedger=()=>fingerprintRows(db.prepare('SELECT * FROM _schema_migrations WHERE id NOT IN (?,?) ORDER BY id').iterate(e.PT_MARKER,e.MARKER));
+            const ptLedger=()=>fingerprintRows(db.prepare('SELECT * FROM _schema_migrations WHERE id=? ORDER BY id').iterate(e.PT_MARKER));
+            const ledger=retainedLedger(),ptReceipt=ptLedger();
             if(current.classification==='PRE_193')db.exec(source.schemaSql);
             else {
                 db.exec(ptSource.guardsSql);
                 db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run(e.PT_MARKER,JSON.stringify({migrationSha256:ptSource.sha256}));
             }
             db.exec(source.guardsSql);
-            const expected={...before,ProficiencyRound:before.ProficiencyRound.map(row=>current.classification==='PRE_193'?{...row,nonconformityId:null}:row)};
-            if(e.fingerprint(retainedRows(db))!==e.fingerprint(expected)||db.prepare('SELECT count(*) n FROM NonconformityReport').get().n!==0||
-                e.fingerprint(db.prepare('SELECT * FROM _schema_migrations WHERE id NOT IN (?,?) ORDER BY id').all(e.PT_MARKER,e.MARKER))!==
-                e.fingerprint(ledger.filter(row=>![e.PT_MARKER,e.MARKER].includes(row.id)))||
+            if(retainedFingerprint(db)!==expected||db.prepare('SELECT count(*) n FROM NonconformityReport').get().n!==0||
+                retainedLedger()!==ledger||
                 !e.ptReceiptMatches(db)||current.classification==='PRE_193'&&
-                e.fingerprint(db.prepare('SELECT * FROM _schema_migrations WHERE id=?').all(e.PT_MARKER))!==e.fingerprint(ledger.filter(row=>row.id===e.PT_MARKER)))
+                ptLedger()!==ptReceipt)
                 throw e.fail('NCR_PRESERVATION_REFUSED','NCR installation changed retained evidence or receipts.');
-            const receipt={sources:current.sources,originalRowsSha256:e.fingerprint(before),originalRowsAndFieldsPreserved:true,newNcrCount:0,backfilledCount:0};
+            const receipt={sources:current.sources,originalRowsSha256:before,originalRowsAndFieldsPreserved:true,newNcrCount:0,backfilledCount:0};
             receipt.receiptSha256=e.fingerprint(receipt);
             db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run(e.MARKER,JSON.stringify(receipt));
             const after=classify(db);

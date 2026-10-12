@@ -1,3 +1,4 @@
+const { gateRecords } = require('../helpers/preparationRecords');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
@@ -56,7 +57,7 @@ describe('WP-26: Single Representation for Operational Gates', () => {
     test('1. updatePhaseStatus DONE synchronizes WorkItem to COMPLETED with verified receipt', async () => {
         const req = {
             params: { id: testSampleId },
-            body: { phase: 'DRYING', status: 'DONE', checklist: [true, true, true] },
+            body: { phase: 'DRYING', status: 'DONE', checklist: [true, true, true], records: gateRecords('DRYING') },
             user: { username: 'test_mgr', role: 'LAB_MANAGER', labId: 'LAB-DEFAULT' }
         };
         const res = {
@@ -101,7 +102,7 @@ describe('WP-26: Single Representation for Operational Gates', () => {
         for (const analysis of ['DRYING', 'PREPARATION']) {
             const item = await prisma.workItem.findFirst({ where: { sampleId: testSampleId, analysis } });
             await operations.confirmOperation({ actor: manager, workItemId: item.id,
-                checklist: checklists[analysis].steps.map(() => true) });
+                checklist: checklists[analysis].steps.map(() => true), records: gateRecords(analysis) });
             if (analysis === 'PREPARATION') preparation = item;
         }
         for (const status of ['SUBMITTED', 'ACCEPTED']) {

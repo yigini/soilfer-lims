@@ -26,7 +26,11 @@ const PublicReport = () => {
             setReport({ ...res.data, content });
         } catch (e) {
             const status = e.response?.status;
-            if (status === 409 && e.response?.data?.code === 'REPORT_WITHDRAWN') setError(t('amendment.publicWithdrawn'));
+            const tombstone = e.response?.data?.tombstone;
+            const number = tombstone?.reportNumber ? ' ' + t('amendment.publicReportNumber', { number: tombstone.reportNumber }) : '';
+            if (status === 409 && e.response?.data?.code === 'REPORT_WITHDRAWN') setError(t('amendment.publicWithdrawn') + number);
+            else if (status === 410 && e.response?.data?.code === 'REPORT_SUPERSEDED') setError(t('amendment.publicSuperseded') + number +
+                (tombstone?.replacementNumber ? ' ' + t('amendment.publicReplacedBy', { number: tombstone.replacementNumber }) : ''));
             else if (status === 404) setError('This report link is invalid or has been removed.');
             else if (status === 410) setError(e.response?.data?.error || 'This link has expired or been revoked.');
             else setError('Failed to load report. Please try again later.');

@@ -184,6 +184,10 @@ test('normal scientific retest review, reapproval and report generation preserve
  await withQcRunHttp(f.db,f.actor,async(app,token)=>{
   const premature=await request(app).post('/api/reports/generate/'+item.sampleId).set('Authorization','Bearer '+token);
   expect(premature.status).toBe(409);expect(await retained()).toEqual(retainedBefore);
+  // #211: the open retest is not yet reviewed and re-approved; zero publication writes.
+  const reports=await f.db.report.count(),incomplete=await request(app).post('/api/reports/generate/'+item.sampleId)
+   .set('Authorization','Bearer '+token).send({amendmentId:amendment.id});
+  expect(incomplete.status).toBe(409);expect(await retained()).toEqual(retainedBefore);expect(await f.db.report.count()).toBe(reports);
   const historical=await request(app).get('/api/reports/'+frozen.id).set('Authorization','Bearer '+token);
   expect(historical.status).toBe(200);expect(historical.body.content).toEqual(JSON.parse(frozen.content));
   expect(historical.body.withdrawal.amendmentId).toBe(amendment.id);
@@ -201,14 +205,22 @@ test('normal scientific retest review, reapproval and report generation preserve
   expect({status:review.status,body:review.body}).toMatchObject({status:200});
   const approval=await post('/api/samples/'+item.sampleId+'/approve');
   expect({status:approval.status,body:approval.body}).toMatchObject({status:200});
-  const issued=await post('/api/reports/generate/'+item.sampleId);
+  const issued=await post('/api/reports/generate/'+item.sampleId).send({amendmentId:amendment.id});
   expect({status:issued.status,body:issued.body}).toMatchObject({status:200});
-  const revised=await f.db.report.findUnique({where:{id:issued.body.id}});
+  const revised=await f.db.report.findUnique({where:{id:issued.body.id}}),reapproved=await f.db.sample.findUnique({where:{id:item.sampleId}});
+  // #211 pin6097077343: the scientific revision freezes its predecessor, amendment and re-approval.
+  expect(revised).toMatchObject({supersedesReportId:frozen.id,amendmentId:amendment.id,amendmentReason:'Client requested an analytical retest',
+   amendmentAuthorizedBy:other.username,issuedBy:other.username,approvedBy:reapproved.approvedBy});
+  expect(reapproved.approvedAt.getTime()).toBeGreaterThan(priorSample.approvedAt.getTime());
+  const frozenAmendment=JSON.parse(revised.content).amendment;
+  expect(frozenAmendment).toMatchObject({amendmentId:amendment.id,type:'SCIENTIFIC',replacesReportId:frozen.id,removed:[],
+   comparison:{changes:[expect.objectContaining({analysisId:f.analysisCode,kind:'CHANGED'})]}});
+  expect(frozenAmendment.statement).toContain('Client requested an analytical retest');
   expect(revised).toMatchObject({status:'PUBLISHED',version:frozen.version+1,reportNumberBase:frozen.reportNumberBase,revision:frozen.revision+1});
   const content=JSON.parse(revised.content);
   expect(content.publication).toMatchObject({replacesReportId:frozen.id,issuer:{username:other.username}});
   expect(content.signedBy.username).toBe(other.username);
-  expect(content.resultGroups[0].items[0]).toMatchObject({value:'7.3',sourceResultIds:[replacement.id]});
+  expect(content.resultGroups[0].items[0]).toMatchObject({value:'7.3',sourceResultIds:[replacement.id],amendmentChange:'CHANGED'});
  },{reviews:true,samples:true,reports:true});
  expect(await retained()).toEqual(retainedBefore);
  expect(await f.db.sampleAmendment.findUnique({where:{id:amendment.id}})).toMatchObject({status:'APPROVED',version:2,

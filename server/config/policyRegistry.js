@@ -65,20 +65,34 @@ key('results.typicalMin', 'number', null, null, null, { nullable: true, unit: 'm
 key('results.typicalMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
 key('results.calibrationMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
 // #201 scope pin6092380877: all presets expose laboratory-owned thresholds.
-key('crossCheck.basesCecFactor', 'number', 1.1, undefined, undefined, { scope: 'LAB', min: 1 });
-key('crossCheck.baseSaturationMaxPct', 'number', 100, undefined, undefined, { scope: 'LAB', unit: '%' });
-key('crossCheck.textureClosureTolerancePct', 'number', 2, undefined, undefined, { scope: 'LAB', unit: '%' });
-key('crossCheck.cnMin', 'number', 8, undefined, undefined, { scope: 'LAB' });
-key('crossCheck.cnMax', 'number', 25, undefined, undefined, { scope: 'LAB' });
-key('crossCheck.carbonatePhMin', 'number', 7, undefined, undefined, { scope: 'LAB', unit: 'pH' });
+// #281: an out-of-range value stored before these bounds existed is never rewritten.
+// It resolves as invalid (value null) so only the cross-checks become unavailable,
+// instead of failing every policy read for that laboratory.
+const crossCheckBound = { storedInvalid: 'UNAVAILABLE' };
+key('crossCheck.basesCecFactor', 'number', 1.1, undefined, undefined, { scope: 'LAB', min: 1, ...crossCheckBound });
+key('crossCheck.baseSaturationMaxPct', 'number', 100, undefined, undefined, { scope: 'LAB', unit: '%', min: 0, ...crossCheckBound });
+key('crossCheck.textureClosureTolerancePct', 'number', 2, undefined, undefined, { scope: 'LAB', unit: '%', min: 0, max: 100, ...crossCheckBound });
+key('crossCheck.cnMin', 'number', 8, undefined, undefined, { scope: 'LAB', min: 0, ...crossCheckBound });
+key('crossCheck.cnMax', 'number', 25, undefined, undefined, { scope: 'LAB', min: 0, ...crossCheckBound });
+key('crossCheck.carbonatePhMin', 'number', 7, undefined, undefined, { scope: 'LAB', unit: 'pH', min: 0, max: 14, ...crossCheckBound });
 key('repeats.maxAttemptsBeforeNcr', 'integer', 3, 5, 0, integer);
 key('repeats.technicianSelfRepeatBeforeSubmit', 'boolean', true);
 key('review.secondPersonRequired', 'boolean', true, true, false);
 key('gate.verificationRequired', 'boolean', false, false, false, { scope: 'LAB', analysisOverrides: ['DRYING', 'PREPARATION'] });
 key('report.amendmentRequiresSecondPerson', 'boolean', true, true, false);
+// #211 pin6097077343: null selects the shipped localized statement; laboratories
+// may supply complete five-locale templates with exactly these placeholders.
+key('report.amendedStatement', 'reportAmendmentTemplate', null, undefined, undefined, {
+    scope: 'LAB', nullable: true, allowedLocales: ['en', 'es', 'es-419', 'fr', 'pt'],
+    requiredPlaceholders: ['replacedNumber', 'replacedRevision', 'reason'],
+    localizedDefaults: Object.fromEntries(['en', 'es', 'es-419', 'fr', 'pt'].map(locale =>
+        [locale, require('../locales/' + locale + '.json').resultReports.amendedStatement]))
+});
 key('report.uncertaintyMode', 'enum', 'NOT_REPORTED', 'NOT_REPORTED', 'NOT_REPORTED',
     { allowedValues: ['NOT_REPORTED', 'EXPANDED_ABSOLUTE', 'EXPANDED_RELATIVE_PCT'] });
 key('report.uncertaintyCoverageFactor', 'number', null, null, null, { min: 1, nullable: true });
+key('report.ovenDryConvertible', 'boolean', false, false, false,
+    { analysisEligible: (code, value) => value !== true || require('../services/ovenDryEligibility').analysisEligible(code) });
 key('report.numberFormat', 'reportFormat', 'RPT-{LAB}-{YYYY}-{SEQ:5}', undefined, undefined, { scope: 'LAB' });
 key('sample.codeFormat', 'sampleFormat', '{LAB}-{YY}-{SEQ:6}{CHK}', undefined, undefined, { scope: 'LAB' });
 key('sample.sequenceReset', 'enum', 'YEARLY', 'YEARLY', 'YEARLY', { scope: 'LAB', allowedValues: ['YEARLY', 'NEVER'] });
@@ -108,6 +122,15 @@ function valid(name, value) {
     const d = definition(name);
     if (value === null) return d.nullable === true;
     switch (d.type) {
+    case 'reportAmendmentTemplate':
+        return !!value && typeof value === 'object' && !Array.isArray(value) &&
+            Object.keys(value).length === d.allowedLocales.length && d.allowedLocales.every(locale => {
+                const text = value[locale]; if (typeof text !== 'string' || !text.trim()) return false;
+                const tokens = text.match(/\{[^{}]+\}/g) || [];
+                return tokens.length === d.requiredPlaceholders.length &&
+                    d.requiredPlaceholders.every(name => tokens.includes('{' + name + '}')) &&
+                    !/[{}]/.test(text.replace(/\{(replacedNumber|replacedRevision|reason)\}/g, ''));
+            });
     case 'enum': return d.allowedValues.includes(value) && !d.unsupportedValues?.includes(value);
     case 'boolean': return typeof value === 'boolean';
     case 'integer': return Number.isSafeInteger(value) && value >= (d.min ?? 0) && (d.max === undefined || value <= d.max);

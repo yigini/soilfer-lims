@@ -115,6 +115,16 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
                 </p>
             )}
 
+            {data.amendment?.statement && (
+                // #211: frozen at generation; the view never recomputes it.
+                <p role="note" data-testid="report-amendment-statement" style={{color:'#b45309',fontWeight:700}}>
+                    {data.amendment.statement}
+                    {data.amendment.removed?.length > 0 && <span style={{display:'block',fontWeight:400}}>
+                        {data.amendment.removed.map(row => [row.name, row.basis, [row.value, row.unit].filter(Boolean).join(' ')].filter(Boolean).join(' ')).join('; ')}
+                    </span>}
+                </p>
+            )}
+
             {/* ═══════════════════════════════════════════════════
                 1. LAB LETTERHEAD
             ═══════════════════════════════════════════════════ */}
@@ -266,6 +276,7 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
                                         return (
                                             <tr key={i}>
                                                 <td className="param-name">
+                                                    {item.amendmentChange === 'CHANGED' ? '† ' : item.amendmentChange === 'ADDED' ? '‡ ' : ''}
                                                     {toScalar(item.name || item.param)}
                                                     {item.provenance && item.provenance !== 'MEASURED' && (
                                                         <span style={{

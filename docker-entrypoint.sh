@@ -183,6 +183,12 @@ echo "📦 Installing immutable cross-check evidence..."
 node scripts/install_cross_check_evaluations.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 echo "📦 Installing immutable amendment requests, attempt links and report withdrawals..."
 node scripts/install_sample_amendment_authorisation.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing immutable report revision evidence..."
+node scripts/install_report_revisions.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing bench credential storage..."
+node scripts/install_bench_credentials.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing preparation record evidence..."
+node scripts/install_preparation_records.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
 echo "📦 Installing retained instrument import templates and receipts..."
 node scripts/install_instrument_imports.js --db "${DATABASE_PATH:-$DB_FILE}" --apply

@@ -1,27 +1,4 @@
 {
-  "pastePreview": {
-    "title": "Vista previa del pegado — {analysis}",
-    "help": "Pegue dos columnas: identificador de muestra y valor. Sepárelas con comas, puntos y comas o tabulaciones. Use comillas en las celdas que contengan el separador.",
-    "formatError": "Se esperan dos columnas: identificador de muestra y valor. Use comillas en las celdas que contengan el separador.",
-    "duplicate": "Esta muestra aparece más de una vez en las filas pegadas.",
-    "ambiguousId": "Este identificador coincide con varias tareas. Use un código de muestra único.",
-    "unmatched": "No hay una tarea asignada de {analysis} que coincida.",
-    "sealed": "La tarea está cerrada ({status}).",
-    "blocked": "Los requisitos previos están bloqueados.",
-    "invalidNumber": "El valor es inválido o ambiguo según el formato numérico de esta tarea.",
-    "separator": "Separador",
-    "auto": "Detectar automáticamente",
-    "tab": "Tabulación",
-    "comma": "Coma",
-    "semicolon": "Punto y coma",
-    "preview": "Ver coincidencias y exclusiones",
-    "summary": "Vista previa: {count} filas",
-    "matched": "{count} coincidencias",
-    "excluded": "{count} excluidas",
-    "matchedRow": "Coincide",
-    "draftNotice": "El pegado actualiza los borradores locales. Las mediciones se guardan con Registrar.",
-    "apply": "Aplicar {count} valores al borrador"
-  },
   "replicateGrid": {
     "rep1": "Rep 1",
     "rep2": "Rep 2",
@@ -2356,6 +2333,10 @@
     }
   },
   "dataResults": {
+    "reportedValueUnavailable": "Valor informado no disponible",
+    "selectionIdColumn": "ID de selección del valor informado",
+    "attemptIdsColumn": "IDs de intento",
+    "batchIdsColumn": "IDs de lote",
     "title": "Resultados analíticos maestros",
     "subtitle": "Vista maestra de todos los resultados analíticos (Aprobados y Pendientes).",
     "columns": "Columnas",
@@ -2522,7 +2503,31 @@
     "recordingIncomplete": "Registro incompleto",
     "recordedCount": "Registrados",
     "retryFailed": "Reintentar fallidos",
-    "recordingUnconfirmed": "No se confirmó el registro de esta fila."
+    "recordingUnconfirmed": "No se confirmó el registro de esta fila.",
+    "preparationRecord": {
+      "steps": {
+        "DRYING": "Secado",
+        "SIEVING": "Tamizado",
+        "GRINDING": "Molienda",
+        "SPLITTING": "Cuarteo"
+      },
+      "methods": {
+        "AIR": "Secado al aire",
+        "OVEN_40": "Estufa 40 °C",
+        "OVEN_105": "Estufa 105 °C",
+        "OTHER": "Otro método"
+      },
+      "method": "Método",
+      "temperatureC": "Temperatura (°C)",
+      "massBeforeG": "Masa inicial (g)",
+      "massAfterG": "Masa final (g)",
+      "coarseFractionG": "Fracción gruesa (g)",
+      "sieveMm": "Tamiz (mm)",
+      "grindMm": "Molido a (mm)",
+      "startedAt": "Inicio",
+      "endedAt": "Fin",
+      "equipment": "Equipo"
+    }
   },
   "batchIntake": {
     "massToApply": "Masa a aplicar (g)",
@@ -2602,12 +2607,14 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Permitir la corrección revisada de errores de transcripción en CC fallido sin disposición",
       "report_uncertaintyMode": "Informar incertidumbre expandida",
       "report_uncertaintyCoverageFactor": "Factor de cobertura de incertidumbre",
+      "report_ovenDryConvertible": "Convertir a base seca en estufa a solicitud",
       "crossCheck_basesCecFactor": "Factor máximo de bases intercambiables / CIC",
       "crossCheck_baseSaturationMaxPct": "Saturación máxima de bases (%)",
       "crossCheck_textureClosureTolerancePct": "Tolerancia del cierre de textura (%)",
       "crossCheck_cnMin": "Relación C:N mínima",
       "crossCheck_cnMax": "Relación C:N máxima",
-      "crossCheck_carbonatePhMin": "pH mínimo en agua para carbonatos"
+      "crossCheck_carbonatePhMin": "pH mínimo en agua para carbonatos",
+      "report_amendedStatement": "Texto del informe modificado"
     },
     "title": "Políticas",
     "yes": "Sí",
@@ -2645,6 +2652,7 @@
     "source": "Origen",
     "difference": "Comparación con la configuración",
     "differs": "Difiere de la configuración",
+    "storedInvalid": "El valor guardado está fuera de rango y no se usa; guarde un valor válido.",
     "edit": "Editar",
     "clear": "Quitar ajuste específico",
     "clearExplanation": "Este ajuste heredará el siguiente valor aplicable. Su valor anterior se conserva en el historial.",
@@ -2747,7 +2755,10 @@
     "ptLimits": {
       "questionable": "Límite cuestionable",
       "unsatisfactory": "Límite insatisfactorio"
-    }
+    },
+    "amendedDefault": "Usar textos predeterminados por idioma",
+    "amendedCustom": "Personalizar los cinco idiomas",
+    "amendedHelp": "Cada idioma debe incluir {replacedNumber}, {replacedRevision} y {reason} una sola vez. El texto queda fijado al emitir el informe."
   },
   "referenceMaterials": {
     "title": "Materiales de referencia",
@@ -3492,7 +3503,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "La evidencia de comprobación requiere el envío correspondiente."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Comprobaciones cruzadas no disponibles: la muestra no tiene un laboratorio registrado"
+      "CROSS_CHECK_LAB_REQUIRED": "Comprobaciones cruzadas no disponibles: la muestra no tiene un laboratorio registrado",
+      "CROSS_CHECK_POLICY_INVALID": "Comprobaciones cruzadas no disponibles: un ajuste de comprobación del laboratorio está fuera de rango; un responsable debe guardar un valor válido"
     }
   },
   "amendment": {
@@ -3535,7 +3547,42 @@
     },
     "pendingNotice": "Solicitud guardada. Se requiere autorización antes de aplicar cambios.",
     "authorisedNotice": "Enmienda autorizada. Los reanálisis científicos deben completar la revisión y aprobación habituales antes de emitir otro informe.",
-    "failed": "No se pudo guardar la enmienda. Se conserva su información."
+    "failed": "No se pudo guardar la enmienda. Se conserva su información.",
+    "publicReportNumber": "Informe {number}.",
+    "publicSuperseded": "Este informe ha sido sustituido por un informe enmendado. Solicite el informe vigente al laboratorio.",
+    "publicReplacedBy": "Sustituido por el informe {number}.",
+    "revisionRequiresAmendment": "Un informe enmendado requiere una enmienda aprobada. Solicítela y autorícela primero."
+  },
+  "session": {
+    "expiredTitle": "Sesión caducada",
+    "expiredBody": "Introduzca su contraseña para continuar como {name}. Su trabajo sin guardar se conserva.",
+    "password": "Contraseña",
+    "continue": "Continuar",
+    "signOut": "Cerrar sesión",
+    "reloginFailed": "La contraseña no es correcta. Inténtelo de nuevo o cierre sesión."
+  },
+  "bench": {
+    "analyst": "Analista: {name}",
+    "switchAnalyst": "Cambiar de analista",
+    "enable": "Activar modo banco",
+    "disable": "Desactivar modo banco",
+    "locked": "Introduzca su PIN para desbloquear",
+    "lockedFor": "Bloqueado para {name}",
+    "confirmRecord": "Introduzca su PIN para registrar",
+    "unlock": "Desbloquear",
+    "pin": "PIN",
+    "password": "Contraseña",
+    "setPinHelp": "Defina un PIN de banco de 4 a 8 dígitos. Confírmelo con su contraseña.",
+    "unsentKept": "{count} cambio(s) aún no se han enviado y se conservan en este dispositivo. Vuelva a conectarse e inténtelo de nuevo.",
+    "errors": {
+      "generic": "No se pudo comprobar el PIN.",
+      "BENCH_PIN_INVALID": "El PIN no es correcto.",
+      "BENCH_PIN_LOCKED": "Demasiados PIN incorrectos. Inténtelo dentro de unos minutos.",
+      "BENCH_PIN_NOT_SET": "Primero defina un PIN de banco.",
+      "BENCH_PIN_FORMAT_INVALID": "El PIN debe tener de 4 a 8 dígitos.",
+      "BENCH_PIN_PASSWORD_INVALID": "Su contraseña no es correcta."
+    },
+    "draftBy": "por {name}"
   },
   "instrumentImport": {
     "title": "Importar archivo del instrumento",
@@ -3636,5 +3683,28 @@
       "CALC_INPUT_INVALID": "Revise el valor original y el formato numérico del laboratorio.",
       "IMPORT_ROW_INVALID": "Revise el valor original y el formato numérico del laboratorio."
     }
+  },
+  "pastePreview": {
+    "title": "Vista previa del pegado — {analysis}",
+    "help": "Pegue dos columnas: identificador de muestra y valor. Sepárelas con comas, puntos y comas o tabulaciones. Use comillas en las celdas que contengan el separador.",
+    "formatError": "Se esperan dos columnas: identificador de muestra y valor. Use comillas en las celdas que contengan el separador.",
+    "duplicate": "Esta muestra aparece más de una vez en las filas pegadas.",
+    "ambiguousId": "Este identificador coincide con varias tareas. Use un código de muestra único.",
+    "unmatched": "No hay una tarea asignada de {analysis} que coincida.",
+    "sealed": "La tarea está cerrada ({status}).",
+    "blocked": "Los requisitos previos están bloqueados.",
+    "invalidNumber": "El valor es inválido o ambiguo según el formato numérico de esta tarea.",
+    "separator": "Separador",
+    "auto": "Detectar automáticamente",
+    "tab": "Tabulación",
+    "comma": "Coma",
+    "semicolon": "Punto y coma",
+    "preview": "Ver coincidencias y exclusiones",
+    "summary": "Vista previa: {count} filas",
+    "matched": "{count} coincidencias",
+    "excluded": "{count} excluidas",
+    "matchedRow": "Coincide",
+    "draftNotice": "El pegado actualiza los borradores locales. Las mediciones se guardan con Registrar.",
+    "apply": "Aplicar {count} valores al borrador"
   }
 }

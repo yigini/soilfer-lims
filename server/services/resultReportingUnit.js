@@ -5,6 +5,7 @@ const FRACTIONS = ['SAND', 'SILT', 'CLAY'];
 // Pin6095652486: the typed writer's decision lives here, shared with the
 // import preflight. Ordinary calls retain the exact existing writer behavior.
 // Import calls require an exact catalogue match and return receipt evidence.
+// #283: methods never override the analysis's controlled reporting unit.
 function numericReportingUnit(ctx, measurement, { instrumentImport = false } = {}) {
     const fraction = FRACTIONS.includes(measurement.param) && TEXTURE_ANALYSES.has(ctx.analysis.code);
     if (instrumentImport) {
@@ -16,7 +17,7 @@ function numericReportingUnit(ctx, measurement, { instrumentImport = false } = {
         return { unit: match[1], evidence: { analysisId: ctx.analysis.code, units: ctx.analysis.units ?? null,
             unitCode: ctx.analysis.unitCode ?? null, matchedField: match[0], matchedValue: match[1] } };
     }
-    const unit = fraction ? '%' : measurement.unit || ctx.method?.unit || ctx.analysis.units || ctx.analysis.unitCode || null;
+    const unit = fraction ? '%' : measurement.unit || ctx.analysis.units || ctx.analysis.unitCode || null;
     if (!fraction && measurement.unit && ctx.analysis.units && ![ctx.analysis.units, ctx.analysis.unitCode].includes(measurement.unit)) {
         throw new TransitionError('Use the configured reporting unit.', 409, 'RESULT_UNIT_MISMATCH');
     }

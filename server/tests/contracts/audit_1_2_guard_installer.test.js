@@ -400,6 +400,30 @@ test('a complete guarded database passes the read-only gate, listens and answers
     expect(fingerprint(fixture.file)).toBe(beforeAmendments);
     expect(require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:fixture.file,apply:true}))
         .toMatchObject({classification:'COMPLETE_210',newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0});
+    const beforeRevisions=fingerprint(fixture.file);
+    const missingRevisions=await realStartup(fixture.file);
+    expect(missingRevisions.accepted).toBe(false);
+    expect(missingRevisions.stderr).toContain('REPORT_REVISION_STARTUP_REQUIRED');
+    expect(missingRevisions.stdout).not.toContain('Enterprise Server running on');
+    expect(fingerprint(fixture.file)).toBe(beforeRevisions);
+    expect(require('../../scripts/install_report_revisions').installReportRevisions({dbPath:fixture.file,apply:true}))
+        .toMatchObject({classification:'COMPLETE_211',previousClassification:'FRESH_PRISMA_211',backfilledCount:0});
+    const beforeBench=fingerprint(fixture.file);
+    const missingBench=await realStartup(fixture.file);
+    expect(missingBench.accepted).toBe(false);
+    expect(missingBench.stderr).toContain('BENCH_CREDENTIAL_STARTUP_REQUIRED');
+    expect(missingBench.stdout).not.toContain('Enterprise Server running on');
+    expect(fingerprint(fixture.file)).toBe(beforeBench);
+    expect(require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:fixture.file,apply:true}))
+        .toMatchObject({classification:'COMPLETE_202',backfilledCount:0});
+    const beforePreparation=fingerprint(fixture.file);
+    const missingPreparation=await realStartup(fixture.file);
+    expect(missingPreparation.accepted).toBe(false);
+    expect(missingPreparation.stderr).toContain('PREPARATION_RECORD_STARTUP_REQUIRED');
+    expect(missingPreparation.stdout).not.toContain('Enterprise Server running on');
+    expect(fingerprint(fixture.file)).toBe(beforePreparation);
+    expect(require('../../scripts/install_preparation_records').installPreparationRecords({dbPath:fixture.file,apply:true}))
+        .toMatchObject({classification:'COMPLETE_205',previousClassification:'FRESH_PRISMA_205',backfilledCount:0});
     const importBeforeSha=createHash('sha256').update(fs.readFileSync(fixture.file)).digest('hex');
     const importMissing=await realStartup(fixture.file,false);
     expect(importMissing.code).toBe(1);
@@ -410,6 +434,15 @@ test('a complete guarded database passes the read-only gate, listens and answers
         .toMatchObject({classification:'COMPLETE_200',newTemplateCount:0,newReceiptCount:0,backfilledCount:0,counts:{draftLinks:0}});
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
+    const benchReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"BENCH_CREDENTIAL_STARTUP_READY"')));
+    expect(benchReady).toMatchObject({classification:'COMPLETE_202',totalChanges:0});
+    expect(child.stdout.indexOf('BENCH_CREDENTIAL_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
+    const preparationReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"PREPARATION_RECORD_STARTUP_READY"')));
+    expect(preparationReady).toMatchObject({classification:'COMPLETE_205',totalChanges:0});
+    expect(child.stdout.indexOf('PREPARATION_RECORD_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
+    const revisionsReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"REPORT_REVISION_STARTUP_READY"')));
+    expect(revisionsReady).toMatchObject({classification:'COMPLETE_211',totalChanges:0});
+    expect(child.stdout.indexOf('REPORT_REVISION_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
     const amendmentsReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"AMENDMENT_STARTUP_READY"')));
     expect(amendmentsReady).toMatchObject({classification:'COMPLETE_210',totalChanges:0});
     expect(child.stdout.indexOf('AMENDMENT_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));

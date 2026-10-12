@@ -45,6 +45,19 @@ model User {
   requestedOverrides ResultOverrideRequest[] @relation("OverrideRequester")
   decidedOverrides ResultOverrideRequest[] @relation("OverrideDecider")
   cancelledOverrides ResultOverrideRequest[] @relation("OverrideCanceller")
+  benchCredential    UserBenchCredential?
+}
+
+// #202: the analyst's bench PIN, kept apart from User so no user read returns it.
+model UserBenchCredential {
+  userId         String    @id
+  pinHash        String
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Message {
@@ -197,6 +210,7 @@ model Sample {
   results           Result[]
   orderRevisions    SampleOrderRevision[]
   amendments        SampleAmendment[]
+  preparationRecords PreparationRecord[]
   reviewDecisions   ReviewDecision[]
   resultEvidenceEvents ResultEvidenceEvent[]
   holds             SampleHold[]
@@ -313,6 +327,7 @@ model WorkItem {
   draft           WorkItemDraft?
   spectralScans   SpectralData[]
   workAttempts    WorkAttempt[]
+  preparationRecords PreparationRecord[]
   reviewDecisions ReviewDecision[]
   batchPositions  BatchPositionWorkItem[]
   reportedValueSelections ReportedValueSelection[]
@@ -348,6 +363,7 @@ model WorkItemDraft {
   value         String?   // Raw input string (e.g. "6,42", "<0.5")
   values        String?   // JSON array of strings (e.g. texture: ["40", "40", "20"])
   checks        String?   // JSON array of booleans (operational task checklists)
+  records       String?   // JSON array of unconfirmed #205 preparation records
   basis         String?   @default("AIR_DRY")
   replicateNo   Int       @default(1)
   instrumentId  String?
@@ -994,6 +1010,7 @@ model EquipmentAsset {
   spectralScans      SpectralData[]
   batches            Batch[]
   resultOverrideRequests ResultOverrideRequest[]
+  preparationRecords PreparationRecord[]
   importTemplates    ImportTemplate[]
   instrumentImports  InstrumentImportReceipt[]
 }
@@ -1639,6 +1656,13 @@ model Report {
   reportNumberBase String?
   revision      Int?
   policyVersion Int?
+  // #211: frozen revision evidence, written only for newly generated reports.
+  supersedesReportId    String?
+  amendmentId           String?
+  amendmentReason       String?
+  issuedBy              String?
+  approvedBy            String?
+  amendmentAuthorizedBy String?
 
   // Denormalized search keys (populated at generation time)
   firstName     String?
@@ -2197,4 +2221,37 @@ model CrossCheckEvaluation {
 
   @@index([sampleId, evaluatedAt])
   @@index([labId, sampleId, evaluatedAt])
+}
+
+// #205: append-only structured preparation evidence, one row per recorded
+// step of a confirmed DRYING or PREPARATION gate receipt.
+model PreparationRecord {
+  id                String          @id
+  sampleId          String
+  workItemId        String
+  receiptId         String
+  gateCode          String          // DRYING | SIEVING | GRINDING | SPLITTING
+  equipmentId       String?
+  method            String?         // AIR | OVEN_40 | OVEN_105 | OTHER (DRYING only)
+  startedAt         DateTime
+  endedAt           DateTime
+  temperatureC      Float?
+  massBeforeG       Float?
+  massAfterG        Float?
+  coarseFractionG   Float?
+  coarseFractionPct Float?
+  sieveMm           Float?
+  grindMm           Float?
+  performedBy       String
+  notes             String?
+  version           Int             @default(1)
+  createdAt         DateTime        @default(now())
+
+  sample    Sample          @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  workItem  WorkItem        @relation(fields: [workItemId], references: [id], onDelete: Restrict)
+  equipment EquipmentAsset? @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+
+  @@unique([receiptId, gateCode])
+  @@index([sampleId])
+  @@index([workItemId])
 }

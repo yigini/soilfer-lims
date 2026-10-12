@@ -1,27 +1,4 @@
 {
-  "pastePreview": {
-    "title": "Pré-visualização da colagem — {analysis}",
-    "help": "Cole duas colunas: identificador da amostra e valor. Separe-as com vírgulas, pontos e vírgulas ou tabulações. Use aspas nas células que contenham o separador.",
-    "formatError": "São esperadas duas colunas: identificador da amostra e valor. Use aspas nas células que contenham o separador.",
-    "duplicate": "Esta amostra aparece mais de uma vez nas linhas coladas.",
-    "ambiguousId": "Este identificador corresponde a várias tarefas. Use um código de amostra único.",
-    "unmatched": "Nenhuma tarefa atribuída de {analysis} corresponde.",
-    "sealed": "A tarefa está encerrada ({status}).",
-    "blocked": "Os pré-requisitos estão bloqueados.",
-    "invalidNumber": "O valor é inválido ou ambíguo segundo o formato numérico desta tarefa.",
-    "separator": "Separador",
-    "auto": "Detetar automaticamente",
-    "tab": "Tabulação",
-    "comma": "Vírgula",
-    "semicolon": "Ponto e vírgula",
-    "preview": "Ver correspondências e exclusões",
-    "summary": "Pré-visualização: {count} linhas",
-    "matched": "{count} correspondências",
-    "excluded": "{count} excluídas",
-    "matchedRow": "Correspondência",
-    "draftNotice": "A colagem atualiza os rascunhos locais. As medições são guardadas com Registar.",
-    "apply": "Aplicar {count} valores aos rascunhos"
-  },
   "replicateGrid": {
     "rep1": "Rep 1",
     "rep2": "Rep 2",
@@ -2356,6 +2333,10 @@
     }
   },
   "dataResults": {
+    "reportedValueUnavailable": "Valor relatado indisponível",
+    "selectionIdColumn": "ID da seleção do valor relatado",
+    "attemptIdsColumn": "IDs das tentativas",
+    "batchIdsColumn": "IDs dos lotes",
     "title": "Resultados analíticos mestres",
     "subtitle": "Vista mestre de todos os resultados analíticos (Aprovados e Pendentes).",
     "columns": "Colunas",
@@ -2522,7 +2503,31 @@
     "recordingIncomplete": "Registro incompleto",
     "recordedCount": "Registrados",
     "retryFailed": "Tentar novamente os que falharam",
-    "recordingUnconfirmed": "O registro desta linha não foi confirmado."
+    "recordingUnconfirmed": "O registro desta linha não foi confirmado.",
+    "preparationRecord": {
+      "steps": {
+        "DRYING": "Secagem",
+        "SIEVING": "Peneiramento",
+        "GRINDING": "Moagem",
+        "SPLITTING": "Quarteamento"
+      },
+      "methods": {
+        "AIR": "Seco ao ar",
+        "OVEN_40": "Estufa 40 °C",
+        "OVEN_105": "Estufa 105 °C",
+        "OTHER": "Outro método"
+      },
+      "method": "Método",
+      "temperatureC": "Temperatura (°C)",
+      "massBeforeG": "Massa inicial (g)",
+      "massAfterG": "Massa final (g)",
+      "coarseFractionG": "Fração grossa (g)",
+      "sieveMm": "Peneira (mm)",
+      "grindMm": "Moído a (mm)",
+      "startedAt": "Início",
+      "endedAt": "Fim",
+      "equipment": "Equipamento"
+    }
   },
   "batchIntake": {
     "massToApply": "Massa a aplicar (g)",
@@ -2602,12 +2607,14 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Permitir correção revisada de erros de transcrição em CQ reprovado sem decisão",
       "report_uncertaintyMode": "Informar incerteza expandida",
       "report_uncertaintyCoverageFactor": "Fator de abrangência da incerteza",
+      "report_ovenDryConvertible": "Converter para base seca em estufa quando solicitado",
       "crossCheck_basesCecFactor": "Fator máximo de bases trocáveis / CTC",
       "crossCheck_baseSaturationMaxPct": "Saturação máxima por bases (%)",
       "crossCheck_textureClosureTolerancePct": "Tolerância do fechamento da textura (%)",
       "crossCheck_cnMin": "Relação C:N mínima",
       "crossCheck_cnMax": "Relação C:N máxima",
-      "crossCheck_carbonatePhMin": "pH mínimo em água para carbonatos"
+      "crossCheck_carbonatePhMin": "pH mínimo em água para carbonatos",
+      "report_amendedStatement": "Texto do relatório alterado"
     },
     "title": "Políticas",
     "yes": "Sim",
@@ -2645,6 +2652,7 @@
     "source": "Origem",
     "difference": "Comparação com a predefinição",
     "differs": "Difere da predefinição",
+    "storedInvalid": "O valor salvo está fora do intervalo e não é usado; salve um valor válido.",
     "edit": "Editar",
     "clear": "Remover substituição",
     "clearExplanation": "Esta configuração herdará o próximo padrão aplicável. O valor anterior permanece no histórico.",
@@ -2747,7 +2755,10 @@
     "ptLimits": {
       "questionable": "Limite questionável",
       "unsatisfactory": "Limite insatisfatório"
-    }
+    },
+    "amendedDefault": "Usar textos padrão por idioma",
+    "amendedCustom": "Personalizar os cinco idiomas",
+    "amendedHelp": "Cada idioma deve conter {replacedNumber}, {replacedRevision} e {reason} uma única vez. O texto é fixado quando o relatório é emitido."
   },
   "referenceMaterials": {
     "title": "Materiais de referência",
@@ -3492,7 +3503,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "A evidência de verificação requer o envio correspondente."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Verificações cruzadas indisponíveis: a amostra não tem um laboratório registrado"
+      "CROSS_CHECK_LAB_REQUIRED": "Verificações cruzadas indisponíveis: a amostra não tem um laboratório registrado",
+      "CROSS_CHECK_POLICY_INVALID": "Verificações cruzadas indisponíveis: uma configuração de verificação do laboratório está fora do intervalo; um gestor deve salvar um valor válido"
     }
   },
   "amendment": {
@@ -3535,7 +3547,42 @@
     },
     "pendingNotice": "Solicitação salva. É necessária autorização antes de aplicar alterações.",
     "authorisedNotice": "Emenda autorizada. As reanálises científicas devem concluir a revisão e aprovação habituais antes da emissão de outro relatório.",
-    "failed": "Não foi possível salvar a emenda. Os seus dados foram preservados."
+    "failed": "Não foi possível salvar a emenda. Os seus dados foram preservados.",
+    "publicReportNumber": "Relatório {number}.",
+    "publicSuperseded": "Este relatório foi substituído por um relatório emendado. Solicite o relatório vigente ao laboratório.",
+    "publicReplacedBy": "Substituído pelo relatório {number}.",
+    "revisionRequiresAmendment": "Um relatório emendado requer uma emenda aprovada. Solicite-a e autorize-a primeiro."
+  },
+  "session": {
+    "expiredTitle": "Sessão expirada",
+    "expiredBody": "Digite sua senha para continuar como {name}. Seu trabalho não salvo é mantido.",
+    "password": "Senha",
+    "continue": "Continuar",
+    "signOut": "Sair",
+    "reloginFailed": "Essa senha não funcionou. Tente novamente ou saia."
+  },
+  "bench": {
+    "analyst": "Analista: {name}",
+    "switchAnalyst": "Trocar de analista",
+    "enable": "Ativar modo bancada",
+    "disable": "Desativar modo bancada",
+    "locked": "Digite seu PIN para desbloquear",
+    "lockedFor": "Bloqueado para {name}",
+    "confirmRecord": "Digite seu PIN para registrar",
+    "unlock": "Desbloquear",
+    "pin": "PIN",
+    "password": "Senha",
+    "setPinHelp": "Defina um PIN de bancada de 4 a 8 dígitos. Confirme com sua senha.",
+    "unsentKept": "{count} alteração(ões) ainda não foram enviadas e ficam neste dispositivo. Reconecte e tente novamente.",
+    "errors": {
+      "generic": "Não foi possível verificar o PIN.",
+      "BENCH_PIN_INVALID": "O PIN não está correto.",
+      "BENCH_PIN_LOCKED": "Muitos PINs errados. Tente novamente em alguns minutos.",
+      "BENCH_PIN_NOT_SET": "Defina um PIN de bancada primeiro.",
+      "BENCH_PIN_FORMAT_INVALID": "O PIN deve ter de 4 a 8 dígitos.",
+      "BENCH_PIN_PASSWORD_INVALID": "Sua senha não está correta."
+    },
+    "draftBy": "por {name}"
   },
   "instrumentImport": {
     "title": "Importar arquivo do instrumento",
@@ -3636,5 +3683,28 @@
       "CALC_INPUT_INVALID": "Revise o valor original e o formato numérico do laboratório.",
       "IMPORT_ROW_INVALID": "Revise o valor original e o formato numérico do laboratório."
     }
+  },
+  "pastePreview": {
+    "title": "Pré-visualização da colagem — {analysis}",
+    "help": "Cole duas colunas: identificador da amostra e valor. Separe-as com vírgulas, pontos e vírgulas ou tabulações. Use aspas nas células que contenham o separador.",
+    "formatError": "São esperadas duas colunas: identificador da amostra e valor. Use aspas nas células que contenham o separador.",
+    "duplicate": "Esta amostra aparece mais de uma vez nas linhas coladas.",
+    "ambiguousId": "Este identificador corresponde a várias tarefas. Use um código de amostra único.",
+    "unmatched": "Nenhuma tarefa atribuída de {analysis} corresponde.",
+    "sealed": "A tarefa está encerrada ({status}).",
+    "blocked": "Os pré-requisitos estão bloqueados.",
+    "invalidNumber": "O valor é inválido ou ambíguo segundo o formato numérico desta tarefa.",
+    "separator": "Separador",
+    "auto": "Detetar automaticamente",
+    "tab": "Tabulação",
+    "comma": "Vírgula",
+    "semicolon": "Ponto e vírgula",
+    "preview": "Ver correspondências e exclusões",
+    "summary": "Pré-visualização: {count} linhas",
+    "matched": "{count} correspondências",
+    "excluded": "{count} excluídas",
+    "matchedRow": "Correspondência",
+    "draftNotice": "A colagem atualiza os rascunhos locais. As medições são guardadas com Registar.",
+    "apply": "Aplicar {count} valores aos rascunhos"
   }
 }

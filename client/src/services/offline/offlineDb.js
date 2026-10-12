@@ -391,6 +391,20 @@ export async function saveLocalDraft(draftKey, data) {
     });
 }
 
+// #202 B15: read and write in one transaction, so a meta-only change (such as
+// a new instrument, value null) never erases the typed value or other fields.
+export async function mergeLocalDraft(draftKey, { value, extra = {}, ...fields }) {
+    return withStore('drafts', 'readwrite', (store) => {
+        const req = store.get(draftKey);
+        req.onsuccess = () => {
+            const previous = req.result?.data || null;
+            store.put({ draftKey, updatedAt: new Date().toISOString(), data: { ...fields,
+                value: value !== null && value !== undefined ? value : previous?.value ?? null,
+                extra: { ...(previous?.extra || {}), ...extra } } });
+        };
+    });
+}
+
 export async function getLocalDraft(draftKey) {
     return withStore('drafts', 'readonly', (store) => {
         return new Promise((resolve, reject) => {
@@ -405,6 +419,27 @@ export async function deleteLocalDraft(draftKey) {
     return withStore('drafts', 'readwrite', (store) => {
         store.delete(draftKey);
     });
+}
+
+// #202: on a shared bench terminal, a signed-out analyst's local drafts and
+// outbox must not be readable by the next analyst. Callers flush first; this
+// only removes rows belonging to userId and reports what it removed.
+export async function purgeUserOfflineState(userId) {
+    if (typeof userId !== 'string' || !userId.trim()) return { drafts: 0, operations: 0 };
+    const removed = { drafts: 0, operations: 0 };
+    await withStore('drafts', 'readwrite', (store) => {
+        const req = store.getAll();
+        req.onsuccess = () => (req.result || []).forEach(row => {
+            if (typeof row.draftKey === 'string' && row.draftKey.startsWith(`draft:${userId}:`)) { store.delete(row.draftKey); removed.drafts++; }
+        });
+    });
+    await withStore('outbox', 'readwrite', (store) => {
+        const req = store.getAll();
+        req.onsuccess = () => (req.result || []).forEach(row => {
+            if (row.userId === userId) { store.delete(row.operationId); removed.operations++; }
+        });
+    });
+    return removed;
 }
 
 // ─── DEVICE IDENTITY ───

@@ -1,4 +1,6 @@
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import React, { useState, useMemo } from 'react';
 import {
     Search, Filter, CheckCircle2, AlertTriangle, ArrowRight,
@@ -19,6 +21,8 @@ export default function WorkbenchQueue({
     onSearchChange
 }) {
     const getAnalysisDisplayName = useAnalysisNames();
+    const { t } = useLanguage();
+    const { user } = useAuth();
     const [statusFilter, setStatusFilter] = useState('ALL');
 
     // Flatten all items across analysis groups
@@ -247,6 +251,9 @@ export default function WorkbenchQueue({
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-blue-500/15 text-blue-800 dark:text-blue-300">
                                                 <span>Draft:</span>
                                                 <span className="font-mono font-semibold">{item.draft.value || 'saved'}</span>
+                                                {/* #202 B16: a handed-over draft names the analyst who saved it. */}
+                                                {item.draft.savedBy && item.draft.savedBy !== user?.username &&
+                                                    <span data-testid="draft-saved-by">{t('bench.draftBy', { name: item.draft.savedBy })}</span>}
                                             </span>
                                         ) : (
                                             <span className="text-sf-muted">Awaiting input</span>

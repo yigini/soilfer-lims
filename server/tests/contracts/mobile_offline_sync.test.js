@@ -1,9 +1,11 @@
+const { gateRecords } = require('../helpers/preparationRecords');
 'use strict';
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
+const DRYING_RECORDS = gateRecords('DRYING');
 const prisma = require('../../prisma');
 const jwt = require('jsonwebtoken');
 
@@ -181,6 +183,7 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
                         capturedAtLocal: new Date().toISOString(),
                         payload: {
                             checklist: [true, true, true],
+                            records: DRYING_RECORDS,
                             observations: 'Sample dry after 24h at 40C'
                         }
                     }]
@@ -209,6 +212,7 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
                         capturedAtLocal: new Date().toISOString(),
                         payload: {
                             checklist: [true, true, true],
+                            records: DRYING_RECORDS,
                             observations: 'Sample dry after 24h at 40C'
                         }
                     }]

@@ -4,6 +4,16 @@ import { useLanguage } from '../../context/LanguageContext';
 import QcRules from './QcRules';
 
 export function PolicyValueEditor({ definition, value, onChange, t }) {
+    if (definition.type === 'reportAmendmentTemplate') return <div className="space-y-2">
+        <select aria-label={t('policies.keys.report_amendedStatement')} value={value === null ? 'default' : 'custom'}
+            onChange={event => onChange(event.target.value === 'default' ? null : JSON.parse(JSON.stringify(definition.localizedDefaults)))}>
+            <option value="default">{t('policies.amendedDefault')}</option><option value="custom">{t('policies.amendedCustom')}</option>
+        </select>
+        <p>{t('policies.amendedHelp', { replacedNumber: '{replacedNumber}', replacedRevision: '{replacedRevision}', reason: '{reason}' })}</p>
+        {value !== null && definition.allowedLocales.map(locale => <label key={locale} className="block">{locale}
+            <textarea required aria-label={locale} value={value[locale] ?? ''} onChange={event => onChange({ ...value, [locale]: event.target.value })} />
+        </label>)}
+    </div>;
     if (definition.type === 'calibrationFailAction') return <div className="space-y-2">{Object.entries(definition.allowedActions).map(([kind, actions]) => <label key={kind}>
         {t(`qcRuns.kinds.${kind}`, kind)}<select value={value[kind]} onChange={e => onChange({ ...value, [kind]: e.target.value })}>
             {actions.map(action => <option key={action} value={action}>{t(`qcRules.actions.${action}`)}</option>)}
@@ -121,11 +131,12 @@ export default function LabPolicies({ labId }) {
                     (!methodologyId && (definition.analysisOverridesAll || definition.analysisOverrides?.includes(analysisCode)));
                 return <tr key={key} className="border-t"><td className="p-2">{t(definition.description)}{definition.unit && <span> ({t(`policies.units.${definition.unit}`, definition.unit)})</span>}{definition.help && <p className="text-xs">{t(definition.help)}</p>}</td>
                     <td className="p-2">{display(definition, row.value)}
+                        {row.invalid && <p role="alert" data-testid="policy-stored-invalid">{t('policies.storedInvalid')}</p>}
                         {definition.type === 'sampleFormat' && !row.value.includes('{CHK}') && <p role="alert">{t('policies.sampleCodeNoCheck')}</p>}</td><td className="p-2">{t(`policies.sources.${row.source}`)}
                         {row.scope?.analysisCode && ` · ${row.scope.analysisCode}`}{row.scope?.methodologyId && ` · ${data.methodologies.find(m => m.id === row.scope.methodologyId)?.name || row.scope.methodologyId}`}
                         {row.profile && ` · ${row.profile}`} · {t('policies.version')} {row.version}</td>
                     <td className="p-2">{JSON.stringify(row.value) !== JSON.stringify(presetValue) ? t('policies.differs') : '—'}</td>
-                    <td>{data.canEdit && canChangeScope && <><button type="button" onClick={() => { setEditing({ key, value: JSON.parse(JSON.stringify(row.value)) }); setReason(''); }}>{t('policies.edit')}</button>
+                    <td>{data.canEdit && canChangeScope && <><button type="button" onClick={() => { setEditing({ key, value: JSON.parse(JSON.stringify(row.invalid ? presetValue : row.value)) }); setReason(''); }}>{t('policies.edit')}</button>
                         {['LAB_OVERRIDE', 'ANALYSIS_OVERRIDE', 'METHOD_OVERRIDE'].includes(row.source) && <button type="button" onClick={() => { setEditing({ key, clear: true, scope: row.scope }); setReason(''); }}>{t('policies.clear')}</button>}</>}</td></tr>;
             })}</tbody></table></div>
         {editing && data.canEdit && <form onSubmit={e => { e.preventDefault(); save({ reason, changes: [{ key: editing.key,

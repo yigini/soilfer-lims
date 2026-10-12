@@ -52,7 +52,10 @@ async function loadSelectionEvidence(tx, item) {
     const attempts = await tx.workAttempt.findMany({ where: { workItemId: item.id } });
     const ids = attempts.map(row => row.id);
     const results = await tx.result.findMany({ where: { attemptId: { in: ids } } });
-    const evidence={ sample, attempts, results, lineage: buildSelectionLineage(attempts, results) };
+    const evidence={ sample, attempts, results, lineage: buildSelectionLineage(attempts, results),
+        // #278: texture classes derive within the laboratory closure tolerance.
+        textureTolerancePct: await policyService.get(sample.assignedLab || sample.labId || item.assignedLab || item.labId,
+            'crossCheck.textureClosureTolerancePct', { db: tx }) };
     const texture=require('./reportedValueTextureService');
     evidence.layout=await texture.textureLayout(tx,item,evidence);
     if(evidence.layout.kind==='SEPARATE') evidence.fractions=await texture.fractionSelections(tx,evidence.layout);

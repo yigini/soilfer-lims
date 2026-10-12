@@ -1,3 +1,4 @@
+const { gateRecords } = require('../helpers/preparationRecords');
 'use strict';
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
@@ -348,7 +349,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         const manager = require('jsonwebtoken').decode(mgrGtmToken);
         for (const [analysis, workItemId] of [['DRYING', 'WI-APPR-DRY'], ['PREPARATION', 'WI-APPR-PREP']]) {
             await OperationalConfirmationService.confirmOperation({ actor: manager, workItemId,
-                checklist: operationalChecklists[analysis].steps.map(() => true) });
+                checklist: operationalChecklists[analysis].steps.map(() => true), records: gateRecords(analysis) });
         }
         for (const status of ['ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
             await transitionWorkItem('WI-APPR-PH', status, manager, 'Reviewed fixture determination');

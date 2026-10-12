@@ -29,7 +29,14 @@ function classifyInstrumentImportSchema(db, source) {
         if (!names.has(row.name)) differences.push(row.name + ' is not a release object');
     }
     const draft = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='WorkItemDraft'").get();
-    const draftSql = normalized(draft.sql), preDraft = draftSql === normalized(source.preDraftSql), freshDraft = draftSql === normalized(source.freshTables.WorkItemDraft), upgradedDraft = draftSql === normalized(source.upgradedDraftSql);
+    const draftSql = normalized(draft.sql);
+    const matches = values => values.some(value => draftSql === normalized(value));
+    // Exact native-ALTER and Prisma emissions bind #205 records; no generic
+    // extra-column allowance and no alteration of the historical variants.
+    const preDraft = matches([source.preDraftSql, source.post205Drafts.preFresh, source.post205Drafts.preUpgraded]);
+    const freshDraft = matches([source.freshTables.WorkItemDraft, source.post205Drafts.postFresh]);
+    const upgradedDraft = matches([source.upgradedDraftSql, source.post205Drafts.postUpgradedFresh,
+        source.post205Drafts.postUpgradedLegacy, source.post205Drafts.postOlderImportThen205]);
     if (!preDraft && !freshDraft && !upgradedDraft) differences.push('WorkItemDraft differs from all captured schema variants');
     const pointer = db.prepare('PRAGMA table_xinfo(WorkItemDraft)').all().find(row => row.name === 'importReceiptId');
     if (pointer && (pointer.type !== 'TEXT' || pointer.notnull !== 0 || pointer.dflt_value !== null || pointer.pk !== 0 || pointer.hidden !== 0)) differences.push('WorkItemDraft.importReceiptId differs');
@@ -47,7 +54,7 @@ function classifyInstrumentImportSchema(db, source) {
     if (markerTable && (markerTable.type !== 'table' || ['id', 'appliedAt', 'details'].some(name => !db.prepare('PRAGMA table_xinfo(_schema_migrations)').all().some(row => row.name === name))))
         throw fail('IMPORT_SCHEMA_MISMATCH', 'The release receipt owner differs.');
     const marker = markerTable ? db.prepare('SELECT details FROM _schema_migrations WHERE id=?').get(MARKER) : null;
-    const sources = { migrationSha256: source.sha256, oracleSha256: source.oracleSha256, preDraftSha256: source.preDraftSha256, upgradedDraftSha256: source.upgradedDraftSha256 };
+    const sources = { migrationSha256: source.sha256, oracleSha256: source.oracleSha256, preDraftSha256: source.preDraftSha256, upgradedDraftSha256: source.upgradedDraftSha256, post205DraftsSha256: source.post205DraftsSha256 };
     let classification, receipt;
     if (present.every(value => !value) && preDraft && !pointer && !marker) classification = 'PRE_200';
     else if (present.slice(0, 3).every(Boolean) && present.slice(3).every(value => !value) && freshDraft && !marker && Object.values(counts).every(value => value === 0)) classification = 'FRESH_PRISMA';

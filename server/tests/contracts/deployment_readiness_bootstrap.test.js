@@ -360,6 +360,12 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({ dbPath: targetDb, apply: true });
         expect(require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:targetDb,apply:true}))
             .toMatchObject({classification:'COMPLETE_210',newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0});
+        expect(require('../../scripts/install_report_revisions').installReportRevisions({dbPath:targetDb,apply:true}))
+            .toMatchObject({classification:'COMPLETE_211',backfilledCount:0});
+        expect(require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:targetDb,apply:true}))
+            .toMatchObject({classification:'COMPLETE_202',backfilledCount:0});
+        expect(require('../../scripts/install_preparation_records').installPreparationRecords({dbPath:targetDb,apply:true}))
+            .toMatchObject({classification:'COMPLETE_205',backfilledCount:0});
         require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: targetDb, apply: true });
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
@@ -408,6 +414,12 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_cross_check_evaluations.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_sample_amendment_authorisation.js',
                 `node "${path.join(serverDir, 'scripts/install_sample_amendment_authorisation.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_report_revisions.js',
+                `node "${path.join(serverDir, 'scripts/install_report_revisions.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_bench_credentials.js',
+                `node "${path.join(serverDir, 'scripts/install_bench_credentials.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_preparation_records.js',
+                `node "${path.join(serverDir, 'scripts/install_preparation_records.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_instrument_imports.js',
                 `node "${path.join(serverDir, 'scripts/install_instrument_imports.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_raw_input.js',

@@ -1,27 +1,4 @@
 {
-  "pastePreview": {
-    "title": "Aperçu du collage — {analysis}",
-    "help": "Collez deux colonnes : identifiant de l'échantillon et valeur. Séparez-les par des virgules, des points-virgules ou des tabulations. Mettez entre guillemets les cellules contenant le séparateur.",
-    "formatError": "Deux colonnes attendues : identifiant de l'échantillon et valeur. Mettez entre guillemets les cellules contenant le séparateur.",
-    "duplicate": "Cet échantillon apparaît plusieurs fois dans les lignes collées.",
-    "ambiguousId": "Cet identifiant correspond à plusieurs tâches. Utilisez un code d'échantillon unique.",
-    "unmatched": "Aucune tâche {analysis} attribuée ne correspond.",
-    "sealed": "La tâche est clôturée ({status}).",
-    "blocked": "Les prérequis sont bloqués.",
-    "invalidNumber": "La valeur est invalide ou ambiguë selon le format numérique de cette tâche.",
-    "separator": "Séparateur",
-    "auto": "Détecter automatiquement",
-    "tab": "Tabulation",
-    "comma": "Virgule",
-    "semicolon": "Point-virgule",
-    "preview": "Voir les correspondances et exclusions",
-    "summary": "Aperçu : {count} lignes",
-    "matched": "{count} correspondances",
-    "excluded": "{count} exclusions",
-    "matchedRow": "Correspondance",
-    "draftNotice": "Le collage met à jour les brouillons locaux. Les mesures sont sauvegardées avec Enregistrer.",
-    "apply": "Appliquer {count} valeurs aux brouillons"
-  },
   "replicateGrid": {
     "rep1": "Rép 1",
     "rep2": "Rép 2",
@@ -2356,6 +2333,10 @@
     }
   },
   "dataResults": {
+    "reportedValueUnavailable": "Valeur rapportée indisponible",
+    "selectionIdColumn": "ID de sélection de la valeur rapportée",
+    "attemptIdsColumn": "ID des essais",
+    "batchIdsColumn": "ID des lots",
     "title": "Résultats analytiques directeurs",
     "subtitle": "Vue principale de tous les résultats analytiques (Approuvés et En attente).",
     "columns": "Colonnes",
@@ -2522,7 +2503,31 @@
     "recordingIncomplete": "Enregistrement incomplet",
     "recordedCount": "Enregistrés",
     "retryFailed": "Réessayer les échecs",
-    "recordingUnconfirmed": "L’enregistrement de cette ligne n’a pas été confirmé."
+    "recordingUnconfirmed": "L’enregistrement de cette ligne n’a pas été confirmé.",
+    "preparationRecord": {
+      "steps": {
+        "DRYING": "Séchage",
+        "SIEVING": "Tamisage",
+        "GRINDING": "Broyage",
+        "SPLITTING": "Division"
+      },
+      "methods": {
+        "AIR": "Séché à l’air",
+        "OVEN_40": "Étuve 40 °C",
+        "OVEN_105": "Étuve 105 °C",
+        "OTHER": "Autre méthode"
+      },
+      "method": "Méthode",
+      "temperatureC": "Température (°C)",
+      "massBeforeG": "Masse initiale (g)",
+      "massAfterG": "Masse finale (g)",
+      "coarseFractionG": "Fraction grossière (g)",
+      "sieveMm": "Tamis (mm)",
+      "grindMm": "Broyé à (mm)",
+      "startedAt": "Début",
+      "endedAt": "Fin",
+      "equipment": "Équipement"
+    }
   },
   "batchIntake": {
     "massToApply": "Masse à appliquer (g)",
@@ -2602,12 +2607,14 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Autoriser la correction révisée des erreurs de transcription du CQ échoué sans décision",
       "report_uncertaintyMode": "Rapporter l’incertitude élargie",
       "report_uncertaintyCoverageFactor": "Facteur de couverture de l’incertitude",
+      "report_ovenDryConvertible": "Convertir en base séchée à l’étuve sur demande",
       "crossCheck_basesCecFactor": "Facteur maximal des bases échangeables / CEC",
       "crossCheck_baseSaturationMaxPct": "Saturation maximale en bases (%)",
       "crossCheck_textureClosureTolerancePct": "Tolérance de fermeture de la texture (%)",
       "crossCheck_cnMin": "Rapport C:N minimal",
       "crossCheck_cnMax": "Rapport C:N maximal",
-      "crossCheck_carbonatePhMin": "pH minimal dans l’eau pour les carbonates"
+      "crossCheck_carbonatePhMin": "pH minimal dans l’eau pour les carbonates",
+      "report_amendedStatement": "Texte du rapport modifié"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -2645,6 +2652,7 @@
     "source": "Source",
     "difference": "Comparaison au préréglage",
     "differs": "Diffère du préréglage",
+    "storedInvalid": "La valeur enregistrée est hors limites et n’est pas utilisée ; enregistrez une valeur valide.",
     "edit": "Modifier",
     "clear": "Retirer la dérogation",
     "clearExplanation": "Ce paramètre héritera de la prochaine valeur applicable. Sa valeur précédente reste dans l’historique.",
@@ -2747,7 +2755,10 @@
     "ptLimits": {
       "questionable": "Seuil discutable",
       "unsatisfactory": "Seuil non satisfaisant"
-    }
+    },
+    "amendedDefault": "Utiliser les textes par défaut par langue",
+    "amendedCustom": "Personnaliser les cinq langues",
+    "amendedHelp": "Chaque langue doit contenir {replacedNumber}, {replacedRevision} et {reason} une seule fois. Le texte est figé à l’émission du rapport."
   },
   "referenceMaterials": {
     "title": "Matériaux de référence",
@@ -3492,7 +3503,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "Les éléments probants nécessitent la soumission correspondante."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Vérifications croisées indisponibles : aucun laboratoire enregistré pour cet échantillon"
+      "CROSS_CHECK_LAB_REQUIRED": "Vérifications croisées indisponibles : aucun laboratoire enregistré pour cet échantillon",
+      "CROSS_CHECK_POLICY_INVALID": "Vérifications croisées indisponibles : un paramètre de vérification du laboratoire est hors limites ; un responsable doit enregistrer une valeur valide"
     }
   },
   "amendment": {
@@ -3535,7 +3547,42 @@
     },
     "pendingNotice": "Demande enregistrée. Une autorisation est nécessaire avant d’appliquer les modifications.",
     "authorisedNotice": "Amendement autorisé. Les nouvelles analyses scientifiques doivent suivre la revue et l’approbation habituelles avant l’émission d’un nouveau rapport.",
-    "failed": "L’amendement n’a pas pu être enregistré. Votre saisie est conservée."
+    "failed": "L’amendement n’a pas pu être enregistré. Votre saisie est conservée.",
+    "publicReportNumber": "Rapport {number}.",
+    "publicSuperseded": "Ce rapport a été remplacé par un rapport amendé. Demandez le rapport en vigueur au laboratoire.",
+    "publicReplacedBy": "Remplacé par le rapport {number}.",
+    "revisionRequiresAmendment": "Un rapport amendé nécessite un amendement approuvé. Demandez-le et autorisez-le d’abord."
+  },
+  "session": {
+    "expiredTitle": "Session expirée",
+    "expiredBody": "Saisissez votre mot de passe pour continuer en tant que {name}. Votre travail non enregistré est conservé.",
+    "password": "Mot de passe",
+    "continue": "Continuer",
+    "signOut": "Se déconnecter",
+    "reloginFailed": "Ce mot de passe ne fonctionne pas. Réessayez ou déconnectez-vous."
+  },
+  "bench": {
+    "analyst": "Analyste : {name}",
+    "switchAnalyst": "Changer d’analyste",
+    "enable": "Activer le mode paillasse",
+    "disable": "Désactiver le mode paillasse",
+    "locked": "Saisissez votre PIN pour déverrouiller",
+    "lockedFor": "Verrouillé pour {name}",
+    "confirmRecord": "Saisissez votre PIN pour enregistrer",
+    "unlock": "Déverrouiller",
+    "pin": "PIN",
+    "password": "Mot de passe",
+    "setPinHelp": "Définissez un PIN de paillasse de 4 à 8 chiffres. Confirmez avec votre mot de passe.",
+    "unsentKept": "{count} modification(s) ne sont pas encore envoyées et restent sur cet appareil. Reconnectez-vous et réessayez.",
+    "errors": {
+      "generic": "Impossible de vérifier le PIN.",
+      "BENCH_PIN_INVALID": "Le PIN est incorrect.",
+      "BENCH_PIN_LOCKED": "Trop de PIN erronés. Réessayez dans quelques minutes.",
+      "BENCH_PIN_NOT_SET": "Définissez d’abord un PIN de paillasse.",
+      "BENCH_PIN_FORMAT_INVALID": "Le PIN doit comporter de 4 à 8 chiffres.",
+      "BENCH_PIN_PASSWORD_INVALID": "Votre mot de passe est incorrect."
+    },
+    "draftBy": "par {name}"
   },
   "instrumentImport": {
     "title": "Importer un fichier instrument",
@@ -3636,5 +3683,28 @@
       "CALC_INPUT_INVALID": "Vérifiez la valeur source et le format numérique du laboratoire.",
       "IMPORT_ROW_INVALID": "Vérifiez la valeur source et le format numérique du laboratoire."
     }
+  },
+  "pastePreview": {
+    "title": "Aperçu du collage — {analysis}",
+    "help": "Collez deux colonnes : identifiant de l'échantillon et valeur. Séparez-les par des virgules, des points-virgules ou des tabulations. Mettez entre guillemets les cellules contenant le séparateur.",
+    "formatError": "Deux colonnes attendues : identifiant de l'échantillon et valeur. Mettez entre guillemets les cellules contenant le séparateur.",
+    "duplicate": "Cet échantillon apparaît plusieurs fois dans les lignes collées.",
+    "ambiguousId": "Cet identifiant correspond à plusieurs tâches. Utilisez un code d'échantillon unique.",
+    "unmatched": "Aucune tâche {analysis} attribuée ne correspond.",
+    "sealed": "La tâche est clôturée ({status}).",
+    "blocked": "Les prérequis sont bloqués.",
+    "invalidNumber": "La valeur est invalide ou ambiguë selon le format numérique de cette tâche.",
+    "separator": "Séparateur",
+    "auto": "Détecter automatiquement",
+    "tab": "Tabulation",
+    "comma": "Virgule",
+    "semicolon": "Point-virgule",
+    "preview": "Voir les correspondances et exclusions",
+    "summary": "Aperçu : {count} lignes",
+    "matched": "{count} correspondances",
+    "excluded": "{count} exclusions",
+    "matchedRow": "Correspondance",
+    "draftNotice": "Le collage met à jour les brouillons locaux. Les mesures sont sauvegardées avec Enregistrer.",
+    "apply": "Appliquer {count} valeurs aux brouillons"
   }
 }

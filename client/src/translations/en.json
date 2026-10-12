@@ -1,27 +1,4 @@
 {
-  "pastePreview": {
-    "title": "Paste preview — {analysis}",
-    "help": "Paste two columns: sample ID and value. Separate them with commas, semicolons or tabs. Quote cells containing the separator.",
-    "formatError": "Expected two columns: sample ID and value. Quote cells containing the separator.",
-    "duplicate": "This sample appears more than once in the pasted rows.",
-    "ambiguousId": "This identifier matches multiple tasks. Use a unique sample code.",
-    "unmatched": "No matching assigned {analysis} task.",
-    "sealed": "Work item is sealed ({status}).",
-    "blocked": "Prerequisites are blocked.",
-    "invalidNumber": "Value is invalid or ambiguous under this task's number format.",
-    "separator": "Separator",
-    "auto": "Detect automatically",
-    "tab": "Tab",
-    "comma": "Comma",
-    "semicolon": "Semicolon",
-    "preview": "Preview matches and exclusions",
-    "summary": "Preview: {count} rows",
-    "matched": "{count} matched",
-    "excluded": "{count} excluded",
-    "matchedRow": "Matched",
-    "draftNotice": "Paste updates local drafts. Measurements are saved with Record.",
-    "apply": "Apply {count} draft values"
-  },
   "replicateGrid": {
     "rep1": "Rep 1",
     "rep2": "Rep 2",
@@ -2356,6 +2333,10 @@
     }
   },
   "dataResults": {
+    "reportedValueUnavailable": "Reported value unavailable",
+    "selectionIdColumn": "Reported value selection ID",
+    "attemptIdsColumn": "Attempt IDs",
+    "batchIdsColumn": "Batch IDs",
     "title": "Analytical Results Master",
     "subtitle": "Master view of all analytical results (Approved & Pending).",
     "columns": "Columns",
@@ -2522,7 +2503,31 @@
     "recordingIncomplete": "Recording incomplete",
     "recordedCount": "Recorded",
     "retryFailed": "Retry failed",
-    "recordingUnconfirmed": "Recording was not confirmed for this row."
+    "recordingUnconfirmed": "Recording was not confirmed for this row.",
+    "preparationRecord": {
+      "steps": {
+        "DRYING": "Drying",
+        "SIEVING": "Sieving",
+        "GRINDING": "Grinding",
+        "SPLITTING": "Splitting"
+      },
+      "methods": {
+        "AIR": "Air dried",
+        "OVEN_40": "Oven 40 °C",
+        "OVEN_105": "Oven 105 °C",
+        "OTHER": "Other method"
+      },
+      "method": "Method",
+      "temperatureC": "Temperature (°C)",
+      "massBeforeG": "Mass before (g)",
+      "massAfterG": "Mass after (g)",
+      "coarseFractionG": "Coarse fraction (g)",
+      "sieveMm": "Sieve (mm)",
+      "grindMm": "Ground to (mm)",
+      "startedAt": "Started",
+      "endedAt": "Ended",
+      "equipment": "Equipment"
+    }
   },
   "batchIntake": {
     "massToApply": "Mass to apply (g)",
@@ -2602,12 +2607,14 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC",
       "report_uncertaintyMode": "Report expanded uncertainty",
       "report_uncertaintyCoverageFactor": "Uncertainty coverage factor",
+      "report_ovenDryConvertible": "Convert to oven-dry basis on request",
       "crossCheck_basesCecFactor": "Maximum exchangeable bases / CEC factor",
       "crossCheck_baseSaturationMaxPct": "Maximum base saturation (%)",
       "crossCheck_textureClosureTolerancePct": "Texture closure tolerance (%)",
       "crossCheck_cnMin": "Minimum C:N ratio",
       "crossCheck_cnMax": "Maximum C:N ratio",
-      "crossCheck_carbonatePhMin": "Minimum water pH for carbonate"
+      "crossCheck_carbonatePhMin": "Minimum water pH for carbonate",
+      "report_amendedStatement": "Amended report statement"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -2645,6 +2652,7 @@
     "source": "Source",
     "difference": "Compared with preset",
     "differs": "Differs from preset",
+    "storedInvalid": "The stored value is out of range and is not used; save a valid value.",
     "edit": "Edit",
     "clear": "Clear override",
     "clearExplanation": "This setting will inherit the next applicable default. Its previous value stays in history.",
@@ -2747,7 +2755,10 @@
     "ptLimits": {
       "questionable": "Questionable boundary",
       "unsatisfactory": "Unsatisfactory boundary"
-    }
+    },
+    "amendedDefault": "Use localized defaults",
+    "amendedCustom": "Customize all five languages",
+    "amendedHelp": "Each language must contain {replacedNumber}, {replacedRevision} and {reason} exactly once. The text is frozen when the report is issued."
   },
   "referenceMaterials": {
     "title": "Reference materials",
@@ -3492,7 +3503,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "Cross-check evidence requires the caller submission."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory"
+      "CROSS_CHECK_LAB_REQUIRED": "Cross-checks unavailable: the sample has no registered laboratory",
+      "CROSS_CHECK_POLICY_INVALID": "Cross-checks unavailable: a laboratory check setting is out of range; a manager must save a valid value"
     }
   },
   "amendment": {
@@ -3535,7 +3547,42 @@
     },
     "pendingNotice": "Request saved. Authorisation is required before changes are applied.",
     "authorisedNotice": "Amendment authorised. Scientific retests must complete the normal review and approval before a report can be reissued.",
-    "failed": "The amendment could not be saved. Your input is preserved."
+    "failed": "The amendment could not be saved. Your input is preserved.",
+    "publicReportNumber": "Report {number}.",
+    "publicSuperseded": "This report has been superseded by an amended report. Ask the laboratory for the current report.",
+    "publicReplacedBy": "Replaced by report {number}.",
+    "revisionRequiresAmendment": "An amended report needs an approved amendment. Request and authorise one first."
+  },
+  "session": {
+    "expiredTitle": "Session expired",
+    "expiredBody": "Enter your password to continue as {name}. Your unsaved work is kept.",
+    "password": "Password",
+    "continue": "Continue",
+    "signOut": "Sign out",
+    "reloginFailed": "That password did not work. Try again or sign out."
+  },
+  "bench": {
+    "analyst": "Analyst: {name}",
+    "switchAnalyst": "Switch analyst",
+    "enable": "Turn on bench mode",
+    "disable": "Turn off bench mode",
+    "locked": "Enter your PIN to unlock",
+    "lockedFor": "Locked for {name}",
+    "confirmRecord": "Enter your PIN to record",
+    "unlock": "Unlock",
+    "pin": "PIN",
+    "password": "Password",
+    "setPinHelp": "Set a 4 to 8 digit bench PIN. Confirm with your password.",
+    "unsentKept": "{count} change(s) are not sent yet, so they stay on this device. Reconnect and try again.",
+    "errors": {
+      "generic": "Could not check the PIN.",
+      "BENCH_PIN_INVALID": "The PIN is not correct.",
+      "BENCH_PIN_LOCKED": "Too many wrong PINs. Try again in a few minutes.",
+      "BENCH_PIN_NOT_SET": "Set a bench PIN first.",
+      "BENCH_PIN_FORMAT_INVALID": "The PIN must be 4 to 8 digits.",
+      "BENCH_PIN_PASSWORD_INVALID": "Your password is not correct."
+    },
+    "draftBy": "by {name}"
   },
   "instrumentImport": {
     "title": "Instrument file import",
@@ -3636,5 +3683,28 @@
       "CALC_INPUT_INVALID": "Review the raw value and the laboratory number format.",
       "IMPORT_ROW_INVALID": "Review the raw value and the laboratory number format."
     }
+  },
+  "pastePreview": {
+    "title": "Paste preview — {analysis}",
+    "help": "Paste two columns: sample ID and value. Separate them with commas, semicolons or tabs. Quote cells containing the separator.",
+    "formatError": "Expected two columns: sample ID and value. Quote cells containing the separator.",
+    "duplicate": "This sample appears more than once in the pasted rows.",
+    "ambiguousId": "This identifier matches multiple tasks. Use a unique sample code.",
+    "unmatched": "No matching assigned {analysis} task.",
+    "sealed": "Work item is sealed ({status}).",
+    "blocked": "Prerequisites are blocked.",
+    "invalidNumber": "Value is invalid or ambiguous under this task's number format.",
+    "separator": "Separator",
+    "auto": "Detect automatically",
+    "tab": "Tab",
+    "comma": "Comma",
+    "semicolon": "Semicolon",
+    "preview": "Preview matches and exclusions",
+    "summary": "Preview: {count} rows",
+    "matched": "{count} matched",
+    "excluded": "{count} excluded",
+    "matchedRow": "Matched",
+    "draftNotice": "Paste updates local drafts. Measurements are saved with Record.",
+    "apply": "Apply {count} draft values"
   }
 }

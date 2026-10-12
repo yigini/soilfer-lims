@@ -81,4 +81,17 @@ describe('Audit 0.10: downloaded header and replicate navigation', () => {
         await spectra[1].props.onClick();
         expect(axios.get).toHaveBeenCalledWith('/api/spectral', { params: { sampleId: 'sample-a', search: 'sample-a', modality: 'MIR' } });
     });
+    test('an unavailable reported value renders its reason instead of crashing the table', () => {
+        const rows = [{ id: 'sample-b', sampleId: 'sample-b', labId: 'LAB-B', originalId: 'ORIGINAL-B',
+            SOC: { status: 'UNAVAILABLE', code: 'REPORTED_VALUE_SOURCE_INVALID', workItemId: 'wi-b' }, PH_H2O: { status: 'SOMETHING_NEW' } }];
+        const columns = [{ key: 'labId', label: 'Lab ID' }, { key: 'SOC', label: 'SOC', isResult: true }, { key: 'PH_H2O', label: 'pH', isResult: true }];
+        const h = harness('pages/DataResults.jsx', { initialStates: { 0: rows, 1: columns, 2: false }, axios: { get: jest.fn() } });
+        const tree = h.render();
+        // React error #31: a plain object (not an element) handed to React as a child.
+        const objectChildren = elements(tree, node => [].concat(node.props?.children ?? []).some(child =>
+            child && typeof child === 'object' && !Array.isArray(child) && !child.$$typeof));
+        expect(objectChildren).toEqual([]);
+        expect(elements(tree, node => node.props?.text === 'Reported value unavailable: REPORTED_VALUE_SOURCE_INVALID')).toHaveLength(1);
+        expect(elements(tree, node => node.type === 'span' && node.props.children === 'SOMETHING_NEW')).toHaveLength(1);
+    });
 });

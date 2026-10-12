@@ -224,10 +224,11 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
     });
 
     test('4. Generates superseding report v2 after authorized change', async () => {
+        const amendment = await require('../helpers/reportAmendmentFixture').approvedReportAmendment(prisma, sampleForReview.id);
         const res = await request(app)
             .post(`/api/reports/generate/${sampleForReview.id}`)
             .set('Authorization', `Bearer ${mgrToken}`)
-            .send({});
+            .send({ amendmentId: amendment.id });
 
         expect(res.status).toBe(200);
         expect(res.body.version).toBe(2);

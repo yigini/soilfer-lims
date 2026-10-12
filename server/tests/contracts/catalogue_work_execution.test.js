@@ -1,3 +1,4 @@
+const { gateRecords } = require('../helpers/preparationRecords');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const crypto = require('crypto');
@@ -55,7 +56,7 @@ describe('Catalogue to operational work and numeric validation', () => {
         expect(response.body.errors).toHaveLength(1);
     });
     test('Completing drying saves evidence, clears its draft and opens only drying', async () => {
-        const response = await call(workbench.batchSave, { draft: false, entries: [entry('drying', { checks: [true, true, true] })] });
+        const response = await call(workbench.batchSave, { draft: false, entries: [entry('drying', { checks: [true, true, true], preparationRecords: gateRecords('DRYING') })] });
         expect(response.body.errors).toBeUndefined();
         expect(response.body.saved).toBe(1);
         const sample = await prisma.sample.findUnique({ where: { id: sampleId } });

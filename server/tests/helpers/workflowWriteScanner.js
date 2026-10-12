@@ -42,9 +42,24 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         directory:'20261010000000_sample_amendment_authorisation',sqlSha256:'98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0',
         oracleSha256:'d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2',
         boundary:'-- Contract guards'}),
+    // #211: inspect the exact additive Report revision source; no writer exception.
+    Object.freeze({functionName:'loadReportRevisionMigrationSource',loader:'services/reportRevisionMigrationSource.js',
+        loaderSha256:'7f6ca34a5c0e7ade0d1f1f032f1e6340e44cbb16298e376ff3a377ccda8e78dd',
+        directory:'20261010000200_report_revision_amendment',sqlSha256:'3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52',
+        boundary:'-- Contract guards'}),
+    // #202: inspect the exact additive bench credential table; no writer exception.
+    Object.freeze({functionName:'loadBenchCredentialMigrationSource',loader:'services/benchCredentialMigrationSource.js',
+        loaderSha256:'41e67eb28895cc0fdd3a9f41b5ff4e651dd36bbaded46d59179e2673938b0422',
+        directory:'20261010000300_bench_credentials',sqlSha256:'954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b',
+        wholeSql:true}),
+    // #205: inspect the exact additive preparation record source; no writer exception.
+    Object.freeze({functionName:'loadPreparationRecordMigrationSource',loader:'services/preparationRecordMigrationSource.js',
+        loaderSha256:'cd8fed9a632c118a7d3f0b50a6227ec273ea9ed78f92506a302580a9ff01fd0f',
+        directory:'20261010000400_preparation_records',sqlSha256:'e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c',
+        boundary:'-- Contract guards'}),
     // #200: inspect the fixed additive import source; no writer exemption.
     Object.freeze({ functionName: 'loadInstrumentImportMigrationSource', loader: 'services/instrumentImportMigrationSource.js',
-        loaderSha256: '66cd5c07954a7c148e241b790e02e45332ed18a14f03c4a003cb3fa9d88789e6',
+        loaderSha256: '877654910330a006735e1650a990880b999ccc07b471b54bd42f6e5875ff98b8',
         directory: '20261010000100_instrument_import_templates', sqlSha256: '68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8',
         boundary: '-- Contract guards' }),
     // Inspect both exact #197 assets. Existing writer restrictions are unchanged.
@@ -184,6 +199,13 @@ const INSTRUMENT_IMPORT_MAIN_FIXTURE = Object.freeze({
     ddlSha256: 'd54b007ef4182ed1a08b340228a52b799308349a5cb632a05f7374cb8d5ebfb6',
     caller: 'tests/contracts/audit_4_7_instrument_import_install.test.js'
 });
+const INSTRUMENT_IMPORT_RELEASE_FIXTURE = Object.freeze({
+    file: 'tests/helpers/instrumentImportReleaseHistoricalFixture.js', exportName: 'createPre200After293SchemaFixture',
+    sha256: 'd1ffc3876fc6ea3a8406217b9a95f384b7276742a97bfb288b2a070645020462',
+    ddl: 'tests/helpers/fixtures/pre200_after293_full_application_schema.sql',
+    ddlSha256: '9a720e1de82b42946c74a18f59458e4b6cc39e8cb814c28384a69f4efd207bc5',
+    caller: 'tests/contracts/audit_4_7_instrument_import_install.test.js'
+});
 // #199 pins6089156077/6090475511: catalogue prerequisites and the real installer only.
 const CALCULATION_PREREQUISITES = Object.freeze({
     file: 'tests/helpers/calculationReleasePrerequisites.js', exportName: 'installCalculationReleasePrerequisites',
@@ -231,6 +253,7 @@ function scanSource(source, filename, exceptions = []) {
     let validCalculationFixture = false;
     let validInstrumentImportFixture = false;
     let validInstrumentImportMainFixture = false;
+    let validInstrumentImportReleaseFixture = false;
     if (filename === INSTRUMENT_IMPORT_FIXTURE.file) {
         try {
             validInstrumentImportFixture = createHash('sha256').update(source).digest('hex') === INSTRUMENT_IMPORT_FIXTURE.sha256 &&
@@ -246,6 +269,13 @@ function scanSource(source, filename, exceptions = []) {
                 createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', INSTRUMENT_IMPORT_MAIN_FIXTURE.ddl))).digest('hex') === INSTRUMENT_IMPORT_MAIN_FIXTURE.ddlSha256;
         } catch { validInstrumentImportMainFixture = false; }
         if (!validInstrumentImportMainFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pre-200 current-main schema-only factory or literal DDL differs.');
+    }
+    if (filename === INSTRUMENT_IMPORT_RELEASE_FIXTURE.file) {
+        try {
+            validInstrumentImportReleaseFixture = createHash('sha256').update(source).digest('hex') === INSTRUMENT_IMPORT_RELEASE_FIXTURE.sha256 &&
+                createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', INSTRUMENT_IMPORT_RELEASE_FIXTURE.ddl))).digest('hex') === INSTRUMENT_IMPORT_RELEASE_FIXTURE.ddlSha256;
+        } catch { validInstrumentImportReleaseFixture = false; }
+        if (!validInstrumentImportReleaseFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pre-200 current-main schema-only factory or literal DDL differs.');
     }
     if (filename === CALCULATION_FIXTURE.file) {
         try {
@@ -735,6 +765,7 @@ function scanSource(source, filename, exceptions = []) {
         if (validCalculationFixture && name === CALCULATION_FIXTURE.exportName) return true;
         if (validInstrumentImportFixture && name === INSTRUMENT_IMPORT_FIXTURE.exportName) return true;
         if (validInstrumentImportMainFixture && name === INSTRUMENT_IMPORT_MAIN_FIXTURE.exportName) return true;
+        if (validInstrumentImportReleaseFixture && name === INSTRUMENT_IMPORT_RELEASE_FIXTURE.exportName) return true;
         if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName) return true;
         if (validRawInputFixture && name === RAW_INPUT_FIXTURE.exportName) return true;
         if (validCrossCheckFixture && name === CROSS_CHECK_FIXTURE.exportName) return true;
@@ -834,6 +865,8 @@ function scanSource(source, filename, exceptions = []) {
             if (resolved === INSTRUMENT_IMPORT_FIXTURE.file.replace(/\.js$/, '') && filename !== INSTRUMENT_IMPORT_FIXTURE.caller)
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             if (resolved === INSTRUMENT_IMPORT_MAIN_FIXTURE.file.replace(/\.js$/, '') && filename !== INSTRUMENT_IMPORT_MAIN_FIXTURE.caller)
+                report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+            if (resolved === INSTRUMENT_IMPORT_RELEASE_FIXTURE.file.replace(/\.js$/, '') && filename !== INSTRUMENT_IMPORT_RELEASE_FIXTURE.caller)
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             if (resolved === RAW_INPUT_FIXTURE.file.replace(/\.js$/, '') && filename !== RAW_INPUT_FIXTURE.caller) {
                 report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);

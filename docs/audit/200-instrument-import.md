@@ -7,9 +7,17 @@ an activated calculation, evaluates QC or changes workflow status.
 
 ## Scope and authorities
 
-Implemented on main e0462c85 after #210; merged #186/#190 are dependencies and
+Initially implemented on main e0462c85 after #210; merged #186/#190 are dependencies and
 merged #199 supplies current local-template activation. The cited paste defects
 were confirmed before editing on main7ea12c66.
+
+The existing PR is now integrated with released main
+51f6798806f630773786a08432290c1b21a841da. It retains #213's selected reported-value
+exports and #283's analysis-unit authority. #205 preparation records remain
+protected: a separate digest-bound exact draft-DDL oracle covers the current
+fresh and native-ALTER predecessors, with no general extra-column allowance.
+Installer row preservation streams the original JSON hash in the same order;
+the populated predecessor test compares it with the original array hash.
 
 Issue comment pins take precedence:
 
@@ -24,8 +32,10 @@ Issue comment pins take precedence:
 
 Closed schema-only fixtures, LF digests/callers, additive installers and independent
 Prisma oracles follow [the standing agreement](https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6089928620).
-Original89-model and independently emitted current-main92-model predecessors are
+Original89-model and independently emitted 92-model predecessors are
 retained. Their factories create schema only and grant no analytical-row authority.
+An additional closed schema-only fixture contains the unmodified Prisma emission
+from released main51f; the old literals and factories are unchanged.
 
 ## Mapping and API
 
@@ -99,8 +109,10 @@ XML uses **saxes6.0.0 (ISC)**, promoted from the existing exact dev lock, with
 exact locked xmlchars2.2.0 (MIT). Upstream saxes is archived. October10 GitHub
 Advisory Database queries found no matching advisory for either package. Existing
 repository dependency findings are neither fixed nor concealed by this issue.
-**Explicit YY approval of this concrete dependency in the PR is required before
-merge**, per the XLSX pin; no approval is claimed here.
+YY explicitly approved this concrete dependency on October 10: "approve saxes,
+clear the hold", recorded on PR284 in comments
+[6099365745](https://github.com/yigini/soilfer-lims/pull/284#issuecomment-6099365745)
+and [6099368373](https://github.com/yigini/soilfer-lims/pull/284#issuecomment-6099368373).
 
 Sources: [saxes](https://github.com/lddubeau/saxes),
 [Node zlib](https://nodejs.org/download/release/v22.22.0/docs/api/zlib.html),

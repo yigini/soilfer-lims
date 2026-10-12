@@ -23,9 +23,9 @@ test('QC analytes use the same catalogue authority without QUDT aliases or conve
     expect(read(qc, 'g/kg').evidence).toEqual({ analysisId: qc.code, units: null, unitCode: 'g/kg', matchedField: 'unitCode', matchedValue: 'g/kg' });
     expect(() => read(qc, 'http://qudt.org/vocab/unit/GM-PER-KiloGM')).toThrow(expect.objectContaining({ code: 'IMPORT_UNIT_MISMATCH' }));
 });
-test('the existing typed-writer defaults, method fallback and refusal retain their original behavior', () => {
+test('the current typed-writer analysis authority and refusal survive the #283 integration', () => {
     expect(numericReportingUnit({ analysis }, { param: analysis.code })).toBe('mg/kg');
-    expect(numericReportingUnit({ analysis, method: { unit: 'retained-method-unit' } }, { param: analysis.code })).toBe('retained-method-unit');
+    expect(numericReportingUnit({ analysis, method: { unit: 'retained-method-unit' } }, { param: analysis.code })).toBe('mg/kg');
     expect(() => numericReportingUnit({ analysis }, { param: analysis.code, unit: 'wrong-unit' })).toThrow(expect.objectContaining({ code: 'RESULT_UNIT_MISMATCH' }));
     expect(numericReportingUnit({ analysis: { code: 'CODE_ONLY', units: null, unitCode: 'g/kg' } }, { param: 'CODE_ONLY', unit: 'retained-existing-writer-behavior' })).toBe('retained-existing-writer-behavior');
 });

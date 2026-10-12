@@ -1,6 +1,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const { createPre200ImportSchemaFixture } = require('../helpers/instrumentImportHistoricalFixture');
 const { createPre200After210SchemaFixture } = require('../helpers/instrumentImportMainHistoricalFixture');
+const { createPre200After293SchemaFixture } = require('../helpers/instrumentImportReleaseHistoricalFixture');
 const { loadInstrumentImportMigrationSource } = require('../../services/instrumentImportMigrationSource');
 const { scanSource } = require('../helpers/workflowWriteScanner');
 const { classifyInstrumentImportSchema, MARKER } = require('../../services/instrumentImportSchemaService');
@@ -151,10 +152,10 @@ test('a populated predecessor retains every analytical, QC, audit and raw draft 
         // Historical draft data is inserted only into this owned pre-200
         // fixture: the 94-model client cannot address its absent new column.
         // Sample, WorkItem, Result, QC and audit data use their existing owners.
-        const rawValue = ' 0007.1000 ', rawValues = '{"note":"  é\\n土  "}';
-        read(raw => raw.prepare('INSERT INTO WorkItemDraft(id,workItemId,sampleId,userId,labId,analysis,value,replicateNo,"values",instrumentId,updatedAt) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
+        const rawValue = ' 0007.1000 ', rawValues = '{"note":"  é\\n土  "}', rawRecords = '{"retained":"  préparation 土  "}';
+        read(raw => raw.prepare('INSERT INTO WorkItemDraft(id,workItemId,sampleId,userId,labId,analysis,value,replicateNo,"values",records,instrumentId,updatedAt) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)')
             .run('owned-pre200-draft', f.items[0].id, f.items[0].sampleId, f.actor.username, f.labId, f.analysisCode,
-                rawValue, 1, rawValues, f.instrument.id, '2026-10-10T00:00:00.000Z'));
+                rawValue, 1, rawValues, rawRecords, f.instrument.id, '2026-10-10T00:00:00.000Z'));
         await f.db.$disconnect();
         const beforeBackup = f.file.replace(/\.db$/, '-pre200-preservation-before.db'), afterBackup = f.file.replace(/\.db$/, '-pre200-preservation-after.db');
         expect(fs.existsSync(beforeBackup)).toBe(false); expect(fs.existsSync(afterBackup)).toBe(false);
@@ -164,6 +165,7 @@ test('a populated predecessor retains every analytical, QC, audit and raw draft 
             rows: raw.prepare('SELECT * FROM ' + quote(name) + ' ORDER BY rowid').all()
         })));
         const counts = Object.fromEntries(original.map(table => [table.name, table.rows.length]));
+        const legacyRowsSha = createHash('sha256').update(JSON.stringify(Object.fromEntries(original.map(table => [table.name, table.rows])))).digest('hex');
         expect(counts).toMatchObject({ Sample: 2, WorkItem: 2, Result: 1, WorkAttempt: 1, WorkItemDraft: 1, QcMeasurement: 1 });
         expect(counts.AuditLog).toBeGreaterThan(0); expect(counts.QcEvaluation).toBeGreaterThan(0);
         const dry = installInstrumentImports({ dbPath: f.file });
@@ -172,13 +174,14 @@ test('a populated predecessor retains every analytical, QC, audit and raw draft 
         const applied = installInstrumentImports({ dbPath: f.file, apply: true });
         expect(applied).toMatchObject({ classification: 'COMPLETE_200', previousClassification: 'PRE_200', mode: 'APPLIED',
             totalChanges: 1, newTemplateCount: 0, newReceiptCount: 0, backfilledCount: 0 });
+        expect(applied.receipt.originalRowsSha256).toBe(legacyRowsSha);
         for (const table of original) read(raw => {
             const actual = raw.prepare('SELECT ' + table.columns.map(quote).join(',') + ' FROM ' + quote(table.name) +
                 (table.name === '_schema_migrations' ? ' WHERE id<>?' : '') + ' ORDER BY rowid');
             expect(table.name === '_schema_migrations' ? actual.all(MARKER) : actual.all()).toEqual(table.rows);
         });
         read(raw => {
-            expect(raw.prepare('SELECT value,"values",importReceiptId FROM WorkItemDraft').get()).toEqual({ value: rawValue, values: rawValues, importReceiptId: null });
+            expect(raw.prepare('SELECT value,"values",records,importReceiptId FROM WorkItemDraft').get()).toEqual({ value: rawValue, values: rawValues, records: rawRecords, importReceiptId: null });
             expect(raw.pragma('integrity_check', { simple: true })).toBe('ok'); expect(raw.pragma('foreign_key_check')).toEqual([]);
         });
         fs.copyFileSync(f.file, afterBackup, fs.constants.COPYFILE_EXCL); const afterHash = hash(f.file);
@@ -187,4 +190,48 @@ test('a populated predecessor retains every analytical, QC, audit and raw draft 
         console.info('IMPORT_POPULATED_PRESERVATION', JSON.stringify({ originalTableCount: original.length, counts, beforeHash, afterHash,
             totalChanges: applied.totalChanges, newTemplateCount: 0, newReceiptCount: 0, backfilledCount: 0 }));
     } finally { await f.close(); }
+});
+
+
+describe('the released #293 predecessor keeps #205 records inside the exact import boundary', () => {
+    test('the additional current release schema-only fixture is closed and digest-bound', () => {
+        const file = 'tests/helpers/instrumentImportReleaseHistoricalFixture.js';
+        const bytes = fs.readFileSync(path.resolve(__dirname, '../..', file), 'utf8');
+        expect(scanSource(bytes, file)).toEqual([]);
+        expect(scanSource(bytes + '\n// changed\n', file).map(row => row.code)).toContain('HISTORICAL_FIXTURE_SOURCE_MISMATCH');
+        expect(scanSource("require('../tests/helpers/instrumentImportReleaseHistoricalFixture')", 'services/unlisted.js').map(row => row.code)).toContain('TEST_HELPER_IMPORTED_BY_RUNTIME');
+        expect(scanSource("require('../helpers/instrumentImportReleaseHistoricalFixture')", 'tests/contracts/unlisted.test.js').map(row => row.code)).toContain('HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED');
+        expect(() => createPre200After293SchemaFixture('not permitted')).toThrow('accepts no arguments');
+    });
+    test('main51f schema and its native import ALTER are recognized without row writes or adoption', () => {
+        const current = createPre200After293SchemaFixture();
+        try {
+            const before = current.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all();
+            const changes = current.prepare('SELECT total_changes() n').get().n;
+            expect(classifyInstrumentImportSchema(current, source)).toMatchObject({ classification: 'PRE_200', counts: { templates: 0, receipts: 0, draftLinks: 0 } });
+            expect(current.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all()).toEqual(before);
+            expect(current.prepare('SELECT total_changes() n').get().n).toBe(changes);
+            current.exec(source.schemaSql); current.exec(source.guardsSql);
+            const draft = current.prepare("SELECT sql FROM sqlite_master WHERE name='WorkItemDraft'").get().sql;
+            expect(draft).toBe(source.post205Drafts.postUpgradedFresh);
+            expect(() => classifyInstrumentImportSchema(current, source)).toThrow('partial, foreign, unmarked or populated');
+            expect(current.prepare('SELECT count(*) n FROM WorkItemDraft').get().n).toBe(0);
+            expect(current.prepare('SELECT count(*) n FROM PreparationRecord').get().n).toBe(0);
+            expect(current.prepare('SELECT total_changes() n').get().n).toBe(changes);
+        } finally { current.close(); }
+    });
+    test.each(['preFresh', 'preUpgraded'])('exact records predecessor %s refuses a changed type or unknown column', key => {
+        for (const ddl of [source.post205Drafts[key].replace('"records" TEXT', '"records" INTEGER'), source.post205Drafts[key]]) {
+            const current = createPre200After293SchemaFixture();
+            try {
+                current.exec('DROP TABLE "WorkItemDraft"'); current.exec(ddl);
+                if (ddl === source.post205Drafts[key]) current.exec('ALTER TABLE "WorkItemDraft" ADD COLUMN "unknownImportAuthority" TEXT');
+                const before = current.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all();
+                const changes = current.prepare('SELECT total_changes() n').get().n;
+                expect(() => classifyInstrumentImportSchema(current, source)).toThrow('differs from the captured release');
+                expect(current.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all()).toEqual(before);
+                expect(current.prepare('SELECT total_changes() n').get().n).toBe(changes);
+            } finally { current.close(); }
+        }
+    });
 });

@@ -1159,11 +1159,20 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             // withdrawal schema, with no adoption of historical evidence.
             const amendmentUpgrade=require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:rehearsalDbPath,apply:true});
             expect(amendmentUpgrade).toMatchObject({classification:'COMPLETE_210',newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0});
+            // #211 adds six nullable Report columns with no backfill.
+            expect(require('../../scripts/install_report_revisions').installReportRevisions({dbPath:rehearsalDbPath,apply:true}))
+                .toMatchObject({classification:'COMPLETE_211',previousClassification:'PRE_211',backfilledCount:0});
+            // #202 adds one empty credential table with no backfill.
+            expect(require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:rehearsalDbPath,apply:true}))
+                .toMatchObject({classification:'COMPLETE_202',previousClassification:'PRE_202',backfilledCount:0});
+            // #205 adds one empty append-only evidence table with no backfill.
+            expect(require('../../scripts/install_preparation_records').installPreparationRecords({dbPath:rehearsalDbPath,apply:true}))
+                .toMatchObject({classification:'COMPLETE_205',previousClassification:'PRE_205',backfilledCount:0});
             const verified = new Database(rehearsalDbPath, { readonly: true });
             const originalResultFields = Object.keys(preSnapshots.results.rows[0]).map(field => `"${field}"`).join(',');
             expect(verified.prepare(`SELECT ${originalResultFields} FROM "Result" ORDER BY id`).all()).toEqual(preSnapshots.results.rows);
             for(const [table,rows]of [['Report',preSnapshots.reports.rows],['ReportShareLink',preSnapshots.shareLinks.rows],['AuditLog',preSnapshots.auditLogs.rows]])
-                expect(verified.prepare(`SELECT * FROM "${table}" ORDER BY id`).all()).toEqual(rows);
+                expect(verified.prepare(`SELECT ${rows.length?Object.keys(rows[0]).map(field=>`"${field}"`).join(','):'*'} FROM "${table}" ORDER BY id`).all()).toEqual(rows);
             verified.close();
 
             // Query via Prisma Client using Better-Sqlite3 adapter — guarantees NO P2022 column missing errors

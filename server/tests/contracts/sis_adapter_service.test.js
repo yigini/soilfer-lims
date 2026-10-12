@@ -250,7 +250,7 @@ describe('Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts', () =
             expect(formatted.labId).toBe('LAB-ACCESS-99');
             expect(formatted.analyticalResults.SOC.as_measured).toBe(1.2);
             expect(formatted.analyticalResults.SOC.normalized).toBe(12); // % to g/kg factor 10
-            expect(formatted.analyticalResults.SOC.value).toBe(12);
+            expect(formatted.analyticalResults.SOC.value).toBe(1.2); // #213: headline is the unconverted report value
 
             // Additive explicit identities
             expect(formatted.specimenId).toBe('uuid-1234');

@@ -555,7 +555,10 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
     // Parse field mapping
     const fieldMapping = currentConfig.fieldMapping ? JSON.parse(currentConfig.fieldMapping) : null;
 
-    // Get existing sample records to avoid duplicates and map accurately
+    // Get existing sample records to avoid duplicates and map accurately.
+    // The duplicate index holds identity and scope only. metadata/fieldMetadata
+    // are read per matched specimen (hydrateExistingEntry): loading them for
+    // every Sample exhausted the production heap on each sync.
     const existingSamples = await prisma.sample.findMany({
         select: {
             id: true,
@@ -564,8 +567,6 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
             projectCode: true,
             status: true,
             rejectionReason: true,
-            metadata: true,
-            fieldMetadata: true,
             latitude: true,
             longitude: true
         }
@@ -587,6 +588,16 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
         } else {
             existingSamplesByNormId.set(norm, s);
         }
+    }
+
+    // Reads the matched specimen's stored metadata once, unchanged, so every
+    // provenance and hold check sees the same columns it did before.
+    async function hydrateExistingEntry(entry) {
+        if (Object.hasOwn(entry, 'metadata')) return;
+        const stored = await prisma.sample.findUnique({ where: { id: entry.id }, select: { metadata: true, fieldMetadata: true } });
+        if (!stored) throw new Error(`EXISTING_SAMPLE_NOT_FOUND: Specimen '${entry.originalId}' not found while reading stored metadata`);
+        entry.metadata = stored.metadata;
+        entry.fieldMetadata = stored.fieldMetadata;
     }
 
     let newCount = 0;
@@ -734,6 +745,7 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                 }
 
                 // Parse existing metadata to check for primary occurrence replay (Finding 1)
+                await hydrateExistingEntry(existingEntry);
                 if (require('../services/sampleHoldService').legacyHoldState(existingEntry).invalid) {
                     skippedCount += samples.length;
                     for (const specimen of samples) skippedReasons.push({ originalId: specimen.original_id, reason: 'HOLD_MARKER_INVALID' });

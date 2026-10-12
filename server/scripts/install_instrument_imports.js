@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const fs = require('node:fs'), path = require('node:path'), Database = require('better-sqlite3');
 const { isDeepStrictEqual } = require('node:util');
+const { createHash } = require('node:crypto');
 const { loadInstrumentImportMigrationSource } = require('../services/instrumentImportMigrationSource');
 const { classifyInstrumentImportSchema, MARKER, fingerprint } = require('../services/instrumentImportSchemaService');
 const fail = (code, message) => Object.assign(new Error(message), { statusCode: 409, code, totalChanges: 0 });
@@ -12,17 +13,26 @@ function integrity(db) {
 function preserve(db) {
     const objects = db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' AND tbl_name NOT IN ('ImportTemplate','InstrumentImportReceipt') ORDER BY type,name").all();
     const tables = objects.filter(row => row.type === 'table').map(row => ({ name: row.name, columns: db.prepare('PRAGMA table_xinfo(' + quoted(row.name) + ')').all(), foreign: db.prepare('PRAGMA foreign_key_list(' + quoted(row.name) + ')').all() }));
-    return { objects, tables, rows: readPreservedRows(db, tables) };
+    return { objects, tables, rowsSha256: preservedRowsFingerprint(db, tables) };
 }
-function readPreservedRows(db, tables) {
-    return Object.fromEntries(tables.map(row => {
-        const sql = 'SELECT ' + row.columns.map(column => quoted(column.name)).join(',') + ' FROM ' + quoted(row.name);
-        const rows = row.name === '_schema_migrations' ? db.prepare(sql + ' WHERE id<>? ORDER BY rowid').all(MARKER) : db.prepare(sql + ' ORDER BY rowid').all();
-        return [row.name, rows];
-    }));
+// Exact JSON.stringify(Object.fromEntries(original table/row arrays)) bytes,
+// streamed one row at a time. Original columns include #205 records; the new
+// nullable pointer and this release's own receipt are excluded on the recheck.
+function preservedRowsFingerprint(db, tables) {
+    const byName = Object.fromEntries(tables.map(table => [table.name, table]));
+    const hash = createHash('sha256'); hash.update('{'); let separator = '';
+    for (const name of Object.keys(byName)) {
+        const table = byName[name]; hash.update(separator); hash.update(JSON.stringify(name)); hash.update(':[');
+        const sql = 'SELECT ' + table.columns.map(column => quoted(column.name)).join(',') + ' FROM ' + quoted(name);
+        const rows = name === '_schema_migrations' ? db.prepare(sql + ' WHERE id<>? ORDER BY rowid').iterate(MARKER) : db.prepare(sql + ' ORDER BY rowid').iterate();
+        let rowSeparator = '';
+        for (const row of rows) { hash.update(rowSeparator); hash.update(JSON.stringify(row)); rowSeparator = ','; }
+        hash.update(']'); separator = ',';
+    }
+    hash.update('}'); return hash.digest('hex');
 }
 function assertPreserved(db, original) {
-    if (!isDeepStrictEqual(readPreservedRows(db, original.tables), original.rows)) throw fail('IMPORT_PRESERVATION_REFUSED', 'An original row changed during import installation.');
+    if (preservedRowsFingerprint(db, original.tables) !== original.rowsSha256) throw fail('IMPORT_PRESERVATION_REFUSED', 'An original row changed during import installation.');
     for (const object of original.objects) {
         if (object.type === 'table' && object.name === 'WorkItemDraft') continue;
         const actual = db.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name=?').get(object.name);
@@ -58,7 +68,7 @@ function installInstrumentImports({ dbPath, apply = false } = {}) {
             if (locked.classification === 'PRE_200') db.exec(releaseSource.schemaSql);
             db.exec(releaseSource.guardsSql);
             assertPreserved(db, original);
-            const receipt = { sources: locked.sources, originalRowsSha256: fingerprint(original.rows), originalRowsPreserved: true,
+            const receipt = { sources: locked.sources, originalRowsSha256: original.rowsSha256, originalRowsPreserved: true,
                 newTemplateCount: 0, newReceiptCount: 0, backfilledCount: 0 };
             receipt.receiptSha256 = fingerprint(receipt);
             db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run(MARKER, JSON.stringify(receipt));

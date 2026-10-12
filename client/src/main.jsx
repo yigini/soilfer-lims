@@ -12,6 +12,7 @@ import { DialogProvider } from './context/DialogContext'
 import { AnalysisCatalogueProvider } from './context/AnalysisCatalogueContext'
 
 import { clearStoredSessionOverride } from './lib/appearance';
+import { retryAfterRelogin } from './lib/sessionBridge';
 import { AuthenticatedAppearanceBridge } from './components/AuthenticatedAppearanceBridge';
 
 import axios from 'axios';
@@ -47,6 +48,11 @@ axios.interceptors.response.use(
                     console.warn('[AUTH] Ignored 401 from stale request with superseded token');
                     return Promise.reject(error);
                 }
+
+                // #202 B14: an expired token re-authenticates in place and the
+                // request is retried once, so pending edits are never lost.
+                const retried = retryAfterRelogin(error, config => axios(config));
+                if (retried) return retried;
 
                 if (currentToken && !isHandlingSessionExpiry) {
                     isHandlingSessionExpiry = true;

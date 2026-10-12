@@ -81,6 +81,34 @@
     "see": "ver",
     "replaces": "Sustituye",
     "preparationRecords": "Registros de preparación",
+    "preparationRecordText": {
+      "steps": {
+        "DRYING": "Secado",
+        "SIEVING": "Tamizado",
+        "GRINDING": "Molienda",
+        "SPLITTING": "Cuarteo"
+      },
+      "methods": {
+        "AIR": "Secado al aire",
+        "OVEN_40": "Estufa 40 °C",
+        "OVEN_105": "Estufa 105 °C",
+        "OTHER": "Otro método"
+      },
+      "sieve": "Tamiz",
+      "coarseFraction": "Fracción gruesa",
+      "grind": "Molido a",
+      "massBefore": "Masa inicial",
+      "massAfter": "Masa final",
+      "duration": "Duración",
+      "equipment": "Equipo",
+      "performedBy": "Realizado por"
+    },
+    "reportBasis": {
+      "ovenDry": "Informado en base seca en estufa",
+      "factor": "factor de corrección de humedad",
+      "waterContent": "contenido gravimétrico de agua",
+      "source": "resultado de humedad"
+    },
     "qcNotRequired": "QC no requerido",
     "qcEvidenceIncomplete": "La aceptación histórica de QC tiene evidencia registrada incompleta",
     "qcAcknowledgedBy": "Aceptado por",
@@ -107,7 +135,13 @@
     "issuedAt": "Fecha de emisión",
     "approvalNotRecorded": "Aprobación: no registrada",
     "filterWithdrawn": "Retirado",
-    "withdrawnPendingAmendment": "Retirado pendiente de enmienda {{amendmentId}}"
+    "withdrawnPendingAmendment": "Retirado pendiente de enmienda {{amendmentId}}",
+    "amendedStatement": "Informe modificado — reemplaza {replacedNumber}, revisión {replacedRevision}; motivo: {reason}.",
+    "amendmentChangedMark": "†",
+    "amendmentChangedLegend": "modificado en esta enmienda",
+    "amendmentAddedMark": "‡",
+    "amendmentAddedLegend": "añadido en esta enmienda",
+    "amendmentRemoved": "Eliminado en esta enmienda"
   },
   "common": {
     "save": "Guardar",
@@ -1013,12 +1047,14 @@
       "qc_reviewedTranscriptionCorrectionEnabled": "Permitir la corrección revisada de errores de transcripción en CC fallido sin disposición",
       "report_uncertaintyMode": "Informar incertidumbre expandida",
       "report_uncertaintyCoverageFactor": "Factor de cobertura de incertidumbre",
+      "report_ovenDryConvertible": "Convertir a base seca en estufa a solicitud",
       "crossCheck_basesCecFactor": "Factor máximo de bases intercambiables / CIC",
       "crossCheck_baseSaturationMaxPct": "Saturación máxima de bases (%)",
       "crossCheck_textureClosureTolerancePct": "Tolerancia del cierre de textura (%)",
       "crossCheck_cnMin": "Relación C:N mínima",
       "crossCheck_cnMax": "Relación C:N máxima",
-      "crossCheck_carbonatePhMin": "pH mínimo en agua para carbonatos"
+      "crossCheck_carbonatePhMin": "pH mínimo en agua para carbonatos",
+      "report_amendedStatement": "Texto del informe modificado"
     },
     "title": "Políticas",
     "yes": "Sí",
@@ -1056,6 +1092,7 @@
     "source": "Origen",
     "difference": "Comparación con la configuración",
     "differs": "Difiere de la configuración",
+    "storedInvalid": "El valor guardado está fuera de rango y no se usa; guarde un valor válido.",
     "edit": "Editar",
     "clear": "Quitar ajuste específico",
     "clearExplanation": "Este ajuste heredará el siguiente valor aplicable. Su valor anterior se conserva en el historial.",
@@ -1158,7 +1195,10 @@
     "ptLimits": {
       "questionable": "Límite cuestionable",
       "unsatisfactory": "Límite insatisfactorio"
-    }
+    },
+    "amendedDefault": "Usar textos predeterminados por idioma",
+    "amendedCustom": "Personalizar los cinco idiomas",
+    "amendedHelp": "Cada idioma debe incluir {replacedNumber}, {replacedRevision} y {reason} una sola vez. El texto queda fijado al emitir el informe."
   },
   "referenceMaterials": {
     "title": "Materiales de referencia",
@@ -1881,7 +1921,8 @@
       "CROSS_CHECK_SUBMISSION_REQUIRED": "La evidencia de comprobación requiere el envío correspondiente."
     },
     "unavailable": {
-      "CROSS_CHECK_LAB_REQUIRED": "Comprobaciones cruzadas no disponibles: la muestra no tiene un laboratorio registrado"
+      "CROSS_CHECK_LAB_REQUIRED": "Comprobaciones cruzadas no disponibles: la muestra no tiene un laboratorio registrado",
+      "CROSS_CHECK_POLICY_INVALID": "Comprobaciones cruzadas no disponibles: un ajuste de comprobación del laboratorio está fuera de rango; un responsable debe guardar un valor válido"
     }
   },
   "amendment": {

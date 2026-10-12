@@ -11,7 +11,15 @@ module.exports = async function globalSetup() {
     }
 
     const testDbPath = path.resolve(tmpDir, `test_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.db`);
-    const sourceDbPath = path.resolve(__dirname, '../prisma/dev.db');
+    const sourceDbPath = process.env.LIMS_OWNED_TEST_TEMPLATE ? path.resolve(process.env.LIMS_OWNED_TEST_TEMPLATE) : path.resolve(__dirname, '../prisma/dev.db');
+    // An explicitly selected local template cannot be a working database, a
+    // production path or an alias. The ordinary published-help checks below
+    // apply unchanged; all suite writes still target fresh .tmp copies.
+    if (process.env.LIMS_OWNED_TEST_TEMPLATE && (path.dirname(sourceDbPath) !== path.resolve(__dirname, '.owned-templates') ||
+        !/^test_template_[a-f0-9-]+\.db$/.test(path.basename(sourceDbPath)) || !fs.existsSync(sourceDbPath) ||
+        fs.realpathSync(sourceDbPath) !== sourceDbPath || process.env.PRODUCTION_DATABASE_PATH &&
+        path.resolve(process.env.PRODUCTION_DATABASE_PATH).toLowerCase() === sourceDbPath.toLowerCase()))
+        throw Error('Owned test template selection refuses a working, production or aliased path.');
 
     // Pin6059793372: CI/local provision the same published, test-only baseline.
     const helpPrerequisite = 'Test template lacks the published help release. Run the existing seed_help_content.cjs and publish_help_release.cjs with NODE_ENV=test against the owned server/prisma/dev.db template.';
@@ -77,6 +85,9 @@ module.exports = async function globalSetup() {
         require('../scripts/install_calculation_templates').installCalculationTemplates({dbPath:testDbPath,apply:true});
         require('../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({dbPath:testDbPath,apply:true});
         require('../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:testDbPath,apply:true});
+        require('../scripts/install_report_revisions').installReportRevisions({dbPath:testDbPath,apply:true});
+        require('../scripts/install_bench_credentials').installBenchCredentials({dbPath:testDbPath,apply:true});
+        require('../scripts/install_preparation_records').installPreparationRecords({dbPath:testDbPath,apply:true});
         require('../scripts/install_instrument_imports').installInstrumentImports({dbPath:testDbPath,apply:true});
     }
 
