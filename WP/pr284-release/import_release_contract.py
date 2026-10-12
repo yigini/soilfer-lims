@@ -130,6 +130,8 @@ def has_failed_verdict(body, include_source=False):
 
 
 def native_installation(row):
+    require(all(type(row[key]) is int for key in ['originalTableCount', 'originalReceiptCount',
+        'installedTableCount', 'installedReceiptCount', 'repeatDatabaseChanges']), 'Native counts must be integers')
     require(row['status'] == 'EXACT_NATIVE_IMPORT_DRY_APPLY_REPEAT_PASS' and
         [row[key] for key in ['originalTableCount', 'originalReceiptCount', 'installedTableCount',
             'installedReceiptCount']] == [104, 38, 106, 39] and
@@ -148,7 +150,8 @@ def native_installation(row):
         require(value['memoryLimitBytes'] == LIMIT and value['nodeOptions'] == '' and
             type(value['exitCode']) is int and value['exitCode'] == 0 and
             value['retainedOwnedContainer'] is True and type(peak['releaseCliPeakBytes']) is int and
-            0 < peak['releaseCliPeakBytes'] <= LIMIT and peak['childStatus'] == 0 and peak['childSignal'] is None,
+            0 < peak['releaseCliPeakBytes'] <= LIMIT and type(peak['childStatus']) is int and
+            peak['childStatus'] == 0 and peak['childSignal'] is None,
             'Native CLI failed, exceeded 768MiB or used an override')
 
 
@@ -173,6 +176,10 @@ def startup_evidence(readiness, checks, jobs):
 def validate_proof(proof, pin):
     require_bound_proof_source()
     candidate_identity(pin)
+    require(all(type(proof[key]) is int for key in ['productionMutations', 'separateInstallerCommands',
+        'effectiveUid', 'pythonOptimize', 'baselineEnumerationErrorCount', 'retainedDatabaseAllocationCount',
+        'originalProtectedTableCount', 'originalProtectedReceiptCount', 'protectedTableCount',
+        'protectedReceiptCount', 'databaseChangesBeforeJobs', 'readOnlyProbeChanges']), 'Proof counts must be integers')
     require(proof['status'] == 'PASSED_NEW_IMPORT_NATURAL_KOBO_PROOF' and
         proof['head'] == pin['head'] and proof['image'] == pin['image'] and
         proof['buildReceiptSha256'] == pin['buildReceiptSha256'] and
@@ -325,6 +332,16 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
         gate['manifestSha256'] == manifest_sha and gate['workloadControl'] == WORKLOAD_PINS and
         gate['entryBinding'] == entry_binding() and gate['frozenFiles'] == manifest['files'],
         'Single-use gate identity differs')
+    for key, name in [('coordinatorSha256', 'deploy_import.py'), ('rehearsalReceiptSha256', 'rehearsal-receipt.json'),
+        ('targetPinSha256', 'target-pin.json'), ('yyEvidenceSha256', 'yy-authorization-evidence.md'),
+        ('proofAuthoritySha256', 'proof-authority.json'), ('proofSourceIndexSha256', 'proof-source-index.json'),
+        ('diskMeasurementGuardSha256', 'known_core_disk_guard_v2.py'),
+        ('baselineMeasurementGuardSha256', 'known_core_disk_guard_v3.py'),
+        ('proofBaselineLayoutGuardSha256', 'known_core_disk_guard_import.py'),
+        ('productionBaselineAdapterSha256', 'known_core_disk_guard_import_deploy.py'),
+        ('productionBaselineSourceReviewSha256', 'production-baseline-source-review.json'),
+        ('copyVerifierSha256', 'kobo_copy_preservation.py'), ('proofContractSha256', 'import_proof_contract.py')]:
+        require(gate[key] == manifest['files'][name], 'Gate frozen artifact hash differs: ' + name)
     require(0 <= now.timestamp() - utc_seconds(gate['verifiedUtc']) <= 600, 'Gate is stale or future-dated')
     readiness = gate['readOnlyExecutionReadiness']
     require(readiness['ready'] is True and readiness['productionMutations'] == 0 and

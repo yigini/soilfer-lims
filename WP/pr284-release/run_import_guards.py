@@ -66,6 +66,7 @@ with tempfile.TemporaryDirectory(prefix='owned-import-assets-') as directory:
  suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromModule(sys.modules[name]) for name in p['files'] if name.startswith('test_'))
  result=unittest.TextTestRunner(verbosity=2).run(suite)
  print(json.dumps({'sourceCommit':p['sourceCommit'],'sourceHashes':{name:item['sha256'] for name,item in p['files'].items()},
+  'packagingSourceHashes':{name:hashlib.sha256(base64.b64decode(raw)).hexdigest() for name,raw in p['package'].items()},
   'assetHashes':{name:item['sha256'] for name,item in p['assets'].items()},'toolingIndex':p['toolingIndex'],'tests':result.testsRun,
   'failures':len(result.failures),'errors':len(result.errors),'skips':len(result.skipped),
   'elapsedSeconds':time.monotonic()-start,'completedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
