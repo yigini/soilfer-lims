@@ -265,7 +265,8 @@ class WalEntryTests(unittest.TestCase):
         calls = [node for node in ast.walk(tree) if isinstance(node, ast.Call) and
             isinstance(node.func, ast.Attribute) and node.func.attr == 'command' and
             len(node.args) > 1 and isinstance(node.args[1], ast.List)]
-        original_stops = [node for node in calls if ast.literal_eval(node.args[1]) ==
+        original_stops = [node for node in calls if all(isinstance(value, ast.Constant) for value in node.args[1].elts) and
+            ast.literal_eval(node.args[1]) ==
             ['docker', 'stop', '-t', '30', 'soilfer-lims']]
         # The normal path is conditional; the failure handler only stops a
         # running original, so the already-stopped held path never stops it.
