@@ -1,0 +1,21 @@
+{
+  "containerName": "lims-owned-import-cli-5b5879059893048f9d30178a",
+  "owner": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z:import-apply",
+  "memoryLimitBytes": 805306368,
+  "memorySwapLimitBytes": 805306368,
+  "networkMode": "none",
+  "timeoutSeconds": 600,
+  "elapsedSeconds": 74.2072544519906,
+  "nodeOptions": "",
+  "exitCode": 0,
+  "cgroupMemoryPeak": {
+    "releaseCliPeakBytes": 92438528,
+    "childStatus": 0,
+    "childSignal": null
+  },
+  "retainedOwnedContainer": true,
+  "retainedArtifacts": {
+    "import-apply.stdout": "b6c0e0d15884446160dceaff97367fd976ff79f17bbdd120486835463bdc8245",
+    "import-apply.stderr": "bb266b268000107494fd2bbbee74cbb12f2d19f48ed095683e134e6584551e7b"
+  }
+}

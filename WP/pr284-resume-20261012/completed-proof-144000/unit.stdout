@@ -1,0 +1,39 @@
+{"stage": "candidate-jobs-off", "elapsedSeconds": 39.01778445999662, "pending": true}
+{"stage": "candidate-jobs-off", "elapsedSeconds": 78.15844998900138, "pending": true}
+{"stage": "candidate-jobs-on", "elapsedSeconds": 40.52634383300028, "pending": true}
+{"stage": "candidate-jobs-on", "elapsedSeconds": 80.0981449670071, "pending": true}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:18:35.536764+00:00", "healthy": true, "restartCount": 0, "peakBytes": 204115968, "minimumFreeBytes": 75799347200}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:18:46.238725+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75799166976}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:20:16.205725+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75235344384}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:20:46.943212+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75235336192}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:21:17.717770+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75235180544}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:21:48.542794+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75234979840}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:22:19.261496+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75234791424}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:22:50.000552+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75234570240}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:23:20.811136+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75234357248}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:23:51.495136+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75234156544}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:24:22.173516+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75234004992}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:24:52.894853+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75233832960}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:25:23.597914+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75233673216}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:25:54.395861+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75233492992}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:26:25.190642+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75233345536}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:26:55.946694+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75233157120}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:27:26.674865+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75232997376}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:27:57.443331+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75232808960}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:28:28.298797+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75232632832}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:28:59.453738+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75232473088}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:29:30.429571+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75232813056}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:30:01.304698+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75232653312}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:30:32.211566+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75232497664}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:31:03.018113+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75232325632}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:31:33.792272+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75232104448}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:32:04.484746+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75231944704}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:32:35.285814+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75231797248}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:33:06.042262+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75231625216}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:33:36.763071+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75231444992}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:34:07.531448+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75231252480}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:34:38.336562+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75231027200}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:35:09.090169+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75230842880}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:35:39.866357+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75230654464}
+{"stage": "candidate-natural-kobo-observation", "utc": "2026-10-12T15:35:42.323183+00:00", "healthy": true, "restartCount": 0, "peakBytes": 284602368, "minimumFreeBytes": 75230519296}
+{"status": "PASSED_NEW_IMPORT_NATURAL_KOBO_PROOF", "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z", "receiptSha256": "f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce"}

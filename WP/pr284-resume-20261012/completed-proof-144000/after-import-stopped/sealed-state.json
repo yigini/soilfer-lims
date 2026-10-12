@@ -1,0 +1,43 @@
+{
+  "policy": "DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL",
+  "originalFiles": {
+    "": {
+      "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+      "bytes": 563322880,
+      "inode": 10878978,
+      "device": 64769,
+      "mtimeNs": 1791817417648233662,
+      "mode": 420
+    },
+    "-wal": null,
+    "-shm": null
+  },
+  "rawFiles": {
+    "": {
+      "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+      "bytes": 563322880,
+      "inode": 10879538,
+      "device": 64769,
+      "mtimeNs": 1791817428014449660,
+      "mode": 256
+    },
+    "-wal": null,
+    "-shm": null
+  },
+  "mainOnlyStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+  "logicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+  "backupSha256": "142f6e0e9c0d391efe6221bd8134e3e7f6133ecaad700060cbf7e3132a587621",
+  "countsIncludeWal": true,
+  "matchesExpected": false,
+  "protectedTableCount": 106,
+  "protectedReceiptCount": 39,
+  "backupPath": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/after-import-stopped/dev-stopped-backup.db",
+  "physical": {
+    "": {
+      "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+      "bytes": 563322880
+    },
+    "-wal": null,
+    "-shm": null
+  }
+}

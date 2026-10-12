@@ -1,0 +1,40 @@
+{
+  "preparedUtc": "2026-10-12T15:42:06.735986+00:00",
+  "sourceCommit": "5fa7e65f3d13a04f270e90e0b4b129f8eaf3296e",
+  "status": "REQUEST_PREPARED_FROM_ACTUAL_STOPPED_FIRST_PASS_NOT_POSTED",
+  "originalProofRoot": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "proofReceiptSha256": "f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce",
+  "productionOperations": 0,
+  "actualMeasuredTiming": {
+    "policy": "MEASURED_STAGES_ONLY_NOT_TOTAL_PRODUCTION_WALL_TIME",
+    "stageElapsedSeconds": {
+      "import-dry": 7.368492781999521,
+      "import-apply": 74.2072544519906,
+      "import-repeat": 6.068385352991754,
+      "jobs-off-readiness": 113.49635759399098,
+      "jobs-on-readiness": 113.82968340200023
+    },
+    "stageTimeoutHeadroomSeconds": {
+      "import-dry": 592.6315072180005,
+      "import-apply": 525.7927455480094,
+      "import-repeat": 593.9316146470082,
+      "jobs-off-readiness": 486.503642406009,
+      "jobs-on-readiness": 486.1703165979998
+    },
+    "productionHealthyObservationSeconds": 660,
+    "additionalMeasuredOperationSeconds": {
+      "repeat-stopped-seal": 194.50089063699124
+    },
+    "measuredStagesPlusObservationSeconds": 1169.4710642199643,
+    "unitLimitSeconds": 5400,
+    "remainingForUnmeasuredOperationsSeconds": 4230.528935780036,
+    "unmeasuredOperations": [
+      "quiesce",
+      "backup",
+      "other seals",
+      "API probes",
+      "ingress",
+      "coordination"
+    ]
+  }
+}

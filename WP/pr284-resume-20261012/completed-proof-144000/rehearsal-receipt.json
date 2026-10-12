@@ -1,0 +1,3658 @@
+{
+  "status": "PASSED_NEW_IMPORT_NATURAL_KOBO_PROOF",
+  "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "startedUtc": "2026-10-12T14:59:46.342769+00:00",
+  "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+  "targetPinSha256": "241bd693b8cfdb3e9a05440716bd925a620a807bdb371206430a4abc2a9481b1",
+  "sourceIndexSha256": "786caccf8a72f290c03fcb01584eea6dd1ac54160d0b52d2641a97b3e5d7cbeb",
+  "toolingCommit": "201bb5fe8fd30cb2991f7169177a864265e6301b",
+  "coordinatorSha256": "18984ff11f0bd2cd1871bb731d44e4985562b0b96b4bea2734b2a2e17b5ceafe",
+  "buildReceiptSha256": "1a983172adebaba8b1a61959810d5469d9c12d706725bd33783d43cc8cceabe0",
+  "proofSourceReviewId": 6126765238,
+  "baseHead": "51f6798806f630773786a08432290c1b21a841da",
+  "buildReusePolicy": "EXACT_ORIGINAL_BUILD_AUTHORITY_NO_REBUILD_OR_RETAG",
+  "buildRoot": "/opt/lims/releases/instrument-import-build-959d17e1-20261012T135400Z",
+  "buildSourceCommit": "630b2354a1a45df0d88545ac5c63594361615999",
+  "buildSourceReviewId": 6125544861,
+  "buildSourceIndexSha256": "592f749f83eb166660a649030a0020600c0f99f403e5c40f9dfb9a5e3fc30c3f",
+  "buildSourceReviewRawSha256": "cd3f50d2794d39b6c28d2af3bbb88d3a2fa7ec1ffe93b7f1b4458655c5b82190",
+  "originalBuilderSha256": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a",
+  "originalPreparerSha256": "a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991",
+  "imageBytes": 413806636,
+  "mergeBaseHead": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+  "auditReviewId": 6125341751,
+  "originalProofRoot": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "firstProofPolicy": "EXACT_REVIEWED_FIRST_PROOF_ROOT_NO_REPLAY",
+  "pr": 294,
+  "tree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+  "auditedTree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+  "mergeParents": [
+    "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+    "5e65fe5b587747efc717f167f9b61469effa9afe"
+  ],
+  "naturalIntakePolicy": "ORIGINAL_CURSOR_ACTUAL_UPSTREAM",
+  "authoritySha256": "0ea78a174ce1df74292ebd2ff78a407b962d6dd302e71dbc21dbbb615382f045",
+  "diskMeasurementGuardSha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+  "coreDeallocationConfirmationDeadlineSeconds": 10,
+  "baselineMeasurementGuardSha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+  "proofBaselineLayoutPolicy": "EXACT_HASHED_IMPORT_PROOF_AUTHORITY_LAYOUT",
+  "proofBaselineLayoutGuardSha256": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+  "baselineVanishedProcessPolicy": "CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE",
+  "BASELINE_ATTEMPTS_MAX": 3,
+  "BASELINE_CONFIRMATION_DEADLINE_SECONDS": 10,
+  "historicalReceiptSha256": "480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515",
+  "productionMutations": 0,
+  "separateInstallerCommands": 3,
+  "importDeltaPolicy": "ONLY_200_EMPTY_ADDITIVE_IMPORT_10438_TO_10639",
+  "retainedDatabaseAllocationCount": 16,
+  "scopeCommentIds": [
+    6112209155,
+    6112305172,
+    6112436098,
+    6113601584
+  ],
+  "refusalScopeCommentId": 6113601584,
+  "schedulerRefusalPolicy": "EXACT_FRESH_COPY_CONFIG_REFUSALS",
+  "intakeCardinalityPolicy": "SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS",
+  "refusalPairingScopeCommentId": 6114143349,
+  "schedulerRefusalPairing": "STREAM_ORDER_ONE_TO_ONE",
+  "REFUSAL_PAIR_WINDOW_SECONDS": 1,
+  "copyVerifierSha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+  "proofContractSha256": "cfc8dab7db0e4861c5a5837811701e52f838111f5e72b7d82a1ea1ac27219d19",
+  "existingSampleVerifierPolicy": "STRICT_ORIGINAL_ROWS",
+  "effectiveUid": 0,
+  "pythonOptimize": 0,
+  "reserveBytes": 10556150894,
+  "workloadPins": {
+    "labAndHubBuildsOwnedByYY": true,
+    "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+  },
+  "baselineEnumerationErrorCount": 0,
+  "baselineAttempt": 1,
+  "freshCopyUtc": "2026-10-12T14:59:52.805766+00:00",
+  "freshCopySha256": "8aafdf7c4325c2a9b429fa04aaf66db26f569b68d391bd18406720db336284b4",
+  "protectedStateSha256": "46c104649639f1c630cd08dabf3cda84a82c93763b6453a6f1d0a91a7e391baa",
+  "nativeImportInstallation": {
+    "status": "EXACT_NATIVE_IMPORT_DRY_APPLY_REPEAT_PASS",
+    "originalTableCount": 104,
+    "originalReceiptCount": 38,
+    "installedTableCount": 106,
+    "installedReceiptCount": 39,
+    "originalRowsSha256": "f2819dc6737b62f25ed0fa1e6057728a8b9612c5fa5068e0271e1f182f7cfb50",
+    "beforeBackupSha256": "8aafdf7c4325c2a9b429fa04aaf66db26f569b68d391bd18406720db336284b4",
+    "afterBackupSha256": "142f6e0e9c0d391efe6221bd8134e3e7f6133ecaad700060cbf7e3132a587621",
+    "preservationSha256": "18e1379bac2f9b93696cf97e19a4d68e52aa3ff2e85053adf8e9d3c5d2efaafe",
+    "measurements": [
+      {
+        "containerName": "lims-owned-import-cli-2b2a9dcf8451d704b09697ec",
+        "owner": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z:import-dry",
+        "memoryLimitBytes": 805306368,
+        "memorySwapLimitBytes": 805306368,
+        "networkMode": "none",
+        "timeoutSeconds": 600,
+        "elapsedSeconds": 7.368492781999521,
+        "nodeOptions": "",
+        "exitCode": 0,
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 91516928,
+          "childStatus": 0,
+          "childSignal": null
+        },
+        "retainedOwnedContainer": true,
+        "retainedArtifacts": {
+          "import-dry.stdout": "d96dc8241e3edbc9d2a2e794a0edbb6dd592f282f978571380d37544446058f3",
+          "import-dry.stderr": "56a6f4c1b7a51ebf3238ab724908c39c8fea65245b38430b834aafa6d7b8d78a"
+        }
+      },
+      {
+        "containerName": "lims-owned-import-cli-5b5879059893048f9d30178a",
+        "owner": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z:import-apply",
+        "memoryLimitBytes": 805306368,
+        "memorySwapLimitBytes": 805306368,
+        "networkMode": "none",
+        "timeoutSeconds": 600,
+        "elapsedSeconds": 74.2072544519906,
+        "nodeOptions": "",
+        "exitCode": 0,
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 92438528,
+          "childStatus": 0,
+          "childSignal": null
+        },
+        "retainedOwnedContainer": true,
+        "retainedArtifacts": {
+          "import-apply.stdout": "b6c0e0d15884446160dceaff97367fd976ff79f17bbdd120486835463bdc8245",
+          "import-apply.stderr": "bb266b268000107494fd2bbbee74cbb12f2d19f48ed095683e134e6584551e7b"
+        }
+      },
+      {
+        "containerName": "lims-owned-import-cli-858ccfc7be8e9f5e98b7f750",
+        "owner": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z:import-repeat",
+        "memoryLimitBytes": 805306368,
+        "memorySwapLimitBytes": 805306368,
+        "networkMode": "none",
+        "timeoutSeconds": 600,
+        "elapsedSeconds": 6.068385352991754,
+        "nodeOptions": "",
+        "exitCode": 0,
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 54587392,
+          "childStatus": 0,
+          "childSignal": null
+        },
+        "retainedOwnedContainer": true,
+        "retainedArtifacts": {
+          "import-repeat.stdout": "241c29108bd722ba20b51d810da0bc232db4efdd1d36d13dc78d7d3e70c884ff",
+          "import-repeat.stderr": "4df899e7b48f535ac59ac6bca0bdfce5a7b5779c8b92ade3a2015f2dc1753307"
+        }
+      }
+    ],
+    "repeatPhysicalPolicy": "EXACT_MAIN_EMPTY_WAL_BOUNDED_SHM_FULL_DETACHED_EQUALITY",
+    "repeatStoppedSeal": {
+      "policy": "DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL",
+      "originalFiles": {
+        "": {
+          "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+          "bytes": 563322880,
+          "inode": 10878978,
+          "device": 64769,
+          "mtimeNs": 1791817417648233662,
+          "mode": 420
+        },
+        "-wal": {
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0,
+          "inode": 10879570,
+          "device": 64769,
+          "mtimeNs": 1791817628216621206,
+          "mode": 420
+        },
+        "-shm": {
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+          "bytes": 32768,
+          "inode": 10879576,
+          "device": 64769,
+          "mtimeNs": 1791817630667672278,
+          "mode": 420
+        }
+      },
+      "rawFiles": {
+        "": {
+          "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+          "bytes": 563322880,
+          "inode": 10879583,
+          "device": 64769,
+          "mtimeNs": 1791817645708985688,
+          "mode": 256
+        },
+        "-wal": {
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0,
+          "inode": 10879584,
+          "device": 64769,
+          "mtimeNs": 1791817649392062432,
+          "mode": 256
+        },
+        "-shm": {
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+          "bytes": 32768,
+          "inode": 10879585,
+          "device": 64769,
+          "mtimeNs": 1791817649559065912,
+          "mode": 256
+        }
+      },
+      "mainOnlyStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+      "logicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+      "backupSha256": "142f6e0e9c0d391efe6221bd8134e3e7f6133ecaad700060cbf7e3132a587621",
+      "countsIncludeWal": true,
+      "matchesExpected": false,
+      "protectedTableCount": 106,
+      "protectedReceiptCount": 39,
+      "backupPath": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/after-repeat-stopped/dev-stopped-backup.db",
+      "physical": {
+        "": {
+          "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+          "bytes": 563322880
+        },
+        "-wal": {
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        "-shm": {
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+          "bytes": 32768
+        }
+      }
+    },
+    "repeatStoppedSealElapsedSeconds": 194.50089063699124,
+    "repeatPreservationSha256": "a6b464115fceebf06f14158b752b3e7fb2c51ffaf6fa4204f862d773dfdc8836",
+    "dryRunCopy": {
+      "policy": "SEPARATE_OWNED_0400_BACKUP_COPY_WITH_WRITABLE_SIDECAR_DIRECTORY",
+      "beforeBackupSha256": "8aafdf7c4325c2a9b429fa04aaf66db26f569b68d391bd18406720db336284b4",
+      "mainSha256": "8aafdf7c4325c2a9b429fa04aaf66db26f569b68d391bd18406720db336284b4",
+      "targetPhysicalTriplePreserved": true,
+      "files": {
+        "dev.db-wal": {
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        "dev.db-shm": {
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+          "bytes": 32768
+        },
+        "dev.db": {
+          "sha256": "8aafdf7c4325c2a9b429fa04aaf66db26f569b68d391bd18406720db336284b4",
+          "bytes": 563322880
+        }
+      }
+    },
+    "dryRunCopyAuthoritySha256": "2429f0ab3cf97e6da9d7be295c8390fbec0bce13bd80bd8c1a87c9f00d5f5612",
+    "dry": {
+      "classification": "PRE_200",
+      "sources": {
+        "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+        "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+        "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+        "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+        "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+      },
+      "counts": {
+        "templates": 0,
+        "receipts": 0,
+        "draftLinks": 0
+      },
+      "mode": "DRY_RUN",
+      "totalChanges": 0,
+      "newTemplateCount": 0,
+      "newReceiptCount": 0,
+      "backfilledCount": 0
+    },
+    "apply": {
+      "classification": "COMPLETE_200",
+      "sources": {
+        "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+        "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+        "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+        "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+        "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+      },
+      "counts": {
+        "templates": 0,
+        "receipts": 0,
+        "draftLinks": 0
+      },
+      "receipt": {
+        "sources": {
+          "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+          "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+          "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+          "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+          "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+        },
+        "originalRowsSha256": "f2819dc6737b62f25ed0fa1e6057728a8b9612c5fa5068e0271e1f182f7cfb50",
+        "originalRowsPreserved": true,
+        "newTemplateCount": 0,
+        "newReceiptCount": 0,
+        "backfilledCount": 0,
+        "receiptSha256": "dab5f1da74296153007a74edc196d1b34555bf0039a2305f2eb8f1664678d0c9"
+      },
+      "previousClassification": "PRE_200",
+      "mode": "APPLIED",
+      "newTemplateCount": 0,
+      "newReceiptCount": 0,
+      "backfilledCount": 0,
+      "totalChanges": 1
+    },
+    "repeat": {
+      "classification": "COMPLETE_200",
+      "sources": {
+        "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+        "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+        "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+        "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+        "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+      },
+      "counts": {
+        "templates": 0,
+        "receipts": 0,
+        "draftLinks": 0
+      },
+      "receipt": {
+        "sources": {
+          "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+          "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+          "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+          "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+          "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+        },
+        "originalRowsSha256": "f2819dc6737b62f25ed0fa1e6057728a8b9612c5fa5068e0271e1f182f7cfb50",
+        "originalRowsPreserved": true,
+        "newTemplateCount": 0,
+        "newReceiptCount": 0,
+        "backfilledCount": 0,
+        "receiptSha256": "dab5f1da74296153007a74edc196d1b34555bf0039a2305f2eb8f1664678d0c9"
+      },
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "newTemplateCount": 0,
+      "newReceiptCount": 0,
+      "backfilledCount": 0
+    },
+    "repeatDatabaseChanges": 0,
+    "allOriginalRowsAndSchemaPreserved": true,
+    "forwardOnly": true
+  },
+  "installedBaselineSha256": "142f6e0e9c0d391efe6221bd8134e3e7f6133ecaad700060cbf7e3132a587621",
+  "installedProtectedStateSha256": "51c15cb88854168b31c6c4dd25f06d0b7273d7830ed2f23ad080af11a78a96f2",
+  "expectedSchedulerRefusals": [
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database."
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed."
+    }
+  ],
+  "copySyncIntervalMins": 15,
+  "initialUpstreamSha256": "55f09d822eb8e586696e5b0218c86b188d8b20f516265623bfd3f1caaa737816",
+  "initialTargetSubmissionCount": 0,
+  "jobsOffReadiness": {
+    "startedUtc": "2026-10-12T15:10:59.195297+00:00",
+    "containerStartedUtc": "2026-10-12T15:10:59.522995217Z",
+    "readyUtc": "2026-10-12T15:12:52.691569+00:00",
+    "elapsedSeconds": 113.49635759399098,
+    "deadlineSeconds": 600,
+    "attempts": 87,
+    "health": {
+      "status": "ok",
+      "version": "1.9.0",
+      "uptime": 54.235660698
+    },
+    "restartCount": 0,
+    "oomKilled": false,
+    "memoryLimitBytes": 805306368,
+    "networkMode": "bridge",
+    "publishedHostIp": "127.0.0.1",
+    "jobsEnabled": false,
+    "baseUrl": "http://127.0.0.1:32786",
+    "sharedReadinessCode": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+  },
+  "jobsOffStartup": {
+    "startupReady": [
+      {
+        "event": "WORKFLOW_STARTUP_READY",
+        "classification": "COMPLETE",
+        "inventory": {
+          "totals": {
+            "Sample": 38928,
+            "WorkItem": 90
+          },
+          "candidateCount": 0,
+          "unmappedCount": 0,
+          "blockedCount": 0,
+          "fingerprint": "f92b4677e3ce0424471df4cffefe4c4e3138a1557846094059b8af0886129386"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "RESULT_ATTEMPT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d"
+        },
+        "guards": [
+          "Result_attempt_insert_guard",
+          "Result_attempt_update_guard",
+          "WorkAttempt_result_reference_guard"
+        ],
+        "counts": {
+          "results": 19,
+          "linked": 19
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "SAMPLE_HOLD_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8"
+        },
+        "guards": [
+          "SampleHold_insert_guard",
+          "SampleHold_update_guard",
+          "SampleHold_raise_immutable",
+          "SampleHold_resolution_final",
+          "SampleHold_delete_refusal",
+          "WorkItem_cancellation_insert_guard",
+          "WorkItem_cancellation_update_guard"
+        ],
+        "counts": {
+          "workItems": 90,
+          "holds": 10
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "REFERENCE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3",
+          "oracleSha256": "7a626b66bd31a7e7305d8c1b091207f3fb26348345a431fb77b63f875d3b99b5"
+        },
+        "guards": [
+          "ReferenceMaterial_insert_guard",
+          "ReferenceMaterial_update_guard",
+          "ReferenceValue_insert_guard",
+          "ReferenceValue_immutable_guard",
+          "ReferenceValue_delete_guard",
+          "BatchQcResult_reference_insert_guard",
+          "BatchQcResult_reference_update_guard"
+        ],
+        "indexes": [
+          "ReferenceMaterial_labId_code_idx",
+          "ReferenceValue_referenceMaterialId_analysisCode_idx",
+          "ReferenceValue_current_generic",
+          "ReferenceValue_current_method"
+        ],
+        "counts": {
+          "materials": 0,
+          "values": 0,
+          "qcRows": 18,
+          "linked": 0
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_RULE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06",
+          "oracleSha256": "fe0dbc7dbb0a35bc62353de715a48b4263d492917225c7be5b6f969ec3f52819"
+        },
+        "guards": [
+          "QcRule_immutable_update",
+          "QcRule_immutable_delete",
+          "QcRule_version_guard",
+          "QcRule_scope_guard",
+          "QcRule_value_guard"
+        ],
+        "indexes": [
+          "QcRule_labId_analysisCode_methodologyId_effectiveFrom_idx",
+          "QcRule_scope_version_unique"
+        ],
+        "counts": {
+          "rules": 0
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_RUN_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+          "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369"
+        },
+        "counts": {
+          "BatchAnalyte": 6,
+          "BatchPosition": 33,
+          "BatchPositionWorkItem": 15,
+          "BatchPositionReference": 0,
+          "QcMeasurement": 24,
+          "QcEvaluation": 6,
+          "BatchDisposition": 1,
+          "BatchEvent": 28
+        },
+        "receipt": {
+          "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+          "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369",
+          "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+          "backfillCounts": {
+            "batches": 6,
+            "analytes": 6,
+            "samplePositions": 15,
+            "qcPositions": 18,
+            "historicalSnapshots": 0,
+            "currentEvaluations": 6,
+            "evaluations": 6,
+            "measurements": 24,
+            "typedRows": 18,
+            "historicalTypedRows": 0,
+            "jsonEntries": 18,
+            "typedFallbackEntries": 0,
+            "typedJsonConflicts": 12,
+            "historyAuditConflicts": 0,
+            "unresolvedMethods": 0,
+            "unresolvedAnalysts": 3,
+            "unresolvedInstruments": 6,
+            "unlinkedReferences": 6,
+            "unresolvedNumbers": 0,
+            "unresolvedDuplicateParents": 6,
+            "unresolvedRackPositions": 15,
+            "missingWorkItems": 16,
+            "malformedHistory": 0,
+            "malformedQcResults": 0,
+            "orphanSnapshots": 0,
+            "multiAttemptMembershipGroups": 0,
+            "refusals": 0,
+            "legacyDispositionMapped": {
+              "REJECT_REANALYSIS": 1,
+              "ACCEPT_OPAQUE": 1
+            },
+            "dispositionAttribution": {
+              "AUDIT_LOG": 0,
+              "BATCH_DISPOSITION_FIELD": 2,
+              "SNAPSHOT_DISPOSITION_FIELD": 0
+            },
+            "dispositionAttributionConflicts": 0,
+            "TEXTURE_ALIAS_MERGED": 0
+          },
+          "bootstrapRebuild": []
+        },
+        "bootstrapRebuild": [],
+        "guards": [
+          "Batch_legacy_qc_immutable",
+          "Batch_first_start_immutable",
+          "BatchQcResult_frozen_insert",
+          "BatchQcResult_frozen_update",
+          "BatchQcResult_frozen_delete",
+          "BatchAnalyte_insert_guard",
+          "BatchAnalyte_update_guard",
+          "BatchAnalyte_identity_immutable",
+          "BatchAnalyte_membership_insert_guard",
+          "BatchAnalyte_membership_delete_guard",
+          "BatchAnalyte_membership_update_guard",
+          "BatchPosition_insert_guard",
+          "BatchPosition_update_guard",
+          "BatchPosition_membership_insert_guard",
+          "BatchPosition_membership_update_guard",
+          "BatchPosition_membership_delete_guard",
+          "BatchPosition_identity_guard",
+          "BatchPositionWorkItem_insert_guard",
+          "BatchPositionWorkItem_immutable",
+          "BatchPositionWorkItem_run_unique_guard",
+          "BatchPositionWorkItem_membership_insert_guard",
+          "BatchPositionWorkItem_membership_delete_guard",
+          "WorkItem_batch_membership_guard",
+          "WorkItem_batch_membership_insert_guard",
+          "BatchPositionReference_insert_guard",
+          "BatchPositionReference_correction_reason_guard",
+          "BatchPositionReference_lot_guard",
+          "BatchPositionReference_supersede_guard",
+          "BatchPositionReference_delete_guard",
+          "QcMeasurement_insert_guard",
+          "QcMeasurement_historical_write_guard",
+          "QcMeasurement_replacement_guard",
+          "BatchPositionReference_replacement_guard",
+          "QcMeasurement_start_guard",
+          "QcMeasurement_supersede_guard",
+          "QcMeasurement_delete_guard",
+          "QcEvaluation_insert_guard",
+          "QcEvaluation_start_guard",
+          "QcEvaluation_frozen_criteria_guard",
+          "QcEvaluation_immutable_update",
+          "QcEvaluation_immutable_delete",
+          "BatchDisposition_immutable_update",
+          "BatchDisposition_immutable_delete",
+          "BatchEvent_immutable_update",
+          "BatchEvent_immutable_delete",
+          "BatchDisposition_insert_guard",
+          "BatchEvent_insert_guard"
+        ],
+        "indexes": [
+          "BatchAnalyte_labId_analysisCode_methodologyId_idx",
+          "BatchAnalyte_batchId_analysisCode_key",
+          "BatchPosition_batchId_position_key",
+          "BatchPositionWorkItem_workItemId_idx",
+          "BatchPositionWorkItem_positionId_analysisCode_key",
+          "BatchPositionReference_positionId_analysisCode_idx",
+          "QcMeasurement_batchId_analysisCode_idx",
+          "QcMeasurement_positionId_analysisCode_replicateNo_idx",
+          "QcEvaluation_batchId_analysisCode_version_key",
+          "BatchDisposition_batchId_analysisCode_idx",
+          "BatchEvent_batchId_at_idx",
+          "BatchAnalyte_crm_ordinal_unique",
+          "BatchPositionReference_current_unique",
+          "QcMeasurement_current_unique"
+        ],
+        "backfillCount": 0,
+        "backfillCounts": {
+          "batches": 6,
+          "analytes": 6,
+          "samplePositions": 15,
+          "qcPositions": 18,
+          "historicalSnapshots": 0,
+          "currentEvaluations": 6,
+          "evaluations": 6,
+          "measurements": 24,
+          "typedRows": 18,
+          "historicalTypedRows": 0,
+          "jsonEntries": 18,
+          "typedFallbackEntries": 0,
+          "typedJsonConflicts": 12,
+          "historyAuditConflicts": 0,
+          "unresolvedMethods": 0,
+          "unresolvedAnalysts": 3,
+          "unresolvedInstruments": 6,
+          "unlinkedReferences": 6,
+          "unresolvedNumbers": 0,
+          "unresolvedDuplicateParents": 6,
+          "unresolvedRackPositions": 15,
+          "missingWorkItems": 16,
+          "malformedHistory": 0,
+          "malformedQcResults": 0,
+          "orphanSnapshots": 0,
+          "multiAttemptMembershipGroups": 0,
+          "refusals": 0,
+          "legacyDispositionMapped": {
+            "REJECT_REANALYSIS": 1,
+            "ACCEPT_OPAQUE": 1
+          },
+          "dispositionAttribution": {
+            "AUDIT_LOG": 0,
+            "BATCH_DISPOSITION_FIELD": 2,
+            "SNAPSHOT_DISPOSITION_FIELD": 0
+          },
+          "dispositionAttributionConflicts": 0,
+          "TEXTURE_ALIAS_MERGED": 0
+        },
+        "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_GATE_SCOPE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+        "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+        "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+        "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+        "existingDispositionRows": 1,
+        "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+        "backfillCount": 0,
+        "bootstrapRebuild": [],
+        "totalChanges": 0,
+        "mode": "DRY_RUN",
+        "receipt": {
+          "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+          "existingDispositionRows": 1,
+          "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+          "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+          "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+          "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+          "backfillCount": 0,
+          "bootstrapRebuild": []
+        }
+      },
+      {
+        "event": "PT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "successor": "COMPLETE_193",
+        "sources": {
+          "migrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "successorSources": {
+          "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+          "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "bootstrapRebuild": [],
+        "backfillCount": 0,
+        "roundCount": 0,
+        "scoreOutcomeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "NCR_STARTUP_READY",
+        "classification": "COMPLETE_193",
+        "sources": {
+          "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+          "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "RESULT_EQUIPMENT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4"
+        },
+        "bootstrapRebuild": [],
+        "backfillCount": 0,
+        "resultCount": 19,
+        "originalResultSha256": "935e140956349abc9eddbee25b830c9ff041700f6565479a62f16031deb90d26",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "WORK_ATTEMPT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+          "contractVersion": "190-v1"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "WORK_REPEAT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd",
+          "contractVersion": "191-v1",
+          "predecessor": {
+            "marker": "190_work_attempt_contract",
+            "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+            "contractVersion": "190-v1",
+            "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+          },
+          "qcPredecessors": {
+            "186_normalized_qc_runs": {
+              "receiptSha256": "d461aab82504feaf91a27b4816e1d4b3abd66c147f32122752d72f4eb842be1a"
+            },
+            "187_qc_gate_scope": {
+              "receiptSha256": "ee802a39b62a9e06ab92677c3c016c461e4d1c8ca43674f077622220ef1fbd04"
+            }
+          }
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "REPORTED_VALUE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "migrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7",
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newSelectionCount": 0
+      },
+      {
+        "event": "REAGENT_LOT_STARTUP_READY",
+        "classification": "COMPLETE_194",
+        "sources": {
+          "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+        },
+        "linkCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+          },
+          "originalRowsSha256": "f79db32ba1d05b87d2e5009954d90ae2dd0f0a960cd51865e0f4b75de0bc4cbe",
+          "originalRowsPreserved": true,
+          "newLinkCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "5d737a49f3a62a5accf3c405ae938308b11b4ffe5682e71c0982951ee61715e1"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "RESULT_OVERRIDE_STARTUP_READY",
+        "classification": "COMPLETE_197",
+        "sources": {
+          "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+        },
+        "requestCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+          },
+          "originalRowsSha256": "6e0207946cd67d4109b3f6e7ff0b23fd8b545b21d2a4f81796e651923db1564b",
+          "originalRowsPreserved": true,
+          "newRequestCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "953a236c33e3b37f7a4fe173dc01f17b6d49924a2bfa432877f05b896253b83e"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "CALCULATION_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+          "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+          "referenceSha256": "57dc4b667dab93606e24673b39a12032e48f3df686b9bd3c593ac04d2fac8491"
+        },
+        "receipt": {
+          "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+          "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+          "guards": [
+            "CalcTemplate_insert_contract",
+            "CalcTemplateActivation_insert_contract",
+            "CalibrationCurve_insert_contract",
+            "CalibrationPoint_insert_contract",
+            "ResultCalculation_insert_contract",
+            "CalcTemplate_update_immutable",
+            "CalcTemplate_delete_immutable",
+            "CalcTemplateActivation_update_immutable",
+            "CalcTemplateActivation_delete_immutable",
+            "CalibrationCurve_update_immutable",
+            "CalibrationCurve_delete_immutable",
+            "CalibrationPoint_update_immutable",
+            "CalibrationPoint_delete_immutable",
+            "ResultCalculation_update_immutable",
+            "ResultCalculation_delete_immutable",
+            "CalibrationCurve_pass_coefficients_guard"
+          ],
+          "backfillCount": 0
+        },
+        "guards": [
+          "CalcTemplate_insert_contract",
+          "CalcTemplateActivation_insert_contract",
+          "CalibrationCurve_insert_contract",
+          "CalibrationPoint_insert_contract",
+          "ResultCalculation_insert_contract",
+          "CalcTemplate_update_immutable",
+          "CalcTemplate_delete_immutable",
+          "CalcTemplateActivation_update_immutable",
+          "CalcTemplateActivation_delete_immutable",
+          "CalibrationCurve_update_immutable",
+          "CalibrationCurve_delete_immutable",
+          "CalibrationPoint_update_immutable",
+          "CalibrationPoint_delete_immutable",
+          "ResultCalculation_update_immutable",
+          "ResultCalculation_delete_immutable",
+          "CalibrationCurve_pass_coefficients_guard"
+        ],
+        "counts": {
+          "CalcTemplate": 8,
+          "CalcTemplateActivation": 0,
+          "CalibrationCurve": 0,
+          "CalibrationPoint": 0,
+          "ResultCalculation": 0
+        },
+        "backfillCount": 0,
+        "unit": {
+          "classification": "ABSENT",
+          "unitCode": "pct_mass",
+          "unitInsertCount": 0,
+          "backfillCount": 0
+        },
+        "references": {
+          "classification": "COMPLETE",
+          "referenceCount": 11,
+          "installedReferenceCount": 8,
+          "missingReferenceIds": [],
+          "deferredReferences": [
+            {
+              "id": "calc-ref-walkley-black-130-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            },
+            {
+              "id": "calc-ref-walkley-black-133-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            },
+            {
+              "id": "calc-ref-kjeldahl-nitrogen-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            }
+          ],
+          "deferredReferenceCount": 3,
+          "referenceInsertCount": 0,
+          "referenceReceiptInsertCount": 0,
+          "activationInsertCount": 0,
+          "backfillCount": 0
+        },
+        "ready": true,
+        "plannedUnitInsertCount": 0,
+        "plannedReferenceInsertCount": 0,
+        "activationInsertCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "unitInsertCount": 0,
+        "referenceInsertCount": 0,
+        "referenceReceiptInsertCount": 0,
+        "schemaReceiptInsertCount": 0
+      },
+      {
+        "event": "CROSS_CHECK_STARTUP_READY",
+        "classification": "COMPLETE_201",
+        "sources": {
+          "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+          "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+          "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+        },
+        "evaluationCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+            "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+            "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+          },
+          "originalRowsSha256": "8559985c861e950fdffe53f6661a48b0e76916edcd4c3f0e51b473d827824d58",
+          "originalRowsPreserved": true,
+          "newEvaluationCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "3185df5bbb809f86c7ca8c0689135e6dbd93e227c9dbda66850256b965966a9e"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newEvaluationCount": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "AMENDMENT_STARTUP_READY",
+        "classification": "COMPLETE_210",
+        "sources": {
+          "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+          "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+          "contractVersion": "210-v1"
+        },
+        "amendmentCount": 1,
+        "amendmentAttemptLinkCount": 0,
+        "withdrawalCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+            "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+            "contractVersion": "210-v1"
+          },
+          "originalRowsSha256": "d843166d8ca8117121e56a44fd8eeed47ac92f75f3cd63ea0b466912247241d3",
+          "originalRowsPreserved": true,
+          "newAmendmentCount": 0,
+          "newAttemptLinkCount": 0,
+          "newWithdrawalCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "efc085838fcd3c85af095eed605a790b1252d178b52c8e9de9a5eaada223e424"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newAmendmentCount": 0,
+        "newAttemptLinkCount": 0,
+        "newWithdrawalCount": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "REPORT_REVISION_STARTUP_READY",
+        "classification": "COMPLETE_211",
+        "sources": {
+          "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+          "contractVersion": "211-v1"
+        },
+        "reportCount": 4,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+            "contractVersion": "211-v1"
+          },
+          "originalRowsSha256": "2e6e021a9c590b35591f505a0aba09f529839015dfbd49e4ff81a8a29541ba39",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "7172b9201f5173b63a1a1414b0a18414da150b8366762c868081d1a6d61dc72d"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "BENCH_CREDENTIAL_STARTUP_READY",
+        "classification": "COMPLETE_202",
+        "sources": {
+          "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+          "contractVersion": "202-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+            "contractVersion": "202-v1"
+          },
+          "originalRowsSha256": "a380b9ab2f9dd1ee5533c9266bbed055be9a6802f6bad10ad9462cfeeb30abf7",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "220eeb9b44b23db3d1176eda595b5fcf1ac67b1f84fe87fbc7be58e12c46e3c6"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "PREPARATION_RECORD_STARTUP_READY",
+        "classification": "COMPLETE_205",
+        "sources": {
+          "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+          "contractVersion": "205-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+            "contractVersion": "205-v1"
+          },
+          "originalRowsSha256": "10f132d31e12b6551a00a48cfd136791d49a70fc9520834df7a5972cd988c57a",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "01df5c84dc90b6c4be4e91b9d3b05e44af2bc5cc03e0ec5fec5bef6a238c19ae"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "INSTRUMENT_IMPORT_STARTUP_READY",
+        "classification": "COMPLETE_200",
+        "sources": {
+          "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+          "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+          "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+          "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+          "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+        },
+        "counts": {
+          "templates": 0,
+          "receipts": 0,
+          "draftLinks": 0
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+            "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+            "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+            "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+            "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+          },
+          "originalRowsSha256": "f2819dc6737b62f25ed0fa1e6057728a8b9612c5fa5068e0271e1f182f7cfb50",
+          "originalRowsPreserved": true,
+          "newTemplateCount": 0,
+          "newReceiptCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "dab5f1da74296153007a74edc196d1b34555bf0039a2305f2eb8f1664678d0c9"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newTemplateCount": 0,
+        "newReceiptCount": 0,
+        "backfilledCount": 0
+      }
+    ],
+    "entrypointInstallers": [
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "ALREADY_PRESENT",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_193",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_194",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_197",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_201",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_210",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_211",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_202",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_205",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_200",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      }
+    ],
+    "startupChanges": 0,
+    "ownedJobsBoundary": null,
+    "startupMemory": {
+      "peakBytes": 205164544,
+      "limitBytes": 805306368,
+      "nodeOptions": null
+    }
+  },
+  "apiChecks": {
+    "passed": 31,
+    "total": 31,
+    "failed": 0
+  },
+  "probes": [
+    {
+      "file": "postflight-roles.cjs",
+      "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-auth.cjs",
+      "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-reference.cjs",
+      "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-qc-runs.cjs",
+      "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-policy.cjs",
+      "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+      "exitCode": 0
+    },
+    {
+      "file": "readonly-smoke.cjs",
+      "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+      "exitCode": 0
+    }
+  ],
+  "readOnlyProbeChanges": 0,
+  "jobsOffStoppedSeal": {
+    "policy": "DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL",
+    "originalFiles": {
+      "": {
+        "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+        "bytes": 563322880,
+        "inode": 10878978,
+        "device": 64769,
+        "mtimeNs": 1791817417648233662,
+        "mode": 420
+      },
+      "-wal": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "inode": 10879570,
+        "device": 64769,
+        "mtimeNs": 1791817628216621206,
+        "mode": 420
+      },
+      "-shm": {
+        "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+        "bytes": 32768,
+        "inode": 10879576,
+        "device": 64769,
+        "mtimeNs": 1791817859194434582,
+        "mode": 420
+      }
+    },
+    "rawFiles": {
+      "": {
+        "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+        "bytes": 563322880,
+        "inode": 10879632,
+        "device": 64769,
+        "mtimeNs": 1791818071208853369,
+        "mode": 256
+      },
+      "-wal": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "inode": 10879633,
+        "device": 64769,
+        "mtimeNs": 1791818074621924504,
+        "mode": 256
+      },
+      "-shm": {
+        "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+        "bytes": 32768,
+        "inode": 10879634,
+        "device": 64769,
+        "mtimeNs": 1791818074782927859,
+        "mode": 256
+      }
+    },
+    "mainOnlyStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+    "logicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+    "backupSha256": "142f6e0e9c0d391efe6221bd8134e3e7f6133ecaad700060cbf7e3132a587621",
+    "countsIncludeWal": true,
+    "matchesExpected": true,
+    "protectedTableCount": 106,
+    "protectedReceiptCount": 39,
+    "backupPath": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/after-jobs-off-stopped/dev-stopped-backup.db",
+    "physical": {
+      "": {
+        "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+        "bytes": 563322880
+      },
+      "-wal": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "-shm": {
+        "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+        "bytes": 32768
+      }
+    }
+  },
+  "databaseChangesBeforeJobs": 0,
+  "jobsOnReadiness": {
+    "startedUtc": "2026-10-12T15:16:40.729540+00:00",
+    "containerStartedUtc": "2026-10-12T15:16:41.079453538Z",
+    "readyUtc": "2026-10-12T15:18:34.559114+00:00",
+    "elapsedSeconds": 113.82968340200023,
+    "deadlineSeconds": 600,
+    "attempts": 86,
+    "health": {
+      "status": "ok",
+      "version": "1.9.0",
+      "uptime": 53.975586008
+    },
+    "restartCount": 0,
+    "oomKilled": false,
+    "memoryLimitBytes": 805306368,
+    "networkMode": "bridge",
+    "publishedHostIp": "127.0.0.1",
+    "jobsEnabled": true,
+    "baseUrl": "http://127.0.0.1:32787",
+    "sharedReadinessCode": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+  },
+  "jobsOnStartup": {
+    "startupReady": [
+      {
+        "event": "WORKFLOW_STARTUP_READY",
+        "classification": "COMPLETE",
+        "inventory": {
+          "totals": {
+            "Sample": 38928,
+            "WorkItem": 90
+          },
+          "candidateCount": 0,
+          "unmappedCount": 0,
+          "blockedCount": 0,
+          "fingerprint": "f92b4677e3ce0424471df4cffefe4c4e3138a1557846094059b8af0886129386"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "RESULT_ATTEMPT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d"
+        },
+        "guards": [
+          "Result_attempt_insert_guard",
+          "Result_attempt_update_guard",
+          "WorkAttempt_result_reference_guard"
+        ],
+        "counts": {
+          "results": 19,
+          "linked": 19
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "SAMPLE_HOLD_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8"
+        },
+        "guards": [
+          "SampleHold_insert_guard",
+          "SampleHold_update_guard",
+          "SampleHold_raise_immutable",
+          "SampleHold_resolution_final",
+          "SampleHold_delete_refusal",
+          "WorkItem_cancellation_insert_guard",
+          "WorkItem_cancellation_update_guard"
+        ],
+        "counts": {
+          "workItems": 90,
+          "holds": 10
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "REFERENCE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3",
+          "oracleSha256": "7a626b66bd31a7e7305d8c1b091207f3fb26348345a431fb77b63f875d3b99b5"
+        },
+        "guards": [
+          "ReferenceMaterial_insert_guard",
+          "ReferenceMaterial_update_guard",
+          "ReferenceValue_insert_guard",
+          "ReferenceValue_immutable_guard",
+          "ReferenceValue_delete_guard",
+          "BatchQcResult_reference_insert_guard",
+          "BatchQcResult_reference_update_guard"
+        ],
+        "indexes": [
+          "ReferenceMaterial_labId_code_idx",
+          "ReferenceValue_referenceMaterialId_analysisCode_idx",
+          "ReferenceValue_current_generic",
+          "ReferenceValue_current_method"
+        ],
+        "counts": {
+          "materials": 0,
+          "values": 0,
+          "qcRows": 18,
+          "linked": 0
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_RULE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06",
+          "oracleSha256": "fe0dbc7dbb0a35bc62353de715a48b4263d492917225c7be5b6f969ec3f52819"
+        },
+        "guards": [
+          "QcRule_immutable_update",
+          "QcRule_immutable_delete",
+          "QcRule_version_guard",
+          "QcRule_scope_guard",
+          "QcRule_value_guard"
+        ],
+        "indexes": [
+          "QcRule_labId_analysisCode_methodologyId_effectiveFrom_idx",
+          "QcRule_scope_version_unique"
+        ],
+        "counts": {
+          "rules": 0
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_RUN_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+          "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369"
+        },
+        "counts": {
+          "BatchAnalyte": 6,
+          "BatchPosition": 33,
+          "BatchPositionWorkItem": 15,
+          "BatchPositionReference": 0,
+          "QcMeasurement": 24,
+          "QcEvaluation": 6,
+          "BatchDisposition": 1,
+          "BatchEvent": 28
+        },
+        "receipt": {
+          "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+          "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369",
+          "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+          "backfillCounts": {
+            "batches": 6,
+            "analytes": 6,
+            "samplePositions": 15,
+            "qcPositions": 18,
+            "historicalSnapshots": 0,
+            "currentEvaluations": 6,
+            "evaluations": 6,
+            "measurements": 24,
+            "typedRows": 18,
+            "historicalTypedRows": 0,
+            "jsonEntries": 18,
+            "typedFallbackEntries": 0,
+            "typedJsonConflicts": 12,
+            "historyAuditConflicts": 0,
+            "unresolvedMethods": 0,
+            "unresolvedAnalysts": 3,
+            "unresolvedInstruments": 6,
+            "unlinkedReferences": 6,
+            "unresolvedNumbers": 0,
+            "unresolvedDuplicateParents": 6,
+            "unresolvedRackPositions": 15,
+            "missingWorkItems": 16,
+            "malformedHistory": 0,
+            "malformedQcResults": 0,
+            "orphanSnapshots": 0,
+            "multiAttemptMembershipGroups": 0,
+            "refusals": 0,
+            "legacyDispositionMapped": {
+              "REJECT_REANALYSIS": 1,
+              "ACCEPT_OPAQUE": 1
+            },
+            "dispositionAttribution": {
+              "AUDIT_LOG": 0,
+              "BATCH_DISPOSITION_FIELD": 2,
+              "SNAPSHOT_DISPOSITION_FIELD": 0
+            },
+            "dispositionAttributionConflicts": 0,
+            "TEXTURE_ALIAS_MERGED": 0
+          },
+          "bootstrapRebuild": []
+        },
+        "bootstrapRebuild": [],
+        "guards": [
+          "Batch_legacy_qc_immutable",
+          "Batch_first_start_immutable",
+          "BatchQcResult_frozen_insert",
+          "BatchQcResult_frozen_update",
+          "BatchQcResult_frozen_delete",
+          "BatchAnalyte_insert_guard",
+          "BatchAnalyte_update_guard",
+          "BatchAnalyte_identity_immutable",
+          "BatchAnalyte_membership_insert_guard",
+          "BatchAnalyte_membership_delete_guard",
+          "BatchAnalyte_membership_update_guard",
+          "BatchPosition_insert_guard",
+          "BatchPosition_update_guard",
+          "BatchPosition_membership_insert_guard",
+          "BatchPosition_membership_update_guard",
+          "BatchPosition_membership_delete_guard",
+          "BatchPosition_identity_guard",
+          "BatchPositionWorkItem_insert_guard",
+          "BatchPositionWorkItem_immutable",
+          "BatchPositionWorkItem_run_unique_guard",
+          "BatchPositionWorkItem_membership_insert_guard",
+          "BatchPositionWorkItem_membership_delete_guard",
+          "WorkItem_batch_membership_guard",
+          "WorkItem_batch_membership_insert_guard",
+          "BatchPositionReference_insert_guard",
+          "BatchPositionReference_correction_reason_guard",
+          "BatchPositionReference_lot_guard",
+          "BatchPositionReference_supersede_guard",
+          "BatchPositionReference_delete_guard",
+          "QcMeasurement_insert_guard",
+          "QcMeasurement_historical_write_guard",
+          "QcMeasurement_replacement_guard",
+          "BatchPositionReference_replacement_guard",
+          "QcMeasurement_start_guard",
+          "QcMeasurement_supersede_guard",
+          "QcMeasurement_delete_guard",
+          "QcEvaluation_insert_guard",
+          "QcEvaluation_start_guard",
+          "QcEvaluation_frozen_criteria_guard",
+          "QcEvaluation_immutable_update",
+          "QcEvaluation_immutable_delete",
+          "BatchDisposition_immutable_update",
+          "BatchDisposition_immutable_delete",
+          "BatchEvent_immutable_update",
+          "BatchEvent_immutable_delete",
+          "BatchDisposition_insert_guard",
+          "BatchEvent_insert_guard"
+        ],
+        "indexes": [
+          "BatchAnalyte_labId_analysisCode_methodologyId_idx",
+          "BatchAnalyte_batchId_analysisCode_key",
+          "BatchPosition_batchId_position_key",
+          "BatchPositionWorkItem_workItemId_idx",
+          "BatchPositionWorkItem_positionId_analysisCode_key",
+          "BatchPositionReference_positionId_analysisCode_idx",
+          "QcMeasurement_batchId_analysisCode_idx",
+          "QcMeasurement_positionId_analysisCode_replicateNo_idx",
+          "QcEvaluation_batchId_analysisCode_version_key",
+          "BatchDisposition_batchId_analysisCode_idx",
+          "BatchEvent_batchId_at_idx",
+          "BatchAnalyte_crm_ordinal_unique",
+          "BatchPositionReference_current_unique",
+          "QcMeasurement_current_unique"
+        ],
+        "backfillCount": 0,
+        "backfillCounts": {
+          "batches": 6,
+          "analytes": 6,
+          "samplePositions": 15,
+          "qcPositions": 18,
+          "historicalSnapshots": 0,
+          "currentEvaluations": 6,
+          "evaluations": 6,
+          "measurements": 24,
+          "typedRows": 18,
+          "historicalTypedRows": 0,
+          "jsonEntries": 18,
+          "typedFallbackEntries": 0,
+          "typedJsonConflicts": 12,
+          "historyAuditConflicts": 0,
+          "unresolvedMethods": 0,
+          "unresolvedAnalysts": 3,
+          "unresolvedInstruments": 6,
+          "unlinkedReferences": 6,
+          "unresolvedNumbers": 0,
+          "unresolvedDuplicateParents": 6,
+          "unresolvedRackPositions": 15,
+          "missingWorkItems": 16,
+          "malformedHistory": 0,
+          "malformedQcResults": 0,
+          "orphanSnapshots": 0,
+          "multiAttemptMembershipGroups": 0,
+          "refusals": 0,
+          "legacyDispositionMapped": {
+            "REJECT_REANALYSIS": 1,
+            "ACCEPT_OPAQUE": 1
+          },
+          "dispositionAttribution": {
+            "AUDIT_LOG": 0,
+            "BATCH_DISPOSITION_FIELD": 2,
+            "SNAPSHOT_DISPOSITION_FIELD": 0
+          },
+          "dispositionAttributionConflicts": 0,
+          "TEXTURE_ALIAS_MERGED": 0
+        },
+        "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_GATE_SCOPE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+        "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+        "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+        "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+        "existingDispositionRows": 1,
+        "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+        "backfillCount": 0,
+        "bootstrapRebuild": [],
+        "totalChanges": 0,
+        "mode": "DRY_RUN",
+        "receipt": {
+          "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+          "existingDispositionRows": 1,
+          "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+          "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+          "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+          "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+          "backfillCount": 0,
+          "bootstrapRebuild": []
+        }
+      },
+      {
+        "event": "PT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "successor": "COMPLETE_193",
+        "sources": {
+          "migrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "successorSources": {
+          "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+          "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "bootstrapRebuild": [],
+        "backfillCount": 0,
+        "roundCount": 0,
+        "scoreOutcomeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "NCR_STARTUP_READY",
+        "classification": "COMPLETE_193",
+        "sources": {
+          "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+          "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "RESULT_EQUIPMENT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4"
+        },
+        "bootstrapRebuild": [],
+        "backfillCount": 0,
+        "resultCount": 19,
+        "originalResultSha256": "935e140956349abc9eddbee25b830c9ff041700f6565479a62f16031deb90d26",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "WORK_ATTEMPT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+          "contractVersion": "190-v1"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "WORK_REPEAT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd",
+          "contractVersion": "191-v1",
+          "predecessor": {
+            "marker": "190_work_attempt_contract",
+            "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+            "contractVersion": "190-v1",
+            "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+          },
+          "qcPredecessors": {
+            "186_normalized_qc_runs": {
+              "receiptSha256": "d461aab82504feaf91a27b4816e1d4b3abd66c147f32122752d72f4eb842be1a"
+            },
+            "187_qc_gate_scope": {
+              "receiptSha256": "ee802a39b62a9e06ab92677c3c016c461e4d1c8ca43674f077622220ef1fbd04"
+            }
+          }
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "REPORTED_VALUE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "migrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7",
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newSelectionCount": 0
+      },
+      {
+        "event": "REAGENT_LOT_STARTUP_READY",
+        "classification": "COMPLETE_194",
+        "sources": {
+          "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+        },
+        "linkCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+          },
+          "originalRowsSha256": "f79db32ba1d05b87d2e5009954d90ae2dd0f0a960cd51865e0f4b75de0bc4cbe",
+          "originalRowsPreserved": true,
+          "newLinkCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "5d737a49f3a62a5accf3c405ae938308b11b4ffe5682e71c0982951ee61715e1"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "RESULT_OVERRIDE_STARTUP_READY",
+        "classification": "COMPLETE_197",
+        "sources": {
+          "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+        },
+        "requestCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+          },
+          "originalRowsSha256": "6e0207946cd67d4109b3f6e7ff0b23fd8b545b21d2a4f81796e651923db1564b",
+          "originalRowsPreserved": true,
+          "newRequestCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "953a236c33e3b37f7a4fe173dc01f17b6d49924a2bfa432877f05b896253b83e"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "CALCULATION_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+          "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+          "referenceSha256": "57dc4b667dab93606e24673b39a12032e48f3df686b9bd3c593ac04d2fac8491"
+        },
+        "receipt": {
+          "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+          "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+          "guards": [
+            "CalcTemplate_insert_contract",
+            "CalcTemplateActivation_insert_contract",
+            "CalibrationCurve_insert_contract",
+            "CalibrationPoint_insert_contract",
+            "ResultCalculation_insert_contract",
+            "CalcTemplate_update_immutable",
+            "CalcTemplate_delete_immutable",
+            "CalcTemplateActivation_update_immutable",
+            "CalcTemplateActivation_delete_immutable",
+            "CalibrationCurve_update_immutable",
+            "CalibrationCurve_delete_immutable",
+            "CalibrationPoint_update_immutable",
+            "CalibrationPoint_delete_immutable",
+            "ResultCalculation_update_immutable",
+            "ResultCalculation_delete_immutable",
+            "CalibrationCurve_pass_coefficients_guard"
+          ],
+          "backfillCount": 0
+        },
+        "guards": [
+          "CalcTemplate_insert_contract",
+          "CalcTemplateActivation_insert_contract",
+          "CalibrationCurve_insert_contract",
+          "CalibrationPoint_insert_contract",
+          "ResultCalculation_insert_contract",
+          "CalcTemplate_update_immutable",
+          "CalcTemplate_delete_immutable",
+          "CalcTemplateActivation_update_immutable",
+          "CalcTemplateActivation_delete_immutable",
+          "CalibrationCurve_update_immutable",
+          "CalibrationCurve_delete_immutable",
+          "CalibrationPoint_update_immutable",
+          "CalibrationPoint_delete_immutable",
+          "ResultCalculation_update_immutable",
+          "ResultCalculation_delete_immutable",
+          "CalibrationCurve_pass_coefficients_guard"
+        ],
+        "counts": {
+          "CalcTemplate": 8,
+          "CalcTemplateActivation": 0,
+          "CalibrationCurve": 0,
+          "CalibrationPoint": 0,
+          "ResultCalculation": 0
+        },
+        "backfillCount": 0,
+        "unit": {
+          "classification": "ABSENT",
+          "unitCode": "pct_mass",
+          "unitInsertCount": 0,
+          "backfillCount": 0
+        },
+        "references": {
+          "classification": "COMPLETE",
+          "referenceCount": 11,
+          "installedReferenceCount": 8,
+          "missingReferenceIds": [],
+          "deferredReferences": [
+            {
+              "id": "calc-ref-walkley-black-130-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            },
+            {
+              "id": "calc-ref-walkley-black-133-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            },
+            {
+              "id": "calc-ref-kjeldahl-nitrogen-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            }
+          ],
+          "deferredReferenceCount": 3,
+          "referenceInsertCount": 0,
+          "referenceReceiptInsertCount": 0,
+          "activationInsertCount": 0,
+          "backfillCount": 0
+        },
+        "ready": true,
+        "plannedUnitInsertCount": 0,
+        "plannedReferenceInsertCount": 0,
+        "activationInsertCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "unitInsertCount": 0,
+        "referenceInsertCount": 0,
+        "referenceReceiptInsertCount": 0,
+        "schemaReceiptInsertCount": 0
+      },
+      {
+        "event": "CROSS_CHECK_STARTUP_READY",
+        "classification": "COMPLETE_201",
+        "sources": {
+          "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+          "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+          "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+        },
+        "evaluationCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+            "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+            "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+          },
+          "originalRowsSha256": "8559985c861e950fdffe53f6661a48b0e76916edcd4c3f0e51b473d827824d58",
+          "originalRowsPreserved": true,
+          "newEvaluationCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "3185df5bbb809f86c7ca8c0689135e6dbd93e227c9dbda66850256b965966a9e"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newEvaluationCount": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "AMENDMENT_STARTUP_READY",
+        "classification": "COMPLETE_210",
+        "sources": {
+          "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+          "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+          "contractVersion": "210-v1"
+        },
+        "amendmentCount": 1,
+        "amendmentAttemptLinkCount": 0,
+        "withdrawalCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+            "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+            "contractVersion": "210-v1"
+          },
+          "originalRowsSha256": "d843166d8ca8117121e56a44fd8eeed47ac92f75f3cd63ea0b466912247241d3",
+          "originalRowsPreserved": true,
+          "newAmendmentCount": 0,
+          "newAttemptLinkCount": 0,
+          "newWithdrawalCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "efc085838fcd3c85af095eed605a790b1252d178b52c8e9de9a5eaada223e424"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newAmendmentCount": 0,
+        "newAttemptLinkCount": 0,
+        "newWithdrawalCount": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "REPORT_REVISION_STARTUP_READY",
+        "classification": "COMPLETE_211",
+        "sources": {
+          "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+          "contractVersion": "211-v1"
+        },
+        "reportCount": 4,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+            "contractVersion": "211-v1"
+          },
+          "originalRowsSha256": "2e6e021a9c590b35591f505a0aba09f529839015dfbd49e4ff81a8a29541ba39",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "7172b9201f5173b63a1a1414b0a18414da150b8366762c868081d1a6d61dc72d"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "BENCH_CREDENTIAL_STARTUP_READY",
+        "classification": "COMPLETE_202",
+        "sources": {
+          "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+          "contractVersion": "202-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+            "contractVersion": "202-v1"
+          },
+          "originalRowsSha256": "a380b9ab2f9dd1ee5533c9266bbed055be9a6802f6bad10ad9462cfeeb30abf7",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "220eeb9b44b23db3d1176eda595b5fcf1ac67b1f84fe87fbc7be58e12c46e3c6"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "PREPARATION_RECORD_STARTUP_READY",
+        "classification": "COMPLETE_205",
+        "sources": {
+          "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+          "contractVersion": "205-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+            "contractVersion": "205-v1"
+          },
+          "originalRowsSha256": "10f132d31e12b6551a00a48cfd136791d49a70fc9520834df7a5972cd988c57a",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "01df5c84dc90b6c4be4e91b9d3b05e44af2bc5cc03e0ec5fec5bef6a238c19ae"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "INSTRUMENT_IMPORT_STARTUP_READY",
+        "classification": "COMPLETE_200",
+        "sources": {
+          "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+          "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+          "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+          "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+          "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+        },
+        "counts": {
+          "templates": 0,
+          "receipts": 0,
+          "draftLinks": 0
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+            "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+            "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+            "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+            "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+          },
+          "originalRowsSha256": "f2819dc6737b62f25ed0fa1e6057728a8b9612c5fa5068e0271e1f182f7cfb50",
+          "originalRowsPreserved": true,
+          "newTemplateCount": 0,
+          "newReceiptCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "dab5f1da74296153007a74edc196d1b34555bf0039a2305f2eb8f1664678d0c9"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newTemplateCount": 0,
+        "newReceiptCount": 0,
+        "backfilledCount": 0
+      }
+    ],
+    "entrypointInstallers": [
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "ALREADY_PRESENT",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_193",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_194",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_197",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_201",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_210",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_211",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_202",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_205",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_200",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      }
+    ],
+    "startupChanges": 0,
+    "ownedJobsBoundary": {
+      "policy": "ISOLATED_NATURAL_INTAKE_WITH_SEALED_FIRST_SECOND_FULL_PRESERVATION",
+      "dataVersionsObserved": [
+        2
+      ],
+      "fullStateZeroClaimed": false
+    },
+    "startupMemory": {
+      "peakBytes": 202526720,
+      "limitBytes": 805306368,
+      "nodeOptions": null
+    }
+  },
+  "peakBytes": 284602368,
+  "healthSamples": [
+    {
+      "utc": "2026-10-12T15:18:35.536764+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 204115968,
+      "minimumFreeBytes": 75799347200
+    },
+    {
+      "utc": "2026-10-12T15:18:46.238725+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75799166976
+    },
+    {
+      "utc": "2026-10-12T15:20:16.205725+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75235344384
+    },
+    {
+      "utc": "2026-10-12T15:20:46.943212+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75235336192
+    },
+    {
+      "utc": "2026-10-12T15:21:17.717770+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75235180544
+    },
+    {
+      "utc": "2026-10-12T15:21:48.542794+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75234979840
+    },
+    {
+      "utc": "2026-10-12T15:22:19.261496+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75234791424
+    },
+    {
+      "utc": "2026-10-12T15:22:50.000552+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75234570240
+    },
+    {
+      "utc": "2026-10-12T15:23:20.811136+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75234357248
+    },
+    {
+      "utc": "2026-10-12T15:23:51.495136+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75234156544
+    },
+    {
+      "utc": "2026-10-12T15:24:22.173516+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75234004992
+    },
+    {
+      "utc": "2026-10-12T15:24:52.894853+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75233832960
+    },
+    {
+      "utc": "2026-10-12T15:25:23.597914+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75233673216
+    },
+    {
+      "utc": "2026-10-12T15:25:54.395861+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75233492992
+    },
+    {
+      "utc": "2026-10-12T15:26:25.190642+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75233345536
+    },
+    {
+      "utc": "2026-10-12T15:26:55.946694+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75233157120
+    },
+    {
+      "utc": "2026-10-12T15:27:26.674865+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75232997376
+    },
+    {
+      "utc": "2026-10-12T15:27:57.443331+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75232808960
+    },
+    {
+      "utc": "2026-10-12T15:28:28.298797+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75232632832
+    },
+    {
+      "utc": "2026-10-12T15:28:59.453738+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75232473088
+    },
+    {
+      "utc": "2026-10-12T15:29:30.429571+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75232813056
+    },
+    {
+      "utc": "2026-10-12T15:30:01.304698+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75232653312
+    },
+    {
+      "utc": "2026-10-12T15:30:32.211566+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75232497664
+    },
+    {
+      "utc": "2026-10-12T15:31:03.018113+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75232325632
+    },
+    {
+      "utc": "2026-10-12T15:31:33.792272+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75232104448
+    },
+    {
+      "utc": "2026-10-12T15:32:04.484746+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75231944704
+    },
+    {
+      "utc": "2026-10-12T15:32:35.285814+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75231797248
+    },
+    {
+      "utc": "2026-10-12T15:33:06.042262+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75231625216
+    },
+    {
+      "utc": "2026-10-12T15:33:36.763071+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75231444992
+    },
+    {
+      "utc": "2026-10-12T15:34:07.531448+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75231252480
+    },
+    {
+      "utc": "2026-10-12T15:34:38.336562+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75231027200
+    },
+    {
+      "utc": "2026-10-12T15:35:09.090169+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75230842880
+    },
+    {
+      "utc": "2026-10-12T15:35:39.866357+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75230654464
+    },
+    {
+      "utc": "2026-10-12T15:35:42.323183+00:00",
+      "healthy": true,
+      "restartCount": 0,
+      "peakBytes": 284602368,
+      "minimumFreeBytes": 75230519296
+    }
+  ],
+  "observedSchedulerRefusals": [
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:18:42.257082632Z",
+      "triggerUtc": "2026-10-12T15:18:42.247910794Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:18:42.247910794Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:18:42.257082632Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2786,
+      "stderrLineIndex": 3,
+      "signedDeltaSeconds": 0.009171838
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:18:42.261307425Z",
+      "triggerUtc": "2026-10-12T15:18:42.257143278Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:18:42.257143278Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:18:42.261307425Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2788,
+      "stderrLineIndex": 4,
+      "signedDeltaSeconds": 0.004164147
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:18:42.265274874Z",
+      "triggerUtc": "2026-10-12T15:18:42.261538615Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:18:42.261538615Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:18:42.265274874Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2790,
+      "stderrLineIndex": 5,
+      "signedDeltaSeconds": 0.003736259
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:18:42.269505628Z",
+      "triggerUtc": "2026-10-12T15:18:42.265468670Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:18:42.265468670Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:18:42.269505628Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2792,
+      "stderrLineIndex": 6,
+      "signedDeltaSeconds": 0.004036958
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:19:30.869450771Z",
+      "triggerUtc": "2026-10-12T15:19:30.861080399Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:19:30.861080399Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:19:30.869450771Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2794,
+      "stderrLineIndex": 7,
+      "signedDeltaSeconds": 0.008370372
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:19:30.874029775Z",
+      "triggerUtc": "2026-10-12T15:19:30.869567090Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:19:30.869567090Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:19:30.874029775Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2796,
+      "stderrLineIndex": 8,
+      "signedDeltaSeconds": 0.004462685
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:19:30.880951542Z",
+      "triggerUtc": "2026-10-12T15:19:30.874084491Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:19:30.874084491Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:19:30.880951542Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2798,
+      "stderrLineIndex": 9,
+      "signedDeltaSeconds": 0.006867051
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:19:30.885690058Z",
+      "triggerUtc": "2026-10-12T15:19:30.881002045Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:19:30.881002045Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:19:30.885690058Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2800,
+      "stderrLineIndex": 10,
+      "signedDeltaSeconds": 0.004688013
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:20:30.871089083Z",
+      "triggerUtc": "2026-10-12T15:20:30.859858479Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:20:30.859858479Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:20:30.871089083Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2802,
+      "stderrLineIndex": 11,
+      "signedDeltaSeconds": 0.011230604
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:20:30.877066268Z",
+      "triggerUtc": "2026-10-12T15:20:30.871312691Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:20:30.871312691Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:20:30.877066268Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2804,
+      "stderrLineIndex": 12,
+      "signedDeltaSeconds": 0.005753577
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:20:30.886436140Z",
+      "triggerUtc": "2026-10-12T15:20:30.877268294Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:20:30.877268294Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:20:30.886436140Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2806,
+      "stderrLineIndex": 13,
+      "signedDeltaSeconds": 0.009167846
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:20:30.891405008Z",
+      "triggerUtc": "2026-10-12T15:20:30.886672174Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:20:30.886672174Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:20:30.891405008Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2808,
+      "stderrLineIndex": 14,
+      "signedDeltaSeconds": 0.004732834
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:21:30.872935036Z",
+      "triggerUtc": "2026-10-12T15:21:30.862359469Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:21:30.862359469Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:21:30.872935036Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2810,
+      "stderrLineIndex": 15,
+      "signedDeltaSeconds": 0.010575567
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:21:30.882404452Z",
+      "triggerUtc": "2026-10-12T15:21:30.872997420Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:21:30.872997420Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:21:30.882404452Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2812,
+      "stderrLineIndex": 16,
+      "signedDeltaSeconds": 0.009407032
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:21:30.888554823Z",
+      "triggerUtc": "2026-10-12T15:21:30.882536587Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:21:30.882536587Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:21:30.888554823Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2814,
+      "stderrLineIndex": 17,
+      "signedDeltaSeconds": 0.006018236
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:21:30.893367620Z",
+      "triggerUtc": "2026-10-12T15:21:30.888646579Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:21:30.888646579Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:21:30.893367620Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2816,
+      "stderrLineIndex": 18,
+      "signedDeltaSeconds": 0.004721041
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:22:30.872826062Z",
+      "triggerUtc": "2026-10-12T15:22:30.865013525Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:22:30.865013525Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:22:30.872826062Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2818,
+      "stderrLineIndex": 19,
+      "signedDeltaSeconds": 0.007812537
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:22:30.883051526Z",
+      "triggerUtc": "2026-10-12T15:22:30.872975559Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:22:30.872975559Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:22:30.883051526Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2820,
+      "stderrLineIndex": 20,
+      "signedDeltaSeconds": 0.010075967
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:22:30.887230613Z",
+      "triggerUtc": "2026-10-12T15:22:30.883215169Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:22:30.883215169Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:22:30.887230613Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2822,
+      "stderrLineIndex": 21,
+      "signedDeltaSeconds": 0.004015444
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:22:30.891319867Z",
+      "triggerUtc": "2026-10-12T15:22:30.887491247Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:22:30.887491247Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:22:30.891319867Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2824,
+      "stderrLineIndex": 22,
+      "signedDeltaSeconds": 0.00382862
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:23:30.884571414Z",
+      "triggerUtc": "2026-10-12T15:23:30.869596428Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:23:30.869596428Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:23:30.884571414Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2826,
+      "stderrLineIndex": 23,
+      "signedDeltaSeconds": 0.014974986
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:23:30.891455134Z",
+      "triggerUtc": "2026-10-12T15:23:30.884930575Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:23:30.884930575Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:23:30.891455134Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2828,
+      "stderrLineIndex": 24,
+      "signedDeltaSeconds": 0.006524559
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:23:30.896700537Z",
+      "triggerUtc": "2026-10-12T15:23:30.891768947Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:23:30.891768947Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:23:30.896700537Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2830,
+      "stderrLineIndex": 25,
+      "signedDeltaSeconds": 0.00493159
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:23:30.902064887Z",
+      "triggerUtc": "2026-10-12T15:23:30.896906301Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:23:30.896906301Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:23:30.902064887Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2832,
+      "stderrLineIndex": 26,
+      "signedDeltaSeconds": 0.005158586
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:24:30.886879286Z",
+      "triggerUtc": "2026-10-12T15:24:30.872655170Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:24:30.872655170Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:24:30.886879286Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2834,
+      "stderrLineIndex": 27,
+      "signedDeltaSeconds": 0.014224116
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:24:30.894230439Z",
+      "triggerUtc": "2026-10-12T15:24:30.886879274Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:24:30.886879274Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:24:30.894230439Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2836,
+      "stderrLineIndex": 28,
+      "signedDeltaSeconds": 0.007351165
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:24:30.898015028Z",
+      "triggerUtc": "2026-10-12T15:24:30.894191654Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:24:30.894191654Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:24:30.898015028Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2838,
+      "stderrLineIndex": 29,
+      "signedDeltaSeconds": 0.003823374
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:24:30.901592658Z",
+      "triggerUtc": "2026-10-12T15:24:30.897975219Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:24:30.897975219Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:24:30.901592658Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2840,
+      "stderrLineIndex": 30,
+      "signedDeltaSeconds": 0.003617439
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:25:30.895665045Z",
+      "triggerUtc": "2026-10-12T15:25:30.877836087Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:25:30.877836087Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:25:30.895665045Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2842,
+      "stderrLineIndex": 31,
+      "signedDeltaSeconds": 0.017828958
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:25:30.900800406Z",
+      "triggerUtc": "2026-10-12T15:25:30.895704406Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:25:30.895704406Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:25:30.900800406Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2844,
+      "stderrLineIndex": 32,
+      "signedDeltaSeconds": 0.005096
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:25:30.905630742Z",
+      "triggerUtc": "2026-10-12T15:25:30.900844707Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:25:30.900844707Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:25:30.905630742Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2846,
+      "stderrLineIndex": 33,
+      "signedDeltaSeconds": 0.004786035
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:25:30.910270312Z",
+      "triggerUtc": "2026-10-12T15:25:30.905696157Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:25:30.905696157Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:25:30.910270312Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2848,
+      "stderrLineIndex": 34,
+      "signedDeltaSeconds": 0.004574155
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:26:30.891906214Z",
+      "triggerUtc": "2026-10-12T15:26:30.878716279Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:26:30.878716279Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:26:30.891906214Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2850,
+      "stderrLineIndex": 35,
+      "signedDeltaSeconds": 0.013189935
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:26:30.895764917Z",
+      "triggerUtc": "2026-10-12T15:26:30.891971373Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:26:30.891971373Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:26:30.895764917Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2852,
+      "stderrLineIndex": 36,
+      "signedDeltaSeconds": 0.003793544
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:26:30.899497699Z",
+      "triggerUtc": "2026-10-12T15:26:30.895832103Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:26:30.895832103Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:26:30.899497699Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2854,
+      "stderrLineIndex": 37,
+      "signedDeltaSeconds": 0.003665596
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:26:30.903043751Z",
+      "triggerUtc": "2026-10-12T15:26:30.899547146Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:26:30.899547146Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:26:30.903043751Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2856,
+      "stderrLineIndex": 38,
+      "signedDeltaSeconds": 0.003496605
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:27:30.892498485Z",
+      "triggerUtc": "2026-10-12T15:27:30.879876005Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:27:30.879876005Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:27:30.892498485Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2858,
+      "stderrLineIndex": 39,
+      "signedDeltaSeconds": 0.01262248
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:27:30.897104356Z",
+      "triggerUtc": "2026-10-12T15:27:30.892556834Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:27:30.892556834Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:27:30.897104356Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2860,
+      "stderrLineIndex": 40,
+      "signedDeltaSeconds": 0.004547522
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:27:30.901680236Z",
+      "triggerUtc": "2026-10-12T15:27:30.897174719Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:27:30.897174719Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:27:30.901680236Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2862,
+      "stderrLineIndex": 41,
+      "signedDeltaSeconds": 0.004505517
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:27:30.905990337Z",
+      "triggerUtc": "2026-10-12T15:27:30.901790235Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:27:30.901790235Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:27:30.905990337Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2864,
+      "stderrLineIndex": 42,
+      "signedDeltaSeconds": 0.004200102
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:28:30.902678709Z",
+      "triggerUtc": "2026-10-12T15:28:30.889519572Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:28:30.889519572Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:28:30.902678709Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2866,
+      "stderrLineIndex": 43,
+      "signedDeltaSeconds": 0.013159137
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:28:30.907045183Z",
+      "triggerUtc": "2026-10-12T15:28:30.902631041Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:28:30.902631041Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:28:30.907045183Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2868,
+      "stderrLineIndex": 44,
+      "signedDeltaSeconds": 0.004414142
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:28:30.911045160Z",
+      "triggerUtc": "2026-10-12T15:28:30.907110571Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:28:30.907110571Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:28:30.911045160Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2870,
+      "stderrLineIndex": 45,
+      "signedDeltaSeconds": 0.003934589
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:28:30.914613668Z",
+      "triggerUtc": "2026-10-12T15:28:30.911082125Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:28:30.911082125Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:28:30.914613668Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2872,
+      "stderrLineIndex": 46,
+      "signedDeltaSeconds": 0.003531543
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:29:30.896669574Z",
+      "triggerUtc": "2026-10-12T15:29:30.883867120Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:29:30.883867120Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:29:30.896669574Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2874,
+      "stderrLineIndex": 47,
+      "signedDeltaSeconds": 0.012802454
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:29:30.900857571Z",
+      "triggerUtc": "2026-10-12T15:29:30.896776463Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:29:30.896776463Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:29:30.900857571Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2876,
+      "stderrLineIndex": 48,
+      "signedDeltaSeconds": 0.004081108
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:29:30.904753989Z",
+      "triggerUtc": "2026-10-12T15:29:30.900925852Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:29:30.900925852Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:29:30.904753989Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2878,
+      "stderrLineIndex": 49,
+      "signedDeltaSeconds": 0.003828137
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:29:30.908334802Z",
+      "triggerUtc": "2026-10-12T15:29:30.904728706Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:29:30.904728706Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:29:30.908334802Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2880,
+      "stderrLineIndex": 50,
+      "signedDeltaSeconds": 0.003606096
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:30:30.893684557Z",
+      "triggerUtc": "2026-10-12T15:30:30.885275351Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:30:30.885275351Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:30:30.893684557Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2882,
+      "stderrLineIndex": 51,
+      "signedDeltaSeconds": 0.008409206
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:30:30.903028013Z",
+      "triggerUtc": "2026-10-12T15:30:30.893946807Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:30:30.893946807Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:30:30.903028013Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2884,
+      "stderrLineIndex": 52,
+      "signedDeltaSeconds": 0.009081206
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:30:30.907346137Z",
+      "triggerUtc": "2026-10-12T15:30:30.903170479Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:30:30.903170479Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:30:30.907346137Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2886,
+      "stderrLineIndex": 53,
+      "signedDeltaSeconds": 0.004175658
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:30:30.911625480Z",
+      "triggerUtc": "2026-10-12T15:30:30.908089167Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:30:30.908089167Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:30:30.911625480Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2888,
+      "stderrLineIndex": 54,
+      "signedDeltaSeconds": 0.003536313
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:31:30.904844827Z",
+      "triggerUtc": "2026-10-12T15:31:30.891912365Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:31:30.891912365Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:31:30.904844827Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2890,
+      "stderrLineIndex": 55,
+      "signedDeltaSeconds": 0.012932462
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:31:30.912825275Z",
+      "triggerUtc": "2026-10-12T15:31:30.905001755Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:31:30.905001755Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:31:30.912825275Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2892,
+      "stderrLineIndex": 56,
+      "signedDeltaSeconds": 0.00782352
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:31:30.918838030Z",
+      "triggerUtc": "2026-10-12T15:31:30.912824611Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:31:30.912824611Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:31:30.918838030Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2894,
+      "stderrLineIndex": 57,
+      "signedDeltaSeconds": 0.006013419
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:31:30.922754873Z",
+      "triggerUtc": "2026-10-12T15:31:30.918984536Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:31:30.918984536Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:31:30.922754873Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2896,
+      "stderrLineIndex": 58,
+      "signedDeltaSeconds": 0.003770337
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:32:30.911000681Z",
+      "triggerUtc": "2026-10-12T15:32:30.900801221Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:32:30.900801221Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:32:30.911000681Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2898,
+      "stderrLineIndex": 59,
+      "signedDeltaSeconds": 0.01019946
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:32:30.919363224Z",
+      "triggerUtc": "2026-10-12T15:32:30.910994024Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:32:30.910994024Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:32:30.919363224Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2900,
+      "stderrLineIndex": 60,
+      "signedDeltaSeconds": 0.0083692
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:32:30.923650261Z",
+      "triggerUtc": "2026-10-12T15:32:30.919638979Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:32:30.919638979Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:32:30.923650261Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2902,
+      "stderrLineIndex": 61,
+      "signedDeltaSeconds": 0.004011282
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:32:30.927982754Z",
+      "triggerUtc": "2026-10-12T15:32:30.923660048Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:32:30.923660048Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:32:30.927982754Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2904,
+      "stderrLineIndex": 62,
+      "signedDeltaSeconds": 0.004322706
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:33:30.909230810Z",
+      "triggerUtc": "2026-10-12T15:33:30.899742422Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:33:30.899742422Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:33:30.909230810Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2906,
+      "stderrLineIndex": 63,
+      "signedDeltaSeconds": 0.009488388
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:33:30.917598725Z",
+      "triggerUtc": "2026-10-12T15:33:30.909227155Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:33:30.909227155Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:33:30.917598725Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2908,
+      "stderrLineIndex": 64,
+      "signedDeltaSeconds": 0.00837157
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:33:30.921562387Z",
+      "triggerUtc": "2026-10-12T15:33:30.917713008Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:33:30.917713008Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:33:30.921562387Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2910,
+      "stderrLineIndex": 65,
+      "signedDeltaSeconds": 0.003849379
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:33:30.926367541Z",
+      "triggerUtc": "2026-10-12T15:33:30.921498490Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:33:30.921498490Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:33:30.926367541Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2912,
+      "stderrLineIndex": 66,
+      "signedDeltaSeconds": 0.004869051
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:34:31.565963571Z",
+      "triggerUtc": "2026-10-12T15:34:31.561509535Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:34:31.561509535Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:34:31.565963571Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2977,
+      "stderrLineIndex": 67,
+      "signedDeltaSeconds": 0.004454036
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:34:31.569245100Z",
+      "triggerUtc": "2026-10-12T15:34:31.565918453Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:34:31.565918453Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:34:31.569245100Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2979,
+      "stderrLineIndex": 68,
+      "signedDeltaSeconds": 0.003326647
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:34:31.572645606Z",
+      "triggerUtc": "2026-10-12T15:34:31.569234669Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:34:31.569234669Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:34:31.572645606Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2981,
+      "stderrLineIndex": 69,
+      "signedDeltaSeconds": 0.003410937
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:34:31.576825042Z",
+      "triggerUtc": "2026-10-12T15:34:31.572620270Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:34:31.572620270Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:34:31.576825042Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2983,
+      "stderrLineIndex": 70,
+      "signedDeltaSeconds": 0.004204772
+    },
+    {
+      "configId": "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+      "labId": "MOZ-LAB1",
+      "projectCode": "MOZL",
+      "message": "[KOBO] Configured project 'MOZL' does not exist in the database.",
+      "utc": "2026-10-12T15:35:30.925987041Z",
+      "triggerUtc": "2026-10-12T15:35:30.917980849Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "triggerRawLine": "2026-10-12T15:35:30.917980849Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: MOZ-LAB1, Project: MOZL",
+      "errorRawLine": "2026-10-12T15:35:30.925987041Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.",
+      "stdoutLineIndex": 2985,
+      "stderrLineIndex": 71,
+      "signedDeltaSeconds": 0.008006192
+    },
+    {
+      "configId": "f24b4f7a-1da7-4320-831e-b9105647f106",
+      "labId": "TUR",
+      "projectCode": "TEST-TURSAP",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:35:30.932646814Z",
+      "triggerUtc": "2026-10-12T15:35:30.925921915Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:35:30.925921915Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST-TURSAP",
+      "errorRawLine": "2026-10-12T15:35:30.932646814Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2987,
+      "stderrLineIndex": 72,
+      "signedDeltaSeconds": 0.006724899
+    },
+    {
+      "configId": "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+      "labId": "TUR",
+      "projectCode": "TEST3",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:35:30.940456726Z",
+      "triggerUtc": "2026-10-12T15:35:30.932597358Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:35:30.932597358Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TEST3",
+      "errorRawLine": "2026-10-12T15:35:30.940456726Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2989,
+      "stderrLineIndex": 73,
+      "signedDeltaSeconds": 0.007859368
+    },
+    {
+      "configId": "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+      "labId": "TUR",
+      "projectCode": "TURSAP8",
+      "message": "LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "utc": "2026-10-12T15:35:30.944385427Z",
+      "triggerUtc": "2026-10-12T15:35:30.940356473Z",
+      "text": "[KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "triggerRawLine": "2026-10-12T15:35:30.940356473Z [KOBO_SCHEDULER] Triggering scheduled sync for Lab: TUR, Project: TURSAP8",
+      "errorRawLine": "2026-10-12T15:35:30.944385427Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.",
+      "stdoutLineIndex": 2991,
+      "stderrLineIndex": 74,
+      "signedDeltaSeconds": 0.004028954
+    }
+  ],
+  "schedulerRefusalLabCounts": {
+    "MOZ-LAB1": 18,
+    "TUR": 54
+  },
+  "schedulerRefusalConfigCountsDerivedFromTriggers": true,
+  "schedulerRefusalCounts": {
+    "ec5a5a67-3f5a-4682-88df-edb0e07e6485": 18,
+    "f24b4f7a-1da7-4320-831e-b9105647f106": 18,
+    "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d": 18,
+    "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0": 18
+  },
+  "firstScheduledSync": {
+    "utc": "2026-10-12T15:18:41.747944016Z",
+    "epochSeconds": 1791818321.747944,
+    "labId": "ZMB-LAB1",
+    "newSamples": 0,
+    "skipped": 0
+  },
+  "firstUpstreamSha256": "7564f16f285b3dff632cf80282ba41bd27ae227eefe8d6080192b02c99a33fe3",
+  "firstDatabaseSha256": "be37493e1f8c9d98e1996067884a0b207dc49a395311bf60d44085e7cb7e3db0",
+  "firstPreservationSha256": "160eba70a768f41dec84c949691a55c1e925586f1c0f9f9863143d3db9cd9bed",
+  "firstIntakeSummary": {
+    "newSamples": 0,
+    "skipped": 0,
+    "distinctSubmissionCount": 0,
+    "newSampleCount": 0,
+    "depthSplit": {}
+  },
+  "priorFetchedIds": {
+    "534aec5a-2b3a-49f1-9136-507f624fbf6b": [],
+    "78cd0dc8-f04c-4bcf-9451-bc9507ee0623": [],
+    "897c1fb0-d83c-40cd-b513-b3e6e6b78172": [],
+    "6e60eebe-5d8d-4e13-8037-efeb8041b24c": [],
+    "38744747-1d3f-4f4a-8523-6f251ecd1fba": [],
+    "c630d7b4-5d44-4826-94e5-5851abbd2a46": [],
+    "25731264-f02a-4172-8ef1-75512b7607a5": [],
+    "ec5a5a67-3f5a-4682-88df-edb0e07e6485": [
+      "37613",
+      "37614",
+      "37615",
+      "37616",
+      "37618",
+      "37619"
+    ],
+    "f24b4f7a-1da7-4320-831e-b9105647f106": [],
+    "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d": [],
+    "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0": []
+  },
+  "secondScheduledSync": {
+    "utc": "2026-10-12T15:34:31.249133774Z",
+    "epochSeconds": 1791819271.249133,
+    "labId": "ZMB-LAB1",
+    "newSamples": 0,
+    "skipped": 0
+  },
+  "observedThroughUtc": "2026-10-12T15:35:42.489760+00:00",
+  "healthySoakSeconds": 1027.930645942688,
+  "schedulerStdoutSha256": "6e13c4c953e6c31d6783af5bc03b27ff923e78e42cc747cbceb5e333081a1109",
+  "schedulerStderrSha256": "8e8e96edfc3c00b5badb4c3b302c3b050539ce26ea14a2bc7dd75296fd586059",
+  "commitVersionsObserved": [
+    2,
+    3,
+    4
+  ],
+  "ownedWriterStopped": true,
+  "finalStoppedSeal": {
+    "policy": "DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL",
+    "originalFiles": {
+      "": {
+        "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+        "bytes": 563322880,
+        "inode": 10878978,
+        "device": 64769,
+        "mtimeNs": 1791817417648233662,
+        "mode": 420
+      },
+      "-wal": {
+        "sha256": "346ddf59e7a84dd1b36cc3b86d974a03001afc6b2c3721b8863ad55cc949bf69",
+        "bytes": 57712,
+        "inode": 10879570,
+        "device": 64769,
+        "mtimeNs": 1791819271558869816,
+        "mode": 420
+      },
+      "-shm": {
+        "sha256": "319408746f37932088f44c0b3887a047753f7199b1f61f866faeafa09d8cfe50",
+        "bytes": 32768,
+        "inode": 10879576,
+        "device": 64769,
+        "mtimeNs": 1791819271059859417,
+        "mode": 420
+      }
+    },
+    "rawFiles": {
+      "": {
+        "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+        "bytes": 563322880,
+        "inode": 11141123,
+        "device": 64769,
+        "mtimeNs": 1791819383686206523,
+        "mode": 256
+      },
+      "-wal": {
+        "sha256": "346ddf59e7a84dd1b36cc3b86d974a03001afc6b2c3721b8863ad55cc949bf69",
+        "bytes": 57712,
+        "inode": 11141124,
+        "device": 64769,
+        "mtimeNs": 1791819387770291636,
+        "mode": 256
+      },
+      "-shm": {
+        "sha256": "319408746f37932088f44c0b3887a047753f7199b1f61f866faeafa09d8cfe50",
+        "bytes": 32768,
+        "inode": 11141125,
+        "device": 64769,
+        "mtimeNs": 1791819387941295200,
+        "mode": 256
+      }
+    },
+    "mainOnlyStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+    "logicalStateSha256": "7258fa87922cea5231b45dbf4c07966ba74222fae3433d55ce4dabd02c371692",
+    "backupSha256": "c60e3ce6a1964f5c7c0632ddbf9ba87a6e16a15f82e4a961968bce64908514fb",
+    "countsIncludeWal": true,
+    "matchesExpected": false,
+    "protectedTableCount": 106,
+    "protectedReceiptCount": 39,
+    "backupPath": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/after-second-stopped/dev-stopped-backup.db",
+    "physical": {
+      "": {
+        "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+        "bytes": 563322880
+      },
+      "-wal": {
+        "sha256": "346ddf59e7a84dd1b36cc3b86d974a03001afc6b2c3721b8863ad55cc949bf69",
+        "bytes": 57712
+      },
+      "-shm": {
+        "sha256": "319408746f37932088f44c0b3887a047753f7199b1f61f866faeafa09d8cfe50",
+        "bytes": 32768
+      }
+    }
+  },
+  "secondUpstreamSha256": "fa49b06a19b1f948eb6f815108b2fc6d1e149339157d61451fc2a6dadb2ee281",
+  "secondPreservationSha256": "b8b51eb044cabb4c9bbe4ce644c4d0531b83a58dc4863b804b493e67c78d1bac",
+  "fullPreservationSha256": "7c74bec1c5a31ab740a9cb776c9cc56de27ae3c4bf70bc529d72ba84bb0fc43d",
+  "secondIntakeSummary": {
+    "newSamples": 0,
+    "skipped": 0,
+    "distinctSubmissionCount": 0,
+    "newSampleCount": 0,
+    "depthSplit": {}
+  },
+  "secondGenuinelyNewSubmissionIds": [],
+  "protectedTableCount": 106,
+  "protectedReceiptCount": 39,
+  "originalProtectedReceiptCount": 38,
+  "originalProtectedTableCount": 104,
+  "allOriginalRowsAndSchemaPreserved": true,
+  "memoryLimitBytes": 805306368,
+  "nodeOptions": "",
+  "retainedAcceptance": {
+    "mode": "READ_ONLY_RETAINED_EVIDENCE",
+    "totalChanges": 0,
+    "eventId": "0c4a247e-339a-4adc-9ba2-061829eb2fce",
+    "eventSha256": "d14c99ff5643a8fe31abef867604ffff2645f63c799e58c62c736937a665dc45",
+    "attemptStatus": "ACCEPTED",
+    "reviewDecisionAttemptId": null,
+    "reportStatus": "PUBLISHED"
+  },
+  "measuredTimingHeadroom": {
+    "policy": "MEASURED_STAGES_ONLY_NOT_TOTAL_PRODUCTION_WALL_TIME",
+    "stageElapsedSeconds": {
+      "import-dry": 7.368492781999521,
+      "import-apply": 74.2072544519906,
+      "import-repeat": 6.068385352991754,
+      "jobs-off-readiness": 113.49635759399098,
+      "jobs-on-readiness": 113.82968340200023
+    },
+    "stageTimeoutHeadroomSeconds": {
+      "import-dry": 592.6315072180005,
+      "import-apply": 525.7927455480094,
+      "import-repeat": 593.9316146470082,
+      "jobs-off-readiness": 486.503642406009,
+      "jobs-on-readiness": 486.1703165979998
+    },
+    "productionHealthyObservationSeconds": 660,
+    "additionalMeasuredOperationSeconds": {
+      "repeat-stopped-seal": 194.50089063699124
+    },
+    "measuredStagesPlusObservationSeconds": 1169.4710642199643,
+    "unitLimitSeconds": 5400,
+    "remainingForUnmeasuredOperationsSeconds": 4230.528935780036,
+    "unmeasuredOperations": [
+      "quiesce",
+      "backup",
+      "other seals",
+      "API probes",
+      "ingress",
+      "coordination"
+    ]
+  },
+  "diskAllocationObservationsSha256": "2dcfc10bdd29fd3de6b161ae686f3e36d66e389eae559eeaa4db3a1dec57df1a",
+  "completedUtc": "2026-10-12T15:40:30.271703+00:00"
+}
