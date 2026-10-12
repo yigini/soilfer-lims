@@ -1,0 +1,6 @@
+{
+  "main": "51f6798806f630773786a08432290c1b21a841da",
+  "prismaVersion": "7.10.0",
+  "operation": "migrate diff from-empty to explicit captured schema; schema only, no database connection or row writes",
+  "mainSchemaSha": "2ff44fcd5afaff7e2073f9f3c46bf2c33f7912c30822ca3c0965b7647798ca10"
+}

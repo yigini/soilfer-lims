@@ -1,0 +1,13 @@
+Error: Jest: Got error running globalSetup - C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\globalSetup.js, reason: Report revision DDL digest differs.
+    at mismatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportRevisionMigrationSource.js:8:52)
+    at loadReportRevisionMigrationSource (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportRevisionMigrationSource.js:22:74)
+    at Object.installReportRevisions (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\scripts\install_report_revisions.js:111:14)
+    at globalSetup (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\globalSetup.js:149:52)
+    at async C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:3166:11
+    at async waitForPromiseWithCleanup (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\transform\build\index.js:141:5)
+    at async ScriptTransformer.requireAndTranspileModule (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\transform\build\index.js:625:16)
+    at async runGlobalHook (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:3162:9)
+    at async runJest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:3429:5)
+    at async _run10000 (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:1543:5)
+    at async runCLI (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:1444:3)
+    at async Object.run (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\jest-cli\build\index.js:656:9)

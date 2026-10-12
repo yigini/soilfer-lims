@@ -1,0 +1,523 @@
+PASS tests/contracts/audit_1_2_guard_installer.test.js (34.152 s)
+  √ fresh Prisma schema installs the exact guards and marker; repeat starts write nothing (2115 ms)
+  √ actual pre-179 child installer preserves seeded historical science and the old schema (627 ms)
+  √ unreviewed UNMAPPED_SAMPLE refuses the actual child with unchanged bytes and no returned handle (479 ms)
+  √ unreviewed COLLECTED refuses the actual child with unchanged bytes and no returned handle (498 ms)
+  √ the real reviewed legacy upgrade preserves science, refuses interrupted startup, then maps and starts without writes (2564 ms)
+  √ a real timestamp race invalidates the review and the actual installer refuses without writes or a returned file (1835 ms)
+  √ a reviewed fingerprint cannot approve an unmapped status (1396 ms)
+  √ a blocked legacy marker refuses startup even with a reviewed fingerprint and preserves all bytes (1488 ms)
+  √ malformed or unsupported reviewed fixture options refuse before creating any file (630 ms)
+  √ direct startup refuses a pre-179 file before app import, scheduler or listen, with unchanged bytes (681 ms)
+  √ direct startup refuses a fresh db push, without writes, serving or scheduler initialization (1493 ms)
+  √ direct startup refuses an interrupted reviewed upgrade with unchanged SHA and no listener (1394 ms)
+  √ direct startup reports a mismatched trigger before serving and preserves the file (1957 ms)
+  √ direct startup refuses a missing file without implicitly creating it (101 ms)
+  √ direct startup refuses missing normalized QC installation before app import and preserves the file (702 ms)
+  √ a complete guarded database passes the read-only gate, listens and answers a real health request (5407 ms)
+  √ partial schema refuses a writable owned database before any write (345 ms)
+  √ tampered trigger refuses a writable owned database before any write (1388 ms)
+  √ marker without guards refuses a writable owned database before any write (1477 ms)
+  √ complete objects without marker refuses a writable owned database before any write (1378 ms)
+  √ different marker hashes refuses a writable owned database before any write (1432 ms)
+  √ extra marker key refuses a writable owned database before any write (1404 ms)
+  √ unparseable marker refuses a writable owned database before any write (1382 ms)
+  √ image-copy hashes are checked and the overlaid volume sources are never read (1532 ms)
+  √ startup calls the installer after the existing migrations and fails before serving; no override argument exists (19 ms)
+
+PASS tests/contracts/deployment_readiness_acceptance.test.js (5.327 s)
+  Deployment Readiness Acceptance Contract
+    1. Initial Login & Mandatory Password Change Enforcement
+      √ Initial login succeeds and reports mustChangePassword: true (94 ms)
+      √ Operational endpoints are blocked with 403 until password is changed (14 ms)
+      √ POST /api/auth/change-password updates credential and clears flag (204 ms)
+      √ Global admin initial password change workflow (232 ms)
+    2. Single-Lab (Local Mode) Security & Authority Boundaries
+      √ LAB_MANAGER can view and edit own laboratory (11 ms)
+      √ LAB_MANAGER can onboard technician to own laboratory (64 ms)
+      √ LAB_MANAGER can create a laboratory project (9 ms)
+      √ LAB_MANAGER cannot create extra laboratories (403) (6 ms)
+      √ LAB_MANAGER cannot create SUPER_ADMIN accounts (403) (3 ms)
+      √ LAB_MANAGER cannot access external data exchange API connections (403) (6 ms)
+    3. Multi-Lab (Global Mode) Scoping & Cross-Lab Isolation
+      √ Manager A only sees Lab A in laboratory catalogue (8 ms)
+      √ Manager B only sees Lab B in laboratory catalogue (6 ms)
+      √ Manager A is denied mutating Lab B (403) (7 ms)
+      √ Manager A is denied creating staff for Lab B (403) (4 ms)
+      √ SUPER_ADMIN can see and coordinate all laboratories (6 ms)
+    4. Stopped-Writer Database Restore & Automatic Epoch Invalidation
+      √ Restores database, verifies integrity & foreign keys, and rotates exchange epoch (102 ms)
+      √ Fails closed, exits non-zero, and preserves safety artifacts when SQL epoch rotation triggers fail (330 ms)
+    5. Bounded Concurrent Multi-Lab Load Processing & Workload Isolation
+      √ Handles concurrent sample intake, queries, and project reads across laboratories without deadlocks (276 ms)
+    6. Provision Super Admin CLI Identity Collision & State Preservation Invariants
+      √ provision_super_admin CLI rejects conflicting email and does not mutate unrelated inactive user (415 ms)
+      √ provision_super_admin CLI creates non-conflicting new admin cleanly without touching existing accounts (422 ms)
+      √ provision_super_admin CLI preserves inactive status unless --activate is explicitly specified (412 ms)
+
+PASS tests/contracts/audit_3_1_attempt_sql_guards.test.js (67.731 s)
+  √ every lab installs partial attempt uniqueness and current-result uniqueness with all guards (379 ms)
+  √ canonical insert and status update OPEN are accepted (346 ms)
+  √ canonical insert and status update RECORDED are accepted (353 ms)
+  √ canonical insert and status update SUBMITTED are accepted (358 ms)
+  √ canonical insert and status update ACCEPTED are accepted (358 ms)
+  √ canonical insert and status update QUESTIONED are accepted (347 ms)
+  √ canonical insert and status update INVALIDATED are accepted (346 ms)
+  √ canonical insert and status update SUPERSEDED are accepted (335 ms)
+  √ historical RETURNED stays stored but cannot be newly inserted or updated (375 ms)
+  √ historical REJECTED stays stored but cannot be newly inserted or updated (353 ms)
+  √ the migration can flag every historical duplicate before guards, without renumbering (357 ms)
+  √ all conflict flag updates unflagged -> flag are refused (364 ms)
+  √ all conflict flag updates flagged -> null are refused (489 ms)
+  √ all conflict flag updates flagged -> same are refused (366 ms)
+  √ all conflict flag updates unflagged -> null are refused (404 ms)
+  √ evidence field evidenceData is immutable even within its creating transaction (352 ms)
+  √ evidence field evidenceHash is immutable even within its creating transaction (360 ms)
+  √ evidence field instrumentId is immutable even within its creating transaction (351 ms)
+  √ the fixed evidence case refuses caller SQL, unknown fields and invalid parents without writes (17604 ms)
+  √ the new native FK identity cannot authorize arbitrary WorkAttempt SQL or an invalid parent (11514 ms)
+  √ recorded identity field attemptNo cannot change (371 ms)
+  √ recorded identity field workItemId cannot change (384 ms)
+  √ recorded identity field author cannot change (373 ms)
+  √ recorded identity field createdAt cannot change (372 ms)
+  √ recorded identity field updatedAt cannot change (369 ms)
+  √ recorded identity field qcBatchId cannot change (381 ms)
+  √ recorded identity field rawData cannot change (370 ms)
+  √ batch FK is additive, reference checked and write-once when recorded (409 ms)
+  √ canonical reason QC_BATCH_FAIL is accepted by both the shared contract and SQL (566 ms)
+  √ canonical reason REVIEW_OUTLIER is accepted by both the shared contract and SQL (352 ms)
+  √ canonical reason DUPLICATE_DISAGREEMENT is accepted by both the shared contract and SQL (332 ms)
+  √ canonical reason ABOVE_RANGE_DILUTION is accepted by both the shared contract and SQL (340 ms)
+  √ canonical reason INSTRUMENT_FAULT is accepted by both the shared contract and SQL (352 ms)
+  √ canonical reason PREP_ERROR is accepted by both the shared contract and SQL (367 ms)
+  √ canonical reason TRANSCRIPTION_ERROR is accepted by both the shared contract and SQL (375 ms)
+  √ canonical reason CLIENT_RETEST is accepted by both the shared contract and SQL (339 ms)
+  √ canonical reason CONFIRMATION is accepted by both the shared contract and SQL (366 ms)
+  √ canonical reason OTHER is accepted by both the shared contract and SQL (336 ms)
+  √ reason remains nullable for a second execution, while noncanonical values are refused (375 ms)
+  √ SQL and runtime canonical lookup agree: only orphan historical imports can omit an attempt (492 ms)
+  √ raw review inserts require a current attempt of the same work item and sample (414 ms)
+  √ the raw review guard permits only an unexecuted analytical OMIT with no attempt (377 ms)
+  √ SQL keeps non-measurement ARCH review on its separate evidence workflow (340 ms)
+  √ SQL keeps non-measurement ARCHIVING review on its separate evidence workflow (348 ms)
+  √ SQL keeps non-measurement Archive review on its separate evidence workflow (333 ms)
+  √ SQL keeps non-measurement DISP review on its separate evidence workflow (329 ms)
+  √ SQL keeps non-measurement DISPOSAL review on its separate evidence workflow (344 ms)
+  √ SQL keeps non-measurement DRYING review on its separate evidence workflow (339 ms)
+  √ SQL keeps non-measurement Dispose review on its separate evidence workflow (365 ms)
+  √ SQL keeps non-measurement HOMOGENIZATION review on its separate evidence workflow (331 ms)
+  √ SQL keeps non-measurement MILLING review on its separate evidence workflow (451 ms)
+  √ SQL keeps non-measurement PREP review on its separate evidence workflow (349 ms)
+  √ SQL keeps non-measurement PREPARATION review on its separate evidence workflow (342 ms)
+  √ SQL keeps non-measurement SAMPLE_PREP review on its separate evidence workflow (357 ms)
+  √ SQL keeps non-measurement SIEVING review on its separate evidence workflow (352 ms)
+  √ SQL keeps non-measurement SPEC_FTIR review on its separate evidence workflow (360 ms)
+  √ SQL keeps non-measurement SPEC_MIR review on its separate evidence workflow (394 ms)
+  √ SQL keeps non-measurement SPEC_NIR review on its separate evidence workflow (328 ms)
+  √ SQL keeps non-measurement SPEC_VIS_NIR review on its separate evidence workflow (338 ms)
+  √ the authenticated workspace returns linked and unlinked attempt metadata without evidence or cross-lab access (809 ms)
+  #191 membership trigger SQL defence in depth (not installer or receipt evidence)
+    √ old-repeat-required refuses a direct repeat pointer clear with exact zero writes (27 ms)
+    √ parent-null-hash refuses a direct repeat pointer clear with exact zero writes (26 ms)
+    √ parent-wrong-batch refuses a direct repeat pointer clear with exact zero writes (23 ms)
+    √ parent-wrong-qc-batch refuses a direct repeat pointer clear with exact zero writes (21 ms)
+    √ wrong-analyte refuses a direct repeat pointer clear with exact zero writes (21 ms)
+    √ mixed-failed-membership refuses a direct repeat pointer clear with exact zero writes (23 ms)
+    √ mixed-accepted-wrong-membership refuses a direct repeat pointer clear with exact zero writes (23 ms)
+    √ qc-fail refuses a direct repeat pointer clear with exact zero writes (23 ms)
+    √ qc-pending refuses a direct repeat pointer clear with exact zero writes (24 ms)
+    √ open-unstarted refuses a direct repeat pointer clear with exact zero writes (21 ms)
+    √ accepted-pass permits the proven SQL handoff and retains all old execution/QC evidence (22 ms)
+    √ accepted-warn permits the proven SQL handoff and retains all old execution/QC evidence (21 ms)
+    √ accepted-deviation permits the proven SQL handoff and retains all old execution/QC evidence (23 ms)
+    √ accepted-texture-alias permits the proven SQL handoff and retains all old execution/QC evidence (20 ms)
+    √ unknown name refuses before opening a scratch or caller database (20 ms)
+    √ unknown option refuses before opening a scratch or caller database
+    √ unknown caller refuses before opening a scratch or caller database (1 ms)
+  all #190 refusals remain effective after the receipt-verified #191 successor installation
+    √ creating-transaction evidence evidenceData still refuses and rolls back (534 ms)
+    √ creating-transaction evidence evidenceHash still refuses and rolls back (504 ms)
+    √ creating-transaction evidence instrumentId still refuses and rolls back (641 ms)
+    √ recorded identity id remains frozen (487 ms)
+    √ recorded identity workItemId remains frozen (493 ms)
+    √ recorded identity orderLineId remains frozen (497 ms)
+    √ recorded identity attemptNo remains frozen (494 ms)
+    √ recorded identity executedMethodRevision remains frozen (484 ms)
+    √ recorded identity author remains frozen (529 ms)
+    √ recorded identity authorName remains frozen (544 ms)
+    √ recorded identity materialAliquot remains frozen (638 ms)
+    √ recorded identity qcBatchId remains frozen (542 ms)
+    √ recorded identity version remains frozen (797 ms)
+    √ recorded identity createdAt remains frozen (671 ms)
+    √ recorded identity updatedAt remains frozen (519 ms)
+    √ recorded identity reason remains frozen (511 ms)
+    √ recorded identity requestedBy remains frozen (524 ms)
+    √ recorded identity requestedAt remains frozen (515 ms)
+    √ recorded identity rawData remains frozen (503 ms)
+    √ recorded identity calcVersion remains frozen (499 ms)
+    √ recorded identity dilutionFactor remains frozen (536 ms)
+    √ recorded identity aliquotId remains frozen (514 ms)
+    √ invalid status RETURNED still refuses insertion and update (534 ms)
+    √ invalid status REJECTED still refuses insertion and update (517 ms)
+    √ invalid status unknown still refuses insertion and update (521 ms)
+    √ canonical reasons, positive numbers, conflict flags and both unique indexes retain their original refusals (772 ms)
+    √ batch FK, write-once batch and deletion refusals survive the successor chain (620 ms)
+    √ Result required and immutable-link guards keep all #190 import and provenance refusal cases (659 ms)
+    √ ReviewDecision required, ownership, current-evidence and immutable-attempt guards keep every #190 refusal (639 ms)
+
+PASS tests/contracts/deployment_readiness_bootstrap.test.js (13.503 s)
+  Deployment Readiness Bootstrap & Packaging Verification
+    √ setup.sh rejects invalid mode with exit 1 (389 ms)
+    √ setup.sh rejects Node 18 runtime with clear guidance (571 ms)
+    √ setup.sh fails fast and aborts if schema push fails (no error swallowing) (738 ms)
+    √ setup.sh auto-populates JWT_SECRET into existing .env with blank secret (1167 ms)
+    √ entrypoint persists auto-generated JWT_SECRET across container restarts (860 ms)
+    √ entrypoint recovers from interrupted initial setup on restart without reseeding populated installations (1475 ms)
+    √ docker-entrypoint.sh database inspection fails closed on corrupt or unreadable database (267 ms)
+    √ docker-entrypoint.sh database inspection passes cleanly on valid populated database (5924 ms)
+    √ seed.js recovers from real partial state ({ labs: 1, users: 0 }) and does not duplicate LAB01 (850 ms)
+    √ docker compose configuration validates cleanly across local, global, and nginx overlays (1127 ms)
+
+PASS tests/contracts/audit_4_7_xlsx_commit.test.js (16.972 s)
+  √ real XLSX commit keeps long, exponent and rounded-display raw drafts plus immutable cell and policy evidence (1318 ms)
+  √ every mapped cell refusal lists its cell and leaves actual drafts, results, QC, attempts, audits and receipts unchanged (1326 ms)
+  √ actual lab number policy {"decimal":",","thousands":"."} controls the verified numeric1.234 lab text (1129 ms)
+  √ actual lab number policy {"decimal":",","thousands":null} controls the verified numeric1.234 lab text (1060 ms)
+  √ actual lab number policy {"decimal":".","thousands":null} controls the verified numeric1.234 lab text (1048 ms)
+  √ actual lab number policy {"decimal":".","thousands":","} controls the verified numeric1.234 lab text (1170 ms)
+  √ numeric/text imports under{"decimal":",","thousands":"."} keep source lexemes, verified draft text and the used policy version (1335 ms)
+  √ numeric/text imports under{"decimal":",","thousands":" "} keep source lexemes, verified draft text and the used policy version (1307 ms)
+  √ numeric/text imports under{"decimal":".","thousands":","} keep source lexemes, verified draft text and the used policy version (1214 ms)
+  √ shared-string1.234 remains ambiguous under comma/space policy and refuses the whole commit without transliteration (1063 ms)
+  √ policy changes after preview invalidate the actual commit before any receipt or draft (1277 ms)
+  √ mounted multipart sheets require an exact selection; changing it cannot authorize another sheet (1230 ms)
+  √ the actual multipart compressed-size cap returns the pinned XLSX code on both routes with zero writes (1197 ms)
+  √ malformed XML, macros, external parts and XML resource overflow refuse the real preview with zero writes (1071 ms)
+
+PASS tests/contracts/audit_4_7_calculation_import.test.js
+  √ actual EXCH_CA/Olsen activated input imports do not calculate; later typed recording freezes the selected local definitions and verified raw input text (1324 ms)
+  √ missing/duplicate/unknown activated variables, output-unit input guesses and active direct-value mappings refuse the whole commit (1320 ms)
+  √ a calculation deactivation after preview refuses before any receipt, raw draft or scientific evidence is created (1166 ms)
+
+PASS tests/contracts/audit_4_7_import_ui.test.js
+  √ new mappings use only the scoped catalogue units and exact activated SOP inputs; a manager explicitly saves them (77 ms)
+  √ a saved mapping revision retains the original, invalidates its preview and sends the precise predecessor version (23 ms)
+  √ real multipart preview and commit retain the exact file, mapping, explicit worksheet and sealed token; no receipt field is supplied (25 ms)
+  √ changing import-sheet clears the previous authorization and requires a new preview (19 ms)
+  √ changing import-template clears the previous authorization and requires a new preview (18 ms)
+  √ changing import-file clears the previous authorization and requires a new preview (19 ms)
+  √ all refused rows and their cell references are visible; the commit callback cannot send a refused preview (16 ms)
+  √ a later commit conflict lists the precise refused rows and never reports success (20 ms)
+  √ a preview response for the previous run is ignored after the operator changes runs (17 ms)
+  √ entry permission can use a saved mapping without exposing equipment-manager revision controls (8 ms)
+  √ an unavailable native run exposes no import actions or context request: {"canEdit":false} (3 ms)
+  √ an unavailable native run exposes no import actions or context request: {"batch":{"id":"owned-import-run","labId":"owned-lab","instrumentId":"owned-instrument","startedAt":null,"status":"OPEN"}} (4 ms)
+  √ an unavailable native run exposes no import actions or context request: {"batch":{"id":"owned-import-run","labId":"owned-lab","instrumentId":null,"startedAt":"2026-10-10T00:00:00Z","status":"OPEN"}} (3 ms)
+  √ an unavailable native run exposes no import actions or context request: {"batch":{"id":"owned-import-run","labId":"owned-lab","instrumentId":"owned-instrument","startedAt":"2026-10-10T00:00:00Z","status":"CLOSED"}} (3 ms)
+  √ the complete import screen and stable refusal codes exist in all five translations (32 ms)
+
+PASS tests/contracts/audit_4_7_import_commit.test.js (8.019 s)
+  √ preview is read-only; commit saves exact sample drafts, pending QC and a complete immutable source receipt (1190 ms)
+  √ two bad matched rows and valid sample/QC values refuse the whole file and list every row with zero writes (1059 ms)
+  √ zero matches and duplicate destinations are explicit refusals, never a skipped ambiguity or partial receipt (1084 ms)
+  √ a draft appearing after preview is rechecked at commit and retains every saved raw input (1086 ms)
+  √ changing the exact file, actor or preview signature cannot authorize a commit (1033 ms)
+  √ mounted multipart preview and commit use actual token/permission/run owners; HTTP cannot claim receipt authority (1174 ms)
+  √ mounted wizard context reads only the actual scoped native instrument/run metadata and persisted templates (1214 ms)
+
+PASS tests/contracts/audit_4_7_xlsx_source.test.js
+  √ numeric and rounding-formatted lexemes, rich Unicode strings and source bytes are exact (5 ms)
+  √ <c r="A1"><f>1+1</f><v>2</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_FORMULA_UNSUPPORTED (14 ms)
+  √ <c r="A1" t="str"><v>cached</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_FORMULA_UNSUPPORTED (1 ms)
+  √ <c r="A1" t="e"><v>#DIV/0!</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_CELL_ERROR (1 ms)
+  √ <c r="A1" t="b"><v>1</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_CELL_TYPE_UNSUPPORTED (1 ms)
+  √ <c r="A1" t="d"><v>2026-10-10</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_CELL_TYPE_UNSUPPORTED (1 ms)
+  √ <c r="A1"><v>1,234</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_INVALID
+  √ <c r="A1"><v>1E99999</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_INVALID (1 ms)
+  √ display format 0% refuses without rendering (11 ms)
+  √ display format #,##0, refuses without rendering (1 ms)
+  √ display format #,##0,, refuses without rendering (1 ms)
+  √ display format yyyy-mm-dd refuses without rendering (1 ms)
+  √ display format [h]:mm:ss refuses without rendering (1 ms)
+  √ display format 0.00;0.00% refuses without rendering
+  √ implied format ID 9 refuses numeric interpretation (1 ms)
+  √ implied format ID 14 refuses numeric interpretation (1 ms)
+  √ implied format ID 27 refuses numeric interpretation (1 ms)
+  √ implied format ID 36 refuses numeric interpretation (1 ms)
+  √ implied format ID 45 refuses numeric interpretation
+  √ implied format ID 46 refuses numeric interpretation (1 ms)
+  √ implied format ID 50 refuses numeric interpretation (1 ms)
+  √ implied format ID 58 refuses numeric interpretation
+  √ inherited percentage format with boolean 0 cannot hide behind a direct General format (1 ms)
+  √ inherited percentage format with boolean false cannot hide behind a direct General format (1 ms)
+  √ inherited percentage format with boolean  false  cannot hide behind a direct General format (1 ms)
+  √ invalid style boolean is refused as malformed metadata rather than silently applying the direct format (1 ms)
+  √ plain/literal format 0.00 retains the stored value (1 ms)
+  √ plain/literal format #,##0.00 retains the stored value
+  √ plain/literal format 0.00E+00 retains the stored value (1 ms)
+  √ plain/literal format 0.00&quot;kg&quot; retains the stored value (1 ms)
+  √ plain/literal format 0.00\% retains the stored value
+  √ numeric lab text has a verified round trip while shared strings retain existing lab parsing (2 ms)
+  √ comma-decimal lab syntax preserves every digit/exponent of OOXML numeric 1.5
+  √ comma-decimal lab syntax preserves every digit/exponent of OOXML numeric 12 (1 ms)
+  √ comma-decimal lab syntax preserves every digit/exponent of OOXML numeric 1E-3
+  √ comma-decimal lab syntax preserves every digit/exponent of OOXML numeric -1.5E-3 (1 ms)
+  √ comma-decimal lab syntax preserves every digit/exponent of OOXML numeric 1234.5
+  √ multiple/hidden sheets need an exact name; explicit selection decodes that sheet (2 ms)
+  √ merged cells are empty except the top-left and sparse coordinates do not allocate dense rows
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A2"><v>1</v></c> (1 ms)
+  √ invalid coordinates/styles/strings/XML refuse: <c r="XFE1"><v>1</v></c> (1 ms)
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A1" t="s"><v>0</v></c>
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A1" s="99"><v>1</v></c> (1 ms)
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A1"><v>1</v><v>2</v></c> (3 ms)
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A1"><v>&unknown;</v></c> (1 ms)
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A1"><v>1</v></c><c r="A1"><v>2</v></c> (1 ms)
+  √ unused malformed XML, DTD and external relationship content also refuse (2 ms)
+  √ XML node/depth and merge resource limits refuse before constructing import commands (274 ms)
+
+PASS tests/contracts/audit_4_7_icp_import.test.js (5.054 s)
+  √ one real ICP CSV places40 samples by four analytes and six native QC rows without recording or evaluating (4888 ms)
+
+FAIL tests/contracts/audit_4_7_paste_preview.test.js
+  √ actual paste preview matches displayed lab code using "\t" and retains decoded value whitespace (54 ms)
+  √ actual paste preview matches displayed lab code using ";" and retains decoded value whitespace (8 ms)
+  √ actual paste preview matches displayed lab code using "," and retains decoded value whitespace (6 ms)
+  √ 40 labelled sample rows apply to 40 exact tasks; an unknown ID is displayed and excluded (22 ms)
+  √ internal, original and explicitly supplied lab labels remain exact aliases (18 ms)
+  √ colliding identifiers and different aliases for the same task never choose or overwrite a target (12 ms)
+  √ numeric ambiguity follows the supplied task policy and never uses the user locale as a fallback (16 ms)
+  √ malformed quotes, extra cells, empty values and non-finite values remain visible and excluded (33 ms)
+  √ edited text or delimiter requires a fresh preview and queue status changes are re-evaluated (11 ms)
+  √ explicit delimiter resolves an identifier containing another supported separator (6 ms)
+  √ quoted IDs, escaped quotes, embedded newlines, BOM and physical row numbers decode without losing cell evidence (10 ms)
+  × all five locales contain the same complete paste-preview keys and parameter placeholders (8 ms)
+
+  ● all five locales contain the same complete paste-preview keys and parameter placeholders
+
+    TypeError: Cannot convert undefined or null to object
+        at Object.keys (<anonymous>)
+
+      84 | test('all five locales contain the same complete paste-preview keys and parameter placeholders',()=>{
+      85 |  const locales=['en','es','es-419','fr','pt'],values=locales.map(locale=>JSON.parse(fs.readFileSync(path.resolve(__dirname,'../../../client/src/translations/'+locale+'.json'),'utf8')).pastePreview);
+    > 86 |  expect(Object.keys(values[0])).toHaveLength(21);
+         |                ^
+      87 |  for(const value of values){expect(Object.keys(value).sort()).toEqual(Object.keys(values[0]).sort());
+      88 |   for(const [key,text]of Object.entries(value)){expect(typeof text).toBe('string');expect(text.trim()).not.toBe('');
+      89 |    expect((text.match(/\{\w+\}/g)||[]).sort()).toEqual((values[0][key].match(/\{\w+\}/g)||[]).sort());}}
+
+      at Object.keys (tests/contracts/audit_4_7_paste_preview.test.js:86:16)
+
+PASS tests/contracts/audit_4_7_import_templates.test.js
+  √ mapping preserves raw column choices and never supplies a calculation, conversion or final value (2 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"delimiter":"AUTO"} (13 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"idColumn":-1} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"idColumn":1.5}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"idType":"GUESS"} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"hasHeader":"yes"}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"conversionFactor":1000}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unit":"mg/L","unitColumn":2}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unit":"mg/L","unitColumn":-1}]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unitColumn":2,"inputs":[{"variable":"c","column":1,"unit":"mg/L"}]}]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","inputs":[{"inputKey":"c","column":1,"unit":"mg/L"}]}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","inputs":[]}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","inputs":[{"variable":"c","column":1}]}]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unit":"mg/L"},{"analysisCode":"X","valueColumn":2,"unit":"mg/L"}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"qcDetector":{"prefixes":[{"prefix":"BLK","kind":"BLANK"}]}} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"qcDetector":{"positionColumn":4,"prefixes":[{"prefix":"BLK","kind":"GUESS"}]}}
+  √ actual scoped template owner appends revisions, retains the root and audits each save (1246 ms)
+  √ another laboratory and an unprivileged actor cannot save a mapping or an audit row (1975 ms)
+  √ mounted template routes save and list through actual token, scope and permission middleware (1067 ms)
+
+PASS tests/contracts/audit_4_7_import_drafts.test.js (18.032 s)
+  √ ordinary draft owner refuses receipt fields before writing: {"importReceiptId":"forged"} (1129 ms)
+  √ ordinary draft owner refuses receipt fields before writing: {"receipt":{}} (1044 ms)
+  √ ordinary draft owner refuses receipt fields before writing: {"options":{"importReceiptId":"forged"}} (1130 ms)
+  √ ordinary draft owner refuses receipt fields before writing: {"values":{"calculation":{"receiptId":"forged"}}} (1538 ms)
+  √ mounted ordinary draft HTTP cannot reach the server receipt option: {"importReceiptId":"forged"} (4791 ms)
+  √ mounted ordinary draft HTTP cannot reach the server receipt option: {"options":{"importReceiptId":"forged"}} (1260 ms)
+  √ the server option binds exact raw input to its persisted receipt through the existing draft owner (1012 ms)
+  √ an existing populated draft blocks import and retains every row (1023 ms)
+  √ an existing receipt-linked draft blocks import and retains every row (1145 ms)
+  √ an existing empty draft blocks import and retains every row (1591 ms)
+  √ a current Result refuses the imported draft with the existing sealed-line code and retains all evidence (1110 ms)
+  √ an unavailable receipt refuses before writing; unknown non-receipt draft fields retain ordinary behavior (1084 ms)
+
+PASS tests/contracts/audit_4_7_import_qc_entry.test.js (13.707 s)
+  √ importing the last required QC value leaves pending evidence and a receipt-bound event/audit until explicit evaluation (1177 ms)
+  √ invalid internal entry-only combination refuses atomically: {"references":[]} {} (1004 ms)
+  √ invalid internal entry-only combination refuses atomically: {"expectedValues":{}} {} (1016 ms)
+  √ invalid internal entry-only combination refuses atomically: {"mode":"REVIEWED_CORRECTION"} {} (1010 ms)
+  √ invalid internal entry-only combination refuses atomically: {"reason":"Correction"} {} (1122 ms)
+  √ invalid internal entry-only combination refuses atomically: {"measurements":[]} {} (1078 ms)
+  √ invalid internal entry-only combination refuses atomically: {} {"correction":true} (995 ms)
+  √ invalid internal entry-only combination refuses atomically: {} {"explicit":true} (1107 ms)
+  √ invalid internal entry-only combination refuses atomically: {} {"entryOnly":"yes"} (980 ms)
+  √ invalid internal entry-only combination refuses atomically: {} {"importReceiptId":null} (993 ms)
+  √ invalid internal entry-only combination refuses atomically: {} {"importReceiptId":"unavailable"} (1015 ms)
+  √ already evaluated native analyte refuses imported values without changing retained evidence (1019 ms)
+  √ a current unevaluated QC value cannot be overwritten by another import (1031 ms)
+
+PASS tests/contracts/audit_4_7_import_row_match.test.js
+  √ forty lab labels retain all four analyte destinations and six QC rows require the exact mapped physical position (8 ms)
+  √ explicit ORIGINAL_ID mapping uses its own identifier authority (1 ms)
+  √ explicit POSITION mapping uses its own identifier authority
+  √ unknown UNKNOWN is listed rather than guessed or imported
+  √ unknown internal-0 is listed rather than guessed or imported
+  √ unknown EXT-1 is listed rather than guessed or imported
+  √ unknown =1+1 is listed rather than guessed or imported
+  √ unknown lab-1 is listed rather than guessed or imported
+  √ duplicate original ids are ambiguous, and historical/duplicate positions never act as sample destinations
+  √ QC kind and exact physical column are required: ""
+  √ QC kind and exact physical column are required: "41.5"
+  √ QC kind and exact physical column are required: "1e2"
+  √ QC kind and exact physical column are required: "999"
+  √ QC kind and exact physical column are required: "43"
+  √ overlapping QC detectors refuse ambiguity instead of choosing a prefix
+
+PASS tests/contracts/audit_4_7_xlsx_archive.test.js
+  √ stored/deflated/described archive bytes are decoded exactly in memory: {"deflate":false} (2 ms)
+  √ stored/deflated/described archive bytes are decoded exactly in memory: {"deflate":true} (1 ms)
+  √ stored/deflated/described archive bytes are decoded exactly in memory: {"deflate":true,"descriptor":true} (2 ms)
+  √ unsafe or macro/external part xl/vbaProject.bin refuses the archive (9 ms)
+  √ unsafe or macro/external part xl/externalLinks/externalLink1.xml refuses the archive
+  √ unsafe or macro/external part ../outside.xml refuses the archive (1 ms)
+  √ unsafe or macro/external part /absolute.xml refuses the archive
+  √ unsafe or macro/external part xl\workbook.xml refuses the archive
+  √ malformed headers/checksums/encryption/truncation refuse without changing supplied bytes (1 ms)
+  √ malformed headers/checksums/encryption/truncation refuse without changing supplied bytes (2 ms)
+  √ malformed headers/checksums/encryption/truncation refuse without changing supplied bytes (1 ms)
+  √ malformed headers/checksums/encryption/truncation refuse without changing supplied bytes (2 ms)
+  √ malformed headers/checksums/encryption/truncation refuse without changing supplied bytes (2 ms)
+  √ duplicate member names are refused rather than choosing one content
+  √ compressed, total declared and entry-count limits each refuse before decoding (1 ms)
+  √ a forged small size cannot bypass the real bounded inflater (232 ms)
+
+PASS tests/contracts/audit_4_7_instrument_source.test.js
+  √ file decoding preserves the exact source digest and quoted raw cells with delimiter "\t" (2 ms)
+  √ file decoding preserves the exact source digest and quoted raw cells with delimiter ";" (1 ms)
+  √ file decoding preserves the exact source digest and quoted raw cells with delimiter ","
+  √ forty sample rows with four analyte columns and six QC rows are decoded without matching, filtering or numeric interpretation (4 ms)
+  √ an unknown label, formula-looking value and malformed row remain decoded evidence for preview refusal (1 ms)
+  √ undecodable or unspecified source refuses with a stable error and unchanged input (7 ms)
+  √ undecodable or unspecified source refuses with a stable error and unchanged input (1 ms)
+  √ undecodable or unspecified source refuses with a stable error and unchanged input (1 ms)
+  √ undecodable or unspecified source refuses with a stable error and unchanged input
+
+PASS tests/contracts/audit_4_7_instrument_import_install.test.js
+  √ the additional current-main schema-only factory is closed and digest-bound without changing the old fixture (18 ms)
+  √ a populated predecessor retains every analytical, QC, audit and raw draft row across dry-run, apply and repeated apply (1889 ms)
+  retained historical89-model main
+    √ every template column is immutable: id (15 ms)
+    √ every template column is immutable: labId (8 ms)
+    √ every template column is immutable: instrumentId (10 ms)
+    √ every template column is immutable: name (9 ms)
+    √ every template column is immutable: version (9 ms)
+    √ every template column is immutable: mapping (10 ms)
+    √ every template column is immutable: createdBy (10 ms)
+    √ every template column is immutable: createdAt (8 ms)
+    √ every template column is immutable: supersedesId (8 ms)
+    √ every receipt column is immutable: id (9 ms)
+    √ every receipt column is immutable: labId (8 ms)
+    √ every receipt column is immutable: instrumentId (9 ms)
+    √ every receipt column is immutable: templateId (7 ms)
+    √ every receipt column is immutable: templateVersion (8 ms)
+    √ every receipt column is immutable: sourceSha256 (7 ms)
+    √ every receipt column is immutable: sourceName (8 ms)
+    √ every receipt column is immutable: mappingSnapshot (7 ms)
+    √ every receipt column is immutable: importedBy (8 ms)
+    √ every receipt column is immutable: importedAt (8 ms)
+    √ deletion of ImportTemplate is refused with its retained rows unchanged (7 ms)
+    √ deletion of InstrumentImportReceipt is refused with its retained rows unchanged (8 ms)
+    √ append-only revisions advance exactly once and preserve the original raw mapping (7 ms)
+    √ invalid template binding or revision refuses without a row: {"version":2} (8 ms)
+    √ invalid template binding or revision refuses without a row: {"instrumentId":"other-instrument"} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"mapping":"not JSON"} (8 ms)
+    √ invalid template binding or revision refuses without a row: {"labId":"other-lab","supersedesId":"mapping-v1","version":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"templateVersion":2} (8 ms)
+    √ invalid source receipt refuses without a row: {"instrumentId":"other-instrument"} (7 ms)
+    √ invalid source receipt refuses without a row: {"sourceSha256":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} (8 ms)
+    √ invalid source receipt refuses without a row: {"mappingSnapshot":"not JSON"} (7 ms)
+    √ the new draft pointer is nullable and restrictive, with no historical backfill or analytical writes (10 ms)
+    √ the schema-only factory is source-bound and unavailable to runtime or another caller (37 ms)
+    √ literal pre-200 classification is read-only and does not invent a receipt (22 ms)
+    √ an unmarked upgraded schema is refused without adopting its rows (12 ms)
+    √ a foreign object in the managed import namespace is refused (13 ms)
+    √ a forged receipt refuses without changing any imported evidence (8 ms)
+    √ installer CLI refuses malformed arguments: [] (11 ms)
+    √ installer CLI refuses malformed arguments: ["--apply"] (8 ms)
+    √ installer CLI refuses malformed arguments: ["--db"] (8 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--dry-run"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--apply"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--unknown"] (7 ms)
+    √ installer CLI accepts an explicit existing-path argument and one mode (7 ms)
+    √ startup refuses a missing database without creating it (8 ms)
+  actual current92-model main after210
+    √ every template column is immutable: id (8 ms)
+    √ every template column is immutable: labId (9 ms)
+    √ every template column is immutable: instrumentId (8 ms)
+    √ every template column is immutable: name (7 ms)
+    √ every template column is immutable: version (7 ms)
+    √ every template column is immutable: mapping (8 ms)
+    √ every template column is immutable: createdBy (7 ms)
+    √ every template column is immutable: createdAt (8 ms)
+    √ every template column is immutable: supersedesId (8 ms)
+    √ every receipt column is immutable: id (8 ms)
+    √ every receipt column is immutable: labId (7 ms)
+    √ every receipt column is immutable: instrumentId (7 ms)
+    √ every receipt column is immutable: templateId (7 ms)
+    √ every receipt column is immutable: templateVersion (7 ms)
+    √ every receipt column is immutable: sourceSha256 (7 ms)
+    √ every receipt column is immutable: sourceName (7 ms)
+    √ every receipt column is immutable: mappingSnapshot (9 ms)
+    √ every receipt column is immutable: importedBy (7 ms)
+    √ every receipt column is immutable: importedAt (9 ms)
+    √ deletion of ImportTemplate is refused with its retained rows unchanged (8 ms)
+    √ deletion of InstrumentImportReceipt is refused with its retained rows unchanged (7 ms)
+    √ append-only revisions advance exactly once and preserve the original raw mapping (8 ms)
+    √ invalid template binding or revision refuses without a row: {"version":2} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"instrumentId":"other-instrument"} (8 ms)
+    √ invalid template binding or revision refuses without a row: {"mapping":"not JSON"} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"labId":"other-lab","supersedesId":"mapping-v1","version":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"templateVersion":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"instrumentId":"other-instrument"} (7 ms)
+    √ invalid source receipt refuses without a row: {"sourceSha256":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} (7 ms)
+    √ invalid source receipt refuses without a row: {"mappingSnapshot":"not JSON"} (8 ms)
+    √ the new draft pointer is nullable and restrictive, with no historical backfill or analytical writes (9 ms)
+    √ the schema-only factory is source-bound and unavailable to runtime or another caller (15 ms)
+    √ literal pre-200 classification is read-only and does not invent a receipt (23 ms)
+    √ an unmarked upgraded schema is refused without adopting its rows (8 ms)
+    √ a foreign object in the managed import namespace is refused (8 ms)
+    √ a forged receipt refuses without changing any imported evidence (9 ms)
+    √ installer CLI refuses malformed arguments: [] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--apply"] (10 ms)
+    √ installer CLI refuses malformed arguments: ["--db"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--dry-run"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--apply"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--unknown"] (9 ms)
+    √ installer CLI accepts an explicit existing-path argument and one mode (7 ms)
+    √ startup refuses a missing database without creating it (8 ms)
+  the released #293 predecessor keeps #205 records inside the exact import boundary
+    √ the additional current release schema-only fixture is closed and digest-bound (8 ms)
+    √ main51f schema and its native import ALTER are recognized without row writes or adoption (18 ms)
+    √ exact records predecessor preFresh refuses a changed type or unknown column (30 ms)
+    √ exact records predecessor preUpgraded refuses a changed type or unknown column (31 ms)
+
+PASS tests/contracts/audit_4_7_import_units.test.js
+  √ direct import unit mg/kg retains the exact catalogue fields and matched source (1 ms)
+  √ direct import unit MASS_FRACTION_CODE retains the exact catalogue fields and matched source
+  √ an unconfigured synonym, case, whitespace or unrelated unit MG/KG refuses (7 ms)
+  √ an unconfigured synonym, case, whitespace or unrelated unit milligrams/kilogram refuses (1 ms)
+  √ an unconfigured synonym, case, whitespace or unrelated unit  mg/kg  refuses
+  √ an unconfigured synonym, case, whitespace or unrelated unit % refuses (1 ms)
+  √ an absent catalogue unit refuses even when the method or source supplies a unit
+  √ texture fractions accept only percent on a texture analysis and retain the original catalogue values (1 ms)
+  √ QC analytes use the same catalogue authority without QUDT aliases or conversions
+  √ the current typed-writer analysis authority and refusal survive the #283 integration (1 ms)
+
+Test Suites: 1 failed, 18 passed, 19 total
+Tests:       1 failed, 451 passed, 452 total
+Snapshots:   0 total
+Time:        195.805 s
+Ran all test suites within paths "tests/contracts/audit_4_7_instrument_import_install.test.js", "tests/contracts/audit_4_7_import_units.test.js", "tests/contracts/audit_4_7_xlsx_source.test.js", "tests/contracts/audit_4_7_xlsx_commit.test.js", "tests/contracts/audit_4_7_xlsx_archive.test.js", "tests/contracts/audit_4_7_paste_preview.test.js", "tests/contracts/audit_4_7_instrument_source.test.js", "tests/contracts/audit_4_7_import_ui.test.js", "tests/contracts/audit_4_7_import_templates.test.js", "tests/contracts/audit_4_7_import_row_match.test.js", "tests/contracts/audit_4_7_import_qc_entry.test.js", "tests/contracts/audit_4_7_import_drafts.test.js", "tests/contracts/audit_4_7_import_commit.test.js", "tests/contracts/audit_4_7_icp_import.test.js", "tests/contracts/audit_4_7_calculation_import.test.js", "tests/contracts/audit_1_2_guard_installer.test.js", "tests/contracts/audit_3_1_attempt_sql_guards.test.js", "tests/contracts/deployment_readiness_bootstrap.test.js", "tests/contracts/deployment_readiness_acceptance.test.js".

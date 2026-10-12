@@ -1,0 +1,4 @@
+
+> server@1.9.0 test
+> jest --runInBand --testMatch **/tests/**/*.test.js --runTestsByPath tests/contracts/audit_4_7_paste_preview.test.js tests/contracts/audit_4_7_import_ui.test.js
+

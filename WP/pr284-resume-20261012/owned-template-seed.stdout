@@ -1,0 +1,37 @@
+OWNED_TEST_METADATA seeds/profile.js
+[PROFILE SEED] Seeding profile: soilfer from C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\profiles\soilfer
+  ✓ Seeded 7 laboratories
+  ✓ Seeded 9 projects
+  ✓ Applied branding configuration
+
+🎉 Profile seed 'soilfer' completed successfully.
+OWNED_TEST_METADATA seeds/units.js
+[SEED] Seeding 37 controlled units...
+[SEED] Successfully seeded 37 units.
+OWNED_TEST_METADATA seeds/references.js
+[SEED] Seeding 73 method references...
+[SEED] Successfully seeded 73 method references.
+OWNED_TEST_METADATA seeds/catalogue.js
+[Catalogue Seed] Database has 0 existing analyses.
+[Catalogue Seed] Seeding clean database with 176 standard analyses...
+[Catalogue Seed] ✓ Clean seeding complete: 176 analyses, 467 methodologies.
+
+Execution Result Summary: { isCleanDb: true, changesApplied: true, seededCount: 176 }
+OWNED_TEST_METADATA seed_languages.js
+🌱 Seeding Languages...
+  ✓ Processed language: English (en)
+  ✓ Processed language: Español (es)
+  ✓ Processed language: Español (Latinoamérica) (es-419)
+  ✓ Processed language: Français (fr)
+  ✓ Processed language: Português (pt)
+✅ Language seeding complete.
+
+OWNED_TEST_METADATA scripts/seed_help_content.cjs
+[HELP_SEED] Starting help content seeding from server/data/help/...
+[HELP_SEED] Seeding completed: 113 created, 0 updated. 0 unreviewed drafts published.
+OWNED_TEST_METADATA scripts/publish_help_release.cjs
+[HELP_RELEASE] Starting Help Knowledge Base Release publication (dryRun: false)...
+[HELP_RELEASE] Auditing 113 application guides across 5 languages...
+[HELP_RELEASE] Release manifest written to C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\data\help\RELEASE_MANIFEST_v1.json
+[HELP_RELEASE] Successfully published 113 guides across all 5 languages (en, es, es-419, fr, pt).
+[HELP_RELEASE] Done.

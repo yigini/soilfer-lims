@@ -1,0 +1,6 @@
+
+> server@1.9.0 postinstall
+> prisma generate
+
+
+added 639 packages in 21s

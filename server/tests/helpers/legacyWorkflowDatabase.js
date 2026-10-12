@@ -242,6 +242,17 @@ function beforeGuards(options) {
             expected.push({table:'UserBenchCredential',missingTable:true});
             // #205 adds exactly one append-only evidence table and one nullable draft column; its installer creates both.
             expected.push({table:'WorkItemDraft',fields:['records']},{table:'PreparationRecord',missingTable:true});
+            // #200 adds only these two models and one nullable draft pointer.
+            // The historical literals and every earlier expected gap stay fixed.
+            const importTables = ['ImportTemplate', 'InstrumentImportReceipt'];
+            const importModels = importTables.filter(table => modelNames.includes(table));
+            assert.ok(importModels.length === 0 || importModels.length === importTables.length, 'Generated import datamodel is partial.');
+            if (importModels.length) {
+                // Both releases extend the same draft. Keep one exact gap in
+                // the generated scalar-field order, rather than two entries.
+                expected.find(row => row.table === 'WorkItemDraft').fields.push('importReceiptId');
+                expected.push(...importTables.map(table => ({ table, missingTable: true })));
+            }
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }

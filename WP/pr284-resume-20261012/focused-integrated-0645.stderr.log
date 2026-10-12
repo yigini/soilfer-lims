@@ -1,0 +1,151 @@
+PASS tests/contracts/audit_4_7_instrument_import_install.test.js
+  √ the additional current-main schema-only factory is closed and digest-bound without changing the old fixture (12 ms)
+  √ a populated predecessor retains every analytical, QC, audit and raw draft row across dry-run, apply and repeated apply (2509 ms)
+  retained historical89-model main
+    √ every template column is immutable: id (17 ms)
+    √ every template column is immutable: labId (7 ms)
+    √ every template column is immutable: instrumentId (8 ms)
+    √ every template column is immutable: name (7 ms)
+    √ every template column is immutable: version (7 ms)
+    √ every template column is immutable: mapping (8 ms)
+    √ every template column is immutable: createdBy (8 ms)
+    √ every template column is immutable: createdAt (8 ms)
+    √ every template column is immutable: supersedesId (8 ms)
+    √ every receipt column is immutable: id (7 ms)
+    √ every receipt column is immutable: labId (8 ms)
+    √ every receipt column is immutable: instrumentId (8 ms)
+    √ every receipt column is immutable: templateId (7 ms)
+    √ every receipt column is immutable: templateVersion (7 ms)
+    √ every receipt column is immutable: sourceSha256 (8 ms)
+    √ every receipt column is immutable: sourceName (7 ms)
+    √ every receipt column is immutable: mappingSnapshot (7 ms)
+    √ every receipt column is immutable: importedBy (9 ms)
+    √ every receipt column is immutable: importedAt (8 ms)
+    √ deletion of ImportTemplate is refused with its retained rows unchanged (8 ms)
+    √ deletion of InstrumentImportReceipt is refused with its retained rows unchanged (7 ms)
+    √ append-only revisions advance exactly once and preserve the original raw mapping (10 ms)
+    √ invalid template binding or revision refuses without a row: {"version":2} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"instrumentId":"other-instrument"} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"mapping":"not JSON"} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"labId":"other-lab","supersedesId":"mapping-v1","version":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"templateVersion":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"instrumentId":"other-instrument"} (7 ms)
+    √ invalid source receipt refuses without a row: {"sourceSha256":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} (6 ms)
+    √ invalid source receipt refuses without a row: {"mappingSnapshot":"not JSON"} (6 ms)
+    √ the new draft pointer is nullable and restrictive, with no historical backfill or analytical writes (8 ms)
+    √ the schema-only factory is source-bound and unavailable to runtime or another caller (35 ms)
+    √ literal pre-200 classification is read-only and does not invent a receipt (20 ms)
+    √ an unmarked upgraded schema is refused without adopting its rows (10 ms)
+    √ a foreign object in the managed import namespace is refused (7 ms)
+    √ a forged receipt refuses without changing any imported evidence (8 ms)
+    √ installer CLI refuses malformed arguments: [] (10 ms)
+    √ installer CLI refuses malformed arguments: ["--apply"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--dry-run"] (6 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--apply"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--unknown"] (7 ms)
+    √ installer CLI accepts an explicit existing-path argument and one mode (7 ms)
+    √ startup refuses a missing database without creating it (7 ms)
+  actual current92-model main after210
+    √ every template column is immutable: id (7 ms)
+    √ every template column is immutable: labId (21 ms)
+    √ every template column is immutable: instrumentId (8 ms)
+    √ every template column is immutable: name (7 ms)
+    √ every template column is immutable: version (7 ms)
+    √ every template column is immutable: mapping (8 ms)
+    √ every template column is immutable: createdBy (7 ms)
+    √ every template column is immutable: createdAt (7 ms)
+    √ every template column is immutable: supersedesId (6 ms)
+    √ every receipt column is immutable: id (6 ms)
+    √ every receipt column is immutable: labId (6 ms)
+    √ every receipt column is immutable: instrumentId (6 ms)
+    √ every receipt column is immutable: templateId (7 ms)
+    √ every receipt column is immutable: templateVersion (8 ms)
+    √ every receipt column is immutable: sourceSha256 (7 ms)
+    √ every receipt column is immutable: sourceName (7 ms)
+    √ every receipt column is immutable: mappingSnapshot (7 ms)
+    √ every receipt column is immutable: importedBy (8 ms)
+    √ every receipt column is immutable: importedAt (8 ms)
+    √ deletion of ImportTemplate is refused with its retained rows unchanged (8 ms)
+    √ deletion of InstrumentImportReceipt is refused with its retained rows unchanged (9 ms)
+    √ append-only revisions advance exactly once and preserve the original raw mapping (8 ms)
+    √ invalid template binding or revision refuses without a row: {"version":2} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"instrumentId":"other-instrument"} (6 ms)
+    √ invalid template binding or revision refuses without a row: {"mapping":"not JSON"} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"labId":"other-lab","supersedesId":"mapping-v1","version":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"templateVersion":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"instrumentId":"other-instrument"} (7 ms)
+    √ invalid source receipt refuses without a row: {"sourceSha256":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} (8 ms)
+    √ invalid source receipt refuses without a row: {"mappingSnapshot":"not JSON"} (7 ms)
+    √ the new draft pointer is nullable and restrictive, with no historical backfill or analytical writes (9 ms)
+    √ the schema-only factory is source-bound and unavailable to runtime or another caller (14 ms)
+    √ literal pre-200 classification is read-only and does not invent a receipt (20 ms)
+    √ an unmarked upgraded schema is refused without adopting its rows (8 ms)
+    √ a foreign object in the managed import namespace is refused (8 ms)
+    √ a forged receipt refuses without changing any imported evidence (8 ms)
+    √ installer CLI refuses malformed arguments: [] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--apply"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--dry-run"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--apply"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--unknown"] (7 ms)
+    √ installer CLI accepts an explicit existing-path argument and one mode (7 ms)
+    √ startup refuses a missing database without creating it (6 ms)
+  the released #293 predecessor keeps #205 records inside the exact import boundary
+    √ the additional current release schema-only fixture is closed and digest-bound (6 ms)
+    √ main51f schema and its native import ALTER are recognized without row writes or adoption (17 ms)
+    √ exact records predecessor preFresh refuses a changed type or unknown column (31 ms)
+    √ exact records predecessor preUpgraded refuses a changed type or unknown column (29 ms)
+
+PASS tests/contracts/issue_213_export_equals_report.test.js (8.271 s)
+  √ ATTEMPT selection from a batched source: every export carries the report value and its selection, attempt and batch ids (2718 ms)
+  √ MEAN of a retained questioned 12.0 and its repeat 12.6 exports 12.3 everywhere while v2 keeps its raw current row (1527 ms)
+  √ a reviewer-selected retained QUESTIONED source exports its own value, not the current repeat (1322 ms)
+  √ NOT_REPORTABLE exports the localized report text with its selection id and no source ids (1102 ms)
+  √ an analysis configured in a non-standard unit (SOC in %) keeps its unconverted headline; normalized stays in _normalized (1391 ms)
+
+PASS tests/contracts/issue_283_one_unit_per_analysis.test.js
+  #283 one unit per analysis
+    √ a method QUDT override that disagrees is ignored and disclosed; an agreeing one changes nothing
+    √ a method never supplies the reporting unit on write (8 ms)
+    √ the V1 export labels the stored value with the analysis unit and never converts it (1 ms)
+  #283 V2 observations
+    √ a disagreeing method override is disclosed, the analysis unit labels the value and nothing stored changes (1019 ms)
+
+PASS tests/security/wiring.test.js
+  WP-03: Dead-Code & System Wiring Regression Tests
+    √ Audit 2.5: QC preview has the evaluate permission and uses the scoped read authority (1 ms)
+    √ 1. validateSampleMatrix is actively called in result save/submit flow
+    √ 2. workflowContract functions are exported and callable (1 ms)
+    √ 3. utils/scopeGuard.js exported functions have active call sites and no dead code (WP-28) (47 ms)
+    √ 4. config/roles.js permission keys are registered and referenced (60 ms)
+    √ 5. client/src/components are tracked for active imports (104 ms)
+    √ 6. SD-16: No client file issues a status write the user did not request (catches SD-07) (1 ms)
+    √ 7. SD-16: Route-level permission guards are consistent with controller authorization (catches SD-06) (1 ms)
+    √ 8. SD-16: Every gate the client renders has an active server counterpart (catches SD-05) (9 ms)
+
+PASS tests/contracts/audit_2_6_sql_scanner.test.js
+  √ closed loadProficiencyMigrationSource SQL is inspected while appended workflow writes remain rejected (6 ms)
+  √ closed loadResultEquipmentMigrationSource SQL is inspected while appended workflow writes remain rejected (2 ms)
+  √ shadowed, escaped and mutated loadProficiencyMigrationSource sources are still unknown SQL (3 ms)
+  √ shadowed, escaped and mutated loadResultEquipmentMigrationSource sources are still unknown SQL (3 ms)
+  √ changed loadProficiencyMigrationSource loader or DDL bytes restore the failing unknown-SQL finding (2 ms)
+  √ changed loadResultEquipmentMigrationSource loader or DDL bytes restore the failing unknown-SQL finding (1 ms)
+
+PASS tests/contracts/audit_4_7_import_units.test.js
+  √ direct import unit mg/kg retains the exact catalogue fields and matched source (1 ms)
+  √ direct import unit MASS_FRACTION_CODE retains the exact catalogue fields and matched source
+  √ an unconfigured synonym, case, whitespace or unrelated unit MG/KG refuses (5 ms)
+  √ an unconfigured synonym, case, whitespace or unrelated unit milligrams/kilogram refuses
+  √ an unconfigured synonym, case, whitespace or unrelated unit  mg/kg  refuses (1 ms)
+  √ an unconfigured synonym, case, whitespace or unrelated unit % refuses
+  √ an absent catalogue unit refuses even when the method or source supplies a unit
+  √ texture fractions accept only percent on a texture analysis and retain the original catalogue values
+  √ QC analytes use the same catalogue authority without QUDT aliases or conversions (1 ms)
+  √ the current typed-writer analysis authority and refusal survive the #283 integration
+
+Test Suites: 6 passed, 6 total
+Tests:       128 passed, 128 total
+Snapshots:   0 total
+Time:        13.456 s
+Ran all test suites within paths "tests/contracts/audit_4_7_instrument_import_install.test.js", "tests/contracts/audit_4_7_import_units.test.js", "tests/contracts/issue_213_export_equals_report.test.js", "tests/contracts/issue_283_one_unit_per_analysis.test.js", "tests/security/wiring.test.js", "tests/contracts/audit_2_6_sql_scanner.test.js".

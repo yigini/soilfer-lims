@@ -1,0 +1,517 @@
+
+> server@1.9.0 test
+> jest --runInBand --testMatch **/tests/**/*.test.js --runTestsByPath tests/contracts/audit_4_7_instrument_import_install.test.js tests/contracts/audit_4_7_import_units.test.js tests/contracts/audit_4_7_xlsx_source.test.js tests/contracts/audit_4_7_xlsx_commit.test.js tests/contracts/audit_4_7_xlsx_archive.test.js tests/contracts/audit_4_7_paste_preview.test.js tests/contracts/audit_4_7_instrument_source.test.js tests/contracts/audit_4_7_import_ui.test.js tests/contracts/audit_4_7_import_templates.test.js tests/contracts/audit_4_7_import_row_match.test.js tests/contracts/audit_4_7_import_qc_entry.test.js tests/contracts/audit_4_7_import_drafts.test.js tests/contracts/audit_4_7_import_commit.test.js tests/contracts/audit_4_7_icp_import.test.js tests/contracts/audit_4_7_calculation_import.test.js tests/contracts/audit_1_2_guard_installer.test.js tests/contracts/audit_3_1_attempt_sql_guards.test.js tests/contracts/deployment_readiness_bootstrap.test.js tests/contracts/deployment_readiness_acceptance.test.js
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-global_admin_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-global_admin_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-global_admin_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [RESTORE] Initiating restore from: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\.tmp_journey_runner_KEbM0f\disposable_journey.db
+
+      at log (scripts/restore_db.js:32:13)
+
+  console.log
+    [RESTORE] Target database path: C:\Users\yigin\AppData\Local\Temp\lims_restore_test_1791787778890_NttO7X\target.db
+
+      at log (scripts/restore_db.js:33:13)
+
+  console.log
+    [RESTORE] Verifying source backup integrity...
+
+      at log (scripts/restore_db.js:36:13)
+
+  console.log
+    [RESTORE] Source backup is valid. Users: 1, Samples: 1
+
+      at log (scripts/restore_db.js:41:13)
+
+  console.log
+    [RESTORE] Successfully rotated data exchange epoch to invalidate prior cursors: epoch-1791787780080-0e6b4f65057a
+
+      at log (scripts/restore_db.js:133:25)
+
+  console.log
+    [RESTORE] SUCCESS: Database successfully restored to C:\Users\yigin\AppData\Local\Temp\lims_restore_test_1791787778890_NttO7X\target.db
+
+      at log (scripts/restore_db.js:141:17)
+
+  console.log
+    [RESTORE] Initiating restore from: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\.tmp_journey_runner_qFGtzN\disposable_journey.db
+
+      at log (scripts/restore_db.js:32:13)
+
+  console.log
+    [RESTORE] Target database path: C:\Users\yigin\AppData\Local\Temp\lims_restore_test_1791787778890_NttO7X\fail_target.db
+
+      at log (scripts/restore_db.js:33:13)
+
+  console.log
+    [RESTORE] Verifying source backup integrity...
+
+      at log (scripts/restore_db.js:36:13)
+
+  console.log
+    [RESTORE] Source backup is valid. Users: 1, Samples: 1
+
+      at log (scripts/restore_db.js:41:13)
+
+  console.log
+    [RESTORE] Creating safety snapshot of current database: C:\Users\yigin\AppData\Local\Temp\lims_restore_test_1791787778890_NttO7X\fail_target.db.pre_restore_2026-10-12T06-49-40-209Z.bak
+
+      at log (scripts/restore_db.js:54:17)
+
+  console.error
+    [RESTORE] ERROR: Restoration failed: Data exchange epoch rotation failed: controlled epoch persistence failure
+
+      150 |             try { fs.unlinkSync(stagingPath); } catch (_) {}
+      151 |         }
+    > 152 |         console.error(`[RESTORE] ERROR: Restoration failed: ${err.message}`);
+          |                 ^
+      153 |         throw err;
+      154 |     }
+      155 | }
+
+      at error (scripts/restore_db.js:152:17)
+      at Object.<anonymous> (tests/contracts/deployment_readiness_acceptance.test.js:475:13)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791787778890 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_lab190evidence (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_lab190other (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 26cc9d00-98ee-4581-b9cb-c7dd3886f460 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User 9f30d251-63b1-4d3e-9b98-8bca8fe039b7 (Lab: 42e8a229-0f7f-48b6-967a-d22bce11751f) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope [as readQcRun] (services/qcRunViewService.js:159:22)
+      at readImportRun (services/instrumentImportTemplateService.js:105:19)
+      at Object.readInstrumentImportContext (services/instrumentImportPreviewService.js:177:40)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:187:60)
+      at exports.importContext (controllers/instrumentImportController.js:34:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: Import receipts are attached by the import owner.
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:32:41)
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:33:9)
+        at Object.assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:33:9)
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:683:33)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:157:13)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\middleware\authMiddleware.js:165:9)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:157:13)
+        at Route.dispatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:117:3)
+        at handle (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:435:11)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:295:15
+        at processParams (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:582:12)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:291:5)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\middleware\authMiddleware.js:123:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 400,
+      status: 400,
+      code: 'DRAFT_FIELDS_INVALID',
+      details: {}
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at error (controllers/workbenchController.js:1332:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:165:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: Import receipts are attached by the import owner.
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:32:41)
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:33:9)
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:33:9)
+        at Object.assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:33:9)
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:683:33)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:157:13)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\middleware\authMiddleware.js:165:9)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:157:13)
+        at Route.dispatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:117:3)
+        at handle (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:435:11)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:295:15
+        at processParams (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:582:12)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:291:5)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\middleware\authMiddleware.js:123:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 400,
+      status: 400,
+      code: 'DRAFT_FIELDS_INVALID',
+      details: {}
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at error (controllers/workbenchController.js:1332:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:165:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.info
+    IMPORT_POPULATED_PRESERVATION {"originalTableCount":97,"counts":{"Analysis":11,"AnalysisCategory":0,"AnalysisGroup":0,"ApiKey":0,"AuditLog":9,"Batch":1,"BatchAnalyte":1,"BatchDisposition":0,"BatchEvent":6,"BatchPosition":3,"BatchPositionReference":0,"BatchPositionWorkItem":2,"BatchQcResult":0,"BatchReagentLot":0,"CalcTemplate":11,"CalcTemplateActivation":0,"CalibrationCurve":0,"CalibrationPoint":0,"CommandReceipt":0,"Consignment":0,"CrossCheckEvaluation":0,"EquipmentAsset":1,"EquipmentEvent":0,"EquipmentMethodEligibility":0,"EquipmentQualification":0,"EquipmentScheduleRule":0,"ExternalMapping":0,"GlobalAppearanceSetting":1,"HelpArticle":0,"HelpFeedback":0,"HelpLabNote":0,"HelpLocaleRevision":0,"HelpPublication":0,"HelpRevision":0,"HelpSupportConfig":0,"InventoryItem":0,"InventoryLocation":0,"InventoryLot":0,"InventoryReservation":0,"InventoryTransaction":0,"KoboConfig":0,"Lab":1,"LabAppearanceSetting":0,"LabLifecycleState":0,"LabMethodDefault":0,"LabPolicy":0,"LabPolicyOverride":0,"LabSequence":0,"Language":0,"Message":0,"MethodReference":0,"MethodRequirement":0,"Methodology":1,"NonconformityReport":0,"Notification":0,"OperationalGate":0,"OrderLine":0,"PreparationRecord":0,"ProficiencyRound":0,"Project":0,"ProjectLab":0,"QcEvaluation":1,"QcMeasurement":1,"QcRule":1,"ReferenceMaterial":0,"ReferenceValue":0,"Report":0,"ReportAccessLog":0,"ReportAmendmentWithdrawal":0,"ReportSequence":0,"ReportShareLink":0,"ReportedValueSelection":0,"Result":1,"ResultCalculation":0,"ResultEvidenceEvent":0,"ResultOverrideRequest":0,"ReviewDecision":0,"Sample":2,"SampleAmendment":0,"SampleAmendmentAttempt":0,"SampleHold":0,"SampleOrderRevision":0,"SpectralData":0,"StaffInvitation":0,"StaffRecoveryGrant":0,"Submission":0,"SystemSetting":0,"Unit":6,"User":1,"UserBenchCredential":0,"WorkAttempt":1,"WorkItem":2,"WorkItemDraft":1,"WorkItemEquipmentUse":0,"_exchange_connection_keys":0,"_exchange_connections":0,"_schema_migrations":31},"beforeHash":"73aa6e2260f74144e3bc804411e8618165a5120b80f5096d4276deea4651422e","afterHash":"93e1d2de201f23f23138f5824b66a13ef2e0b79be43b39024540241b7d5ddd79","totalChanges":1,"newTemplateCount":0,"newReceiptCount":0,"backfilledCount":0}
+
+      at Object.info (tests/contracts/audit_4_7_instrument_import_install.test.js:190:17)
+

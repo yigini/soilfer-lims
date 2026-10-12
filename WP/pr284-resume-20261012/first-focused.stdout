@@ -1,0 +1,11 @@
+
+> server@1.9.0 test
+> jest --runInBand --runTestsByPath tests/contracts/audit_4_7_instrument_import_install.test.js tests/contracts/audit_4_7_import_units.test.js tests/contracts/issue_213_export_equals_report.test.js tests/contracts/issue_283_one_unit_per_analysis.test.js tests/security/wiring.test.js tests/contracts/workflow_integrity_scanner.test.js
+
+No tests found, exiting with code 1
+Run with `--passWithNoTests` to exit with code 0
+No files found in C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server.
+Make sure Jest's configuration does not exclude this directory.
+To set up Jest, make sure a package.json file exists.
+Jest Documentation: https://jestjs.io/docs/configuration
+Files: "tests/contracts/audit_4_7_instrument_import_install.test.js", "tests/contracts/audit_4_7_import_units.test.js", "tests/contracts/issue_213_export_equals_report.test.js", "tests/contracts/issue_283_one_unit_per_analysis.test.js", "tests/security/wiring.test.js", "tests/contracts/workflow_integrity_scanner.test.js"

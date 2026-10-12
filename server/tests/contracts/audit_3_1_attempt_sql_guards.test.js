@@ -10,6 +10,7 @@ const {installWorkflowStateGuards}=require('../../scripts/install_workflow_state
 const {installResultAttemptLinks}=require('../../scripts/install_result_attempt_links');
 const {installWorkAttemptContract}=require('../../scripts/install_work_attempt_contract');
 const {loadWorkRepeatMigrationSource}=require('../../services/workRepeatMigrationSource');
+const {installCalculationReleasePrerequisites}=require('../helpers/calculationReleasePrerequisites');
 const {WORK_ATTEMPT_STATUS_LIST,LEGACY_WORK_ATTEMPT_STATUS_LIST,REPEAT_REASON_LIST,assertRepeatReason,canonicalWorkItemWhere}=require('../../services/workAttemptContract');
 const directory=path.resolve(__dirname,'../.tmp'),timestamp=Date.parse('2026-10-01T12:00:00Z');
 let db,client,file;
@@ -267,6 +268,11 @@ test('the authenticated workspace returns linked and unlinked attempt metadata w
     require('../../scripts/install_report_revisions').installReportRevisions({dbPath:file,apply:true});
     require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:file,apply:true});
     require('../../scripts/install_preparation_records').installPreparationRecords({dbPath:file,apply:true});
+    // Current workspace reads include the nullable draft import pointer. Prepare
+    // this one owned predecessor through the actual prerequisite and import
+    // installers; all retained raw Result/attempt assertions stay unchanged.
+    installCalculationReleasePrerequisites(file);
+    require('../../scripts/install_instrument_imports').installInstrumentImports({dbPath:file,apply:true});
     await insert('linked',{attemptNo:2,evidenceData:'{"private":"linked"}'});
     result('linked-result',{attemptId:'linked'});result('imported',{param:'NO_WORK',provenance:'IMPORTED'});
     const {createAuthTokenFixture}=require('../helpers/workflowFixtures');

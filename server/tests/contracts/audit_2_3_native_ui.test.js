@@ -23,11 +23,11 @@ function mount(batch) {
                     { module: navigation, exports: navigation.exports });
                 return navigation.exports;
             }
-            if (name === './BarcodeSafeInput' || name === './CalibrationCurvePanel' || name === './CalculationTemplateManager') {
+            if (name === './BarcodeSafeInput' || name === './CalibrationCurvePanel' || name === './CalculationTemplateManager' || name === './InstrumentImportPanel') {
                 const child = { exports: {} };
                 const source = fs.readFileSync(path.resolve(__dirname, '../../../client/src/components/workbench', name + '.jsx'), 'utf8');
                 vm.runInNewContext(esbuild.transformSync(source, { loader: 'jsx', format: 'cjs' }).code,
-                    { module: child, exports: child.exports, Date, setTimeout, clearTimeout,
+                    { module: child, exports: child.exports, Date, setTimeout, clearTimeout, FormData,
                         require(dependency) {
                             if (dependency === 'react') return react;
                             if (dependency === 'axios') return axios;

@@ -1,0 +1,41 @@
+{
+  "utc": "2026-10-12T05:41:12.542692+00:00",
+  "files": [
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma\\dev.db",
+      "sha256": "ef02482e586391f1670f88279bfc7f436a847c5c20e2457e76ca4a94a8efcaca",
+      "bytes": 2473984,
+      "tables": 80,
+      "samples": 0,
+      "helpPublications": 104
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma\\dev.db-wal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma\\dev.db-shm",
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "bytes": 32768
+    },
+    {
+      "path": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db",
+      "sha256": "490b8c4782bdc5300e729dbcafe9f01dd695995a7d6c69f3002dde9b75cf1835",
+      "bytes": 563195904,
+      "tables": 71,
+      "samples": 35195,
+      "helpPublications": 678
+    },
+    {
+      "path": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db-wal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db-shm",
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "bytes": 32768
+    }
+  ]
+}

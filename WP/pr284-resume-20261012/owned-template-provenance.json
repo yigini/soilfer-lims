@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-12T05:53:33.644072+00:00",
+  "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.owned-templates\\test_template_33522c62-1788-4298-8db6-06a0d4e5ff38.db",
+  "sha256": "e8300c63d817933182ad35393eb5a84bd1974f2ddf5f5830efdce0ec21fd1498",
+  "bytes": 2752512,
+  "source": "independently emitted current merged Prisma schema; same CI profile/units/references/catalogue/languages/help metadata and publication commands",
+  "scientificRows": "no Sample/Result/WorkItem/WorkAttempt/ReviewDecision/Report rows initialized",
+  "protectedOriginalLocalDBs": "all DB/WAL/SHM raw hashes unchanged; working490b and ownedef024 retained",
+  "normalHooks": "original normal globalSetup/ownedSuiteSetup/teardown; only closed explicit owned template selection and equivalent test discovery matcher"
+}

@@ -1,0 +1,10 @@
+{
+  "defaultRun": "first-focused stdout retained: zero tests discovered and no setup/test executed",
+  "cause": "Jest30 escaped the hidden .codex parent in absolute rootDir glob; showConfig retained",
+  "equivalentMatcher": "**/tests/**/*.test.js",
+  "filesystemTestFileCount": 360,
+  "jestDiscoveredCount": 360,
+  "sameNormalGlobalSetupTeardownAndOwnedSuiteSetup": true,
+  "assertionsUnchanged": true,
+  "noTestSkippingOrFilteringForFullRun": true
+}

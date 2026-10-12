@@ -89,3 +89,16 @@ WP/pr293-frozen-kit-20261012T044924Z/** -text
 
 WP/pr293-independent-postdeploy/** -text
 WP/pr293-independent-postdeploy/handoff-053100Z/** -text
+server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql text eol=lf
+server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json text eol=lf
+server/services/instrumentImportMigrationSource.js text eol=lf
+server/tests/helpers/instrumentImportHistoricalFixture.js text eol=lf
+server/tests/helpers/fixtures/pre200_full_application_schema.sql -text
+server/tests/helpers/fixtures/pre200_after210_full_application_schema.sql -text
+server/tests/helpers/instrumentImportMainHistoricalFixture.js text eol=lf
+server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql text eol=lf
+server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql text eol=lf
+server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json text eol=lf
+server/tests/helpers/fixtures/pre200_after293_full_application_schema.sql -text
+server/tests/helpers/instrumentImportReleaseHistoricalFixture.js text eol=lf
+WP/pr284-resume-20261012/** -text

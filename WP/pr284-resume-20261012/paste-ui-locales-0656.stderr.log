@@ -1,0 +1,36 @@
+PASS tests/contracts/audit_4_7_paste_preview.test.js
+  √ actual paste preview matches displayed lab code using "\t" and retains decoded value whitespace (63 ms)
+  √ actual paste preview matches displayed lab code using ";" and retains decoded value whitespace (10 ms)
+  √ actual paste preview matches displayed lab code using "," and retains decoded value whitespace (6 ms)
+  √ 40 labelled sample rows apply to 40 exact tasks; an unknown ID is displayed and excluded (19 ms)
+  √ internal, original and explicitly supplied lab labels remain exact aliases (17 ms)
+  √ colliding identifiers and different aliases for the same task never choose or overwrite a target (12 ms)
+  √ numeric ambiguity follows the supplied task policy and never uses the user locale as a fallback (15 ms)
+  √ malformed quotes, extra cells, empty values and non-finite values remain visible and excluded (32 ms)
+  √ edited text or delimiter requires a fresh preview and queue status changes are re-evaluated (10 ms)
+  √ explicit delimiter resolves an identifier containing another supported separator (6 ms)
+  √ quoted IDs, escaped quotes, embedded newlines, BOM and physical row numbers decode without losing cell evidence (10 ms)
+  √ all five locales contain the same complete paste-preview keys and parameter placeholders (23 ms)
+
+PASS tests/contracts/audit_4_7_import_ui.test.js
+  √ new mappings use only the scoped catalogue units and exact activated SOP inputs; a manager explicitly saves them (57 ms)
+  √ a saved mapping revision retains the original, invalidates its preview and sends the precise predecessor version (24 ms)
+  √ real multipart preview and commit retain the exact file, mapping, explicit worksheet and sealed token; no receipt field is supplied (24 ms)
+  √ changing import-sheet clears the previous authorization and requires a new preview (19 ms)
+  √ changing import-template clears the previous authorization and requires a new preview (17 ms)
+  √ changing import-file clears the previous authorization and requires a new preview (18 ms)
+  √ all refused rows and their cell references are visible; the commit callback cannot send a refused preview (16 ms)
+  √ a later commit conflict lists the precise refused rows and never reports success (19 ms)
+  √ a preview response for the previous run is ignored after the operator changes runs (16 ms)
+  √ entry permission can use a saved mapping without exposing equipment-manager revision controls (8 ms)
+  √ an unavailable native run exposes no import actions or context request: {"canEdit":false} (4 ms)
+  √ an unavailable native run exposes no import actions or context request: {"batch":{"id":"owned-import-run","labId":"owned-lab","instrumentId":"owned-instrument","startedAt":null,"status":"OPEN"}} (3 ms)
+  √ an unavailable native run exposes no import actions or context request: {"batch":{"id":"owned-import-run","labId":"owned-lab","instrumentId":null,"startedAt":"2026-10-10T00:00:00Z","status":"OPEN"}} (6 ms)
+  √ an unavailable native run exposes no import actions or context request: {"batch":{"id":"owned-import-run","labId":"owned-lab","instrumentId":"owned-instrument","startedAt":"2026-10-10T00:00:00Z","status":"CLOSED"}} (3 ms)
+  √ the complete import screen and stable refusal codes exist in all five translations (27 ms)
+
+Test Suites: 2 passed, 2 total
+Tests:       27 passed, 27 total
+Snapshots:   0 total
+Time:        0.74 s, estimated 1 s
+Ran all test suites within paths "tests/contracts/audit_4_7_paste_preview.test.js", "tests/contracts/audit_4_7_import_ui.test.js".
