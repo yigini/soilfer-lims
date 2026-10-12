@@ -1,0 +1,11 @@
+{
+  "recordedUtc": "2026-10-12T04:59:54.585752+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-release-51f67988-20261012T044924Z",
+  "unit": "lims-release-runtime-kobo-release-51f67988-20261012t044924z.service",
+  "reviewId": 6118040064,
+  "head": "51f6798806f630773786a08432290c1b21a841da",
+  "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+  "manifestSha256": "29b45cdba8f16552a160929afd9dc0d39bf86cbf9bae92addca5556bdaf2b2ac",
+  "action": "ONE_FRESH_GATE_THEN_ONE_REVIEWED_FORWARD_LAUNCH",
+  "standingGo": "AUTO_AFTER_REVIEW/my go covers all"
+}

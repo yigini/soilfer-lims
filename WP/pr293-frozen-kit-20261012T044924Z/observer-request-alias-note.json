@@ -1,0 +1,7 @@
+{
+  "recordedUtc": "2026-10-12T04:57:45.417513+00:00",
+  "file": "exact-kit-pass-6117986071.json",
+  "actualRecordKind": "REQUEST_ONLY_NOT_APPROVAL",
+  "actualCommentId": 6117986071,
+  "reason": "Observer initially matched mandatory token text contained in our request. This alias is preserved but cannot authorize a gate. Actual Claudio review must be separate with an affirmative verdict header."
+}
