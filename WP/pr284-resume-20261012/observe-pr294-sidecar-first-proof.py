@@ -30,8 +30,16 @@ outputs={}
 for name in ['unit.stdout','unit.stderr']:
  p=r/name
  if p.exists():outputs[name]=p.read_text(encoding='utf-8',errors='replace')[-6000:]
+progress={}
+for name in ['import-dry-container.json','import-apply-container.json','import-repeat-container.json',
+ 'import-install-preservation.json','import-repeat-preservation.json',
+ 'after-repeat-stopped/sealed-state.json','after-jobs-off-stopped/sealed-state.json',
+ 'first-sync-preservation.json','second-sync-preservation.json']:
+ p=r/name
+ if p.exists() and p.stat().st_mode&0o777==0o400:
+  progress[name]={'sha256':sha(p),'value':json.loads(p.read_bytes())}
 print(json.dumps({'observedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'root':str(r),'unit':u,
- 'unitState':state,'files':files,'receipt':receipt,'containers':containers,'outputs':outputs,
+ 'unitState':state,'files':files,'receipt':receipt,'containers':containers,'outputs':outputs,'progress':progress,
  'freeBytes':os.statvfs('/opt/lims').f_bavail*os.statvfs('/opt/lims').f_frsize,
  'productionMutations':0,'sqliteConnections':0}))
 '''
@@ -44,4 +52,4 @@ path = directory / ('pr294-sidecar-proof-observation-' + stamp + '.json')
 with path.open('x', encoding='utf-8', newline='\n') as stream: json.dump(evidence, stream, indent=2)
 print(json.dumps({'path':str(path),'observedUtc':evidence['observedUtc'],'unitState':evidence['unitState'],
     'receipt':evidence['receipt'], 'containers':evidence['containers'], 'freeBytes':evidence['freeBytes'],
-    'outputs':evidence['outputs']}))
+    'outputs':evidence['outputs'], 'progressHashes':{name:row['sha256'] for name,row in evidence['progress'].items()}}))

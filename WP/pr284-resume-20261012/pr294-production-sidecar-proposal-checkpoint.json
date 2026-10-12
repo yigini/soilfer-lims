@@ -1,0 +1,9 @@
+{
+  "recordedUtc": "2026-10-12T15:14:03.302894+00:00",
+  "proposalSource": "5fa7e65f3d13a04f270e90e0b4b129f8eaf3296e",
+  "status": "PROPOSED_PRODUCTION_SOURCE_NO_REQUEST_NO_APPROVAL_NO_EXECUTION",
+  "activeProofObservation": "pr294-sidecar-proof-observation-20261012T151142084631Z.json",
+  "observationSha256": "eea557f7b02de99b66bf2f42908791dfb089fd042fa6a4e0bf63b472ce1c5475",
+  "nativeBoundaryDeliveredAndVerified": true,
+  "productionOperations": 0
+}
