@@ -1,0 +1,10 @@
+{
+  "recordedUtc": "2026-10-12T19:15:13.673890+00:00",
+  "status": "MEASURED_PACKAGING_CORRECTION_ACTUAL_REVIEW_PENDING",
+  "requestId": 6130853606,
+  "requestSha256": "a334d7486ac2967e6a935323cf5b7e6bf4da525e7d76ae67a2d36a0605ccc93e",
+  "nativeDeliveryVisuallyVerified": true,
+  "actualClaudioDiffAndGuardReviewAcknowledged": true,
+  "formalSourcePassClaimed": false,
+  "productionOperations": 0
+}
