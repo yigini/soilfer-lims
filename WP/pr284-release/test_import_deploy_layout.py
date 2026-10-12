@@ -50,16 +50,22 @@ class ImportDeployLayoutTests(unittest.TestCase):
         self.root.__str__.return_value = '/opt/lims/releases/' + self.root.name
         self.head = '1' * 40
         self.manifest = {'root': str(self.root), 'head': self.head,
+            'outputNamespace': adapter.namespace_binding(RAW_PACKAGE),
             'files': {name: self.digest(raw) for name, raw in RAW_PACKAGE.items()}}
         self.manifest_bytes = json.dumps(self.manifest).encode()
         self.manifest_sha = self.digest(self.manifest_bytes)
         self.gate = {'executionRoot': str(self.root), 'manifestSha256': self.manifest_sha, 'head': self.head}
         gate_bytes = json.dumps(self.gate).encode(); self.gate_sha = self.digest(gate_bytes)
         self.attempt = {'gateSha256': self.gate_sha, 'head': self.head}
+        self.frozen_entries = {name: self.entry(name, raw) for name, raw in {
+            **RAW_PACKAGE, 'prepared-manifest.json': self.manifest_bytes}.items()}
+        self.frozen = self.entry('frozen')
+        self.frozen.is_dir.return_value = True
+        self.frozen.is_file.return_value = False
         self.entries = {name: self.entry(name, raw) for name, raw in {
-            **RAW_PACKAGE, 'prepared-manifest.json': self.manifest_bytes,
             'production-gate.json': gate_bytes,
             'execution-attempt.json': json.dumps(self.attempt).encode()}.items()}
+        self.entries['frozen'] = self.frozen
 
     @staticmethod
     def digest(raw): return hashlib.sha256(raw).hexdigest()
@@ -73,6 +79,7 @@ class ImportDeployLayoutTests(unittest.TestCase):
 
     def check(self):
         self.root.iterdir.return_value = list(self.entries.values())
+        self.frozen.iterdir.return_value = list(self.frozen_entries.values())
         adapter.require_frozen_root(self.root, self.manifest, self.manifest_sha, self.gate_sha)
 
     def test_exact_unused_frozen_kit_and_journal_only_output_accept(self):
@@ -81,13 +88,13 @@ class ImportDeployLayoutTests(unittest.TestCase):
         self.check()
 
     def test_every_required_file_changed_missing_or_writable_refuses(self):
-        for name, item in list(self.entries.items()):
-            if name == 'execution-attempt.json': continue
+        for name, item in list(self.frozen_entries.items()) + [('production-gate.json', self.entries['production-gate.json'])]:
+            entries = self.entries if name == 'production-gate.json' else self.frozen_entries
             raw = item.read_bytes.return_value; item.read_bytes.return_value = b'changed'
             with self.subTest(changed=name), self.assertRaises(RuntimeError): self.check()
-            item.read_bytes.return_value = raw; del self.entries[name]
+            item.read_bytes.return_value = raw; del entries[name]
             with self.subTest(missing=name), self.assertRaises(RuntimeError): self.check()
-            self.entries[name] = item; item.stat.return_value.st_mode = stat.S_IFREG | 0o600
+            entries[name] = item; item.stat.return_value.st_mode = stat.S_IFREG | 0o600
             with self.subTest(writable=name), self.assertRaises(RuntimeError): self.check()
             item.stat.return_value.st_mode = stat.S_IFREG | 0o400
 
@@ -98,12 +105,19 @@ class ImportDeployLayoutTests(unittest.TestCase):
             with self.subTest(name=name), patch.object(adapter, 'core_allocations') as scan, self.assertRaises(RuntimeError):
                 adapter.KnownCoreDiskGuard(self.root, 500, self.manifest, self.manifest_sha, self.gate_sha)
             scan.assert_not_called(); del self.entries[name]
-        for item in self.entries.values():
+        for item in list(self.frozen_entries.values()) + list(self.entries.values()):
             item.is_symlink.return_value = True
             with self.subTest(symlink=item.name), self.assertRaises(RuntimeError): self.check()
-            item.is_symlink.return_value = False; item.is_file.return_value = False
+            item.is_symlink.return_value = False
+            if item.name == 'frozen':
+                item.is_dir.return_value = False
+            else:
+                item.is_file.return_value = False
             with self.subTest(directory=item.name), self.assertRaises(RuntimeError): self.check()
-            item.is_file.return_value = True
+            if item.name == 'frozen':
+                item.is_dir.return_value = True
+            else:
+                item.is_file.return_value = True
 
     def test_missing_or_wrong_execution_attempt_and_gate_bindings_refuse(self):
         item = self.entries.pop('execution-attempt.json')

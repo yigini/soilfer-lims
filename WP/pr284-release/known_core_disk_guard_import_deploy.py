@@ -11,6 +11,7 @@ import startup_common as c
 from known_core_disk_guard_v2 import KnownCoreDiskGuard as V2Guard
 from known_core_disk_guard_v3 import confirm_baseline, ATTEMPTS_MAX, DEADLINE_SECONDS, POLICY
 from known_core_disk_guard import core_allocations
+from production_output_paths import FROZEN_DIRECTORY, namespace_binding
 
 
 def require_frozen_root(root, manifest, manifest_sha, gate_sha):
@@ -19,26 +20,39 @@ def require_frozen_root(root, manifest, manifest_sha, gate_sha):
         raise RuntimeError('Baseline requires the exact new frozen release root')
     # These two authority files bind the kit and gate. They are required frozen
     # files, not unmeasured outputs. Unit output goes to the systemd journal.
-    required = {**manifest['files'], 'prepared-manifest.json': manifest_sha, 'production-gate.json': gate_sha}
+    required = {**manifest['files'], 'prepared-manifest.json': manifest_sha}
     if any(pathlib.PurePosixPath(name).name != name or name.startswith('production-receipt') or
             name.endswith(('.db', '.tar.gz')) for name in required):
         raise RuntimeError('Unsafe frozen baseline file set')
+    if manifest.get('outputNamespace') != namespace_binding(manifest['files']):
+        raise RuntimeError('Frozen/output namespace authority differs')
     entries = {path.name: path for path in root.iterdir()}
-    if set(entries) - set(required) - {'execution-attempt.json', 'disk-allocation-observations.jsonl'}:
+    if set(entries) - {FROZEN_DIRECTORY, 'production-gate.json', 'execution-attempt.json',
+            'disk-allocation-observations.jsonl'}:
         raise RuntimeError('Extra allocation in unused frozen kit')
     for name, path in entries.items():
-        if path.is_symlink() or not path.is_file():
+        if path.is_symlink() or not (path.is_dir() if name == FROZEN_DIRECTORY else path.is_file()):
             raise RuntimeError('Frozen baseline contains a directory or symlink')
+    frozen = entries.get(FROZEN_DIRECTORY)
+    if frozen is None:
+        raise RuntimeError('Dedicated frozen directory missing')
+    frozen_entries = {path.name: path for path in frozen.iterdir()}
+    if set(frozen_entries) != set(required):
+        raise RuntimeError('Frozen baseline file set differs')
     for name, digest in required.items():
-        path = entries.get(name)
-        if path is None or path.stat().st_mode & 0o777 != 0o400 or \
+        path = frozen_entries.get(name)
+        if path is None or path.is_symlink() or not path.is_file() or path.stat().st_mode & 0o777 != 0o400 or \
                 hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             raise RuntimeError('Frozen baseline file missing or changed: ' + name)
+    gate_path = entries.get('production-gate.json')
+    if gate_path is None or gate_path.stat().st_mode & 0o777 != 0o400 or \
+            hashlib.sha256(gate_path.read_bytes()).hexdigest() != gate_sha:
+        raise RuntimeError('Frozen single-use gate missing or changed')
     attempt = entries.get('execution-attempt.json')
     if attempt is None or attempt.stat().st_mode & 0o777 != 0o400:
         raise RuntimeError('Exclusive immutable execution attempt missing')
     bound = json.loads(attempt.read_bytes())
-    gate = json.loads(entries['production-gate.json'].read_bytes())
+    gate = json.loads(gate_path.read_bytes())
     if bound['gateSha256'] != gate_sha or bound['head'] != manifest['head'] or \
             gate['executionRoot'] != str(root) or gate['manifestSha256'] != manifest_sha or \
             gate['head'] != manifest['head']:

@@ -83,7 +83,7 @@ def main():
     proof, target = map(pathlib.Path, sys.argv[1:])
     require_first_proof_root(str(proof))
     safe_root(str(proof), 'instrument-import-proof-'); safe_root(str(target), 'instrument-import-release-')
-    require(not target.exists(), 'Never overwrite or refreeze a kit')
+    require(not target.exists() and not target.is_symlink(), 'Never overwrite or refreeze a kit')
     lock = pathlib.Path('/opt/lims/apply.lock').open('a')
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     print(json.dumps({'event': 'START', 'stage': 'stopped-authority-and-retained-file-hashes'}), flush=True)
@@ -261,6 +261,7 @@ def main():
     require(min(s.disk_free().values()) >= FLOOR + sum(map(len, files.values())) + 268435456,
         'Packaging allocation reserve refused')
     manifest = {'status': KIT_STATUS, 'root': str(target), 'head': pin['head'], 'image': pin['image'], 'tree': pin['tree'],
+        'outputNamespace': namespace_binding(FROZEN_FILE_SET),
         **build_reuse_binding(), 'repeatPhysicalPolicy': REPEAT_POLICY,
         'baseHead': BASE_HEAD, 'mergeBaseHead': MERGE_BASE_HEAD,
         'auditReviewId': AUDIT_REVIEW_ID, 'firstProofPolicy': FIRST_PROOF_POLICY,
@@ -285,11 +286,14 @@ def main():
         'totalElapsedSeconds': time.monotonic() - VALIDATION_STARTED,
         'destinationCreated': False}), flush=True)
     target.mkdir(mode=0o700)
-    for name, raw in files.items(): freeze_file(target, name, raw)
-    freeze_file(target, 'prepared-manifest.json', (json.dumps(manifest, indent=2) + '\n').encode())
+    evidence = target / FROZEN_DIRECTORY
+    evidence.mkdir(mode=0o700)
+    for name, raw in files.items(): freeze_file(evidence, name, raw)
+    freeze_file(evidence, 'prepared-manifest.json', (json.dumps(manifest, indent=2) + '\n').encode())
     frozen_files(target, manifest)
+    require_unused_outputs(target, FROZEN_FILE_SET)
     require(sha(receipt_path) == receipt_sha, 'Original proof receipt changed during freeze')
-    print(json.dumps({'status': KIT_STATUS, 'root': str(target), 'manifestSha256': sha(target / 'prepared-manifest.json'),
+    print(json.dumps({'status': KIT_STATUS, 'root': str(target), 'manifestSha256': sha(evidence / 'prepared-manifest.json'),
         'coordinatorSha256': manifest['files']['deploy_import.py'], 'receiptSha256': receipt_sha,
         'targetPinSha256': manifest['files']['target-pin.json'], 'fileCount': len(files)}), flush=True)
 

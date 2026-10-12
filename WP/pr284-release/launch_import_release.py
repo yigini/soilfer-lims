@@ -12,16 +12,16 @@ def main():
     require(unit == 'lims-release-' + path.name.lower() + '.service', 'Unexpected single owned production unit')
     payload = base64.b64encode(json.dumps({'root': root, 'unit': unit}).encode()).decode()
     code = '''import base64,hashlib,json,pathlib,subprocess,sys
-p=json.loads(base64.b64decode(PAYLOAD));r=pathlib.Path(p['root']);sys.path.insert(0,str(r))
+p=json.loads(base64.b64decode(PAYLOAD));r=pathlib.Path(p['root']);sys.path.insert(0,str(r/'frozen'))
 from deploy_import import execution_preflight
 from import_release_contract import verify_gate,verify_entry_readiness
-m=json.loads((r/'prepared-manifest.json').read_bytes());g=json.loads((r/'production-gate.json').read_bytes())
-digest=hashlib.sha256((r/'prepared-manifest.json').read_bytes()).hexdigest()
+m=json.loads((r/'frozen'/'prepared-manifest.json').read_bytes());g=json.loads((r/'production-gate.json').read_bytes())
+digest=hashlib.sha256((r/'frozen'/'prepared-manifest.json').read_bytes()).hexdigest()
 actual=execution_preflight(r,digest);verify_gate(m,g,digest);verify_entry_readiness(m,g,actual)
 assert (r/'production-gate.json').stat().st_mode&0o777==0o400
 result=subprocess.run(['systemd-run','--unit='+p['unit'],'--property=Type=exec','--property=RuntimeMaxSec=5400',
  '--property=KillMode=process','--property=StandardOutput=journal',
- '--property=StandardError=journal','/usr/bin/python3','-B',str(r/'deploy_import.py'),
+ '--property=StandardError=journal','/usr/bin/python3','-B',str(r/'frozen'/'deploy_import.py'),
  '--execute-new-reviewed-import-gate'],text=True,capture_output=True,timeout=20)
 assert result.returncode==0,result.stderr
 print(json.dumps({'root':str(r),'unit':p['unit'],'head':m['head'],'image':m['image'],

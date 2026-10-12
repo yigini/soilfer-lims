@@ -31,21 +31,23 @@ def main():
     kit, review_id, output = sys.argv[1:]
     kit = pathlib.Path(kit); output = pathlib.Path(output)
     require(not output.exists(), 'Never overwrite an execution gate')
-    manifest = json.loads((kit / 'prepared-manifest.json').read_bytes())
+    evidence = frozen_directory(kit)
+    manifest = json.loads(safe_reference(evidence, 'prepared-manifest.json').read_bytes())
     root = str(safe_root(manifest['root'], 'instrument-import-release-'))
-    manifest_sha = sha(kit / 'prepared-manifest.json')
+    manifest_sha = sha(evidence / 'prepared-manifest.json')
+    require_unused_outputs(kit, FROZEN_FILE_SET)
     for name, digest in manifest['files'].items():
-        require(pathlib.PurePosixPath(name).name == name and not (kit / name).is_symlink() and
-            sha(kit / name) == digest, 'Downloaded frozen kit differs: ' + name)
+        require(pathlib.PurePosixPath(name).name == name and
+            sha(safe_reference(evidence, name)) == digest, 'Downloaded frozen kit differs: ' + name)
     payload = base64.b64encode(json.dumps({'root': root, 'manifestSha256': manifest_sha}).encode()).decode()
     preflight = '''import base64,json,pathlib,sys
-p=json.loads(base64.b64decode(PAYLOAD));r=pathlib.Path(p['root']);sys.path.insert(0,str(r))
+p=json.loads(base64.b64decode(PAYLOAD));r=pathlib.Path(p['root']);sys.path.insert(0,str(r/'frozen'))
 from deploy_import import execution_preflight
 print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=True)))
 '''.replace('PAYLOAD', repr(payload))
     readiness = remote(preflight)
     require(readiness['productionMutations'] == 0 and readiness['ready'] is True, 'Remote kit is not ready')
-    pin = json.loads((kit / 'target-pin.json').read_bytes())
+    pin = json.loads(safe_reference(evidence, 'target-pin.json').read_bytes())
     pr = github('pulls/' + str(PR_NUMBER)); current = github('git/ref/heads/main')['object']['sha']
     require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD and
         pr['merge_commit_sha'] == current == pin['head'], 'Exact merged-main head changed')
@@ -64,7 +66,7 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
     kit_comments = github('issues/162/comments?per_page=100', True)
     source_review = github('issues/comments/' + str(manifest['sourceReviewId']))
     production_source = github('issues/comments/' + str(manifest['productionBaselineSourceReviewId']))
-    frozen_production_source = json.loads((kit / 'production-baseline-source-review.json').read_bytes())
+    frozen_production_source = json.loads(safe_reference(evidence, 'production-baseline-source-review.json').read_bytes())
     require(production_source['body'] == frozen_production_source['body'] and
         production_source['created_at'] == frozen_production_source['created_at'], 'Production source verdict changed')
     later_production_failure = any(has_failed_verdict(row['body'], include_source=True) and
@@ -75,10 +77,11 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
         for row in kit_comments)
     later_kit_failure = any(has_failed_verdict(row['body']) and row['created_at'] > kit_review['created_at']
         for row in kit_comments)
-    yy = json.loads((kit / 'yy-authorization-evidence.md').read_bytes())
+    yy = json.loads(safe_reference(evidence, 'yy-authorization-evidence.md').read_bytes())
     require(yy['confirmedByYY'] is True and yy['scopeText'] == 'my go covers all' and
         yy['authorizationMode'] == 'AUTO_AFTER_REVIEW', 'Original YY standing go missing')
     gate = {'status': 'FRESH_SINGLE_USE_IMPORT_GATE', 'executionRoot': root, 'head': current,
+        'outputNamespace': manifest['outputNamespace'],
         'buildReuseBinding': build_reuse_binding(), 'repeatPhysicalPolicy': REPEAT_POLICY,
         'frozenFiles': manifest['files'], 'currentMainHead': current, 'image': pin['image'], 'manifestSha256': manifest_sha,
         'coordinatorSha256': manifest['files']['deploy_import.py'],
@@ -126,11 +129,11 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
         out.write(data)
     encoded = base64.b64encode(data).decode()
     install = '''import base64,hashlib,json,pathlib,sys
-p=json.loads(base64.b64decode(PAYLOAD));r=pathlib.Path(p['root']);sys.path.insert(0,str(r))
+p=json.loads(base64.b64decode(PAYLOAD));r=pathlib.Path(p['root']);sys.path.insert(0,str(r/'frozen'))
 from deploy_import import execution_preflight
 from import_release_contract import verify_gate,verify_entry_readiness
 actual=execution_preflight(r,p['manifestSha256'],require_unused_gate=True)
-data=base64.b64decode(DATA);g=json.loads(data);m=json.loads((r/'prepared-manifest.json').read_bytes())
+data=base64.b64decode(DATA);g=json.loads(data);m=json.loads((r/'frozen'/'prepared-manifest.json').read_bytes())
 verify_gate(m,g,p['manifestSha256'])
 verify_entry_readiness(m,g,actual)
 with (r/'production-gate.json').open('xb') as out:out.write(data)

@@ -15,6 +15,8 @@ from import_source_graph import SOURCE_FILES, UNCHANGED_HELPER_HASHES
 from import_installation import CLI_TIMEOUT_SECONDS, DRY_COPY_POLICY, validate_apply, validate_plan
 from import_stage import REPEAT_POLICY, readonly_repeat_physical
 from import_startup_checks import READY_EVENTS, import_zero
+from production_output_paths import (POLICY as OUTPUT_NAMESPACE_POLICY, FROZEN_DIRECTORY,
+    frozen_directory, namespace_binding, require_unused_outputs, require_prequiesce_outputs)
 
 WORKLOAD_PINS = {'labAndHubBuildsOwnedByYY': True,
     'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}
@@ -55,10 +57,11 @@ REVIEWED_PROOF_FILES = {
 }
 PRODUCTION_SOURCE_FILES = ['import_release_contract.py', 'deploy_import.py',
     'freeze_import.py', 'known_core_disk_guard_import_deploy.py',
-    'collect_import_gate.py', 'export_freeze_import_kit.py', 'launch_import_release.py']
+    'collect_import_gate.py', 'export_freeze_import_kit.py', 'launch_import_release.py',
+    'production_output_paths.py']
 PACKAGE_SOURCE_FILES = SOURCE_FILES | set(PRODUCTION_SOURCE_FILES) | {'yy-authorization-evidence.md'}
 PROOF_BASELINE_LAYOUT_POLICY = 'EXACT_HASHED_IMPORT_PROOF_AUTHORITY_LAYOUT'
-DEPLOY_LAYOUT_POLICY = 'EXACT_HASHED_UNUSED_IMPORT_KIT_AND_SINGLE_USE_GATE'
+DEPLOY_LAYOUT_POLICY = OUTPUT_NAMESPACE_POLICY
 BASELINE_POLICY = 'CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE'
 BASELINE_ATTEMPTS_MAX = 3
 BASELINE_CONFIRMATION_SECONDS = CORE_CONFIRMATION_SECONDS = 10
@@ -346,6 +349,8 @@ def source_policy_tokens():
         'retainedDatabaseAllocationCount=' + str(RETAINED_DATABASE_ALLOCATION_COUNT),
         'repeatPhysicalPolicy=' + REPEAT_POLICY, 'defaultStartup=23NO_OP0/22READY0',
         'REQUIRED_HASHED_MANIFEST_AND_GATE', 'JOURNAL_UNIT_OUTPUT', DEPLOY_LAYOUT_POLICY,
+        'frozenDirectory=frozen', 'prospectiveOutputsAbsentBeforeQuiesce=true',
+        'outputCatalogSha256=' + namespace_binding(FROZEN_FILE_SET)['catalogSha256'],
         'BASELINE_ATTEMPTS_MAX=3', 'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10',
         'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
         'productionObservationSeconds=660', 'deadlineSeconds=600',
@@ -376,6 +381,8 @@ def measurement_manifest(manifest):
     require_build_reuse(manifest)
     require(manifest.get('repeatPhysicalPolicy') == REPEAT_POLICY,
         'Frozen readonly repeat policy differs')
+    require(manifest.get('outputNamespace') == namespace_binding(FROZEN_FILE_SET),
+        'Hash-bound disjoint frozen/execution namespace differs')
     require(set(manifest['files']) == FROZEN_FILE_SET and
         all(re.fullmatch('[a-f0-9]{64}', digest) for digest in manifest['files'].values()) and
         {name: manifest['files'][name] for name in SOURCE_FILES} == REVIEWED_PROOF_FILES,
@@ -416,6 +423,8 @@ def review_tokens(manifest, manifest_sha):
 def verify_gate(manifest, gate, manifest_sha, now=None):
     now = now or datetime.datetime.now(datetime.timezone.utc)
     measurement_manifest(manifest)
+    require(gate.get('outputNamespace') == manifest['outputNamespace'],
+        'Gate output namespace differs')
     require(gate.get('buildReuseBinding') == build_reuse_binding() and
         gate.get('repeatPhysicalPolicy') == REPEAT_POLICY, 'Gate repeat or build reuse authority differs')
     require(gate['status'] == 'FRESH_SINGLE_USE_IMPORT_GATE' and gate['executionRoot'] == manifest['root'] and
@@ -473,6 +482,9 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
 
 def frozen_files(root, manifest):
     measurement_manifest(manifest)
+    root = frozen_directory(root)
+    require({path.name for path in root.iterdir()} == FROZEN_FILE_SET | {'prepared-manifest.json'},
+        'Frozen evidence has extra or missing paths')
     for name, digest in manifest['files'].items():
         require(pathlib.PurePosixPath(name).name == name and sha(safe_reference(root, name)) == digest,
             'Frozen file changed: ' + name)

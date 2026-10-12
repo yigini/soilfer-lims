@@ -8,6 +8,7 @@ import fcntl
 import json
 import os
 import pathlib
+import re
 import signal
 import stat
 import subprocess
@@ -22,7 +23,8 @@ from import_sealing import sealed_stopped_state
 from import_stage import install_once
 from import_startup_checks import startup_checks as import_startup_checks
 
-ROOT = pathlib.Path(__file__).resolve().parent
+FROZEN = pathlib.Path(__file__).resolve().parent
+ROOT = FROZEN.parent
 HISTORICAL_ROOT = pathlib.Path(HISTORICAL_ROOT_PATH)
 
 
@@ -109,12 +111,14 @@ def execution_preflight(root, manifest_sha, require_unused_gate=False):
     require(os.geteuid() == 0 and sys.flags.optimize == 0 and
         os.environ.get('PYTHONOPTIMIZE', '') in ['', '0'], 'Root and plain Python required')
     safe_root(str(root), 'instrument-import-release-')
+    require_unused_outputs(root, FROZEN_FILE_SET, gate_present=not require_unused_gate)
     require(not any((root / name).exists() for name in ['production-receipt.json',
         'production-receipt.in-progress', 'execution-attempt.json']), 'Never replay a release attempt')
     if require_unused_gate:
         require(not (root / 'production-gate.json').exists(), 'Never overwrite or recollect a gate')
-    require(sha(root / 'prepared-manifest.json') == manifest_sha, 'Manifest changed')
-    manifest = json.loads((root / 'prepared-manifest.json').read_bytes())
+    evidence = frozen_directory(root)
+    require(sha(safe_reference(evidence, 'prepared-manifest.json')) == manifest_sha, 'Manifest changed')
+    manifest = json.loads(safe_reference(evidence, 'prepared-manifest.json').read_bytes())
     require(manifest['root'] == str(root), 'Execution root differs')
     pin = frozen_files(root, manifest); original_proof_files(manifest)
     build_root = pathlib.Path(pin['buildRoot']); safe_root(str(build_root), 'instrument-import-build-')
@@ -153,6 +157,27 @@ def execution_preflight(root, manifest_sha, require_unused_gate=False):
         'entryState': entry}
 
 
+def production_probes(root, frozen, name, database, expected):
+    """Shared probe policy; only hash-bound script reads use frozen/.
+
+    Keep the historical startup_common bytes unchanged. All command outputs
+    remain in root, while each input script is read from frozen evidence.
+    """
+    args = ['docker', 'exec', '-w', '/app/server', '-e', 'POSTFLIGHT_ADMIN_ID=1770311018064',
+        '-e', 'POSTFLIGHT_MANAGER_ID=user-mgr-gha', '-e', 'POSTFLIGHT_TECH_ID=user-tech-gha',
+        '-e', 'POSTFLIGHT_BASE_URL=http://127.0.0.1:3000']
+    old = s.command(root, args + [name, 'node', 'scripts/postflight_issue140.cjs'], 'api-postflight')
+    match = re.search(r'POSTFLIGHT SUMMARY: (\d+)/(\d+) checks passed \((\d+) failed\)', old.stdout)
+    require(match and tuple(map(int, match.groups())) == (31, 31, 0), 'Production API checks failed')
+    records = []
+    for name_of_file in c.PROBES:
+        script = safe_reference(frozen, name_of_file)
+        s.command(root, args + ['-i', name, 'node'], name_of_file[:-4], stdin=script.read_text())
+        records.append({'file': FROZEN_DIRECTORY + '/' + name_of_file, 'sha256': sha(script), 'exitCode': 0})
+    c.exact_state(database, expected)
+    return {'apiChecks': {'passed': 31, 'total': 31, 'failed': 0}, 'probes': records, 'readOnlyProbeChanges': 0}
+
+
 def all_writers_stopped():
     c.writers_stopped()
     ids = subprocess.check_output(['docker', 'ps', '-q'], text=True, timeout=15).split()
@@ -187,15 +212,16 @@ def all_writers_stopped():
 
 def main():
     require(sys.argv[1:] == ['--execute-new-reviewed-import-gate'], 'Only one NEW reviewed execution mode')
+    require_unused_outputs(ROOT, FROZEN_FILE_SET, gate_present=True)
     lock = pathlib.Path('/opt/lims/apply.lock').open('a'); fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    manifest = json.loads((ROOT / 'prepared-manifest.json').read_bytes())
+    manifest = json.loads(safe_reference(FROZEN, 'prepared-manifest.json').read_bytes())
     gate = json.loads((ROOT / 'production-gate.json').read_bytes())
-    manifest_sha = sha(ROOT / 'prepared-manifest.json')
+    manifest_sha = sha(FROZEN / 'prepared-manifest.json')
     readiness = execution_preflight(ROOT, manifest_sha)
     require((ROOT / 'production-gate.json').stat().st_mode & 0o777 == 0o400, 'Gate is not immutable')
     verify_gate(manifest, gate, manifest_sha)
     verify_entry_readiness(manifest, gate, readiness)
-    pin = json.loads((ROOT / 'target-pin.json').read_bytes()); c.IMAGE = pin['image']; s.HEAD = pin['head']
+    pin = json.loads(safe_reference(FROZEN, 'target-pin.json').read_bytes()); c.IMAGE = pin['image']; s.HEAD = pin['head']
     with (ROOT / 'execution-attempt.json').open('x', encoding='utf-8') as out:
         json.dump({'startedUtc': s.utc(), 'head': pin['head'], 'gateSha256': sha(ROOT / 'production-gate.json')}, out)
     (ROOT / 'execution-attempt.json').chmod(0o400)
@@ -204,6 +230,7 @@ def main():
         'timesUtc': {}, 'manifestSha256': manifest_sha, 'coordinatorSha256': sha(__file__),
         'rehearsalReceiptSha256': manifest['files']['rehearsal-receipt.json'],
         'productionGateSha256': sha(ROOT / 'production-gate.json'), 'githubGate': gate,
+        'outputNamespace': manifest['outputNamespace'],
         'separateInstallerCommands': 3, 'anyInstallerAttempted': False, 'anyEntrypointAttempted': False,
         'importDeltaPolicy': NATIVE_DELTA_POLICY, 'retainedDatabaseAllocationCount': RETAINED_DATABASE_ALLOCATION_COUNT,
         'originalProductionReceiptSha256': HISTORICAL_RECEIPT_SHA, 'preflight': readiness,
@@ -244,7 +271,7 @@ def main():
             '-w', '%{http_code}', '-X', method, 'https://lims.yigini.net' + path], label, timeout=20)
         require(response.stdout == str(expected), label + ' returned ' + response.stdout)
     def set_ingress(name):
-        s.CONF.write_bytes((ROOT / name).read_bytes())
+        s.CONF.write_bytes(safe_reference(FROZEN, name).read_bytes())
         stamp = str(time.time_ns())
         s.command(ROOT, ['apachectl', 'configtest'], 'apache-test-' + stamp)
         s.command(ROOT, ['systemctl', 'reload', 'httpd'], 'apache-reload-' + stamp)
@@ -261,6 +288,7 @@ def main():
         # Recheck gate freshness immediately before the first live mutation.
         verify_gate(manifest, gate, manifest_sha)
         verify_entry_readiness(manifest, gate, {'entryState': observe_entry_state(manifest)})
+        require_prequiesce_outputs(ROOT, FROZEN_FILE_SET)
         quiesced = True
         if readiness['entryState']['mode'] == 'RUNNING_NORMAL':
             set_ingress('apache-held.conf')
@@ -295,7 +323,7 @@ def main():
             _, evidence = sealed_stopped_state(ROOT, label, s.LIVE, guard, installed=installed)
             return evidence
         receipt['nativeImportInstallation'], expected = install_once(ROOT, pin['image'], s.LIVE.parent,
-            pathlib.Path(stopped['backupPath']), s.physical(s.LIVE), ROOT, guard, s, seal_import, production=True)
+            pathlib.Path(stopped['backupPath']), s.physical(s.LIVE), FROZEN, guard, s, seal_import, production=True)
         c.write_new(ROOT / 'installed-protected-state.json', expected)
         receipt['installedProtectedStateSha256'] = sha(ROOT / 'installed-protected-state.json')
         receipt['protectedTableCount'] = 106; receipt['protectedReceiptCount'] = 39
@@ -313,7 +341,7 @@ def main():
         require(environment_hash(c.inspect('soilfer-lims')) == manifest['effectiveEnvironmentSha256'],
             'Candidate environment differs from the measured proof')
         receipt['jobsOffChecks'] = import_startup_checks(ROOT, 'soilfer-lims', s.LIVE, expected, 'production-jobs-off', c, s)
-        receipt.update(c.probes(ROOT, 'soilfer-lims', s.LIVE, expected))
+        receipt.update(production_probes(ROOT, FROZEN, 'soilfer-lims', s.LIVE, expected))
         watch.check(); c.exact_state(s.LIVE, expected); guard.check(); save('jobsOffPreservationAndProbesPassed')
         set_ingress('apache-before.conf')
         http('/api/health', 200, 'reopened-health'); http('/login', 200, 'reopened-login')

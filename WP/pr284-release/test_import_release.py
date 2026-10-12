@@ -86,6 +86,7 @@ class ReleaseTests(unittest.TestCase):
             'proofToolingCommit': release.REVIEWED_PROOF_SOURCE,
             'packagingCommit': 'f' * 40, 'productionBaselineSourceReviewId': 999900002,
             'entryBinding': release.entry_binding(), 'workloadControl': release.WORKLOAD_PINS,
+            'outputNamespace': release.namespace_binding(release.FROZEN_FILE_SET),
             'historicalReceiptSha256': release.HISTORICAL_RECEIPT_SHA,
             'naturalIntakePolicy': release.NATURAL_INTAKE_POLICY,
             'importDeltaPolicy': release.NATIVE_DELTA_POLICY, 'separateInstallerCommands': 3,
@@ -289,6 +290,7 @@ class ReleaseTests(unittest.TestCase):
             'head': manifest['head'], 'currentMainHead': manifest['head'], 'image': manifest['image'],
             'manifestSha256': 'a' * 64, 'workloadControl': release.WORKLOAD_PINS,
             'entryBinding': release.entry_binding(), 'frozenFiles': manifest['files'],
+            'outputNamespace': manifest['outputNamespace'],
             'verifiedUtc': '2026-10-12T00:00:00Z'}
         self.add_gate_hashes(gate, manifest)
         now = datetime.datetime(2026, 10, 12, 0, 11, tzinfo=datetime.timezone.utc)
@@ -338,6 +340,7 @@ class ReleaseTests(unittest.TestCase):
             'head': manifest['head'], 'currentMainHead': manifest['head'], 'image': manifest['image'],
             'manifestSha256': 'a' * 64, 'workloadControl': release.WORKLOAD_PINS,
             'entryBinding': release.entry_binding(), 'frozenFiles': manifest['files'],
+            'outputNamespace': manifest['outputNamespace'],
             'verifiedUtc': '2026-10-12T00:00:00Z', 'laterSourceAuditFailure': False,
             'laterProductionSourceAuditFailure': False, 'laterKitAuditFailure': False,
             'proofSourceReview': self.source_verdict(), 'productionBaselineSourceReview': self.source_verdict(True),
