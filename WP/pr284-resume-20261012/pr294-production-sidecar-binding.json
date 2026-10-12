@@ -1,0 +1,11 @@
+{
+  "status": "PROPOSED_PRODUCTION_BINDING_ONLY_NO_EXECUTION_AUTHORITY",
+  "proofSourceCommit": "201bb5fe8fd30cb2991f7169177a864265e6301b",
+  "proofSourceReviewId": 6126765238,
+  "reviewSha256": "20d7807ac5973b2f6b30b60a20f8dfd221c8b200a502c30e6ed02c5a51801bf0",
+  "productionContractSha256": "a7a5b83de579ba5f4ff992094a25c91e92d26b44e908a115c55d67158eb485f7",
+  "activeProofFilesUnchanged": 31,
+  "productionReviewRequested": false,
+  "productionOperations": 0,
+  "proofReplay": false
+}

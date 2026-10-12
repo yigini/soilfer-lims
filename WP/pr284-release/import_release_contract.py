@@ -18,19 +18,19 @@ from import_startup_checks import READY_EVENTS, import_zero
 
 WORKLOAD_PINS = {'labAndHubBuildsOwnedByYY': True,
     'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}
-REVIEWED_PROOF_SOURCE = 'UNREVIEWED_SIDECAR_FORWARD_REFUSE'
-PROOF_SOURCE_REVIEW_ID = 0
+REVIEWED_PROOF_SOURCE = '201bb5fe8fd30cb2991f7169177a864265e6301b'
+PROOF_SOURCE_REVIEW_ID = 6126765238
 REVIEWED_PROOF_FILES = {
-    'build_import.py': 'c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a',
+    'build_import.py': '50acb99cc30a2116b0421c39c4f366626dd0f8283a1ff38abbb895fc06c97494',
     'capture_kobo_fetch.py': '1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86',
-    'export_launch_import_proof.py': '0c642b50c8996c33efc25b7e0922c0dc4dc6c104cd9db8d70231604a16b3f100',
+    'export_launch_import_proof.py': '2ed46d33a56e8a149e0666ed4a08ca7fc5444ef0f8a8577c4725c6e1a4dbbb2c',
     'fresh-prisma-tables.json': '9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df',
     'import_installation.py': 'eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d',
     'import_preservation.py': '2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783',
-    'import_proof_contract.py': '2736d3ad6b788bb2e9302bb7e31fced42bead523e2f5889e7d9987a839657d55',
+    'import_proof_contract.py': 'cfc8dab7db0e4861c5a5837811701e52f838111f5e72b7d82a1ea1ac27219d19',
     'import_sealing.py': 'de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401',
     'import_source_graph.py': '74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637',
-    'import_stage.py': 'c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1',
+    'import_stage.py': 'db27c39cfeb8ed58167f2fba108a91702498561245e57eefeaff1f5d7397aca6',
     'import_startup_checks.py': '033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b',
     'known_core_disk_guard.py': 'f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169',
     'known_core_disk_guard_import.py': '3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c',
@@ -45,9 +45,9 @@ REVIEWED_PROOF_FILES = {
     'postflight-reference.cjs': '530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526',
     'postflight-roles.cjs': '6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da',
     'pre-prisma-draft-table.sql': 'a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af',
-    'prepare_import_build.py': 'a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991',
+    'prepare_import_build.py': '319fd4bb156ff61e82a46e6adee701aef6a41147365e68f0b06330f3b482f4f1',
     'readonly-smoke.cjs': '7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626',
-    'rehearse_import.py': '8c65daee59ddd303adab4f7f48b1a22073472bd99203a8c45c31d9e4438fa213',
+    'rehearse_import.py': '18984ff11f0bd2cd1871bb731d44e4985562b0b96b4bea2734b2a2e17b5ceafe',
     'release_support.py': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
     'runtime_proof_policies.py': '08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf',
     'startup_common.py': 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00',
