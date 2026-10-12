@@ -1,0 +1,67 @@
+{
+  "observedUtc": "2026-10-12T01:36:45.658444+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T012552Z",
+  "unit": "lims-release-runtime-kobo-release-f830f900-20261012t012552z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "journalTail": "2026-10-12T03:36:09+0200 server systemd[1]: Starting /usr/bin/python3 -B /opt/lims/releases/runtime-kobo-release-f830f900-20261012T012552Z/deploy_runtime.py --execute-new-reviewed-runtime-gate...\n2026-10-12T03:36:09+0200 server systemd[1]: Started /usr/bin/python3 -B /opt/lims/releases/runtime-kobo-release-f830f900-20261012T012552Z/deploy_runtime.py --execute-new-reviewed-runtime-gate.\n2026-10-12T03:36:25+0200 server python3[776846]: {\"stage\": \"beforeQuiesceGuardsPassed\", \"utc\": \"2026-10-12T01:36:25.420790+00:00\"}\n2026-10-12T03:36:30+0200 server python3[776846]: {\"stage\": \"writersStopped\", \"utc\": \"2026-10-12T01:36:30.601453+00:00\"}\n",
+  "live": {
+    "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+    "revision": "171dd36c5b2dbeea8763520dd18fbdb158ffca05",
+    "running": false,
+    "health": "unhealthy",
+    "restartCount": 0,
+    "oomKilled": false,
+    "memoryLimitBytes": 805306368,
+    "nodeOptions": "",
+    "jobsDisabled": "false",
+    "autoPush": "false",
+    "autoSeed": "false",
+    "volumes": [
+      {
+        "destination": "/app/server/prisma",
+        "name": "lims_lims-data",
+        "type": "volume"
+      },
+      {
+        "destination": "/app/server/uploads",
+        "name": "lims_lims-assets",
+        "type": "volume"
+      }
+    ]
+  },
+  "freeBytes": 100935430144,
+  "httpsGet": {
+    "/api/health": {
+      "curlExit": 0,
+      "httpStatus": "503",
+      "health": null
+    },
+    "/login": {
+      "curlExit": 0,
+      "httpStatus": "503"
+    }
+  },
+  "files": {
+    "prepared-manifest.json": {
+      "bytes": 8820,
+      "mode": "0o400",
+      "sha256": "0e0339e23c7cb9ea32b25d8e26b486c94a63889c00b317af76b7cadffd1e6fe9"
+    },
+    "production-gate.json": {
+      "bytes": 57190,
+      "mode": "0o400",
+      "sha256": "8aeb1413000b22491d028496c41f9c56d971bf21e66f37732be0df0cac6002ae"
+    },
+    "execution-attempt.json": {
+      "bytes": 184,
+      "mode": "0o400",
+      "sha256": "7a5f15aa880b234ef69da7622d79b4c44041df3ee6d3f86d93aa2132a1c50e92"
+    },
+    "production-receipt.json": {
+      "bytes": 63356,
+      "mode": "0o644",
+      "sha256": "75a91280302ad53c687c8c51460c02e0e77add7462b3ec671bfb2d379fcb6d27"
+    }
+  }
+}
