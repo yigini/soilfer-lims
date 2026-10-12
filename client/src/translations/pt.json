@@ -2334,6 +2334,9 @@
   },
   "dataResults": {
     "reportedValueUnavailable": "Valor relatado indisponível",
+    "selectionIdColumn": "ID da seleção do valor relatado",
+    "attemptIdsColumn": "IDs das tentativas",
+    "batchIdsColumn": "IDs dos lotes",
     "title": "Resultados analíticos mestres",
     "subtitle": "Vista mestre de todos os resultados analíticos (Aprovados e Pendentes).",
     "columns": "Colunas",

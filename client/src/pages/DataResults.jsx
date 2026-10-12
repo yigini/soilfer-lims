@@ -178,6 +178,9 @@ const DataResults = () => {
                 }
                 newRow[col.label] = val;
             });
+            newRow[t('dataResults.selectionIdColumn', 'Reported value selection ID')] = row.reportedValueSelectionId || '';
+            newRow[t('dataResults.attemptIdsColumn', 'Attempt IDs')] = (row.attemptIds || []).join(';');
+            newRow[t('dataResults.batchIdsColumn', 'Batch IDs')] = (row.batchIds || []).join(';');
             return newRow;
         });
 

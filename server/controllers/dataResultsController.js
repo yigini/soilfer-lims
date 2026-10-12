@@ -80,11 +80,13 @@ exports.getAnalyticalResults = async (req, res) => {
                 const pLower = result.param.toLowerCase();
                 const notReportable=result.mode==='NOT_REPORTABLE', text=reportedValueText(result,req.user.language);
                 const row = { ...base, id: `${sample.id}:${result.selectionId}`, reportedValueSelectionId:result.selectionId,
-                    sourceResultIds:result.sourceResultIds, attemptIds:result.attemptIds,
+                    sourceResultIds:result.sourceResultIds, attemptIds:result.attemptIds, batchIds:result.batchIds,
                     methodologyId: result.methodologyId,
                     [result.param]:notReportable?text:value.value,
                     [`${pLower}_as_measured`]:notReportable?text:value.asMeasured, [`${pLower}_unit`]:notReportable?'':value.unit,
-                    [`${pLower}_normalized`]:notReportable?text:value.normalizedValue, [`${pLower}_controlled_unit`]:notReportable?'':value.controlledUnit };
+                    [`${pLower}_normalized`]:notReportable?text:value.normalizedValue, [`${pLower}_controlled_unit`]:notReportable?'':value.controlledUnit,
+                    [`${pLower}_selection_id`]:result.selectionId, [`${pLower}_attempt_ids`]:result.attemptIds.join(';'),
+                    [`${pLower}_batch_ids`]:result.batchIds.join(';') };
                 for (const code of codes.filter(code => SPECTRAL_ANALYSES.has(code))) row[code] = pending[code];
                 return row;
             });
