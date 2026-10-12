@@ -1,0 +1,42 @@
+{
+  "recordedUtc": "2026-10-12T02:35:44.411072+00:00",
+  "source": "Fresh native Lab workflow audit and plan screenshot",
+  "postcheckStatus": "INCOMPLETE; only remaining91 suites now running without prior25-minute limit",
+  "firstRun": {
+    "suitesCompleted": 253,
+    "totalSuites": 344,
+    "passed": 251,
+    "failed": 2,
+    "stoppedBy": "Claudio own25-minute local timeout",
+    "notRelabeledPass": true
+  },
+  "originalFailures": [
+    {
+      "suite": "reception_route_smoke.test.js",
+      "assertion": "Test1 client production build(client/dist) must exist",
+      "cause": "Client was not built when original run started"
+    },
+    {
+      "suite": "audit_4_3_keyboard_playwright",
+      "assertion": "chromium.launch()",
+      "cause": "Expected browser binary missing in local environment"
+    }
+  ],
+  "freshReruns": {
+    "suites": 2,
+    "testsPassed": 7,
+    "testsTotal": 7,
+    "status": "PASS",
+    "originalFailureAndRerunLogsRetainedBy": "Claudio"
+  },
+  "remainingSuites": 91,
+  "clientBuildLint": {
+    "completed": true,
+    "errors": 0,
+    "warnings": 14
+  },
+  "productionDeploymentComplete": true,
+  "productionFailureReported": false,
+  "next213": "Still saved local work; push after actual completed postcheck",
+  "pipProductionMutations": 0
+}
