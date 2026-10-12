@@ -1,0 +1,48 @@
+{
+  "status": "ACTUAL_CLAUDIO_POSTCHECK_PASS_CLOSED_TICKED_HANDOFF_COMPLETE",
+  "observedUtc": "2026-10-12T22:18:24.446872+00:00",
+  "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "postcheckId": 6133613238,
+  "postcheckUrl": "https://github.com/yigini/soilfer-lims/issues/200#issuecomment-6133613238",
+  "postcheckUtc": "2026-10-12T22:16:15Z",
+  "closedUtc": "2026-10-12T22:16:17Z",
+  "issue162Ticked": true,
+  "mainCiSuccess": true,
+  "otherApplicationMergeHold": "RELEASED_BY_CLAUDIO",
+  "nativeFinalVerdictRead": true,
+  "claudioLiveHttpsLimitation": "Own network proxy blocked production; HTTPS results explicitly attributed to Pip retained evidence.",
+  "productionMutations": 0,
+  "pendingSeparateBacklogDecisions": [
+    "YY release batching preference",
+    "YY owners for #102/#103/#156 or close as not planned"
+  ],
+  "rawRecords": {
+    "postcheck-200.json": {
+      "sha256": "df097d24943a3ee1e5b78ecf8b58a81f8c79a6861c0554dae9fb6186f196fa88",
+      "bytes": 6832,
+      "endpoint": "repos/yigini/soilfer-lims/issues/comments/6133613238"
+    },
+    "issue-200-closed.json": {
+      "sha256": "2eeb2b22d1cc6e4d03f9cfa72f285a99f1656fb745ea861ca6d75029f24a83ba",
+      "bytes": 9718,
+      "endpoint": "repos/yigini/soilfer-lims/issues/200"
+    },
+    "issue-162-ticked.json": {
+      "sha256": "cd6e5e96c71a0993cbf5e0941f99d4a6c1b508cd5e476d2b0c63cefb8702e807",
+      "bytes": 24151,
+      "endpoint": "repos/yigini/soilfer-lims/issues/162"
+    },
+    "current-main.json": {
+      "sha256": "b80a139ba9da230bf25b4fe2a137e4420c70a9b093cfc445dbb9607f878fb920",
+      "bytes": 336,
+      "endpoint": "repos/yigini/soilfer-lims/git/ref/heads/main"
+    },
+    "main-ci.json": {
+      "sha256": "4eea258ad649864a123d0c0c0680c82f382523cab57e4b9d6964db326b793e30",
+      "bytes": 12140,
+      "endpoint": "repos/yigini/soilfer-lims/actions/runs/38256676268"
+    }
+  },
+  "nativeAcknowledgementSentAndVisuallyVerified": true,
+  "humanDraftOrDecisionCardChanged": false
+}
