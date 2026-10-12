@@ -185,7 +185,7 @@ def main():
     s.HEAD = pin['head']
     asset_bytes = sum(path.stat().st_size for path in s.ASSETS.rglob('*') if path.is_file())
     reserve = max(FLOOR, s.disk_reserve(s.LIVE.stat().st_size, image['Size'], asset_bytes))
-    require(min(s.disk_free().values()) >= reserve + 12 * s.LIVE.stat().st_size + asset_bytes + 268435456,
+    require(min(s.disk_free().values()) >= reserve + RETAINED_DATABASE_ALLOCATION_COUNT * s.LIVE.stat().st_size + asset_bytes + 268435456,
         'Pre-copy backup/allocation reserve refused; production untouched')
     receipt = {'status': 'NEW_IMPORT_PROOF_IN_PROGRESS', 'root': str(ROOT), 'startedUtc': s.utc(),
         'head': pin['head'], 'image': pin['image'], 'targetPinSha256': s.sha(ROOT / 'target-pin.json'),
@@ -203,7 +203,7 @@ def main():
         'baselineVanishedProcessPolicy': 'CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE',
         'BASELINE_ATTEMPTS_MAX': 3, 'BASELINE_CONFIRMATION_DEADLINE_SECONDS': 10,
         'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA, 'productionMutations': 0,
-        'separateInstallerCommands': 3, 'importDeltaPolicy': NATIVE_DELTA_POLICY, 'retainedDatabaseAllocationCount': 12, 'scopeCommentIds': [6112209155, 6112305172, 6112436098, REFUSAL_SCOPE_COMMENT_ID],
+        'separateInstallerCommands': 3, 'importDeltaPolicy': NATIVE_DELTA_POLICY, 'retainedDatabaseAllocationCount': RETAINED_DATABASE_ALLOCATION_COUNT, 'scopeCommentIds': [6112209155, 6112305172, 6112436098, REFUSAL_SCOPE_COMMENT_ID],
         'refusalScopeCommentId': REFUSAL_SCOPE_COMMENT_ID,
         'schedulerRefusalPolicy': REFUSAL_POLICY, 'intakeCardinalityPolicy': CARDINALITY_POLICY,
         'refusalPairingScopeCommentId': REFUSAL_PAIRING_SCOPE_COMMENT_ID,

@@ -219,7 +219,7 @@ def main():
         'proofToolingCommit': REVIEWED_PROOF_SOURCE, 'productionBaselineSourceReviewId': production_review['id'],
         'naturalIntakePolicy': NATURAL_INTAKE_POLICY, 'importDeltaPolicy': NATIVE_DELTA_POLICY,
         'entryBinding': entry_binding(), 'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA,
-        'separateInstallerCommands': 3, 'retainedDatabaseAllocationCount': 12,
+        'separateInstallerCommands': 3, 'retainedDatabaseAllocationCount': RETAINED_DATABASE_ALLOCATION_COUNT,
         'deadlineSeconds': 600, 'productionObservationSeconds': 660, 'reserveFloorBytes': FLOOR,
         'workloadControl': WORKLOAD_PINS, 'effectiveEnvironmentSha256': environment_hash(live),
         'envFileSha256': sha(pathlib.Path('/opt/lims/.env')), 'baselineVanishedProcessPolicy': BASELINE_POLICY,

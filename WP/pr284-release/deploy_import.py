@@ -145,7 +145,7 @@ def execution_preflight(root, manifest_sha, require_unused_gate=False):
     # Retain all three production stopped seals, their scratch triples and
     # logical backups, allowing twelve full database allocations. Include
     # full JSON states/keyed audit rows plus assets and an allocation margin.
-    required = reserve + 12 * database_bytes + assets + 536870912
+    required = reserve + RETAINED_DATABASE_ALLOCATION_COUNT * database_bytes + assets + 536870912
     free = s.disk_free(); require(min(free.values()) >= required, 'Backup/allocation reserve refused before quiesce')
     return {'ready': True, 'productionMutations': 0, 'head': pin['head'], 'image': pin['image'],
         'reserveBytes': reserve, 'requiredIncludingBackupBytes': required, 'freeBytes': free,
@@ -204,7 +204,7 @@ def main():
         'rehearsalReceiptSha256': manifest['files']['rehearsal-receipt.json'],
         'productionGateSha256': sha(ROOT / 'production-gate.json'), 'githubGate': gate,
         'separateInstallerCommands': 3, 'anyInstallerAttempted': False, 'anyEntrypointAttempted': False,
-        'importDeltaPolicy': NATIVE_DELTA_POLICY, 'retainedDatabaseAllocationCount': 12,
+        'importDeltaPolicy': NATIVE_DELTA_POLICY, 'retainedDatabaseAllocationCount': RETAINED_DATABASE_ALLOCATION_COUNT,
         'originalProductionReceiptSha256': HISTORICAL_RECEIPT_SHA, 'preflight': readiness,
         'proofSourceReviewId': PROOF_SOURCE_REVIEW_ID, 'baseHead': BASE_HEAD, 'pr': PR_NUMBER,
         'tree': MERGED_TREE, 'auditedPrTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,

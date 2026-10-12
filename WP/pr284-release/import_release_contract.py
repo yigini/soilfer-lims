@@ -220,7 +220,7 @@ def validate_proof(proof, pin):
     require(proof['historicalReceiptSha256'] == HISTORICAL_RECEIPT_SHA and
         proof['productionMutations'] == 0 and proof['separateInstallerCommands'] == 3 and
         proof['ownedWriterStopped'] is True and proof['effectiveUid'] == 0 and proof['pythonOptimize'] == 0 and
-        proof['baselineEnumerationErrorCount'] == 0 and proof['retainedDatabaseAllocationCount'] == 12,
+        proof['baselineEnumerationErrorCount'] == 0 and proof['retainedDatabaseAllocationCount'] == RETAINED_DATABASE_ALLOCATION_COUNT,
         'Proof isolation, stopped state or original allocation policy missing')
     require(proof['workloadPins'] == WORKLOAD_PINS and proof['reserveBytes'] >= FLOOR and
         proof['importDeltaPolicy'] == NATIVE_DELTA_POLICY and
@@ -284,7 +284,7 @@ def proof_authority(proof, pin, source, authority, authority_sha):
 def source_policy_tokens():
     return [ENTRY_POLICY, NATIVE_DELTA_POLICY, RECOVERY_POLICY, WAL_RECOVERY_POLICY,
         ORIGINAL_INGRESS_SHA, HELD_INGRESS_SHA, 'separateInstallerCommands=3',
-        'retainedDatabaseAllocationCount=12', 'defaultStartup=23NO_OP0/22READY0',
+        'retainedDatabaseAllocationCount=13', 'defaultStartup=23NO_OP0/22READY0',
         'REQUIRED_HASHED_MANIFEST_AND_GATE', 'JOURNAL_UNIT_OUTPUT', DEPLOY_LAYOUT_POLICY,
         'BASELINE_ATTEMPTS_MAX=3', 'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10',
         'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
@@ -324,7 +324,7 @@ def measurement_manifest(manifest):
         manifest['proofToolingCommit'] == REVIEWED_PROOF_SOURCE and manifest['entryBinding'] == entry_binding() and
         manifest['workloadControl'] == WORKLOAD_PINS and manifest['historicalReceiptSha256'] == HISTORICAL_RECEIPT_SHA and
         manifest['naturalIntakePolicy'] == NATURAL_INTAKE_POLICY and manifest['importDeltaPolicy'] == NATIVE_DELTA_POLICY and
-        manifest['separateInstallerCommands'] == 3 and manifest['retainedDatabaseAllocationCount'] == 12 and
+        manifest['separateInstallerCommands'] == 3 and manifest['retainedDatabaseAllocationCount'] == RETAINED_DATABASE_ALLOCATION_COUNT and
         manifest['productionObservationSeconds'] == 660 and manifest['deadlineSeconds'] == 600 and
         manifest['reserveFloorBytes'] == FLOOR and manifest['coreDeallocationConfirmationDeadlineSeconds'] == 10 and
         manifest['baselineVanishedProcessPolicy'] == BASELINE_POLICY and manifest['BASELINE_ATTEMPTS_MAX'] == 3 and
