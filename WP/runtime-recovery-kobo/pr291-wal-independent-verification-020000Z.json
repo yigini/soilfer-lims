@@ -1,0 +1,71 @@
+{
+  "status": "INDEPENDENT_READ_ONLY_POST_DEPLOY_PASS",
+  "observedUtc": "2026-10-12T02:02:22.664396+00:00",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=0\nActiveState=inactive\nSubState=dead\n",
+  "root": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T012552Z",
+  "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+  "receiptSha256": "0b8c3f54ab70e404d5797266f349d3b2a819151dc3afa9c5059f63a27727a8d7",
+  "receiptMode": "0o400",
+  "completedUtc": "2026-10-12T01:57:11.788150+00:00",
+  "healthObservationElapsedSeconds": 660.99977,
+  "healthSampleCount": 23,
+  "peakBytes": 276758528,
+  "seals": {
+    "original-stopped-seal": {
+      "logicalStateSha256": "7cb20bb4c766011f226d434d77da0d7933c653e796c650c8c8f25a92e7853da2",
+      "backupSha256": "4cb003f1ef84c59789d3636de79ed212e29dec37fe9d5640f4beeb97df8ba4e7",
+      "rawHashesAndModesPassed": true,
+      "tables": 104,
+      "receipts": 38,
+      "integrity": "ok",
+      "foreignKeyViolations": 0
+    },
+    "candidate-jobs-off-seal": {
+      "logicalStateSha256": "7cb20bb4c766011f226d434d77da0d7933c653e796c650c8c8f25a92e7853da2",
+      "backupSha256": "4cb003f1ef84c59789d3636de79ed212e29dec37fe9d5640f4beeb97df8ba4e7",
+      "rawHashesAndModesPassed": true,
+      "tables": 104,
+      "receipts": 38,
+      "integrity": "ok",
+      "foreignKeyViolations": 0
+    }
+  },
+  "https": {
+    "/api/health": {
+      "httpStatus": 200,
+      "tlsVerified": true,
+      "status": "ok",
+      "version": "1.9.0"
+    },
+    "/login": {
+      "httpStatus": 200,
+      "tlsVerified": true
+    }
+  },
+  "unauthorizedReceiptPostStatus": 401,
+  "restartCount": 0,
+  "nodeOptions": "",
+  "jobsEnabled": true,
+  "sameVolumes": [
+    "lims_lims-data",
+    "lims_lims-assets"
+  ],
+  "historicalReceiptUnchanged": true,
+  "all41FrozenSourceProofFilesUnchanged": true,
+  "requiredIncludingAllocationBytes": 14502202229,
+  "freeBytes": {
+    "/opt/lims": 98035896320,
+    "/var/lib/docker": 98035896320
+  },
+  "retainedAcceptance": {
+    "mode": "READ_ONLY_RETAINED_EVIDENCE",
+    "totalChanges": 0,
+    "eventId": "0c4a247e-339a-4adc-9ba2-061829eb2fce",
+    "eventSha256": "d14c99ff5643a8fe31abef867604ffff2645f63c799e58c62c736937a665dc45",
+    "attemptStatus": "ACCEPTED",
+    "reviewDecisionAttemptId": null,
+    "reportStatus": "PUBLISHED"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "checkpointUtc": "2026-10-12T02:02:51.315989+00:00",
+  "receiptSha256": "0b8c3f54ab70e404d5797266f349d3b2a819151dc3afa9c5059f63a27727a8d7",
+  "receiptPath": "WP\\runtime-recovery-kobo\\pr291-wal-deploy-observation-015716Z\\production-receipt.json",
+  "verificationPath": "WP\\runtime-recovery-kobo\\pr291-wal-independent-verification-020000Z.json",
+  "verificationSha256": "36cd3c4054d1813c7fe0422d0483a475f5df339a33971acec10476627a4be59b",
+  "sourceKitUnchanged": true,
+  "postDeployCheckOwner": "Claudio",
+  "postDeployCheckStatus": "AWAITING_ACTUAL_CHECKS"
+}

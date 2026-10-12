@@ -1,0 +1,76 @@
+{
+  "observedUtc": "2026-10-12T01:56:34.279548+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T012552Z",
+  "unit": "lims-release-runtime-kobo-release-f830f900-20261012t012552z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "journalTail": "2026-10-12T03:36:09+0200 server systemd[1]: Starting /usr/bin/python3 -B /opt/lims/releases/runtime-kobo-release-f830f900-20261012T012552Z/deploy_runtime.py --execute-new-reviewed-runtime-gate...\n2026-10-12T03:36:09+0200 server systemd[1]: Started /usr/bin/python3 -B /opt/lims/releases/runtime-kobo-release-f830f900-20261012T012552Z/deploy_runtime.py --execute-new-reviewed-runtime-gate.\n2026-10-12T03:36:25+0200 server python3[776846]: {\"stage\": \"beforeQuiesceGuardsPassed\", \"utc\": \"2026-10-12T01:36:25.420790+00:00\"}\n2026-10-12T03:36:30+0200 server python3[776846]: {\"stage\": \"writersStopped\", \"utc\": \"2026-10-12T01:36:30.601453+00:00\"}\n2026-10-12T03:38:32+0200 server python3[776846]: {\"stage\": \"stoppedHashedBackupVerified\", \"utc\": \"2026-10-12T01:38:32.544677+00:00\"}\n2026-10-12T03:38:32+0200 server python3[776846]: {\"stage\": \"candidateEntrypointAttempted\", \"utc\": \"2026-10-12T01:38:32.658836+00:00\"}\n2026-10-12T03:39:09+0200 server python3[776846]: {\"stage\": \"production-jobs-off\", \"elapsedSeconds\": 36.49455677399965, \"pending\": true}\n2026-10-12T03:39:46+0200 server python3[776846]: {\"stage\": \"production-jobs-off\", \"elapsedSeconds\": 73.34701187899918, \"pending\": true}\n2026-10-12T03:41:36+0200 server python3[776846]: {\"stage\": \"jobsOffPreservationAndProbesPassed\", \"utc\": \"2026-10-12T01:41:36.224960+00:00\"}\n2026-10-12T03:41:57+0200 server python3[776846]: {\"stage\": \"ingressReopenedBeforeJobs\", \"utc\": \"2026-10-12T01:41:57.686366+00:00\"}\n2026-10-12T03:44:27+0200 server python3[776846]: {\"stage\": \"jobsOffStoppedFullLogicalPreservationPassed\", \"utc\": \"2026-10-12T01:44:27.209745+00:00\"}\n2026-10-12T03:45:04+0200 server python3[776846]: {\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 36.818834584002616, \"pending\": true}\n2026-10-12T03:45:41+0200 server python3[776846]: {\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 73.91778521200467, \"pending\": true}\n2026-10-12T03:46:10+0200 server python3[776846]: {\"stage\": \"normalJobsEnabled\", \"utc\": \"2026-10-12T01:46:10.788380+00:00\"}\n",
+  "live": {
+    "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+    "revision": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+    "running": true,
+    "health": "healthy",
+    "restartCount": 0,
+    "oomKilled": false,
+    "memoryLimitBytes": 805306368,
+    "nodeOptions": "",
+    "jobsDisabled": "false",
+    "autoPush": "false",
+    "autoSeed": "false",
+    "volumes": [
+      {
+        "destination": "/app/server/prisma",
+        "name": "lims_lims-data",
+        "type": "volume"
+      },
+      {
+        "destination": "/app/server/uploads",
+        "name": "lims_lims-assets",
+        "type": "volume"
+      }
+    ]
+  },
+  "freeBytes": 98037121024,
+  "httpsGet": {
+    "/api/health": {
+      "curlExit": 0,
+      "httpStatus": "200",
+      "health": {
+        "status": "ok",
+        "version": "1.9.0",
+        "uptime": 675.179319569
+      }
+    },
+    "/login": {
+      "curlExit": 0,
+      "httpStatus": "200"
+    }
+  },
+  "files": {
+    "prepared-manifest.json": {
+      "bytes": 8820,
+      "mode": "0o400",
+      "sha256": "0e0339e23c7cb9ea32b25d8e26b486c94a63889c00b317af76b7cadffd1e6fe9"
+    },
+    "production-gate.json": {
+      "bytes": 57190,
+      "mode": "0o400",
+      "sha256": "8aeb1413000b22491d028496c41f9c56d971bf21e66f37732be0df0cac6002ae"
+    },
+    "execution-attempt.json": {
+      "bytes": 184,
+      "mode": "0o400",
+      "sha256": "7a5f15aa880b234ef69da7622d79b4c44041df3ee6d3f86d93aa2132a1c50e92"
+    },
+    "production-receipt.json": {
+      "bytes": 129795,
+      "mode": "0o644",
+      "sha256": "9d75c8961761ae81a62039c48d49af310caf60b8ec69dc073907869936acda16"
+    },
+    "production-protected-state.json": {
+      "bytes": 7465346,
+      "mode": "0o400",
+      "sha256": "7cb20bb4c766011f226d434d77da0d7933c653e796c650c8c8f25a92e7853da2"
+    }
+  }
+}
