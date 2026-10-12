@@ -1,0 +1,1794 @@
+{
+  "status": "RUNTIME_FORWARD_IN_PROGRESS",
+  "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+  "timesUtc": {
+    "beforeQuiesceGuardsPassed": "2026-10-12T01:36:25.420790+00:00",
+    "writersStopped": "2026-10-12T01:36:30.601453+00:00",
+    "stoppedHashedBackupVerified": "2026-10-12T01:38:32.544677+00:00",
+    "candidateEntrypointAttempted": "2026-10-12T01:38:32.658836+00:00",
+    "jobsOffPreservationAndProbesPassed": "2026-10-12T01:41:36.224960+00:00"
+  },
+  "manifestSha256": "0e0339e23c7cb9ea32b25d8e26b486c94a63889c00b317af76b7cadffd1e6fe9",
+  "coordinatorSha256": "72baa9cb901aec8baaf35d33284eea2c23395150ee8cca211239b1ffa61d445d",
+  "rehearsalReceiptSha256": "257196f530a0494ca0ba43023091febe670bc894c063d4bdd99e98f23d979c0d",
+  "productionGateSha256": "8aeb1413000b22491d028496c41f9c56d971bf21e66f37732be0df0cac6002ae",
+  "githubGate": {
+    "status": "FRESH_SINGLE_USE_RUNTIME_GATE",
+    "executionRoot": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T012552Z",
+    "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+    "currentMainHead": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+    "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+    "manifestSha256": "0e0339e23c7cb9ea32b25d8e26b486c94a63889c00b317af76b7cadffd1e6fe9",
+    "coordinatorSha256": "72baa9cb901aec8baaf35d33284eea2c23395150ee8cca211239b1ffa61d445d",
+    "rehearsalReceiptSha256": "257196f530a0494ca0ba43023091febe670bc894c063d4bdd99e98f23d979c0d",
+    "targetPinSha256": "ce54c1222b128a23ee149b4139a3cd40829d5168c78b6b2ed657033565253eed",
+    "yyEvidenceSha256": "02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1",
+    "proofAuthoritySha256": "8b568e3e48a3330664612529a7ae7c63974d4a1a81cce4fc9b406133c57cbc1e",
+    "proofSourceIndexSha256": "ecbaa38b3a78ce635605dffa3d170427b6cc6cb3f6e64fa32b9c3e3bd1f3f158",
+    "diskMeasurementGuardSha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+    "baselineMeasurementGuardSha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+    "proofBaselineLayoutGuardSha256": "49c76b8d0312a38820ea8dff707cdfd6674614c63344bedf2655755b6ca6f1b6",
+    "proofBaselineLayoutPolicy": "EXACT_HASHED_PROOF_AUTHORITY_LAYOUT",
+    "productionBaselineAdapterSha256": "d1993f59d75c8e0da6b32f1a5bfc0343968caef05df92036ae991fcfd61f7c7f",
+    "productionBaselineScopeCommentId": 6113922488,
+    "productionBaselineSourceReviewSha256": "64d3c0f08c0581971043aa2d42636c832cc91672c256c4d62dba630fed10bc37",
+    "productionBaselineSourceReview": {
+      "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6116073246",
+      "html_url": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6116073246",
+      "issue_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/162",
+      "id": 6116073246,
+      "node_id": "IC_kwDOROLhSM8AAAABbIvfHg",
+      "user": {
+        "login": "yigini",
+        "id": 32960535,
+        "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/yigini",
+        "html_url": "https://github.com/yigini",
+        "followers_url": "https://api.github.com/users/yigini/followers",
+        "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+        "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+        "organizations_url": "https://api.github.com/users/yigini/orgs",
+        "repos_url": "https://api.github.com/users/yigini/repos",
+        "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/yigini/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "created_at": "2026-10-12T01:21:37Z",
+      "updated_at": "2026-10-12T01:21:37Z",
+      "author_association": "OWNER",
+      "body": "Source review: PASS\n\nNEW #291 WAL-preserving production packaging source review (Claudio), answering 6116041311. Exact packaging/tooling commit 79d7132322fd482733d350384b0a8b2e5278c757 on audit/release-eb6de2e8. This supersedes 6115712337 (5c1d1692). Kit 004200Z, gate ef23 and failed receipt e274 are bound only as immutable predecessor authority and are never replayed.\n\nRelease binding: 171dd36c5b2dbeea8763520dd18fbdb158ffca05, 5d3550d709f0b62ef013f9114e9da9344f9818a1, f830f900f597f20e12570b583e4e32ce9cb50a1d, 48678dda23fa876d8d233db812149c8d1792bf16, 2292fbf2a2626ad89c5abdcc49843dffffdefd02, sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320, ac4ffc39c0b8e2c27f7aa1494edffcfd45e5c47d2c4aa5b7fffee1c2b6b1781e, releasePr=291, mergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE, naturalIntakePolicy=ORIGINAL_CURSOR_ACTUAL_UPSTREAM\n\nWAL recovery binding: EXACT_STOPPED_TRIPLE_WAL_AWARE_COPY_FULL_LOGICAL_ZERO_WRITE, walScopeCommentId=6115903244, predecessor root /opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z, failed receipt e274d3b8cf6514e7fe878ad7d712caa6303d3f969fd49372f8bb0147efbb6588, failed manifest 5f75662a3394dd01a490338e0e389a0cfe5854d3ffcb170b9a48200b914c3a27, original ingress f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20, held ingress d92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c, entry states RUNNING_NORMAL / STOPPED_HELD, NO_SECOND_STOP, held triple main 44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34 (563322880 B), wal 9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0 (4190072 B), shm 5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d (32768 B).\n\nVerdict classification policy: PASS_HEADER_NEGATED_QUOTED_FAILURE_REFERENCE_ONLY\n\nProduction source files (sha256 at 79d71323, independently computed):\n- known_core_disk_guard_deploy.py d1993f59d75c8e0da6b32f1a5bfc0343968caef05df92036ae991fcfd61f7c7f\n- deploy_runtime.py 72baa9cb901aec8baaf35d33284eea2c23395150ee8cca211239b1ffa61d445d\n- freeze_runtime.py 9b76e19f3d4ea2002aa38f4748eb05a62d160866c852245a4320e1b6ec626cec\n- runtime_release_contract.py f1f252b967c2b2434ea94a9b5c782d3368ee3122c24bdd6cb551b36dbe32c86c\n- collect_runtime_gate.py d263a168472411b63fdb06291aeba947c187953a61c43a8b460c893f21d39cd5\n- export_freeze_runtime_kit.py c55f7067c5207d1ac3875135f8e394f768f8f928aa1f5d250c9ee538a4f0f23e\n- launch_runtime_release.py 5e1816ffa1fe5fa89314f0bdddc7b0ee79fc000f479449cc24dc9f606f773cc3\n\nApproved proof authority (bytes identical to 206c4dc4): proofSourceReviewId=6115225815, 206c4dc41a99045ab8a47871ebe8782fda4cba20, coordinator c47ef37880185fa7c8ac565f28fc16fe7040b549ed3bea482ab1c0295478d5f0, proof contract cd190348d332fd12e53694ca080819c2d095bfa5c4ee86eb058686a65a38fb0e, layout adapter 49c76b8d0312a38820ea8dff707cdfd6674614c63344bedf2655755b6ca6f1b6, proofBaselineLayoutPolicy=EXACT_HASHED_PROOF_AUTHORITY_LAYOUT. Startup helpers unchanged: release_support 9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810, startup_common e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00.\n\nGuards unchanged: DEPLOY d1993f59d75c8e0da6b32f1a5bfc0343968caef05df92036ae991fcfd61f7c7f, V3 878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f, V2 f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c, original f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169; verifier 3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23.\n\nPolicy tokens: productionBaselineScopeCommentId=6113922488, REQUIRED_HASHED_MANIFEST_AND_GATE, JOURNAL_UNIT_OUTPUT, baselineVanishedProcessPolicy=CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE, BASELINE_ATTEMPTS_MAX=3, BASELINE_CONFIRMATION_DEADLINE_SECONDS=10, CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10, labAndHubBuildsOwnedByYY=true, RELEASE_DAY_DISK_ABORTS_ACCEPTED, refusalPairingScopeCommentId=6114143349, schedulerRefusalPairing=STREAM_ORDER_ONE_TO_ONE, REFUSAL_PAIR_WINDOW_SECONDS=1\n\nWhat I checked against my scope pin 6115903244:\n- **What changed.** Only deploy_runtime, freeze_runtime, collect_runtime_gate, launch_runtime_release, runtime_release_contract and the tests changed, plus retained diagnosis evidence. The proof, startup helpers, guards, verifier and the 234650Z evidence are byte-identical, and export_freeze_runtime_kit is unchanged at c55f7067.\n- **Triple capture (`copy_triple`, `triple_state`).**\n  - Physical reads only, with no SQLite connection to the stopped originals. Symlinks and non-regular files are refused.\n  - It records sha256, size, inode, device, mtime_ns and mode before and after, and refuses on any change.\n  - Copies are written exclusively ('xb') at mode 0400 with a hash match. The disk guard is checked every 32 MiB and after each file.\n- **Logical state from copies (`sealed_stopped_state`).**\n  - The raw copy is sealed. A second scratch copy is the only file SQLite opens normally, read-only, so the WAL is read on the copy only.\n  - It records the main-only immutable snapshot and enforces folded counts >= main-only per table with an identical table set.\n  - It requires 104 tables, 38 migrations, integrity ok and FK 0.\n  - The backup comes from the scratch copy and its exact_state is verified.\n  - Afterwards the originals and the raw seal are re-checked, and nothing is checkpointed, truncated or deleted.\n- **Zero-write proof.** The byte-level `c.main_bytes` check is replaced by full logical `exact_state(s.LIVE, expected)` during jobs-OFF and after ingress reopens. After the candidate stops, a second complete stopped seal must equal `expected` exactly. This is new coordinator code; startup_common is unchanged.\n- **Entry state.** It is exactly one of two states, and anything else refuses:\n  - RUNNING_NORMAL needs running bac52, restartCount 0 and the original ingress.\n  - STOPPED_HELD needs a stopped bac52 with exit 137, OOM false, restartCount 0, the held ingress, and the triple equal to the pinned hashes and sizes. It does not stop the writer a second time.\n\n  The entry state is observed in preflight, frozen into the gate and re-checked for full equality, including inode and mtime, at launch and again immediately before quiesce. The predecessor receipt, manifest and both ingress files are hash- and mode-checked. The freezer reuses the predecessor's hash-bound ingress bytes instead of rebuilding them from a held config. On failure, the hold is not rewritten when it is already held.\n- **Reserve.** It now covers 6x the full triple, plus assets and a 512 MiB margin.\n- **Tests.** 174 tests ran from my extraction. 173 pass, including the new nonempty-WAL, empty-WAL, change-during-copy, lower-count, content-changed, new-sidecar, entry-state, held-triple-mismatch and no-second-stop cases. The one exception is test_old_guard_and_verifier_bytes_stay_exact, which needs `git show HEAD:`, so I verified those hashes directly.\n\nScope: this PASS covers the packaging source only. It does not authorise a gate or any live action. ONE new unique kit may be frozen from the SAME stopped PASSED proof 234650Z (receipt 257196f530a0494ca0ba43023091febe670bc894c063d4bdd99e98f23d979c0d), and a NEW exact-kit audit must follow before any gate. YY's restart decision stays separate. Either answer maps to a reviewed entry state; any other state refuses. No restore, older image, replay, checkpoint or cleanup.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+      "reactions": {
+        "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6116073246/reactions",
+        "total_count": 0,
+        "+1": 0,
+        "-1": 0,
+        "laugh": 0,
+        "hooray": 0,
+        "confused": 0,
+        "heart": 0,
+        "rocket": 0,
+        "eyes": 0
+      },
+      "performed_via_github_app": {
+        "id": 1236702,
+        "slug": "claude",
+        "node_id": "A_kwHOBIuudM4AEt7e",
+        "owner": {
+          "login": "anthropics",
+          "id": 76263028,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjc2MjYzMDI4",
+          "avatar_url": "https://avatars.githubusercontent.com/u/76263028?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/anthropics",
+          "html_url": "https://github.com/anthropics",
+          "followers_url": "https://api.github.com/users/anthropics/followers",
+          "following_url": "https://api.github.com/users/anthropics/following{/other_user}",
+          "gists_url": "https://api.github.com/users/anthropics/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/anthropics/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/anthropics/subscriptions",
+          "organizations_url": "https://api.github.com/users/anthropics/orgs",
+          "repos_url": "https://api.github.com/users/anthropics/repos",
+          "events_url": "https://api.github.com/users/anthropics/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/anthropics/received_events",
+          "type": "Organization",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "name": "Claude",
+        "description": "Run Claude Code from your GitHub Pull Requests and Issues to respond to reviewer feedback, fix CI errors, or modify code, turning it into a virtual teammate that works alongside your development pipelines.\r\n\r\nThis is built on the publicly available Claude Code SDK.",
+        "external_url": "https://anthropic.com/claude-code",
+        "html_url": "https://github.com/apps/claude",
+        "created_at": "2025-04-30T17:54:24Z",
+        "updated_at": "2026-09-30T19:04:00Z",
+        "permissions": {
+          "actions": "write",
+          "administration": "read",
+          "checks": "write",
+          "contents": "write",
+          "discussions": "write",
+          "issues": "write",
+          "members": "read",
+          "merge_queues": "read",
+          "metadata": "read",
+          "pull_requests": "write",
+          "repository_hooks": "write",
+          "statuses": "read",
+          "workflows": "write"
+        },
+        "events": [
+          "branch_protection_rule",
+          "check_run",
+          "check_suite",
+          "commit_comment",
+          "discussion",
+          "discussion_comment",
+          "issues",
+          "issue_comment",
+          "merge_group",
+          "merge_queue_entry",
+          "pull_request",
+          "pull_request_review",
+          "pull_request_review_comment",
+          "pull_request_review_thread",
+          "push",
+          "release",
+          "repository_ruleset",
+          "status",
+          "sub_issues"
+        ]
+      },
+      "minimized": null,
+      "pin": null
+    },
+    "laterProductionSourceAuditFailure": false,
+    "copyVerifierSha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+    "proofContractSha256": "cd190348d332fd12e53694ca080819c2d095bfa5c4ee86eb058686a65a38fb0e",
+    "refusalScopeCommentId": 6113601584,
+    "schedulerRefusalPolicy": "EXACT_FRESH_COPY_CONFIG_REFUSALS",
+    "intakeCardinalityPolicy": "SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS",
+    "refusalPairingScopeCommentId": 6114143349,
+    "schedulerRefusalPairing": "STREAM_ORDER_ONE_TO_ONE",
+    "REFUSAL_PAIR_WINDOW_SECONDS": 1,
+    "baselineVanishedProcessPolicy": "CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE",
+    "BASELINE_ATTEMPTS_MAX": 3,
+    "BASELINE_CONFIRMATION_DEADLINE_SECONDS": 10,
+    "coreDeallocationConfirmationDeadlineSeconds": 10,
+    "proofSourceReview": {
+      "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6115225815",
+      "html_url": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6115225815",
+      "issue_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/162",
+      "id": 6115225815,
+      "node_id": "IC_kwDOROLhSM8AAAABbH7w1w",
+      "user": {
+        "login": "yigini",
+        "id": 32960535,
+        "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/yigini",
+        "html_url": "https://github.com/yigini",
+        "followers_url": "https://api.github.com/users/yigini/followers",
+        "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+        "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+        "organizations_url": "https://api.github.com/users/yigini/orgs",
+        "repos_url": "https://api.github.com/users/yigini/repos",
+        "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/yigini/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "created_at": "2026-10-11T23:43:05Z",
+      "updated_at": "2026-10-11T23:43:05Z",
+      "author_association": "OWNER",
+      "body": "Source review: PASS\n\nNEW #291 corrected proof source review (Claudio), answering 6115208676. Exact source/tooling commit 206c4dc41a99045ab8a47871ebe8782fda4cba20 on audit/release-eb6de2e8. This supersedes 6114935703 for proof purposes; the stopped FAILED proof 233321Z (receipt e68a80fbe56b006ef71c3ba8c0d0e13e1165dc0ad035c195e1eb9648749bf707) is never replayed and never feeds a kit.\n\nRelease binding: 171dd36c5b2dbeea8763520dd18fbdb158ffca05, 5d3550d709f0b62ef013f9114e9da9344f9818a1, f830f900f597f20e12570b583e4e32ce9cb50a1d, 48678dda23fa876d8d233db812149c8d1792bf16, 2292fbf2a2626ad89c5abdcc49843dffffdefd02, sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320, ac4ffc39c0b8e2c27f7aa1494edffcfd45e5c47d2c4aa5b7fffee1c2b6b1781e, releasePr=291, mergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE, naturalIntakePolicy=ORIGINAL_CURSOR_ACTUAL_UPSTREAM\n\nHashes (sha256 at 206c4dc4, independently computed):\n- new proof-layout adapter known_core_disk_guard_proof.py 49c76b8d0312a38820ea8dff707cdfd6674614c63344bedf2655755b6ca6f1b6, proofBaselineLayoutPolicy=EXACT_HASHED_PROOF_AUTHORITY_LAYOUT\n- coordinator rehearse_runtime.py c47ef37880185fa7c8ac565f28fc16fe7040b549ed3bea482ab1c0295478d5f0\n- proof_contract.py cd190348d332fd12e53694ca080819c2d095bfa5c4ee86eb058686a65a38fb0e\n- launcher export_launch_runtime_proof.py d4eb6be436f492343f660e5aad14fff87bca8c8d1c5ce161d5184f4c57590a19\n- builder build_candidate.py 22e2cdc152253c5b85da8120b4c546e828e26262f6c460bec1330354be74a9e1 and preparer prepare_candidate_build.py 042ba7fb750646cd5edcfa9965b69c26d80a9534f5ce7e2695d82be05562696c (unchanged)\n- byte-identical guards and verifier: V3 878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f, V2 f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c, original f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169, deploy d1993f59d75c8e0da6b32f1a5bfc0343968caef05df92036ae991fcfd61f7c7f, verifier 3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23\n\nPolicy tokens: refusalScopeCommentId=6113601584, EXACT_FRESH_COPY_CONFIG_REFUSALS, SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS, baselineVanishedProcessPolicy=CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE, BASELINE_ATTEMPTS_MAX=3, BASELINE_CONFIRMATION_DEADLINE_SECONDS=10, refusalPairingScopeCommentId=6114143349, schedulerRefusalPairing=STREAM_ORDER_ONE_TO_ONE, REFUSAL_PAIR_WINDOW_SECONDS=1, CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10, labAndHubBuildsOwnedByYY=true, RELEASE_DAY_DISK_ABORTS_ACCEPTED\n\nWhat I checked:\n- **Root cause confirmed.** The V3 `require_empty_root` accepts only names in `EMPTY_FILES`. The three raw authority files the launcher now exports (build, preparer and launcher) are not in that set, so 233321Z was refused before its baseline scan. That is correct fail-closed behaviour.\n- **Adapter construction.** The adapter subclasses V2. Its baseline `attempt()` and its `__init__` state are line-for-line identical to V3. It imports V3's `confirm_baseline`, which keeps the 3 attempts in 10 s rule, zero failed-scan credit, the reserve floor and the vanished `/proc/<pid>` handling. It also imports V3's `EMPTY_FILES`, so V3 and V2 bytes are untouched. The only change is the root check passed to `confirm_baseline`, and that check runs before and after every attempt.\n- **What `require_proof_root` checks:**\n  - the root must be a fresh `/opt/lims/releases/runtime-kobo-proof-*` folder;\n  - the source index keys must equal the fixed `SOURCE_FILES` exactly, which is the old set plus the 4 named files;\n  - the authority keys must equal the 3 named authority files;\n  - no names may exist beyond the required files and the 3 output files;\n  - there may be no symlinks or folders;\n  - every required file must be present, at mode 0400 and at its exact sha256;\n  - the parsed source index must equal the verified `source`.\n\n  Nothing is moved, deleted or credited away; the whole root is still measured by `c.allocation(root)`.\n- **Coordinator wiring.** The coordinator verifies every source file at mode 0400 and its hash before constructing the guard, pins the adapter in `HELPER_HASHES`, and records `proofBaselineLayoutPolicy` and the adapter hash in the receipt. The \"never replay\" refusals are unchanged.\n- **Review binding.** `source_review_pass` now requires the adapter hash and the policy token. It refuses 6114935703 and 6115039634 as the authority for a layout-bound proof.\n- **Tests.** 153 ran from my extraction. 152 pass, including all 15 in `test_proof_baseline_guard`; I ran 2 of those 15 with the in-memory `__raw_source__` that Pip's runner injects. The only exception is `test_old_guard_and_verifier_bytes_stay_exact`, which needs `git show HEAD:`, so I verified those hashes directly. The exported filename set equals `SOURCE_FILES`.\n\nScope: this PASS clears ONE fresh isolated proof from 206c4dc4 on the retained build 7993c29c\u2026/4894eabc\u2026. Main CI 38182451105 is already green. A kit still needs a NEW packaging source review bound to this proof source and review, then a stopped PASSED proof, then a NEW exact-kit \"Audit passed\". Packaging PASS 6115039634 cannot freeze anything. Production stays on 171dd36c/bac52, and all forward-only and no-touch rules are unchanged.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+      "reactions": {
+        "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6115225815/reactions",
+        "total_count": 0,
+        "+1": 0,
+        "-1": 0,
+        "laugh": 0,
+        "hooray": 0,
+        "confused": 0,
+        "heart": 0,
+        "rocket": 0,
+        "eyes": 0
+      },
+      "performed_via_github_app": {
+        "id": 1236702,
+        "slug": "claude",
+        "node_id": "A_kwHOBIuudM4AEt7e",
+        "owner": {
+          "login": "anthropics",
+          "id": 76263028,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjc2MjYzMDI4",
+          "avatar_url": "https://avatars.githubusercontent.com/u/76263028?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/anthropics",
+          "html_url": "https://github.com/anthropics",
+          "followers_url": "https://api.github.com/users/anthropics/followers",
+          "following_url": "https://api.github.com/users/anthropics/following{/other_user}",
+          "gists_url": "https://api.github.com/users/anthropics/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/anthropics/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/anthropics/subscriptions",
+          "organizations_url": "https://api.github.com/users/anthropics/orgs",
+          "repos_url": "https://api.github.com/users/anthropics/repos",
+          "events_url": "https://api.github.com/users/anthropics/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/anthropics/received_events",
+          "type": "Organization",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "name": "Claude",
+        "description": "Run Claude Code from your GitHub Pull Requests and Issues to respond to reviewer feedback, fix CI errors, or modify code, turning it into a virtual teammate that works alongside your development pipelines.\r\n\r\nThis is built on the publicly available Claude Code SDK.",
+        "external_url": "https://anthropic.com/claude-code",
+        "html_url": "https://github.com/apps/claude",
+        "created_at": "2025-04-30T17:54:24Z",
+        "updated_at": "2026-09-30T19:04:00Z",
+        "permissions": {
+          "actions": "write",
+          "administration": "read",
+          "checks": "write",
+          "contents": "write",
+          "discussions": "write",
+          "issues": "write",
+          "members": "read",
+          "merge_queues": "read",
+          "metadata": "read",
+          "pull_requests": "write",
+          "repository_hooks": "write",
+          "statuses": "read",
+          "workflows": "write"
+        },
+        "events": [
+          "branch_protection_rule",
+          "check_run",
+          "check_suite",
+          "commit_comment",
+          "discussion",
+          "discussion_comment",
+          "issues",
+          "issue_comment",
+          "merge_group",
+          "merge_queue_entry",
+          "pull_request",
+          "pull_request_review",
+          "pull_request_review_comment",
+          "pull_request_review_thread",
+          "push",
+          "release",
+          "repository_ruleset",
+          "status",
+          "sub_issues"
+        ]
+      },
+      "minimized": null,
+      "pin": null
+    },
+    "laterSourceAuditFailure": false,
+    "workloadControl": {
+      "labAndHubBuildsOwnedByYY": true,
+      "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+    },
+    "readOnlyExecutionReadiness": {
+      "ready": true,
+      "productionMutations": 0,
+      "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+      "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+      "reserveBytes": 10556150894,
+      "requiredIncludingBackupBytes": 14502202229,
+      "freeBytes": {
+        "/opt/lims": 101506052096,
+        "/var/lib/docker": 101506052096
+      },
+      "databaseBytesWithWal": 567545720,
+      "assetsBytes": 3906103,
+      "originalRestartCount": 0,
+      "entryState": {
+        "mode": "STOPPED_HELD",
+        "containerId": "0d9d0a96052683e97a44af1b06b04d2efc077ae8f6558caf6d8c8b28b8a8c98e",
+        "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+        "restartCount": 0,
+        "ingressSha256": "d92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c",
+        "originalFiles": {
+          "": {
+            "sha256": "44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34",
+            "bytes": 563322880,
+            "inode": 1280648,
+            "device": 64769,
+            "mtimeNs": 1791758477795015270,
+            "mode": 438
+          },
+          "-wal": {
+            "sha256": "9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0",
+            "bytes": 4190072,
+            "inode": 1191799,
+            "device": 64769,
+            "mtimeNs": 1791766145231682695,
+            "mode": 438
+          },
+          "-shm": {
+            "sha256": "5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d",
+            "bytes": 32768,
+            "inode": 1191838,
+            "device": 64769,
+            "mtimeNs": 1791766144752672822,
+            "mode": 438
+          }
+        }
+      }
+    },
+    "walRecovery": {
+      "policy": "EXACT_STOPPED_TRIPLE_WAL_AWARE_COPY_FULL_LOGICAL_ZERO_WRITE",
+      "scopeCommentId": 6115903244,
+      "predecessorRoot": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z",
+      "failedReceiptSha256": "e274d3b8cf6514e7fe878ad7d712caa6303d3f969fd49372f8bb0147efbb6588",
+      "failedManifestSha256": "5f75662a3394dd01a490338e0e389a0cfe5854d3ffcb170b9a48200b914c3a27",
+      "normalIngressSha256": "f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20",
+      "heldIngressSha256": "d92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c",
+      "heldTriple": {
+        "": {
+          "sha256": "44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34",
+          "bytes": 563322880
+        },
+        "-wal": {
+          "sha256": "9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0",
+          "bytes": 4190072
+        },
+        "-shm": {
+          "sha256": "5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d",
+          "bytes": 32768
+        }
+      },
+      "allowedEntryStates": [
+        "RUNNING_NORMAL",
+        "STOPPED_HELD"
+      ]
+    },
+    "pr": {
+      "number": 291,
+      "merged": true,
+      "head": "5d3550d709f0b62ef013f9114e9da9344f9818a1",
+      "mergeCommit": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+      "tree": "48678dda23fa876d8d233db812149c8d1792bf16",
+      "auditedTree": "2292fbf2a2626ad89c5abdcc49843dffffdefd02",
+      "mergeParents": [
+        "171dd36c5b2dbeea8763520dd18fbdb158ffca05",
+        "5d3550d709f0b62ef013f9114e9da9344f9818a1"
+      ],
+      "review": {
+        "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6113454688",
+        "html_url": "https://github.com/yigini/soilfer-lims/pull/291#issuecomment-6113454688",
+        "issue_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/291",
+        "id": 6113454688,
+        "node_id": "IC_kwDOROLhSM8AAAABbGPqYA",
+        "user": {
+          "login": "yigini",
+          "id": 32960535,
+          "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+          "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/yigini",
+          "html_url": "https://github.com/yigini",
+          "followers_url": "https://api.github.com/users/yigini/followers",
+          "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+          "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+          "organizations_url": "https://api.github.com/users/yigini/orgs",
+          "repos_url": "https://api.github.com/users/yigini/repos",
+          "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/yigini/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "created_at": "2026-10-11T20:34:00Z",
+        "updated_at": "2026-10-11T20:34:00Z",
+        "author_association": "OWNER",
+        "body": "Audit passed: OK to merge and deploy\n\n**Exact head:** 5d3550d709f0b62ef013f9114e9da9344f9818a1\n\n**Merge hold:** do not merge until #292's release (main 171dd36c) is live and its post-deploy check has passed. The runtime proof's tree check pins main to the audited #292 tree. After that, merge this PR on the then-current main and give it its own release kit.\n\n**Evidence**\n- **Full server suite, run serially** (`npm test` = `jest --runInBand`, as in CI): 344 suites and 4,743 tests.\n  - First pass: 302 suites and 4,737 tests passed.\n  - 42 suites could not load in my worktree because I broke the local client `node_modules` link. Nothing in the PR caused it.\n  - After repairing the link, building `client/dist`, and pointing `PLAYWRIGHT_BROWSERS_PATH` at the installed headless shell, I reran those 42: **42/42 suites, 485/485 tests pass**.\n  - No test, timeout or runner setting was changed.\n- **Client** (unchanged since 5ca14d07): `npm run build` passes; `npm run lint` shows 0 errors and 14 existing warnings.\n- **CI:** \"Test & Build\" is green on 5d3550d7.\n- **Independent review: PASS** at this exact head (6112182389): 122/122 tests across 11 suites, plus 16/16 pure separate and mean outcomes. Result, WorkAttempt, WorkItem and AuditLog hashes are preserved on every refusal.\n- **Focused local runs:** 13 texture, matrix and cross-check suites at 174/174, and 28 reported-value and matrix consumers at 604/604.\n\n**Diff against the issues and pins**\n- **#278:** the blocking TEXTURE_CLOSURE gate uses `crossCheck.textureClosureTolerancePct` via policyService (inclusive, default \u00b12), reading stored number, unit and censoring per replicate.\n  - Censored, non-numeric, non-'%' or ambiguous inputs are NOT_EVALUATED.\n  - An unknown unit or censoring closes exactly (`*_EXACT_CLOSURE`), never at the tolerance.\n  - Every derivation (recording, selected-fraction, composite mean) goes through the one `textureInputAuthority`, which refuses g/kg, mixed, missing-unit, NULL-censoring and duplicate inputs. The selection paths also check the stored source Results.\n  - Pins: 6111805861 and 6112038115.\n- **#279:** the legacy C:N and bases/CEC advisories are retired. crossChecks are the only advisory source, there is no Na = 0 default, and the retirement is disclosed in `matrixDiagnostics`.\n- **#281:** registry bounds are added and out-of-range saves are refused with POLICY_VALUE_INVALID.\n  - A stored invalid value is never rewritten.\n  - The advisories are unavailable (`CROSS_CHECK_POLICY_INVALID`).\n  - The texture gate and derivations fall back to exact closure, never wider. That is the boundary pinned with Pip.\n- **#283:** one unit per analysis. The `ctx.method?.unit` fallback is removed, and SIS exports use the analysis QUDT unit with `METHOD_UNIT_OVERRIDE_IGNORED` disclosed.\n- **Guardrails:** no migration, no data rewrite, all policy through policyService and the registry, and no inferred scientific policy.\n\n**Follow-ups, not in this PR**\n- The PDF metrology box and interpretationService still recompute texture at exact closure.\n- Selection outputs default a NULL censoring to 'NONE' for all analyses (`reportedValueSelectionService.js:62,164`, `reportedValueChoiceContract.js:30`).\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+        "reactions": {
+          "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6113454688/reactions",
+          "total_count": 0,
+          "+1": 0,
+          "-1": 0,
+          "laugh": 0,
+          "hooray": 0,
+          "confused": 0,
+          "heart": 0,
+          "rocket": 0,
+          "eyes": 0
+        },
+        "performed_via_github_app": {
+          "id": 1236702,
+          "slug": "claude",
+          "node_id": "A_kwHOBIuudM4AEt7e",
+          "owner": {
+            "login": "anthropics",
+            "id": 76263028,
+            "node_id": "MDEyOk9yZ2FuaXphdGlvbjc2MjYzMDI4",
+            "avatar_url": "https://avatars.githubusercontent.com/u/76263028?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/anthropics",
+            "html_url": "https://github.com/anthropics",
+            "followers_url": "https://api.github.com/users/anthropics/followers",
+            "following_url": "https://api.github.com/users/anthropics/following{/other_user}",
+            "gists_url": "https://api.github.com/users/anthropics/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/anthropics/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/anthropics/subscriptions",
+            "organizations_url": "https://api.github.com/users/anthropics/orgs",
+            "repos_url": "https://api.github.com/users/anthropics/repos",
+            "events_url": "https://api.github.com/users/anthropics/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/anthropics/received_events",
+            "type": "Organization",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "name": "Claude",
+          "description": "Run Claude Code from your GitHub Pull Requests and Issues to respond to reviewer feedback, fix CI errors, or modify code, turning it into a virtual teammate that works alongside your development pipelines.\r\n\r\nThis is built on the publicly available Claude Code SDK.",
+          "external_url": "https://anthropic.com/claude-code",
+          "html_url": "https://github.com/apps/claude",
+          "created_at": "2025-04-30T17:54:24Z",
+          "updated_at": "2026-09-30T19:04:00Z",
+          "permissions": {
+            "actions": "write",
+            "administration": "read",
+            "checks": "write",
+            "contents": "write",
+            "discussions": "write",
+            "issues": "write",
+            "members": "read",
+            "merge_queues": "read",
+            "metadata": "read",
+            "pull_requests": "write",
+            "repository_hooks": "write",
+            "statuses": "read",
+            "workflows": "write"
+          },
+          "events": [
+            "branch_protection_rule",
+            "check_run",
+            "check_suite",
+            "commit_comment",
+            "discussion",
+            "discussion_comment",
+            "issues",
+            "issue_comment",
+            "merge_group",
+            "merge_queue_entry",
+            "pull_request",
+            "pull_request_review",
+            "pull_request_review_comment",
+            "pull_request_review_thread",
+            "push",
+            "release",
+            "repository_ruleset",
+            "status",
+            "sub_issues"
+          ]
+        },
+        "minimized": null,
+        "pin": null
+      },
+      "checks": [
+        {
+          "id": 114537601299,
+          "name": "Test & Build",
+          "node_id": "CR_kwDOROLhSM8AAAAaqvkZEw",
+          "head_sha": "5d3550d709f0b62ef013f9114e9da9344f9818a1",
+          "external_id": "36b27ec9-7c6d-5162-b9e3-8f1313ee316c",
+          "url": "https://api.github.com/repos/yigini/soilfer-lims/check-runs/114537601299",
+          "html_url": "https://github.com/yigini/soilfer-lims/actions/runs/38162307967/job/114537601299",
+          "details_url": "https://github.com/yigini/soilfer-lims/actions/runs/38162307967/job/114537601299",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-11T18:04:59Z",
+          "completed_at": "2026-10-11T18:37:51Z",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2,
+            "annotations_url": "https://api.github.com/repos/yigini/soilfer-lims/check-runs/114537601299/annotations"
+          },
+          "check_suite": {
+            "id": 103393718282
+          },
+          "app": {
+            "id": 15368,
+            "client_id": "Iv1.05c79e9ad1f6bdfa",
+            "slug": "github-actions",
+            "node_id": "MDM6QXBwMTUzNjg=",
+            "owner": {
+              "login": "github",
+              "id": 9919,
+              "node_id": "MDEyOk9yZ2FuaXphdGlvbjk5MTk=",
+              "avatar_url": "https://avatars.githubusercontent.com/u/9919?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/github",
+              "html_url": "https://github.com/github",
+              "followers_url": "https://api.github.com/users/github/followers",
+              "following_url": "https://api.github.com/users/github/following{/other_user}",
+              "gists_url": "https://api.github.com/users/github/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/github/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/github/subscriptions",
+              "organizations_url": "https://api.github.com/users/github/orgs",
+              "repos_url": "https://api.github.com/users/github/repos",
+              "events_url": "https://api.github.com/users/github/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/github/received_events",
+              "type": "Organization",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "name": "GitHub Actions",
+            "description": "Automate your workflow from idea to production",
+            "external_url": "https://help.github.com/en/actions",
+            "html_url": "https://github.com/apps/github-actions",
+            "created_at": "2018-07-30T09:30:17Z",
+            "updated_at": "2026-06-18T16:17:48Z",
+            "permissions": {
+              "actions": "write",
+              "administration": "read",
+              "artifact_metadata": "write",
+              "attestations": "write",
+              "checks": "write",
+              "code_quality": "write",
+              "contents": "write",
+              "copilot_requests": "write",
+              "deployments": "write",
+              "discussions": "write",
+              "drives": "write",
+              "issues": "write",
+              "merge_queues": "write",
+              "metadata": "read",
+              "models": "read",
+              "packages": "write",
+              "pages": "write",
+              "pull_requests": "write",
+              "repository_hooks": "write",
+              "repository_projects": "write",
+              "security_events": "write",
+              "statuses": "write",
+              "vulnerability_alerts": "read"
+            },
+            "events": [
+              "branch_protection_rule",
+              "check_run",
+              "check_suite",
+              "create",
+              "delete",
+              "deployment",
+              "deployment_status",
+              "discussion",
+              "discussion_comment",
+              "fork",
+              "gollum",
+              "issues",
+              "issue_comment",
+              "label",
+              "merge_group",
+              "milestone",
+              "page_build",
+              "public",
+              "pull_request",
+              "pull_request_review",
+              "pull_request_review_comment",
+              "push",
+              "registry_package",
+              "release",
+              "repository",
+              "repository_dispatch",
+              "status",
+              "watch",
+              "workflow_dispatch",
+              "workflow_run"
+            ]
+          },
+          "pull_requests": []
+        }
+      ],
+      "laterAuditFailure": false
+    },
+    "mainCi": {
+      "id": 38182451105,
+      "head_sha": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+      "name": "CI",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "updated_at": "2026-10-11T23:32:04Z"
+    },
+    "kitReview": {
+      "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6116173459",
+      "html_url": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6116173459",
+      "issue_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/162",
+      "id": 6116173459,
+      "node_id": "IC_kwDOROLhSM8AAAABbI1mkw",
+      "user": {
+        "login": "yigini",
+        "id": 32960535,
+        "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/yigini",
+        "html_url": "https://github.com/yigini",
+        "followers_url": "https://api.github.com/users/yigini/followers",
+        "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+        "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+        "organizations_url": "https://api.github.com/users/yigini/orgs",
+        "repos_url": "https://api.github.com/users/yigini/repos",
+        "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/yigini/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "created_at": "2026-10-12T01:33:04Z",
+      "updated_at": "2026-10-12T01:33:04Z",
+      "author_association": "OWNER",
+      "body": "Audit passed: OK to merge and deploy\n\nNEW exact-kit audit (Claudio) for the ONE WAL-preserving #291 kit, answering 6116151050. Root /opt/lims/releases/runtime-kobo-release-f830f900-20261012T012552Z, prepared 2026-10-12T01:29:25.074884Z, status PREPARED_RUNTIME_FORWARD_ONLY_NOT_EXECUTED. I audited the byte-exact copies pushed at d327269c9512d6bf387f7174ace91a3d96e4226c in WP/runtime-recovery-kobo/pr291-wal-kit-012552Z. This supersedes my kit verdict 6115780943 for kit 004200Z; that kit, its gate ef23 and its failed receipt e274 stay predecessor authority only and are never replayed.\n\nHead f830f900f597f20e12570b583e4e32ce9cb50a1d\nImage sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413\nManifest (prepared-manifest.json) 0e0339e23c7cb9ea32b25d8e26b486c94a63889c00b317af76b7cadffd1e6fe9\nPackaging 79d7132322fd482733d350384b0a8b2e5278c757 (source PASS 6116073246); proof tooling 206c4dc41a99045ab8a47871ebe8782fda4cba20 (source PASS 6115225815)\n\nRequired tokens (review_tokens(manifest, manifest_sha), recomputed by me from the frozen contract, one per line):\n171dd36c5b2dbeea8763520dd18fbdb158ffca05\n5d3550d709f0b62ef013f9114e9da9344f9818a1\nf830f900f597f20e12570b583e4e32ce9cb50a1d\n48678dda23fa876d8d233db812149c8d1792bf16\n2292fbf2a2626ad89c5abdcc49843dffffdefd02\nsha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320\nac4ffc39c0b8e2c27f7aa1494edffcfd45e5c47d2c4aa5b7fffee1c2b6b1781e\nreleasePr=291\nmergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE\nnaturalIntakePolicy=ORIGINAL_CURSOR_ACTUAL_UPSTREAM\nrefusalPairingScopeCommentId=6114143349\nschedulerRefusalPairing=STREAM_ORDER_ONE_TO_ONE\nREFUSAL_PAIR_WINDOW_SECONDS=1\nEXACT_STOPPED_TRIPLE_WAL_AWARE_COPY_FULL_LOGICAL_ZERO_WRITE\nwalScopeCommentId=6115903244\n/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z\ne274d3b8cf6514e7fe878ad7d712caa6303d3f969fd49372f8bb0147efbb6588\n5f75662a3394dd01a490338e0e389a0cfe5854d3ffcb170b9a48200b914c3a27\nf46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20\nd92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c\nRUNNING_NORMAL\nSTOPPED_HELD\nNO_SECOND_STOP\n44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34\n9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0\n5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d\nAudit passed: OK to merge and deploy\nPASS_HEADER_NEGATED_QUOTED_FAILURE_REFERENCE_ONLY\nf830f900f597f20e12570b583e4e32ce9cb50a1d\nsha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413\n0e0339e23c7cb9ea32b25d8e26b486c94a63889c00b317af76b7cadffd1e6fe9\n72baa9cb901aec8baaf35d33284eea2c23395150ee8cca211239b1ffa61d445d\n257196f530a0494ca0ba43023091febe670bc894c063d4bdd99e98f23d979c0d\ne541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00\n02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1\nce54c1222b128a23ee149b4139a3cd40829d5168c78b6b2ed657033565253eed\nac4ffc39c0b8e2c27f7aa1494edffcfd45e5c47d2c4aa5b7fffee1c2b6b1781e\n8b568e3e48a3330664612529a7ae7c63974d4a1a81cce4fc9b406133c57cbc1e\necbaa38b3a78ce635605dffa3d170427b6cc6cb3f6e64fa32b9c3e3bd1f3f158\n206c4dc41a99045ab8a47871ebe8782fda4cba20\nc47ef37880185fa7c8ac565f28fc16fe7040b549ed3bea482ab1c0295478d5f0\nf88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c\nf4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169\n878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f\n3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23\ncd190348d332fd12e53694ca080819c2d095bfa5c4ee86eb058686a65a38fb0e\n49c76b8d0312a38820ea8dff707cdfd6674614c63344bedf2655755b6ca6f1b6\nproofBaselineLayoutPolicy=EXACT_HASHED_PROOF_AUTHORITY_LAYOUT\nd1993f59d75c8e0da6b32f1a5bfc0343968caef05df92036ae991fcfd61f7c7f\nproductionBaselineScopeCommentId=6113922488\nproductionBaselineSourceReviewId=6116073246\n64d3c0f08c0581971043aa2d42636c832cc91672c256c4d62dba630fed10bc37\nREQUIRED_HASHED_MANIFEST_AND_GATE\nJOURNAL_UNIT_OUTPUT\nbaselineVanishedProcessPolicy=CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE\nBASELINE_ATTEMPTS_MAX=3\nBASELINE_CONFIRMATION_DEADLINE_SECONDS=10\nrefusalScopeCommentId=6113601584\nEXACT_FRESH_COPY_CONFIG_REFUSALS\nSAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS\nproofSourceReviewId=6115225815\nCORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10\nlabAndHubBuildsOwnedByYY=true\nRELEASE_DAY_DISK_ABORTS_ACCEPTED\n\nAll 41 frozen files (sha256, each recomputed and equal to the manifest):\n- rehearse_runtime.py c47ef37880185fa7c8ac565f28fc16fe7040b549ed3bea482ab1c0295478d5f0\n- proof_contract.py cd190348d332fd12e53694ca080819c2d095bfa5c4ee86eb058686a65a38fb0e\n- kobo_copy_preservation.py 3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23\n- capture_kobo_fetch.py 1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86\n- runtime_release_contract.py f1f252b967c2b2434ea94a9b5c782d3368ee3122c24bdd6cb551b36dbe32c86c\n- deploy_runtime.py 72baa9cb901aec8baaf35d33284eea2c23395150ee8cca211239b1ffa61d445d\n- freeze_runtime.py 9b76e19f3d4ea2002aa38f4748eb05a62d160866c852245a4320e1b6ec626cec\n- collect_runtime_gate.py d263a168472411b63fdb06291aeba947c187953a61c43a8b460c893f21d39cd5\n- known_core_disk_guard_v2.py f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c\n- known_core_disk_guard_v3.py 878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f\n- known_core_disk_guard_proof.py 49c76b8d0312a38820ea8dff707cdfd6674614c63344bedf2655755b6ca6f1b6\n- known_core_disk_guard_deploy.py d1993f59d75c8e0da6b32f1a5bfc0343968caef05df92036ae991fcfd61f7c7f\n- launch_runtime_release.py 5e1816ffa1fe5fa89314f0bdddc7b0ee79fc000f479449cc24dc9f606f773cc3\n- export_freeze_runtime_kit.py c55f7067c5207d1ac3875135f8e394f768f8f928aa1f5d250c9ee538a4f0f23e\n- build_candidate.py 22e2cdc152253c5b85da8120b4c546e828e26262f6c460bec1330354be74a9e1\n- prepare_candidate_build.py 042ba7fb750646cd5edcfa9965b69c26d80a9534f5ce7e2695d82be05562696c\n- export_launch_runtime_proof.py d4eb6be436f492343f660e5aad14fff87bca8c8d1c5ce161d5184f4c57590a19\n- known_core_disk_guard.py f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169\n- release_support.py 9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810\n- startup_common.py e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00\n- postflight-roles.cjs 6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da\n- postflight-auth.cjs 37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192\n- postflight-reference.cjs 530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526\n- postflight-qc-runs.cjs 4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f\n- postflight-policy.cjs 6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51\n- readonly-smoke.cjs 7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626\n- yy-authorization-evidence.md 02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1\n- production-baseline-source-review.json 64d3c0f08c0581971043aa2d42636c832cc91672c256c4d62dba630fed10bc37\n- target-pin.json ce54c1222b128a23ee149b4139a3cd40829d5168c78b6b2ed657033565253eed\n- rehearsal-receipt.json 257196f530a0494ca0ba43023091febe670bc894c063d4bdd99e98f23d979c0d\n- proof-source-index.json ecbaa38b3a78ce635605dffa3d170427b6cc6cb3f6e64fa32b9c3e3bd1f3f158\n- proof-authority.json 8b568e3e48a3330664612529a7ae7c63974d4a1a81cce4fc9b406133c57cbc1e\n- first-sync-preservation.json b57bcc97a184a87b65bcf3ed9dfdb1ff2262ee5cb3f6e17e85d1a043ee14721e\n- second-sync-preservation.json 4bd8b50203bf179f445a9396496160ae46d10a232af7cb2d85b8539eca897016\n- full-copy-preservation.json fcc427061b1133c7dcb9f7df40efb3ef8c97583c790fb9f3224bdee4e637df62\n- upstream-before-start.json 3c2b92d1835862287fe108f6278e32942220858ec266434e0e2ad74f3da4ad9e\n- upstream-first-completion.json 32294738d13f3d203cdc6bbc6099fed087072ec791b9e22ee6eafe95c2eab97b\n- upstream-second-completion.json 8897995f1662049779d0831a99506acbf92035ba5d0765dcd62dcabfd320b196\n- packaging-source-index.json 9760e8b433b91a9255bf05146ac06b120602ffc8ec7d93dca6e444f578d6ad09\n- apache-before.conf f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20\n- apache-held.conf d92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c\n\nWhat I checked:\n- **File bindings.**\n  - Every .py and .cjs file is byte-identical to its source at the approved packaging commit 79d71323.\n  - The data and evidence files are byte-identical to those in kit 004200Z: target pin, PASSED receipt 257196f5, proof authority, proof source index, all three preservation seals, the upstream captures, the YY evidence and both Apache configs. Both Apache configs equal the predecessor-bound ingress hashes.\n  - Only packaging-source-index.json and the frozen production source review (the raw body of 6116073246) differ from that kit, as expected.\n  - The manifest lists exactly 41 files. The repo also holds original-file-hashes.json, a record of the original files' hashes; it is not in the manifest and not part of the kit.\n- **Frozen contract.** I ran the kit's own frozen_files(root, manifest) on a mode-0400 copy, using the frozen contract code, and it PASSED. That run covers:\n  - measurement_manifest, which now also requires walRecovery == wal_recovery_binding() and the two ingress hashes;\n  - every file's mode and hash;\n  - the 660/600/floor execution contract;\n  - candidate_identity;\n  - validate_proof;\n  - proof_authority against 6115225815;\n  - production_source_review against the frozen 6116073246, including every WAL token.\n\n  The manifest's walRecovery block equals the reviewed binding exactly: policy, scope 6115903244, predecessor root, receipt and manifest, both ingress hashes, the held triple and the two entry states.\n- **The proof.** It is the same single stopped PASSED proof 234650Z, with no proof, build or copy replayed.\n\nRemaining gates, all enforced by the frozen coordinator, collector and launcher; this verdict does not replace any of them:\n- one fresh 10-minute single-use gate on this unchanged and unused kit;\n- exactly one reviewed entry state, observed at the gate and re-checked for full equality at launch and again before quiesce. In STOPPED_HELD the writer must be stopped with exit 137, the ingress held and the triple byte-equal to the pinned 44d174bd\u2026/9f0981c7\u2026/5ad9f8e2\u2026, with NO_SECOND_STOP. In RUNNING_NORMAL the bac52 writer must be running with the original ingress.\n- main still at f830f900 with main CI green;\n- the PR #291 formal review, with no subsequent negative verdict;\n- disk headroom for 6x the triple plus assets and margin;\n- the historical receipt ac4ffc39 unchanged.\n\nThen ONE forward deploy under YY's standing go: WAL-aware sealed copies, a full logical zero-write check before jobs, 768 MiB, NODE_OPTIONS empty, 660 healthy jobs-ON seconds and zero restarts. The originals are never checkpointed or deleted by the coordinator. Forward-only: no restore, older image, retry, heap override, cleanup or replay. Other application merges stay held until #291 is live and my post-deploy check passes. Human cards and the four refused configs stay untouched.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+      "reactions": {
+        "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6116173459/reactions",
+        "total_count": 0,
+        "+1": 0,
+        "-1": 0,
+        "laugh": 0,
+        "hooray": 0,
+        "confused": 0,
+        "heart": 0,
+        "rocket": 0,
+        "eyes": 0
+      },
+      "performed_via_github_app": {
+        "id": 1236702,
+        "slug": "claude",
+        "node_id": "A_kwHOBIuudM4AEt7e",
+        "owner": {
+          "login": "anthropics",
+          "id": 76263028,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjc2MjYzMDI4",
+          "avatar_url": "https://avatars.githubusercontent.com/u/76263028?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/anthropics",
+          "html_url": "https://github.com/anthropics",
+          "followers_url": "https://api.github.com/users/anthropics/followers",
+          "following_url": "https://api.github.com/users/anthropics/following{/other_user}",
+          "gists_url": "https://api.github.com/users/anthropics/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/anthropics/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/anthropics/subscriptions",
+          "organizations_url": "https://api.github.com/users/anthropics/orgs",
+          "repos_url": "https://api.github.com/users/anthropics/repos",
+          "events_url": "https://api.github.com/users/anthropics/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/anthropics/received_events",
+          "type": "Organization",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "name": "Claude",
+        "description": "Run Claude Code from your GitHub Pull Requests and Issues to respond to reviewer feedback, fix CI errors, or modify code, turning it into a virtual teammate that works alongside your development pipelines.\r\n\r\nThis is built on the publicly available Claude Code SDK.",
+        "external_url": "https://anthropic.com/claude-code",
+        "html_url": "https://github.com/apps/claude",
+        "created_at": "2025-04-30T17:54:24Z",
+        "updated_at": "2026-09-30T19:04:00Z",
+        "permissions": {
+          "actions": "write",
+          "administration": "read",
+          "checks": "write",
+          "contents": "write",
+          "discussions": "write",
+          "issues": "write",
+          "members": "read",
+          "merge_queues": "read",
+          "metadata": "read",
+          "pull_requests": "write",
+          "repository_hooks": "write",
+          "statuses": "read",
+          "workflows": "write"
+        },
+        "events": [
+          "branch_protection_rule",
+          "check_run",
+          "check_suite",
+          "commit_comment",
+          "discussion",
+          "discussion_comment",
+          "issues",
+          "issue_comment",
+          "merge_group",
+          "merge_queue_entry",
+          "pull_request",
+          "pull_request_review",
+          "pull_request_review_comment",
+          "pull_request_review_thread",
+          "push",
+          "release",
+          "repository_ruleset",
+          "status",
+          "sub_issues"
+        ]
+      },
+      "minimized": null,
+      "pin": null
+    },
+    "laterKitAuditFailure": false,
+    "yyGo": {
+      "authorizationMode": "AUTO_AFTER_REVIEW",
+      "standingScopeText": "my go covers all",
+      "evidenceSha256": "02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1",
+      "releaseHead": "f830f900f597f20e12570b583e4e32ce9cb50a1d"
+    },
+    "verifiedUtc": "2026-10-12T01:35:17.173199+00:00"
+  },
+  "separateInstallerCommands": 0,
+  "anyEntrypointAttempted": true,
+  "originalProductionReceiptSha256": "ac4ffc39c0b8e2c27f7aa1494edffcfd45e5c47d2c4aa5b7fffee1c2b6b1781e",
+  "preflight": {
+    "ready": true,
+    "productionMutations": 0,
+    "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+    "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+    "reserveBytes": 10556150894,
+    "requiredIncludingBackupBytes": 14502202229,
+    "freeBytes": {
+      "/opt/lims": 101505761280,
+      "/var/lib/docker": 101505761280
+    },
+    "databaseBytesWithWal": 567545720,
+    "assetsBytes": 3906103,
+    "originalRestartCount": 0,
+    "entryState": {
+      "mode": "STOPPED_HELD",
+      "containerId": "0d9d0a96052683e97a44af1b06b04d2efc077ae8f6558caf6d8c8b28b8a8c98e",
+      "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+      "restartCount": 0,
+      "ingressSha256": "d92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c",
+      "originalFiles": {
+        "": {
+          "sha256": "44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34",
+          "bytes": 563322880,
+          "inode": 1280648,
+          "device": 64769,
+          "mtimeNs": 1791758477795015270,
+          "mode": 438
+        },
+        "-wal": {
+          "sha256": "9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0",
+          "bytes": 4190072,
+          "inode": 1191799,
+          "device": 64769,
+          "mtimeNs": 1791766145231682695,
+          "mode": 438
+        },
+        "-shm": {
+          "sha256": "5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d",
+          "bytes": 32768,
+          "inode": 1191838,
+          "device": 64769,
+          "mtimeNs": 1791766144752672822,
+          "mode": 438
+        }
+      }
+    }
+  },
+  "proofSourceReviewId": 6115225815,
+  "baseHead": "171dd36c5b2dbeea8763520dd18fbdb158ffca05",
+  "pr": 291,
+  "tree": "48678dda23fa876d8d233db812149c8d1792bf16",
+  "auditedPrTree": "2292fbf2a2626ad89c5abdcc49843dffffdefd02",
+  "mergeParents": [
+    "171dd36c5b2dbeea8763520dd18fbdb158ffca05",
+    "5d3550d709f0b62ef013f9114e9da9344f9818a1"
+  ],
+  "naturalIntakePolicy": "ORIGINAL_CURSOR_ACTUAL_UPSTREAM",
+  "proofAuthoritySha256": "8b568e3e48a3330664612529a7ae7c63974d4a1a81cce4fc9b406133c57cbc1e",
+  "diskMeasurementGuardSha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+  "baselineMeasurementGuardSha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+  "proofBaselineLayoutGuardSha256": "49c76b8d0312a38820ea8dff707cdfd6674614c63344bedf2655755b6ca6f1b6",
+  "proofBaselineLayoutPolicy": "EXACT_HASHED_PROOF_AUTHORITY_LAYOUT",
+  "productionBaselineAdapterSha256": "d1993f59d75c8e0da6b32f1a5bfc0343968caef05df92036ae991fcfd61f7c7f",
+  "productionBaselineScopeCommentId": 6113922488,
+  "productionBaselineSourceReviewId": 6116073246,
+  "productionBaselineSourceReviewSha256": "64d3c0f08c0581971043aa2d42636c832cc91672c256c4d62dba630fed10bc37",
+  "copyVerifierSha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+  "proofContractSha256": "cd190348d332fd12e53694ca080819c2d095bfa5c4ee86eb058686a65a38fb0e",
+  "refusalScopeCommentId": 6113601584,
+  "schedulerRefusalPolicy": "EXACT_FRESH_COPY_CONFIG_REFUSALS",
+  "intakeCardinalityPolicy": "SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS",
+  "refusalPairingScopeCommentId": 6114143349,
+  "schedulerRefusalPairing": "STREAM_ORDER_ONE_TO_ONE",
+  "REFUSAL_PAIR_WINDOW_SECONDS": 1,
+  "baselineVanishedProcessPolicy": "CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE",
+  "BASELINE_ATTEMPTS_MAX": 3,
+  "BASELINE_CONFIRMATION_DEADLINE_SECONDS": 10,
+  "coreDeallocationConfirmationDeadlineSeconds": 10,
+  "workloadControl": {
+    "labAndHubBuildsOwnedByYY": true,
+    "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+  },
+  "effectiveUid": 0,
+  "pythonOptimize": 0,
+  "baselineAttempt": 1,
+  "baselineEnumerationErrorCount": 0,
+  "alreadyStoppedEntryNoSecondStop": true,
+  "protectedStateSha256": "7cb20bb4c766011f226d434d77da0d7933c653e796c650c8c8f25a92e7853da2",
+  "stoppedBackupSha256": "4cb003f1ef84c59789d3636de79ed212e29dec37fe9d5640f4beeb97df8ba4e7",
+  "originalStoppedSeal": {
+    "policy": "EXACT_STOPPED_TRIPLE_WAL_AWARE_COPY_FULL_LOGICAL_ZERO_WRITE",
+    "originalFiles": {
+      "": {
+        "sha256": "44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34",
+        "bytes": 563322880,
+        "inode": 1280648,
+        "device": 64769,
+        "mtimeNs": 1791758477795015270,
+        "mode": 438
+      },
+      "-wal": {
+        "sha256": "9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0",
+        "bytes": 4190072,
+        "inode": 1191799,
+        "device": 64769,
+        "mtimeNs": 1791766145231682695,
+        "mode": 438
+      },
+      "-shm": {
+        "sha256": "5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d",
+        "bytes": 32768,
+        "inode": 1191838,
+        "device": 64769,
+        "mtimeNs": 1791766144752672822,
+        "mode": 438
+      }
+    },
+    "rawFiles": {
+      "": {
+        "sha256": "44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34",
+        "bytes": 563322880,
+        "inode": 9182882,
+        "device": 64769,
+        "mtimeNs": 1791768999029489187,
+        "mode": 256
+      },
+      "-wal": {
+        "sha256": "9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0",
+        "bytes": 4190072,
+        "inode": 9182883,
+        "device": 64769,
+        "mtimeNs": 1791769002653563866,
+        "mode": 256
+      },
+      "-shm": {
+        "sha256": "5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d",
+        "bytes": 32768,
+        "inode": 9182884,
+        "device": 64769,
+        "mtimeNs": 1791769002795566793,
+        "mode": 256
+      }
+    },
+    "mainOnlyStateSha256": "76343f9200bff5c88263c61506cafb826fb32c7fbb22ff3e35d9604137ce729c",
+    "logicalStateSha256": "7cb20bb4c766011f226d434d77da0d7933c653e796c650c8c8f25a92e7853da2",
+    "backupSha256": "4cb003f1ef84c59789d3636de79ed212e29dec37fe9d5640f4beeb97df8ba4e7",
+    "countsIncludeWal": true,
+    "matchesExpected": false,
+    "protectedTableCount": 104,
+    "protectedReceiptCount": 38
+  },
+  "walRecovery": {
+    "policy": "EXACT_STOPPED_TRIPLE_WAL_AWARE_COPY_FULL_LOGICAL_ZERO_WRITE",
+    "scopeCommentId": 6115903244,
+    "predecessorRoot": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z",
+    "failedReceiptSha256": "e274d3b8cf6514e7fe878ad7d712caa6303d3f969fd49372f8bb0147efbb6588",
+    "failedManifestSha256": "5f75662a3394dd01a490338e0e389a0cfe5854d3ffcb170b9a48200b914c3a27",
+    "normalIngressSha256": "f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20",
+    "heldIngressSha256": "d92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c",
+    "heldTriple": {
+      "": {
+        "sha256": "44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34",
+        "bytes": 563322880
+      },
+      "-wal": {
+        "sha256": "9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0",
+        "bytes": 4190072
+      },
+      "-shm": {
+        "sha256": "5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d",
+        "bytes": 32768
+      }
+    },
+    "allowedEntryStates": [
+      "RUNNING_NORMAL",
+      "STOPPED_HELD"
+    ]
+  },
+  "assetsBackupSha256": "ab5a7990b209f09cf8361515c681cf7300964ab8ebe1fd06f8ffded7eab25fda",
+  "originalDatabaseFiles": {
+    "": {
+      "sha256": "44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34",
+      "bytes": 563322880,
+      "inode": 1280648,
+      "device": 64769,
+      "mtimeNs": 1791758477795015270,
+      "mode": 438
+    },
+    "-wal": {
+      "sha256": "9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0",
+      "bytes": 4190072,
+      "inode": 1191799,
+      "device": 64769,
+      "mtimeNs": 1791766145231682695,
+      "mode": 438
+    },
+    "-shm": {
+      "sha256": "5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d",
+      "bytes": 32768,
+      "inode": 1191838,
+      "device": 64769,
+      "mtimeNs": 1791766144752672822,
+      "mode": 438
+    }
+  },
+  "protectedTableCount": 104,
+  "protectedReceiptCount": 38,
+  "originalContainerRetainedAs": "soilfer-lims-before-runtime-kobo-release-f830f900-20261012T012552Z",
+  "jobsOffReadiness": {
+    "startedUtc": "2026-10-12T01:38:32.664419+00:00",
+    "containerStartedUtc": "2026-10-12T01:38:32.898074922Z",
+    "readyUtc": "2026-10-12T01:40:15.344319+00:00",
+    "elapsedSeconds": 102.67996008699993,
+    "deadlineSeconds": 600,
+    "attempts": 84,
+    "health": {
+      "status": "ok",
+      "version": "1.9.0",
+      "uptime": 50.0653679
+    },
+    "restartCount": 0,
+    "oomKilled": false,
+    "memoryLimitBytes": 805306368,
+    "networkMode": "bridge",
+    "publishedHostIp": "127.0.0.1",
+    "jobsEnabled": false,
+    "baseUrl": "http://127.0.0.1:3000",
+    "sharedReadinessCode": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+  },
+  "jobsOffChecks": {
+    "startupReady": [
+      {
+        "event": "WORKFLOW_STARTUP_READY",
+        "classification": "COMPLETE",
+        "inventory": {
+          "totals": {
+            "Sample": 38928,
+            "WorkItem": 90
+          },
+          "candidateCount": 0,
+          "unmappedCount": 0,
+          "blockedCount": 0,
+          "fingerprint": "f92b4677e3ce0424471df4cffefe4c4e3138a1557846094059b8af0886129386"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "RESULT_ATTEMPT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d"
+        },
+        "guards": [
+          "Result_attempt_insert_guard",
+          "Result_attempt_update_guard",
+          "WorkAttempt_result_reference_guard"
+        ],
+        "counts": {
+          "results": 19,
+          "linked": 19
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "SAMPLE_HOLD_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8"
+        },
+        "guards": [
+          "SampleHold_insert_guard",
+          "SampleHold_update_guard",
+          "SampleHold_raise_immutable",
+          "SampleHold_resolution_final",
+          "SampleHold_delete_refusal",
+          "WorkItem_cancellation_insert_guard",
+          "WorkItem_cancellation_update_guard"
+        ],
+        "counts": {
+          "workItems": 90,
+          "holds": 10
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "REFERENCE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3",
+          "oracleSha256": "7a626b66bd31a7e7305d8c1b091207f3fb26348345a431fb77b63f875d3b99b5"
+        },
+        "guards": [
+          "ReferenceMaterial_insert_guard",
+          "ReferenceMaterial_update_guard",
+          "ReferenceValue_insert_guard",
+          "ReferenceValue_immutable_guard",
+          "ReferenceValue_delete_guard",
+          "BatchQcResult_reference_insert_guard",
+          "BatchQcResult_reference_update_guard"
+        ],
+        "indexes": [
+          "ReferenceMaterial_labId_code_idx",
+          "ReferenceValue_referenceMaterialId_analysisCode_idx",
+          "ReferenceValue_current_generic",
+          "ReferenceValue_current_method"
+        ],
+        "counts": {
+          "materials": 0,
+          "values": 0,
+          "qcRows": 18,
+          "linked": 0
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_RULE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06",
+          "oracleSha256": "fe0dbc7dbb0a35bc62353de715a48b4263d492917225c7be5b6f969ec3f52819"
+        },
+        "guards": [
+          "QcRule_immutable_update",
+          "QcRule_immutable_delete",
+          "QcRule_version_guard",
+          "QcRule_scope_guard",
+          "QcRule_value_guard"
+        ],
+        "indexes": [
+          "QcRule_labId_analysisCode_methodologyId_effectiveFrom_idx",
+          "QcRule_scope_version_unique"
+        ],
+        "counts": {
+          "rules": 0
+        },
+        "backfillCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_RUN_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+          "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369"
+        },
+        "counts": {
+          "BatchAnalyte": 6,
+          "BatchPosition": 33,
+          "BatchPositionWorkItem": 15,
+          "BatchPositionReference": 0,
+          "QcMeasurement": 24,
+          "QcEvaluation": 6,
+          "BatchDisposition": 1,
+          "BatchEvent": 28
+        },
+        "receipt": {
+          "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+          "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369",
+          "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+          "backfillCounts": {
+            "batches": 6,
+            "analytes": 6,
+            "samplePositions": 15,
+            "qcPositions": 18,
+            "historicalSnapshots": 0,
+            "currentEvaluations": 6,
+            "evaluations": 6,
+            "measurements": 24,
+            "typedRows": 18,
+            "historicalTypedRows": 0,
+            "jsonEntries": 18,
+            "typedFallbackEntries": 0,
+            "typedJsonConflicts": 12,
+            "historyAuditConflicts": 0,
+            "unresolvedMethods": 0,
+            "unresolvedAnalysts": 3,
+            "unresolvedInstruments": 6,
+            "unlinkedReferences": 6,
+            "unresolvedNumbers": 0,
+            "unresolvedDuplicateParents": 6,
+            "unresolvedRackPositions": 15,
+            "missingWorkItems": 16,
+            "malformedHistory": 0,
+            "malformedQcResults": 0,
+            "orphanSnapshots": 0,
+            "multiAttemptMembershipGroups": 0,
+            "refusals": 0,
+            "legacyDispositionMapped": {
+              "REJECT_REANALYSIS": 1,
+              "ACCEPT_OPAQUE": 1
+            },
+            "dispositionAttribution": {
+              "AUDIT_LOG": 0,
+              "BATCH_DISPOSITION_FIELD": 2,
+              "SNAPSHOT_DISPOSITION_FIELD": 0
+            },
+            "dispositionAttributionConflicts": 0,
+            "TEXTURE_ALIAS_MERGED": 0
+          },
+          "bootstrapRebuild": []
+        },
+        "bootstrapRebuild": [],
+        "guards": [
+          "Batch_legacy_qc_immutable",
+          "Batch_first_start_immutable",
+          "BatchQcResult_frozen_insert",
+          "BatchQcResult_frozen_update",
+          "BatchQcResult_frozen_delete",
+          "BatchAnalyte_insert_guard",
+          "BatchAnalyte_update_guard",
+          "BatchAnalyte_identity_immutable",
+          "BatchAnalyte_membership_insert_guard",
+          "BatchAnalyte_membership_delete_guard",
+          "BatchAnalyte_membership_update_guard",
+          "BatchPosition_insert_guard",
+          "BatchPosition_update_guard",
+          "BatchPosition_membership_insert_guard",
+          "BatchPosition_membership_update_guard",
+          "BatchPosition_membership_delete_guard",
+          "BatchPosition_identity_guard",
+          "BatchPositionWorkItem_insert_guard",
+          "BatchPositionWorkItem_immutable",
+          "BatchPositionWorkItem_run_unique_guard",
+          "BatchPositionWorkItem_membership_insert_guard",
+          "BatchPositionWorkItem_membership_delete_guard",
+          "WorkItem_batch_membership_guard",
+          "WorkItem_batch_membership_insert_guard",
+          "BatchPositionReference_insert_guard",
+          "BatchPositionReference_correction_reason_guard",
+          "BatchPositionReference_lot_guard",
+          "BatchPositionReference_supersede_guard",
+          "BatchPositionReference_delete_guard",
+          "QcMeasurement_insert_guard",
+          "QcMeasurement_historical_write_guard",
+          "QcMeasurement_replacement_guard",
+          "BatchPositionReference_replacement_guard",
+          "QcMeasurement_start_guard",
+          "QcMeasurement_supersede_guard",
+          "QcMeasurement_delete_guard",
+          "QcEvaluation_insert_guard",
+          "QcEvaluation_start_guard",
+          "QcEvaluation_frozen_criteria_guard",
+          "QcEvaluation_immutable_update",
+          "QcEvaluation_immutable_delete",
+          "BatchDisposition_immutable_update",
+          "BatchDisposition_immutable_delete",
+          "BatchEvent_immutable_update",
+          "BatchEvent_immutable_delete",
+          "BatchDisposition_insert_guard",
+          "BatchEvent_insert_guard"
+        ],
+        "indexes": [
+          "BatchAnalyte_labId_analysisCode_methodologyId_idx",
+          "BatchAnalyte_batchId_analysisCode_key",
+          "BatchPosition_batchId_position_key",
+          "BatchPositionWorkItem_workItemId_idx",
+          "BatchPositionWorkItem_positionId_analysisCode_key",
+          "BatchPositionReference_positionId_analysisCode_idx",
+          "QcMeasurement_batchId_analysisCode_idx",
+          "QcMeasurement_positionId_analysisCode_replicateNo_idx",
+          "QcEvaluation_batchId_analysisCode_version_key",
+          "BatchDisposition_batchId_analysisCode_idx",
+          "BatchEvent_batchId_at_idx",
+          "BatchAnalyte_crm_ordinal_unique",
+          "BatchPositionReference_current_unique",
+          "QcMeasurement_current_unique"
+        ],
+        "backfillCount": 0,
+        "backfillCounts": {
+          "batches": 6,
+          "analytes": 6,
+          "samplePositions": 15,
+          "qcPositions": 18,
+          "historicalSnapshots": 0,
+          "currentEvaluations": 6,
+          "evaluations": 6,
+          "measurements": 24,
+          "typedRows": 18,
+          "historicalTypedRows": 0,
+          "jsonEntries": 18,
+          "typedFallbackEntries": 0,
+          "typedJsonConflicts": 12,
+          "historyAuditConflicts": 0,
+          "unresolvedMethods": 0,
+          "unresolvedAnalysts": 3,
+          "unresolvedInstruments": 6,
+          "unlinkedReferences": 6,
+          "unresolvedNumbers": 0,
+          "unresolvedDuplicateParents": 6,
+          "unresolvedRackPositions": 15,
+          "missingWorkItems": 16,
+          "malformedHistory": 0,
+          "malformedQcResults": 0,
+          "orphanSnapshots": 0,
+          "multiAttemptMembershipGroups": 0,
+          "refusals": 0,
+          "legacyDispositionMapped": {
+            "REJECT_REANALYSIS": 1,
+            "ACCEPT_OPAQUE": 1
+          },
+          "dispositionAttribution": {
+            "AUDIT_LOG": 0,
+            "BATCH_DISPOSITION_FIELD": 2,
+            "SNAPSHOT_DISPOSITION_FIELD": 0
+          },
+          "dispositionAttributionConflicts": 0,
+          "TEXTURE_ALIAS_MERGED": 0
+        },
+        "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "QC_GATE_SCOPE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+        "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+        "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+        "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+        "existingDispositionRows": 1,
+        "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+        "backfillCount": 0,
+        "bootstrapRebuild": [],
+        "totalChanges": 0,
+        "mode": "DRY_RUN",
+        "receipt": {
+          "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+          "existingDispositionRows": 1,
+          "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+          "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+          "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+          "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+          "backfillCount": 0,
+          "bootstrapRebuild": []
+        }
+      },
+      {
+        "event": "PT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "successor": "COMPLETE_193",
+        "sources": {
+          "migrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "successorSources": {
+          "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+          "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "bootstrapRebuild": [],
+        "backfillCount": 0,
+        "roundCount": 0,
+        "scoreOutcomeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "NCR_STARTUP_READY",
+        "classification": "COMPLETE_193",
+        "sources": {
+          "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+          "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "RESULT_EQUIPMENT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4"
+        },
+        "bootstrapRebuild": [],
+        "backfillCount": 0,
+        "resultCount": 19,
+        "originalResultSha256": "935e140956349abc9eddbee25b830c9ff041700f6565479a62f16031deb90d26",
+        "mode": "DRY_RUN",
+        "totalChanges": 0
+      },
+      {
+        "event": "WORK_ATTEMPT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+          "contractVersion": "190-v1"
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "WORK_REPEAT_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd",
+          "contractVersion": "191-v1",
+          "predecessor": {
+            "marker": "190_work_attempt_contract",
+            "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+            "contractVersion": "190-v1",
+            "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+          },
+          "qcPredecessors": {
+            "186_normalized_qc_runs": {
+              "receiptSha256": "d461aab82504feaf91a27b4816e1d4b3abd66c147f32122752d72f4eb842be1a"
+            },
+            "187_qc_gate_scope": {
+              "receiptSha256": "ee802a39b62a9e06ab92677c3c016c461e4d1c8ca43674f077622220ef1fbd04"
+            }
+          }
+        },
+        "totalChanges": 0
+      },
+      {
+        "event": "REPORTED_VALUE_STARTUP_READY",
+        "classification": "COMPLETE",
+        "migrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7",
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newSelectionCount": 0
+      },
+      {
+        "event": "REAGENT_LOT_STARTUP_READY",
+        "classification": "COMPLETE_194",
+        "sources": {
+          "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+        },
+        "linkCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+          },
+          "originalRowsSha256": "f79db32ba1d05b87d2e5009954d90ae2dd0f0a960cd51865e0f4b75de0bc4cbe",
+          "originalRowsPreserved": true,
+          "newLinkCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "5d737a49f3a62a5accf3c405ae938308b11b4ffe5682e71c0982951ee61715e1"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "RESULT_OVERRIDE_STARTUP_READY",
+        "classification": "COMPLETE_197",
+        "sources": {
+          "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+        },
+        "requestCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+          },
+          "originalRowsSha256": "6e0207946cd67d4109b3f6e7ff0b23fd8b545b21d2a4f81796e651923db1564b",
+          "originalRowsPreserved": true,
+          "newRequestCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "953a236c33e3b37f7a4fe173dc01f17b6d49924a2bfa432877f05b896253b83e"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "CALCULATION_STARTUP_READY",
+        "classification": "COMPLETE",
+        "sources": {
+          "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+          "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+          "referenceSha256": "57dc4b667dab93606e24673b39a12032e48f3df686b9bd3c593ac04d2fac8491"
+        },
+        "receipt": {
+          "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+          "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+          "guards": [
+            "CalcTemplate_insert_contract",
+            "CalcTemplateActivation_insert_contract",
+            "CalibrationCurve_insert_contract",
+            "CalibrationPoint_insert_contract",
+            "ResultCalculation_insert_contract",
+            "CalcTemplate_update_immutable",
+            "CalcTemplate_delete_immutable",
+            "CalcTemplateActivation_update_immutable",
+            "CalcTemplateActivation_delete_immutable",
+            "CalibrationCurve_update_immutable",
+            "CalibrationCurve_delete_immutable",
+            "CalibrationPoint_update_immutable",
+            "CalibrationPoint_delete_immutable",
+            "ResultCalculation_update_immutable",
+            "ResultCalculation_delete_immutable",
+            "CalibrationCurve_pass_coefficients_guard"
+          ],
+          "backfillCount": 0
+        },
+        "guards": [
+          "CalcTemplate_insert_contract",
+          "CalcTemplateActivation_insert_contract",
+          "CalibrationCurve_insert_contract",
+          "CalibrationPoint_insert_contract",
+          "ResultCalculation_insert_contract",
+          "CalcTemplate_update_immutable",
+          "CalcTemplate_delete_immutable",
+          "CalcTemplateActivation_update_immutable",
+          "CalcTemplateActivation_delete_immutable",
+          "CalibrationCurve_update_immutable",
+          "CalibrationCurve_delete_immutable",
+          "CalibrationPoint_update_immutable",
+          "CalibrationPoint_delete_immutable",
+          "ResultCalculation_update_immutable",
+          "ResultCalculation_delete_immutable",
+          "CalibrationCurve_pass_coefficients_guard"
+        ],
+        "counts": {
+          "CalcTemplate": 8,
+          "CalcTemplateActivation": 0,
+          "CalibrationCurve": 0,
+          "CalibrationPoint": 0,
+          "ResultCalculation": 0
+        },
+        "backfillCount": 0,
+        "unit": {
+          "classification": "ABSENT",
+          "unitCode": "pct_mass",
+          "unitInsertCount": 0,
+          "backfillCount": 0
+        },
+        "references": {
+          "classification": "COMPLETE",
+          "referenceCount": 11,
+          "installedReferenceCount": 8,
+          "missingReferenceIds": [],
+          "deferredReferences": [
+            {
+              "id": "calc-ref-walkley-black-130-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            },
+            {
+              "id": "calc-ref-walkley-black-133-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            },
+            {
+              "id": "calc-ref-kjeldahl-nitrogen-v1",
+              "code": "DEFERRED_PREREQUISITE_ABSENT",
+              "missingAnalysisCodes": [],
+              "missingUnitCodes": [
+                "pct_mass"
+              ]
+            }
+          ],
+          "deferredReferenceCount": 3,
+          "referenceInsertCount": 0,
+          "referenceReceiptInsertCount": 0,
+          "activationInsertCount": 0,
+          "backfillCount": 0
+        },
+        "ready": true,
+        "plannedUnitInsertCount": 0,
+        "plannedReferenceInsertCount": 0,
+        "activationInsertCount": 0,
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "unitInsertCount": 0,
+        "referenceInsertCount": 0,
+        "referenceReceiptInsertCount": 0,
+        "schemaReceiptInsertCount": 0
+      },
+      {
+        "event": "CROSS_CHECK_STARTUP_READY",
+        "classification": "COMPLETE_201",
+        "sources": {
+          "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+          "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+          "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+        },
+        "evaluationCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+            "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+            "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+          },
+          "originalRowsSha256": "8559985c861e950fdffe53f6661a48b0e76916edcd4c3f0e51b473d827824d58",
+          "originalRowsPreserved": true,
+          "newEvaluationCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "3185df5bbb809f86c7ca8c0689135e6dbd93e227c9dbda66850256b965966a9e"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newEvaluationCount": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "AMENDMENT_STARTUP_READY",
+        "classification": "COMPLETE_210",
+        "sources": {
+          "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+          "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+          "contractVersion": "210-v1"
+        },
+        "amendmentCount": 1,
+        "amendmentAttemptLinkCount": 0,
+        "withdrawalCount": 0,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+            "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+            "contractVersion": "210-v1"
+          },
+          "originalRowsSha256": "d843166d8ca8117121e56a44fd8eeed47ac92f75f3cd63ea0b466912247241d3",
+          "originalRowsPreserved": true,
+          "newAmendmentCount": 0,
+          "newAttemptLinkCount": 0,
+          "newWithdrawalCount": 0,
+          "backfilledCount": 0,
+          "receiptSha256": "efc085838fcd3c85af095eed605a790b1252d178b52c8e9de9a5eaada223e424"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "newAmendmentCount": 0,
+        "newAttemptLinkCount": 0,
+        "newWithdrawalCount": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "REPORT_REVISION_STARTUP_READY",
+        "classification": "COMPLETE_211",
+        "sources": {
+          "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+          "contractVersion": "211-v1"
+        },
+        "reportCount": 4,
+        "receipt": {
+          "sources": {
+            "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+            "contractVersion": "211-v1"
+          },
+          "originalRowsSha256": "2e6e021a9c590b35591f505a0aba09f529839015dfbd49e4ff81a8a29541ba39",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "7172b9201f5173b63a1a1414b0a18414da150b8366762c868081d1a6d61dc72d"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "BENCH_CREDENTIAL_STARTUP_READY",
+        "classification": "COMPLETE_202",
+        "sources": {
+          "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+          "contractVersion": "202-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+            "contractVersion": "202-v1"
+          },
+          "originalRowsSha256": "a380b9ab2f9dd1ee5533c9266bbed055be9a6802f6bad10ad9462cfeeb30abf7",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "220eeb9b44b23db3d1176eda595b5fcf1ac67b1f84fe87fbc7be58e12c46e3c6"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      {
+        "event": "PREPARATION_RECORD_STARTUP_READY",
+        "classification": "COMPLETE_205",
+        "sources": {
+          "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+          "contractVersion": "205-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+            "contractVersion": "205-v1"
+          },
+          "originalRowsSha256": "10f132d31e12b6551a00a48cfd136791d49a70fc9520834df7a5972cd988c57a",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "01df5c84dc90b6c4be4e91b9d3b05e44af2bc5cc03e0ec5fec5bef6a238c19ae"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      }
+    ],
+    "entrypointInstallers": [
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "ALREADY_PRESENT",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_193",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_194",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_197",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_201",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_210",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_211",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_202",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      },
+      {
+        "classification": "COMPLETE_205",
+        "mode": "NO_OP",
+        "totalChanges": 0
+      }
+    ],
+    "startupChanges": 0,
+    "ownedJobsBoundary": null,
+    "startupMemory": {
+      "peakBytes": 202747904,
+      "limitBytes": 805306368,
+      "nodeOptions": null
+    }
+  },
+  "apiChecks": {
+    "passed": 31,
+    "total": 31,
+    "failed": 0
+  },
+  "probes": [
+    {
+      "file": "postflight-roles.cjs",
+      "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-auth.cjs",
+      "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-reference.cjs",
+      "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-qc-runs.cjs",
+      "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+      "exitCode": 0
+    },
+    {
+      "file": "postflight-policy.cjs",
+      "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+      "exitCode": 0
+    },
+    {
+      "file": "readonly-smoke.cjs",
+      "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+      "exitCode": 0
+    }
+  ],
+  "readOnlyProbeChanges": 0
+}
