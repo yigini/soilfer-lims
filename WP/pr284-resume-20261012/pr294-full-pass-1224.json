@@ -1,0 +1,73 @@
+{
+  "verifiedUtc": "2026-10-12T12:24:50.270196+00:00",
+  "applicationHead": "5e65fe5b587747efc717f167f9b61469effa9afe",
+  "applicationTree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+  "applicationFiles": {
+    "server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad",
+    "server/services/instrumentImportMigrationSource.js": "28a152d18f76578509c52e2865bbea1f0b3c2154427945fc8151909b9d216688",
+    "server/services/instrumentImportSchemaService.js": "897cd427cf8f16cc9199269d259232cc34395049b75d7fb119aa3a15c3fbec41",
+    "server/tests/contracts/audit_4_7_instrument_import_install.test.js": "9478f9ca362ec2994d7d218cdea37a8fe57aa7e06c33e266965ee8b2d22f363d",
+    "server/tests/helpers/workflowWriteScanner.js": "ecbcfed96847a1c864476c624f8074ef05b6a791bf35ffec2c239f9da6345c28"
+  },
+  "pr": 294,
+  "localSession": 38507,
+  "localSessionExitCode": 0,
+  "status": "FULL_LOCAL_UNFILTERED_360_SUITE_PASS",
+  "passingSuites": 360,
+  "passingTests": 5478,
+  "failingSuites": 0,
+  "failingTests": 0,
+  "pendingTests": 0,
+  "todoTests": 0,
+  "elapsedSeconds": 1522.451,
+  "inventoryEqualsAllActualTestFiles": true,
+  "normalHooksRetained": true,
+  "singleSequentialTestChild": true,
+  "maxWorkers": 1,
+  "workerIdleMemoryLimitBytes": 512000000,
+  "heapLimitRaised": false,
+  "applicationEditsDuringValidation": 0,
+  "concurrentJestOrSetup": false,
+  "resultSha256": "480f2da089fde3370ad3cd2ca0d94322445d3bd2561119b95a16484fef4b5e04",
+  "logSha256": "53ff3d97c4d89b0ae6ac9c6eec88440d321e140958312128c9a9f2978c29bec8",
+  "clientBuildSession": 54479,
+  "clientBuildExitCode": 0,
+  "clientBuildLogSha256": "b140fa6921ef09ac787d78f7c98b2c880700f51f4abb547414e0e8967b90c044",
+  "originalLocalDatabaseFilesUnchanged": [
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma\\dev.db",
+      "bytes": 2473984,
+      "sha256": "ef02482e586391f1670f88279bfc7f436a847c5c20e2457e76ca4a94a8efcaca"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma\\dev.db-wal",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma\\dev.db-shm",
+      "bytes": 32768,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    },
+    {
+      "path": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db",
+      "bytes": 563195904,
+      "sha256": "490b8c4782bdc5300e729dbcafe9f01dd695995a7d6c69f3002dde9b75cf1835"
+    },
+    {
+      "path": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db-wal",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db-shm",
+      "bytes": 32768,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    }
+  ],
+  "earlierPartialRunsAggregated": false,
+  "githubCiStatus": "IN_PROGRESS",
+  "githubCiRunId": 38247731718,
+  "formalApplicationAuditClaimed": false,
+  "productionMutations": 0
+}
