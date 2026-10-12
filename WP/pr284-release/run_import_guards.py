@@ -8,9 +8,15 @@ import sys
 head = sys.argv[1]
 if len(head) != 40 or any(character not in '0123456789abcdef' for character in head):
     raise RuntimeError('Exact source commit required')
-names = ['import_preservation', 'import_startup_checks', 'import_installation', 'import_stage',
-    'test_import_preservation', 'test_import_startup_checks', 'test_import_installation', 'test_import_stage']
+names = ['import_preservation', 'import_startup_checks', 'import_installation', 'import_stage', 'import_sealing',
+    'test_import_preservation', 'test_import_startup_checks', 'test_import_installation', 'test_import_stage', 'test_import_sealing']
 files = {name: subprocess.check_output(['git', 'show', head + ':WP/pr284-release/' + name + '.py']) for name in names}
+helpers = {'release_support': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
+    'startup_common': 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00'}
+raw_helpers = {name: subprocess.check_output(['git', 'show', head + ':WP/forward-ae64f169/' + name + '.py']) for name in helpers}
+if any(hashlib.sha256(raw).hexdigest() != helpers[name] for name, raw in raw_helpers.items()):
+    raise RuntimeError('Historical measured helper changed')
+files = dict(raw_helpers, **files)
 assets = {name: subprocess.check_output(['git', 'show', head + ':server/prisma/migrations/20261010000100_instrument_import_templates/' + name])
     for name in ['migration.sql', 'fresh-prisma-tables.json', 'pre-prisma-draft-table.sql',
         'upgraded-prisma-draft-table.sql', 'post205-draft-tables.json']}
