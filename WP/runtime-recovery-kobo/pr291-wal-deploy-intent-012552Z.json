@@ -1,0 +1,17 @@
+{
+  "utc": "2026-10-12T01:34:44.638682+00:00",
+  "status": "SINGLE_NEW_FORWARD_DEPLOY_INTENT_NO_GATE_YET",
+  "root": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T012552Z",
+  "unit": "lims-release-runtime-kobo-release-f830f900-20261012t012552z.service",
+  "manifestSha256": "0e0339e23c7cb9ea32b25d8e26b486c94a63889c00b317af76b7cadffd1e6fe9",
+  "coordinatorSha256": "72baa9cb901aec8baaf35d33284eea2c23395150ee8cca211239b1ffa61d445d",
+  "kitReviewId": 6116173459,
+  "kitReviewRawSha256": "cba46c16442259d853b9784b6ab6988af7388d6e7aec5ad00db4495e12be2fb9",
+  "sourceReviewId": 6116073246,
+  "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "all64ReviewTokensValidated": true,
+  "nativeActualPassRead": true,
+  "standingYYGo": "AUTO_AFTER_REVIEW",
+  "entry": "STOPPED_HELD if actual remains equal; YY restart card untouched",
+  "gateFile": "WP/runtime-recovery-kobo/pr291-wal-gate-012552Z.json"
+}
