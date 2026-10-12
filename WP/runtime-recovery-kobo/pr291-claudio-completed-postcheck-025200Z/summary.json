@@ -1,0 +1,67 @@
+{
+  "observedUtc": "2026-10-12T02:53:51.105893+00:00",
+  "status": "CLAUDIO_ACTUAL_POSTCHECK_PASS_RECORDED",
+  "deployedHead": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "productionActions": 0,
+  "records": [
+    {
+      "issue": 162,
+      "commentId": 6116880414,
+      "url": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6116880414",
+      "createdAt": "2026-10-12T02:52:08Z",
+      "rawSha256": "1033f957728ae35db604cccfd62a86c6771039bd0915581e0c52dd5d004c73ff",
+      "issueState": "open",
+      "closedAt": null
+    },
+    {
+      "issue": 291,
+      "commentId": 6116881795,
+      "url": "https://github.com/yigini/soilfer-lims/pull/291#issuecomment-6116881795",
+      "createdAt": "2026-10-12T02:52:13Z",
+      "rawSha256": "9a0d868669a831d975dbb0338c9d56df0cbee31aeb3f9c2b1e5fc540b59816ef",
+      "issueState": "closed",
+      "closedAt": "2026-10-11T22:57:30Z"
+    },
+    {
+      "issue": 278,
+      "commentId": 6116882473,
+      "url": "https://github.com/yigini/soilfer-lims/issues/278#issuecomment-6116882473",
+      "createdAt": "2026-10-12T02:52:16Z",
+      "rawSha256": "3ce437d2a8ab2fe1f6039df0712fce631888e1db39c2960cdbf55a0190d240e9",
+      "issueState": "closed",
+      "closedAt": "2026-10-12T02:52:28Z"
+    },
+    {
+      "issue": 279,
+      "commentId": 6116883192,
+      "url": "https://github.com/yigini/soilfer-lims/issues/279#issuecomment-6116883192",
+      "createdAt": "2026-10-12T02:52:19Z",
+      "rawSha256": "668a48392cf5047b970fc08d6c10d5265ec45da5dbe20d3241729c73f35f17aa",
+      "issueState": "closed",
+      "closedAt": "2026-10-12T02:52:29Z"
+    },
+    {
+      "issue": 281,
+      "commentId": 6116883780,
+      "url": "https://github.com/yigini/soilfer-lims/issues/281#issuecomment-6116883780",
+      "createdAt": "2026-10-12T02:52:21Z",
+      "rawSha256": "c4499961ea0bf65eafe40301722bfa9039c5b00595d24b92a08a615ec80788e3",
+      "issueState": "closed",
+      "closedAt": "2026-10-12T02:52:31Z"
+    },
+    {
+      "issue": 283,
+      "commentId": 6116884384,
+      "url": "https://github.com/yigini/soilfer-lims/issues/283#issuecomment-6116884384",
+      "createdAt": "2026-10-12T02:52:24Z",
+      "rawSha256": "7db20ae3ce6cee39a3c27f191baee9dfe8331424c6de27b7003fda73446155ca",
+      "issueState": "closed",
+      "closedAt": "2026-10-12T02:52:34Z"
+    }
+  ],
+  "limits": [
+    "Claudio cannot reach production from his network; production evidence is Pip retained receipt/independent read-only verification checked against audited kit.",
+    "Original interrupted253-suite run and setup-only failures retained; fresh2-suite7-test rerun and91-suite2106-test remainder passed. Not one uninterrupted344-suite run.",
+    "#213 saved work not yet pushed; no application change or next release authorization gate collected."
+  ]
+}
