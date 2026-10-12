@@ -1,0 +1,20 @@
+{
+  "recordedUtc": "2026-10-12T02:07:10.045764+00:00",
+  "status": "READ_ONLY_SCOPE_PREPARATION_NO_NEW_APPLICATION_WORK",
+  "deployedHead": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "issue": 213,
+  "issueTitle": "[Audit 6.4] Exports use the selected reported value",
+  "nextOwner": "Claudio existing local work; exact branch/head not yet supplied",
+  "reviewCriteria": [
+    "SIS v2, adapter, WET_CHEM and CSV reported output equals the report using saved ReportedValueSelection only",
+    "Attempt and batch provenance where format allows; derived means retain all source evidence",
+    "Missing, stale or ineligible selection fails with stable 4xx code; no fallback to raw result or invented selection",
+    "NOT_REPORTABLE, censoring, unit representation and policy version agree with the report",
+    "Tenant scoping and roles preserved; analytical/QC/audit rows never rewritten; migrations additive",
+    "Reconcile explicitly the existing SIS v2 raw-observation contract with the new issue scope; keep any raw export separate",
+    "Independent behavior tests and exact-head formal review before merge; separate proof/kit/audit/gate for later deployment"
+  ],
+  "productionMutations": 0,
+  "applicationChanges": 0,
+  "mergeHold": "Until actual PR291 postcheck complete"
+}
