@@ -26,6 +26,7 @@ def native():
         'afterBackupSha256': 'c' * 64, 'preservationSha256': 'd' * 64,
         'dryRunCopyAuthoritySha256': 'd' * 64,
         'repeatPhysicalPolicy': release.REPEAT_POLICY, 'repeatPreservationSha256': 'd' * 64,
+        'repeatStoppedSealElapsedSeconds': 1.0,
         'repeatStoppedSeal': {'policy': release.WAL_RECOVERY_POLICY, 'countsIncludeWal': True,
             'protectedTableCount': 106, 'protectedReceiptCount': 39},
         'dryRunCopy': {'policy': release.DRY_COPY_POLICY, 'beforeBackupSha256': 'a' * 64,
@@ -475,7 +476,8 @@ class ReleaseTests(unittest.TestCase):
 
     def test_measured_timeout_margin_and_unmeasured_costs_are_explicit(self):
         report = release.measured_timing_headroom(native(), startup(False)[0], startup(True)[0])
-        self.assertEqual(report['remainingForUnmeasuredOperationsSeconds'], 4474)
+        self.assertEqual(report['remainingForUnmeasuredOperationsSeconds'], 4473)
+        self.assertEqual(report['additionalMeasuredOperationSeconds'], {'repeat-stopped-seal': 1.0})
         self.assertIn('backup', report['unmeasuredOperations'])
         self.assertEqual(report['policy'], 'MEASURED_STAGES_ONLY_NOT_TOTAL_PRODUCTION_WALL_TIME')
         for elapsed in [540.0001, 600, True, float('nan'), float('inf'), -1]:
@@ -485,6 +487,12 @@ class ReleaseTests(unittest.TestCase):
         proof, pin = self.complete_proof()
         proof['measuredTimingHeadroom']['remainingForUnmeasuredOperationsSeconds'] += 1
         with self.assertRaises(RuntimeError): release.validate_proof(proof, pin)
+
+    def test_added_repeat_seal_cost_cannot_be_missing_or_consume_unit_headroom(self):
+        for elapsed in [None, True, 0, -1, float('nan'), float('inf'), 4000]:
+            changed = native(); changed['repeatStoppedSealElapsedSeconds'] = elapsed
+            with self.subTest(elapsed=elapsed), self.assertRaises(RuntimeError):
+                release.measured_timing_headroom(changed, startup(False)[0], startup(True)[0])
 
     def test_original_raw_application_authority_cannot_be_substituted(self):
         proof, pin = self.complete_proof()

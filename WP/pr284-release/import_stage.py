@@ -7,6 +7,7 @@ There is no resume, retry, recovery, restore or historical installer path.
 import json
 import pathlib
 import stat
+import time
 
 from import_installation import DRY_COPY_POLICY, measured_cli, validate_apply, validate_plan
 from import_preservation import assets, require, verify_import_installation
@@ -134,6 +135,7 @@ def install_once(root, image, database_dir, before_backup, before_physical, sour
     readonly_repeat_physical(physical, support.physical(database))
     # Do not open SQLite on originals or disregard WAL. Retain another complete
     # detached seal and require every installed row/schema/receipt to be equal.
+    repeat_seal_started = time.monotonic()
     repeat_seal = seal('after-repeat-stopped', installed=True)
     readonly_repeat_physical(sealed['originalFiles'], repeat_seal['originalFiles'])
     repeat_backup = pathlib.Path(repeat_seal['backupPath'])
@@ -146,6 +148,7 @@ def install_once(root, image, database_dir, before_backup, before_physical, sour
         'Immediate repeat changed full installed state')
     require(repeat_seal['logicalStateSha256'] == sealed['logicalStateSha256'],
         'Immediate repeat detached full-state seal differs')
+    repeat_seal_elapsed = time.monotonic() - repeat_seal_started
     repeat_authority = {'policy': REPEAT_POLICY, 'mainBytesAndAttributesPreserved': True,
         'fullInstalledStateEqual': True, 'beforePhysical': sealed['originalFiles'],
         'afterPhysical': repeat_seal['originalFiles'],
@@ -160,6 +163,7 @@ def install_once(root, image, database_dir, before_backup, before_physical, sour
         'afterBackupSha256': support.sha(after_backup), 'preservationSha256': delta_sha,
         'measurements': [dry_measurement, apply_measurement, repeat_measurement],
         'repeatPhysicalPolicy': REPEAT_POLICY, 'repeatStoppedSeal': repeat_seal,
+        'repeatStoppedSealElapsedSeconds': repeat_seal_elapsed,
         'repeatPreservationSha256': repeat_authority_sha,
         'dryRunCopy': dry_authority, 'dryRunCopyAuthoritySha256': dry_authority_sha,
         'dry': dry, 'apply': applied, 'repeat': repeated, 'repeatDatabaseChanges': 0,

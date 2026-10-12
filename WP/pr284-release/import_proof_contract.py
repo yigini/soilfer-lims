@@ -114,7 +114,10 @@ def measured_timing_headroom(native, jobs_off, jobs_on):
     require(all(type(value) in [int, float] and math.isfinite(value) and
         0 < value <= 600 - MIN_MEASURED_TIMEOUT_HEADROOM_SECONDS for value in stages.values()),
         'Measured CLI/readiness stages need at least sixty seconds of timeout headroom')
-    measured = sum(stages.values()) + 660
+    seal_elapsed = native.get('repeatStoppedSealElapsedSeconds')
+    require(type(seal_elapsed) in [int, float] and math.isfinite(seal_elapsed) and seal_elapsed > 0,
+        'Actual added repeat-seal wall cost must be measured')
+    measured = sum(stages.values()) + seal_elapsed + 660
     remaining = PRODUCTION_UNIT_LIMIT_SECONDS - measured
     require(remaining >= MIN_MEASURED_UNIT_HEADROOM_SECONDS,
         'Measured stages leave insufficient production unit headroom')
@@ -122,10 +125,11 @@ def measured_timing_headroom(native, jobs_off, jobs_on):
         'stageElapsedSeconds': stages, 'stageTimeoutHeadroomSeconds':
             {label: 600 - elapsed for label, elapsed in stages.items()},
         'productionHealthyObservationSeconds': 660,
+        'additionalMeasuredOperationSeconds': {'repeat-stopped-seal': seal_elapsed},
         'measuredStagesPlusObservationSeconds': measured,
         'unitLimitSeconds': PRODUCTION_UNIT_LIMIT_SECONDS,
         'remainingForUnmeasuredOperationsSeconds': remaining,
-        'unmeasuredOperations': ['quiesce', 'backup', 'seals', 'API probes', 'ingress', 'coordination']}
+        'unmeasuredOperations': ['quiesce', 'backup', 'other seals', 'API probes', 'ingress', 'coordination']}
 
 
 def require_pr_review(review):
