@@ -1,0 +1,12 @@
+{
+  "verifiedUtc": "2026-10-12T19:18:17.431329+00:00",
+  "status": "ACTUAL_NEW_PRODUCTION_SOURCE_PASS_VERIFIED_NO_EXECUTION",
+  "reviewId": 6130963561,
+  "sourceCommit": "abceab95b8d68b1b3202df9f4f9fc229d9baa2ae",
+  "sourceFileCount": 39,
+  "reviewSha256": "eea070fac0690382eea797fc6763cd6ba077ca72cd05d8895195b252be737da9",
+  "originalStoppedProofReceiptSha256": "f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce",
+  "currentMainHead": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "packagingDeadlineSeconds": 900,
+  "productionOperations": 0
+}
