@@ -1,0 +1,13 @@
+{
+  "status": "ACTUAL_NEW_EXACT_KIT_PASS_VERIFIED",
+  "utc": "2026-10-12T00:49:20.242525+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z",
+  "manifestSha256": "5f75662a3394dd01a490338e0e389a0cfe5854d3ffcb170b9a48200b914c3a27",
+  "kitReviewId": 6115780943,
+  "rawSha256": "13ac642e0f04ee9686ca397f91d43e80449fa19e54e1296df62c0e1048b36d08",
+  "requiredTokenCount": 51,
+  "allRequiredTokensPresent": true,
+  "allFrozenFileHashesVerified": true,
+  "laterGenuineFailure": false,
+  "gateNotCollected": true
+}
