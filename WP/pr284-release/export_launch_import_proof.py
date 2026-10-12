@@ -67,6 +67,7 @@ def main():
         'repos/yigini/soilfer-lims/issues/162/comments?per_page=100', '--paginate', '--slurp'],
         text=True, encoding='utf-8'))
     require(not any(('source review: failed' in comment['body'].lower() or
+        'source review: changes required' in comment['body'].lower() or
         'audit failed' in comment['body'].lower()) and comment['created_at'] > source_review['created_at']
         for page in source_comments for comment in page), 'Later source audit failure exists')
     require(github('repos/yigini/soilfer-lims/git/ref/heads/main')['object']['sha'] == pin['head'],

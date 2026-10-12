@@ -86,6 +86,8 @@ def main():
         owned = c.inspect(measurement['containerName'])
         require(not owned['State']['Running'] and owned['State']['ExitCode'] == 0 and not owned['State']['OOMKilled'] and
             owned['RestartCount'] == 0 and owned['Image'] == pin['image'] and
+            owned['HostConfig']['Memory'] == owned['HostConfig']['MemorySwap'] == LIMIT and
+            owned['HostConfig']['NetworkMode'] == 'none' and
             measurement['owner'].startswith(str(proof) + ':') and
             owned['Config']['Labels'].get('io.soilfer.release-owned') == measurement['owner'],
             'Native proof CLI stopped identity differs')
@@ -109,6 +111,15 @@ def main():
     for name, original in PROOF_ARTIFACTS.items():
         raw = safe_reference(proof, original).read_bytes()
         files[name] = raw; references[original] = hashlib.sha256(raw).hexdigest()
+    native = receipt['nativeImportInstallation']
+    require(json.loads(files['import-dry-copy-authority.json']) == native['dryRunCopy'] and
+        hashlib.sha256(files['import-dry-copy-authority.json']).hexdigest() == native['dryRunCopyAuthoritySha256'],
+        'Original dry-run copy authority differs')
+    for name, row in native['dryRunCopy']['files'].items():
+        original = 'import-dry-database/' + name
+        path = safe_reference(proof, original)
+        require(path.stat().st_size == row['bytes'] and sha(path) == row['sha256'], 'Retained dry-run copy changed')
+        references[original] = row['sha256']
     proof_authority(receipt, pin, source, json.loads(files['proof-authority.json']),
         hashlib.sha256(files['proof-authority.json']).hexdigest())
     bound_artifacts = {'first-sync-preservation.json': 'firstPreservationSha256',

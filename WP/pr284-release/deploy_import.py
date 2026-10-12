@@ -292,7 +292,7 @@ def main():
             _, evidence = sealed_stopped_state(ROOT, label, s.LIVE, guard, installed=installed)
             return evidence
         receipt['nativeImportInstallation'], expected = install_once(ROOT, pin['image'], s.LIVE.parent,
-            pathlib.Path(stopped['backupPath']), s.physical(s.LIVE), ROOT, guard, s, seal_import)
+            pathlib.Path(stopped['backupPath']), s.physical(s.LIVE), ROOT, guard, s, seal_import, production=True)
         c.write_new(ROOT / 'installed-protected-state.json', expected)
         receipt['installedProtectedStateSha256'] = sha(ROOT / 'installed-protected-state.json')
         receipt['protectedTableCount'] = 106; receipt['protectedReceiptCount'] = 39

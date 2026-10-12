@@ -46,7 +46,9 @@ def release_binding_tokens():
         'mergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE',
         'naturalIntakePolicy=' + NATURAL_INTAKE_POLICY, 'importDeltaPolicy=' + NATIVE_DELTA_POLICY,
         'originalState=104tables/38receipts', 'installedState=106tables/39receipts',
-        'defaultStartup=23NO_OP0/22READY0', 'productionRecovery=' + RECOVERY_POLICY]
+        'defaultStartup=23NO_OP0/22READY0', 'productionRecovery=' + RECOVERY_POLICY,
+        'nativeDryCopyPolicy=SEPARATE_OWNED_0400_BACKUP_COPY_WITH_WRITABLE_SIDECAR_DIRECTORY',
+        'CLI_TIMEOUT_SECONDS=600', 'nativeCliNetwork=none', 'nativeCliMemorySwapBytes=805306368']
 
 
 def require_pr_review(review):

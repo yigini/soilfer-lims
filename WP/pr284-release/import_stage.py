@@ -8,7 +8,7 @@ import json
 import pathlib
 import stat
 
-from import_installation import measured_cli, validate_apply, validate_plan
+from import_installation import DRY_COPY_POLICY, measured_cli, validate_apply, validate_plan
 from import_preservation import assets, require, verify_import_installation
 
 
@@ -27,12 +27,37 @@ def baseline(state, installed=False):
         'Exact #200 stage baseline differs')
 
 
-def install_once(root, image, database_dir, before_backup, before_physical, source_directory, guard, support, seal):
+def prepare_dry_copy(root, before_backup, expected, guard, support):
+    directory = root / 'import-dry-database'
+    require(not directory.exists() and not directory.is_symlink(), 'Never reuse a dry-run copy')
+    directory.mkdir(mode=0o700)
+    copied = directory / 'dev.db'
+    with before_backup.open('rb') as source, copied.open('xb') as target:
+        copied_since_check = 0
+        while block := source.read(1024 * 1024):
+            target.write(block); copied_since_check += len(block)
+            if copied_since_check >= 32 * 1024 * 1024:
+                target.flush(); guard.check(); copied_since_check = 0
+    copied.chmod(0o400)
+    require(support.sha(copied) == support.sha(before_backup) and
+        support.snapshot(copied, immutable=True) == expected, 'Separate dry-run backup copy differs')
+    guard.check()
+    return directory
+
+
+def install_once(root, image, database_dir, before_backup, before_physical, source_directory, guard, support, seal,
+        production=False):
     root, database_dir, before_backup = map(pathlib.Path, (root, database_dir, before_backup))
     require(root.is_dir() and not root.is_symlink() and before_backup.is_file() and
         not before_backup.is_symlink() and before_backup.resolve().is_relative_to(root.resolve()) and
         stat.S_IMODE(before_backup.stat().st_mode) == 0o400,
         'Native stage needs the original stopped immutable backup')
+    live_parent = pathlib.Path(support.LIVE).parent.resolve()
+    require(type(production) is bool and (database_dir.resolve() != live_parent if not production else
+        database_dir.resolve() == live_parent and root.resolve().parent == pathlib.Path('/opt/lims/releases') and
+        root.name.startswith('instrument-import-release-')), 'Proof stage cannot use the live database parent')
+    require(not database_dir.is_symlink() and (production or database_dir.resolve().is_relative_to(root.resolve())),
+        'Proof database must remain inside its isolated root')
     attempt = root / 'instrument-import-attempt.json'
     require(not attempt.exists(), 'Native installer attempt is single-use and cannot resume')
     database = database_dir / 'dev.db'
@@ -43,15 +68,31 @@ def install_once(root, image, database_dir, before_backup, before_physical, sour
     require(support.physical(database) == before_physical,
         'Target physical triple differs from the separately sealed stopped authority')
     guard.check()
+    dry_directory = prepare_dry_copy(root, before_backup, expected, guard, support)
     # Persist intent BEFORE even a dry-run. A failure or NO_OP cannot reopen an
     # old image or replay this stage after a default-entrypoint/installer attempt.
     write_new(root, attempt.name, {'status': 'ATTEMPTED_FORWARD_ONLY', 'image': image,
         'beforeBackupSha256': before_sha, 'productionRecovery': 'SEPARATELY_AUDITED_FORWARD_FIX_ONLY'}, support)
     physical = support.physical(database)
-    dry, dry_measurement = measured_cli(root, image, database_dir, '--dry-run', 'import-dry', support)
+    dry, dry_measurement = measured_cli(root, image, dry_directory, '--dry-run', 'import-dry', support)
     validate_plan(dry, 'PRE_200', 'DRY_RUN')
     require(support.physical(database) == physical,
         'Dry-run changed the stopped original target')
+    dry_copy = dry_directory / 'dev.db'
+    require(support.sha(dry_copy) == before_sha and stat.S_IMODE(dry_copy.stat().st_mode) == 0o400 and
+        support.snapshot(dry_copy, immutable=True) == expected, 'Dry-run changed its separate immutable main copy')
+    dry_files = {}
+    require({path.name for path in dry_directory.iterdir()} <= {'dev.db', 'dev.db-wal', 'dev.db-shm'},
+        'Unexpected separate dry-run allocation')
+    for path in dry_directory.iterdir():
+        require(path.is_file() and not path.is_symlink(), 'Dry-run copy contains a link or non-file')
+        if path.name == 'dev.db-wal': require(path.stat().st_size == 0, 'Readonly dry-run wrote WAL frames')
+        if path.name == 'dev.db-shm': require(path.stat().st_size == 32768, 'Unexpected readonly dry-run SHM size')
+        path.chmod(0o400)
+        dry_files[path.name] = {'sha256': support.sha(path), 'bytes': path.stat().st_size}
+    dry_authority = {'policy': DRY_COPY_POLICY, 'beforeBackupSha256': before_sha,
+        'mainSha256': support.sha(dry_copy), 'targetPhysicalTriplePreserved': True, 'files': dry_files}
+    dry_authority_sha = write_new(root, 'import-dry-copy-authority.json', dry_authority, support)
     guard.check()
     require(support.sha(before_backup) == before_sha, 'Original stopped backup changed before apply')
     applied, apply_measurement = measured_cli(root, image, database_dir, '--apply', 'import-apply', support)
@@ -83,5 +124,6 @@ def install_once(root, image, database_dir, before_backup, before_physical, sour
         'originalRowsSha256': original_hash, 'beforeBackupSha256': before_sha,
         'afterBackupSha256': support.sha(after_backup), 'preservationSha256': delta_sha,
         'measurements': [dry_measurement, apply_measurement, repeat_measurement],
+        'dryRunCopy': dry_authority, 'dryRunCopyAuthoritySha256': dry_authority_sha,
         'dry': dry, 'apply': applied, 'repeat': repeated, 'repeatDatabaseChanges': 0,
         'allOriginalRowsAndSchemaPreserved': True, 'forwardOnly': True}, installed

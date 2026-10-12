@@ -12,7 +12,7 @@ import re
 
 from import_proof_contract import *
 from import_source_graph import SOURCE_FILES, UNCHANGED_HELPER_HASHES
-from import_installation import validate_apply, validate_plan
+from import_installation import CLI_TIMEOUT_SECONDS, DRY_COPY_POLICY, validate_apply, validate_plan
 from import_startup_checks import READY_EVENTS, import_zero
 
 WORKLOAD_PINS = {'labAndHubBuildsOwnedByYY': True,
@@ -53,6 +53,7 @@ PROOF_ARTIFACTS = {
     'fresh-protected-state.json': 'fresh-protected-state.json',
     'installed-protected-state.json': 'installed-protected-state.json',
     'import-install-preservation.json': 'import-install-preservation.json',
+    'import-dry-copy-authority.json': 'import-dry-copy-authority.json',
     'import-installed-seal.json': 'after-import-stopped/sealed-state.json',
     'import-jobs-off-seal.json': 'after-jobs-off-stopped/sealed-state.json',
     'import-final-seal.json': 'after-second-stopped/sealed-state.json'}
@@ -127,7 +128,8 @@ def has_failed_verdict(body, include_source=False):
     if first in [PHRASE, 'Source review: PASS']:
         body = re.sub(r'\bno later[ \t]+(?:"audit failed"|\'audit failed\'|“audit failed”|‘audit failed’)',
             '', body, flags=re.IGNORECASE)
-    return 'audit failed' in body.lower() or (include_source and 'source review: failed' in body.lower())
+    return 'audit failed' in body.lower() or (include_source and any(value in body.lower()
+        for value in ['source review: failed', 'source review: changes required']))
 
 
 def native_installation(row):
@@ -141,6 +143,20 @@ def native_installation(row):
     validate_plan(row['dry'], 'PRE_200', 'DRY_RUN')
     require(validate_apply(row['apply']) == row['originalRowsSha256'], 'Original row hash differs')
     validate_plan(row['repeat'], 'COMPLETE_200', 'NO_OP')
+    dry_copy = row.get('dryRunCopy', {})
+    require(dry_copy.get('policy') == DRY_COPY_POLICY and
+        dry_copy.get('beforeBackupSha256') == dry_copy.get('mainSha256') == row['beforeBackupSha256'] and
+        dry_copy.get('targetPhysicalTriplePreserved') is True and
+        re.fullmatch('[a-f0-9]{64}', row.get('dryRunCopyAuthoritySha256', '')),
+        'Separate immutable dry-run copy authority missing')
+    dry_files = dry_copy.get('files', {})
+    require('dev.db' in dry_files and set(dry_files) <= {'dev.db', 'dev.db-wal', 'dev.db-shm'} and
+        dry_files['dev.db']['sha256'] == row['beforeBackupSha256'] and
+        all(re.fullmatch('[a-f0-9]{64}', value['sha256']) and type(value['bytes']) is int and value['bytes'] >= 0
+            for value in dry_files.values()) and
+        ('dev.db-wal' not in dry_files or dry_files['dev.db-wal']['bytes'] == 0) and
+        ('dev.db-shm' not in dry_files or dry_files['dev.db-shm']['bytes'] == 32768),
+        'Readonly dry-run copy bytes or sidecars differ')
     for key in ['originalRowsSha256', 'beforeBackupSha256', 'afterBackupSha256', 'preservationSha256']:
         require(re.fullmatch('[a-f0-9]{64}', row[key]), 'Native hash is missing: ' + key)
     measurements = row['measurements']
@@ -149,6 +165,9 @@ def native_installation(row):
     for label, value in zip(['import-dry', 'import-apply', 'import-repeat'], measurements):
         peak = value['cgroupMemoryPeak']
         require(value['memoryLimitBytes'] == LIMIT and value['nodeOptions'] == '' and
+            value.get('memorySwapLimitBytes') == LIMIT and value.get('networkMode') == 'none' and
+            value.get('timeoutSeconds') == CLI_TIMEOUT_SECONDS and
+            type(value.get('elapsedSeconds')) in [float, int] and 0 < value['elapsedSeconds'] < CLI_TIMEOUT_SECONDS and
             type(value['exitCode']) is int and value['exitCode'] == 0 and
             value['retainedOwnedContainer'] is True and type(peak['releaseCliPeakBytes']) is int and
             0 < peak['releaseCliPeakBytes'] <= LIMIT and type(peak['childStatus']) is int and
@@ -176,6 +195,12 @@ def startup_evidence(readiness, checks, jobs):
     import_zero(checks['startupReady'][-1])
     require(0 < checks['startupMemory']['peakBytes'] <= LIMIT and
         checks['startupMemory']['nodeOptions'] is None, 'Startup peak or heap override refused')
+    if jobs:
+        boundary = checks.get('ownedJobsBoundary') or {}
+        require(boundary.get('policy') == 'ISOLATED_NATURAL_INTAKE_WITH_SEALED_FIRST_SECOND_FULL_PRESERVATION' and
+            boundary.get('fullStateZeroClaimed') is False and boundary.get('dataVersionsObserved') and
+            all(type(value) is int for value in boundary['dataVersionsObserved']),
+            'Explicit natural jobs-ON observation boundary missing')
 
 
 def validate_proof(proof, pin):

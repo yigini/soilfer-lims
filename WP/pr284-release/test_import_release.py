@@ -24,9 +24,14 @@ def native():
         'repeatDatabaseChanges': 0, 'allOriginalRowsAndSchemaPreserved': True, 'forwardOnly': True,
         'originalRowsSha256': 'b' * 64, 'beforeBackupSha256': 'a' * 64,
         'afterBackupSha256': 'c' * 64, 'preservationSha256': 'd' * 64,
+        'dryRunCopyAuthoritySha256': 'd' * 64,
+        'dryRunCopy': {'policy': release.DRY_COPY_POLICY, 'beforeBackupSha256': 'a' * 64,
+            'mainSha256': 'a' * 64, 'targetPhysicalTriplePreserved': True,
+            'files': {'dev.db': {'sha256': 'a' * 64, 'bytes': 1234}}},
         'dry': plan(), 'apply': applied(), 'repeat': dict(plan(), classification='COMPLETE_200', mode='NO_OP'),
         'measurements': [{'containerName': 'owned-' + str(i), 'owner': 'owned-stage-' + str(i),
             'memoryLimitBytes': release.LIMIT, 'nodeOptions': '', 'exitCode': 0,
+            'memorySwapLimitBytes': release.LIMIT, 'networkMode': 'none', 'timeoutSeconds': 600, 'elapsedSeconds': 20.0,
             'retainedOwnedContainer': True,
             'retainedArtifacts': {label + '.stdout': 'e' * 64, label + '.stderr': 'f' * 64},
             'cgroupMemoryPeak': {'releaseCliPeakBytes': 500000000,
@@ -39,6 +44,8 @@ def startup(jobs):
         'sharedReadinessCode': release.SHARED_READINESS_SHA, 'restartCount': 0,
         'oomKilled': False, 'memoryLimitBytes': release.LIMIT, 'jobsEnabled': jobs}
     checks = {'startupChanges': 0, 'entrypointInstallers': entry_values(), 'startupReady': ready_values(),
+        'ownedJobsBoundary': {'policy': 'ISOLATED_NATURAL_INTAKE_WITH_SEALED_FIRST_SECOND_FULL_PRESERVATION',
+            'dataVersionsObserved': [2], 'fullStateZeroClaimed': False} if jobs else None,
         'startupMemory': {'peakBytes': 400000000, 'nodeOptions': None}}
     return ready, checks
 
@@ -106,9 +113,27 @@ class ReleaseTests(unittest.TestCase):
 
     def test_failed_or_unbounded_cli_refuses(self):
         for key, value in [('exitCode', 1), ('nodeOptions', '--max-old-space-size=900'),
-            ('memoryLimitBytes', 1073741824), ('retainedOwnedContainer', False)]:
+            ('memoryLimitBytes', 1073741824), ('retainedOwnedContainer', False),
+            ('memorySwapLimitBytes', -1), ('networkMode', 'bridge'), ('timeoutSeconds', 240),
+            ('elapsedSeconds', 600), ('elapsedSeconds', False)]:
             row = native(); row['measurements'][1][key] = value
             with self.subTest(key=key), self.assertRaises(RuntimeError): release.native_installation(row)
+
+    def test_native_dry_copy_cannot_be_missing_changed_or_have_wal_frames(self):
+        for change in ['missing', 'wrong-main', 'target-write', 'wal-frames']:
+            row = native()
+            if change == 'missing': row.pop('dryRunCopy')
+            if change == 'wrong-main': row['dryRunCopy']['mainSha256'] = 'f' * 64
+            if change == 'target-write': row['dryRunCopy']['targetPhysicalTriplePreserved'] = False
+            if change == 'wal-frames': row['dryRunCopy']['files']['dev.db-wal'] = {'bytes': 1, 'sha256': 'f' * 64}
+            with self.subTest(change=change), self.assertRaises(RuntimeError): release.native_installation(row)
+
+    def test_jobs_on_cannot_omit_boundary_or_claim_zero_full_state(self):
+        for change in [None, {'policy': 'anything'}, {
+                'policy': 'ISOLATED_NATURAL_INTAKE_WITH_SEALED_FIRST_SECOND_FULL_PRESERVATION',
+                'dataVersionsObserved': [2], 'fullStateZeroClaimed': True}]:
+            ready, checks = startup(True); checks['ownedJobsBoundary'] = change
+            with self.assertRaises(RuntimeError): release.startup_evidence(ready, checks, True)
         for key, value in [('releaseCliPeakBytes', release.LIMIT + 1), ('releaseCliPeakBytes', 0),
             ('childStatus', 1), ('childStatus', False), ('childSignal', 'SIGKILL')]:
             row = native(); row['measurements'][2]['cgroupMemoryPeak'][key] = value

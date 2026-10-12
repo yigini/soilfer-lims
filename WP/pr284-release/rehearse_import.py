@@ -104,6 +104,11 @@ class CopyObservation:
     def close(self):
         self.db.close()
 
+    def startup_boundary(self):
+        self.check()
+        return {'policy': 'ISOLATED_NATURAL_INTAKE_WITH_SEALED_FIRST_SECOND_FULL_PRESERVATION',
+            'dataVersionsObserved': list(self.versions), 'fullStateZeroClaimed': False}
+
 
 def sample(name, base, guard, watch, env_hash, receipt):
     candidate = c.inspect(name)
@@ -241,7 +246,6 @@ def main():
         installed_baseline = ROOT / 'after-import-stopped' / 'dev-stopped-backup.db'
         receipt['installedBaselineSha256'] = s.sha(installed_baseline)
         receipt['installedProtectedStateSha256'] = write_new('installed-protected-state.json', expected)
-        original_physical = s.physical(database)
         configs = configs_from_backup(ROOT / 'fresh-live-backup.db')
         with contextlib.closing(sqlite3.connect((ROOT / 'fresh-live-backup.db').as_uri() +
                 '?mode=ro&immutable=1', uri=True)) as db:

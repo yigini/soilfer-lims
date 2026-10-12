@@ -31,7 +31,8 @@ class StageGuards(unittest.TestCase):
         self.behavior = {}
         self.snapshots = []
         self.checks = 0
-        self.support = types.SimpleNamespace(sha=self.sha, physical=self.physical, snapshot=self.snapshot)
+        self.support = types.SimpleNamespace(sha=self.sha, physical=self.physical, snapshot=self.snapshot,
+            LIVE=self.root / 'unrelated-live' / 'dev.db')
         self.guard = types.SimpleNamespace(check=self.check)
         # Windows exposes read-only files as 0444, not POSIX owner-only 0400.
         # Normalize ONLY this owned synthetic harness; Linux uses actual modes.
@@ -69,7 +70,8 @@ class StageGuards(unittest.TestCase):
             raise RuntimeError('Owned disk refusal')
 
     def cli(self, root, image, directory, mode, label, support):
-        self.assertEqual((root, image, directory, support), (self.root, IMAGE, self.target_dir, self.support))
+        expected_dir = self.root / 'import-dry-database' if label == 'import-dry' else self.target_dir
+        self.assertEqual((root, image, directory, support), (self.root, IMAGE, expected_dir, self.support))
         self.calls.append(label)
         if self.behavior.get('fail') == label:
             raise RuntimeError('Owned CLI failure')
@@ -84,6 +86,8 @@ class StageGuards(unittest.TestCase):
         if self.behavior.get('write') == label:
             with self.target.open('ab') as stream:
                 stream.write(b'owned-unapproved-write')
+        if self.behavior.get('dry_copy_write') and label == 'import-dry':
+            with (directory / 'dev.db').open('ab') as stream: stream.write(b'unapproved-dry-copy-write')
         if self.behavior.get('wrong_plan') == label:
             value['totalChanges'] = 2
         return value, {'ownedSyntheticMeasurement': True, 'label': label}
@@ -115,6 +119,8 @@ class StageGuards(unittest.TestCase):
         self.assertEqual((len(state['tables']), state['tables']['_schema_migrations']['count']), (106, 39))
         self.assertEqual(self.sha(self.pair.before), before)
         self.assertTrue(result['allOriginalRowsAndSchemaPreserved'])
+        self.assertTrue(result['dryRunCopy']['targetPhysicalTriplePreserved'])
+        self.assertEqual(result['dryRunCopy']['mainSha256'], before)
         self.assertEqual(json.loads((self.root / 'instrument-import-attempt.json').read_text())['status'], 'ATTEMPTED_FORWARD_ONLY')
 
     def test_second_invocation_never_calls_an_installer(self):
@@ -166,6 +172,20 @@ class StageGuards(unittest.TestCase):
             self.run_stage(before_physical={})
         self.assertEqual(self.calls, [])
         self.assertFalse((self.root / 'instrument-import-attempt.json').exists())
+
+    def test_proof_refuses_live_parent_before_any_copy_or_marker(self):
+        self.support.LIVE = self.target
+        with self.assertRaisesRegex(RuntimeError, 'live database parent'):
+            self.run_stage()
+        self.assertEqual(self.calls, [])
+        self.assertFalse((self.root / 'import-dry-database').exists())
+        self.assertFalse((self.root / 'instrument-import-attempt.json').exists())
+
+    def test_dry_copy_mutation_refuses_before_apply(self):
+        self.behavior['dry_copy_write'] = True
+        with self.assertRaisesRegex(RuntimeError, 'separate immutable main copy'):
+            self.run_stage()
+        self.assertEqual(self.calls, ['import-dry'])
 
     def test_preflight_disk_refuses_without_attempt(self):
         self.behavior['guard_failure'] = 1

@@ -60,7 +60,8 @@ def main():
     source_review_pass(source_review, tooling, {name: item['sha256'] for name, item in tooling_index['files'].items()})
     source_comments = json.loads(subprocess.check_output(['gh', 'api',
         'repos/yigini/soilfer-lims/issues/162/comments?per_page=100', '--paginate', '--slurp'], text=True, encoding='utf-8'))
-    require(not any(('source review: failed' in row['body'].lower() or 'audit failed' in row['body'].lower()) and
+    require(not any(('source review: failed' in row['body'].lower() or
+        'source review: changes required' in row['body'].lower() or 'audit failed' in row['body'].lower()) and
         row['created_at'] > source_review['created_at'] for page in source_comments for row in page),
         'Later helper source audit failure exists')
     require(github('repos/yigini/soilfer-lims/git/ref/heads/main')['object']['sha'] == head,

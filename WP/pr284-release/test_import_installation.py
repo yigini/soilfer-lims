@@ -86,7 +86,7 @@ class InstallationGuards(unittest.TestCase):
             install.validate_apply(value)
 
     def test_only_pinned_instrument_import_script_and_no_cleanup(self):
-        name, owner, args = install.arguments('/owned/release', IMAGE, '/owned/database', '--apply', 'one-apply', '/live')
+        name, owner, args = install.arguments('/owned/release', IMAGE, '/owned/release/database', '--apply', 'one-apply', '/live')
         self.assertTrue(name.startswith('lims-owned-import-cli-'))
         self.assertIn('/app/server/scripts/install_instrument_imports.js', args)
         self.assertIn('--network', args)
@@ -97,9 +97,17 @@ class InstallationGuards(unittest.TestCase):
         self.assertEqual(args[-1], '--apply')
         self.assertTrue(all(value not in args for value in ['--rm', '--force', 'prune', 'restore']))
 
-    def test_dry_mount_is_readonly(self):
-        args = install.arguments('/owned/release', IMAGE, '/owned/database', '--dry-run', 'one-dry', '/live')[2]
-        self.assertTrue(args[args.index('--mount') + 1].endswith(',readonly'))
+    def test_dry_mount_is_only_separate_copy_with_writable_sidecars(self):
+        args = install.arguments('/owned/release', IMAGE, '/owned/release/import-dry-database', '--dry-run', 'one-dry', '/live')[2]
+        mount = args[args.index('--mount') + 1]
+        self.assertIn('src=' + str(pathlib.Path('/owned/release/import-dry-database').resolve()), mount)
+        self.assertFalse(mount.endswith(',readonly'))
+        self.assertEqual(args[args.index('--memory-swap') + 1], '768m')
+
+    def test_dry_refuses_apply_target_and_live_volume(self):
+        for directory in ['/live', '/owned/release/database']:
+            with self.assertRaisesRegex(RuntimeError, 'separate owned'):
+                install.arguments('/owned/release', IMAGE, directory, '--dry-run', 'one-dry', '/live')
 
     def test_live_volume_identity_is_exact(self):
         args = install.arguments('/owned/release', IMAGE, '/live', '--apply', 'one-apply', '/live')[2]
@@ -128,10 +136,12 @@ class InstallationGuards(unittest.TestCase):
             def command(where, args, label, **kwargs):
                 calls.append(args)
                 if args[:2] == ['docker', 'inspect']:
-                    name, owner, _ = install.arguments(root, IMAGE, root / 'database', '--dry-run', 'import-dry', '/live')
+                    name, owner, _ = install.arguments(root, IMAGE, root / 'import-dry-database', '--dry-run', 'import-dry', '/live')
                     value = [{'Image': IMAGE, 'RestartCount': 0,
                         'State': {'Running': False, 'OOMKilled': False, 'ExitCode': 0},
-                        'HostConfig': {'Memory': install.LIMIT},
+                        'HostConfig': {'Memory': install.LIMIT, 'MemorySwap': install.LIMIT, 'NetworkMode': 'none'},
+                        'Mounts': [{'Destination': '/app/server/prisma', 'Source': str((root / 'import-dry-database').resolve()),
+                            'RW': True, 'Type': 'bind'}],
                         'Config': {'Env': ['NODE_OPTIONS='], 'Labels': {'io.soilfer.release-owned': owner}}}]
                     stdout, stderr = json.dumps(value), ''
                 else:
@@ -141,7 +151,7 @@ class InstallationGuards(unittest.TestCase):
                 return types.SimpleNamespace(stdout=stdout, stderr=stderr, returncode=0)
             support = types.SimpleNamespace(LIVE=pathlib.Path('/live/dev.db'), command=command,
                 sha=lambda path: hashlib.sha256(path.read_bytes()).hexdigest())
-            result, measurement = install.measured_cli(root, IMAGE, root / 'database', '--dry-run', 'import-dry', support)
+            result, measurement = install.measured_cli(root, IMAGE, root / 'import-dry-database', '--dry-run', 'import-dry', support)
             self.assertEqual(result, plan())
             self.assertEqual(measurement['retainedArtifacts'], {
                 name: support.sha(root / name) for name in ['import-dry.stdout', 'import-dry.stderr']})

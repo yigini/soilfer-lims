@@ -2,6 +2,7 @@
 import copy
 import json
 import unittest
+import types
 
 import import_startup_checks as checks
 
@@ -31,6 +32,39 @@ def entry_log(values):
 
 
 class StartupGuards(unittest.TestCase):
+    def runtime(self, jobs_guard):
+        log = entry_log(entry_values()) + ready_log(ready_values())
+        class OwnedJobsWatch: pass
+        class NormalProductionJobs: pass
+        observed = []
+        common = types.SimpleNamespace(OwnedJobsWatch=OwnedJobsWatch, NormalProductionJobs=NormalProductionJobs,
+            inspect=lambda name: {'name': name}, state_guard=lambda value, jobs: observed.append((value, jobs)),
+            exact_state=lambda database, expected: observed.append('exact-state'))
+        support = types.SimpleNamespace(command=lambda root, args, label:
+            types.SimpleNamespace(stdout=log if args[:2] == ['docker', 'logs'] else '400000000', stderr=''))
+        result = checks.startup_checks('/owned', 'owned-jobs-on', '/owned/db', {}, 'owned-stage', common, support, jobs_guard)
+        return result, observed
+
+    def test_arbitrary_jobs_guard_cannot_silently_skip_boundary(self):
+        with self.assertRaisesRegex(RuntimeError, 'Explicit jobs-ON'):
+            self.runtime(types.SimpleNamespace(check=lambda: None))
+
+    def test_explicit_natural_jobs_boundary_is_observed_without_zero_claim(self):
+        boundary = {'policy': 'ISOLATED_NATURAL_INTAKE_WITH_SEALED_FIRST_SECOND_FULL_PRESERVATION',
+            'dataVersionsObserved': [2, 3], 'fullStateZeroClaimed': False}
+        result, observed = self.runtime(types.SimpleNamespace(check=lambda: None, startup_boundary=lambda: boundary))
+        self.assertEqual(result['ownedJobsBoundary'], boundary)
+        self.assertTrue(observed[0][1])
+        self.assertNotIn('exact-state', observed)
+
+    def test_natural_jobs_boundary_refuses_unobserved_or_fabricated_zero(self):
+        for changes in [{'dataVersionsObserved': []}, {'fullStateZeroClaimed': True}, {'dataVersionsObserved': [False]}]:
+            boundary = {
+                'policy': 'ISOLATED_NATURAL_INTAKE_WITH_SEALED_FIRST_SECOND_FULL_PRESERVATION',
+                'dataVersionsObserved': [2], 'fullStateZeroClaimed': False, **changes}
+            with self.assertRaisesRegex(RuntimeError, 'incomplete'):
+                self.runtime(types.SimpleNamespace(check=lambda: None, startup_boundary=lambda: boundary))
+
     def test_exact_22_ready_and_23_noop_pass(self):
         self.assertEqual(len(checks.ready_logs(ready_log(ready_values()))), 22)
         self.assertEqual(len(checks.entrypoint_zero(entry_log(entry_values()))), 23)

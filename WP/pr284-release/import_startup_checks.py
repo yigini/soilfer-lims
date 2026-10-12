@@ -88,7 +88,26 @@ def startup_checks(root, name, database, expected, stage, common, support, jobs_
     require(0 < peak <= 805306368, 'Startup peak exceeds 768MiB')
     if jobs_guard is None:
         common.exact_state(database, expected)
-    boundary = jobs_guard.verify() if isinstance(jobs_guard, common.OwnedJobsWatch) else None
+        boundary = None
+    else:
+        # Jobs may already be doing their natural work. Assert the actual
+        # jobs-enabled runtime and an explicit observed boundary; never claim
+        # its whole database stayed zero merely because startup logs say zero.
+        common.state_guard(common.inspect(name), True)
+        jobs_guard.check()
+        if isinstance(jobs_guard, common.OwnedJobsWatch):
+            boundary = jobs_guard.verify()
+        elif isinstance(jobs_guard, common.NormalProductionJobs):
+            boundary = {'policy': 'NORMAL_PRODUCTION_JOBS_AFTER_ZERO_WRITE_SEAL_AND_INGRESS_REOPEN',
+                'fullStateZeroClaimed': False}
+        else:
+            require(callable(getattr(jobs_guard, 'startup_boundary', None)), 'Explicit jobs-ON startup boundary required')
+            boundary = jobs_guard.startup_boundary()
+            require(isinstance(boundary, dict) and boundary.get('policy') ==
+                'ISOLATED_NATURAL_INTAKE_WITH_SEALED_FIRST_SECOND_FULL_PRESERVATION' and
+                boundary.get('fullStateZeroClaimed') is False and boundary.get('dataVersionsObserved') and
+                all(type(value) is int for value in boundary['dataVersionsObserved']),
+                'Isolated jobs-ON boundary is incomplete')
     return {'startupReady': ready, 'entrypointInstallers': entry, 'startupChanges': 0,
         'ownedJobsBoundary': boundary, 'startupMemory': {'peakBytes': peak,
         'limitBytes': 805306368, 'nodeOptions': None}}

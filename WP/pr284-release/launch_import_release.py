@@ -19,7 +19,7 @@ m=json.loads((r/'prepared-manifest.json').read_bytes());g=json.loads((r/'product
 digest=hashlib.sha256((r/'prepared-manifest.json').read_bytes()).hexdigest()
 actual=execution_preflight(r,digest);verify_gate(m,g,digest);verify_entry_readiness(m,g,actual)
 assert (r/'production-gate.json').stat().st_mode&0o777==0o400
-result=subprocess.run(['systemd-run','--unit='+p['unit'],'--property=Type=exec','--property=RuntimeMaxSec=2700',
+result=subprocess.run(['systemd-run','--unit='+p['unit'],'--property=Type=exec','--property=RuntimeMaxSec=5400',
  '--property=KillMode=process','--property=StandardOutput=journal',
  '--property=StandardError=journal','/usr/bin/python3','-B',str(r/'deploy_import.py'),
  '--execute-new-reviewed-import-gate'],text=True,capture_output=True,timeout=20)
