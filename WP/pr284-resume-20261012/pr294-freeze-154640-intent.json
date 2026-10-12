@@ -1,0 +1,10 @@
+{
+  "startedUtc": "2026-10-12T15:47:22.663470+00:00",
+  "sourceCommit": "5fa7e65f3d13a04f270e90e0b4b129f8eaf3296e",
+  "sourceReviewId": 6127651539,
+  "originalProofRoot": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "packageRoot": "/opt/lims/releases/instrument-import-package-959d17e1-20261012T154640Z",
+  "executionRoot": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T154640Z",
+  "productionOperations": 0,
+  "status": "ONE_FREEZE_DISPATCH_INTENT_NEVER_REPLAY"
+}
