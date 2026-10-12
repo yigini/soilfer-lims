@@ -1,0 +1,15 @@
+{
+  "ready": true,
+  "productionMutations": 0,
+  "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+  "reserveBytes": 10556150894,
+  "requiredIncludingBackupBytes": 11396005405,
+  "freeBytes": {
+    "/opt/lims": 103228825600,
+    "/var/lib/docker": 103228825600
+  },
+  "databaseBytesWithWal": 567512952,
+  "assetsBytes": 3906103,
+  "originalRestartCount": 0
+}

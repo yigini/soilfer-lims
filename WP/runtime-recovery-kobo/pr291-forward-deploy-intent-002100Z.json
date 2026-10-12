@@ -1,0 +1,15 @@
+{
+  "status": "SINGLE_FORWARD_DEPLOY_INTENT_NOT_EXECUTED",
+  "recordedUtc": "2026-10-12T00:29:02.118552+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T002100Z",
+  "unit": "lims-release-runtime-kobo-release-f830f900-20261012t002100z.service",
+  "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+  "manifestSha256": "db6868f84da186ac1d6fd7977379458dbd658f1ce397d5271d63946d322b5ca7",
+  "kitReviewId": 6115595393,
+  "kitReviewRawSha256": "f66e5ff7708db0d469064c42985a8da7b8fc5abbf529431d4f71daa8111cdd21",
+  "freshGatePending": true,
+  "originalYyGo": "AUTO_AFTER_REVIEW / my go covers all",
+  "noRetry": true,
+  "forwardOnly": true
+}

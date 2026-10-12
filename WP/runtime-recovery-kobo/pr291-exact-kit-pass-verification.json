@@ -1,0 +1,9 @@
+{
+  "reviewId": 6115595393,
+  "createdUtc": "2026-10-12T00:27:29Z",
+  "rawSha256": "f66e5ff7708db0d469064c42985a8da7b8fc5abbf529431d4f71daa8111cdd21",
+  "mandatoryTokenCount": 50,
+  "allMandatoryTokensPresent": true,
+  "laterAuditFailed": false,
+  "manifestSha256": "db6868f84da186ac1d6fd7977379458dbd658f1ce397d5271d63946d322b5ca7"
+}
