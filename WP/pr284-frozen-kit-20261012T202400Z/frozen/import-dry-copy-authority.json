@@ -1,0 +1,20 @@
+{
+  "policy": "SEPARATE_OWNED_0400_BACKUP_COPY_WITH_WRITABLE_SIDECAR_DIRECTORY",
+  "beforeBackupSha256": "8aafdf7c4325c2a9b429fa04aaf66db26f569b68d391bd18406720db336284b4",
+  "mainSha256": "8aafdf7c4325c2a9b429fa04aaf66db26f569b68d391bd18406720db336284b4",
+  "targetPhysicalTriplePreserved": true,
+  "files": {
+    "dev.db-wal": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "dev.db-shm": {
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "bytes": 32768
+    },
+    "dev.db": {
+      "sha256": "8aafdf7c4325c2a9b429fa04aaf66db26f569b68d391bd18406720db336284b4",
+      "bytes": 563322880
+    }
+  }
+}

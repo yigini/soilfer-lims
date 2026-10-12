@@ -1,0 +1,31 @@
+{
+  "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "baseHead": "51f6798806f630773786a08432290c1b21a841da",
+  "auditedPrHead": "5e65fe5b587747efc717f167f9b61469effa9afe",
+  "mergeBaseHead": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+  "originalProofRoot": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "firstProofPolicy": "EXACT_REVIEWED_FIRST_PROOF_ROOT_NO_REPLAY",
+  "pr": 294,
+  "tree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+  "auditedTree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+  "mergeParents": [
+    "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+    "5e65fe5b587747efc717f167f9b61469effa9afe"
+  ],
+  "auditReviewId": 6125341751,
+  "mainCiRunId": 38256676268,
+  "proofSourceReviewId": 6126765238,
+  "buildReusePolicy": "EXACT_ORIGINAL_BUILD_AUTHORITY_NO_REBUILD_OR_RETAG",
+  "buildRoot": "/opt/lims/releases/instrument-import-build-959d17e1-20261012T135400Z",
+  "buildReceiptSha256": "1a983172adebaba8b1a61959810d5469d9c12d706725bd33783d43cc8cceabe0",
+  "buildSourceCommit": "630b2354a1a45df0d88545ac5c63594361615999",
+  "buildSourceReviewId": 6125544861,
+  "buildSourceIndexSha256": "592f749f83eb166660a649030a0020600c0f99f403e5c40f9dfb9a5e3fc30c3f",
+  "buildSourceReviewRawSha256": "cd3f50d2794d39b6c28d2af3bbb88d3a2fa7ec1ffe93b7f1b4458655c5b82190",
+  "originalBuilderSha256": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a",
+  "originalPreparerSha256": "a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991",
+  "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+  "imageBytes": 413806636,
+  "labAndHubBuildsOwnedByYY": true,
+  "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+}

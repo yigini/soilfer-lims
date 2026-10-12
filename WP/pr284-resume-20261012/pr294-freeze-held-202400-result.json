@@ -1,0 +1,94 @@
+{
+  "finishedUtc": "2026-10-12T20:52:25.416456+00:00",
+  "exitCode": 0,
+  "sourceCommit": "e4d692a0c0eaed34017f4419172dfcf8db563be0",
+  "sourceReviewId": 6132295413,
+  "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T202400Z",
+  "productionOperations": 0,
+  "actualFreeze": {
+    "status": "PREPARED_IMPORT_FORWARD_ONLY_NOT_EXECUTED",
+    "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T202400Z",
+    "manifestSha256": "02d67dede9fd160f723ff1949353b7a36991d41a34e6c255884282ed07da8bad",
+    "coordinatorSha256": "24479eb79a6bdf9d900321dcbc25f2b15e6aa56c110aaf9028e205a5139d6d6d",
+    "receiptSha256": "f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce",
+    "targetPinSha256": "241bd693b8cfdb3e9a05440716bd925a620a807bdb371206430a4abc2a9481b1",
+    "fileCount": 66
+  },
+  "validationStageEvents": [
+    {
+      "event": "START",
+      "stage": "stopped-authority-and-retained-file-hashes"
+    },
+    {
+      "event": "PASSED",
+      "stage": "stopped-authority-and-retained-file-hashes",
+      "elapsedSeconds": 53.208671411004616
+    },
+    {
+      "event": "START",
+      "stage": "native-installation-full104-original-rows",
+      "elapsedSeconds": 53.21019734699803
+    },
+    {
+      "event": "PASSED",
+      "stage": "native-installation-full104-original-rows",
+      "elapsedSeconds": 47.13534460100345,
+      "totalElapsedSeconds": 100.34554399800254
+    },
+    {
+      "event": "START",
+      "stage": "repeat-full106-table-state",
+      "elapsedSeconds": 101.01564006200351
+    },
+    {
+      "event": "PASSED",
+      "stage": "repeat-full106-table-state",
+      "elapsedSeconds": 32.369933697002125,
+      "totalElapsedSeconds": 133.3855764050095
+    },
+    {
+      "event": "START",
+      "stage": "first-natural-full106-preservation",
+      "elapsedSeconds": 133.41199771800893
+    },
+    {
+      "event": "PASSED",
+      "stage": "first-natural-full106-preservation",
+      "elapsedSeconds": 54.0440529389889,
+      "totalElapsedSeconds": 187.45605348300887
+    },
+    {
+      "event": "START",
+      "stage": "second-natural-full106-preservation",
+      "elapsedSeconds": 187.4568034200056
+    },
+    {
+      "event": "PASSED",
+      "stage": "second-natural-full106-preservation",
+      "elapsedSeconds": 91.56138326600194,
+      "totalElapsedSeconds": 279.018188824004
+    },
+    {
+      "event": "START",
+      "stage": "full-installed-to-final106-preservation",
+      "elapsedSeconds": 279.01973444700707
+    },
+    {
+      "event": "PASSED",
+      "stage": "full-installed-to-final106-preservation",
+      "elapsedSeconds": 69.55209115300386,
+      "totalElapsedSeconds": 348.5718328820076
+    },
+    {
+      "event": "START",
+      "stage": "final-hashes-live-build-and-reserve",
+      "elapsedSeconds": 348.5735505449993
+    },
+    {
+      "event": "PASSED",
+      "stage": "final-hashes-live-build-and-reserve",
+      "totalElapsedSeconds": 367.15999707000447,
+      "destinationCreated": false
+    }
+  ]
+}

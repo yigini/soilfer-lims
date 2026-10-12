@@ -1,0 +1,365 @@
+{
+  "observedUtc": "2026-10-12T20:52:32.088954+00:00",
+  "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T202400Z",
+  "status": "READ_ONLY_UNUSED_HELD_FROZEN_KIT_VERIFIED",
+  "manifestSha256": "02d67dede9fd160f723ff1949353b7a36991d41a34e6c255884282ed07da8bad",
+  "rootInventory": [
+    "frozen"
+  ],
+  "files": {
+    "apache-before.conf": {
+      "sha256": "f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20",
+      "mode": "0o400",
+      "bytes": 996
+    },
+    "apache-held.conf": {
+      "sha256": "d92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c",
+      "mode": "0o400",
+      "bytes": 1049
+    },
+    "build_import.py": {
+      "sha256": "50acb99cc30a2116b0421c39c4f366626dd0f8283a1ff38abbb895fc06c97494",
+      "mode": "0o400",
+      "bytes": 8204
+    },
+    "capture_kobo_fetch.py": {
+      "sha256": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86",
+      "mode": "0o400",
+      "bytes": 4767
+    },
+    "collect_import_gate.py": {
+      "sha256": "f4bbf2bc94fd59459093ccc9aaf8888d36e72be2fce0b38faf8da85d2f5cf06a",
+      "mode": "0o400",
+      "bytes": 10452
+    },
+    "deploy_import.py": {
+      "sha256": "24479eb79a6bdf9d900321dcbc25f2b15e6aa56c110aaf9028e205a5139d6d6d",
+      "mode": "0o400",
+      "bytes": 28526
+    },
+    "export_freeze_import_kit.py": {
+      "sha256": "bb3890273ddb9ca25928941dd66250aef09adabab8e7a073033fb5fd2ca16b96",
+      "mode": "0o400",
+      "bytes": 6781
+    },
+    "export_launch_import_proof.py": {
+      "sha256": "2ed46d33a56e8a149e0666ed4a08ca7fc5444ef0f8a8577c4725c6e1a4dbbb2c",
+      "mode": "0o400",
+      "bytes": 7468
+    },
+    "first-sync-preservation.json": {
+      "sha256": "160eba70a768f41dec84c949691a55c1e925586f1c0f9f9863143d3db9cd9bed",
+      "mode": "0o400",
+      "bytes": 93951
+    },
+    "freeze_import.py": {
+      "sha256": "a412449c1e81680e1663f1503f0740ba3391eb718c448e823d0dd632b25cb1cc",
+      "mode": "0o400",
+      "bytes": 21084
+    },
+    "fresh-prisma-tables.json": {
+      "sha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+      "mode": "0o400",
+      "bytes": 2877
+    },
+    "fresh-protected-state.json": {
+      "sha256": "46c104649639f1c630cd08dabf3cda84a82c93763b6453a6f1d0a91a7e391baa",
+      "mode": "0o400",
+      "bytes": 7465051
+    },
+    "full-copy-preservation.json": {
+      "sha256": "7c74bec1c5a31ab740a9cb776c9cc56de27ae3c4bf70bc529d72ba84bb0fc43d",
+      "mode": "0o400",
+      "bytes": 93951
+    },
+    "held-entry-receipt.json": {
+      "sha256": "2a03e66071406c58b754d9c63ed8200373c55a0433c2d1ad1cbdc2836d72499e",
+      "mode": "0o400",
+      "bytes": 79672
+    },
+    "held-entry-scope-review.json": {
+      "sha256": "9788614e7c1ee3bd39714e8f3b98bb35458d12d59afbaa6ceab8ff96d1d65d4c",
+      "mode": "0o400",
+      "bytes": 4744
+    },
+    "import-dry-copy-authority.json": {
+      "sha256": "2429f0ab3cf97e6da9d7be295c8390fbec0bce13bd80bd8c1a87c9f00d5f5612",
+      "mode": "0o400",
+      "bytes": 707
+    },
+    "import-final-seal.json": {
+      "sha256": "a82dd3a0437d9952c50f86e9a1f054587ca969072e84f12759d5b6e3deda43a0",
+      "mode": "0o400",
+      "bytes": 2404
+    },
+    "import-install-preservation.json": {
+      "sha256": "18e1379bac2f9b93696cf97e19a4d68e52aa3ff2e85053adf8e9d3c5d2efaafe",
+      "mode": "0o400",
+      "bytes": 15167
+    },
+    "import-installed-seal.json": {
+      "sha256": "4fc2a2ba94e43627600d56998735fbf2087023efe6eccc7bb091e3f452a56aeb",
+      "mode": "0o400",
+      "bytes": 1336
+    },
+    "import-jobs-off-seal.json": {
+      "sha256": "aa64b34b83a360bd1eca743c65ef19bc29ead153caca7a0d639667027ed8db3f",
+      "mode": "0o400",
+      "bytes": 2393
+    },
+    "import-repeat-preservation.json": {
+      "sha256": "a6b464115fceebf06f14158b752b3e7fb2c51ffaf6fa4204f862d773dfdc8836",
+      "mode": "0o400",
+      "bytes": 1353
+    },
+    "import-repeat-seal.json": {
+      "sha256": "5d0ec77dae5735313792a3536c052837c1c29acfea47455cac0f8891d2b2b7a5",
+      "mode": "0o400",
+      "bytes": 2392
+    },
+    "import_installation.py": {
+      "sha256": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+      "mode": "0o400",
+      "bytes": 7579
+    },
+    "import_preservation.py": {
+      "sha256": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783",
+      "mode": "0o400",
+      "bytes": 9307
+    },
+    "import_proof_contract.py": {
+      "sha256": "cfc8dab7db0e4861c5a5837811701e52f838111f5e72b7d82a1ea1ac27219d19",
+      "mode": "0o400",
+      "bytes": 15238
+    },
+    "import_release_contract.py": {
+      "sha256": "a2c72f9c13640af093ea5b120676f9a545b0ac46baca9774c97e3cdb8d45df72",
+      "mode": "0o400",
+      "bytes": 44132
+    },
+    "import_sealing.py": {
+      "sha256": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401",
+      "mode": "0o400",
+      "bytes": 5918
+    },
+    "import_source_graph.py": {
+      "sha256": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637",
+      "mode": "0o400",
+      "bytes": 5771
+    },
+    "import_stage.py": {
+      "sha256": "db27c39cfeb8ed58167f2fba108a91702498561245e57eefeaff1f5d7397aca6",
+      "mode": "0o400",
+      "bytes": 10714
+    },
+    "import_startup_checks.py": {
+      "sha256": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b",
+      "mode": "0o400",
+      "bytes": 5448
+    },
+    "installed-protected-state.json": {
+      "sha256": "51c15cb88854168b31c6c4dd25f06d0b7273d7830ed2f23ad080af11a78a96f2",
+      "mode": "0o400",
+      "bytes": 7476444
+    },
+    "known_core_disk_guard.py": {
+      "sha256": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+      "mode": "0o400",
+      "bytes": 5984
+    },
+    "known_core_disk_guard_import.py": {
+      "sha256": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+      "mode": "0o400",
+      "bytes": 3839
+    },
+    "known_core_disk_guard_import_deploy.py": {
+      "sha256": "b012ec710362a56683a8229162acae3ade7ef53c4d6218d0bee0df22a45a3b2a",
+      "mode": "0o400",
+      "bytes": 5114
+    },
+    "known_core_disk_guard_v2.py": {
+      "sha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+      "mode": "0o400",
+      "bytes": 5278
+    },
+    "known_core_disk_guard_v3.py": {
+      "sha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+      "mode": "0o400",
+      "bytes": 5625
+    },
+    "kobo_copy_preservation.py": {
+      "sha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+      "mode": "0o400",
+      "bytes": 16701
+    },
+    "launch_import_release.py": {
+      "sha256": "4ec0870973d9a9047a65aca87c0ffd838318d3092701fb9ce35aed7c5017c357",
+      "mode": "0o400",
+      "bytes": 2193
+    },
+    "migration.sql": {
+      "sha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+      "mode": "0o400",
+      "bytes": 4342
+    },
+    "packaging-source-index.json": {
+      "sha256": "b30baaf1df3a62323d4e544ec39b2841182dc715a29c5f1b21b0e51781fdd84d",
+      "mode": "0o400",
+      "bytes": 11611
+    },
+    "post205-draft-tables.json": {
+      "sha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad",
+      "mode": "0o400",
+      "bytes": 8105
+    },
+    "postflight-auth.cjs": {
+      "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+      "mode": "0o400",
+      "bytes": 2045
+    },
+    "postflight-policy.cjs": {
+      "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+      "mode": "0o400",
+      "bytes": 4035
+    },
+    "postflight-qc-runs.cjs": {
+      "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+      "mode": "0o400",
+      "bytes": 4091
+    },
+    "postflight-reference.cjs": {
+      "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+      "mode": "0o400",
+      "bytes": 2096
+    },
+    "postflight-roles.cjs": {
+      "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+      "mode": "0o400",
+      "bytes": 12281
+    },
+    "pre-prisma-draft-table.sql": {
+      "sha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+      "mode": "0o400",
+      "bytes": 769
+    },
+    "prepare_import_build.py": {
+      "sha256": "319fd4bb156ff61e82a46e6adee701aef6a41147365e68f0b06330f3b482f4f1",
+      "mode": "0o400",
+      "bytes": 11009
+    },
+    "prepared-manifest.json": {
+      "sha256": "02d67dede9fd160f723ff1949353b7a36991d41a34e6c255884282ed07da8bad",
+      "mode": "0o400",
+      "bytes": 29746
+    },
+    "production-baseline-source-review.json": {
+      "sha256": "4533e20b99670675d5c74a3f76be203b5f15eb7944bfc13c13cf5e94ae459009",
+      "mode": "0o400",
+      "bytes": 17263
+    },
+    "production_output_paths.py": {
+      "sha256": "38ab6d904f529474a78fd35374e97845cec988a102cda65302a79eac8935cdfb",
+      "mode": "0o400",
+      "bytes": 7898
+    },
+    "proof-authority.json": {
+      "sha256": "0ea78a174ce1df74292ebd2ff78a407b962d6dd302e71dbc21dbbb615382f045",
+      "mode": "0o400",
+      "bytes": 22636
+    },
+    "proof-source-index.json": {
+      "sha256": "786caccf8a72f290c03fcb01584eea6dd1ac54160d0b52d2641a97b3e5d7cbeb",
+      "mode": "0o400",
+      "bytes": 8418
+    },
+    "readonly-smoke.cjs": {
+      "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+      "mode": "0o400",
+      "bytes": 3255
+    },
+    "rehearsal-receipt.json": {
+      "sha256": "f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce",
+      "mode": "0o400",
+      "bytes": 156654
+    },
+    "rehearse_import.py": {
+      "sha256": "18984ff11f0bd2cd1871bb731d44e4985562b0b96b4bea2734b2a2e17b5ceafe",
+      "mode": "0o400",
+      "bytes": 26511
+    },
+    "release_support.py": {
+      "sha256": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+      "mode": "0o400",
+      "bytes": 20330
+    },
+    "runtime_proof_policies.py": {
+      "sha256": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf",
+      "mode": "0o400",
+      "bytes": 15922
+    },
+    "second-sync-preservation.json": {
+      "sha256": "b8b51eb044cabb4c9bbe4ce644c4d0531b83a58dc4863b804b493e67c78d1bac",
+      "mode": "0o400",
+      "bytes": 93951
+    },
+    "startup_common.py": {
+      "sha256": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+      "mode": "0o400",
+      "bytes": 13858
+    },
+    "target-pin.json": {
+      "sha256": "241bd693b8cfdb3e9a05440716bd925a620a807bdb371206430a4abc2a9481b1",
+      "mode": "0o400",
+      "bytes": 1706
+    },
+    "upgraded-prisma-draft-table.sql": {
+      "sha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+      "mode": "0o400",
+      "bytes": 874
+    },
+    "upstream-before-start.json": {
+      "sha256": "55f09d822eb8e586696e5b0218c86b188d8b20f516265623bfd3f1caaa737816",
+      "mode": "0o400",
+      "bytes": 136941
+    },
+    "upstream-first-completion.json": {
+      "sha256": "7564f16f285b3dff632cf80282ba41bd27ae227eefe8d6080192b02c99a33fe3",
+      "mode": "0o400",
+      "bytes": 136941
+    },
+    "upstream-second-completion.json": {
+      "sha256": "fa49b06a19b1f948eb6f815108b2fc6d1e149339157d61451fc2a6dadb2ee281",
+      "mode": "0o400",
+      "bytes": 136941
+    },
+    "yy-authorization-evidence.md": {
+      "sha256": "02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1",
+      "mode": "0o400",
+      "bytes": 1938
+    },
+    "yy-maintenance-choice-evidence.json": {
+      "sha256": "1499cd6ab9b534c8e5852cfd27fbe10632309a8f45c21f23c6abeb8870f05213",
+      "mode": "0o400",
+      "bytes": 963
+    }
+  },
+  "packagingTerminal": {
+    "freeze.stdout": {
+      "sha256": "5577fbbb79bc04ae8184f38384447c732d45dd97f360afd9790eb438207d6a94",
+      "mode": "0o400",
+      "bytes": 2192
+    },
+    "freeze.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o400",
+      "bytes": 0
+    },
+    "freeze-result.json": {
+      "sha256": "a15cd195288cc74df22a55536e85b8074ed425ceecfd41ca8a2254b2988371e7",
+      "mode": "0o400",
+      "bytes": 148
+    }
+  },
+  "productionOperations": 0,
+  "sqliteConnections": 0
+}

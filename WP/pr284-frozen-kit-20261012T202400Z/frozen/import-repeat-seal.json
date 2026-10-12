@@ -1,0 +1,77 @@
+{
+  "policy": "DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL",
+  "originalFiles": {
+    "": {
+      "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+      "bytes": 563322880,
+      "inode": 10878978,
+      "device": 64769,
+      "mtimeNs": 1791817417648233662,
+      "mode": 420
+    },
+    "-wal": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "inode": 10879570,
+      "device": 64769,
+      "mtimeNs": 1791817628216621206,
+      "mode": 420
+    },
+    "-shm": {
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "bytes": 32768,
+      "inode": 10879576,
+      "device": 64769,
+      "mtimeNs": 1791817630667672278,
+      "mode": 420
+    }
+  },
+  "rawFiles": {
+    "": {
+      "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+      "bytes": 563322880,
+      "inode": 10879583,
+      "device": 64769,
+      "mtimeNs": 1791817645708985688,
+      "mode": 256
+    },
+    "-wal": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "inode": 10879584,
+      "device": 64769,
+      "mtimeNs": 1791817649392062432,
+      "mode": 256
+    },
+    "-shm": {
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "bytes": 32768,
+      "inode": 10879585,
+      "device": 64769,
+      "mtimeNs": 1791817649559065912,
+      "mode": 256
+    }
+  },
+  "mainOnlyStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+  "logicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+  "backupSha256": "142f6e0e9c0d391efe6221bd8134e3e7f6133ecaad700060cbf7e3132a587621",
+  "countsIncludeWal": true,
+  "matchesExpected": false,
+  "protectedTableCount": 106,
+  "protectedReceiptCount": 39,
+  "backupPath": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/after-repeat-stopped/dev-stopped-backup.db",
+  "physical": {
+    "": {
+      "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+      "bytes": 563322880
+    },
+    "-wal": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "-shm": {
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "bytes": 32768
+    }
+  }
+}

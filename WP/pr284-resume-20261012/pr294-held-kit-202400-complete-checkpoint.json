@@ -1,0 +1,32 @@
+{
+  "recordedUtc": "2026-10-12T20:53:55.178965+00:00",
+  "status": "ACTUAL_NEW_HELD_KIT_COMPLETE_NOT_EXECUTED",
+  "actualFreeze": {
+    "status": "PREPARED_IMPORT_FORWARD_ONLY_NOT_EXECUTED",
+    "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T202400Z",
+    "manifestSha256": "02d67dede9fd160f723ff1949353b7a36991d41a34e6c255884282ed07da8bad",
+    "coordinatorSha256": "24479eb79a6bdf9d900321dcbc25f2b15e6aa56c110aaf9028e205a5139d6d6d",
+    "receiptSha256": "f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce",
+    "targetPinSha256": "241bd693b8cfdb3e9a05440716bd925a620a807bdb371206430a4abc2a9481b1",
+    "fileCount": 66
+  },
+  "readonlyObservedUtc": "2026-10-12T20:52:32.088954+00:00",
+  "terminalHashes": {
+    "freeze.stdout": {
+      "sha256": "5577fbbb79bc04ae8184f38384447c732d45dd97f360afd9790eb438207d6a94",
+      "mode": "0o400",
+      "bytes": 2192
+    },
+    "freeze.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o400",
+      "bytes": 0
+    },
+    "freeze-result.json": {
+      "sha256": "a15cd195288cc74df22a55536e85b8074ed425ceecfd41ca8a2254b2988371e7",
+      "mode": "0o400",
+      "bytes": 148
+    }
+  },
+  "productionOperations": 0
+}
