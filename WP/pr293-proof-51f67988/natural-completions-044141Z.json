@@ -1,0 +1,13 @@
+{
+  "observedUtc": "2026-10-12T04:41:41.475667+00:00",
+  "source": "READ_ONLY_EXISTING_OWNED_STDOUT",
+  "completedNaturalSyncs": [
+    {
+      "utc": "2026-10-12T04:25:54.449055083Z",
+      "epochSeconds": 1791779154.449055,
+      "labId": "ZMB-LAB1",
+      "newSamples": 0,
+      "skipped": 0
+    }
+  ]
+}

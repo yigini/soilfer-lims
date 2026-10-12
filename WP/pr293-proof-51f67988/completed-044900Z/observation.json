@@ -1,0 +1,71 @@
+{
+  "observedUtc": "2026-10-12T04:48:53.822803+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-51f67988-20261012T041721Z",
+  "unit": "lims-owned-runtime-kobo-proof-51f67988-20261012t041721z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=0\nActiveState=inactive\nSubState=dead\n",
+  "unit.stdoutTail": "al-kobo-observation\", \"utc\": \"2026-10-12T04:34:23.095195+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95859150848}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:34:53.858346+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95858978816}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:35:24.602563+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95858802688}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:35:55.308158+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95858548736}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:36:26.022004+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95858372608}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:36:56.771955+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95858204672}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:37:27.520928+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95858012160}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:37:58.269296+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95857848320}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:38:29.033804+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95857676288}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:38:59.792869+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95857491968}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:39:30.482045+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95857332224}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:40:01.205742+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95857160192}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:40:31.917900+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95856984064}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:41:02.698987+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95856828416}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:41:33.409950+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95856640000}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:42:04.158235+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95856406528}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:42:34.930800+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95856205824}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T04:42:55.002639+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 191778816, \"minimumFreeBytes\": 95856054272}\n{\"status\": \"PASSED_NEW_CANDIDATE_NATURAL_KOBO_PROOF\", \"root\": \"/opt/lims/releases/runtime-kobo-proof-51f67988-20261012T041721Z\", \"receiptSha256\": \"4b18963ae410af1afb0c9458ab759a50f2de3dfbf591771f28233636fc321cc9\"}\n",
+  "unit.stderrTail": "",
+  "files": {
+    "rehearsal-receipt.json": {
+      "bytes": 142318,
+      "sha256": "4b18963ae410af1afb0c9458ab759a50f2de3dfbf591771f28233636fc321cc9",
+      "mode": "0o400"
+    },
+    "target-pin.json": {
+      "bytes": 1219,
+      "sha256": "49dcb7bdc7e102fe35700a0226154431465d3cbe1a7d5d9761f573aad24baddc",
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 5111,
+      "sha256": "93d90b3fa1ee6d54816ec5cf0831632fadab8953d7f78c3c788e9b64b97255a6",
+      "mode": "0o400"
+    },
+    "first-sync-preservation.json": {
+      "bytes": 93356,
+      "sha256": "8fca96780d7c617275653f8adbe9822993ece9077bc1a5e13a5e603c7babf5e9",
+      "mode": "0o400"
+    },
+    "second-sync-preservation.json": {
+      "bytes": 93356,
+      "sha256": "e19e4636f0ddcb90e08a233f185bbc12a7b62a33958db75d156c8b27d2b13dda",
+      "mode": "0o400"
+    },
+    "full-copy-preservation.json": {
+      "bytes": 93356,
+      "sha256": "440e138d0a7ea2654edc2c8de616d8937943825091895018bf782f71c0e76caa",
+      "mode": "0o400"
+    },
+    "upstream-before-start.json": {
+      "bytes": 136941,
+      "sha256": "797334ca1a282e403ef430618251edf035e7b62609d0efa5488eb3a84fd7b0fc",
+      "mode": "0o400"
+    },
+    "upstream-first-completion.json": {
+      "bytes": 136941,
+      "sha256": "e5c457dd9381cae6313f6e2e5f925786bb1b24c38343f5f4851f18824fe0d429",
+      "mode": "0o400"
+    },
+    "upstream-second-completion.json": {
+      "bytes": 136941,
+      "sha256": "47ca78893c32df5bc566c2ee8a865456086644e997ebdc0165ecbd6d90926b55",
+      "mode": "0o400"
+    },
+    "candidate-rehearsal-authority.json": {
+      "bytes": 18548,
+      "sha256": "b59e7bb9e33bee57a6f431d1cb50f77f60d5f3685ba4fd7d24eb09c6ede06e94",
+      "mode": "0o400"
+    },
+    "candidate-jobs-on-stdout.log": {
+      "bytes": 203354,
+      "sha256": "84c9ca03ab7fc0ba6abfbad3ea5e03d854554ec07028cf7e39b7e4fcf21fdf3f",
+      "mode": "0o400"
+    },
+    "candidate-jobs-on-stderr.log": {
+      "bytes": 12940,
+      "sha256": "2c8a532586db53577fda0a735cdb8199e5d6b52f501be40a3a371d6178e73957",
+      "mode": "0o400"
+    }
+  }
+}
