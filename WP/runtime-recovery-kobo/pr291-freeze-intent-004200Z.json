@@ -1,0 +1,13 @@
+{
+  "status": "SINGLE_NEW_FREEZE_INTENT_NOT_EXECUTED",
+  "preparedUtc": "2026-10-12T00:41:45.619918+00:00",
+  "toolingCommit": "5c1d169277440abc8530cbb11583964f1fba290a",
+  "productionSourceReviewId": 6115712337,
+  "proofRoot": "/opt/lims/releases/runtime-kobo-proof-f830f900-20261011T234650Z",
+  "proofReceiptSha256": "257196f530a0494ca0ba43023091febe670bc894c063d4bdd99e98f23d979c0d",
+  "packageRoot": "/opt/lims/releases/runtime-kobo-package-f830f900-20261012T004200Z",
+  "executionRoot": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z",
+  "supersededUnusedRoot": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T002100Z",
+  "productionMutations": 0,
+  "noReplay": true
+}

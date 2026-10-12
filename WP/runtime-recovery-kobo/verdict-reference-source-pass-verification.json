@@ -1,0 +1,20 @@
+{
+  "status": "ACTUAL_NEW_PRODUCTION_SOURCE_PASS_VERIFIED",
+  "observedUtc": "2026-10-12T00:41:45.619918+00:00",
+  "source": "5c1d169277440abc8530cbb11583964f1fba290a",
+  "reviewId": 6115712337,
+  "rawSha256": "6eeb149246129df0ec42b124e36cd5de2d339b3753bc2554b3355cce53ca8e2b",
+  "files": {
+    "known_core_disk_guard_deploy.py": "d1993f59d75c8e0da6b32f1a5bfc0343968caef05df92036ae991fcfd61f7c7f",
+    "deploy_runtime.py": "7881ed29bc44fac616a188d4226c7a28196a408acd169af0d0d1096cc035c8a3",
+    "freeze_runtime.py": "100e0b6ed0dc57d258acfbd08574dd6db0d531901f377f33a4dd3225e41d8168",
+    "runtime_release_contract.py": "fb2c3215515abf79e2773aa006c7940446a10d0ca0b06719ecbaad5df709c19f",
+    "collect_runtime_gate.py": "3358577845ed6eee3b878f3c0706aea78079a6069134f47bbca2bb4094bd6003",
+    "export_freeze_runtime_kit.py": "c55f7067c5207d1ac3875135f8e394f768f8f928aa1f5d250c9ee538a4f0f23e",
+    "launch_runtime_release.py": "e82a336a1fa7adfe9d64bf87ca2bc049e418a1d6259abecbfae53783ca3771bf"
+  },
+  "laterGenuineFailure": false,
+  "measuredProofUnchanged": true,
+  "nativeAcknowledgementRead": true,
+  "productionMutations": 0
+}
