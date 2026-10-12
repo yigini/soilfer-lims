@@ -75,3 +75,7 @@ server/tests/helpers/sampleAmendmentHistoricalFixture.js text eol=lf
 server/tests/helpers/fixtures/pre210_after201_full_application_schema.sql -text
 server/tests/helpers/sampleAmendmentMainHistoricalFixture.js text eol=lf
 WP/pr293-independent-review-990a4cb5/* -text
+
+WP/pr293-build-51f67988/** -text
+WP/pr293-source-review-071d61c3/** -text
+WP/pr293-source-review-c0f8fde4/** -text

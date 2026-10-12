@@ -1,0 +1,26 @@
+{
+  "rootName": "runtime-kobo-build-51f67988-20261012T035200Z",
+  "head": "51f6798806f630773786a08432290c1b21a841da",
+  "tree": "90ed6a26c72bfab5a348dfdb9d6e59876c61ee4c",
+  "auditedTree": "90ed6a26c72bfab5a348dfdb9d6e59876c61ee4c",
+  "baseHead": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "pr": 293,
+  "mergeParents": [
+    "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+    "990a4cb535fd3ccb2a81ca019f453123b60a14b8"
+  ],
+  "auditedPrHead": "990a4cb535fd3ccb2a81ca019f453123b60a14b8",
+  "auditReviewId": 6117307869,
+  "mainCiRunId": 38200697950,
+  "archiveSha256": "1c13c7abf37b1000bd7fb1a7ee69d39049a3b640a2ac945ef9c48407c678080c",
+  "indexSha256": "ea9f09becfcdf549a640c907d87ad323c1f7b6cd3cddc0f8290f04cf2857aaa9",
+  "builderSha256": "1daa1d73c9f0b9af2be3b292764c6e585874ae551ed5dd0a1adaf4085342ffa6",
+  "toolingCommit": "071d61c372d48b4e283b9a4520b7044c18a7f238",
+  "proofSourceReviewId": 6117398054,
+  "proofSourceReviewRawSha256": "bcd74c0e6cc270bf62ccb8ab1e6cd1fbde9b914cdecae54ca9e43f6be03b7029",
+  "labAndHubBuildsOwnedByYY": true,
+  "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED",
+  "preparedUtc": "2026-10-12T03:52:16.501958+00:00",
+  "mainCiStatusAtBuildPreparation": "in_progress",
+  "mainCiConclusionAtBuildPreparation": null
+}
