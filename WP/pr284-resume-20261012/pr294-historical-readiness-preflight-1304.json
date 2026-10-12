@@ -1,0 +1,74 @@
+{
+  "observedUtc": "2026-10-12T13:02:35.018422+00:00",
+  "status": "HISTORICAL_READ_ONLY_TIMING_REVIEW_NOT_NEW_PROOF",
+  "records": [
+    {
+      "relativeFile": "WP/pr293-frozen-kit-20261012T044924Z/kit/rehearsal-receipt.json",
+      "receiptSha256": "4b18963ae410af1afb0c9458ab759a50f2de3dfbf591771f28233636fc321cc9",
+      "historicalHead": "51f6798806f630773786a08432290c1b21a841da",
+      "historicalStatus": "PASSED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+      "elapsedSeconds": {
+        "jobsOffReadiness": 102.86770543400053,
+        "jobsOnReadiness": 103.13266929899692
+      },
+      "distanceFromProposed540SecondMaximum": {
+        "jobsOffReadiness": 437.1322945659995,
+        "jobsOnReadiness": 436.8673307010031
+      },
+      "distanceFrom600SecondTimeout": {
+        "jobsOffReadiness": 497.1322945659995,
+        "jobsOnReadiness": 496.8673307010031
+      }
+    },
+    {
+      "relativeFile": "WP/pr293-independent-postdeploy/completed-052300Z/production-receipt.json",
+      "receiptSha256": "480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515",
+      "historicalHead": "51f6798806f630773786a08432290c1b21a841da",
+      "historicalStatus": "DEPLOYED_NEW_RUNTIME_FORWARD",
+      "elapsedSeconds": {
+        "jobsOffReadiness": 102.35818891300005,
+        "jobsOnReadiness": 102.73492802399414
+      },
+      "distanceFromProposed540SecondMaximum": {
+        "jobsOffReadiness": 437.64181108699995,
+        "jobsOnReadiness": 437.26507197600586
+      },
+      "distanceFrom600SecondTimeout": {
+        "jobsOffReadiness": 497.64181108699995,
+        "jobsOnReadiness": 497.26507197600586
+      }
+    }
+  ],
+  "newCandidateCliOrReadinessMeasured": false,
+  "newCandidatePassClaimed": false,
+  "newTotalProductionWallTimeEstimated": false,
+  "remainingNewMeasurementsRequired": [
+    "import-dry",
+    "import-apply",
+    "import-repeat",
+    "new-jobs-off-readiness",
+    "new-jobs-on-readiness"
+  ],
+  "unmeasuredCostsRemainExplicit": [
+    "quiesce",
+    "backup",
+    "seals",
+    "API probes",
+    "ingress",
+    "coordination"
+  ],
+  "nativeClaudioPreReview": {
+    "source": "4090ffcb89429bc8a902b5581b25811a367f2b89",
+    "hisReportedOwnedGuardsPassed": 175,
+    "isSourceReviewPass": false,
+    "requiredBeforeSourceRequest": [
+      "exact EXPECTED_PROOF_ROOT with timestamp",
+      "actual application audit and merge",
+      "no intervening application merge",
+      "review prior measured readiness timings; failed first root can never retry"
+    ],
+    "optionalSubstringVerdictClassifierChangeApplied": false
+  },
+  "productionOperations": 0,
+  "newBuildsOrProofs": 0
+}
