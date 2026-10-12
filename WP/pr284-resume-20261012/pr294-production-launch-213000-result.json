@@ -1,0 +1,13 @@
+{
+  "finishedUtc": "2026-10-12T21:32:02.033679+00:00",
+  "exitCode": 0,
+  "actualLaunch": {
+    "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z",
+    "unit": "lims-release-instrument-import-release-959d17e1-20261012t213000z.service",
+    "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+    "manifestSha256": "39b054dbc89889493ac02984675ca72e5fc0da1593706a6abcab450ed481b76e",
+    "gateSha256": "fac9e2418ba7376b99e2e57b2e66ad4e66edf3d417bc2b8f083adfb1da56212a",
+    "status": "SINGLE_NEW_RELEASE_LAUNCHED_NOT_YET_DEPLOYED"
+  }
+}

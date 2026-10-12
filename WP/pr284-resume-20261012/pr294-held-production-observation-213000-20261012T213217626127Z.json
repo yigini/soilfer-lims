@@ -1,0 +1,11 @@
+{
+  "observedUtc": "2026-10-12T21:32:16.901366+00:00",
+  "unitState": {
+    "Result": "success",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "journalTail": "Starting /usr/bin/python3 -B /opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z/frozen/deploy_import.py --execute-new-reviewed-import-gate...\nStarted /usr/bin/python3 -B /opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z/frozen/deploy_import.py --execute-new-reviewed-import-gate.\n",
+  "runningLimsNames": []
+}

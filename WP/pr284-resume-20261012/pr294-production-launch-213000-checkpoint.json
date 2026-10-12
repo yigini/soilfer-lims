@@ -1,0 +1,36 @@
+{
+  "recordedUtc": "2026-10-12T21:33:25.905045+00:00",
+  "actualLaunch": {
+    "finishedUtc": "2026-10-12T21:32:02.033679+00:00",
+    "exitCode": 0,
+    "actualLaunch": {
+      "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z",
+      "unit": "lims-release-instrument-import-release-959d17e1-20261012t213000z.service",
+      "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+      "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+      "manifestSha256": "39b054dbc89889493ac02984675ca72e5fc0da1593706a6abcab450ed481b76e",
+      "gateSha256": "fac9e2418ba7376b99e2e57b2e66ad4e66edf3d417bc2b8f083adfb1da56212a",
+      "status": "SINGLE_NEW_RELEASE_LAUNCHED_NOT_YET_DEPLOYED"
+    }
+  },
+  "files": {
+    "pr294-gate-213000-intent.json": "10c1e1eaf50d3c36b2afc5cf3cb8526ff054b95384141fda695cbdaa5bdd8fdc",
+    "pr294-gate-213000-result.json": "811770f68e0c9a0d4272c04da7a3189b2a394be136792f8cd2882efca648444d",
+    "pr294-gate-213000.stdout": "455f09445b7949b815c6f70888d5437eddd459300268709a56c48481bbfc8622",
+    "pr294-gate-213000.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pr294-production-gate-213000.json": "fac9e2418ba7376b99e2e57b2e66ad4e66edf3d417bc2b8f083adfb1da56212a",
+    "pr294-production-launch-213000-intent.json": "36e21054fe722f0eb69a7d812fe3937ef7ba4a527ea67e1178f3d5041c513e0d",
+    "pr294-production-launch-213000-result.json": "ca9d3758c03a0d5ba44fd9a1c2e879b5e016118cdf053170798caf98c122fd71",
+    "pr294-production-launch-213000.stdout": "d2c6d708058cec3d6ede061c58e7ac031980cabdd0e7209252a20e9312c4e090",
+    "pr294-production-launch-213000.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pr294-held-production-observation-213000-20261012T213217626127Z.json": "39842c14694f2b284522b11bc137ada31f1c3247e4dd97abc07b8a41b4aec279"
+  },
+  "nativeBoundary": {
+    "observation": "Fresh capture after the actual 21:32:16 unit observation; delivery visually verified before this record.",
+    "thread": "LIMS Audit / Lab workflow audit and plan",
+    "actualLaunchMessageVisuallyVerified": true,
+    "humanDraftPreserved": true,
+    "decisionCardsAnswered": false
+  },
+  "status": "SINGLE_PRODUCTION_UNIT_ACTIVE_NOT_YET_DEPLOYED"
+}

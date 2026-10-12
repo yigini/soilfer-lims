@@ -1,0 +1,7 @@
+{
+  "startedUtc": "2026-10-12T21:31:01.176252+00:00",
+  "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z",
+  "unit": "lims-release-instrument-import-release-959d17e1-20261012t213000z.service",
+  "gateSha256": "fac9e2418ba7376b99e2e57b2e66ad4e66edf3d417bc2b8f083adfb1da56212a",
+  "status": "ONE_REVIEWED_FORWARD_LAUNCH_INTENT_NEVER_REPLAY"
+}

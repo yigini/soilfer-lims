@@ -1,0 +1,11 @@
+{
+  "finishedUtc": "2026-10-12T21:28:00.872354+00:00",
+  "exitCode": 0,
+  "productionOperations": 0,
+  "actualGate": {
+    "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z",
+    "gateSha256": "fac9e2418ba7376b99e2e57b2e66ad4e66edf3d417bc2b8f083adfb1da56212a",
+    "verifiedUtc": "2026-10-12T21:27:01.413314+00:00",
+    "status": "FRESH_GATE_CREATED_NOT_EXECUTED"
+  }
+}
