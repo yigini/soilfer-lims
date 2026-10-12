@@ -1,0 +1,12 @@
+{
+  "observedUtc": "2026-10-12T00:46:46.276694+00:00",
+  "requestCommentId": 6115759904,
+  "kitRoot": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z",
+  "manifestSha256": "5f75662a3394dd01a490338e0e389a0cfe5854d3ffcb170b9a48200b914c3a27",
+  "fullHashesDelivered": true,
+  "nativeThread": "LIMS Audit / Lab workflow audit and plan",
+  "deliveredAndVisuallyVerified": true,
+  "draftWasEmpty": true,
+  "humanCardsAnswered": false,
+  "productionGateCollected": false
+}
