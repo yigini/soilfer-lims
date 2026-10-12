@@ -1,3 +1,13 @@
+PR294 corrected source APPROVED / SAME one-shot freeze ACTIVE 2026-10-12T20:47UTC
+
+Actual NEW Source review: PASS #162/6132295413 at20:44:27UTC for exacte4d692a0c0eaed34017f4419172dfcf8db563be0 independently verified20:46:00UTC/all43files/currentmain/no laterfailure/rawSHA4533e20b99670675d5c74a3f76be203b5f15eb7944bfc13c13cf5e94ae459009. Actual native Claudio approval read: own204/204 guards PASS, remote0400 preserved; one202400freeze authorised. Historicala2aPASS superseded for execution.
+
+ONE freezer is ACTIVE in SAME local session98702, wrapperfreeze-pr294-held-reviewed-kit-once.py6132295413; distinctpackage202400 andtarget202400 were freshly absent before dispatch. Intent retained; no actual completed kit/manifest/gate/deploy is claimed. NEVER run freezer/exporter again or launch another process; continue ONLY SAMEsession98702/read-only progress. Packaging900s/SSH960s/1100swrapper; no newproof/build/replay/productionmutation/cleanup. Only originalstopped144000PASS/135400build feeds this package. If it refuses, retain root/result and do not retry/reuse.
+
+LIMS stays maintenance/jobsHOLD per original verifiedYYchoice; latest fullphysical20:27PASS/originalDB/WAL/SHM+backupunchanged/allwritersstopped/noAPPLYrepeat/HTTPS503. No further human go needed. On actual successful freeze retain66files+manifest from frozen/ using NEWreadonlyretainer; closedlocalmirror ONLYfrozen/, metadataoutside. Send actualmanifest/coordinator/PASSreceipt/terminal/catalog/entryhashes for NEWexactkitreview, thenfreshsingle-usegate/ONEforwarddeployment/Clactualhandoff. Failed161000 and historicalconsumedkits/gates/proofs untouched/excluded.
+
+Previous checkpoint follows:
+
 PR294 Windows mirror amendment awaiting NEW source review 2026-10-12T20:40UTC
 
 Actual Claudio Source review: PASS #162/6132133647 at20:33:16UTC independently verified exacta2a1694/all43files/all118tokens/currentmain/no laterfailure. This approval is retained but cannot authorise subsequent changed collector e4d692a0c0eaed34017f4419172dfcf8db563be0. No a2a freezer was run, no202400 package/kit/gate exists.

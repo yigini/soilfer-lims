@@ -1,0 +1,14 @@
+{
+  "recordedUtc": "2026-10-12T20:46:54.876187+00:00",
+  "status": "ACTUAL_E4_SOURCE_PASS_SINGLE_FREEZE_ACTIVE_NOT_DEPLOYED",
+  "sourceCommit": "e4d692a0c0eaed34017f4419172dfcf8db563be0",
+  "sourceReviewId": 6132295413,
+  "rawReviewSha256": "4533e20b99670675d5c74a3f76be203b5f15eb7944bfc13c13cf5e94ae459009",
+  "localSessionId": 98702,
+  "packageRoot": "/opt/lims/releases/instrument-import-package-959d17e1-20261012T202400Z",
+  "executionRoot": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T202400Z",
+  "nativeApprovalReadDirectly": true,
+  "native204GuardAcknowledgement": true,
+  "humanDraftOrCardActions": 0,
+  "productionOperations": 0
+}
