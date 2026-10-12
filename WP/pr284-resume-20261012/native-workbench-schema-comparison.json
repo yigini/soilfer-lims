@@ -1,0 +1,463 @@
+{
+  "historicalScript": "server/scripts/migrate_workbench_drafts.js",
+  "historicalScriptSha256": "59fbde9fec4bf54bb966b831ffaf920347e94b1f5178483f037b537f3c540451",
+  "retainedFailedReceiptSha256": "511c1951dd11b37612186190237f302f015ebfabefb970b4490395ef9cc2268e",
+  "historicalDdlPlus205ExactlyEqualsCapturedSql": true,
+  "preNativeWorkbench": "CREATE TABLE \"WorkItemDraft\" (\n            \"id\" TEXT NOT NULL PRIMARY KEY,\n            \"workItemId\" TEXT NOT NULL UNIQUE,\n            \"sampleId\" TEXT NOT NULL,\n            \"userId\" TEXT NOT NULL,\n            \"labId\" TEXT,\n            \"analysis\" TEXT NOT NULL,\n            \"value\" TEXT,\n            \"values\" TEXT,\n            \"checks\" TEXT,\n            \"basis\" TEXT DEFAULT 'AIR_DRY',\n            \"replicateNo\" INTEGER NOT NULL DEFAULT 1,\n            \"instrumentId\" TEXT,\n            \"methodologyId\" TEXT,\n            \"notes\" TEXT,\n            \"baseVersion\" INTEGER NOT NULL DEFAULT 0,\n            \"draftVersion\" INTEGER NOT NULL DEFAULT 1,\n            \"conflictValue\" TEXT,\n            \"createdAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n            \"updatedAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, \"records\" TEXT,\n            CONSTRAINT \"WorkItemDraft_workItemId_fkey\" FOREIGN KEY (\"workItemId\") REFERENCES \"WorkItem\" (\"id\") ON DELETE CASCADE ON UPDATE CASCADE\n        )",
+  "postNativeWorkbench": "CREATE TABLE \"WorkItemDraft\" (\n            \"id\" TEXT NOT NULL PRIMARY KEY,\n            \"workItemId\" TEXT NOT NULL UNIQUE,\n            \"sampleId\" TEXT NOT NULL,\n            \"userId\" TEXT NOT NULL,\n            \"labId\" TEXT,\n            \"analysis\" TEXT NOT NULL,\n            \"value\" TEXT,\n            \"values\" TEXT,\n            \"checks\" TEXT,\n            \"basis\" TEXT DEFAULT 'AIR_DRY',\n            \"replicateNo\" INTEGER NOT NULL DEFAULT 1,\n            \"instrumentId\" TEXT,\n            \"methodologyId\" TEXT,\n            \"notes\" TEXT,\n            \"baseVersion\" INTEGER NOT NULL DEFAULT 0,\n            \"draftVersion\" INTEGER NOT NULL DEFAULT 1,\n            \"conflictValue\" TEXT,\n            \"createdAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n            \"updatedAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, \"records\" TEXT, \"importReceiptId\" TEXT REFERENCES \"InstrumentImportReceipt\"(\"id\") ON DELETE RESTRICT ON UPDATE RESTRICT,\n            CONSTRAINT \"WorkItemDraft_workItemId_fkey\" FOREIGN KEY (\"workItemId\") REFERENCES \"WorkItem\" (\"id\") ON DELETE CASCADE ON UPDATE CASCADE\n        )",
+  "preSqlSha256": "e3c04c14115c007fb7a5ff84f32b7f3e9adb22c178746f7f13c8ed0bd45e9e67",
+  "postSqlSha256": "4e6096cd9a8de0b71181392944f8776cad44d24041d0e4b181e881120151297c",
+  "beforeShape": [
+    [
+      0,
+      "id",
+      "TEXT",
+      1,
+      null,
+      1,
+      0
+    ],
+    [
+      1,
+      "workItemId",
+      "TEXT",
+      1,
+      null,
+      0,
+      0
+    ],
+    [
+      2,
+      "sampleId",
+      "TEXT",
+      1,
+      null,
+      0,
+      0
+    ],
+    [
+      3,
+      "userId",
+      "TEXT",
+      1,
+      null,
+      0,
+      0
+    ],
+    [
+      4,
+      "labId",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      5,
+      "analysis",
+      "TEXT",
+      1,
+      null,
+      0,
+      0
+    ],
+    [
+      6,
+      "value",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      7,
+      "values",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      8,
+      "checks",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      9,
+      "basis",
+      "TEXT",
+      0,
+      "'AIR_DRY'",
+      0,
+      0
+    ],
+    [
+      10,
+      "replicateNo",
+      "INTEGER",
+      1,
+      "1",
+      0,
+      0
+    ],
+    [
+      11,
+      "instrumentId",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      12,
+      "methodologyId",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      13,
+      "notes",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      14,
+      "baseVersion",
+      "INTEGER",
+      1,
+      "0",
+      0,
+      0
+    ],
+    [
+      15,
+      "draftVersion",
+      "INTEGER",
+      1,
+      "1",
+      0,
+      0
+    ],
+    [
+      16,
+      "conflictValue",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      17,
+      "createdAt",
+      "DATETIME",
+      1,
+      "CURRENT_TIMESTAMP",
+      0,
+      0
+    ],
+    [
+      18,
+      "updatedAt",
+      "DATETIME",
+      1,
+      "CURRENT_TIMESTAMP",
+      0,
+      0
+    ],
+    [
+      19,
+      "records",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ]
+  ],
+  "afterShape": [
+    [
+      0,
+      "id",
+      "TEXT",
+      1,
+      null,
+      1,
+      0
+    ],
+    [
+      1,
+      "workItemId",
+      "TEXT",
+      1,
+      null,
+      0,
+      0
+    ],
+    [
+      2,
+      "sampleId",
+      "TEXT",
+      1,
+      null,
+      0,
+      0
+    ],
+    [
+      3,
+      "userId",
+      "TEXT",
+      1,
+      null,
+      0,
+      0
+    ],
+    [
+      4,
+      "labId",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      5,
+      "analysis",
+      "TEXT",
+      1,
+      null,
+      0,
+      0
+    ],
+    [
+      6,
+      "value",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      7,
+      "values",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      8,
+      "checks",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      9,
+      "basis",
+      "TEXT",
+      0,
+      "'AIR_DRY'",
+      0,
+      0
+    ],
+    [
+      10,
+      "replicateNo",
+      "INTEGER",
+      1,
+      "1",
+      0,
+      0
+    ],
+    [
+      11,
+      "instrumentId",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      12,
+      "methodologyId",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      13,
+      "notes",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      14,
+      "baseVersion",
+      "INTEGER",
+      1,
+      "0",
+      0,
+      0
+    ],
+    [
+      15,
+      "draftVersion",
+      "INTEGER",
+      1,
+      "1",
+      0,
+      0
+    ],
+    [
+      16,
+      "conflictValue",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      17,
+      "createdAt",
+      "DATETIME",
+      1,
+      "CURRENT_TIMESTAMP",
+      0,
+      0
+    ],
+    [
+      18,
+      "updatedAt",
+      "DATETIME",
+      1,
+      "CURRENT_TIMESTAMP",
+      0,
+      0
+    ],
+    [
+      19,
+      "records",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ],
+    [
+      20,
+      "importReceiptId",
+      "TEXT",
+      0,
+      null,
+      0,
+      0
+    ]
+  ],
+  "originalDraftRowDigest": {
+    "fields": [
+      "id",
+      "workItemId",
+      "sampleId",
+      "userId",
+      "labId",
+      "analysis",
+      "value",
+      "values",
+      "checks",
+      "basis",
+      "replicateNo",
+      "instrumentId",
+      "methodologyId",
+      "notes",
+      "baseVersion",
+      "draftVersion",
+      "conflictValue",
+      "createdAt",
+      "updatedAt",
+      "records"
+    ],
+    "count": 1,
+    "sha256": "d38a842729c3f62f9e019122d2f0fcb899e99ef5669bcf479879437edc9dd75d"
+  },
+  "semanticDifferences": [
+    "inline workItemId UNIQUE",
+    "updatedAt DEFAULT CURRENT_TIMESTAMP"
+  ],
+  "nearestOracleDiff": [
+    "--- captured-preUpgraded\n",
+    "+++ actual-native-workbench\n",
+    "@@ -1,22 +1,22 @@\n",
+    " CREATE TABLE \"WorkItemDraft\" (",
+    "-    \"id\" TEXT NOT NULL PRIMARY KEY,",
+    "-    \"workItemId\" TEXT NOT NULL,",
+    "-    \"sampleId\" TEXT NOT NULL,",
+    "-    \"userId\" TEXT NOT NULL,",
+    "-    \"labId\" TEXT,",
+    "-    \"analysis\" TEXT NOT NULL,",
+    "-    \"value\" TEXT,",
+    "-    \"values\" TEXT,",
+    "-    \"checks\" TEXT,",
+    "-    \"basis\" TEXT DEFAULT 'AIR_DRY',",
+    "-    \"replicateNo\" INTEGER NOT NULL DEFAULT 1,",
+    "-    \"instrumentId\" TEXT,",
+    "-    \"methodologyId\" TEXT,",
+    "-    \"notes\" TEXT,",
+    "-    \"baseVersion\" INTEGER NOT NULL DEFAULT 0,",
+    "-    \"draftVersion\" INTEGER NOT NULL DEFAULT 1,",
+    "-    \"conflictValue\" TEXT,",
+    "-    \"createdAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,",
+    "-    \"updatedAt\" DATETIME NOT NULL, \"records\" TEXT,",
+    "-    CONSTRAINT \"WorkItemDraft_workItemId_fkey\" FOREIGN KEY (\"workItemId\") REFERENCES \"WorkItem\" (\"id\") ON DELETE CASCADE ON UPDATE CASCADE",
+    "-)",
+    "+            \"id\" TEXT NOT NULL PRIMARY KEY,",
+    "+            \"workItemId\" TEXT NOT NULL UNIQUE,",
+    "+            \"sampleId\" TEXT NOT NULL,",
+    "+            \"userId\" TEXT NOT NULL,",
+    "+            \"labId\" TEXT,",
+    "+            \"analysis\" TEXT NOT NULL,",
+    "+            \"value\" TEXT,",
+    "+            \"values\" TEXT,",
+    "+            \"checks\" TEXT,",
+    "+            \"basis\" TEXT DEFAULT 'AIR_DRY',",
+    "+            \"replicateNo\" INTEGER NOT NULL DEFAULT 1,",
+    "+            \"instrumentId\" TEXT,",
+    "+            \"methodologyId\" TEXT,",
+    "+            \"notes\" TEXT,",
+    "+            \"baseVersion\" INTEGER NOT NULL DEFAULT 0,",
+    "+            \"draftVersion\" INTEGER NOT NULL DEFAULT 1,",
+    "+            \"conflictValue\" TEXT,",
+    "+            \"createdAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,",
+    "+            \"updatedAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, \"records\" TEXT,",
+    "+            CONSTRAINT \"WorkItemDraft_workItemId_fkey\" FOREIGN KEY (\"workItemId\") REFERENCES \"WorkItem\" (\"id\") ON DELETE CASCADE ON UPDATE CASCADE",
+    "+        )"
+  ],
+  "productionDatabaseAccess": false,
+  "databaseMode": "IN_MEMORY_DDL_ONLY"
+}

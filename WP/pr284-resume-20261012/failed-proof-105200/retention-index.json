@@ -1,0 +1,93 @@
+{
+  "files": {
+    "rehearsal-receipt.json": {
+      "sha256": "511c1951dd11b37612186190237f302f015ebfabefb970b4490395ef9cc2268e",
+      "bytes": 3500,
+      "mode": "0400"
+    },
+    "import-dry.stderr": {
+      "sha256": "1d17252600b44bd9a5fd1083bea245c4460176265861b176dcaef2c2532db93d",
+      "bytes": 259,
+      "mode": "0400"
+    },
+    "import-dry.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": "0400"
+    },
+    "import-dry-container.json": {
+      "sha256": "c3f3d3a05d9a18386209de75b6336e0b85bd62437769274a05327d436b7d9a91",
+      "bytes": 723,
+      "mode": "0400"
+    },
+    "candidate-rehearsal-authority.json": {
+      "sha256": "123710a1cd435816b00b978a4e01e8447711c4cbcf3d1a46ab82bba0df61b557",
+      "bytes": 23942,
+      "mode": "0400"
+    },
+    "target-pin.json": {
+      "sha256": "bc2b5dffd45e2db59d02bfe9ec26c8780eb9c67a70b0ebaec8389b2ca5c77d50",
+      "bytes": 914,
+      "mode": "0400"
+    },
+    "source-index.json": {
+      "sha256": "cbeae2e04e6803511e62c506438e4c049a6982cf48a0769b3091bd39e4946279",
+      "bytes": 8416,
+      "mode": "0400"
+    },
+    "disk-allocation-observations.jsonl": {
+      "sha256": "08d40ed5bdc2359709c3672b441cddcd332915b2263ccefbbe16379b6f16cd5c",
+      "bytes": 2247191,
+      "mode": "0400"
+    }
+  },
+  "rootFileNames": [
+    "migration.sql",
+    "import_sealing.py",
+    "import-dry-database",
+    "post205-draft-tables.json",
+    "known_core_disk_guard_v2.py",
+    "kobo_copy_preservation.py",
+    "postflight-policy.cjs",
+    "known_core_disk_guard.py",
+    "unit.stdout",
+    "capture_kobo_fetch.py",
+    "import_startup_checks.py",
+    "export_launch_import_proof.py",
+    "rehearse_import.py",
+    "fresh-prisma-tables.json",
+    "unit.stderr",
+    "import_installation.py",
+    "rehearsal-receipt.json",
+    "fresh-protected-state.json",
+    "known_core_disk_guard_v3.py",
+    "upgraded-prisma-draft-table.sql",
+    "postflight-qc-runs.cjs",
+    "import_stage.py",
+    "import-dry.stderr",
+    "postflight-auth.cjs",
+    "readonly-smoke.cjs",
+    "fresh-live-backup.db",
+    "pre-prisma-draft-table.sql",
+    "postflight-reference.cjs",
+    "disk-allocation-observations.jsonl",
+    "startup_common.py",
+    "release_support.py",
+    "database",
+    "import-dry.stdout",
+    "assets",
+    "instrument-import-attempt.json",
+    "target-pin.json",
+    "import_proof_contract.py",
+    "runtime_proof_policies.py",
+    "source-index.json",
+    "import_preservation.py",
+    "prepare_import_build.py",
+    "import_source_graph.py",
+    "build_import.py",
+    "known_core_disk_guard_import.py",
+    "candidate-rehearsal-authority.json",
+    "postflight-roles.cjs",
+    "import-dry-container.json"
+  ]
+}

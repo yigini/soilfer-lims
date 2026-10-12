@@ -1,0 +1,127 @@
+{
+  "status": "READ_ONLY_OWNED_RUN_OBSERVATION",
+  "observedUtc": "2026-10-12T10:55:36.722580+00:00",
+  "root": "/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z",
+  "unit": "lims-owned-instrument-import-proof-5dd5488d-20261012t105200z.service",
+  "unitState": "Result=exit-code\nExecMainStatus=1\nActiveState=failed\nSubState=failed\n",
+  "files": {
+    "rehearsal-receipt.json": {
+      "bytes": 3500,
+      "sha256": "511c1951dd11b37612186190237f302f015ebfabefb970b4490395ef9cc2268e",
+      "mode": "0o400",
+      "receipt": {
+        "status": "FAILED_NEW_IMPORT_NATURAL_KOBO_PROOF",
+        "root": "/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z",
+        "startedUtc": "2026-10-12T10:52:26.578984+00:00",
+        "head": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+        "image": "sha256:57575a88c02aa6b9c0e801c2c6a6e7da0de298c41d093aeba5cc75480c3aa930",
+        "targetPinSha256": "bc2b5dffd45e2db59d02bfe9ec26c8780eb9c67a70b0ebaec8389b2ca5c77d50",
+        "sourceIndexSha256": "cbeae2e04e6803511e62c506438e4c049a6982cf48a0769b3091bd39e4946279",
+        "toolingCommit": "f5e59428c1bbf19247db2555f5158bc3a2ac5fad",
+        "coordinatorSha256": "73fd8dc57cc85332f499caa4fbd01912217295b51048d5c05cddefc1c6e5c894",
+        "buildReceiptSha256": "92be0f7ce246fd94f2dfd39c9b26e3e9fe84d35b5a28e1687f6199428576058f",
+        "proofSourceReviewId": 6122670828,
+        "baseHead": "51f6798806f630773786a08432290c1b21a841da",
+        "pr": 284,
+        "tree": "9b3b77496c3aa2cdad7c7594a0b258ec4b491753",
+        "auditedTree": "9b3b77496c3aa2cdad7c7594a0b258ec4b491753",
+        "mergeParents": [
+          "51f6798806f630773786a08432290c1b21a841da",
+          "c26591698c1e974a3bf771e5c333578755aef315"
+        ],
+        "naturalIntakePolicy": "ORIGINAL_CURSOR_ACTUAL_UPSTREAM",
+        "authoritySha256": "123710a1cd435816b00b978a4e01e8447711c4cbcf3d1a46ab82bba0df61b557",
+        "diskMeasurementGuardSha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+        "coreDeallocationConfirmationDeadlineSeconds": 10,
+        "baselineMeasurementGuardSha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+        "proofBaselineLayoutPolicy": "EXACT_HASHED_IMPORT_PROOF_AUTHORITY_LAYOUT",
+        "proofBaselineLayoutGuardSha256": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+        "baselineVanishedProcessPolicy": "CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE",
+        "BASELINE_ATTEMPTS_MAX": 3,
+        "BASELINE_CONFIRMATION_DEADLINE_SECONDS": 10,
+        "historicalReceiptSha256": "480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515",
+        "productionMutations": 0,
+        "separateInstallerCommands": 3,
+        "importDeltaPolicy": "ONLY_200_EMPTY_ADDITIVE_IMPORT_10438_TO_10639",
+        "retainedDatabaseAllocationCount": 13,
+        "scopeCommentIds": [
+          6112209155,
+          6112305172,
+          6112436098,
+          6113601584
+        ],
+        "refusalScopeCommentId": 6113601584,
+        "schedulerRefusalPolicy": "EXACT_FRESH_COPY_CONFIG_REFUSALS",
+        "intakeCardinalityPolicy": "SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS",
+        "refusalPairingScopeCommentId": 6114143349,
+        "schedulerRefusalPairing": "STREAM_ORDER_ONE_TO_ONE",
+        "REFUSAL_PAIR_WINDOW_SECONDS": 1,
+        "copyVerifierSha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+        "proofContractSha256": "067177df424a70528c8a6473c2d8016a5dc2c73602d45297ed450d5e4736accd",
+        "existingSampleVerifierPolicy": "STRICT_ORIGINAL_ROWS",
+        "effectiveUid": 0,
+        "pythonOptimize": 0,
+        "reserveBytes": 10556150894,
+        "workloadPins": {
+          "labAndHubBuildsOwnedByYY": true,
+          "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+        },
+        "baselineEnumerationErrorCount": 0,
+        "baselineAttempt": 1,
+        "freshCopyUtc": "2026-10-12T10:52:33.233016+00:00",
+        "freshCopySha256": "ff8181df01ab472ff940900ee15e73d5447b018b3fd1aa45fc3682ced528fa39",
+        "protectedStateSha256": "6e561dbe39a01eac87a0ca672d764c3c4292092d917c1439b2954516bcd61b76",
+        "error": "Bounded import CLI failed; retain evidence and hold forward-only",
+        "diskAllocationObservationsSha256": "08d40ed5bdc2359709c3672b441cddcd332915b2263ccefbbe16379b6f16cd5c",
+        "completedUtc": "2026-10-12T10:54:26.150977+00:00"
+      }
+    },
+    "target-pin.json": {
+      "bytes": 914,
+      "sha256": "bc2b5dffd45e2db59d02bfe9ec26c8780eb9c67a70b0ebaec8389b2ca5c77d50",
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 8416,
+      "sha256": "cbeae2e04e6803511e62c506438e4c049a6982cf48a0769b3091bd39e4946279",
+      "mode": "0o400"
+    },
+    "disk-allocation-observations.jsonl": {
+      "bytes": 2247191,
+      "sha256": "08d40ed5bdc2359709c3672b441cddcd332915b2263ccefbbe16379b6f16cd5c",
+      "mode": "0o400"
+    }
+  },
+  "tails": {
+    "unit.stdout": "{\"status\": \"FAILED_NEW_IMPORT_NATURAL_KOBO_PROOF\", \"root\": \"/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z\", \"receiptSha256\": \"511c1951dd11b37612186190237f302f015ebfabefb970b4490395ef9cc2268e\"}\n",
+    "unit.stderr": ""
+  },
+  "containers": [],
+  "progressFiles": {
+    "candidate-rehearsal-authority.json": {
+      "bytes": 23942,
+      "mode": "0o400"
+    },
+    "fresh-protected-state.json": {
+      "bytes": 7465051,
+      "mode": "0o400"
+    },
+    "import-dry-container.json": {
+      "bytes": 723,
+      "mode": "0o400"
+    },
+    "import-dry.stderr": {
+      "bytes": 259,
+      "mode": "0o400"
+    },
+    "import-dry.stdout": {
+      "bytes": 0,
+      "mode": "0o400"
+    }
+  },
+  "freeBytes": {
+    "/opt/lims": 86600359936,
+    "/var/lib/docker": 86600359936
+  },
+  "productionMutations": 0
+}

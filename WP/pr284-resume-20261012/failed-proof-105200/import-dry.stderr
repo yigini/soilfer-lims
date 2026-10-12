@@ -1,0 +1,2 @@
+{"error":"IMPORT_SCHEMA_MISMATCH","message":"The import schema differs from the captured release.","differences":["WorkItemDraft differs from all captured schema variants"],"totalChanges":0}
+{"releaseCliPeakBytes":52801536,"childStatus":1,"childSignal":null}

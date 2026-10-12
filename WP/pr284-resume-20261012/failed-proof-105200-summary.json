@@ -1,0 +1,48 @@
+{
+  "observedUtc": "2026-10-12T11:05:11.574197+00:00",
+  "originalFailedReceiptSha256": "511c1951dd11b37612186190237f302f015ebfabefb970b4490395ef9cc2268e",
+  "root": "/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z",
+  "unit": "lims-owned-instrument-import-proof-5dd5488d-20261012t105200z.service",
+  "state": "Result=exit-code\nExecMainStatus=1\nActiveState=failed\nSubState=failed\n",
+  "failureCommentId": 6122945854,
+  "packagingSourcePassId": 6122904371,
+  "nativeFailure": "IMPORT_SCHEMA_MISMATCH",
+  "dryTotalChanges": 0,
+  "applyAttempted": false,
+  "defaultStartupAttempted": false,
+  "stoppedCli": {
+    "name": "/lims-owned-import-cli-b21b92fe6c73789f3460fc7c",
+    "image": "sha256:57575a88c02aa6b9c0e801c2c6a6e7da0de298c41d093aeba5cc75480c3aa930",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 1,
+      "Error": "",
+      "StartedAt": "2026-10-12T10:54:20.984103368Z",
+      "FinishedAt": "2026-10-12T10:54:26.022707252Z"
+    },
+    "restartCount": 0,
+    "memory": 805306368,
+    "swap": 805306368,
+    "network": "none",
+    "mounts": [
+      {
+        "Type": "bind",
+        "Source": "/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z/import-dry-database",
+        "Destination": "/app/server/prisma",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      }
+    ]
+  },
+  "comparisonSha256": "317d35697c9686f23716cda28cbdb0bafa91fbb389117ae009203720ca010edb",
+  "failedRootNeverReplay": true,
+  "originalBuildNeverRebuild": true,
+  "newForwardCorrectionReviewRequired": true
+}
