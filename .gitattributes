@@ -102,3 +102,4 @@ server/prisma/migrations/20261010000100_instrument_import_templates/post205-draf
 server/tests/helpers/fixtures/pre200_after293_full_application_schema.sql -text
 server/tests/helpers/instrumentImportReleaseHistoricalFixture.js text eol=lf
 WP/pr284-resume-20261012/** -text
+WP/pr284-release/*.py text eol=lf

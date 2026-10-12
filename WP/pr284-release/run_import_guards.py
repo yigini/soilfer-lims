@@ -8,7 +8,8 @@ import sys
 head = sys.argv[1]
 if len(head) != 40 or any(character not in '0123456789abcdef' for character in head):
     raise RuntimeError('Exact source commit required')
-names = ['import_preservation', 'test_import_preservation']
+names = ['import_preservation', 'import_startup_checks', 'import_installation',
+    'test_import_preservation', 'test_import_startup_checks', 'test_import_installation']
 files = {name: subprocess.check_output(['git', 'show', head + ':WP/pr284-release/' + name + '.py']) for name in names}
 assets = {name: subprocess.check_output(['git', 'show', head + ':server/prisma/migrations/20261010000100_instrument_import_templates/' + name])
     for name in ['migration.sql', 'fresh-prisma-tables.json', 'pre-prisma-draft-table.sql',
@@ -28,7 +29,8 @@ with tempfile.TemporaryDirectory(prefix='owned-import-assets-') as directory:
   module=types.ModuleType(name);module.__file__='/owned-in-memory-guards/WP/pr284-release/'+name+'.py';sys.modules[name]=module
   exec(compile(raw,module.__file__,'exec'),module.__dict__)
  tests=sys.modules['test_import_preservation'];tests.ASSET_ROOT=root
- result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromModule(tests))
+ suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromModule(sys.modules[name]) for name in p['files'] if name.startswith('test_'))
+ result=unittest.TextTestRunner(verbosity=2).run(suite)
  print(json.dumps({'sourceCommit':p['sourceCommit'],'sourceHashes':{name:item['sha256'] for name,item in p['files'].items()},
   'assetHashes':{name:item['sha256'] for name,item in p['assets'].items()},'tests':result.testsRun,
   'failures':len(result.failures),'errors':len(result.errors),'skips':len(result.skipped),
