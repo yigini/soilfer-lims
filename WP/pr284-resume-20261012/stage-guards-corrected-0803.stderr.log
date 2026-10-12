@@ -1,0 +1,17 @@
+test_apply_failure_holds_without_repeat_or_retry (test_import_stage.StageGuards.test_apply_failure_holds_without_repeat_or_retry) ... ok
+test_bad_dry_plan_refuses_before_apply (test_import_stage.StageGuards.test_bad_dry_plan_refuses_before_apply) ... ok
+test_dry_physical_write_refuses_before_apply (test_import_stage.StageGuards.test_dry_physical_write_refuses_before_apply) ... ok
+test_exact_stage_passes_without_connecting_original_target (test_import_stage.StageGuards.test_exact_stage_passes_without_connecting_original_target) ... ok
+test_nonimmutable_backup_refuses_before_any_cli (test_import_stage.StageGuards.test_nonimmutable_backup_refuses_before_any_cli) ... ok
+test_old_row_mutation_refuses_before_repeat (test_import_stage.StageGuards.test_old_row_mutation_refuses_before_repeat) ... ok
+test_post_backup_cannot_reuse_original (test_import_stage.StageGuards.test_post_backup_cannot_reuse_original) ... ok
+test_preflight_disk_refuses_without_attempt (test_import_stage.StageGuards.test_preflight_disk_refuses_without_attempt) ... ok
+test_preflight_physical_mismatch_refuses_without_attempt (test_import_stage.StageGuards.test_preflight_physical_mismatch_refuses_without_attempt) ... ok
+test_repeat_byte_change_refuses (test_import_stage.StageGuards.test_repeat_byte_change_refuses) ... ok
+test_second_invocation_never_calls_an_installer (test_import_stage.StageGuards.test_second_invocation_never_calls_an_installer) ... ok
+test_wrong_assets_refuse_before_any_cli (test_import_stage.StageGuards.test_wrong_assets_refuse_before_any_cli) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 1.034s
+
+OK
