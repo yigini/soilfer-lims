@@ -1,0 +1,14 @@
+{
+  "retainedUtc": "2026-10-12T19:54:05.104137+00:00",
+  "scopeId": 6131470499,
+  "url": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6131470499",
+  "rawApiSha256": "0bbfc7a19359bdba1b2ca72e9400fbeb21f14bb2a243229907d2a7739d207fd0",
+  "scopeIsSourceApproval": false,
+  "productionMutations": 0,
+  "yyEntryDecision": "PENDING_ACTUAL_ANSWER_NEVER_INFERRED",
+  "nativeObserved": "Scope and waiting-on-YY checklist read; composer empty; no card answered",
+  "originalProofFilesMustRemainByteIdentical": 31,
+  "failedProductionRoot": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+  "failedProductionReceiptSha256": "2a03e66071406c58b754d9c63ed8200373c55a0433c2d1ad1cbdc2836d72499e",
+  "requiredProductionOnlyChange": "Hash-bound frozen subdirectory and exhaustive disjoint output paths checked before any live mutation"
+}

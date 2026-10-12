@@ -1,0 +1,399 @@
+{
+  "status": "ORIGINAL_RUNTIME_WRITE_CALL_INVENTORY_NOT_EXECUTION_OR_APPROVAL",
+  "manifestSha256": "5392cab2c224e68e74694950336ec1fad638eb4c0bf282e6614009f58cb5c7c8",
+  "actualCollision": "import-dry-copy-authority.json",
+  "staticFutureExclusiveWriteCollisions": [
+    {
+      "source": "deploy_import.py",
+      "line": 299,
+      "function": "c.write_new",
+      "expression": "c.write_new(ROOT / 'installed-protected-state.json', expected)",
+      "literalFrozenPaths": [
+        "installed-protected-state.json"
+      ]
+    },
+    {
+      "source": "import_stage.py",
+      "line": 112,
+      "function": "write_new",
+      "expression": "write_new(root, 'import-dry-copy-authority.json', dry_authority, support)",
+      "literalFrozenPaths": [
+        "import-dry-copy-authority.json"
+      ]
+    },
+    {
+      "source": "import_stage.py",
+      "line": 127,
+      "function": "write_new",
+      "expression": "write_new(root, 'import-install-preservation.json', delta, support)",
+      "literalFrozenPaths": [
+        "import-install-preservation.json"
+      ]
+    },
+    {
+      "source": "import_stage.py",
+      "line": 157,
+      "function": "write_new",
+      "expression": "write_new(root, 'import-repeat-preservation.json', repeat_authority, support)",
+      "literalFrozenPaths": [
+        "import-repeat-preservation.json"
+      ]
+    }
+  ],
+  "runtimeWriteExpressions": [
+    {
+      "source": "deploy_import.py",
+      "line": 190,
+      "function": "pathlib.Path('/opt/lims/apply.lock').open",
+      "expression": "pathlib.Path('/opt/lims/apply.lock').open('a')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 199,
+      "function": "(ROOT / 'execution-attempt.json').open",
+      "expression": "(ROOT / 'execution-attempt.json').open('x', encoding='utf-8')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 239,
+      "function": "temporary.write_text",
+      "expression": "temporary.write_text(json.dumps(receipt, indent=2), encoding='utf-8')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 243,
+      "function": "s.command",
+      "expression": "s.command(ROOT, ['curl', '-sS', '--max-time', '15', '-o', str(ROOT / (label + '.body')),\n            '-w', '%{http_code}', '-X', method, 'https://lims.yigini.net' + path], label, timeout=20)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 247,
+      "function": "s.CONF.write_bytes",
+      "expression": "s.CONF.write_bytes((ROOT / name).read_bytes())",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 249,
+      "function": "s.command",
+      "expression": "s.command(ROOT, ['apachectl', 'configtest'], 'apache-test-' + stamp)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 250,
+      "function": "s.command",
+      "expression": "s.command(ROOT, ['systemctl', 'reload', 'httpd'], 'apache-reload-' + stamp)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 278,
+      "function": "c.write_new",
+      "expression": "c.write_new(ROOT / 'production-protected-state.json', expected)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 299,
+      "function": "c.write_new",
+      "expression": "c.write_new(ROOT / 'installed-protected-state.json', expected)",
+      "literalFrozenPaths": [
+        "installed-protected-state.json"
+      ]
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 305,
+      "function": "s.command",
+      "expression": "s.command(ROOT, ['docker', 'rename', 'soilfer-lims', retained], 'retain-original-stopped-container')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 329,
+      "function": "s.command",
+      "expression": "s.command(ROOT, ['docker', 'rename', 'soilfer-lims', off], 'retain-candidate-jobs-off')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 270,
+      "function": "s.command",
+      "expression": "s.command(ROOT, ['docker', 'stop', '-t', '30', 'soilfer-lims'], 'stop-original-live-writer', timeout=45)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 280,
+      "function": "tarfile.open",
+      "expression": "tarfile.open(ROOT / 'assets-stopped-backup.tar.gz', 'x:gz')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "deploy_import.py",
+      "line": 380,
+      "function": "s.command",
+      "expression": "s.command(ROOT, ['docker', 'stop', '-t', '30', 'soilfer-lims'], 'failed-original-stop', timeout=45)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_stage.py",
+      "line": 50,
+      "function": "directory.mkdir",
+      "expression": "directory.mkdir(mode=0o700)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_stage.py",
+      "line": 91,
+      "function": "write_new",
+      "expression": "write_new(root, attempt.name, {'status': 'ATTEMPTED_FORWARD_ONLY', 'image': image,\n        'beforeBackupSha256': before_sha, 'productionRecovery': 'SEPARATELY_AUDITED_FORWARD_FIX_ONLY'}, support)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_stage.py",
+      "line": 112,
+      "function": "write_new",
+      "expression": "write_new(root, 'import-dry-copy-authority.json', dry_authority, support)",
+      "literalFrozenPaths": [
+        "import-dry-copy-authority.json"
+      ]
+    },
+    {
+      "source": "import_stage.py",
+      "line": 127,
+      "function": "write_new",
+      "expression": "write_new(root, 'import-install-preservation.json', delta, support)",
+      "literalFrozenPaths": [
+        "import-install-preservation.json"
+      ]
+    },
+    {
+      "source": "import_stage.py",
+      "line": 157,
+      "function": "write_new",
+      "expression": "write_new(root, 'import-repeat-preservation.json', repeat_authority, support)",
+      "literalFrozenPaths": [
+        "import-repeat-preservation.json"
+      ]
+    },
+    {
+      "source": "import_stage.py",
+      "line": 34,
+      "function": "path.open",
+      "expression": "path.open('x', encoding='utf-8')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_stage.py",
+      "line": 52,
+      "function": "before_backup.open",
+      "expression": "before_backup.open('rb')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_stage.py",
+      "line": 52,
+      "function": "copied.open",
+      "expression": "copied.open('xb')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_installation.py",
+      "line": 82,
+      "function": "support.command",
+      "expression": "support.command(root, args, label, expected=None, timeout=CLI_TIMEOUT_SECONDS)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_installation.py",
+      "line": 100,
+      "function": "path.open",
+      "expression": "path.open('x', encoding='utf-8')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_installation.py",
+      "line": 108,
+      "function": "support.command",
+      "expression": "support.command(root, ['docker', 'inspect', name],\n        label + '-retained-inspect')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_sealing.py",
+      "line": 44,
+      "function": "directory.mkdir",
+      "expression": "directory.mkdir(mode=0o700)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_sealing.py",
+      "line": 63,
+      "function": "c.write_new",
+      "expression": "c.write_new(directory / 'original-triple.json', {'before': before, 'after': after})",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_sealing.py",
+      "line": 87,
+      "function": "directory.mkdir",
+      "expression": "directory.mkdir(mode=0o700)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_sealing.py",
+      "line": 99,
+      "function": "c.write_new",
+      "expression": "c.write_new(directory / 'main-only-state.json', main_only)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_sealing.py",
+      "line": 100,
+      "function": "c.write_new",
+      "expression": "c.write_new(directory / 'wal-aware-state.json', folded)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_sealing.py",
+      "line": 116,
+      "function": "c.write_new",
+      "expression": "c.write_new(directory / 'sealed-state.json', evidence)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_sealing.py",
+      "line": 51,
+      "function": "source.open",
+      "expression": "source.open('rb')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_sealing.py",
+      "line": 51,
+      "function": "copied.open",
+      "expression": "copied.open('xb')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_startup_checks.py",
+      "line": 82,
+      "function": "support.command",
+      "expression": "support.command(root, ['docker', 'logs', name], stage + '-startup')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "import_startup_checks.py",
+      "line": 85,
+      "function": "support.command",
+      "expression": "support.command(root, ['docker', 'exec', name, 'node', '-e',\n        \"console.log(Number(require('node:fs').readFileSync('/sys/fs/cgroup/memory.peak','utf8')))\"], stage + '-memory')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "startup_common.py",
+      "line": 149,
+      "function": "s.command",
+      "expression": "s.command(root,args,stage+'-run',timeout=30)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "startup_common.py",
+      "line": 185,
+      "function": "s.command",
+      "expression": "s.command(root,['docker','logs',name],stage+'-startup')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "startup_common.py",
+      "line": 188,
+      "function": "s.command",
+      "expression": "s.command(root,['docker','exec',name,'node','-e',\n        \"console.log(Number(require('node:fs').readFileSync('/sys/fs/cgroup/memory.peak','utf8')))\"],stage+'-memory')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "startup_common.py",
+      "line": 200,
+      "function": "s.command",
+      "expression": "s.command(root,args+[name,'node','scripts/postflight_issue140.cjs'],'api-postflight')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "startup_common.py",
+      "line": 71,
+      "function": "path.open",
+      "expression": "path.open('x')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "startup_common.py",
+      "line": 205,
+      "function": "s.command",
+      "expression": "s.command(root,args+['-i',name,'node'],file[:-4],stdin=(root/file).read_text())",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "startup_common.py",
+      "line": 222,
+      "function": "s.command",
+      "expression": "s.command(root,['docker','stop','-t','30',name],label,timeout=45)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "startup_common.py",
+      "line": 168,
+      "function": "write_new",
+      "expression": "write_new(root/(stage+'-readiness.json'),result)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "release_support.py",
+      "line": 56,
+      "function": "pathlib.Path(file).open",
+      "expression": "pathlib.Path(file).open('rb')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "release_support.py",
+      "line": 110,
+      "function": "pathlib.Path(target).open",
+      "expression": "pathlib.Path(target).open('xb')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "release_support.py",
+      "line": 183,
+      "function": "command",
+      "expression": "command(root, args, label, expected=None)",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "release_support.py",
+      "line": 192,
+      "function": "(root / (label + '-container.json')).open",
+      "expression": "(root / (label + '-container.json')).open('x')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "release_support.py",
+      "line": 144,
+      "function": "(root / (label + '.' + suffix)).open",
+      "expression": "(root / (label + '.' + suffix)).open('x')",
+      "literalFrozenPaths": []
+    },
+    {
+      "source": "release_support.py",
+      "line": 140,
+      "function": "(root / (label + '.' + suffix)).open",
+      "expression": "(root / (label + '.' + suffix)).open('x')",
+      "literalFrozenPaths": []
+    }
+  ],
+  "dynamicExpressionsRequireManualAndBehavioralCoverage": true,
+  "sourceFilesUnchanged": true,
+  "productionOperations": 0
+}
