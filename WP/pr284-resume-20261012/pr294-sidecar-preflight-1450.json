@@ -1,0 +1,68 @@
+{
+  "observedUtc": "2026-10-12T14:50:00.573573+00:00",
+  "newRootAbsent": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "originalBuildBinding": {
+    "buildReusePolicy": "EXACT_ORIGINAL_BUILD_AUTHORITY_NO_REBUILD_OR_RETAG",
+    "buildRoot": "/opt/lims/releases/instrument-import-build-959d17e1-20261012T135400Z",
+    "buildReceiptSha256": "1a983172adebaba8b1a61959810d5469d9c12d706725bd33783d43cc8cceabe0",
+    "buildSourceCommit": "630b2354a1a45df0d88545ac5c63594361615999",
+    "buildSourceReviewId": 6125544861,
+    "buildSourceIndexSha256": "592f749f83eb166660a649030a0020600c0f99f403e5c40f9dfb9a5e3fc30c3f",
+    "buildSourceReviewRawSha256": "cd3f50d2794d39b6c28d2af3bbb88d3a2fa7ec1ffe93b7f1b4458655c5b82190",
+    "originalBuilderSha256": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a",
+    "originalPreparerSha256": "a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991",
+    "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+    "imageBytes": 413806636,
+    "firstRoot": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+    "liveImage": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+    "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "historicalRoot": "/opt/lims/releases/runtime-kobo-release-51f67988-20261012T044924Z",
+    "historicalReceiptSha256": "480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515"
+  },
+  "originalAuthorityFiles": {
+    "build-receipt.json": {
+      "sha256": "1a983172adebaba8b1a61959810d5469d9c12d706725bd33783d43cc8cceabe0",
+      "bytes": 1473,
+      "mode": 256
+    },
+    "source.tar.gz": {
+      "sha256": "99c40eef08c11ad0dbc2576b7e6f36abd56f4e0bb68e36102b187cb9fb20cbe1",
+      "bytes": 63049154,
+      "mode": 256
+    },
+    "source-index.json": {
+      "sha256": "35c20fd965066aabb123d059a79f240223a40a9b9602ef87216ec126fa47c76a",
+      "bytes": 616500,
+      "mode": 256
+    },
+    "tooling-source-index.json": {
+      "sha256": "cfffb76512d4d0ad46a5b1725a5e7c9f0bc45c5f3a2f48378d5d0164a961ca7f",
+      "bytes": 8607,
+      "mode": 256
+    },
+    "proof-source-review.json": {
+      "sha256": "706fac3911d349f9e3da86182c3f283ddef80b92a3af0d6b1ccf16702eeda877",
+      "bytes": 12197,
+      "mode": 256
+    }
+  },
+  "originalSourceFileCount": 31,
+  "image": {
+    "Id": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+    "Size": 413806636,
+    "revision": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "originalTag": "soilfer-lims:audit-instrument-import-build-959d17e1-20261012T135400Z"
+  },
+  "unitState": {
+    "ExecMainStatus": "0",
+    "ActiveState": "inactive",
+    "SubState": "dead"
+  },
+  "activeOwnedWriters": 0,
+  "liveImage": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+  "liveHealth": "healthy",
+  "liveRestartCount": 0,
+  "freeBytes": 82668220416,
+  "productionMutations": 0,
+  "sqliteConnections": 0
+}
