@@ -1,0 +1,35 @@
+{
+  "observedUtc": "2026-10-12T05:13:00.074332+00:00",
+  "unitState": "ExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "freeBytes": 91834642432,
+  "journalTail": "2026-10-12T07:04:26+0200 server python3[964257]: {\"stage\": \"production-jobs-off\", \"elapsedSeconds\": 36.30269004699949, \"pending\": true}\n2026-10-12T07:05:04+0200 server python3[964257]: {\"stage\": \"production-jobs-off\", \"elapsedSeconds\": 74.15113297800417, \"pending\": true}\n2026-10-12T07:06:53+0200 server python3[964257]: {\"stage\": \"jobsOffPreservationAndProbesPassed\", \"utc\": \"2026-10-12T05:06:53.015583+00:00\"}\n2026-10-12T07:07:17+0200 server python3[964257]: {\"stage\": \"ingressReopenedBeforeJobs\", \"utc\": \"2026-10-12T05:07:17.377776+00:00\"}\n2026-10-12T07:09:59+0200 server python3[964257]: {\"stage\": \"jobsOffStoppedFullLogicalPreservationPassed\", \"utc\": \"2026-10-12T05:09:59.049883+00:00\"}\n2026-10-12T07:10:36+0200 server python3[964257]: {\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 36.941449986996304, \"pending\": true}\n2026-10-12T07:11:12+0200 server python3[964257]: {\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 73.64142520499445, \"pending\": true}\n2026-10-12T07:11:42+0200 server python3[964257]: {\"stage\": \"normalJobsEnabled\", \"utc\": \"2026-10-12T05:11:42.348047+00:00\"}\n",
+  "receipt": {
+    "status": "RUNTIME_FORWARD_IN_PROGRESS",
+    "head": "51f6798806f630773786a08432290c1b21a841da",
+    "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+    "timesUtc": {
+      "beforeQuiesceGuardsPassed": "2026-10-12T05:01:19.532485+00:00",
+      "writersStopped": "2026-10-12T05:01:51.314858+00:00",
+      "stoppedHashedBackupVerified": "2026-10-12T05:03:49.803678+00:00",
+      "candidateEntrypointAttempted": "2026-10-12T05:03:49.893763+00:00",
+      "jobsOffPreservationAndProbesPassed": "2026-10-12T05:06:53.015583+00:00",
+      "ingressReopenedBeforeJobs": "2026-10-12T05:07:17.377776+00:00",
+      "jobsOffStoppedFullLogicalPreservationPassed": "2026-10-12T05:09:59.049883+00:00",
+      "normalJobsEnabled": "2026-10-12T05:11:42.348047+00:00"
+    },
+    "protectedTableCount": 104,
+    "protectedReceiptCount": 38,
+    "sha256": "5f37a3c413c22c8b34b9343f55ad15b322b3362ebf0feef3b057f6aae034c6a4",
+    "mode": "0o644"
+  },
+  "productionMutations": 0,
+  "live": {
+    "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+    "running": true,
+    "health": "healthy",
+    "restartCount": 0,
+    "oomKilled": false,
+    "jobsDisabled": "false",
+    "memory": 805306368
+  }
+}
