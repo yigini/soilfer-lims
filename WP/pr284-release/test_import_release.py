@@ -388,7 +388,7 @@ class ReleaseTests(unittest.TestCase):
         root = '/opt/lims/releases/instrument-import-release-owned'
         runner = Mock()
         namespace = {'require': release.require, 'subprocess': runner, 'base64': base64, 'json': json,
-            'safe_root': pathlib.PurePosixPath,
+            'safe_root': lambda value, prefix: pathlib.PurePosixPath(value),
             'sys': types.SimpleNamespace(argv=['owned', root, 'lims-release-instrument-import-release-owned.service'])}
         exec(compile(ast.Module(body=selected, type_ignores=[]), '/owned-launch-transport.py', 'exec'), namespace)
         def completed(*args, **kwargs):
