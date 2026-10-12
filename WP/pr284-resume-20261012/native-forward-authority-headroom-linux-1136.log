@@ -1,0 +1,11 @@
+fatal: path 'WP/pr284-release/import_source_graph.py' exists on disk, but not in '7d7ca9f2d8be07194b61b0cc853c06d9d30a5a53'
+Traceback (most recent call last):
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\pr284-release\run_import_guards.py", line 17, in <module>
+    files = {name: subprocess.check_output(['git', 'show', head + ':WP/pr284-release/' + name + '.py']) for name in names}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yigin\AppData\Local\Programs\Python\Python312-arm64\Lib\subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yigin\AppData\Local\Programs\Python\Python312-arm64\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['git', 'show', '7d7ca9f2d8be07194b61b0cc853c06d9d30a5a53:WP/pr284-release/import_source_graph.py']' returned non-zero exit status 128.

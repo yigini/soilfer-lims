@@ -1,0 +1,159 @@
+{
+  "observedUtc": "2026-10-12T11:38:44.247951+00:00",
+  "applicationHead": "5e65fe5b587747efc717f167f9b61469effa9afe",
+  "applicationTree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+  "applicationFiles": {
+    "server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad",
+    "server/services/instrumentImportMigrationSource.js": "28a152d18f76578509c52e2865bbea1f0b3c2154427945fc8151909b9d216688",
+    "server/services/instrumentImportSchemaService.js": "897cd427cf8f16cc9199269d259232cc34395049b75d7fb119aa3a15c3fbec41",
+    "server/tests/contracts/audit_4_7_instrument_import_install.test.js": "9478f9ca362ec2994d7d218cdea37a8fe57aa7e06c33e266965ee8b2d22f363d",
+    "server/tests/helpers/workflowWriteScanner.js": "ecbcfed96847a1c864476c624f8074ef05b6a791bf35ffec2c239f9da6345c28"
+  },
+  "sixOldVariantBytesUnchanged": true,
+  "originalUnicodeLinesUnchanged": true,
+  "fullInventoryCount": 360,
+  "fullInventoryEqualsAllActualTests": true,
+  "fullValidation": {
+    "status": "IN_PROGRESS_NOT_A_PASS",
+    "session": 79434,
+    "completedPassingSuites": 8,
+    "completedFailingSuites": 0,
+    "log": "native-workbench-full-5e65fe5b-1133.log"
+  },
+  "protectedOriginalLocalDatabaseFiles": [
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma\\dev.db",
+      "bytes": 2473984,
+      "sha256": "ef02482e586391f1670f88279bfc7f436a847c5c20e2457e76ca4a94a8efcaca"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma\\dev.db-wal",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma\\dev.db-shm",
+      "bytes": 32768,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    },
+    {
+      "path": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db",
+      "bytes": 563195904,
+      "sha256": "490b8c4782bdc5300e729dbcafe9f01dd695995a7d6c69f3002dde9b75cf1835"
+    },
+    {
+      "path": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db-wal",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db-shm",
+      "bytes": 32768,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    }
+  ],
+  "proposedSourceGuards": {
+    "Windows": {
+      "sourceCommit": "4e591feb85fa81cb29ea17e35a450cfb2d1fa949",
+      "tests": 175,
+      "elapsedSeconds": 4.577999999979511,
+      "completedUtc": "2026-10-12T11:36:36.501015+00:00",
+      "logSha256": "d0ca367100d678595fb38b22c5aac46b4e780af098143f477c1d3b002a4169a8",
+      "packagingSourceHashes": {
+        "rehearse_import.py": "8c65daee59ddd303adab4f7f48b1a22073472bd99203a8c45c31d9e4438fa213",
+        "import_proof_contract.py": "38254282216a6644126353abaf9bbbbf85b1fd6d9ad3ac401d91829a4ccd0ed4",
+        "import_source_graph.py": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637",
+        "import_preservation.py": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783",
+        "import_startup_checks.py": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b",
+        "import_installation.py": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+        "import_stage.py": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1",
+        "import_sealing.py": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401",
+        "known_core_disk_guard_import.py": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+        "build_import.py": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a",
+        "prepare_import_build.py": "a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991",
+        "export_launch_import_proof.py": "0c642b50c8996c33efc25b7e0922c0dc4dc6c104cd9db8d70231604a16b3f100",
+        "capture_kobo_fetch.py": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86",
+        "kobo_copy_preservation.py": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+        "known_core_disk_guard_v2.py": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+        "known_core_disk_guard_v3.py": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+        "runtime_proof_policies.py": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf",
+        "known_core_disk_guard.py": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+        "release_support.py": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+        "startup_common.py": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+        "postflight-roles.cjs": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+        "postflight-auth.cjs": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+        "postflight-reference.cjs": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+        "postflight-qc-runs.cjs": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+        "postflight-policy.cjs": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+        "readonly-smoke.cjs": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+        "migration.sql": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+        "fresh-prisma-tables.json": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+        "pre-prisma-draft-table.sql": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+        "upgraded-prisma-draft-table.sql": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+        "post205-draft-tables.json": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad",
+        "import_release_contract.py": "2b7817cb1daa78d681af571e42f01d7cb8216b0c476945f417ba3d0703d8ba83",
+        "deploy_import.py": "5aa582a7329c5db6866bb6e17115d054aa1d30b8974d7cd7d74ee12e443d732c",
+        "freeze_import.py": "61c6e6c1199cf17fb1c06337f141ab308b3966123ad6e139780c1937c7ebfaf7",
+        "known_core_disk_guard_import_deploy.py": "b02d5feff5321b72b5fca04db977c875e400e876b5c2086b1d3d30f81bba6b8c",
+        "collect_import_gate.py": "656e79c1de48f3fc752ddfa6647f446ddda74297d363fbea01097eec50012663",
+        "export_freeze_import_kit.py": "3d7d5b8aa80dfb81302ee467ed3893d7765e32b87ec51d3d0d449de1585ffbdf",
+        "launch_import_release.py": "e1ef11c5a9aa9c764025ffefaeb87671a3143209902d409eb44e53a311442d1e",
+        "yy-authorization-evidence.md": "02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1"
+      }
+    },
+    "Linux": {
+      "sourceCommit": "4e591feb85fa81cb29ea17e35a450cfb2d1fa949",
+      "tests": 175,
+      "elapsedSeconds": 12.336707062000642,
+      "completedUtc": "2026-10-12T11:37:24.697958+00:00",
+      "logSha256": "4d01d40725401529ccd8c704336f1c23bba16faece2a67e0aec2d33dab62e5f3",
+      "packagingSourceHashes": {
+        "rehearse_import.py": "8c65daee59ddd303adab4f7f48b1a22073472bd99203a8c45c31d9e4438fa213",
+        "import_proof_contract.py": "38254282216a6644126353abaf9bbbbf85b1fd6d9ad3ac401d91829a4ccd0ed4",
+        "import_source_graph.py": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637",
+        "import_preservation.py": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783",
+        "import_startup_checks.py": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b",
+        "import_installation.py": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+        "import_stage.py": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1",
+        "import_sealing.py": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401",
+        "known_core_disk_guard_import.py": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+        "build_import.py": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a",
+        "prepare_import_build.py": "a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991",
+        "export_launch_import_proof.py": "0c642b50c8996c33efc25b7e0922c0dc4dc6c104cd9db8d70231604a16b3f100",
+        "capture_kobo_fetch.py": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86",
+        "kobo_copy_preservation.py": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+        "known_core_disk_guard_v2.py": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+        "known_core_disk_guard_v3.py": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+        "runtime_proof_policies.py": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf",
+        "known_core_disk_guard.py": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+        "release_support.py": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+        "startup_common.py": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+        "postflight-roles.cjs": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+        "postflight-auth.cjs": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+        "postflight-reference.cjs": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+        "postflight-qc-runs.cjs": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+        "postflight-policy.cjs": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+        "readonly-smoke.cjs": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+        "migration.sql": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+        "fresh-prisma-tables.json": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+        "pre-prisma-draft-table.sql": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+        "upgraded-prisma-draft-table.sql": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+        "post205-draft-tables.json": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad",
+        "import_release_contract.py": "2b7817cb1daa78d681af571e42f01d7cb8216b0c476945f417ba3d0703d8ba83",
+        "deploy_import.py": "5aa582a7329c5db6866bb6e17115d054aa1d30b8974d7cd7d74ee12e443d732c",
+        "freeze_import.py": "61c6e6c1199cf17fb1c06337f141ab308b3966123ad6e139780c1937c7ebfaf7",
+        "known_core_disk_guard_import_deploy.py": "b02d5feff5321b72b5fca04db977c875e400e876b5c2086b1d3d30f81bba6b8c",
+        "collect_import_gate.py": "656e79c1de48f3fc752ddfa6647f446ddda74297d363fbea01097eec50012663",
+        "export_freeze_import_kit.py": "3d7d5b8aa80dfb81302ee467ed3893d7765e32b87ec51d3d0d449de1585ffbdf",
+        "launch_import_release.py": "e1ef11c5a9aa9c764025ffefaeb87671a3143209902d409eb44e53a311442d1e",
+        "yy-authorization-evidence.md": "02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1"
+      }
+    }
+  },
+  "newPullRequestCreated": false,
+  "newPrPermissionQuestion": "PENDING_NO_ANSWER_ASSUMED",
+  "nativeClaudioEncodingUpdateDelivered": true,
+  "githubEncodingUpdateCommentId": 6123429193,
+  "productionMutations": 0,
+  "sourceReviewOrExecutionAuthorityClaimed": false
+}
