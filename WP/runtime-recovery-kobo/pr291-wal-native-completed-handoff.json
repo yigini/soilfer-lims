@@ -1,0 +1,57 @@
+{
+  "deliveredUtcRecorded": "2026-10-12T02:05:40.539591+00:00",
+  "nativeProject": "LIMS Audit",
+  "nativeThread": "Lab workflow audit and plan",
+  "deliveryVerifiedBy": "fresh screenshot: sent message bubble and emptied composer; Claudio working indicator",
+  "postDeployCheckStatus": "AWAITING_ACTUAL_CLAUDIO_CHECKS",
+  "comments": [
+    {
+      "issue": 162,
+      "id": 6116443194,
+      "url": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6116443194",
+      "createdUtc": "2026-10-12T02:03:46Z",
+      "rawSha256": "218196bee83c37812cc3a7cb39124518aa1cb6b6eeec46295140da8b97fb478a",
+      "existing": false
+    },
+    {
+      "issue": 291,
+      "id": 6116443440,
+      "url": "https://github.com/yigini/soilfer-lims/pull/291#issuecomment-6116443440",
+      "createdUtc": "2026-10-12T02:03:48Z",
+      "rawSha256": "4c0d75e9e38e471b1fa68e4ebecbb822d66610a4eedbac27ade7c4d5df0453da",
+      "existing": false
+    },
+    {
+      "issue": 278,
+      "id": 6116443662,
+      "url": "https://github.com/yigini/soilfer-lims/issues/278#issuecomment-6116443662",
+      "createdUtc": "2026-10-12T02:03:49Z",
+      "rawSha256": "138b19b934a4a2f194ee6cf140518c1d7c3d3451fcb1ac166368f1bda80860ab",
+      "existing": false
+    },
+    {
+      "issue": 279,
+      "id": 6116443875,
+      "url": "https://github.com/yigini/soilfer-lims/issues/279#issuecomment-6116443875",
+      "createdUtc": "2026-10-12T02:03:51Z",
+      "rawSha256": "eb0f52daa7414cd5197ba5f16eb53702e0393cc828c32266ce5ba07822badd71",
+      "existing": false
+    },
+    {
+      "issue": 281,
+      "id": 6116444051,
+      "url": "https://github.com/yigini/soilfer-lims/issues/281#issuecomment-6116444051",
+      "createdUtc": "2026-10-12T02:03:52Z",
+      "rawSha256": "d5286ea8be8e61906ae3df91d6bc620c3e6e19d1b775125fd64bfc3ef732bdd7",
+      "existing": false
+    },
+    {
+      "issue": 283,
+      "id": 6116444262,
+      "url": "https://github.com/yigini/soilfer-lims/issues/283#issuecomment-6116444262",
+      "createdUtc": "2026-10-12T02:03:53Z",
+      "rawSha256": "6f2274ab921ca8e80c30654159dc7fdd604f31ca82a3707cf6f1989c76cb4485",
+      "existing": false
+    }
+  ]
+}
