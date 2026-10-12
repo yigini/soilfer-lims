@@ -84,6 +84,7 @@ class ReleaseTests(unittest.TestCase):
             'historicalReceiptSha256': release.HISTORICAL_RECEIPT_SHA,
             'naturalIntakePolicy': release.NATURAL_INTAKE_POLICY,
             'importDeltaPolicy': release.NATIVE_DELTA_POLICY, 'separateInstallerCommands': 3,
+            'measuredTimingHeadroom': release.measured_timing_headroom(native(), startup(False)[0], startup(True)[0]),
             'retainedDatabaseAllocationCount': release.RETAINED_DATABASE_ALLOCATION_COUNT, 'productionObservationSeconds': 660,
             'deadlineSeconds': 600, 'reserveFloorBytes': release.FLOOR,
             'baselineVanishedProcessPolicy': release.BASELINE_POLICY,
@@ -415,6 +416,7 @@ class ReleaseTests(unittest.TestCase):
             'tree': release.MERGED_TREE, 'auditedTree': release.AUDITED_PR_TREE,
             'mergeParents': release.MERGE_PARENTS, 'image': proof['image'], 'buildReceiptSha256': proof['buildReceiptSha256'],
             'proofSourceReviewId': release.PROOF_SOURCE_REVIEW_ID}
+        proof['measuredTimingHeadroom'] = release.measured_timing_headroom(native_row, off_ready, on_ready)
         return proof, pin
 
     def test_complete_import_proof_and_strict_natural_window(self):
@@ -444,4 +446,17 @@ class ReleaseTests(unittest.TestCase):
                 ('auditReviewId', True), ('mergeBaseHead', release.BASE_HEAD)]:
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 release.measurement_manifest({**manifest, key: value})
+
+    def test_measured_timeout_margin_and_unmeasured_costs_are_explicit(self):
+        report = release.measured_timing_headroom(native(), startup(False)[0], startup(True)[0])
+        self.assertEqual(report['remainingForUnmeasuredOperationsSeconds'], 4474)
+        self.assertIn('backup', report['unmeasuredOperations'])
+        self.assertEqual(report['policy'], 'MEASURED_STAGES_ONLY_NOT_TOTAL_PRODUCTION_WALL_TIME')
+        for elapsed in [540.0001, 600, True, float('nan'), float('inf'), -1]:
+            changed = native(); changed['measurements'][0]['elapsedSeconds'] = elapsed
+            with self.subTest(elapsed=elapsed), self.assertRaises(RuntimeError):
+                release.measured_timing_headroom(changed, startup(False)[0], startup(True)[0])
+        proof, pin = self.complete_proof()
+        proof['measuredTimingHeadroom']['remainingForUnmeasuredOperationsSeconds'] += 1
+        with self.assertRaises(RuntimeError): release.validate_proof(proof, pin)
 

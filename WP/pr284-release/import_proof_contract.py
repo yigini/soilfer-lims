@@ -23,14 +23,17 @@ HISTORICAL_ROOT_PATH = '/opt/lims/releases/runtime-kobo-release-51f67988-2026101
 HISTORICAL_RECEIPT_SHA = '480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515'
 PR_NUMBER = 0  # YY's no-new-PR exception and actual application audit are pending.
 AUDIT_REVIEW_ID = 0
-AUDITED_PR_HEAD = 'd1509febd010a12f14adfef147aa7f88c369119a'
+AUDITED_PR_HEAD = '5e65fe5b587747efc717f167f9b61469effa9afe'
 CANDIDATE_HEAD = 'UNMERGED_REFUSE'
-AUDITED_PR_TREE = 'f05031f800af670ddcb2215f06fa34f684c695bd'
+AUDITED_PR_TREE = '336223df0161caeae4eb7db1e40df748d8ba110f'
 MERGED_TREE = 'UNMERGED_REFUSE'
 MERGE_PARENTS = [MERGE_BASE_HEAD, AUDITED_PR_HEAD]
 EXPECTED_PROOF_ROOT = 'UNREVIEWED_FIRST_PROOF_REFUSE'
 FAILED_PROOF_ROOTS = {'/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z'}
 FIRST_PROOF_POLICY = 'EXACT_REVIEWED_FIRST_PROOF_ROOT_NO_REPLAY'
+MIN_MEASURED_TIMEOUT_HEADROOM_SECONDS = 60
+PRODUCTION_UNIT_LIMIT_SECONDS = 5400
+MIN_MEASURED_UNIT_HEADROOM_SECONDS = 600
 NATIVE_DELTA_POLICY = 'ONLY_200_EMPTY_ADDITIVE_IMPORT_10438_TO_10639'
 RECOVERY_POLICY = 'SEPARATELY_AUDITED_FORWARD_FIX_ONLY'
 RETAINED_DATABASE_ALLOCATION_COUNT = 13
@@ -68,6 +71,8 @@ def release_binding_tokens():
         LIVE_IMAGE, HISTORICAL_RECEIPT_SHA, 'releasePr=' + str(PR_NUMBER),
         'auditReviewId=' + str(AUDIT_REVIEW_ID), 'mergeBaseHead=' + MERGE_BASE_HEAD,
         'originalProofRoot=' + EXPECTED_PROOF_ROOT, 'firstProofPolicy=' + FIRST_PROOF_POLICY,
+        'MIN_MEASURED_TIMEOUT_HEADROOM_SECONDS=60', 'PRODUCTION_UNIT_LIMIT_SECONDS=5400',
+        'MIN_MEASURED_UNIT_HEADROOM_SECONDS=600',
         'mergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE',
         'naturalIntakePolicy=' + NATURAL_INTAKE_POLICY, 'importDeltaPolicy=' + NATIVE_DELTA_POLICY,
         'originalState=104tables/38receipts', 'installedState=106tables/39receipts',
@@ -75,6 +80,31 @@ def release_binding_tokens():
         'nativeDryCopyPolicy=SEPARATE_OWNED_0400_BACKUP_COPY_WITH_WRITABLE_SIDECAR_DIRECTORY',
         'retainedDatabaseAllocationCount=13',
         'CLI_TIMEOUT_SECONDS=600', 'nativeCliNetwork=none', 'nativeCliMemorySwapBytes=805306368']
+
+
+def measured_timing_headroom(native, jobs_off, jobs_on):
+    """Report measured stages only; backup/quiesce/ingress are not estimated here."""
+    import math
+    stages = {label: row.get('elapsedSeconds') for label, row in zip(
+        ['import-dry', 'import-apply', 'import-repeat'], native.get('measurements', []))}
+    require(len(native.get('measurements', [])) == 3, 'Three measured native stages required')
+    stages.update({'jobs-off-readiness': jobs_off.get('elapsedSeconds'),
+                  'jobs-on-readiness': jobs_on.get('elapsedSeconds')})
+    require(all(type(value) in [int, float] and math.isfinite(value) and
+        0 < value <= 600 - MIN_MEASURED_TIMEOUT_HEADROOM_SECONDS for value in stages.values()),
+        'Measured CLI/readiness stages need at least sixty seconds of timeout headroom')
+    measured = sum(stages.values()) + 660
+    remaining = PRODUCTION_UNIT_LIMIT_SECONDS - measured
+    require(remaining >= MIN_MEASURED_UNIT_HEADROOM_SECONDS,
+        'Measured stages leave insufficient production unit headroom')
+    return {'policy': 'MEASURED_STAGES_ONLY_NOT_TOTAL_PRODUCTION_WALL_TIME',
+        'stageElapsedSeconds': stages, 'stageTimeoutHeadroomSeconds':
+            {label: 600 - elapsed for label, elapsed in stages.items()},
+        'productionHealthyObservationSeconds': 660,
+        'measuredStagesPlusObservationSeconds': measured,
+        'unitLimitSeconds': PRODUCTION_UNIT_LIMIT_SECONDS,
+        'remainingForUnmeasuredOperationsSeconds': remaining,
+        'unmeasuredOperations': ['quiesce', 'backup', 'seals', 'API probes', 'ingress', 'coordination']}
 
 
 def require_pr_review(review):

@@ -267,6 +267,9 @@ def validate_proof(proof, pin):
         proof['originalProtectedReceiptCount'] == 38 and proof['protectedTableCount'] == 106 and
         proof['protectedReceiptCount'] == 39, 'Original or installed full protection missing')
     native_installation(proof['nativeImportInstallation'])
+    require(proof.get('measuredTimingHeadroom') == measured_timing_headroom(
+        proof['nativeImportInstallation'], proof['jobsOffReadiness'], proof['jobsOnReadiness']),
+        'Actual measured timeout/unit headroom differs')
     require(proof['freshCopySha256'] == proof['nativeImportInstallation']['beforeBackupSha256'] and
         proof['installedBaselineSha256'] == proof['nativeImportInstallation']['afterBackupSha256'],
         'Native delta backups differ from the natural proof baseline')
@@ -455,6 +458,8 @@ def frozen_files(root, manifest):
     require(pin['image'] == manifest['image'], 'Frozen image differs')
     proof = json.loads((root / 'rehearsal-receipt.json').read_bytes())
     validate_proof(proof, pin)
+    require(manifest.get('measuredTimingHeadroom') == proof['measuredTimingHeadroom'],
+        'Frozen measured timing headroom differs from the original proof')
     proof_authority(proof, pin, json.loads((root / 'proof-source-index.json').read_bytes()),
         json.loads((root / 'proof-authority.json').read_bytes()), sha(root / 'proof-authority.json'))
     review = json.loads((root / 'production-baseline-source-review.json').read_bytes())

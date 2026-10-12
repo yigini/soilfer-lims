@@ -377,6 +377,8 @@ def main():
         require(c.inspect('soilfer-lims')['Image'] == live['Image'], 'Live image changed during isolated proof')
         require(s.sha(HISTORICAL_ROOT / 'production-receipt.json') == HISTORICAL_RECEIPT_SHA, 'Historical receipt changed')
         guard.check()
+        receipt['measuredTimingHeadroom'] = measured_timing_headroom(receipt['nativeImportInstallation'],
+            receipt['jobsOffReadiness'], receipt['jobsOnReadiness'])
         receipt['status'] = 'PASSED_NEW_IMPORT_NATURAL_KOBO_PROOF'
     except BaseException as error:
         receipt['status'] = 'FAILED_NEW_IMPORT_NATURAL_KOBO_PROOF'

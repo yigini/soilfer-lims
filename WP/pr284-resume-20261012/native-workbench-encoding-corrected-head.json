@@ -1,0 +1,18 @@
+{
+  "head": "5e65fe5b587747efc717f167f9b61469effa9afe",
+  "tree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+  "parent": "d1509febd010a12f14adfef147aa7f88c369119a",
+  "mergeBase": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+  "branch": "codex/native-workbench-import-forward-fix",
+  "changedApplicationFiles": [
+    "server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json",
+    "server/services/instrumentImportMigrationSource.js",
+    "server/services/instrumentImportSchemaService.js",
+    "server/tests/contracts/audit_4_7_instrument_import_install.test.js",
+    "server/tests/helpers/workflowWriteScanner.js"
+  ],
+  "testFileSha256": "9478f9ca362ec2994d7d218cdea37a8fe57aa7e06c33e266965ee8b2d22f363d",
+  "newPullRequestCreated": false,
+  "humanCheckoutUntouched": true,
+  "productionMutations": 0
+}

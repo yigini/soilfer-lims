@@ -1,0 +1,17 @@
+{
+  "observedUtc": "2026-10-12T11:28:31.805661+00:00",
+  "status": "D150_FULL_VALIDATION_STOPPED_SUPERSEDED_TEST_ENCODING_NOT_A_PASS",
+  "session": 59467,
+  "sessionExitCode": 1,
+  "head": "d1509febd010a12f14adfef147aa7f88c369119a",
+  "logSha256": "69220ad86204c8368473b8b804a3c55a8d7cca7eb42fd204bdb0f625a9338a35",
+  "completedPassingSuitesBeforeStop": 25,
+  "completedFailingSuitesBeforeStop": 0,
+  "changedFile": "server/tests/contracts/audit_4_7_instrument_import_install.test.js",
+  "beforeSha256": "c3b636da166986d2a4cbb93ee74c886f784bd193ce07bfd93504ce58247d23b5",
+  "afterSha256": "9478f9ca362ec2994d7d218cdea37a8fe57aa7e06c33e266965ee8b2d22f363d",
+  "restoredRawGitBase": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+  "restoredOriginalLineCount": 3,
+  "originalUnicodeLineBytesRestored": true,
+  "productionMutations": 0
+}

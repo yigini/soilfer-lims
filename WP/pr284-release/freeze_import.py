@@ -221,6 +221,7 @@ def main():
         'originalProofUnit': unit, 'proofReferences': references, 'sourceReviewId': PROOF_SOURCE_REVIEW_ID,
         'proofToolingCommit': REVIEWED_PROOF_SOURCE, 'productionBaselineSourceReviewId': production_review['id'],
         'naturalIntakePolicy': NATURAL_INTAKE_POLICY, 'importDeltaPolicy': NATIVE_DELTA_POLICY,
+        'measuredTimingHeadroom': receipt['measuredTimingHeadroom'],
         'entryBinding': entry_binding(), 'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA,
         'separateInstallerCommands': 3, 'retainedDatabaseAllocationCount': RETAINED_DATABASE_ALLOCATION_COUNT,
         'deadlineSeconds': 600, 'productionObservationSeconds': 660, 'reserveFloorBytes': FLOOR,
