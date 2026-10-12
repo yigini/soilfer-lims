@@ -1,0 +1,10 @@
+{
+  "observedUtc": "2026-10-12T00:39:49.167700+00:00",
+  "requestCommentId": 6115662398,
+  "source": "5c1d169277440abc8530cbb11583964f1fba290a",
+  "nativeThread": "LIMS Audit / Lab workflow audit and plan",
+  "deliveredAndVisuallyVerified": true,
+  "draftWasEmpty": true,
+  "humanCardsAnswered": false,
+  "summary": "Full source request link, 164 guard passes and conservative classification policy delivered. Claudio header-only suggestion acknowledged; actual review still pending. Old002100Z kit retained immutable/unused, no gate or production attempt."
+}
