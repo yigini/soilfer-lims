@@ -1,0 +1,438 @@
+"""Proposed closed #200 forward release authority; no operations at import.
+
+Every new approval is deliberately unbound until the actual merged application,
+reviewed proof source and original stopped PASS exist. Historical runtime kits
+and failed proofs cannot grant authority for this additive import migration.
+"""
+import datetime
+import hashlib
+import json
+import pathlib
+import re
+
+from import_proof_contract import *
+from import_source_graph import SOURCE_FILES, UNCHANGED_HELPER_HASHES
+from import_installation import validate_apply, validate_plan
+from import_startup_checks import READY_EVENTS, import_zero
+
+WORKLOAD_PINS = {'labAndHubBuildsOwnedByYY': True,
+    'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}
+REVIEWED_PROOF_SOURCE = 'UNREVIEWED_REFUSE'
+PROOF_SOURCE_REVIEW_ID = 0
+REVIEWED_PROOF_FILES = {}
+PRODUCTION_SOURCE_FILES = ['import_release_contract.py', 'deploy_import.py',
+    'freeze_import.py', 'known_core_disk_guard_import_deploy.py',
+    'collect_import_gate.py', 'export_freeze_import_kit.py', 'launch_import_release.py']
+PACKAGE_SOURCE_FILES = SOURCE_FILES | set(PRODUCTION_SOURCE_FILES) | {'yy-authorization-evidence.md'}
+PROOF_BASELINE_LAYOUT_POLICY = 'EXACT_HASHED_IMPORT_PROOF_AUTHORITY_LAYOUT'
+DEPLOY_LAYOUT_POLICY = 'EXACT_HASHED_UNUSED_IMPORT_KIT_AND_SINGLE_USE_GATE'
+BASELINE_POLICY = 'CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE'
+BASELINE_ATTEMPTS_MAX = 3
+BASELINE_CONFIRMATION_SECONDS = CORE_CONFIRMATION_SECONDS = 10
+MEASUREMENT_GUARD_SHA = UNCHANGED_HELPER_HASHES['known_core_disk_guard_v2.py']
+BASELINE_GUARD_SHA = UNCHANGED_HELPER_HASHES['known_core_disk_guard_v3.py']
+ORIGINAL_GUARD_SHA = UNCHANGED_HELPER_HASHES['known_core_disk_guard.py']
+SHARED_READINESS_SHA = UNCHANGED_HELPER_HASHES['startup_common.py']
+REVIEWED_VERIFIER_SHA = UNCHANGED_HELPER_HASHES['kobo_copy_preservation.py']
+KIT_STATUS = 'PREPARED_IMPORT_FORWARD_ONLY_NOT_EXECUTED'
+PHRASE = 'Audit passed: OK to merge and deploy'
+WAL_RECOVERY_POLICY = 'DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL'
+ORIGINAL_INGRESS_SHA = 'f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20'
+HELD_INGRESS_SHA = 'd92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c'
+ENTRY_POLICY = 'HEALTHY_RUNNING_NORMAL_51F_ONLY'
+PROOF_ARTIFACTS = {
+    'target-pin.json': 'target-pin.json', 'rehearsal-receipt.json': 'rehearsal-receipt.json',
+    'proof-source-index.json': 'source-index.json',
+    'proof-authority.json': 'candidate-rehearsal-authority.json',
+    'first-sync-preservation.json': 'first-sync-preservation.json',
+    'second-sync-preservation.json': 'second-sync-preservation.json',
+    'full-copy-preservation.json': 'full-copy-preservation.json',
+    'upstream-before-start.json': 'upstream-before-start.json',
+    'upstream-first-completion.json': 'upstream-first-completion.json',
+    'upstream-second-completion.json': 'upstream-second-completion.json',
+    'fresh-protected-state.json': 'fresh-protected-state.json',
+    'installed-protected-state.json': 'installed-protected-state.json',
+    'import-install-preservation.json': 'import-install-preservation.json',
+    'import-installed-seal.json': 'after-import-stopped/sealed-state.json',
+    'import-jobs-off-seal.json': 'after-jobs-off-stopped/sealed-state.json',
+    'import-final-seal.json': 'after-second-stopped/sealed-state.json'}
+FROZEN_FILE_SET = PACKAGE_SOURCE_FILES | set(PROOF_ARTIFACTS) | {
+    'packaging-source-index.json', 'production-baseline-source-review.json',
+    'apache-before.conf', 'apache-held.conf'}
+
+
+def require_bound_proof_source():
+    bound_candidate()
+    require(re.fullmatch('[a-f0-9]{40}', REVIEWED_PROOF_SOURCE) and
+        type(PROOF_SOURCE_REVIEW_ID) is int and PROOF_SOURCE_REVIEW_ID > 0 and
+        PROOF_SOURCE_REVIEW_ID not in HISTORICAL_SOURCE_REVIEWS,
+        'Actual NEW #200 proof source approval is deliberately unbound')
+    require_source_set(REVIEWED_PROOF_FILES)
+
+
+def sha(path):
+    result = hashlib.sha256()
+    with pathlib.Path(path).open('rb') as stream:
+        while block := stream.read(1024 * 1024): result.update(block)
+    return result.hexdigest()
+
+
+def safe_root(value, prefix):
+    root = pathlib.PurePosixPath(value)
+    require(root.parent == pathlib.PurePosixPath('/opt/lims/releases') and
+        re.fullmatch(re.escape(prefix) + '[A-Za-z0-9_-]+', root.name), 'Wrong or unsafe new release root')
+    return root
+
+
+def safe_reference(root, name):
+    relative = pathlib.PurePosixPath(name)
+    require(isinstance(name, str) and name and '\\' not in name and str(relative) == name and
+        not relative.is_absolute() and all(part not in ['', '.', '..'] for part in relative.parts),
+        'Unsafe retained proof reference')
+    path = pathlib.Path(root)
+    require(not path.is_symlink(), 'Proof root is a symlink')
+    for part in relative.parts:
+        path = path / part
+        require(not path.is_symlink(), 'Proof reference follows a symlink')
+    require(path.is_file() and path.stat().st_mode & 0o777 == 0o400,
+        'Original retained proof artifact is not immutable')
+    return path
+
+
+def entry_binding():
+    return {'policy': ENTRY_POLICY, 'baseHead': BASE_HEAD, 'liveImage': LIVE_IMAGE,
+        'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA,
+        'normalIngressSha256': ORIGINAL_INGRESS_SHA, 'heldIngressSha256': HELD_INGRESS_SHA,
+        'allowedEntryStates': ['RUNNING_NORMAL'], 'recoveryPolicy': RECOVERY_POLICY}
+
+
+def validate_entry_state(entry, manifest):
+    require(manifest.get('entryBinding') == entry_binding(), 'Healthy predecessor authority differs')
+    require(set(entry) == {'mode', 'containerId', 'image', 'restartCount', 'ingressSha256', 'originalFiles'} and
+        entry['mode'] == 'RUNNING_NORMAL' and re.fullmatch('[a-f0-9]{64}', entry['containerId']) and
+        entry['image'] == LIVE_IMAGE and type(entry['restartCount']) is int and entry['restartCount'] == 0 and
+        entry['ingressSha256'] == ORIGINAL_INGRESS_SHA and entry['originalFiles'] is None,
+        'Only healthy normal unchanged predecessor is release authority')
+
+
+def verify_entry_readiness(manifest, gate, actual):
+    validate_entry_state(actual['entryState'], manifest)
+    require(actual['entryState'] == gate['readOnlyExecutionReadiness']['entryState'],
+        'Original writer or ingress changed after the single-use gate')
+
+
+def has_failed_verdict(body, include_source=False):
+    first = next((line.strip().strip('*_# ') for line in body.splitlines() if line.strip()), '')
+    if first in [PHRASE, 'Source review: PASS']:
+        body = re.sub(r'\bno later[ \t]+(?:"audit failed"|\'audit failed\'|“audit failed”|‘audit failed’)',
+            '', body, flags=re.IGNORECASE)
+    return 'audit failed' in body.lower() or (include_source and 'source review: failed' in body.lower())
+
+
+def native_installation(row):
+    require(row['status'] == 'EXACT_NATIVE_IMPORT_DRY_APPLY_REPEAT_PASS' and
+        [row[key] for key in ['originalTableCount', 'originalReceiptCount', 'installedTableCount',
+            'installedReceiptCount']] == [104, 38, 106, 39] and
+        row['repeatDatabaseChanges'] == 0 and row['allOriginalRowsAndSchemaPreserved'] is True and
+        row['forwardOnly'] is True, 'Native import delta or repeat proof differs')
+    validate_plan(row['dry'], 'PRE_200', 'DRY_RUN')
+    require(validate_apply(row['apply']) == row['originalRowsSha256'], 'Original row hash differs')
+    validate_plan(row['repeat'], 'COMPLETE_200', 'NO_OP')
+    for key in ['originalRowsSha256', 'beforeBackupSha256', 'afterBackupSha256', 'preservationSha256']:
+        require(re.fullmatch('[a-f0-9]{64}', row[key]), 'Native hash is missing: ' + key)
+    measurements = row['measurements']
+    require(len(measurements) == 3 and len({value['containerName'] for value in measurements}) == 3,
+        'All three distinct native CLI measurements required')
+    for value in measurements:
+        peak = value['cgroupMemoryPeak']
+        require(value['memoryLimitBytes'] == LIMIT and value['nodeOptions'] == '' and
+            type(value['exitCode']) is int and value['exitCode'] == 0 and
+            value['retainedOwnedContainer'] is True and type(peak['releaseCliPeakBytes']) is int and
+            0 < peak['releaseCliPeakBytes'] <= LIMIT and peak['childStatus'] == 0 and peak['childSignal'] is None,
+            'Native CLI failed, exceeded 768MiB or used an override')
+
+
+def startup_evidence(readiness, checks, jobs):
+    require(readiness['deadlineSeconds'] == 600 and 0 < readiness['elapsedSeconds'] < 600 and
+        readiness['sharedReadinessCode'] == SHARED_READINESS_SHA and readiness['restartCount'] == 0 and
+        readiness['oomKilled'] is False and readiness['memoryLimitBytes'] == LIMIT and
+        readiness['jobsEnabled'] is jobs, 'Default startup readiness is incomplete')
+    require(checks['startupChanges'] == 0 and len(checks['entrypointInstallers']) == 23 and
+        all(row['mode'] == 'NO_OP' and type(row['totalChanges']) is int and row['totalChanges'] == 0
+            for row in checks['entrypointInstallers']) and
+        checks['entrypointInstallers'][-1]['classification'] == 'COMPLETE_200',
+        'Exactly 23 default NO_OP/0 verifiers required')
+    require([row['event'] for row in checks['startupReady']] == [name + '_STARTUP_READY' for name in READY_EVENTS] and
+        all(type(row['totalChanges']) is int and row['totalChanges'] == 0 for row in checks['startupReady']),
+        'Exactly 22 ordered zero-change READY events required')
+    import_zero(checks['startupReady'][-1])
+    require(0 < checks['startupMemory']['peakBytes'] <= LIMIT and
+        checks['startupMemory']['nodeOptions'] is None, 'Startup peak or heap override refused')
+
+
+def validate_proof(proof, pin):
+    require_bound_proof_source()
+    candidate_identity(pin)
+    require(proof['status'] == 'PASSED_NEW_IMPORT_NATURAL_KOBO_PROOF' and
+        proof['head'] == pin['head'] and proof['image'] == pin['image'] and
+        proof['buildReceiptSha256'] == pin['buildReceiptSha256'] and
+        proof['baseHead'] == BASE_HEAD and proof['pr'] == PR_NUMBER and proof['tree'] == MERGED_TREE and
+        proof['auditedTree'] == AUDITED_PR_TREE and proof['mergeParents'] == MERGE_PARENTS and
+        proof['naturalIntakePolicy'] == NATURAL_INTAKE_POLICY, 'Failed, historical or wrong candidate proof refused')
+    proof_source_binding(proof, pin)
+    require(proof['historicalReceiptSha256'] == HISTORICAL_RECEIPT_SHA and
+        proof['productionMutations'] == 0 and proof['separateInstallerCommands'] == 3 and
+        proof['ownedWriterStopped'] is True and proof['effectiveUid'] == 0 and proof['pythonOptimize'] == 0 and
+        proof['baselineEnumerationErrorCount'] == 0 and proof['retainedDatabaseAllocationCount'] == 12,
+        'Proof isolation, stopped state or original allocation policy missing')
+    require(proof['workloadPins'] == WORKLOAD_PINS and proof['reserveBytes'] >= FLOOR and
+        proof['importDeltaPolicy'] == NATIVE_DELTA_POLICY and
+        proof['existingSampleVerifierPolicy'] == 'STRICT_ORIGINAL_ROWS' and
+        proof['allOriginalRowsAndSchemaPreserved'] is True and proof['originalProtectedTableCount'] == 104 and
+        proof['originalProtectedReceiptCount'] == 38 and proof['protectedTableCount'] == 106 and
+        proof['protectedReceiptCount'] == 39, 'Original or installed full protection missing')
+    native_installation(proof['nativeImportInstallation'])
+    require(proof['freshCopySha256'] == proof['nativeImportInstallation']['beforeBackupSha256'] and
+        proof['installedBaselineSha256'] == proof['nativeImportInstallation']['afterBackupSha256'],
+        'Native delta backups differ from the natural proof baseline')
+    for key in ['jobsOffStoppedSeal', 'finalStoppedSeal']:
+        seal = proof[key]
+        require(seal['policy'] == WAL_RECOVERY_POLICY and seal['countsIncludeWal'] is True and
+            seal['protectedTableCount'] == 106 and seal['protectedReceiptCount'] == 39,
+            'Stopped installed WAL-aware seal missing')
+    require(proof['jobsOffStoppedSeal']['matchesExpected'] is True,
+        'Jobs-OFF full installed state changed')
+    require(proof['memoryLimitBytes'] == LIMIT and proof['nodeOptions'] == '' and
+        0 < proof['peakBytes'] <= LIMIT and proof['databaseChangesBeforeJobs'] == 0 and
+        proof['healthSamples'] and all(row['healthy'] is True and row['restartCount'] == 0 and
+            0 < row['peakBytes'] <= LIMIT for row in proof['healthSamples']), 'Runtime bounded health proof missing')
+    for stage, jobs in [('jobsOff', False), ('jobsOn', True)]:
+        startup_evidence(proof[stage + 'Readiness'], proof[stage + 'Startup'], jobs)
+    require(proof['apiChecks'] == {'passed': 31, 'total': 31, 'failed': 0} and
+        len(proof['probes']) == 6 and all(row['exitCode'] == 0 for row in proof['probes']) and
+        proof['readOnlyProbeChanges'] == 0, '31+6 read-only proof missing')
+    require_final_observation(proof['firstScheduledSync'], proof['secondScheduledSync'],
+        proof['jobsOnReadiness']['readyUtc'], proof['observedThroughUtc'], proof['copySyncIntervalMins'],
+        0, proof['peakBytes'], proof['healthySoakSeconds'])
+
+
+def pairing_contract(row):
+    require(row['refusalPairingScopeCommentId'] == REFUSAL_PAIRING_SCOPE_COMMENT_ID and
+        row['schedulerRefusalPairing'] == REFUSAL_PAIRING_POLICY and
+        row['REFUSAL_PAIR_WINDOW_SECONDS'] == REFUSAL_PAIR_WINDOW_SECONDS, 'Original stream pairing differs')
+
+
+def proof_source_binding(proof, pin):
+    pairing_contract(proof)
+    require(proof['toolingCommit'] == REVIEWED_PROOF_SOURCE and
+        proof['proofSourceReviewId'] == pin['proofSourceReviewId'] == PROOF_SOURCE_REVIEW_ID and
+        proof['coordinatorSha256'] == REVIEWED_PROOF_FILES['rehearse_import.py'] and
+        proof['proofContractSha256'] == REVIEWED_PROOF_FILES['import_proof_contract.py'] and
+        proof['proofBaselineLayoutGuardSha256'] == REVIEWED_PROOF_FILES['known_core_disk_guard_import.py'] and
+        proof['proofBaselineLayoutPolicy'] == PROOF_BASELINE_LAYOUT_POLICY and
+        proof['copyVerifierSha256'] == REVIEWED_VERIFIER_SHA and
+        proof['diskMeasurementGuardSha256'] == MEASUREMENT_GUARD_SHA and
+        proof['baselineMeasurementGuardSha256'] == BASELINE_GUARD_SHA and
+        proof['baselineVanishedProcessPolicy'] == BASELINE_POLICY and
+        proof['BASELINE_ATTEMPTS_MAX'] == 3 and proof['BASELINE_CONFIRMATION_DEADLINE_SECONDS'] == 10 and
+        proof['coreDeallocationConfirmationDeadlineSeconds'] == 10 and proof['baselineAttempt'] in [1, 2, 3] and
+        proof['refusalScopeCommentId'] == REFUSAL_SCOPE_COMMENT_ID and proof['schedulerRefusalPolicy'] == REFUSAL_POLICY and
+        proof['intakeCardinalityPolicy'] == CARDINALITY_POLICY and re.fullmatch('[a-f0-9]{64}', proof['authoritySha256']),
+        'New exact proof source or unchanged measurement policy differs')
+
+
+def proof_authority(proof, pin, source, authority, authority_sha):
+    proof_source_binding(proof, pin)
+    require(source['head'] == REVIEWED_PROOF_SOURCE and
+        {name: row['sha256'] for name, row in source['files'].items()} == REVIEWED_PROOF_FILES and
+        proof['authoritySha256'] == authority_sha and authority['head'] == pin['head'] and
+        authority['proofSourceReview']['id'] == PROOF_SOURCE_REVIEW_ID, 'Original proof authority changed')
+    source_review_pass(authority['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_FILES)
+
+
+def source_policy_tokens():
+    return [ENTRY_POLICY, NATIVE_DELTA_POLICY, RECOVERY_POLICY, WAL_RECOVERY_POLICY,
+        ORIGINAL_INGRESS_SHA, HELD_INGRESS_SHA, 'separateInstallerCommands=3',
+        'retainedDatabaseAllocationCount=12', 'defaultStartup=23NO_OP0/22READY0',
+        'REQUIRED_HASHED_MANIFEST_AND_GATE', 'JOURNAL_UNIT_OUTPUT', DEPLOY_LAYOUT_POLICY,
+        'BASELINE_ATTEMPTS_MAX=3', 'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10',
+        'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
+        'productionObservationSeconds=660', 'deadlineSeconds=600',
+        'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
+
+
+def production_source_review(review, tooling, files, now=None):
+    require_bound_proof_source()
+    require(set(files) >= PACKAGE_SOURCE_FILES and
+        {name: files[name] for name in SOURCE_FILES} == REVIEWED_PROOF_FILES,
+        'Packaging must retain every exact measured proof byte')
+    require(type(review['id']) is int and review['id'] > 0 and
+        review['id'] not in HISTORICAL_SOURCE_REVIEWS | {PROOF_SOURCE_REVIEW_ID} and
+        review['html_url'] == 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(review['id']) and
+        re.fullmatch('[a-f0-9]{40}', tooling), 'Separate NEW production source review required')
+    first = next((line.strip().strip('*_# ') for line in review['body'].splitlines() if line.strip()), '')
+    tokens = release_binding_tokens() + source_policy_tokens() + [tooling, REVIEWED_PROOF_SOURCE,
+        'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID)]
+    tokens += [name + '=' + files[name] for name in sorted(PACKAGE_SOURCE_FILES)]
+    require(first == 'Source review: PASS' and not has_failed_verdict(review['body'], True) and
+        all(token in review['body'] for token in tokens), 'Complete NEW production source verdict missing')
+    require(utc_seconds(review['created_at']) <= (now or datetime.datetime.now(datetime.timezone.utc)).timestamp(),
+        'Production source review is future-dated')
+
+
+def measurement_manifest(manifest):
+    require_bound_proof_source()
+    require(set(manifest['files']) == FROZEN_FILE_SET and
+        all(re.fullmatch('[a-f0-9]{64}', digest) for digest in manifest['files'].values()) and
+        {name: manifest['files'][name] for name in SOURCE_FILES} == REVIEWED_PROOF_FILES,
+        'Exact complete frozen file set differs')
+    require(manifest['status'] == KIT_STATUS and manifest['head'] == CANDIDATE_HEAD and
+        manifest['baseHead'] == BASE_HEAD and manifest['tree'] == MERGED_TREE and
+        manifest['auditedPrTree'] == AUDITED_PR_TREE and manifest['mergeParents'] == MERGE_PARENTS and
+        manifest['sourceReviewId'] == PROOF_SOURCE_REVIEW_ID and
+        manifest['proofToolingCommit'] == REVIEWED_PROOF_SOURCE and manifest['entryBinding'] == entry_binding() and
+        manifest['workloadControl'] == WORKLOAD_PINS and manifest['historicalReceiptSha256'] == HISTORICAL_RECEIPT_SHA and
+        manifest['naturalIntakePolicy'] == NATURAL_INTAKE_POLICY and manifest['importDeltaPolicy'] == NATIVE_DELTA_POLICY and
+        manifest['separateInstallerCommands'] == 3 and manifest['retainedDatabaseAllocationCount'] == 12 and
+        manifest['productionObservationSeconds'] == 660 and manifest['deadlineSeconds'] == 600 and
+        manifest['reserveFloorBytes'] == FLOOR and manifest['coreDeallocationConfirmationDeadlineSeconds'] == 10 and
+        manifest['baselineVanishedProcessPolicy'] == BASELINE_POLICY and manifest['BASELINE_ATTEMPTS_MAX'] == 3 and
+        manifest['BASELINE_CONFIRMATION_DEADLINE_SECONDS'] == 10 and
+        manifest['files']['apache-before.conf'] == ORIGINAL_INGRESS_SHA and
+        manifest['files']['apache-held.conf'] == HELD_INGRESS_SHA, 'Frozen execution policy differs')
+    pairing_contract(manifest)
+    safe_root(manifest['root'], 'instrument-import-release-')
+    safe_root(manifest['originalProofRoot'], 'instrument-import-proof-')
+
+
+def formal_pr_review(review):
+    require_pr_review(review)
+
+
+def review_tokens(manifest, manifest_sha):
+    measurement_manifest(manifest)
+    return release_binding_tokens() + source_policy_tokens() + [PHRASE, manifest['head'], manifest['image'],
+        manifest_sha, REVIEWED_PROOF_SOURCE, 'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID),
+        'productionSourceReviewId=' + str(manifest['productionBaselineSourceReviewId'])] + [
+        name + '=' + digest for name, digest in sorted(manifest['files'].items())]
+
+
+def verify_gate(manifest, gate, manifest_sha, now=None):
+    now = now or datetime.datetime.now(datetime.timezone.utc)
+    measurement_manifest(manifest)
+    require(gate['status'] == 'FRESH_SINGLE_USE_IMPORT_GATE' and gate['executionRoot'] == manifest['root'] and
+        gate['head'] == gate['currentMainHead'] == manifest['head'] and gate['image'] == manifest['image'] and
+        gate['manifestSha256'] == manifest_sha and gate['workloadControl'] == WORKLOAD_PINS and
+        gate['entryBinding'] == entry_binding() and gate['frozenFiles'] == manifest['files'],
+        'Single-use gate identity differs')
+    require(0 <= now.timestamp() - utc_seconds(gate['verifiedUtc']) <= 600, 'Gate is stale or future-dated')
+    readiness = gate['readOnlyExecutionReadiness']
+    require(readiness['ready'] is True and readiness['productionMutations'] == 0 and
+        min(readiness['freeBytes'].values()) >= readiness['requiredIncludingBackupBytes'] >= readiness['reserveBytes'] >= FLOOR,
+        'Fresh ready headroom is incomplete')
+    validate_entry_state(readiness['entryState'], manifest)
+    source_review_pass(gate['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_FILES, now)
+    require(gate['proofSourceReview']['id'] == PROOF_SOURCE_REVIEW_ID and gate['laterSourceAuditFailure'] is False and
+        gate['laterProductionSourceAuditFailure'] is False and gate['laterKitAuditFailure'] is False,
+        'Approval was superseded')
+    require(gate['productionBaselineSourceReview']['id'] == manifest['productionBaselineSourceReviewId'],
+        'Frozen production source approval differs')
+    production_source_review(gate['productionBaselineSourceReview'], manifest['packagingCommit'], manifest['files'], now)
+    pr = gate['pr']
+    require(pr['number'] == 284 and pr['merged'] is True and pr['head'] == AUDITED_PR_HEAD and
+        pr['mergeCommit'] == CANDIDATE_HEAD and pr['tree'] == MERGED_TREE and pr['auditedTree'] == AUDITED_PR_TREE and
+        pr['mergeParents'] == MERGE_PARENTS and pr['laterAuditFailure'] is False,
+        'Actual merged PR284 differs')
+    formal_pr_review(pr['review'])
+    require(pr['checks'] and all(row['head_sha'] == AUDITED_PR_HEAD and row['status'] == 'completed' and
+        row['conclusion'] == 'success' for row in pr['checks']), 'Exact PR checks are not all green')
+    ci = gate['mainCi']
+    require(ci['head_sha'] == CANDIDATE_HEAD and ci['name'] == 'CI' and ci['event'] == 'push' and
+        ci['status'] == 'completed' and ci['conclusion'] == 'success', 'Exact main CI is not green')
+    review = gate['kitReview']
+    require(type(review['id']) is int and review['id'] > 0 and review['id'] not in HISTORICAL_SOURCE_REVIEWS |
+        {6102481848, 6109804174, 6110472696, 6114626674, 6118040064, PROOF_SOURCE_REVIEW_ID,
+         manifest['productionBaselineSourceReviewId']} and review['html_url'] ==
+        'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(review['id']) and
+        next((line.strip().strip('*_# ') for line in review['body'].splitlines() if line.strip()), '') == PHRASE and
+        not has_failed_verdict(review['body']) and all(token in review['body'] for token in review_tokens(manifest, manifest_sha)) and
+        utc_seconds(review['created_at']) <= now.timestamp(), 'NEW exact-kit verdict missing')
+    yy = gate['yyGo']
+    require(yy['authorizationMode'] == 'AUTO_AFTER_REVIEW' and yy['standingScopeText'] == 'my go covers all' and
+        yy['evidenceSha256'] == manifest['files']['yy-authorization-evidence.md'] and yy['releaseHead'] == CANDIDATE_HEAD,
+        'Original standing YY evidence is not bound to this release')
+
+
+def frozen_files(root, manifest):
+    measurement_manifest(manifest)
+    for name, digest in manifest['files'].items():
+        require(pathlib.PurePosixPath(name).name == name and sha(safe_reference(root, name)) == digest,
+            'Frozen file changed: ' + name)
+    require((root / 'prepared-manifest.json').stat().st_mode & 0o777 == 0o400, 'Manifest is not immutable')
+    pin = json.loads((root / 'target-pin.json').read_bytes())
+    candidate_identity(pin)
+    require(pin['image'] == manifest['image'], 'Frozen image differs')
+    proof = json.loads((root / 'rehearsal-receipt.json').read_bytes())
+    validate_proof(proof, pin)
+    proof_authority(proof, pin, json.loads((root / 'proof-source-index.json').read_bytes()),
+        json.loads((root / 'proof-authority.json').read_bytes()), sha(root / 'proof-authority.json'))
+    review = json.loads((root / 'production-baseline-source-review.json').read_bytes())
+    require(review['id'] == manifest['productionBaselineSourceReviewId'], 'Production source review changed')
+    production_source_review(review, manifest['packagingCommit'], manifest['files'])
+    return pin
+
+
+def original_cursor_intake(proof, record, original_config):
+    """Bind pending identities to the actual immutable baseline cursor, including empty."""
+    require(proof['naturalIntakePolicy'] == NATURAL_INTAKE_POLICY and
+        record['configId'] == original_config['id'] == TARGET_CONFIG and
+        record['labId'] == original_config['labId'] == TARGET_LAB and
+        record['projectCode'] == original_config['projectCode'] == TARGET_PROJECT and
+        record['since'] == original_config['lastSubmissionId'], 'Original intake cursor or config differs')
+    ids = record['submissionIds']
+    require(isinstance(ids, list) and all(isinstance(value, str) and value.isdigit() for value in ids) and
+        len(set(ids)) == len(ids) and ids == sorted(ids, key=int) and
+        (record['since'] is None or str(record['since']).isdigit()) and
+        all(record['since'] is None or int(value) > int(record['since']) for value in ids),
+        'Actual pending submission identities differ')
+    require(type(proof['initialTargetSubmissionCount']) is int and
+        proof['initialTargetSubmissionCount'] == len(ids), 'Actual initial pending count differs')
+
+
+def pairing_contract(row):
+    require(row['refusalPairingScopeCommentId'] == REFUSAL_PAIRING_SCOPE_COMMENT_ID and
+        row['schedulerRefusalPairing'] == REFUSAL_PAIRING_POLICY and
+        row['REFUSAL_PAIR_WINDOW_SECONDS'] == REFUSAL_PAIR_WINDOW_SECONDS,
+        'Cross-stream pairing authority or timing differs')
+
+
+def pairing_review_tokens():
+    return ['refusalPairingScopeCommentId=' + str(REFUSAL_PAIRING_SCOPE_COMMENT_ID),
+        'schedulerRefusalPairing=' + REFUSAL_PAIRING_POLICY, 'REFUSAL_PAIR_WINDOW_SECONDS=1']
+
+
+def sealed_scheduler_evidence(proof, expected, stdout, stderr, first, second, full):
+    """Recheck the original timestamped log against its sealed copy results."""
+    require(proof['expectedSchedulerRefusals'] == expected, 'Fresh baseline refusal scope differs')
+    observed = scheduler_refusals(stdout, stderr, expected)
+    pairing_contract(proof)
+    lab_counts = {lab: sum(row['labId'] == lab for row in observed)
+        for lab in sorted({row['labId'] for row in expected})}
+    require(proof['schedulerRefusalLabCounts'] == lab_counts and
+        proof['schedulerRefusalConfigCountsDerivedFromTriggers'] is True, 'Per-lab refusal counts differ')
+    counts = {row['configId']: sum(value['configId'] == row['configId'] for value in observed)
+        for row in expected}
+    require(proof['observedSchedulerRefusals'] == observed and proof['schedulerRefusalCounts'] == counts,
+        'Retained scheduler refusal evidence differs')
+    completions = completed_syncs(stdout)
+    require(len(completions) >= 2 and proof['firstScheduledSync'] == completions[0] and
+        proof['secondScheduledSync'] == completions[1], 'Original natural completion evidence differs')
+    protected = sorted(row['configId'] for row in expected)
+    for state in [first, second, full]:
+        require(state['protectedRefusalConfigIds'] == protected, 'Failed configuration protection differs')
+    require(proof['firstIntakeSummary'] == intake_summary(first, completions[0]) and
+        proof['secondIntakeSummary'] == intake_summary(second, completions[1]) and
+        proof['secondGenuinelyNewSubmissionIds'] == second['newSubmissionIds'].get(TARGET_CONFIG, []),
+        'Sealed Sample-row cardinality differs')
+
+

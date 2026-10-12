@@ -11,7 +11,8 @@ if len(head) != 40 or any(character not in '0123456789abcdef' for character in h
 names = ['import_source_graph', 'import_proof_contract', 'import_preservation', 'import_startup_checks',
     'import_installation', 'import_stage', 'import_sealing', 'known_core_disk_guard_import',
     'test_import_preservation', 'test_import_startup_checks', 'test_import_installation', 'test_import_stage',
-    'test_import_sealing', 'test_import_authority', 'test_import_layout']
+    'test_import_sealing', 'test_import_authority', 'test_import_layout',
+    'import_release_contract', 'test_import_release']
 files = {name: subprocess.check_output(['git', 'show', head + ':WP/pr284-release/' + name + '.py']) for name in names}
 helpers = {'release_support': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
     'startup_common': 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00'}
@@ -28,12 +29,22 @@ files = dict(raw_helpers, **{name: subprocess.check_output(['git', 'show', head 
 graph_namespace = {}
 exec(compile(files['import_source_graph'], '/owned-graph.py', 'exec'), graph_namespace)
 tooling, tooling_index = graph_namespace['git_source'](head, lambda *args: subprocess.check_output(['git', *args]))
+production_names = ['import_release_contract.py', 'deploy_import.py', 'freeze_import.py',
+    'known_core_disk_guard_import_deploy.py', 'collect_import_gate.py', 'export_freeze_import_kit.py', 'launch_import_release.py']
+package = dict(tooling)
+for name in production_names:
+    package[name] = subprocess.check_output(['git', 'show', head + ':WP/pr284-release/' + name])
+package['yy-authorization-evidence.md'] = subprocess.check_output(['git', 'show',
+    head + ':WP/forward-ae64f169/yy-authorization-evidence.md'])
+for name, raw in package.items():
+    if name.endswith('.py'): compile(raw, '/owned-compile-only/' + name, 'exec')
 for name, raw in tooling.items():
     if name.endswith('.py'): compile(raw, '/owned-compile-only/' + name, 'exec')
 assets = {name: subprocess.check_output(['git', 'show', head + ':server/prisma/migrations/20261010000100_instrument_import_templates/' + name])
     for name in ['migration.sql', 'fresh-prisma-tables.json', 'pre-prisma-draft-table.sql',
         'upgraded-prisma-draft-table.sql', 'post205-draft-tables.json']}
 payload = {'sourceCommit': head, 'tooling': {name: base64.b64encode(raw).decode() for name, raw in tooling.items()},
+    'package': {name: base64.b64encode(raw).decode() for name, raw in package.items()},
     'toolingIndex': tooling_index, 'files': {name: {'data': base64.b64encode(raw).decode(),
     'sha256': hashlib.sha256(raw).hexdigest()} for name, raw in files.items()},
     'assets': {name: {'data': base64.b64encode(raw).decode(), 'sha256': hashlib.sha256(raw).hexdigest()}
@@ -49,8 +60,9 @@ with tempfile.TemporaryDirectory(prefix='owned-import-assets-') as directory:
   module=types.ModuleType(name);module.__file__='/owned-in-memory-guards/WP/pr284-release/'+name+'.py';module.__raw_sha256__=hashlib.sha256(raw).hexdigest();sys.modules[name]=module
   exec(compile(raw,module.__file__,'exec'),module.__dict__)
  tests=sys.modules['test_import_preservation'];tests.ASSET_ROOT=root
- for name in ['test_import_authority','test_import_layout']:
+ for name in ['test_import_authority','test_import_layout','test_import_release']:
   sys.modules[name].RAW_TOOLING={n:base64.b64decode(raw) for n,raw in p['tooling'].items()}
+ sys.modules['test_import_release'].RAW_PACKAGE={n:base64.b64decode(raw) for n,raw in p['package'].items()}
  suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromModule(sys.modules[name]) for name in p['files'] if name.startswith('test_'))
  result=unittest.TextTestRunner(verbosity=2).run(suite)
  print(json.dumps({'sourceCommit':p['sourceCommit'],'sourceHashes':{name:item['sha256'] for name,item in p['files'].items()},

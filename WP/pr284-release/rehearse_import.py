@@ -386,6 +386,7 @@ def main():
         ledger = ROOT / 'disk-allocation-observations.jsonl'
         if ledger.exists():
             receipt['diskAllocationObservationsSha256'] = s.sha(ledger)
+            ledger.chmod(0o400)
         receipt.pop('_schedulerStdout', None); receipt.pop('_schedulerStderr', None)
         receipt['completedUtc'] = s.utc()
         write_new('rehearsal-receipt.json', receipt)
