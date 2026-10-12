@@ -8,8 +8,8 @@ import sys
 head = sys.argv[1]
 if len(head) != 40 or any(character not in '0123456789abcdef' for character in head):
     raise RuntimeError('Exact source commit required')
-names = ['import_preservation', 'import_startup_checks', 'import_installation',
-    'test_import_preservation', 'test_import_startup_checks', 'test_import_installation']
+names = ['import_preservation', 'import_startup_checks', 'import_installation', 'import_stage',
+    'test_import_preservation', 'test_import_startup_checks', 'test_import_installation', 'test_import_stage']
 files = {name: subprocess.check_output(['git', 'show', head + ':WP/pr284-release/' + name + '.py']) for name in names}
 assets = {name: subprocess.check_output(['git', 'show', head + ':server/prisma/migrations/20261010000100_instrument_import_templates/' + name])
     for name in ['migration.sql', 'fresh-prisma-tables.json', 'pre-prisma-draft-table.sql',
