@@ -1,0 +1,48 @@
+{
+  "retainedUtc": "2026-10-12T20:29:04.092456+00:00",
+  "sourceCommit": "a2a1694ef3956aea0fbe12d21dfaa8f5473ac947",
+  "requestId": 6132063289,
+  "requestUrl": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6132063289",
+  "requestCreatedUtc": "2026-10-12T20:28:27Z",
+  "rawApiSha256": "d74f9f7d79cbdd387a47f48ae58e62cbd9db4ea4eb4d978fee4235c7f890f4d7",
+  "requestFileSha256": "5213d2139fd91f9bae89552317f48a2dcedf7655f503fa4baa596215cd82fbe7",
+  "sourceApproved": false,
+  "heldObservation": {
+    "observedUtc": "2026-10-12T20:27:16.122416+00:00",
+    "status": "FAILED_PRODUCTION_HELD_PHYSICAL_ORIGINALS_VERIFIED_NO_APPLY",
+    "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+    "unitState": {
+      "Result": "exit-code",
+      "ExecMainStatus": "1",
+      "ActiveState": "failed",
+      "SubState": "failed"
+    },
+    "receiptSha256": "2a03e66071406c58b754d9c63ed8200373c55a0433c2d1ad1cbdc2836d72499e",
+    "originalPhysicalTripleUnchanged": true,
+    "originalStoppedBackupHashUnchanged": true,
+    "allOriginalWritersStopped": true,
+    "ingressHeld": true,
+    "originalImageStopped": true,
+    "dryRunTotalChanges": 0,
+    "noApplyOrRepeatArtifacts": true,
+    "all62FrozenFilesUnchanged": true,
+    "originalProofReceiptUnchanged": true,
+    "productionMutationsByThisVerifier": 0,
+    "liveSqliteConnections": 0,
+    "/api/health": {
+      "httpStatus": 503,
+      "tlsVerified": true
+    },
+    "/login": {
+      "httpStatus": 503,
+      "tlsVerified": true
+    },
+    "futurePackageAndKitRootsAbsent": true,
+    "freeBytes": {
+      "/opt/lims": 71187468288,
+      "/var/lib/docker": 71187468288
+    }
+  },
+  "nativeDelivery": "PENDING_DIRECT_OBSERVATION",
+  "productionMutations": 0
+}
