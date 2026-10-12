@@ -1,3 +1,11 @@
+PR294 SAME213000 deployment ACTIVE after migration/jobsOFF preservation PASS — 2026-10-12T21:50:04.755938+00:00
+
+ONE reviewed unit remains active/running, IMPORT_FORWARD_IN_PROGRESS; NEVER restart/replay/recollect/retry. All3CLI succeeded: DRY0/APPLY1/NO_OP0, 0restart/OOMfalse/blankheap/maximum106627072B. Full native delta and immediate repeat preservation passed 2026-10-12T21:45:10.046081+00:00. Candidate jobsOFF readiness112.605671s/0restart/noOOM. JobsOFF full preservation/31checks+6probes passed 2026-10-12T21:48:25.614942+00:00. Ingress health/login200/deniedPOST401 passed and normal ingress restored BEFORE jobs at 2026-10-12T21:48:49.113794+00:00. The process has stopped its jobsOFF container to seal full stopped logical state, then will start the distinct same-image final jobsON container. Current observation has no running LIMS name during that reviewed transition; do not claim currently healthy/live/completed from the earlier200 probes. Final jobsON readiness/startup/660healthy seconds/terminal0400receipt/independent verification remain required. No further YY decision; original automatic-after-review go applies.
+
+Gatefac9e241 consumed/kitPASS6132886810/source92e32PASS6132712806/currentapp959d/image7aeb/manifest39b054/coordinator24479 unchanged. Actual native migration boundary delivered, Claudio waits for actual completed receipt and independent verification. Sole144000PASS/135400build and all original evidence retained,161000failed/202400superseded excluded. Any failure is forwardfix only; no restore/olderimage/installerreplay/cleanup. Other application merges remain held until#200live/Clpostchecked.
+
+Previous checkpoint follows:
+
 PR294 single reviewed 213000 production unit ACTIVE — 2026-10-12T21:32 UTC
 
 Actual exact-kit PASS6132886810 verified; ONE gate fac9e2418ba7376b99e2e57b2e66ad4e66edf3d417bc2b8f083adfb1da56212a collected once, verified21:27:01.413314UTC, completed21:28:00.872354UTC. SAME collector54496 completed0 and must NEVER be restarted/recollected. ONE reviewed launch completed21:32:02.033679UTC, exit0, SINGLE_NEW_RELEASE_LAUNCHED_NOT_YET_DEPLOYED. Launcher82776 completed; no local launch process remains. Gate is now consumed by this execution and must never be replaced/reused.
