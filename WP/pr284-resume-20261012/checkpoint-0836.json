@@ -1,0 +1,31 @@
+{
+  "updatedUtc": "2026-10-12T08:36:11.530284+00:00",
+  "appHead": "c26591698c1e974a3bf771e5c333578755aef315",
+  "appTree": "9b3b77496c3aa2cdad7c7594a0b258ec4b491753",
+  "status": "FINAL_FULL_AND_CI_IN_PROGRESS",
+  "localSession": 61602,
+  "ciRun": 38224227228,
+  "focusedSuites": 8,
+  "focusedTests": 146,
+  "intermediateFullSuites": 360,
+  "intermediateFullTests": 5466,
+  "intermediateCiRun": 38218977639,
+  "intermediateCiStatus": "SUCCESS",
+  "draft": true,
+  "nativeFinalBoundaryDelivered": true,
+  "sourceAdapterCommit": "02c93ec199e0de0e6a7cc9aa078e2d08cc2ad4bc",
+  "proposedWindowsGuards": 86,
+  "proposedLinuxGuards": 86,
+  "productionMutations": 0,
+  "evidenceHashes": {
+    "WP/pr284-resume-20261012/ci-36ee7617-success-run.json": "38da230acd8a3a1a15a68b6f0b27a7dd9e82442858532568518ca3b62ed286ca",
+    "WP/pr284-resume-20261012/ci-36ee7617-success.log": "428002a4adc41d2ae71da255f0bb12b7a7cfdb84fe8c3f0445dcdd59f10ae720",
+    "WP/pr284-resume-20261012/final-discovered-tests-0833.json": "977a378358865b3b4beed51f3ead564be943adbf8d8bc67ea7c5c535837ca4e1",
+    "WP/pr284-resume-20261012/final-refusals-application-commit.json": "ef3899bcaf861666c855c167aaacacd57185038f3b8d43f7bc88c9d4f4538e46",
+    "WP/pr284-resume-20261012/final-refusals-focused-corrected-0824.stderr.log": "13e1754debd0cb99d23ea50c75fbf02a354a126e91e4c313caf81296aefdb922",
+    "WP/pr284-resume-20261012/final-refusals-focused-corrected-0824.stdout.log": "427f103a04581f5c60009482a03c85f51040ae5414981bfa9bdee3288e23c31a",
+    "WP/pr284-resume-20261012/full-server-36ee7617-0740.stderr.log": "8912c628b120218fa292503758e3aa2c941280a142911a962f2aaa11ecbcc6f1",
+    "WP/pr284-resume-20261012/full-server-36ee7617-0740.stdout.log": "c93cefcb54cbbd21f709abd64b4fa1b056fa8b61e460075c164e68fc64df0962",
+    "WP/pr284-resume-20261012/owned-path-resolver.cjs": "da9219b440601e07f4f0b2abcdcc8a30f232fe3f7adf1ef9da8863724fea5788"
+  }
+}

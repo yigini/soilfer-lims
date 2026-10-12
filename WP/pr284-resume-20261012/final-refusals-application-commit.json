@@ -1,0 +1,35 @@
+{
+  "preparedUtc": "2026-10-12T08:32:46.668806+00:00",
+  "head": "c26591698c1e974a3bf771e5c333578755aef315",
+  "tree": "9b3b77496c3aa2cdad7c7594a0b258ec4b491753",
+  "parent": "36ee761789a1eb42bceee537ff419456f6cd484d",
+  "existingBranch": "audit/4.7-instrument-file-import",
+  "files": {
+    "server/app.js": {
+      "blob": "c536bdf5bf973c2a97edb4b5e9ab157dab924260",
+      "sha256": "21b5cb9de55a9c51a9934eb78ba24584c8a794940c461f9b8fb9e493eca5f3e5"
+    },
+    "server/controllers/spectralController.js": {
+      "blob": "373fbf34a2ea00738bba18b15d275b501be65f78",
+      "sha256": "08a72f0be8cb901d6c6e725ecf13bbec7c2dff70c5543f658a49d9aae59ff396"
+    },
+    "server/tests/contracts/audit_4_7_import_commit.test.js": {
+      "blob": "fe98d357db52c6a2b431da769e0b7d6efb6649ca",
+      "sha256": "3595eed2b21b7364156a52d993f21e2e0bd949f10cb619244cf93fced8c9a8a7"
+    },
+    "server/tests/contracts/audit_4_7_calculation_import.test.js": {
+      "blob": "a91df2af70d78d362e83f8d98ddc0b2896f98fee",
+      "sha256": "e75f14621cadbaaa8a4f4f91636d6cfd80ef301e7af88eca8516f2c3d52186ac"
+    },
+    "server/tests/contracts/audit_4_7_import_templates.test.js": {
+      "blob": "21e8fff5194f60e2fbba55a6ce6f1a7032cb3365",
+      "sha256": "64c8e4f5f041eb32097e4c3eedf9c62df22860543e2f64ff4b35e47efe68d162"
+    }
+  },
+  "focusedSuites": 8,
+  "focusedTests": 146,
+  "fullValidation": "PENDING_FINAL_HEAD",
+  "newWorktree": false,
+  "productionMutation": false,
+  "pushedUtc": "2026-10-12T08:32:48.866297+00:00"
+}

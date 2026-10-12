@@ -1,0 +1,3 @@
+Cover pinned import refusals and retain existing file delivery
+
+Refs #200. Keep started-run instrumentation and mapping immutability intact; verify actual HTTP mismatch, direct/QC dilution, input-only QC, revision and unit refusals with zero writes. Restore unchanged SPA and spectral delivery scope.
