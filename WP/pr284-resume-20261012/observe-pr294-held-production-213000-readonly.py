@@ -24,6 +24,10 @@ summary={key:record[key] for key in ['observedUtc','unitState','journalTail']}
 if 'production-receipt.json' in record:
  summary['receipt']={key:value for key,value in record['production-receipt.json'].items() if key!='keys'}
 summary['runningLimsNames']=[name for name in record['ownedRunningNames'] if 'lims' in name]
+live=subprocess.run(['docker','inspect','soilfer-lims'],capture_output=True,text=True,timeout=15)
+if live.returncode==0:
+ item=json.loads(live.stdout)[0];env=dict(row.split('=',1) for row in item['Config']['Env'] if '=' in row)
+ summary['liveContainer']={'image':item['Image'],'running':item['State']['Running'],'health':item['State'].get('Health',{}).get('Status'),'restartCount':item['RestartCount'],'oomKilled':item['State']['OOMKilled'],'jobsDisabled':env.get('DISABLE_BACKGROUND_JOBS'),'memoryLimitBytes':item['HostConfig']['Memory'],'nodeOptions':env.get('NODE_OPTIONS','')}
 print(json.dumps(summary))
 '''
 result=subprocess.run(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=15','root@46.19.33.37','python3','-B','-'],input=payload.encode(),capture_output=True,timeout=60)
