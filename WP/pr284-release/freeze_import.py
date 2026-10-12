@@ -19,10 +19,17 @@ import startup_common as c
 from kobo_copy_preservation import verify_copy
 from import_preservation import verify_import_installation
 from import_release_contract import *
-from deploy_import import predecessor_ingress_authority, select_entry_state, environment_hash
+from deploy_import import predecessor_ingress_authority, observe_entry_state, environment_hash
 
 ROOT = pathlib.Path(__file__).resolve().parent
 VALIDATION_STARTED = time.monotonic()
+
+
+def packaging_entry_preflight():
+    # Use the same full stopped receipt/backup/physical-triple and no-writer
+    # observation as gate/deploy. A former healthy-entry placeholder cannot
+    # authorise creation of a held-entry kit.
+    return observe_entry_state({'entryBinding': entry_binding()})
 
 
 @contextlib.contextmanager
@@ -237,7 +244,7 @@ def main():
     files['production-baseline-source-review.json'] = production_review_bytes
     files.update(predecessor_ingress_authority())
     live = c.inspect('soilfer-lims')
-    select_entry_state(live, sha(s.CONF), None, {'entryBinding': entry_binding()})
+    packaging_entry_preflight()
     proof_jobs_on = c.inspect('lims-owned-' + proof.name.lower() + '-jobs-on')
     require(environment_hash(live) == environment_hash(proof_jobs_on), 'Measured and current environment differ')
     image = json.loads(subprocess.check_output(['docker', 'image', 'inspect', pin['image']], text=True, timeout=15))[0]

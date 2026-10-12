@@ -290,6 +290,30 @@ class ReleaseTests(unittest.TestCase):
             with self.subTest(field=key), self.assertRaises(RuntimeError):
                 select(dict(live, **{key: value}), release.HELD_INGRESS_SHA, entry['originalFiles'], manifest)
 
+    def test_freezer_uses_full_held_entry_observation_before_destination_creation(self):
+        import ast
+        tree = ast.parse(RAW_PACKAGE['freeze_import.py'])
+        function = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and
+            node.name == 'packaging_entry_preflight')
+        entry = self.held_entry(); observations = []
+        def observe(manifest):
+            observations.append(manifest)
+            release.validate_entry_state(entry, manifest)
+            return entry
+        namespace = dict(release.__dict__, observe_entry_state=observe)
+        exec(compile(ast.Module(body=[function], type_ignores=[]), '/owned-freeze-entry.py', 'exec'), namespace)
+        self.assertEqual(namespace['packaging_entry_preflight'](), entry)
+        self.assertEqual(observations, [{'entryBinding': release.entry_binding()}])
+        main = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'main')
+        calls = [node for node in ast.walk(main) if isinstance(node, ast.Call)]
+        preflight = next(node for node in calls if isinstance(node.func, ast.Name) and
+            node.func.id == 'packaging_entry_preflight')
+        creation = next(node for node in calls if isinstance(node.func, ast.Attribute) and
+            isinstance(node.func.value, ast.Name) and node.func.value.id == 'target' and node.func.attr == 'mkdir')
+        self.assertLess(preflight.lineno, creation.lineno)
+        self.assertFalse(any(isinstance(node.func, ast.Name) and node.func.id == 'select_entry_state'
+            for node in calls))
+
     def test_nested_proof_references_refuse_traversal_or_symlink(self):
         with tempfile.TemporaryDirectory(prefix='owned-reference-') as directory:
             root = pathlib.Path(directory); (root / 'after-second-stopped').mkdir()
