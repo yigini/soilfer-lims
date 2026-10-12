@@ -1,0 +1,25 @@
+{
+  "verifiedUtc": "2026-10-12T09:59:13.114285+00:00",
+  "head": "c26591698c1e974a3bf771e5c333578755aef315",
+  "tree": "9b3b77496c3aa2cdad7c7594a0b258ec4b491753",
+  "base": "51f6798806f630773786a08432290c1b21a841da",
+  "auditId": 6121933894,
+  "auditCreatedUtc": "2026-10-12T09:57:07Z",
+  "ciRunId": 38224227228,
+  "checks": [
+    {
+      "name": "Test & Build",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "rawHashes": {
+    "audit.json": "22b9524030807057a0a90ceea1088e409d83ba499b31408dcaf4cc55b78be7c9",
+    "pr.json": "676c8d0a27d4696a5701e7e20a2873a6c6ba496818ae1c70e4eed7f2aebcfe2e",
+    "checks.json": "cd2b60b20457a96ef6fe542b38b006e4cb4fca115ffe296857406f1352f55501",
+    "ci.json": "d4bc078770c068ef3cdebdd7742f40273b087a05420218a4e08dea97ca80aa26",
+    "main.json": "302f825a78fe88809b0c74c598e34148065e5e15f77b5a81eb3f1706c11c71db",
+    "comments.json": "073bdd01a8a51aaf8145ed01d9f5439d2411e97ed493dc0937d41e5a04581320"
+  },
+  "status": "EXACT_HEAD_AUDIT_AND_ALL_PR_GATES_PASS_BEFORE_MERGE"
+}

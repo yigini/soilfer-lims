@@ -50,11 +50,10 @@ class AuthorityTests(unittest.TestCase):
         return {'id': 9999999999, 'html_url': 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-9999999999',
             'created_at': '2026-10-12T00:00:00Z', 'body': 'Source review: PASS\n' + '\n'.join(tokens)}
 
-    def test_unmerged_checked_in_authority_refuses(self):
-        self.assertEqual(self.original_unbound[:4], ('UNREVIEWED_REFUSE', 'UNMERGED_REFUSE',
-            'UNREVIEWED_REFUSE', 'UNMERGED_REFUSE'))
-        with patch.object(contract, 'CANDIDATE_HEAD', 'UNMERGED_REFUSE'), self.assertRaises(RuntimeError):
-            contract.bound_candidate()
+    def test_bound_application_identity_cannot_become_unreviewed_or_unmerged(self):
+        for name in ['AUDITED_PR_HEAD', 'CANDIDATE_HEAD', 'AUDITED_PR_TREE', 'MERGED_TREE']:
+            with self.subTest(name=name), patch.object(contract, name, 'UNMERGED_REFUSE'), self.assertRaises(RuntimeError):
+                contract.bound_candidate()
 
     def test_exact_candidate_accepts_only_bound_tree_image_and_both_pins(self):
         contract.validate_candidate(self.pin, self.built, self.image)
