@@ -1,0 +1,17 @@
+{
+  "recordedUtc": "2026-10-12T14:54:37.143490+00:00",
+  "status": "NEW_SOURCE_REVIEW_PENDING_NO_ACTIVE_WRITER",
+  "sourceCommit": "201bb5fe8fd30cb2991f7169177a864265e6301b",
+  "sourceRequestId": 6126680868,
+  "sourceRequestUrl": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6126680868",
+  "rawRequestSha256": "aebc1f9c853287d474806abfc82c45a3318e199cbc9d210261214754d9797e4a",
+  "coordinatorSha256": "18984ff11f0bd2cd1871bb731d44e4985562b0b96b4bea2734b2a2e17b5ceafe",
+  "stageSha256": "db27c39cfeb8ed58167f2fba108a91702498561245e57eefeaff1f5d7397aca6",
+  "contractSha256": "cfc8dab7db0e4861c5a5837811701e52f838111f5e72b7d82a1ea1ac27219d19",
+  "nativeDeliveryVisuallyVerified": true,
+  "nativeReviewRunningObserved": true,
+  "sourceReviewPassClaimed": false,
+  "newProofs": 0,
+  "newBuilds": 0,
+  "productionOperations": 0
+}
