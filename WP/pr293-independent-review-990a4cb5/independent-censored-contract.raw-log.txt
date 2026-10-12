@@ -1,0 +1,10 @@
+PASS tests/contracts/pip_issue_213_censored_exports_valid_contract.test.js
+  √ censored or categorical selected text remains unchanged in every report/export (<5) (1606 ms)
+  √ censored or categorical selected text remains unchanged in every report/export (>20) (1225 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        3.377 s
+Ran all test suites matching tests/contracts/pip_issue_213_censored_exports_valid_contract.test.js.
+Test results written to: ..\..\..\..\..\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\pr293-independent-review-990a4cb5\independent-censored-contract-results.json

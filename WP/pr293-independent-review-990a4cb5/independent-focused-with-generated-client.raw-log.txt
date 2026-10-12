@@ -1,0 +1,163 @@
+FAIL tests/contracts/sis_adapter_service.test.js
+  Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts
+    1. Metadata unwrapping
+      √ unwraps scalar primitives correctly (2 ms)
+      √ unwraps single-level { value, source } wrapper objects
+      √ unwraps nested wrappers recursively
+    2. Truthful WGS84 Coordinates Extraction
+      √ preserves exact 0.0 coordinates (equator / prime meridian) without falsy drop
+      √ extracts coordinates from wrapped fieldMetadata (1 ms)
+      √ returns null for missing or invalid coordinates outside WGS84 bounds
+    3. Truthful Depths Extraction
+      √ preserves floating-point decimal depths and zero top depth
+      √ extracts decimal depths from wrapped field metadata without truncation (1 ms)
+      √ does NOT invent 0-20 cm defaults when depths are genuinely missing
+    4. Truthful Dates Extraction
+      √ distinguishes field collectionDate from laboratory receptionDate (1 ms)
+      √ returns null collectionDate when missing without falling back to reception date
+    5. Profile Code and Namespace Resolution
+      √ extracts site_id from fieldMetadata with project namespace (2 ms)
+      √ unwraps nested profile code objects
+      √ returns null profileCode and UNSPECIFIED relation when absent (1 ms)
+      √ disambiguates shared programme projects with country prefix
+    6. Lossless Observations Extraction
+      √ retains all determinations including replicates without clobbering (3 ms)
+      √ preserves LOD, LOQ, provenance and treats empty string as null value
+    7. V1 Backward Compatibility & Additive Metadata
+      × formatSampleV1 preserves legacy keys and adds non-breaking explicit identifiers (57 ms)
+    8. V2 Clean Lossless Representation
+      × formatSampleV2 produces clean structured SOSA/GloSIS payload (5 ms)
+      × unreleased status maps to DRAFT, cancelled to WITHDRAWN (1 ms)
+
+  ● Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts › 7. V1 Backward Compatibility & Additive Metadata › formatSampleV1 preserves legacy keys and adds non-breaking explicit identifiers
+
+    Cannot find module './prisma_client' from 'prisma.js'
+
+    Require stack:
+      prisma.js
+      services/cataloguePolicy.js
+      services/resultEntryPolicy.js
+      services/qcGateService.js
+      services/reportedValueSourceService.js
+      services/reportedValueReadService.js
+      services/sisAdapterService.js
+      services/exchangeDbFunctions.js
+      tests/setup.js
+
+    > 1 | const { PrismaClient } = require('./prisma_client');
+        |                          ^
+      2 | const path = require('path');
+      3 | const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+      4 | const Database = require('better-sqlite3');
+
+      at Resolver._throwModNotFoundError (../../../../../Documents/soilfer-lims/server/node_modules/jest-resolve/build/index.js:863:11)
+      at Object.require (prisma.js:1:26)
+      at Object.require (services/cataloguePolicy.js:1:16)
+      at Object.require (services/resultEntryPolicy.js:1:56)
+      at Object.require (services/qcGateService.js:5:30)
+      at Object.require (services/reportedValueSourceService.js:2:16)
+      at Object.require (services/reportedValueReadService.js:3:37)
+      at require (services/sisAdapterService.js:550:51)
+      at extractReportedObservations (services/sisAdapterService.js:623:26)
+      at Object.formatSampleV1 (tests/contracts/sis_adapter_service.test.js:242:31)
+
+  ● Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts › 8. V2 Clean Lossless Representation › formatSampleV2 produces clean structured SOSA/GloSIS payload
+
+    Source system identity storage query failed: Cannot find module './prisma_client' from 'prisma.js'
+
+    Require stack:
+      prisma.js
+      services/exchangeStateService.js
+      services/sisAdapterService.js
+      services/exchangeDbFunctions.js
+      tests/setup.js
+
+      59 |         if (cachedSourceSystemId) return cachedSourceSystemId;
+      60 |         if (!e.message?.includes('Unexpected dependency')) {
+    > 61 |             throw new Error(`Source system identity storage query failed: ${e.message}`);
+         |                   ^
+      62 |         }
+      63 |     }
+      64 |     if (cachedSourceSystemId) return cachedSourceSystemId;
+
+      at resolveSourceSystemId (services/sisAdapterService.js:61:19)
+      at resolveSourceSystemId (services/sisAdapterService.js:726:76)
+      at Object.formatSampleV2 (tests/contracts/sis_adapter_service.test.js:292:24)
+
+  ● Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts › 8. V2 Clean Lossless Representation › unreleased status maps to DRAFT, cancelled to WITHDRAWN
+
+    Source system identity storage query failed: Cannot find module './prisma_client' from 'prisma.js'
+
+    Require stack:
+      prisma.js
+      services/exchangeStateService.js
+      services/sisAdapterService.js
+      services/exchangeDbFunctions.js
+      tests/setup.js
+
+      59 |         if (cachedSourceSystemId) return cachedSourceSystemId;
+      60 |         if (!e.message?.includes('Unexpected dependency')) {
+    > 61 |             throw new Error(`Source system identity storage query failed: ${e.message}`);
+         |                   ^
+      62 |         }
+      63 |     }
+      64 |     if (cachedSourceSystemId) return cachedSourceSystemId;
+
+      at resolveSourceSystemId (services/sisAdapterService.js:61:19)
+      at resolveSourceSystemId (services/sisAdapterService.js:726:76)
+      at Object.formatSampleV2 (tests/contracts/sis_adapter_service.test.js:314:27)
+
+FAIL tests/contracts/issue_213_export_equals_report.test.js
+  ● Test suite failed to run
+
+    Cannot find module '../../prisma_client' from 'tests/helpers/qcGateFixture.js'
+
+    Require stack:
+      tests/helpers/qcGateFixture.js
+      tests/contracts/issue_213_export_equals_report.test.js
+
+      3 | const { randomUUID } = require('node:crypto');
+      4 | const Database = require('better-sqlite3');
+    > 5 | const { PrismaClient } = require('../../prisma_client');
+        |                          ^
+      6 | const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+      7 | const { beforeGuards } = require('./legacyWorkflowDatabase');
+      8 | const { createSampleFixture, createWorkItemFixture } = require('./workflowFixtures');
+
+      at Resolver._throwModNotFoundError (../../../../../Documents/soilfer-lims/server/node_modules/jest-resolve/build/index.js:863:11)
+      at Object.require (tests/helpers/qcGateFixture.js:5:26)
+      at Object.require (tests/contracts/issue_213_export_equals_report.test.js:3:23)
+
+FAIL tests/contracts/export_normalization.test.js
+  ● Test suite failed to run
+
+    Cannot find module './prisma_client' from 'prisma.js'
+
+    Require stack:
+      prisma.js
+      services/cataloguePolicy.js
+      services/resultEntryPolicy.js
+      services/resultWriteService.js
+      tests/helpers/workAttemptFixtures.js
+      tests/contracts/export_normalization.test.js
+
+    > 1 | const { PrismaClient } = require('./prisma_client');
+        |                          ^
+      2 | const path = require('path');
+      3 | const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+      4 | const Database = require('better-sqlite3');
+
+      at Resolver._throwModNotFoundError (../../../../../Documents/soilfer-lims/server/node_modules/jest-resolve/build/index.js:863:11)
+      at Object.require (prisma.js:1:26)
+      at Object.require (services/cataloguePolicy.js:1:16)
+      at Object.require (services/resultEntryPolicy.js:1:56)
+      at Object.require (services/resultWriteService.js:4:30)
+      at Object.require (tests/helpers/workAttemptFixtures.js:7:33)
+      at Object.require (tests/contracts/export_normalization.test.js:1:42)
+
+Test Suites: 3 failed, 3 total
+Tests:       3 failed, 17 passed, 20 total
+Snapshots:   0 total
+Time:        0.481 s, estimated 1 s
+Ran all test suites matching tests/contracts/issue_213_export_equals_report.test.js|tests/contracts/export_normalization.test.js|tests/contracts/sis_adapter_service.test.js.
+Test results written to: ..\..\..\..\..\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\pr293-independent-review-990a4cb5\independent-focused-with-generated-client-results.json

@@ -1,0 +1,48 @@
+FAIL tests/contracts/pip_issue_213_export_edge_matrix.test.js (9.987 s)
+  √ localized NOT_REPORTABLE matches the actual report on all eight surfaces (en) (1549 ms)
+  √ localized NOT_REPORTABLE matches the actual report on all eight surfaces (es) (1158 ms)
+  √ localized NOT_REPORTABLE matches the actual report on all eight surfaces (es-419) (1134 ms)
+  √ localized NOT_REPORTABLE matches the actual report on all eight surfaces (fr) (1263 ms)
+  √ localized NOT_REPORTABLE matches the actual report on all eight surfaces (pt) (1131 ms)
+  × censored or categorical selected text remains unchanged in every report/export (<5) (1088 ms)
+  × censored or categorical selected text remains unchanged in every report/export (>20) (1003 ms)
+  √ censored or categorical selected text remains unchanged in every report/export (Loam) (1166 ms)
+
+  ● censored or categorical selected text remains unchanged in every report/export (<5)
+
+    The database refused an invalid workflow write.
+
+      42 |     const text = `${error.message || ''} ${JSON.stringify(error.meta || {})}`;
+      43 |     const code = TRIGGER_CODES.find(value => text.includes(value));
+    > 44 |     if (code) return new TransitionError('The database refused an invalid workflow write.', 409, code);
+         |                      ^
+      45 |     if (['P2025', 'P2034', 'P1008', 'SQLITE_BUSY', 'SQLITE_LOCKED'].includes(error.code) || /database is (?:locked|busy)/i.test(text)) {
+      46 |         return new TransitionError('The workflow row changed. Reload before retrying.', 409, conflictCode);
+      47 |     }
+
+      at mapStateError (services/workflowStateRules.js:44:22)
+      at Object.mapStateError (services/workflowStateRules.js:188:29)
+      at tests/contracts/pip_issue_213_export_edge_matrix.test.js:137:2
+
+  ● censored or categorical selected text remains unchanged in every report/export (>20)
+
+    The database refused an invalid workflow write.
+
+      42 |     const text = `${error.message || ''} ${JSON.stringify(error.meta || {})}`;
+      43 |     const code = TRIGGER_CODES.find(value => text.includes(value));
+    > 44 |     if (code) return new TransitionError('The database refused an invalid workflow write.', 409, code);
+         |                      ^
+      45 |     if (['P2025', 'P2034', 'P1008', 'SQLITE_BUSY', 'SQLITE_LOCKED'].includes(error.code) || /database is (?:locked|busy)/i.test(text)) {
+      46 |         return new TransitionError('The workflow row changed. Reload before retrying.', 409, conflictCode);
+      47 |     }
+
+      at mapStateError (services/workflowStateRules.js:44:22)
+      at Object.mapStateError (services/workflowStateRules.js:188:29)
+      at tests/contracts/pip_issue_213_export_edge_matrix.test.js:137:2
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 6 passed, 8 total
+Snapshots:   0 total
+Time:        10.03 s
+Ran all test suites matching tests/contracts/pip_issue_213_export_edge_matrix.test.js.
+Test results written to: ..\..\..\..\..\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\pr293-independent-review-990a4cb5\independent-edge-matrix-results.json

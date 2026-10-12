@@ -21,7 +21,7 @@
     "V2 remains explicitly RAW observations under the existing contract; nullable attemptId/batchId are additive provenance only, and raw rows/counts/cursors are not rewritten.",
     "Batch ids derived from validated source Result rows; selection/attempt/source evidence retained including questioned sources and means.",
     "Translated CSV/XLSX provenance labels present in all five locales.",
-    "PR description currently Refs#213; ask Claudio to use required Closes#213 and explicitly defer raw-v2/basis/revisions scope."
+    "Claudio updated PR description explicitly retaining RAWv2 and separate report scope. Refs#213 is deliberate to preserve YY post-deploy closure convention; actual issue closure remains Claudio after deployment. This resolves the metadata note without application changes."
   ],
   "retainedReviewerSetupFailures": "Two initial local focused invocations lacked generated client. Exact-source Prisma generation fixed setup. Initial independent censored fixture used unsupported LT/GT and guard refused before exports; correct disposable BELOW_LOQ/ABOVE_RANGE inputs pass. Originals not relabeled or overwritten.",
   "productionActions": 0,
