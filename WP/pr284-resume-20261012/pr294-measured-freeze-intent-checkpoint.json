@@ -1,0 +1,18 @@
+{
+  "recordedUtc": "2026-10-12T19:20:59.023617+00:00",
+  "status": "ACTUAL_SOURCE_PASS_SAME_FREEZER_IN_PROGRESS",
+  "sourceReviewId": 6130963561,
+  "localSession": 47957,
+  "intent": {
+    "startedUtc": "2026-10-12T19:18:51.214817+00:00",
+    "sourceCommit": "abceab95b8d68b1b3202df9f4f9fc229d9baa2ae",
+    "sourceReviewId": 6130963561,
+    "originalProofRoot": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+    "packageRoot": "/opt/lims/releases/instrument-import-package-959d17e1-20261012T161000Z",
+    "executionRoot": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+    "packagingReadOnlyDeadlineSeconds": 900,
+    "productionOperations": 0,
+    "status": "ONE_DISTINCT_REVIEWED_FREEZE_INTENT_NEVER_REPLAY"
+  },
+  "productionOperations": 0
+}
