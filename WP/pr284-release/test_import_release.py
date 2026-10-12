@@ -118,6 +118,10 @@ class ReleaseTests(unittest.TestCase):
             ('elapsedSeconds', 600), ('elapsedSeconds', False)]:
             row = native(); row['measurements'][1][key] = value
             with self.subTest(key=key), self.assertRaises(RuntimeError): release.native_installation(row)
+        for key, value in [('releaseCliPeakBytes', release.LIMIT + 1), ('releaseCliPeakBytes', 0),
+            ('childStatus', 1), ('childStatus', False), ('childSignal', 'SIGKILL')]:
+            row = native(); row['measurements'][2]['cgroupMemoryPeak'][key] = value
+            with self.subTest(key=key), self.assertRaises(RuntimeError): release.native_installation(row)
 
     def test_native_dry_copy_cannot_be_missing_changed_or_have_wal_frames(self):
         for change in ['missing', 'wrong-main', 'target-write', 'wal-frames']:
@@ -134,10 +138,6 @@ class ReleaseTests(unittest.TestCase):
                 'dataVersionsObserved': [2], 'fullStateZeroClaimed': True}]:
             ready, checks = startup(True); checks['ownedJobsBoundary'] = change
             with self.assertRaises(RuntimeError): release.startup_evidence(ready, checks, True)
-        for key, value in [('releaseCliPeakBytes', release.LIMIT + 1), ('releaseCliPeakBytes', 0),
-            ('childStatus', 1), ('childStatus', False), ('childSignal', 'SIGKILL')]:
-            row = native(); row['measurements'][2]['cgroupMemoryPeak'][key] = value
-            with self.subTest(key=key), self.assertRaises(RuntimeError): release.native_installation(row)
 
     def test_original_hash_or_dry_apply_repeat_tampering_refuses(self):
         for key in ['originalRowsSha256', 'beforeBackupSha256', 'afterBackupSha256', 'preservationSha256']:

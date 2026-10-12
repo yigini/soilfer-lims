@@ -6,6 +6,7 @@ import pathlib
 import tempfile
 import types
 import unittest
+from unittest.mock import patch
 
 import import_installation as install
 
@@ -151,7 +152,8 @@ class InstallationGuards(unittest.TestCase):
                 return types.SimpleNamespace(stdout=stdout, stderr=stderr, returncode=0)
             support = types.SimpleNamespace(LIVE=pathlib.Path('/live/dev.db'), command=command,
                 sha=lambda path: hashlib.sha256(path.read_bytes()).hexdigest())
-            result, measurement = install.measured_cli(root, IMAGE, root / 'import-dry-database', '--dry-run', 'import-dry', support)
+            with patch.object(install.time, 'monotonic', side_effect=[100.0, 101.0]):
+                result, measurement = install.measured_cli(root, IMAGE, root / 'import-dry-database', '--dry-run', 'import-dry', support)
             self.assertEqual(result, plan())
             self.assertEqual(measurement['retainedArtifacts'], {
                 name: support.sha(root / name) for name in ['import-dry.stdout', 'import-dry.stderr']})

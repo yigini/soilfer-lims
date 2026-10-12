@@ -87,6 +87,7 @@ class StageGuards(unittest.TestCase):
             with self.target.open('ab') as stream:
                 stream.write(b'owned-unapproved-write')
         if self.behavior.get('dry_copy_write') and label == 'import-dry':
+            (directory / 'dev.db').chmod(0o600)
             with (directory / 'dev.db').open('ab') as stream: stream.write(b'unapproved-dry-copy-write')
         if self.behavior.get('wrong_plan') == label:
             value['totalChanges'] = 2
