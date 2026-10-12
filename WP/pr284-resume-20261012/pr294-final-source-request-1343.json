@@ -1,0 +1,10 @@
+{
+  "status": "FINAL_UNPUBLISHED_SOURCE_REQUEST_WORDING_ONLY",
+  "source": "630b2354a1a45df0d88545ac5c63594361615999",
+  "originalDraftSha256": "fa5391cfdc58f02059a55d0e9b2699ffd9fc9c2137c05ea0e056f2466937d0b2",
+  "finalRequestSha256": "b6f80b99f0e60d971280c9c8561f3cc8254f4c606fe8291e31110b9d9c094a72",
+  "change": "Clarify the proof has one jobs-OFF readiness followed by distinct jobs-ON proof",
+  "sourceChanges": 0,
+  "originalDraftRetained": true,
+  "productionOperations": 0
+}
