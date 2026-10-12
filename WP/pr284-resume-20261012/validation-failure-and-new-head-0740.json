@@ -1,0 +1,63 @@
+{
+  "recordedUtc": "2026-10-12T07:41:15.510368+00:00",
+  "head": "36ee761789a1eb42bceee537ff419456f6cd484d",
+  "oldHead": "217a623bea0766688cd1e76c9344d19ec3f0ed12",
+  "priorFullLocal": {
+    "status": "FAILED",
+    "suitesPassed": 355,
+    "suites": 360,
+    "testsPassed": 5459,
+    "tests": 5465,
+    "seconds": 1770.631
+  },
+  "priorCi": {
+    "id": 38215041808,
+    "status": "FAILED",
+    "suitesPassed": 359,
+    "suites": 360,
+    "testsPassed": 5464,
+    "tests": 5465,
+    "docker": "NOT_RUN"
+  },
+  "fixedFocused": {
+    "suites": 6,
+    "tests": 213,
+    "seconds": 43.365,
+    "status": "PASS"
+  },
+  "newFullLocal": {
+    "status": "IN_PROGRESS",
+    "sessionId": 33162
+  },
+  "newCi": {
+    "id": 38218977639,
+    "status": "IN_PROGRESS"
+  },
+  "files": {
+    "full-server-0657.stdout.log": {
+      "sha256": "4adfdb6a575cd0ea3950df2d79067be4630fdb95cb087e1dbc4fd4be20fff176",
+      "bytes": 1619386
+    },
+    "full-server-0657.stderr.log": {
+      "sha256": "2436cecf6c84fb3378e4a7bc51b085ce1ac4e9ca809858bc2fd36967db6899f9",
+      "bytes": 592714
+    },
+    "ci-217a623b-failed.log": {
+      "sha256": "8cf26eeb2ff32c30c9c3e0e7dc29127a08069c72ba25848fa123a6ad3764950f",
+      "bytes": 5453524
+    },
+    "ci-217a623b-failed-run.json": {
+      "sha256": "a1716417827ae5abe99673592b18d0139c737bdf2502e38ce38b5fe5573110e6",
+      "bytes": 12640
+    },
+    "scanner-static-focused-0742.stdout.log": {
+      "sha256": "87d79c9f2d58184b36ab773dba361aeed95d5cafbcd3cb1dcf41d079be615695",
+      "bytes": 30336
+    },
+    "scanner-static-focused-0742.stderr.log": {
+      "sha256": "6d507729e527cb0f3fc8763ba7bb15b091ed64f9f6e48a52554abbace38ba651",
+      "bytes": 23067
+    }
+  },
+  "productionMutationCount": 0
+}

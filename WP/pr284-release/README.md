@@ -1,3 +1,7 @@
+PR284 validation update 2026-10-12T07:41:15.510368+00:00: original217a full local FAILED355/360 suites5459/5465 tests; CI38215041808 FAILED359/360 suites5464/5465 tests (Docker not run). Raw full failure logs retained. Explicit test SQL fixes both unresolved expressions with scanner bytes unchanged; rooted SPA/download fixes local hidden-parent serving. All six affected suites now PASS213/213 in43.365s. Existing DRAFT PR284 fast-forwarded to 36ee761789a1eb42bceee537ff419456f6cd484d/tree682e735c827a9dc22a9c2afb419434465798e260, only3files changed. NEW unfiltered360-suite local session33162 and exactCI38218977639 IN_PROGRESS; NOT audit-ready. Human checkout untouched/no production mutation/proof/build/kit/gate/cleanup/cards. Separate proposed import adaptersab824 passed64/64 Win+Linux guards, require NEW source review/full coordinator. Native actual failure/fix delivered and verified; Claudio running his existing local217a audit setup, told final head changes.
+
+Previous checkpoint follows:
+
 PR284 / #200 release preparation — proposed source only
 
 The application remains draft head 217a623bea0766688cd1e76c9344d19ec3f0ed12

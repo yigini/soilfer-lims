@@ -1,0 +1,12 @@
+{
+  "recordedUtc": "2026-10-12T07:39:30.5906580Z",
+  "changes": [
+    "Explicit inspectable negative fixture SQL; scanner unchanged",
+    "Rooted SPA shell and spectral downloads; hidden parents allowed, hidden request files still refused"
+  ],
+  "parent": "217a623bea0766688cd1e76c9344d19ec3f0ed12",
+  "head": "36ee761789a1eb42bceee537ff419456f6cd484d",
+  "tree": "682e735c827a9dc22a9c2afb419434465798e260",
+  "focusedSuites": 6,
+  "focusedTests": 213
+}
