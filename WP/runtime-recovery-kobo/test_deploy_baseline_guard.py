@@ -239,10 +239,11 @@ class WalEntryTests(unittest.TestCase):
         self.triple = {suffix: {**row, 'inode': 42, 'device': 7, 'mtimeNs': 12, 'mode': 0o666}
             for suffix, row in HELD_TRIPLE.items()}
 
-    def test_exact_held_and_running_entry_states(self):
-        entry = deploy.select_entry_state(self.live, HELD_INGRESS_SHA, self.triple, self.manifest)
-        self.assertEqual(entry['mode'], 'STOPPED_HELD')
+    def test_historical_held_entry_refuses_and_healthy_normal_entry_passes(self):
+        with self.assertRaises(RuntimeError):
+            deploy.select_entry_state(self.live, HELD_INGRESS_SHA, self.triple, self.manifest)
         self.live['State']['Running'] = True
+        self.live['State']['Health'] = {'Status': 'healthy'}
         self.assertEqual(deploy.select_entry_state(self.live, ORIGINAL_INGRESS_SHA, None,
             self.manifest)['mode'], 'RUNNING_NORMAL')
 

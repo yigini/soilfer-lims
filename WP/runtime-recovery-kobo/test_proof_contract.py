@@ -36,15 +36,15 @@ class ProofContractTests(unittest.TestCase):
             'parents': [{'sha': value} for value in MERGE_PARENTS]}
         audited = {'sha': AUDITED_PR_HEAD, 'tree': {'sha': AUDITED_PR_TREE}}
         validate_merge_identity(merged, audited)
-        for key, value in [('sha', BASE_HEAD), ('tree', {'sha': AUDITED_PR_TREE}),
+        for key, value in [('sha', BASE_HEAD), ('tree', {'sha': 'e' * 40}),
                 ('parents', [{'sha': AUDITED_PR_HEAD}, {'sha': BASE_HEAD}])]:
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 validate_merge_identity({**merged, key: value}, audited)
         with self.assertRaises(RuntimeError):
-            validate_merge_identity(merged, {**audited, 'tree': {'sha': MERGED_TREE}})
+            validate_merge_identity(merged, {**audited, 'tree': {'sha': 'e' * 40}})
 
     def test_historical_release_or_wrong_parent_cannot_feed_this_candidate(self):
-        for key, value in [('pr', 292), ('auditedTree', MERGED_TREE),
+        for key, value in [('pr', 292), ('auditedTree', 'e' * 40),
                 ('mergeParents', [BASE_HEAD]), ('head', '171dd36c5b2dbeea8763520dd18fbdb158ffca05')]:
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 validate_candidate({**self.pin, key: value}, self.built, self.image)

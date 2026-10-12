@@ -197,13 +197,13 @@ class RuntimeGateTests(unittest.TestCase):
             with self.assertRaises(RuntimeError): self.verify()
             self.gate['mainCi'] = original
 
-    def test_historical_pr292_cannot_replace291(self):
+    def test_historical_pr292_cannot_replace293(self):
         self.gate['pr']['number'] = 292
         with self.assertRaises(RuntimeError): self.verify()
 
     def test_branch_tree_and_ordered_merge_parents_cannot_be_replaced(self):
         original = copy.deepcopy(self.gate['pr'])
-        for key, value in [('auditedTree', MERGED_TREE), ('mergeParents', list(reversed(MERGE_PARENTS)))]:
+        for key, value in [('auditedTree', 'e' * 40), ('mergeParents', list(reversed(MERGE_PARENTS)))]:
             self.gate['pr'][key] = value
             with self.subTest(key=key), self.assertRaises(RuntimeError): self.verify()
             self.gate['pr'] = copy.deepcopy(original)
