@@ -345,6 +345,10 @@ class ReleaseTests(unittest.TestCase):
             'laterProductionSourceAuditFailure': False, 'laterKitAuditFailure': False,
             'proofSourceReview': self.source_verdict(), 'productionBaselineSourceReview': self.source_verdict(True),
             'readOnlyExecutionReadiness': {'ready': True, 'productionMutations': 0,
+                'outputPreflight': {'policy': release.OUTPUT_NAMESPACE_POLICY,
+                    'catalogSha256': manifest['outputNamespace']['catalogSha256'],
+                    'allProspectiveExecutionOutputsAbsent': True, 'gatePresent': False,
+                    'frozenFileCount': len(release.FROZEN_FILE_SET) + 1, 'productionMutations': 0},
                 'freeBytes': {'/opt/lims': release.FLOOR + 100, '/var/lib/docker': release.FLOOR + 100},
                 'requiredIncludingBackupBytes': release.FLOOR + 50, 'reserveBytes': release.FLOOR, 'entryState': entry},
             'pr': {'number': release.PR_NUMBER, 'merged': True, 'head': release.AUDITED_PR_HEAD,
@@ -358,6 +362,33 @@ class ReleaseTests(unittest.TestCase):
                 'evidenceSha256': manifest['files']['yy-authorization-evidence.md'], 'releaseHead': manifest['head']}}
         self.add_gate_hashes(gate, manifest)
         return gate
+
+    def test_gate_refuses_missing_changed_or_consumed_output_preflight(self):
+        manifest = self.manifest()
+        now = datetime.datetime(2026, 10, 12, tzinfo=datetime.timezone.utc)
+        for key, value in [('policy', 'old-flat-kit'), ('catalogSha256', '0' * 64),
+                ('allProspectiveExecutionOutputsAbsent', False), ('gatePresent', True),
+                ('frozenFileCount', 62), ('productionMutations', False), ('productionMutations', 1)]:
+            gate = self.complete_gate(manifest)
+            gate['readOnlyExecutionReadiness']['outputPreflight'][key] = value
+            with self.subTest(key=key, value=value), self.assertRaisesRegex(RuntimeError, 'output preflight'):
+                release.verify_gate(manifest, gate, 'a' * 64, now)
+        gate = self.complete_gate(manifest)
+        del gate['readOnlyExecutionReadiness']['outputPreflight']
+        with self.assertRaisesRegex(RuntimeError, 'output preflight'):
+            release.verify_gate(manifest, gate, 'a' * 64, now)
+
+    def test_manifest_and_gate_refuse_changed_namespace_catalog(self):
+        manifest = self.manifest()
+        altered = copy.deepcopy(manifest)
+        altered['outputNamespace']['frozenDirectory'] = '.'
+        with self.assertRaisesRegex(RuntimeError, 'namespace'):
+            release.measurement_manifest(altered)
+        gate = self.complete_gate(manifest)
+        gate['outputNamespace'] = {}
+        with self.assertRaisesRegex(RuntimeError, 'namespace'):
+            release.verify_gate(manifest, gate, 'a' * 64,
+                datetime.datetime(2026, 10, 12, tzinfo=datetime.timezone.utc))
 
     def test_complete_new_gate_checks_all_three_formal_approvals(self):
         manifest = self.manifest(); gate = self.complete_gate(manifest)

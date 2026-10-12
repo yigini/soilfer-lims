@@ -444,6 +444,14 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
         require(gate[key] == manifest['files'][name], 'Gate frozen artifact hash differs: ' + name)
     require(0 <= now.timestamp() - utc_seconds(gate['verifiedUtc']) <= 600, 'Gate is stale or future-dated')
     readiness = gate['readOnlyExecutionReadiness']
+    outputs = readiness.get('outputPreflight', {})
+    require(outputs.get('policy') == OUTPUT_NAMESPACE_POLICY and
+        outputs.get('catalogSha256') == manifest['outputNamespace']['catalogSha256'] and
+        outputs.get('allProspectiveExecutionOutputsAbsent') is True and
+        outputs.get('gatePresent') is False and type(outputs.get('productionMutations')) is int and
+        outputs['productionMutations'] == 0 and type(outputs.get('frozenFileCount')) is int and
+        outputs['frozenFileCount'] == len(FROZEN_FILE_SET) + 1,
+        'Gate lacks the fresh unused production-output preflight')
     require(readiness['ready'] is True and readiness['productionMutations'] == 0 and
         min(readiness['freeBytes'].values()) >= readiness['requiredIncludingBackupBytes'] >= readiness['reserveBytes'] >= FLOOR,
         'Fresh ready headroom is incomplete')

@@ -44,6 +44,8 @@ SEAL_LABELS = ('original-stopped-seal', 'after-import-stopped',
     'after-repeat-stopped', 'candidate-jobs-off-seal')
 SEAL_FILES = frozenset({
     'main-only-state.json', 'wal-aware-state.json', 'sealed-state.json', 'dev-stopped-backup.db',
+    'dev-stopped-backup.db-journal', 'dev-stopped-backup.db-wal', 'dev-stopped-backup.db-shm',
+    'scratch/dev.db-journal',
     *(directory + '/' + name for directory in ('raw', 'scratch')
         for name in ('dev.db', 'dev.db-wal', 'dev.db-shm', 'original-triple.json')),
 })
@@ -74,6 +76,8 @@ def require(value, message):
 
 
 def output_path_allowed(name):
+    if not isinstance(name, str):
+        return False
     relative = pathlib.PurePosixPath(name)
     return (isinstance(name, str) and bool(name) and '\\' not in name and
         not relative.is_absolute() and str(relative) == name and
@@ -131,7 +135,7 @@ def require_unused_outputs(root, frozen_names, gate_present=False):
     gate is accepted only when explicitly required by the execution caller.
     """
     root = pathlib.Path(root)
-    namespace_binding(frozen_names)
+    binding = namespace_binding(frozen_names)
     frozen = frozen_directory(root)
     wanted = set(frozen_names) | {'prepared-manifest.json'}
     require({path.name for path in frozen.iterdir()} == wanted,
@@ -145,4 +149,5 @@ def require_unused_outputs(root, frozen_names, gate_present=False):
         gate = root / GATE
         require(gate.is_file() and not gate.is_symlink(), 'Gate is linked or not a regular file')
     return {'policy': POLICY, 'allProspectiveExecutionOutputsAbsent': True,
+        'catalogSha256': binding['catalogSha256'],
         'gatePresent': gate_present, 'frozenFileCount': len(wanted), 'productionMutations': 0}

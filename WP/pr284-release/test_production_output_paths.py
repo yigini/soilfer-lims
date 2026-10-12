@@ -72,6 +72,30 @@ class OutputPathGuards(unittest.TestCase):
             self.assertFalse(paths.output_path_allowed(name))
         for name in ('apache-test-123.stdout', 'health-observation-456.body', 'after-import-stopped/raw/dev.db'):
             self.assertTrue(paths.output_path_allowed(name))
+        for name in (None, 42, False):
+            self.assertFalse(paths.output_path_allowed(name))
+
+    def test_prequiesce_recheck_accepts_only_intent_receipt_gate_and_guard_ledger(self):
+        for name in ('production-gate.json', 'execution-attempt.json',
+                'production-receipt.json', 'disk-allocation-observations.jsonl'):
+            (self.root / name).write_bytes(b'owned intent')
+        paths.require_prequiesce_outputs(self.root, self.names)
+        for name in ('import-dry-copy-authority.json', 'after-import-stopped', 'apache-test-1.stdout'):
+            path = self.root / name
+            path.write_bytes(b'unexpected output')
+            try:
+                with self.assertRaisesRegex(RuntimeError, 'appeared before quiesce'):
+                    paths.require_prequiesce_outputs(self.root, self.names)
+            finally:
+                path.unlink()
+
+    def test_namespace_binds_entire_catalog_and_frozen_file_set(self):
+        before = paths.namespace_binding(self.names)
+        after = paths.namespace_binding(self.names | {'another-source.py'})
+        self.assertNotEqual(before['catalogSha256'], after['catalogSha256'])
+        for name in ('../outside', 'frozen/source.py', '.', ''):
+            with self.assertRaises(RuntimeError):
+                paths.namespace_binding({name})
 
 
 class ProductionInstallNamespaceGuards(unittest.TestCase):

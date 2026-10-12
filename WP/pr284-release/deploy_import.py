@@ -111,7 +111,7 @@ def execution_preflight(root, manifest_sha, require_unused_gate=False):
     require(os.geteuid() == 0 and sys.flags.optimize == 0 and
         os.environ.get('PYTHONOPTIMIZE', '') in ['', '0'], 'Root and plain Python required')
     safe_root(str(root), 'instrument-import-release-')
-    require_unused_outputs(root, FROZEN_FILE_SET, gate_present=not require_unused_gate)
+    outputs = require_unused_outputs(root, FROZEN_FILE_SET, gate_present=not require_unused_gate)
     require(not any((root / name).exists() for name in ['production-receipt.json',
         'production-receipt.in-progress', 'execution-attempt.json']), 'Never replay a release attempt')
     if require_unused_gate:
@@ -152,6 +152,7 @@ def execution_preflight(root, manifest_sha, require_unused_gate=False):
     required = reserve + RETAINED_DATABASE_ALLOCATION_COUNT * database_bytes + assets + 536870912
     free = s.disk_free(); require(min(free.values()) >= required, 'Backup/allocation reserve refused before quiesce')
     return {'ready': True, 'productionMutations': 0, 'head': pin['head'], 'image': pin['image'],
+        'outputPreflight': outputs,
         'reserveBytes': reserve, 'requiredIncludingBackupBytes': required, 'freeBytes': free,
         'databaseBytesWithWal': database_bytes, 'assetsBytes': assets, 'originalRestartCount': live['RestartCount'],
         'entryState': entry}

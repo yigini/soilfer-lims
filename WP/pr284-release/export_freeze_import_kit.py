@@ -65,7 +65,7 @@ def main():
     # contract. This read touches only tooling files, not a production database.
     require_executed_sources({name: hashes[name] for name in SOURCE_FILES},
         pathlib.Path(sys.modules['import_proof_contract'].__file__))
-    for name in ['import_release_contract', 'export_freeze_import_kit']:
+    for name in ['import_release_contract', 'production_output_paths', 'export_freeze_import_kit']:
         path = pathlib.Path(__file__ if name == 'export_freeze_import_kit' else sys.modules[name].__file__)
         require(not path.is_symlink() and sha(path) == hashes[name + '.py'], 'Executed packaging authority changed')
     review_bytes = subprocess.check_output(['gh', 'api', 'repos/yigini/soilfer-lims/issues/comments/' + review_id])
