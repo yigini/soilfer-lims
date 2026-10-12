@@ -46,7 +46,7 @@ with tempfile.TemporaryDirectory(prefix='owned-import-assets-') as directory:
   raw=base64.b64decode(item['data']);assert hashlib.sha256(raw).hexdigest()==item['sha256'];(root/name).write_bytes(raw)
  for name,item in p['files'].items():
   raw=base64.b64decode(item['data']);assert hashlib.sha256(raw).hexdigest()==item['sha256']
-  module=types.ModuleType(name);module.__file__='/owned-in-memory-guards/WP/pr284-release/'+name+'.py';sys.modules[name]=module
+  module=types.ModuleType(name);module.__file__='/owned-in-memory-guards/WP/pr284-release/'+name+'.py';module.__raw_sha256__=hashlib.sha256(raw).hexdigest();sys.modules[name]=module
   exec(compile(raw,module.__file__,'exec'),module.__dict__)
  tests=sys.modules['test_import_preservation'];tests.ASSET_ROOT=root
  for name in ['test_import_authority','test_import_layout']:

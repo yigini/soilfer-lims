@@ -19,7 +19,9 @@ class AuthorityTests(unittest.TestCase):
         for name, value in [('AUDITED_PR_HEAD', 'a' * 40), ('CANDIDATE_HEAD', 'b' * 40),
                 ('AUDITED_PR_TREE', 'c' * 40), ('MERGED_TREE', 'c' * 40),
                 ('MERGE_PARENTS', [contract.BASE_HEAD, 'a' * 40])]:
-            self.enterContext(patch.object(contract, name, value))
+            patcher = patch.object(contract, name, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
         self.files = {name: hashlib.sha256(raw).hexdigest() for name, raw in RAW_TOOLING.items()}
         self.pin = {'head': contract.CANDIDATE_HEAD, 'baseHead': contract.BASE_HEAD,
             'auditedPrHead': contract.AUDITED_PR_HEAD, 'pr': 284, 'tree': contract.MERGED_TREE,
@@ -33,11 +35,6 @@ class AuthorityTests(unittest.TestCase):
             'Config': {'Labels': {'org.opencontainers.image.revision': self.pin['head']}}}
 
     def source_review(self):
-        captured = []
-        def required(value, reason):
-            if not value:
-                captured.append(reason)
-                raise RuntimeError(reason)
         # Build a positive source verdict from public binding tokens plus the
         # fixed documented policy tokens, never from approval side effects.
         tokens = contract.release_binding_tokens() + ['1' * 40,
