@@ -1,0 +1,14 @@
+{
+  "audit_4_7_import_commit.test.js": {
+    "beforeSha256": "d9b2796ea7061ac3b51d2a86960ecbd9e33f0dec1a8c548a8be52e0a2bafef3c",
+    "proposedSha256": "1732c81cdba06fad568bca2da6396915600fd86f1f05a1e84c6759ab654da5c3"
+  },
+  "audit_4_7_calculation_import.test.js": {
+    "beforeSha256": "703e0a6c8ffcdc51cd74fcd19d0c0da35ce3362e14b4bc87c26bc9252585e857",
+    "proposedSha256": "e75f14621cadbaaa8a4f4f91636d6cfd80ef301e7af88eca8516f2c3d52186ac"
+  },
+  "audit_4_7_import_templates.test.js": {
+    "beforeSha256": "dd1636a6ae8f9ad60e3e4b395d02aaa89c40b7c0aee94a1a7c6b3e0c242be203",
+    "proposedSha256": "64c8e4f5f041eb32097e4c3eedf9c62df22860543e2f64ff4b35e47efe68d162"
+  }
+}

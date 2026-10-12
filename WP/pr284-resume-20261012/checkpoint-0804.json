@@ -1,0 +1,18 @@
+{
+  "updatedUtc": "2026-10-12T08:03:55.081697+00:00",
+  "status": "PROPOSED_TESTS_AND_SOURCE_ONLY",
+  "appHead": "36ee761789a1eb42bceee537ff419456f6cd484d",
+  "sameLocalFullSession": 33162,
+  "sameExactCi": 38218977639,
+  "finalHeadPending": true,
+  "nativeClaudioGaps": [
+    "INSTRUMENT_MISMATCH_PREVIEW_AND_COMMIT_409",
+    "DIRECT_AND_QC_DILUTION10",
+    "INPUT_ONLY_QC_WHOLE_FILE_ZERO_WRITES"
+  ],
+  "scopeCorrection": "REMOVE_TWO_DELIVERY_HUNKS",
+  "proposedAdapterSource": "c435f2e18032a01641d64233068ec4eecfa6d1f4",
+  "windowsGuards": 76,
+  "linuxGuards": 76,
+  "productionMutations": 0
+}
