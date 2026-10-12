@@ -1,0 +1,20 @@
+{
+  "recordedUtc": "2026-10-12T02:21:16.642263+00:00",
+  "source": "Fresh native Lab workflow audit and plan screenshots",
+  "productionReceiptReview": "Claudio verified receipt/gate/manifest at4f11acc9 equal to reviewed kit; both WAL logical seals match;23 healthy samples/0 restarts",
+  "postcheckStatus": "INCOMPLETE; full server tests running (228 of344 suites observed); one reception route smoke suite failed initially and is being rerun after client/dist build",
+  "clientBuildLint": "Completed;0 errors/14 warnings",
+  "failureClassification": "Not yet resolved; no production failure claimed",
+  "next213": {
+    "existingLocalBranch": "wip/213-exports",
+    "localHeadAbbreviated": "50c88a4e",
+    "baseAbbreviated": "5ca14d07",
+    "commits": 3,
+    "behindMainCommits": 5,
+    "pushed": false,
+    "handoffPlan": "Claudio rebases onto current main and pushes claude/project-thread-7qdiri only after actual postcheck passes"
+  },
+  "pipApplicationChanges": 0,
+  "pipProductionMutations": 0,
+  "nativeResponseDeliveredAndVisuallyVerified": true
+}
