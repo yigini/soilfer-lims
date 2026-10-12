@@ -1,0 +1,7 @@
+{
+  "packagingSource": "f5cb18176a9d6efa3560182534f57280af71f66a",
+  "proof": "/opt/lims/releases/runtime-kobo-proof-51f67988-20261012T041721Z",
+  "package": "/opt/lims/releases/runtime-kobo-package-51f67988-20261012T044924Z",
+  "target": "/opt/lims/releases/runtime-kobo-release-51f67988-20261012T044924Z",
+  "sourceReviewId": 6117551195
+}
