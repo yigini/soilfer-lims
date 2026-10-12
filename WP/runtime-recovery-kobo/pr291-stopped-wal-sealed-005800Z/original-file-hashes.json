@@ -1,0 +1,14 @@
+{
+  "diagnosis.json": {
+    "sha256": "bbf9ea2bd24558829d8850f3fff93da57c12f7cef488c721008ac92fbbafd4bc",
+    "bytes": 4160
+  },
+  "main-only-state.json": {
+    "sha256": "76343f9200bff5c88263c61506cafb826fb32c7fbb22ff3e35d9604137ce729c",
+    "bytes": 7429166
+  },
+  "wal-aware-logical-state.json": {
+    "sha256": "7cb20bb4c766011f226d434d77da0d7933c653e796c650c8c8f25a92e7853da2",
+    "bytes": 7465346
+  }
+}
