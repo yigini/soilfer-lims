@@ -1,0 +1,34 @@
+{
+  "observedUtc": "2026-10-12T05:11:05.363808+00:00",
+  "unitState": "ExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "freeBytes": 91838947328,
+  "journalTail": "2026-10-12T07:03:49+0200 server python3[964257]: {\"stage\": \"stoppedHashedBackupVerified\", \"utc\": \"2026-10-12T05:03:49.803678+00:00\"}\n2026-10-12T07:03:49+0200 server python3[964257]: {\"stage\": \"candidateEntrypointAttempted\", \"utc\": \"2026-10-12T05:03:49.893763+00:00\"}\n2026-10-12T07:04:26+0200 server python3[964257]: {\"stage\": \"production-jobs-off\", \"elapsedSeconds\": 36.30269004699949, \"pending\": true}\n2026-10-12T07:05:04+0200 server python3[964257]: {\"stage\": \"production-jobs-off\", \"elapsedSeconds\": 74.15113297800417, \"pending\": true}\n2026-10-12T07:06:53+0200 server python3[964257]: {\"stage\": \"jobsOffPreservationAndProbesPassed\", \"utc\": \"2026-10-12T05:06:53.015583+00:00\"}\n2026-10-12T07:07:17+0200 server python3[964257]: {\"stage\": \"ingressReopenedBeforeJobs\", \"utc\": \"2026-10-12T05:07:17.377776+00:00\"}\n2026-10-12T07:09:59+0200 server python3[964257]: {\"stage\": \"jobsOffStoppedFullLogicalPreservationPassed\", \"utc\": \"2026-10-12T05:09:59.049883+00:00\"}\n2026-10-12T07:10:36+0200 server python3[964257]: {\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 36.941449986996304, \"pending\": true}\n",
+  "receipt": {
+    "status": "RUNTIME_FORWARD_IN_PROGRESS",
+    "head": "51f6798806f630773786a08432290c1b21a841da",
+    "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+    "timesUtc": {
+      "beforeQuiesceGuardsPassed": "2026-10-12T05:01:19.532485+00:00",
+      "writersStopped": "2026-10-12T05:01:51.314858+00:00",
+      "stoppedHashedBackupVerified": "2026-10-12T05:03:49.803678+00:00",
+      "candidateEntrypointAttempted": "2026-10-12T05:03:49.893763+00:00",
+      "jobsOffPreservationAndProbesPassed": "2026-10-12T05:06:53.015583+00:00",
+      "ingressReopenedBeforeJobs": "2026-10-12T05:07:17.377776+00:00",
+      "jobsOffStoppedFullLogicalPreservationPassed": "2026-10-12T05:09:59.049883+00:00"
+    },
+    "protectedTableCount": 104,
+    "protectedReceiptCount": 38,
+    "sha256": "79fd0c78a004cc59a1867c43ec4af7bb7e383636d82d0d2ef4e0a28f51b1fcc5",
+    "mode": "0o644"
+  },
+  "productionMutations": 0,
+  "live": {
+    "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+    "running": true,
+    "health": "unhealthy",
+    "restartCount": 0,
+    "oomKilled": false,
+    "jobsDisabled": "false",
+    "memory": 805306368
+  }
+}
