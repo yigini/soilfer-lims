@@ -1,0 +1,15 @@
+{
+  "observedUtc": "2026-10-12T21:59:47.112933+00:00",
+  "productionMutations": 0,
+  "status": "INTERIM_HTTPS_CHECK_NOT_TERMINAL_RELEASE_VERIFICATION",
+  "/api/health": {
+    "httpStatus": 200,
+    "tlsVerified": true,
+    "status": "ok",
+    "version": "1.9.0"
+  },
+  "/login": {
+    "httpStatus": 200,
+    "tlsVerified": true
+  }
+}

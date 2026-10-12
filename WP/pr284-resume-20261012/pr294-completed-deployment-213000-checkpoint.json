@@ -1,0 +1,93 @@
+{
+  "recordedUtc": "2026-10-12T22:08:00.723598+00:00",
+  "completedUtc": "2026-10-12T22:04:33.865599+00:00",
+  "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+  "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z",
+  "receiptSha256": "03e3309714cadd956e13e9b34576ed774f1e56c482fdc2b07a828a52c1fcb953",
+  "manifestSha256": "39b054dbc89889493ac02984675ca72e5fc0da1593706a6abcab450ed481b76e",
+  "coordinatorSha256": "24479eb79a6bdf9d900321dcbc25f2b15e6aa56c110aaf9028e205a5139d6d6d",
+  "productionGateSha256": "fac9e2418ba7376b99e2e57b2e66ad4e66edf3d417bc2b8f083adfb1da56212a",
+  "exactKitReviewId": 6132886810,
+  "productionSourceReviewId": 6132712806,
+  "independentVerificationUtc": "2026-10-12T22:07:04.899797+00:00",
+  "status": "DEPLOYED_AND_INDEPENDENTLY_VERIFIED_AWAITING_ACTUAL_CLAUDIO_POSTCHECK",
+  "cliMeasurements": [
+    {
+      "containerName": "lims-owned-import-cli-9f39db59f175885695e8ef64",
+      "owner": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z:import-dry",
+      "memoryLimitBytes": 805306368,
+      "memorySwapLimitBytes": 805306368,
+      "networkMode": "none",
+      "timeoutSeconds": 600,
+      "elapsedSeconds": 5.396756382993772,
+      "nodeOptions": "",
+      "exitCode": 0,
+      "cgroupMemoryPeak": {
+        "releaseCliPeakBytes": 53227520,
+        "childStatus": 0,
+        "childSignal": null
+      },
+      "retainedOwnedContainer": true,
+      "retainedArtifacts": {
+        "import-dry.stdout": "d96dc8241e3edbc9d2a2e794a0edbb6dd592f282f978571380d37544446058f3",
+        "import-dry.stderr": "9099e44515fe228001b2ba18d47fe73c46ff740f418695b97f8607c28b2b0cd2"
+      }
+    },
+    {
+      "containerName": "lims-owned-import-cli-b3183440f6a3c9aea0e19cf4",
+      "owner": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z:import-apply",
+      "memoryLimitBytes": 805306368,
+      "memorySwapLimitBytes": 805306368,
+      "networkMode": "none",
+      "timeoutSeconds": 600,
+      "elapsedSeconds": 73.01557879500615,
+      "nodeOptions": "",
+      "exitCode": 0,
+      "cgroupMemoryPeak": {
+        "releaseCliPeakBytes": 97763328,
+        "childStatus": 0,
+        "childSignal": null
+      },
+      "retainedOwnedContainer": true,
+      "retainedArtifacts": {
+        "import-apply.stdout": "dd6e78807f742134a0b9ebd87250c3796ac99c52d10f99e2cd76e47e6d21b720",
+        "import-apply.stderr": "0b30c01796c9223a3f2561b2da7ceed6b8a68740e2e84e06c411b958d5a27b40"
+      }
+    },
+    {
+      "containerName": "lims-owned-import-cli-f1904b8d0a8a3033d4699369",
+      "owner": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z:import-repeat",
+      "memoryLimitBytes": 805306368,
+      "memorySwapLimitBytes": 805306368,
+      "networkMode": "none",
+      "timeoutSeconds": 600,
+      "elapsedSeconds": 6.789684330011369,
+      "nodeOptions": "",
+      "exitCode": 0,
+      "cgroupMemoryPeak": {
+        "releaseCliPeakBytes": 106627072,
+        "childStatus": 0,
+        "childSignal": null
+      },
+      "retainedOwnedContainer": true,
+      "retainedArtifacts": {
+        "import-repeat.stdout": "91ebb43682dcf34f035fe46521dfb2bd887e51a0895255f263d7370e8d20f94e",
+        "import-repeat.stderr": "956094617fc4deeffe3c476bd8005f69602c76f54a46b24b5895841a6cc2d243"
+      }
+    }
+  ],
+  "healthyObservationSeconds": 661.12678,
+  "healthSamples": 23,
+  "peakBytes": 324808704,
+  "freeBytes": {
+    "/opt/lims": 63693156352,
+    "/var/lib/docker": 63693156352
+  },
+  "requiredIncludingAllocationBytes": 20152939429,
+  "allOriginal104Tables38ReceiptsPreserved": true,
+  "additiveInstalledState": "106 tables / 39 receipts, empty import tables and no analytical backfill",
+  "fullDataPreservationRecomputed": true,
+  "allFrozenBytesUnchanged": true,
+  "nativeClaudioPostcheckClaimed": false
+}

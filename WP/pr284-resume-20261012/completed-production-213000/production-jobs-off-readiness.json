@@ -1,0 +1,21 @@
+{
+  "startedUtc": "2026-10-12T21:45:10.145718+00:00",
+  "containerStartedUtc": "2026-10-12T21:45:10.464522905Z",
+  "readyUtc": "2026-10-12T21:47:02.751319+00:00",
+  "elapsedSeconds": 112.6056710670091,
+  "deadlineSeconds": 600,
+  "attempts": 91,
+  "health": {
+    "status": "ok",
+    "version": "1.9.0",
+    "uptime": 54.350123794
+  },
+  "restartCount": 0,
+  "oomKilled": false,
+  "memoryLimitBytes": 805306368,
+  "networkMode": "bridge",
+  "publishedHostIp": "127.0.0.1",
+  "jobsEnabled": false,
+  "baseUrl": "http://127.0.0.1:3000",
+  "sharedReadinessCode": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+}

@@ -1,0 +1,26 @@
+{
+  "before": {
+    "": {
+      "sha256": "eaa8f24b28c5be0fde83c7a1e33b78ed976af437916acadec7cba120f4480d40",
+      "bytes": 563322880,
+      "inode": 1280648,
+      "device": 64769,
+      "mtimeNs": 1791841107423274230,
+      "mode": 438
+    },
+    "-wal": null,
+    "-shm": null
+  },
+  "after": {
+    "": {
+      "sha256": "eaa8f24b28c5be0fde83c7a1e33b78ed976af437916acadec7cba120f4480d40",
+      "bytes": 563322880,
+      "inode": 1280648,
+      "device": 64769,
+      "mtimeNs": 1791841107423274230,
+      "mode": 438
+    },
+    "-wal": null,
+    "-shm": null
+  }
+}

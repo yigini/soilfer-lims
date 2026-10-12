@@ -1,0 +1,54 @@
+{
+  "before": {
+    "": {
+      "sha256": "eaa8f24b28c5be0fde83c7a1e33b78ed976af437916acadec7cba120f4480d40",
+      "bytes": 563322880,
+      "inode": 1280648,
+      "device": 64769,
+      "mtimeNs": 1791841107423274230,
+      "mode": 438
+    },
+    "-wal": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "inode": 1191799,
+      "device": 64769,
+      "mtimeNs": 1791841342454222977,
+      "mode": 438
+    },
+    "-shm": {
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "bytes": 32768,
+      "inode": 1191838,
+      "device": 64769,
+      "mtimeNs": 1791841345136279449,
+      "mode": 438
+    }
+  },
+  "after": {
+    "": {
+      "sha256": "eaa8f24b28c5be0fde83c7a1e33b78ed976af437916acadec7cba120f4480d40",
+      "bytes": 563322880,
+      "inode": 1280648,
+      "device": 64769,
+      "mtimeNs": 1791841107423274230,
+      "mode": 438
+    },
+    "-wal": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "inode": 1191799,
+      "device": 64769,
+      "mtimeNs": 1791841342454222977,
+      "mode": 438
+    },
+    "-shm": {
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "bytes": 32768,
+      "inode": 1191838,
+      "device": 64769,
+      "mtimeNs": 1791841345136279449,
+      "mode": 438
+    }
+  }
+}

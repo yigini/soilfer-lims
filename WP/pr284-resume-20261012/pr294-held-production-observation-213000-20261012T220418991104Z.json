@@ -1,0 +1,41 @@
+{
+  "observedUtc": "2026-10-12T22:04:18.340629+00:00",
+  "unitState": {
+    "Result": "success",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "journalTail": "{\"stage\": \"nativeImportDeltaAndImmediateRepeatPassed\", \"utc\": \"2026-10-12T21:45:10.046081+00:00\"}\n{\"stage\": \"candidateEntrypointAttempted\", \"utc\": \"2026-10-12T21:45:10.137394+00:00\"}\n{\"stage\": \"production-jobs-off\", \"elapsedSeconds\": 36.97100733499974, \"pending\": true}\n{\"stage\": \"production-jobs-off\", \"elapsedSeconds\": 74.29155818599975, \"pending\": true}\n{\"stage\": \"production-jobs-off\", \"elapsedSeconds\": 111.34343689100933, \"pending\": true}\n{\"stage\": \"jobsOffPreservationAndProbesPassed\", \"utc\": \"2026-10-12T21:48:25.614942+00:00\"}\n{\"stage\": \"ingressReopenedBeforeJobs\", \"utc\": \"2026-10-12T21:48:49.113794+00:00\"}\n{\"stage\": \"jobsOffStoppedFullLogicalPreservationPassed\", \"utc\": \"2026-10-12T21:51:39.022834+00:00\"}\n{\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 36.59399113099789, \"pending\": true}\n{\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 74.04179117899912, \"pending\": true}\n{\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 111.5753269650013, \"pending\": true}\n{\"stage\": \"normalJobsEnabled\", \"utc\": \"2026-10-12T21:53:32.738819+00:00\"}\n",
+  "receipt": {
+    "sha256": "ff769bf45e28aea5a2508f750ae633ec35c3a38ba5b77a0872a7bde6c82c6a9c",
+    "mode": "0o644",
+    "status": "IMPORT_FORWARD_IN_PROGRESS",
+    "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "timesUtc": {
+      "beforeQuiesceGuardsPassed": "2026-10-12T21:33:00.521788+00:00",
+      "writersStopped": "2026-10-12T21:33:08.547090+00:00",
+      "stoppedHashedBackupVerified": "2026-10-12T21:35:17.673148+00:00",
+      "nativeImportInstallerAttemptedForwardOnly": "2026-10-12T21:35:17.846199+00:00",
+      "nativeImportDeltaAndImmediateRepeatPassed": "2026-10-12T21:45:10.046081+00:00",
+      "candidateEntrypointAttempted": "2026-10-12T21:45:10.137394+00:00",
+      "jobsOffPreservationAndProbesPassed": "2026-10-12T21:48:25.614942+00:00",
+      "ingressReopenedBeforeJobs": "2026-10-12T21:48:49.113794+00:00",
+      "jobsOffStoppedFullLogicalPreservationPassed": "2026-10-12T21:51:39.022834+00:00",
+      "normalJobsEnabled": "2026-10-12T21:53:32.738819+00:00"
+    }
+  },
+  "runningLimsNames": [
+    "soilfer-lims"
+  ],
+  "liveContainer": {
+    "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+    "running": true,
+    "health": "healthy",
+    "restartCount": 0,
+    "oomKilled": false,
+    "jobsDisabled": "false",
+    "memoryLimitBytes": 805306368,
+    "nodeOptions": ""
+  }
+}

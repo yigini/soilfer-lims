@@ -1,0 +1,4 @@
+PASS SUPER_ADMIN: normalized list/detail, imported states, exact retained observations (6 visible runs)
+PASS LAB_MANAGER: normalized list/detail, imported states, exact retained observations (0 visible runs)
+PASS LAB_TECHNICIAN: normalized list/detail, imported states, exact retained observations (0 visible runs)
+PASS 113 normalized rows, 18 legacy typed rows retained, no read-probe writes

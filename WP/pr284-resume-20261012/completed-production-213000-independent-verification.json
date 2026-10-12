@@ -1,0 +1,80 @@
+{
+  "status": "INDEPENDENT_READ_ONLY_IMPORT_POST_DEPLOY_PASS",
+  "observedUtc": "2026-10-12T22:07:04.899797+00:00",
+  "productionMutations": 0,
+  "liveSqliteConnections": 0,
+  "unitState": {
+    "Result": "success",
+    "ExecMainStatus": "0",
+    "ActiveState": "inactive",
+    "SubState": "dead"
+  },
+  "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z",
+  "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+  "receiptSha256": "03e3309714cadd956e13e9b34576ed774f1e56c482fdc2b07a828a52c1fcb953",
+  "manifestSha256": "39b054dbc89889493ac02984675ca72e5fc0da1593706a6abcab450ed481b76e",
+  "receiptMode": "0o400",
+  "completedUtc": "2026-10-12T22:04:33.865599+00:00",
+  "healthObservationElapsedSeconds": 661.12678,
+  "healthSamples": 23,
+  "peakBytes": 324808704,
+  "seals": {
+    "original-stopped-seal": {
+      "logicalStateSha256": "9b50b553028098efcf47964ee28bc2919a96c47507bee72f2ee189efa947568b",
+      "backupSha256": "70ee994b2013baa5553c5d0939b57b4891189a42e3553335c6b1fc13d90674f5",
+      "rawHashesAndModesPassed": true,
+      "tables": 104,
+      "receipts": 38,
+      "integrity": "ok",
+      "foreignKeyViolations": 0
+    },
+    "candidate-jobs-off-seal": {
+      "logicalStateSha256": "3ecacdf6b5b6fcd4e79a71a6a28b51a0cabed83abf769bb175a233b3227fccec",
+      "backupSha256": "7bdcdb4ebf033608e1ded3257940510978a055127f3f9d06043ce07d08e94da5",
+      "rawHashesAndModesPassed": true,
+      "tables": 106,
+      "receipts": 39,
+      "integrity": "ok",
+      "foreignKeyViolations": 0
+    }
+  },
+  "exactImportDeltaRecomputed": true,
+  "repeatFullStateRecomputed": true,
+  "https": {
+    "/api/health": {
+      "httpStatus": 200,
+      "tlsVerified": true,
+      "status": "ok",
+      "version": "1.9.0"
+    },
+    "/login": {
+      "httpStatus": 200,
+      "tlsVerified": true
+    }
+  },
+  "retainedUnauthorizedReceiptPostStatus": 401,
+  "freshUnauthorizedReceiptPostStatus": 401,
+  "restartCount": 0,
+  "nodeOptions": "",
+  "jobsEnabled": true,
+  "sameVolumes": [
+    "lims_lims-data",
+    "lims_lims-assets"
+  ],
+  "all66FrozenSourceProofFilesUnchanged": true,
+  "requiredIncludingAllocationBytes": 20152939429,
+  "freeBytes": {
+    "/opt/lims": 63693156352,
+    "/var/lib/docker": 63693156352
+  },
+  "retainedAcceptance": {
+    "mode": "READ_ONLY_RETAINED_EVIDENCE",
+    "totalChanges": 0,
+    "eventId": "0c4a247e-339a-4adc-9ba2-061829eb2fce",
+    "eventSha256": "d14c99ff5643a8fe31abef867604ffff2645f63c799e58c62c736937a665dc45",
+    "attemptStatus": "ACCEPTED",
+    "reviewDecisionAttemptId": null,
+    "reportStatus": "PUBLISHED"
+  }
+}

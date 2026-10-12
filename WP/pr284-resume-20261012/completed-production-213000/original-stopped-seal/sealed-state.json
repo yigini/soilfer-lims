@@ -1,0 +1,77 @@
+{
+  "policy": "DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL",
+  "originalFiles": {
+    "": {
+      "sha256": "fd10bfae4375eb8e6f56a371f4a0413edaba6fb8d411cb44ff4ebe12d4ef71a9",
+      "bytes": 563322880,
+      "inode": 1280648,
+      "device": 64769,
+      "mtimeNs": 1791781799932390591,
+      "mode": 438
+    },
+    "-wal": {
+      "sha256": "6893de3477a9f53b41f758f430538ba2610318faf8cecaebbf66e345c3cd425f",
+      "bytes": 2645072,
+      "inode": 1191799,
+      "device": 64769,
+      "mtimeNs": 1791833858968192125,
+      "mode": 438
+    },
+    "-shm": {
+      "sha256": "2a469021855b1b4a9101dd6f3beaec4469ae28f9af981b073fc778e9b63e8e68",
+      "bytes": 32768,
+      "inode": 1191838,
+      "device": 64769,
+      "mtimeNs": 1791833858585184120,
+      "mode": 438
+    }
+  },
+  "rawFiles": {
+    "": {
+      "sha256": "fd10bfae4375eb8e6f56a371f4a0413edaba6fb8d411cb44ff4ebe12d4ef71a9",
+      "bytes": 563322880,
+      "inode": 11403747,
+      "device": 64769,
+      "mtimeNs": 1791840795907715048,
+      "mode": 256
+    },
+    "-wal": {
+      "sha256": "6893de3477a9f53b41f758f430538ba2610318faf8cecaebbf66e345c3cd425f",
+      "bytes": 2645072,
+      "inode": 11403748,
+      "device": 64769,
+      "mtimeNs": 1791840799519791103,
+      "mode": 256
+    },
+    "-shm": {
+      "sha256": "2a469021855b1b4a9101dd6f3beaec4469ae28f9af981b073fc778e9b63e8e68",
+      "bytes": 32768,
+      "inode": 11403749,
+      "device": 64769,
+      "mtimeNs": 1791840799642793693,
+      "mode": 256
+    }
+  },
+  "mainOnlyStateSha256": "ff52e7bd0c5c5370c337c34c98842298287f82f2f14c688170cdae2a50af44d6",
+  "logicalStateSha256": "9b50b553028098efcf47964ee28bc2919a96c47507bee72f2ee189efa947568b",
+  "backupSha256": "70ee994b2013baa5553c5d0939b57b4891189a42e3553335c6b1fc13d90674f5",
+  "countsIncludeWal": true,
+  "matchesExpected": false,
+  "protectedTableCount": 104,
+  "protectedReceiptCount": 38,
+  "backupPath": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z/original-stopped-seal/dev-stopped-backup.db",
+  "physical": {
+    "": {
+      "sha256": "fd10bfae4375eb8e6f56a371f4a0413edaba6fb8d411cb44ff4ebe12d4ef71a9",
+      "bytes": 563322880
+    },
+    "-wal": {
+      "sha256": "6893de3477a9f53b41f758f430538ba2610318faf8cecaebbf66e345c3cd425f",
+      "bytes": 2645072
+    },
+    "-shm": {
+      "sha256": "2a469021855b1b4a9101dd6f3beaec4469ae28f9af981b073fc778e9b63e8e68",
+      "bytes": 32768
+    }
+  }
+}

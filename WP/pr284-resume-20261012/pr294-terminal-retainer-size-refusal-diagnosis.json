@@ -1,0 +1,13 @@
+{
+  "observedUtc": "2026-10-12T22:06:44.334110+00:00",
+  "status": "READ_ONLY_RETAINER_SIZE_LIMIT_DIAGNOSED_NOT_PRODUCTION_FAILURE",
+  "productionMutations": 0,
+  "localDestinationCreated": false,
+  "originalLargeLedger": {
+    "path": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z/disk-allocation-observations.jsonl",
+    "bytes": 47226954,
+    "mode": "0o644",
+    "symlink": false
+  },
+  "originalRefusal": "AssertionError: disk-allocation-observations.jsonl exceeds the prepared 16MiB evidence transport bound."
+}

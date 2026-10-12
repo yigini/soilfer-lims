@@ -38,7 +38,13 @@ for label in ['original-stopped-seal','after-import-stopped','after-repeat-stopp
 files={}
 for name in names:
  f=r/name;assert f.is_file() and not f.is_symlink()
- value=f.read_bytes();assert len(value)<=16*1024*1024,name
+ value=f.read_bytes()
+ if name=='disk-allocation-observations.jsonl':
+  # The original read-only refusal was diagnosed before any destination was
+  # created. Retain exactly that measured ledger and its receipt-bound digest.
+  assert len(value)==47226954 and hashlib.sha256(value).hexdigest()==receipt['diskAllocationObservationsSha256']
+ else:
+  assert len(value)<=16*1024*1024,name
  files[name]={'data':base64.b64encode(value).decode(),'sha256':hashlib.sha256(value).hexdigest(),'bytes':len(value),'remoteMode':oct(f.stat().st_mode&0o777)}
 journal=subprocess.check_output(['journalctl','-u',u,'--no-pager','-o','cat'],timeout=15)
 files['unit-journal.txt']={'data':base64.b64encode(journal).decode(),'sha256':hashlib.sha256(journal).hexdigest(),'bytes':len(journal)}

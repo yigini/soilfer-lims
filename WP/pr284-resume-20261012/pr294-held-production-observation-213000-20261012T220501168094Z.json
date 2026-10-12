@@ -1,0 +1,45 @@
+{
+  "observedUtc": "2026-10-12T22:05:00.510022+00:00",
+  "unitState": {
+    "Result": "success",
+    "ExecMainStatus": "0",
+    "ActiveState": "inactive",
+    "SubState": "dead"
+  },
+  "journalTail": "{\"stage\": \"jobsOffPreservationAndProbesPassed\", \"utc\": \"2026-10-12T21:48:25.614942+00:00\"}\n{\"stage\": \"ingressReopenedBeforeJobs\", \"utc\": \"2026-10-12T21:48:49.113794+00:00\"}\n{\"stage\": \"jobsOffStoppedFullLogicalPreservationPassed\", \"utc\": \"2026-10-12T21:51:39.022834+00:00\"}\n{\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 36.59399113099789, \"pending\": true}\n{\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 74.04179117899912, \"pending\": true}\n{\"stage\": \"production-jobs-on\", \"elapsedSeconds\": 111.5753269650013, \"pending\": true}\n{\"stage\": \"normalJobsEnabled\", \"utc\": \"2026-10-12T21:53:32.738819+00:00\"}\n{\"stage\": \"completed\", \"utc\": \"2026-10-12T22:04:33.865599+00:00\"}\n{\"stage\": \"immutableReceiptReady\", \"utc\": \"2026-10-12T22:04:34.207363+00:00\"}\n{\"status\": \"DEPLOYED_NEW_IMPORT_FORWARD\", \"head\": \"959d17e11c357266f7c2a41b0c84ab76914c591e\", \"image\": \"sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2\", \"receiptSha256\": \"03e3309714cadd956e13e9b34576ed774f1e56c482fdc2b07a828a52c1fcb953\"}\nlims-release-instrument-import-release-959d17e1-20261012t213000z.service: Deactivated successfully.\nlims-release-instrument-import-release-959d17e1-20261012t213000z.service: Consumed 12min 49.750s CPU time, 4.3G memory peak.\n",
+  "receipt": {
+    "sha256": "03e3309714cadd956e13e9b34576ed774f1e56c482fdc2b07a828a52c1fcb953",
+    "mode": "0o400",
+    "status": "DEPLOYED_NEW_IMPORT_FORWARD",
+    "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "timesUtc": {
+      "beforeQuiesceGuardsPassed": "2026-10-12T21:33:00.521788+00:00",
+      "writersStopped": "2026-10-12T21:33:08.547090+00:00",
+      "stoppedHashedBackupVerified": "2026-10-12T21:35:17.673148+00:00",
+      "nativeImportInstallerAttemptedForwardOnly": "2026-10-12T21:35:17.846199+00:00",
+      "nativeImportDeltaAndImmediateRepeatPassed": "2026-10-12T21:45:10.046081+00:00",
+      "candidateEntrypointAttempted": "2026-10-12T21:45:10.137394+00:00",
+      "jobsOffPreservationAndProbesPassed": "2026-10-12T21:48:25.614942+00:00",
+      "ingressReopenedBeforeJobs": "2026-10-12T21:48:49.113794+00:00",
+      "jobsOffStoppedFullLogicalPreservationPassed": "2026-10-12T21:51:39.022834+00:00",
+      "normalJobsEnabled": "2026-10-12T21:53:32.738819+00:00",
+      "completed": "2026-10-12T22:04:33.865599+00:00",
+      "immutableReceiptReady": "2026-10-12T22:04:34.207363+00:00"
+    },
+    "peakBytes": 324808704,
+    "normalJobsHealthSampleCount": 23
+  },
+  "runningLimsNames": [
+    "soilfer-lims"
+  ],
+  "liveContainer": {
+    "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+    "running": true,
+    "health": "healthy",
+    "restartCount": 0,
+    "oomKilled": false,
+    "jobsDisabled": "false",
+    "memoryLimitBytes": 805306368,
+    "nodeOptions": ""
+  }
+}
