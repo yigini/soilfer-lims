@@ -1,0 +1,542 @@
+{
+  "utc": "2026-10-12T00:55:15.757444+00:00",
+  "before": {
+    "": {
+      "sha256": "44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34",
+      "bytes": 563322880,
+      "inode": 1280648,
+      "device": 64769,
+      "mtimeNs": 1791758477795015270,
+      "mode": "0o666"
+    },
+    "-wal": {
+      "sha256": "9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0",
+      "bytes": 4190072,
+      "inode": 1191799,
+      "device": 64769,
+      "mtimeNs": 1791766145231682695,
+      "mode": "0o666"
+    },
+    "-shm": {
+      "sha256": "5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d",
+      "bytes": 32768,
+      "inode": 1191838,
+      "device": 64769,
+      "mtimeNs": 1791766144752672822,
+      "mode": "0o666"
+    }
+  },
+  "allWritersStopped": true,
+  "sqliteConnectionOpened": false,
+  "productionMutations": 0,
+  "mainHeader": {
+    "magicOk": true,
+    "pageSize": 4096,
+    "readVersion": 2,
+    "writeVersion": 2,
+    "changeCounter": 39,
+    "databasePages": 137530,
+    "versionValidFor": 39
+  },
+  "walHeader": {
+    "magic": "0x377f0682",
+    "formatVersion": 3007000,
+    "pageSize": 4096,
+    "checkpointSequence": 1,
+    "salt1": 2028460854,
+    "salt2": 247222629,
+    "checksum1": 214100619,
+    "checksum2": 721190462
+  },
+  "walSaltScan": {
+    "validSaltPrefixFrames": 725,
+    "commitFrames": [
+      {
+        "frame": 19,
+        "databasePages": 137530
+      },
+      {
+        "frame": 38,
+        "databasePages": 137530
+      },
+      {
+        "frame": 58,
+        "databasePages": 137530
+      },
+      {
+        "frame": 78,
+        "databasePages": 137530
+      },
+      {
+        "frame": 98,
+        "databasePages": 137530
+      },
+      {
+        "frame": 118,
+        "databasePages": 137530
+      },
+      {
+        "frame": 142,
+        "databasePages": 137530
+      },
+      {
+        "frame": 165,
+        "databasePages": 137530
+      },
+      {
+        "frame": 185,
+        "databasePages": 137530
+      },
+      {
+        "frame": 211,
+        "databasePages": 137530
+      },
+      {
+        "frame": 237,
+        "databasePages": 137530
+      },
+      {
+        "frame": 257,
+        "databasePages": 137530
+      },
+      {
+        "frame": 280,
+        "databasePages": 137530
+      },
+      {
+        "frame": 303,
+        "databasePages": 137530
+      },
+      {
+        "frame": 330,
+        "databasePages": 137530
+      },
+      {
+        "frame": 353,
+        "databasePages": 137530
+      },
+      {
+        "frame": 375,
+        "databasePages": 137530
+      },
+      {
+        "frame": 395,
+        "databasePages": 137530
+      },
+      {
+        "frame": 421,
+        "databasePages": 137530
+      },
+      {
+        "frame": 441,
+        "databasePages": 137530
+      },
+      {
+        "frame": 463,
+        "databasePages": 137530
+      },
+      {
+        "frame": 483,
+        "databasePages": 137530
+      },
+      {
+        "frame": 504,
+        "databasePages": 137530
+      },
+      {
+        "frame": 530,
+        "databasePages": 137530
+      },
+      {
+        "frame": 550,
+        "databasePages": 137530
+      },
+      {
+        "frame": 573,
+        "databasePages": 137530
+      },
+      {
+        "frame": 596,
+        "databasePages": 137530
+      },
+      {
+        "frame": 619,
+        "databasePages": 137530
+      },
+      {
+        "frame": 639,
+        "databasePages": 137530
+      },
+      {
+        "frame": 662,
+        "databasePages": 137530
+      },
+      {
+        "frame": 663,
+        "databasePages": 137530
+      },
+      {
+        "frame": 665,
+        "databasePages": 137530
+      },
+      {
+        "frame": 666,
+        "databasePages": 137530
+      },
+      {
+        "frame": 667,
+        "databasePages": 137530
+      },
+      {
+        "frame": 668,
+        "databasePages": 137530
+      },
+      {
+        "frame": 669,
+        "databasePages": 137530
+      },
+      {
+        "frame": 670,
+        "databasePages": 137530
+      },
+      {
+        "frame": 671,
+        "databasePages": 137530
+      },
+      {
+        "frame": 672,
+        "databasePages": 137530
+      },
+      {
+        "frame": 673,
+        "databasePages": 137530
+      },
+      {
+        "frame": 674,
+        "databasePages": 137530
+      },
+      {
+        "frame": 675,
+        "databasePages": 137530
+      },
+      {
+        "frame": 676,
+        "databasePages": 137530
+      },
+      {
+        "frame": 677,
+        "databasePages": 137530
+      },
+      {
+        "frame": 678,
+        "databasePages": 137530
+      },
+      {
+        "frame": 679,
+        "databasePages": 137530
+      },
+      {
+        "frame": 680,
+        "databasePages": 137530
+      },
+      {
+        "frame": 681,
+        "databasePages": 137530
+      },
+      {
+        "frame": 682,
+        "databasePages": 137530
+      },
+      {
+        "frame": 683,
+        "databasePages": 137530
+      },
+      {
+        "frame": 684,
+        "databasePages": 137530
+      },
+      {
+        "frame": 685,
+        "databasePages": 137530
+      },
+      {
+        "frame": 686,
+        "databasePages": 137530
+      },
+      {
+        "frame": 687,
+        "databasePages": 137530
+      },
+      {
+        "frame": 688,
+        "databasePages": 137530
+      },
+      {
+        "frame": 689,
+        "databasePages": 137530
+      },
+      {
+        "frame": 690,
+        "databasePages": 137530
+      },
+      {
+        "frame": 691,
+        "databasePages": 137530
+      },
+      {
+        "frame": 692,
+        "databasePages": 137530
+      },
+      {
+        "frame": 693,
+        "databasePages": 137530
+      },
+      {
+        "frame": 694,
+        "databasePages": 137530
+      },
+      {
+        "frame": 695,
+        "databasePages": 137530
+      },
+      {
+        "frame": 696,
+        "databasePages": 137530
+      },
+      {
+        "frame": 697,
+        "databasePages": 137530
+      },
+      {
+        "frame": 698,
+        "databasePages": 137530
+      },
+      {
+        "frame": 699,
+        "databasePages": 137530
+      },
+      {
+        "frame": 700,
+        "databasePages": 137530
+      },
+      {
+        "frame": 701,
+        "databasePages": 137530
+      },
+      {
+        "frame": 702,
+        "databasePages": 137530
+      },
+      {
+        "frame": 703,
+        "databasePages": 137530
+      },
+      {
+        "frame": 704,
+        "databasePages": 137530
+      },
+      {
+        "frame": 705,
+        "databasePages": 137530
+      },
+      {
+        "frame": 706,
+        "databasePages": 137530
+      },
+      {
+        "frame": 707,
+        "databasePages": 137530
+      },
+      {
+        "frame": 708,
+        "databasePages": 137530
+      },
+      {
+        "frame": 709,
+        "databasePages": 137530
+      },
+      {
+        "frame": 710,
+        "databasePages": 137530
+      },
+      {
+        "frame": 711,
+        "databasePages": 137530
+      },
+      {
+        "frame": 712,
+        "databasePages": 137530
+      },
+      {
+        "frame": 713,
+        "databasePages": 137530
+      },
+      {
+        "frame": 714,
+        "databasePages": 137530
+      },
+      {
+        "frame": 715,
+        "databasePages": 137530
+      },
+      {
+        "frame": 716,
+        "databasePages": 137530
+      },
+      {
+        "frame": 717,
+        "databasePages": 137530
+      },
+      {
+        "frame": 718,
+        "databasePages": 137530
+      },
+      {
+        "frame": 719,
+        "databasePages": 137530
+      },
+      {
+        "frame": 720,
+        "databasePages": 137530
+      },
+      {
+        "frame": 721,
+        "databasePages": 137530
+      },
+      {
+        "frame": 722,
+        "databasePages": 137530
+      },
+      {
+        "frame": 723,
+        "databasePages": 137530
+      },
+      {
+        "frame": 724,
+        "databasePages": 137530
+      },
+      {
+        "frame": 725,
+        "databasePages": 137530
+      }
+    ],
+    "trailingBoundary": {
+      "frame": 726,
+      "reason": "salt differs (older trailing cycle)"
+    },
+    "checksumsValidated": false
+  },
+  "mainComparedToLastSaltMatchedCommit": {
+    "distinctPages": 418,
+    "differentPagesCount": 416,
+    "differentPageNumbersFirst20": [
+      1,
+      5332,
+      5830,
+      5831,
+      5832,
+      5833,
+      5834,
+      5835,
+      5836,
+      5847,
+      6350,
+      6533,
+      14614,
+      17526,
+      18606,
+      44947,
+      68638,
+      99614,
+      135412,
+      5823
+    ],
+    "checksumValidationRequired": true
+  },
+  "shmHeaderReadOnly": {
+    "first48Hex": "18e22d00000000008e00000001000010d50200003a1902006fef98111aee2d3678e7db360ebc5165b51c5a16ac813a17",
+    "second48Hex": "18e22d00000000008e00000001000010d50200003a1902006fef98111aee2d3678e7db360ebc5165b51c5a16ac813a17",
+    "copiesMatch": true,
+    "mxFrameNative": 725,
+    "nPageNative": 137530,
+    "nBackfillNative": 0
+  },
+  "after": {
+    "": {
+      "sha256": "44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34",
+      "bytes": 563322880,
+      "inode": 1280648,
+      "device": 64769,
+      "mtimeNs": 1791758477795015270,
+      "mode": "0o666"
+    },
+    "-wal": {
+      "sha256": "9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0",
+      "bytes": 4190072,
+      "inode": 1191799,
+      "device": 64769,
+      "mtimeNs": 1791766145231682695,
+      "mode": "0o666"
+    },
+    "-shm": {
+      "sha256": "5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d",
+      "bytes": 32768,
+      "inode": 1191838,
+      "device": 64769,
+      "mtimeNs": 1791766144752672822,
+      "mode": "0o666"
+    }
+  },
+  "allPhysicalBytesAndMetadataUnchanged": true,
+  "allWritersStillStopped": true,
+  "ingressConfigSha256": "d92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c",
+  "originalContainerState": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 137,
+    "Error": "",
+    "StartedAt": "2026-10-11T22:39:33.522555111Z",
+    "FinishedAt": "2026-10-12T00:52:06.946812702Z",
+    "Health": {
+      "Status": "unhealthy",
+      "FailingStreak": 0,
+      "Log": [
+        {
+          "Start": "2026-10-12T02:51:18.675424438+02:00",
+          "End": "2026-10-12T02:51:19.071113218+02:00",
+          "ExitCode": 0,
+          "Output": ""
+        },
+        {
+          "Start": "2026-10-12T02:51:29.073821625+02:00",
+          "End": "2026-10-12T02:51:29.165737033+02:00",
+          "ExitCode": 0,
+          "Output": ""
+        },
+        {
+          "Start": "2026-10-12T02:51:39.166835046+02:00",
+          "End": "2026-10-12T02:51:39.253945376+02:00",
+          "ExitCode": 0,
+          "Output": ""
+        },
+        {
+          "Start": "2026-10-12T02:51:49.255268435+02:00",
+          "End": "2026-10-12T02:51:49.334972475+02:00",
+          "ExitCode": 0,
+          "Output": ""
+        },
+        {
+          "Start": "2026-10-12T02:51:59.336194834+02:00",
+          "End": "2026-10-12T02:51:59.423478267+02:00",
+          "ExitCode": 0,
+          "Output": ""
+        }
+      ]
+    }
+  }
+}
