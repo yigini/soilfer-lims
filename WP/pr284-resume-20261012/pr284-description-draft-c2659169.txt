@@ -13,7 +13,7 @@ YY's existing dependency approval on 6099365745/6099368373 covers saxes6.0.0 ISC
 Validation: DRAFT, final full validation in progress.
 - Final focused8 suites/146 tests pass, including actual HTTP/import/installer and Chromium keyboard paths.
 - Intermediate36ee passed360 suites/5466 tests and CI38218977639, including actual Docker boundary/readiness checks. This is not final-head approval.
-- Final c265 unfiltered360-suite local run and exactCI38224227228 are running; no final-green claim yet.
+- Final Windows full run terminated with process status C0000409 after four passing suites; it is incomplete, with all raw logs retained. The next suite passes52/52 independently. Claudio is running the final full suite on Linux; exact CI38224227228 is still running. No final-green claim yet.
 - Client build passed, lint0errors/14 existing warnings. All earlier failed logs remain retained.
 - Local hidden-path handling uses a verified alias of the same physical checkout and two-module environment resolver outside the PR. All360 files, normal setup/hooks and closed fixture identities remain. Original local DB/WAL/SHM files are preserved.
 

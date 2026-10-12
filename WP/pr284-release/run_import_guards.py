@@ -8,19 +8,33 @@ import sys
 head = sys.argv[1]
 if len(head) != 40 or any(character not in '0123456789abcdef' for character in head):
     raise RuntimeError('Exact source commit required')
-names = ['import_preservation', 'import_startup_checks', 'import_installation', 'import_stage', 'import_sealing',
-    'test_import_preservation', 'test_import_startup_checks', 'test_import_installation', 'test_import_stage', 'test_import_sealing']
+names = ['import_source_graph', 'import_proof_contract', 'import_preservation', 'import_startup_checks',
+    'import_installation', 'import_stage', 'import_sealing', 'known_core_disk_guard_import',
+    'test_import_preservation', 'test_import_startup_checks', 'test_import_installation', 'test_import_stage',
+    'test_import_sealing', 'test_import_authority', 'test_import_layout']
 files = {name: subprocess.check_output(['git', 'show', head + ':WP/pr284-release/' + name + '.py']) for name in names}
 helpers = {'release_support': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
     'startup_common': 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00'}
 raw_helpers = {name: subprocess.check_output(['git', 'show', head + ':WP/forward-ae64f169/' + name + '.py']) for name in helpers}
 if any(hashlib.sha256(raw).hexdigest() != helpers[name] for name, raw in raw_helpers.items()):
     raise RuntimeError('Historical measured helper changed')
-files = dict(raw_helpers, **files)
+extra = {'known_core_disk_guard': 'WP/runtime-containment-ae64f169/known_core_disk_guard.py',
+    'known_core_disk_guard_v2': 'WP/runtime-recovery-kobo/known_core_disk_guard_v2.py',
+    'known_core_disk_guard_v3': 'WP/runtime-recovery-kobo/known_core_disk_guard_v3.py',
+    'runtime_proof_policies': 'WP/runtime-recovery-kobo/proof_contract.py',
+    'test_baseline_confirmation': 'WP/runtime-recovery-kobo/test_baseline_confirmation.py'}
+files = dict(raw_helpers, **{name: subprocess.check_output(['git', 'show', head + ':' + path])
+    for name, path in extra.items()}, **files)
+graph_namespace = {}
+exec(compile(files['import_source_graph'], '/owned-graph.py', 'exec'), graph_namespace)
+tooling, tooling_index = graph_namespace['git_source'](head, lambda *args: subprocess.check_output(['git', *args]))
+for name, raw in tooling.items():
+    if name.endswith('.py'): compile(raw, '/owned-compile-only/' + name, 'exec')
 assets = {name: subprocess.check_output(['git', 'show', head + ':server/prisma/migrations/20261010000100_instrument_import_templates/' + name])
     for name in ['migration.sql', 'fresh-prisma-tables.json', 'pre-prisma-draft-table.sql',
         'upgraded-prisma-draft-table.sql', 'post205-draft-tables.json']}
-payload = {'sourceCommit': head, 'files': {name: {'data': base64.b64encode(raw).decode(),
+payload = {'sourceCommit': head, 'tooling': {name: base64.b64encode(raw).decode() for name, raw in tooling.items()},
+    'toolingIndex': tooling_index, 'files': {name: {'data': base64.b64encode(raw).decode(),
     'sha256': hashlib.sha256(raw).hexdigest()} for name, raw in files.items()},
     'assets': {name: {'data': base64.b64encode(raw).decode(), 'sha256': hashlib.sha256(raw).hexdigest()}
         for name, raw in assets.items()}}
@@ -35,10 +49,12 @@ with tempfile.TemporaryDirectory(prefix='owned-import-assets-') as directory:
   module=types.ModuleType(name);module.__file__='/owned-in-memory-guards/WP/pr284-release/'+name+'.py';sys.modules[name]=module
   exec(compile(raw,module.__file__,'exec'),module.__dict__)
  tests=sys.modules['test_import_preservation'];tests.ASSET_ROOT=root
+ for name in ['test_import_authority','test_import_layout']:
+  sys.modules[name].RAW_TOOLING={n:base64.b64decode(raw) for n,raw in p['tooling'].items()}
  suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromModule(sys.modules[name]) for name in p['files'] if name.startswith('test_'))
  result=unittest.TextTestRunner(verbosity=2).run(suite)
  print(json.dumps({'sourceCommit':p['sourceCommit'],'sourceHashes':{name:item['sha256'] for name,item in p['files'].items()},
-  'assetHashes':{name:item['sha256'] for name,item in p['assets'].items()},'tests':result.testsRun,
+  'assetHashes':{name:item['sha256'] for name,item in p['assets'].items()},'toolingIndex':p['toolingIndex'],'tests':result.testsRun,
   'failures':len(result.failures),'errors':len(result.errors),'skips':len(result.skipped),
   'elapsedSeconds':time.monotonic()-start,'completedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
   'productionDatabaseAccess':False,'status':'PROPOSED_SOURCE_GUARDS_ONLY_NOT_EXECUTION_AUTHORITY'}))

@@ -1,0 +1,8 @@
+{
+  "ObservedUtc": "2026-10-12T08:45:35.1715279Z",
+  "ExitCode": -1073740791,
+  "ExitHex": "C0000409",
+  "MatchingApplicationFaults": [],
+  "AssertionFailureObserved": false,
+  "FullValidation": "INCOMPLETE_DRIVER_TERMINATED"
+}

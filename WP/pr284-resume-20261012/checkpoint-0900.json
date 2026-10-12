@@ -1,0 +1,40 @@
+{
+  "updatedUtc": "2026-10-12T09:00:53.658047+00:00",
+  "applicationHead": "c26591698c1e974a3bf771e5c333578755aef315",
+  "tree": "9b3b77496c3aa2cdad7c7594a0b258ec4b491753",
+  "draft": true,
+  "finalLocalFull": {
+    "session": 61602,
+    "status": "INCOMPLETE_DRIVER_TERMINATED",
+    "exitCode": -1073740791,
+    "exitHex": "C0000409",
+    "passingSuitesBeforeTermination": 4,
+    "assertionFailureObserved": false,
+    "matchingApplicationFaultEvents": 0
+  },
+  "diagnosticNextSuite": {
+    "session": 41863,
+    "status": "PASSED",
+    "suites": 1,
+    "tests": 52,
+    "seconds": 62.419
+  },
+  "finalFocused": {
+    "suites": 8,
+    "tests": 146,
+    "status": "PASSED"
+  },
+  "ciRun": 38224227228,
+  "ciStatus": "IN_PROGRESS",
+  "claudioNativeAcknowledgement": "Final c265 Linux full run underway; exact CI plus his run can serve as full-suite gate",
+  "additionalWindowsFullLaunched": false,
+  "sourcePreparation": "UNREVIEWED_UNMERGED_REFUSE",
+  "productionMutations": 0,
+  "evidenceHashes": {
+    "final-local-driver-windows-fault-0844.json": "cf2f2560d084f9850e27406adc824d670af61c42bab35edb51e4be31de9c6281",
+    "full-server-c2659169-0834.stdout.log": "a9e77af6c1a751d07124573f88365f761614a6599f115669a89db16b39739661",
+    "full-server-c2659169-0834.stderr.log": "0b76f7becf0a375c60ed31240efa8aa7f022eef45c7bb2b7408bdb4bdc1d7f1f",
+    "local-driver-next-suite-0846.stdout.log": "94fed3d5b62e4e5d01142c9310b85663d2bf26da0fe8768fb4ef9232f361f7aa",
+    "local-driver-next-suite-0846.stderr.log": "c443f0db4274170d51e5d8be36c54b5d006d75a8d24d7b94ae4396775a9bc3da"
+  }
+}
