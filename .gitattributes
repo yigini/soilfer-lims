@@ -103,3 +103,5 @@ server/tests/helpers/fixtures/pre200_after293_full_application_schema.sql -text
 server/tests/helpers/instrumentImportReleaseHistoricalFixture.js text eol=lf
 WP/pr284-resume-20261012/** -text
 WP/pr284-release/*.py text eol=lf
+# Exact raw bytes of the separately reviewed202400 held-entry frozen kit.
+WP/pr284-frozen-kit-20261012T202400Z/** -text
