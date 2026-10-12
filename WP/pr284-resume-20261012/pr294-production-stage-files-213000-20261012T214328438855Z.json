@@ -1,0 +1,109 @@
+{
+  "observedUtc": "2026-10-12T21:43:27.708027+00:00",
+  "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z",
+  "unitState": {
+    "Result": "success",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "productionMutations": 0,
+  "liveSqliteConnections": 0,
+  "stages": {
+    "import-dry": {
+      "ownedContainer": {
+        "name": "lims-owned-import-cli-9f39db59f175885695e8ef64",
+        "restartCount": 0,
+        "Running": false,
+        "ExitCode": 0,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-12T21:36:28.473154697Z",
+        "FinishedAt": "2026-10-12T21:36:33.487575647Z"
+      },
+      ".stdout": {
+        "bytes": 705,
+        "mode": "DRY_RUN",
+        "classification": "PRE_200",
+        "totalChanges": 0
+      },
+      ".stderr": {
+        "bytes": 68
+      },
+      "-container.json": {
+        "bytes": 725,
+        "exitCode": 0,
+        "elapsedSeconds": 5.396756382993772,
+        "nodeOptions": "",
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 53227520,
+          "childStatus": 0,
+          "childSignal": null
+        }
+      }
+    },
+    "import-apply": {
+      "ownedContainer": {
+        "name": "lims-owned-import-cli-b3183440f6a3c9aea0e19cf4",
+        "restartCount": 0,
+        "Running": false,
+        "ExitCode": 0,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-12T21:37:14.88356067Z",
+        "FinishedAt": "2026-10-12T21:38:27.534380161Z"
+      },
+      ".stdout": {
+        "bytes": 1557,
+        "mode": "APPLIED",
+        "classification": "COMPLETE_200",
+        "totalChanges": 1
+      },
+      ".stderr": {
+        "bytes": 68
+      },
+      "-container.json": {
+        "bytes": 731,
+        "exitCode": 0,
+        "elapsedSeconds": 73.01557879500615,
+        "nodeOptions": "",
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 97763328,
+          "childStatus": 0,
+          "childSignal": null
+        }
+      }
+    },
+    "import-repeat": {
+      "ownedContainer": {
+        "name": "lims-owned-import-cli-f1904b8d0a8a3033d4699369",
+        "restartCount": 0,
+        "Running": false,
+        "ExitCode": 0,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-12T21:42:21.551584641Z",
+        "FinishedAt": "2026-10-12T21:42:27.915523144Z"
+      },
+      ".stdout": {
+        "bytes": 1516,
+        "mode": "NO_OP",
+        "classification": "COMPLETE_200",
+        "totalChanges": 0
+      },
+      ".stderr": {
+        "bytes": 69
+      },
+      "-container.json": {
+        "bytes": 735,
+        "exitCode": 0,
+        "elapsedSeconds": 6.789684330011369,
+        "nodeOptions": "",
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 106627072,
+          "childStatus": 0,
+          "childSignal": null
+        }
+      }
+    },
+    "production-jobs-off": {},
+    "production-jobs-on": {}
+  }
+}

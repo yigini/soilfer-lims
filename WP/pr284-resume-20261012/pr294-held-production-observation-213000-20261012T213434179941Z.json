@@ -1,0 +1,21 @@
+{
+  "observedUtc": "2026-10-12T21:34:33.423397+00:00",
+  "unitState": {
+    "Result": "success",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "journalTail": "Starting /usr/bin/python3 -B /opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z/frozen/deploy_import.py --execute-new-reviewed-import-gate...\nStarted /usr/bin/python3 -B /opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z/frozen/deploy_import.py --execute-new-reviewed-import-gate.\n{\"stage\": \"beforeQuiesceGuardsPassed\", \"utc\": \"2026-10-12T21:33:00.521788+00:00\"}\n{\"stage\": \"writersStopped\", \"utc\": \"2026-10-12T21:33:08.547090+00:00\"}\n",
+  "receipt": {
+    "sha256": "a957711dcdcc3b3c2cfb96554a67f8a922eaac34a66ddfe7577feac9154683f0",
+    "mode": "0o644",
+    "status": "IMPORT_FORWARD_IN_PROGRESS",
+    "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "timesUtc": {
+      "beforeQuiesceGuardsPassed": "2026-10-12T21:33:00.521788+00:00",
+      "writersStopped": "2026-10-12T21:33:08.547090+00:00"
+    }
+  },
+  "runningLimsNames": []
+}

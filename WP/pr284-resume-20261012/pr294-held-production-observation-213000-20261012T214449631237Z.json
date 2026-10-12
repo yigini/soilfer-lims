@@ -1,0 +1,23 @@
+{
+  "observedUtc": "2026-10-12T21:44:48.869907+00:00",
+  "unitState": {
+    "Result": "success",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "journalTail": "Starting /usr/bin/python3 -B /opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z/frozen/deploy_import.py --execute-new-reviewed-import-gate...\nStarted /usr/bin/python3 -B /opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z/frozen/deploy_import.py --execute-new-reviewed-import-gate.\n{\"stage\": \"beforeQuiesceGuardsPassed\", \"utc\": \"2026-10-12T21:33:00.521788+00:00\"}\n{\"stage\": \"writersStopped\", \"utc\": \"2026-10-12T21:33:08.547090+00:00\"}\n{\"stage\": \"stoppedHashedBackupVerified\", \"utc\": \"2026-10-12T21:35:17.673148+00:00\"}\n{\"stage\": \"nativeImportInstallerAttemptedForwardOnly\", \"utc\": \"2026-10-12T21:35:17.846199+00:00\"}\n",
+  "receipt": {
+    "sha256": "cc7166fbf0e98a2ac43aba0b4162669d5cbb1f53c39c39e74fe2da0053acc753",
+    "mode": "0o644",
+    "status": "IMPORT_FORWARD_IN_PROGRESS",
+    "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "timesUtc": {
+      "beforeQuiesceGuardsPassed": "2026-10-12T21:33:00.521788+00:00",
+      "writersStopped": "2026-10-12T21:33:08.547090+00:00",
+      "stoppedHashedBackupVerified": "2026-10-12T21:35:17.673148+00:00",
+      "nativeImportInstallerAttemptedForwardOnly": "2026-10-12T21:35:17.846199+00:00"
+    }
+  },
+  "runningLimsNames": []
+}
