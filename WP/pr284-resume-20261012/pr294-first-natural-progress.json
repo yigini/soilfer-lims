@@ -1,0 +1,8 @@
+{
+  "recordedUtc": "2026-10-12T15:29:31.940646+00:00",
+  "status": "FIRST_NATURAL_PRESERVATION_PASSED_PROOF_STILL_ACTIVE",
+  "observation": "pr294-sidecar-proof-observation-20261012T152827522160Z.json",
+  "observationSha256": "c1fe4ef08b8e639925f334cbbfa2eeedfef06b8be546a9d7b7ecb530f58d7a4e",
+  "firstPreservationSha256": "160eba70a768f41dec84c949691a55c1e925586f1c0f9f9863143d3db9cd9bed",
+  "productionOperations": 0
+}
