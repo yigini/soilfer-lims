@@ -1,0 +1,8 @@
+{
+  "finishedUtc": "2026-10-12T15:52:30.366803+00:00",
+  "exitCode": 1,
+  "sourceCommit": "5fa7e65f3d13a04f270e90e0b4b129f8eaf3296e",
+  "sourceReviewId": 6127651539,
+  "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T154640Z",
+  "productionOperations": 0
+}

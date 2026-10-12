@@ -1,0 +1,32 @@
+{
+  "observedUtc": "2026-10-12T15:53:29.984985+00:00",
+  "status": "READ_ONLY_FREEZE_TIMEOUT_DIAGNOSIS",
+  "packageRoot": "/opt/lims/releases/instrument-import-package-959d17e1-20261012T154640Z",
+  "packageExists": true,
+  "executionRoot": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T154640Z",
+  "executionRootExists": false,
+  "files": {},
+  "freezerProcesses": [],
+  "proofUnitState": {
+    "ExecMainStatus": "0",
+    "ActiveState": "inactive",
+    "SubState": "dead"
+  },
+  "originalProofReceiptSha256": "f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce",
+  "liveImage": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+  "liveHealthy": true,
+  "restartCount": 0,
+  "https": {
+    "/api/health": {
+      "httpStatus": 200,
+      "tlsVerified": true
+    },
+    "/login": {
+      "httpStatus": 200,
+      "tlsVerified": true
+    }
+  },
+  "freeBytes": 73517789184,
+  "productionOperations": 0,
+  "sqliteConnections": 0
+}

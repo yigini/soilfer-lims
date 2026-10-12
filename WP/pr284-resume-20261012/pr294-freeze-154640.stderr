@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\pr284-resume-20261012\production-source-export-5fa7e65f\export_freeze_import_kit.py", line 81, in <module>
+    if __name__ == '__main__': main()
+                               ^^^^^^
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\pr284-resume-20261012\production-source-export-5fa7e65f\export_freeze_import_kit.py", line 77, in main
+    require(result.returncode == 0, 'New original kit freeze refused: ' + result.stderr)
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\pr284-resume-20261012\production-source-export-5fa7e65f\runtime_proof_policies.py", line 42, in require
+    raise RuntimeError(message)
+RuntimeError: New original kit freeze refused: Traceback (most recent call last):
+  File "<stdin>", line 15, in <module>
+  File "/usr/lib64/python3.9/subprocess.py", line 507, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/usr/lib64/python3.9/subprocess.py", line 1134, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib64/python3.9/subprocess.py", line 1996, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib64/python3.9/subprocess.py", line 1178, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/usr/bin/python3', '-B', '/opt/lims/releases/instrument-import-package-959d17e1-20261012T154640Z/freeze_import.py', '/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z', '/opt/lims/releases/instrument-import-release-959d17e1-20261012T154640Z']' timed out after 300 seconds
+
