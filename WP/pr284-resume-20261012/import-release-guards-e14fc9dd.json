@@ -1,0 +1,24 @@
+[
+  {
+    "platform": "windows",
+    "sourceCommit": "e14fc9dd4d77861bf846b53fe5bc2d358534e530",
+    "tests": 138,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "completedUtc": "2026-10-12T11:38:58.319663+02:00",
+    "stdoutSHA": "D2CA3819A127815D763A0B57901F80F1C68BD914C689FE8C3FB1131CF385C2EC",
+    "stderrSHA": "578ADEE920E8666FEC8B042B2A22F1B7AE56AC396160770C46C6DD47E96D1886"
+  },
+  {
+    "platform": "linux",
+    "sourceCommit": "e14fc9dd4d77861bf846b53fe5bc2d358534e530",
+    "tests": 138,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "completedUtc": "2026-10-12T11:39:05.378163+02:00",
+    "stdoutSHA": "66E66F1FA1396559629E1B9F94B5B192711D666E5E3F34A05B172530ABD3DF83",
+    "stderrSHA": "222DBFBB6B0D48A44FFFBD3BC6B31A27F2C3C49C168B5DE163E722DA70DBD628"
+  }
+]
