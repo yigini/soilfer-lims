@@ -1,0 +1,6324 @@
+{
+  "observedUtc": "2026-10-12T15:32:46.898504+00:00",
+  "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "unit": "lims-owned-instrument-import-proof-959d17e1-20261012t144000z.service",
+  "unitState": {
+    "Result": "success",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "files": {
+    "migration.sql": {
+      "bytes": 4342,
+      "mode": "0o400"
+    },
+    "upstream-first-completion.json": {
+      "bytes": 136941,
+      "mode": "0o400"
+    },
+    "import_sealing.py": {
+      "bytes": 5918,
+      "mode": "0o400"
+    },
+    "readonly-smoke.stdout": {
+      "bytes": 698,
+      "mode": "0o644"
+    },
+    "import-repeat.stdout": {
+      "bytes": 1516,
+      "mode": "0o400"
+    },
+    "import-repeat-preservation.json": {
+      "bytes": 1353,
+      "mode": "0o400"
+    },
+    "post205-draft-tables.json": {
+      "bytes": 8105,
+      "mode": "0o400"
+    },
+    "candidate-jobs-on-startup.stdout": {
+      "bytes": 100947,
+      "mode": "0o644"
+    },
+    "candidate-jobs-on-memory.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "known_core_disk_guard_v2.py": {
+      "bytes": 5278,
+      "mode": "0o400"
+    },
+    "postflight-policy.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-apply.stdout": {
+      "bytes": 1557,
+      "mode": "0o400"
+    },
+    "candidate-jobs-on-readiness.json": {
+      "bytes": 629,
+      "mode": "0o400"
+    },
+    "import-install-preservation.json": {
+      "bytes": 15167,
+      "mode": "0o400"
+    },
+    "import-repeat.stderr": {
+      "bytes": 68,
+      "mode": "0o400"
+    },
+    "kobo_copy_preservation.py": {
+      "bytes": 16701,
+      "mode": "0o400"
+    },
+    "postflight-policy.cjs": {
+      "bytes": 4035,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard.py": {
+      "bytes": 5984,
+      "mode": "0o400"
+    },
+    "unit.stdout": {
+      "bytes": 5309,
+      "mode": "0o644"
+    },
+    "capture_kobo_fetch.py": {
+      "bytes": 4767,
+      "mode": "0o400"
+    },
+    "postflight-reference.stdout": {
+      "bytes": 150,
+      "mode": "0o644"
+    },
+    "candidate-jobs-on-run.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "candidate-jobs-off-readiness.json": {
+      "bytes": 630,
+      "mode": "0o400"
+    },
+    "import-apply.stderr": {
+      "bytes": 68,
+      "mode": "0o400"
+    },
+    "api-postflight.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "postflight-qc-runs.stdout": {
+      "bytes": 393,
+      "mode": "0o644"
+    },
+    "import_startup_checks.py": {
+      "bytes": 5448,
+      "mode": "0o400"
+    },
+    "export_launch_import_proof.py": {
+      "bytes": 7468,
+      "mode": "0o400"
+    },
+    "candidate-jobs-off-stop.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "upstream-before-start.json": {
+      "bytes": 136941,
+      "mode": "0o400"
+    },
+    "import-dry-retained-inspect.stdout": {
+      "bytes": 9287,
+      "mode": "0o644"
+    },
+    "rehearse_import.py": {
+      "bytes": 26511,
+      "mode": "0o400"
+    },
+    "fresh-prisma-tables.json": {
+      "bytes": 2877,
+      "mode": "0o400"
+    },
+    "import-repeat-container.json": {
+      "bytes": 732,
+      "mode": "0o400"
+    },
+    "candidate-jobs-off-run.stdout": {
+      "bytes": 65,
+      "mode": "0o644"
+    },
+    "unit.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import_installation.py": {
+      "bytes": 7579,
+      "mode": "0o400"
+    },
+    "fresh-protected-state.json": {
+      "bytes": 7465051,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard_v3.py": {
+      "bytes": 5625,
+      "mode": "0o400"
+    },
+    "import-apply-retained-inspect.stdout": {
+      "bytes": 9263,
+      "mode": "0o644"
+    },
+    "readonly-smoke.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "postflight-auth.stdout": {
+      "bytes": 150,
+      "mode": "0o644"
+    },
+    "postflight-roles.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "upgraded-prisma-draft-table.sql": {
+      "bytes": 874,
+      "mode": "0o400"
+    },
+    "postflight-qc-runs.cjs": {
+      "bytes": 4091,
+      "mode": "0o400"
+    },
+    "import_stage.py": {
+      "bytes": 10714,
+      "mode": "0o400"
+    },
+    "import-dry-retained-inspect.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "candidate-jobs-off-run.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-dry.stderr": {
+      "bytes": 68,
+      "mode": "0o400"
+    },
+    "postflight-auth.cjs": {
+      "bytes": 2045,
+      "mode": "0o400"
+    },
+    "readonly-smoke.cjs": {
+      "bytes": 3255,
+      "mode": "0o400"
+    },
+    "import-repeat-retained-inspect.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "fresh-live-backup.db": {
+      "bytes": 563322880,
+      "mode": "0o400"
+    },
+    "postflight-roles.stdout": {
+      "bytes": 343,
+      "mode": "0o644"
+    },
+    "pre-prisma-draft-table.sql": {
+      "bytes": 769,
+      "mode": "0o400"
+    },
+    "after-first-sync.db-wal": {
+      "bytes": 0,
+      "mode": "0o400"
+    },
+    "postflight-policy.stdout": {
+      "bytes": 482,
+      "mode": "0o644"
+    },
+    "candidate-jobs-off-startup.stderr": {
+      "bytes": 1598,
+      "mode": "0o644"
+    },
+    "candidate-jobs-off-startup.stdout": {
+      "bytes": 100972,
+      "mode": "0o644"
+    },
+    "postflight-reference.cjs": {
+      "bytes": 2096,
+      "mode": "0o400"
+    },
+    "disk-allocation-observations.jsonl": {
+      "bytes": 41099028,
+      "mode": "0o644"
+    },
+    "startup_common.py": {
+      "bytes": 13858,
+      "mode": "0o400"
+    },
+    "candidate-jobs-off-stop.stdout": {
+      "bytes": 70,
+      "mode": "0o644"
+    },
+    "release_support.py": {
+      "bytes": 20330,
+      "mode": "0o400"
+    },
+    "after-first-sync.db": {
+      "bytes": 563322880,
+      "mode": "0o400"
+    },
+    "postflight-reference.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-dry.stdout": {
+      "bytes": 705,
+      "mode": "0o400"
+    },
+    "installed-protected-state.json": {
+      "bytes": 7476444,
+      "mode": "0o400"
+    },
+    "postflight-qc-runs.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "instrument-import-attempt.json": {
+      "bytes": 281,
+      "mode": "0o400"
+    },
+    "candidate-jobs-on-startup.stderr": {
+      "bytes": 1598,
+      "mode": "0o644"
+    },
+    "after-first-sync.db-shm": {
+      "bytes": 32768,
+      "mode": "0o400"
+    },
+    "api-postflight.stdout": {
+      "bytes": 2673,
+      "mode": "0o644"
+    },
+    "target-pin.json": {
+      "bytes": 1706,
+      "mode": "0o400"
+    },
+    "import_proof_contract.py": {
+      "bytes": 15238,
+      "mode": "0o400"
+    },
+    "candidate-jobs-off-memory.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "runtime_proof_policies.py": {
+      "bytes": 15922,
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 8418,
+      "mode": "0o400"
+    },
+    "import_preservation.py": {
+      "bytes": 9307,
+      "mode": "0o400"
+    },
+    "candidate-jobs-off-memory.stdout": {
+      "bytes": 10,
+      "mode": "0o644"
+    },
+    "prepare_import_build.py": {
+      "bytes": 11009,
+      "mode": "0o400"
+    },
+    "postflight-auth.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "first-sync-preservation.json": {
+      "bytes": 93951,
+      "mode": "0o400"
+    },
+    "candidate-jobs-on-run.stdout": {
+      "bytes": 65,
+      "mode": "0o644"
+    },
+    "import_source_graph.py": {
+      "bytes": 5771,
+      "mode": "0o400"
+    },
+    "build_import.py": {
+      "bytes": 8204,
+      "mode": "0o400"
+    },
+    "import-repeat-retained-inspect.stdout": {
+      "bytes": 9264,
+      "mode": "0o644"
+    },
+    "known_core_disk_guard_import.py": {
+      "bytes": 3839,
+      "mode": "0o400"
+    },
+    "candidate-rehearsal-authority.json": {
+      "bytes": 22636,
+      "mode": "0o400"
+    },
+    "import-apply-container.json": {
+      "bytes": 728,
+      "mode": "0o400"
+    },
+    "postflight-roles.cjs": {
+      "bytes": 12281,
+      "mode": "0o400"
+    },
+    "import-dry-copy-authority.json": {
+      "bytes": 707,
+      "mode": "0o400"
+    },
+    "import-apply-retained-inspect.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-dry-container.json": {
+      "bytes": 723,
+      "mode": "0o400"
+    },
+    "candidate-jobs-on-memory.stdout": {
+      "bytes": 10,
+      "mode": "0o644"
+    }
+  },
+  "receipt": null,
+  "containers": [
+    {
+      "name": "soilfer-lims",
+      "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+      "restartCount": 0,
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "OOMKilled": false,
+        "ExitCode": 0,
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-12T17:31:58.725138813+02:00",
+              "End": "2026-10-12T17:31:58.805839694+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:32:08.807502803+02:00",
+              "End": "2026-10-12T17:32:08.902073231+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:32:18.903684898+02:00",
+              "End": "2026-10-12T17:32:18.99926548+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:32:29.001305189+02:00",
+              "End": "2026-10-12T17:32:29.086296706+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:32:39.087465122+02:00",
+              "End": "2026-10-12T17:32:39.168377924+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "memoryBytes": 805306368
+    },
+    {
+      "name": "lims-owned-instrument-import-proof-959d17e1-20261012t144000z-jobs-on",
+      "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+      "restartCount": 0,
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "OOMKilled": false,
+        "ExitCode": 0,
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-12T17:32:01.163666954+02:00",
+              "End": "2026-10-12T17:32:01.242785431+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:32:11.244344275+02:00",
+              "End": "2026-10-12T17:32:11.328453125+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:32:21.330862424+02:00",
+              "End": "2026-10-12T17:32:21.409569859+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:32:31.411504345+02:00",
+              "End": "2026-10-12T17:32:31.510376374+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:32:41.512636538+02:00",
+              "End": "2026-10-12T17:32:41.585175945+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "memoryBytes": 805306368
+    },
+    {
+      "name": "lims-owned-instrument-import-proof-959d17e1-20261012t144000z-jobs-off",
+      "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+      "restartCount": 0,
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "OOMKilled": false,
+        "ExitCode": 137,
+        "Health": {
+          "Status": "unhealthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-12T17:13:31.76500598+02:00",
+              "End": "2026-10-12T17:13:31.847879837+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:13:42.001118355+02:00",
+              "End": "2026-10-12T17:13:42.104757604+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:13:52.106480726+02:00",
+              "End": "2026-10-12T17:13:52.188642911+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:14:02.190219189+02:00",
+              "End": "2026-10-12T17:14:02.287158579+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:14:12.289124558+02:00",
+              "End": "2026-10-12T17:14:12.381045082+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "memoryBytes": 805306368
+    }
+  ],
+  "outputs": {
+    "unit.stdout": "{\"stage\": \"candidate-jobs-off\", \"elapsedSeconds\": 39.01778445999662, \"pending\": true}\n{\"stage\": \"candidate-jobs-off\", \"elapsedSeconds\": 78.15844998900138, \"pending\": true}\n{\"stage\": \"candidate-jobs-on\", \"elapsedSeconds\": 40.52634383300028, \"pending\": true}\n{\"stage\": \"candidate-jobs-on\", \"elapsedSeconds\": 80.0981449670071, \"pending\": true}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:18:35.536764+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 204115968, \"minimumFreeBytes\": 75799347200}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:18:46.238725+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75799166976}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:20:16.205725+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75235344384}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:20:46.943212+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75235336192}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:21:17.717770+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75235180544}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:21:48.542794+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75234979840}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:22:19.261496+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75234791424}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:22:50.000552+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75234570240}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:23:20.811136+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75234357248}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:23:51.495136+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75234156544}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:24:22.173516+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75234004992}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:24:52.894853+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75233832960}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:25:23.597914+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75233673216}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:25:54.395861+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75233492992}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:26:25.190642+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75233345536}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:26:55.946694+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75233157120}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:27:26.674865+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75232997376}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:27:57.443331+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75232808960}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:28:28.298797+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75232632832}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:28:59.453738+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75232473088}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:29:30.429571+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75232813056}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:30:01.304698+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75232653312}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:30:32.211566+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75232497664}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:31:03.018113+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75232325632}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:31:33.792272+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75232104448}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:32:04.484746+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75231944704}\n{\"stage\": \"candidate-natural-kobo-observation\", \"utc\": \"2026-10-12T15:32:35.285814+00:00\", \"healthy\": true, \"restartCount\": 0, \"peakBytes\": 284602368, \"minimumFreeBytes\": 75231797248}\n",
+    "unit.stderr": ""
+  },
+  "progress": {
+    "import-dry-container.json": {
+      "sha256": "fe40e2e14903fcf4d0ec56317ecd5a380c93b10ef47c08b2adca11fec07c1b8b",
+      "value": {
+        "containerName": "lims-owned-import-cli-2b2a9dcf8451d704b09697ec",
+        "owner": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z:import-dry",
+        "memoryLimitBytes": 805306368,
+        "memorySwapLimitBytes": 805306368,
+        "networkMode": "none",
+        "timeoutSeconds": 600,
+        "elapsedSeconds": 7.368492781999521,
+        "nodeOptions": "",
+        "exitCode": 0,
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 91516928,
+          "childStatus": 0,
+          "childSignal": null
+        },
+        "retainedOwnedContainer": true,
+        "retainedArtifacts": {
+          "import-dry.stdout": "d96dc8241e3edbc9d2a2e794a0edbb6dd592f282f978571380d37544446058f3",
+          "import-dry.stderr": "56a6f4c1b7a51ebf3238ab724908c39c8fea65245b38430b834aafa6d7b8d78a"
+        }
+      }
+    },
+    "import-apply-container.json": {
+      "sha256": "7387ebac3d8fd8eac7362c68476504a7f7cdf4c4d7f0a3489595fa94c00eec90",
+      "value": {
+        "containerName": "lims-owned-import-cli-5b5879059893048f9d30178a",
+        "owner": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z:import-apply",
+        "memoryLimitBytes": 805306368,
+        "memorySwapLimitBytes": 805306368,
+        "networkMode": "none",
+        "timeoutSeconds": 600,
+        "elapsedSeconds": 74.2072544519906,
+        "nodeOptions": "",
+        "exitCode": 0,
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 92438528,
+          "childStatus": 0,
+          "childSignal": null
+        },
+        "retainedOwnedContainer": true,
+        "retainedArtifacts": {
+          "import-apply.stdout": "b6c0e0d15884446160dceaff97367fd976ff79f17bbdd120486835463bdc8245",
+          "import-apply.stderr": "bb266b268000107494fd2bbbee74cbb12f2d19f48ed095683e134e6584551e7b"
+        }
+      }
+    },
+    "import-repeat-container.json": {
+      "sha256": "6be5b70cd4b380b84e8489c1ce1aeb569700e654fb13b2a34c68b92536d1a91d",
+      "value": {
+        "containerName": "lims-owned-import-cli-858ccfc7be8e9f5e98b7f750",
+        "owner": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z:import-repeat",
+        "memoryLimitBytes": 805306368,
+        "memorySwapLimitBytes": 805306368,
+        "networkMode": "none",
+        "timeoutSeconds": 600,
+        "elapsedSeconds": 6.068385352991754,
+        "nodeOptions": "",
+        "exitCode": 0,
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 54587392,
+          "childStatus": 0,
+          "childSignal": null
+        },
+        "retainedOwnedContainer": true,
+        "retainedArtifacts": {
+          "import-repeat.stdout": "241c29108bd722ba20b51d810da0bc232db4efdd1d36d13dc78d7d3e70c884ff",
+          "import-repeat.stderr": "4df899e7b48f535ac59ac6bca0bdfce5a7b5779c8b92ade3a2015f2dc1753307"
+        }
+      }
+    },
+    "import-install-preservation.json": {
+      "sha256": "18e1379bac2f9b93696cf97e19a4d68e52aa3ff2e85053adf8e9d3c5d2efaafe",
+      "value": {
+        "status": "READ_ONLY_EXACT_IMPORT_DELTA_PASS",
+        "originalTableCount": 104,
+        "originalReceiptCount": 38,
+        "candidateTableCount": 106,
+        "candidateReceiptCount": 39,
+        "allOriginalRowsAndSchemaPreserved": true,
+        "newTables": [
+          "ImportTemplate",
+          "InstrumentImportReceipt"
+        ],
+        "historicalDraftLinks": 0,
+        "scientificChanges": 0,
+        "originalRows": {
+          "Analysis": {
+            "count": 216,
+            "sha256": "5af9f232fbd41ecaa80d8a75cf0a13a9059adabb83f2895800a3bf505e1d4160"
+          },
+          "AnalysisCategory": {
+            "count": 19,
+            "sha256": "b26d3ddc40849d4291186a16965334cf3bfad183cef1c53f7dbfc679d1e242d9"
+          },
+          "AnalysisGroup": {
+            "count": 23,
+            "sha256": "e5535815f4fdc7e33ccef5955a8dae0787d1a14765f6093f69ee4b07569e6a82"
+          },
+          "ApiKey": {
+            "count": 4,
+            "sha256": "69905288549d5d9d9171b231483e019a759eb6e192c2bfac4200d13f85035091"
+          },
+          "AuditLog": {
+            "count": 12853,
+            "sha256": "261bd341c7e7ac137e7957c46a99e5c11ea7773087eca3f13cc200a84dc2172d"
+          },
+          "Batch": {
+            "count": 6,
+            "sha256": "b77a95062fa0115aec0770f6d34600cc6c1800b710e48b71d380aafba196c7c8"
+          },
+          "BatchAnalyte": {
+            "count": 6,
+            "sha256": "2ccf1f89ec85f09a835d380ff79192bf254820c84d1a33943dfe1e1e54ec8f4f"
+          },
+          "BatchDisposition": {
+            "count": 1,
+            "sha256": "80ecf7c19e9920800dc1d4668f86cb22412a0524657c5b4ef9433bc62f6bba0e"
+          },
+          "BatchEvent": {
+            "count": 28,
+            "sha256": "62ae64c863fb8664d49fc745593adbe2ecc9c6211063345ee269938434ff566d"
+          },
+          "BatchPosition": {
+            "count": 33,
+            "sha256": "760141d69879913bb941a865d2801373e042dc6464189a4929600f9a1c126a56"
+          },
+          "BatchPositionReference": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "BatchPositionWorkItem": {
+            "count": 15,
+            "sha256": "fb34ce15b6269fb57c132555ce6c1101ce4aeba90df1b676493111f03ebe0e72"
+          },
+          "BatchQcResult": {
+            "count": 18,
+            "sha256": "9777d6de101db10f5f2d6660f70681b8ee5d2d19d3c72f7baad6167742a1e9d6"
+          },
+          "BatchReagentLot": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "CalcTemplate": {
+            "count": 8,
+            "sha256": "3e81dbad5dafed347fee9a35179115ea552d758d1836e245c76443f462508c5b"
+          },
+          "CalcTemplateActivation": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "CalibrationCurve": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "CalibrationPoint": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "CommandReceipt": {
+            "count": 1,
+            "sha256": "c5f465670a39af62ab868c97e912923ec2e6a86ae4dc981f291127df2c1d60df"
+          },
+          "Consignment": {
+            "count": 1,
+            "sha256": "5688e8f1b094f0c9828c666c32780201ee85c9f682cf05dbab02ea217109bb59"
+          },
+          "CrossCheckEvaluation": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "EquipmentAsset": {
+            "count": 42,
+            "sha256": "48f48d5eca56465e3afcfd375c8bbe84745297a450791d31df2cbf2ae6d72b4e"
+          },
+          "EquipmentEvent": {
+            "count": 4,
+            "sha256": "f2f4e0bf5b60c64c339502b51e7f1805b9305bc870d651192fb986b95eea3e23"
+          },
+          "EquipmentMethodEligibility": {
+            "count": 14,
+            "sha256": "22a79210b686f0bee6034f2105b743b47fb91b8bdb4810b0ea9f428caf57fdea"
+          },
+          "EquipmentQualification": {
+            "count": 42,
+            "sha256": "fca61f7d071c9dc3ba09f8a106f8b694677fc14547d4e704fac681130287e8cb"
+          },
+          "EquipmentScheduleRule": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ExternalMapping": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "GlobalAppearanceSetting": {
+            "count": 1,
+            "sha256": "468af72f7e73bcfb84b6e7052b67792a95c899550c8579a7b925daa75096a79c"
+          },
+          "HelpArticle": {
+            "count": 113,
+            "sha256": "b37b19f5cd90d1e720324223909e76daca57649ff7932ad77b8afcb89b06e0b6"
+          },
+          "HelpFeedback": {
+            "count": 6,
+            "sha256": "fb1bd9ad2f2d2a5b04245d533f359019ef3791afbf9aacfe58e5513c50602eb3"
+          },
+          "HelpLabNote": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "HelpLocaleRevision": {
+            "count": 565,
+            "sha256": "14965d065791248bf55d149dc476796f137fbad465324373309aedde17f90192"
+          },
+          "HelpPublication": {
+            "count": 366,
+            "sha256": "d6f2df77bbfd99785f251e021fde1e797faac37e0a86ed3ad1816b34f3b7f045"
+          },
+          "HelpRevision": {
+            "count": 113,
+            "sha256": "129b70d2b04cb027fcc8dcdb2554e61e84a3fe4b32f8940d9e7ed4624e796ba1"
+          },
+          "HelpSupportConfig": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "InventoryItem": {
+            "count": 127,
+            "sha256": "d47f11d93c502d2754b983c15d6c0278eb34e0e60289df242f51f5aec941e583"
+          },
+          "InventoryLocation": {
+            "count": 35,
+            "sha256": "ec3a75b3d5f2530e512336a8815f6c88daa9b0449565866e9c57fb8986269502"
+          },
+          "InventoryLot": {
+            "count": 5,
+            "sha256": "906f766c947b05174cf67fbf060a1b6080db27211bbca0e3e10a299ed2f6d0e4"
+          },
+          "InventoryReservation": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "InventoryTransaction": {
+            "count": 11,
+            "sha256": "7f191eb057208dbac17172bde8aaf30cac38c1575c1f2e341bd6073c0e130a87"
+          },
+          "KoboConfig": {
+            "count": 11,
+            "sha256": "07775aae9b1fcc6cfd3591c5ce16ce7552f6fe14893e44717e78ce4c531e127a"
+          },
+          "Lab": {
+            "count": 10,
+            "sha256": "ea2b612c81a6afe44e1b2a3f36368bc55c91df9eecfc1727907e92aa20efaaa6"
+          },
+          "LabAppearanceSetting": {
+            "count": 1,
+            "sha256": "dba6f69aafc547318d3a90c4553df42b250244845439b762e843ae412a6a0b9e"
+          },
+          "LabLifecycleState": {
+            "count": 1,
+            "sha256": "679cc6877f3b94d572ea7580f3e4a70acb8b587e624ad8be04f1feee0b9d62a3"
+          },
+          "LabMethodDefault": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "LabPolicy": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "LabPolicyOverride": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "LabSequence": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Language": {
+            "count": 5,
+            "sha256": "761d8388189c422ba81859af0a1c5a81b41cb6ba741016cfcb6ea5a13d37f852"
+          },
+          "Message": {
+            "count": 116,
+            "sha256": "d1148111b3c3c2a417795ee4aa050141b82df015f5fc78aacd93fe1c83907ee8"
+          },
+          "MethodReference": {
+            "count": 73,
+            "sha256": "f9afd15d4b336b048ab16e2c8e8cf75cb4f515cdbc76bd5ebe67bfe2504ee582"
+          },
+          "MethodRequirement": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Methodology": {
+            "count": 590,
+            "sha256": "bd22af870919d6654e6d85b2181f0a19b51c94686ca5578f76086c1a8f0bba31"
+          },
+          "NonconformityReport": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Notification": {
+            "count": 227,
+            "sha256": "6dbb591dc5688dd3456bec43c0695ebe74384f2b4baea68896574355315bcfc3"
+          },
+          "OperationalGate": {
+            "count": 6,
+            "sha256": "7e187a9b9a6c198f3d6aa2e3b7174a213ffb6b7173d74d3c733b688771aa701a"
+          },
+          "OrderLine": {
+            "count": 119,
+            "sha256": "8352bfd2d3163da416e03529b0c35e64458f6f9eb6e783744b991980d1238df7"
+          },
+          "PreparationRecord": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ProficiencyRound": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Project": {
+            "count": 6,
+            "sha256": "a335b1b703b56ec4e3a28f4bcf3921d2bd17cebd8e898cbc98463ab83104664a"
+          },
+          "ProjectLab": {
+            "count": 10,
+            "sha256": "d896e38946204228cffd4a9ab8a804ba7ff7f7b009b53809ec7f0c04fc0e0267"
+          },
+          "QcEvaluation": {
+            "count": 6,
+            "sha256": "295c32dc2fa985fb55f61b583dfa59a71260daacb0725f7b50c706fa2c3e4ccb"
+          },
+          "QcMeasurement": {
+            "count": 24,
+            "sha256": "3fc1c1c14850b61cbac11ab1a71d1dc537d4b5bbaa0d64ecbaaf3f754ed6d10d"
+          },
+          "QcRule": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ReferenceMaterial": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ReferenceValue": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Report": {
+            "count": 4,
+            "sha256": "d94b6f1b0086bd83f6e85095b63911844295eda8ce4dda2bc29bb696526dda22"
+          },
+          "ReportAccessLog": {
+            "count": 4,
+            "sha256": "5f7326baa6236012f7eeeed00dc83ce8de013b42719621711010c01bec8b783f"
+          },
+          "ReportAmendmentWithdrawal": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ReportSequence": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ReportShareLink": {
+            "count": 7,
+            "sha256": "da42ed81025e229f76f1127befcd77dbfd7929e53f0abc2fd21d973fbc3074be"
+          },
+          "ReportedValueSelection": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Result": {
+            "count": 19,
+            "sha256": "59d5c18fc8afb9fa046a0d7a259ce9c0c4d43cf247bc67e5287d178de8c7b63a"
+          },
+          "ResultCalculation": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ResultEvidenceEvent": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ResultOverrideRequest": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ReviewDecision": {
+            "count": 7,
+            "sha256": "4e5a29c9519bea56888728b0fc2c173a9cbfb2ebd5533fe3d4fe001a96d71976"
+          },
+          "Sample": {
+            "count": 38928,
+            "sha256": "a6dedc02356427fd8f1381b584ba6f5ce5a547d75cbc26652b74141dda814b48"
+          },
+          "SampleAmendment": {
+            "count": 1,
+            "sha256": "64915c5cdafe6172044ce7fc3823a7d7925dded3f279f7d2803b0011ed951a1c"
+          },
+          "SampleAmendmentAttempt": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "SampleHold": {
+            "count": 10,
+            "sha256": "48a5544d2e660f4b8b606b6a0494897536db45fd62a1daaa49ca014434fef930"
+          },
+          "SampleOrderRevision": {
+            "count": 13,
+            "sha256": "fcb19dc0a929fa3b0d203da2a8ec2b13f0d43ff6f106312df57f35847a91b598"
+          },
+          "SpectralData": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "StaffInvitation": {
+            "count": 3,
+            "sha256": "81930a5c98a56276edc273dc7c4339d1295c51734cac20ba519aa2cdf3259ca6"
+          },
+          "StaffRecoveryGrant": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Submission": {
+            "count": 7,
+            "sha256": "8d04653c3c5f182bc7abfcdef72142f0c166919c2fc4e2cf37f2396c26cac486"
+          },
+          "SystemSetting": {
+            "count": 1,
+            "sha256": "e3ab8859afcfce431e7a308bfbd1e2e990057ea522ba700bd0d0fb6337acdac7"
+          },
+          "Unit": {
+            "count": 36,
+            "sha256": "19d67d8f16c0ced85928ce2d9457f2676ea2ae1e165c4ce57aaf3a13b2b4a816"
+          },
+          "User": {
+            "count": 49,
+            "sha256": "f62430eccd21a79fe625a4b5bf15cb2d8fa32f62fc4ac4646e4134673dfde36f"
+          },
+          "UserBenchCredential": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "WorkAttempt": {
+            "count": 19,
+            "sha256": "9ca69bc217bdd9f6dc8027739dabad54ad7199409e3ad192a8312d63f35ffd02"
+          },
+          "WorkItem": {
+            "count": 90,
+            "sha256": "8a05ba704af28cd23578d5106d23338e750b0c68eb6729eda366931332476669"
+          },
+          "WorkItemDraft": {
+            "count": 1,
+            "sha256": "d38a842729c3f62f9e019122d2f0fcb899e99ef5669bcf479879437edc9dd75d"
+          },
+          "WorkItemEquipmentUse": {
+            "count": 6,
+            "sha256": "2bd75d9608eeeb56786a0aebd852f76b83916c43f8a4293f1088164b7b1b25ef"
+          },
+          "_exchange_batches": {
+            "count": 11,
+            "sha256": "9a9a269dbda0b0c9f81885109f9de0a4f3735b27ab6082d75d29a7fe37eb8100"
+          },
+          "_exchange_connection_keys": {
+            "count": 4,
+            "sha256": "86575e0f8e870548e4f190b7d1cf817663dcddfdb13fa66c5ab957c072009837"
+          },
+          "_exchange_connections": {
+            "count": 4,
+            "sha256": "9b5d6a79aa6e976e7a509157ee3e6cd51ea51ef1f0607fbad5130e00289e9769"
+          },
+          "_exchange_journal": {
+            "count": 3,
+            "sha256": "61189edab12757b8de8c7a749b80ce739a99575480f1ab427b867f79c26a0ecc"
+          },
+          "_exchange_meta": {
+            "count": 5,
+            "sha256": "1d4906d757f5a227a0cd112a5651900f28151c84d5e3fcc9fbea74809810b45b"
+          },
+          "_exchange_receipts": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "_exchange_rotation_operations": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "_exchange_snapshot_items": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "_exchange_snapshots": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "_schema_migrations": {
+            "count": 38,
+            "sha256": "7246cf4754160f6d8bbadc6dc74d5214ca2a9785f16e17ed88d8bda5352d26ff"
+          }
+        },
+        "snapshotSha256": {
+          "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/fresh-live-backup.db": "8aafdf7c4325c2a9b429fa04aaf66db26f569b68d391bd18406720db336284b4",
+          "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/after-import-stopped/dev-stopped-backup.db": "142f6e0e9c0d391efe6221bd8134e3e7f6133ecaad700060cbf7e3132a587621"
+        },
+        "sources": {
+          "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+          "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+          "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+          "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+          "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+        },
+        "originalRowsSha256": "f2819dc6737b62f25ed0fa1e6057728a8b9612c5fa5068e0271e1f182f7cfb50"
+      }
+    },
+    "import-repeat-preservation.json": {
+      "sha256": "a6b464115fceebf06f14158b752b3e7fb2c51ffaf6fa4204f862d773dfdc8836",
+      "value": {
+        "policy": "EXACT_MAIN_EMPTY_WAL_BOUNDED_SHM_FULL_DETACHED_EQUALITY",
+        "mainBytesAndAttributesPreserved": true,
+        "fullInstalledStateEqual": true,
+        "beforePhysical": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880,
+            "inode": 10878978,
+            "device": 64769,
+            "mtimeNs": 1791817417648233662,
+            "mode": 420
+          },
+          "-wal": null,
+          "-shm": null
+        },
+        "afterPhysical": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880,
+            "inode": 10878978,
+            "device": 64769,
+            "mtimeNs": 1791817417648233662,
+            "mode": 420
+          },
+          "-wal": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0,
+            "inode": 10879570,
+            "device": 64769,
+            "mtimeNs": 1791817628216621206,
+            "mode": 420
+          },
+          "-shm": {
+            "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+            "bytes": 32768,
+            "inode": 10879576,
+            "device": 64769,
+            "mtimeNs": 1791817630667672278,
+            "mode": 420
+          }
+        },
+        "beforeLogicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+        "afterLogicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef"
+      }
+    },
+    "after-repeat-stopped/sealed-state.json": {
+      "sha256": "5d0ec77dae5735313792a3536c052837c1c29acfea47455cac0f8891d2b2b7a5",
+      "value": {
+        "policy": "DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL",
+        "originalFiles": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880,
+            "inode": 10878978,
+            "device": 64769,
+            "mtimeNs": 1791817417648233662,
+            "mode": 420
+          },
+          "-wal": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0,
+            "inode": 10879570,
+            "device": 64769,
+            "mtimeNs": 1791817628216621206,
+            "mode": 420
+          },
+          "-shm": {
+            "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+            "bytes": 32768,
+            "inode": 10879576,
+            "device": 64769,
+            "mtimeNs": 1791817630667672278,
+            "mode": 420
+          }
+        },
+        "rawFiles": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880,
+            "inode": 10879583,
+            "device": 64769,
+            "mtimeNs": 1791817645708985688,
+            "mode": 256
+          },
+          "-wal": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0,
+            "inode": 10879584,
+            "device": 64769,
+            "mtimeNs": 1791817649392062432,
+            "mode": 256
+          },
+          "-shm": {
+            "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+            "bytes": 32768,
+            "inode": 10879585,
+            "device": 64769,
+            "mtimeNs": 1791817649559065912,
+            "mode": 256
+          }
+        },
+        "mainOnlyStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+        "logicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+        "backupSha256": "142f6e0e9c0d391efe6221bd8134e3e7f6133ecaad700060cbf7e3132a587621",
+        "countsIncludeWal": true,
+        "matchesExpected": false,
+        "protectedTableCount": 106,
+        "protectedReceiptCount": 39,
+        "backupPath": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/after-repeat-stopped/dev-stopped-backup.db",
+        "physical": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880
+          },
+          "-wal": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          "-shm": {
+            "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+            "bytes": 32768
+          }
+        }
+      }
+    },
+    "after-jobs-off-stopped/sealed-state.json": {
+      "sha256": "aa64b34b83a360bd1eca743c65ef19bc29ead153caca7a0d639667027ed8db3f",
+      "value": {
+        "policy": "DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL",
+        "originalFiles": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880,
+            "inode": 10878978,
+            "device": 64769,
+            "mtimeNs": 1791817417648233662,
+            "mode": 420
+          },
+          "-wal": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0,
+            "inode": 10879570,
+            "device": 64769,
+            "mtimeNs": 1791817628216621206,
+            "mode": 420
+          },
+          "-shm": {
+            "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+            "bytes": 32768,
+            "inode": 10879576,
+            "device": 64769,
+            "mtimeNs": 1791817859194434582,
+            "mode": 420
+          }
+        },
+        "rawFiles": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880,
+            "inode": 10879632,
+            "device": 64769,
+            "mtimeNs": 1791818071208853369,
+            "mode": 256
+          },
+          "-wal": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0,
+            "inode": 10879633,
+            "device": 64769,
+            "mtimeNs": 1791818074621924504,
+            "mode": 256
+          },
+          "-shm": {
+            "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+            "bytes": 32768,
+            "inode": 10879634,
+            "device": 64769,
+            "mtimeNs": 1791818074782927859,
+            "mode": 256
+          }
+        },
+        "mainOnlyStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+        "logicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+        "backupSha256": "142f6e0e9c0d391efe6221bd8134e3e7f6133ecaad700060cbf7e3132a587621",
+        "countsIncludeWal": true,
+        "matchesExpected": true,
+        "protectedTableCount": 106,
+        "protectedReceiptCount": 39,
+        "backupPath": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/after-jobs-off-stopped/dev-stopped-backup.db",
+        "physical": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880
+          },
+          "-wal": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          "-shm": {
+            "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+            "bytes": 32768
+          }
+        }
+      }
+    },
+    "first-sync-preservation.json": {
+      "sha256": "160eba70a768f41dec84c949691a55c1e925586f1c0f9f9863143d3db9cd9bed",
+      "value": {
+        "scopeCommentIds": [
+          6112209155,
+          6112305172
+        ],
+        "protectedTableCount": 106,
+        "schemaPreserved": true,
+        "allOriginalRowsPreserved": true,
+        "tables": {
+          "Analysis": {
+            "before": {
+              "count": 216,
+              "sha256": "8da50461d3f9df7ff5e0c67b3e414cdcdb3e239972de1e835fd06e0a84f40c00"
+            },
+            "after": {
+              "count": 216,
+              "sha256": "8da50461d3f9df7ff5e0c67b3e414cdcdb3e239972de1e835fd06e0a84f40c00"
+            }
+          },
+          "AnalysisCategory": {
+            "before": {
+              "count": 19,
+              "sha256": "42d47b3148815da65c943cf2eaf850d4c56e3bbbae5ea2d4c8aac019ca49e9e2"
+            },
+            "after": {
+              "count": 19,
+              "sha256": "42d47b3148815da65c943cf2eaf850d4c56e3bbbae5ea2d4c8aac019ca49e9e2"
+            }
+          },
+          "AnalysisGroup": {
+            "before": {
+              "count": 23,
+              "sha256": "8e5a0a284b7c31169522f5021b7d2d09f6268d6e08aa44a8532010705460c651"
+            },
+            "after": {
+              "count": 23,
+              "sha256": "8e5a0a284b7c31169522f5021b7d2d09f6268d6e08aa44a8532010705460c651"
+            }
+          },
+          "ApiKey": {
+            "before": {
+              "count": 4,
+              "sha256": "f63af7538f357fa8ecce948cc4308d493ffee9dfcc0f2815ca64f383f1ed0b16"
+            },
+            "after": {
+              "count": 4,
+              "sha256": "f63af7538f357fa8ecce948cc4308d493ffee9dfcc0f2815ca64f383f1ed0b16"
+            }
+          },
+          "AuditLog": {
+            "originalCount": 12853,
+            "originalSha256": "b216509b99495ea50261b8865063b06aa748dee4bf9628fab3be604ee7d3aefb",
+            "preserved": true
+          },
+          "Batch": {
+            "before": {
+              "count": 6,
+              "sha256": "59b48b6b83c1253ec855fbfc693a91aa6aa4fdfe6b456f44410888b940258d3d"
+            },
+            "after": {
+              "count": 6,
+              "sha256": "59b48b6b83c1253ec855fbfc693a91aa6aa4fdfe6b456f44410888b940258d3d"
+            }
+          },
+          "BatchAnalyte": {
+            "before": {
+              "count": 6,
+              "sha256": "ee0086f8ea4eeb0010ffb1df6fbcb3252ced264a355e15c64211097dd5509de9"
+            },
+            "after": {
+              "count": 6,
+              "sha256": "ee0086f8ea4eeb0010ffb1df6fbcb3252ced264a355e15c64211097dd5509de9"
+            }
+          },
+          "BatchDisposition": {
+            "before": {
+              "count": 1,
+              "sha256": "80ecf7c19e9920800dc1d4668f86cb22412a0524657c5b4ef9433bc62f6bba0e"
+            },
+            "after": {
+              "count": 1,
+              "sha256": "80ecf7c19e9920800dc1d4668f86cb22412a0524657c5b4ef9433bc62f6bba0e"
+            }
+          },
+          "BatchEvent": {
+            "before": {
+              "count": 28,
+              "sha256": "0d3ac1242ef11a3ceb772c6e14d41a05ed9bf81790f0a19ec9d39966c9ab25df"
+            },
+            "after": {
+              "count": 28,
+              "sha256": "0d3ac1242ef11a3ceb772c6e14d41a05ed9bf81790f0a19ec9d39966c9ab25df"
+            }
+          },
+          "BatchPosition": {
+            "before": {
+              "count": 33,
+              "sha256": "18ccb7ae93f4a15e2440e3c5aea2b99b67c3c8ce0806e0d1892b7c85878e9f17"
+            },
+            "after": {
+              "count": 33,
+              "sha256": "18ccb7ae93f4a15e2440e3c5aea2b99b67c3c8ce0806e0d1892b7c85878e9f17"
+            }
+          },
+          "BatchPositionReference": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "BatchPositionWorkItem": {
+            "before": {
+              "count": 15,
+              "sha256": "73448ab23c5f171d243c61b6bdff8675cc6862a3d8940adc1c4c0d90e616c80e"
+            },
+            "after": {
+              "count": 15,
+              "sha256": "73448ab23c5f171d243c61b6bdff8675cc6862a3d8940adc1c4c0d90e616c80e"
+            }
+          },
+          "BatchQcResult": {
+            "before": {
+              "count": 18,
+              "sha256": "191c87111fa49308d78fbb06cb0ed861308183d198ce0c7c417a8fd4c6965a92"
+            },
+            "after": {
+              "count": 18,
+              "sha256": "191c87111fa49308d78fbb06cb0ed861308183d198ce0c7c417a8fd4c6965a92"
+            }
+          },
+          "BatchReagentLot": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "CalcTemplate": {
+            "before": {
+              "count": 8,
+              "sha256": "2e6aa73970aec90a17b4c069c485943b548fad26cbf2fb5507dd4301ae99ab58"
+            },
+            "after": {
+              "count": 8,
+              "sha256": "2e6aa73970aec90a17b4c069c485943b548fad26cbf2fb5507dd4301ae99ab58"
+            }
+          },
+          "CalcTemplateActivation": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "CalibrationCurve": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "CalibrationPoint": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "CommandReceipt": {
+            "before": {
+              "count": 1,
+              "sha256": "c5f465670a39af62ab868c97e912923ec2e6a86ae4dc981f291127df2c1d60df"
+            },
+            "after": {
+              "count": 1,
+              "sha256": "c5f465670a39af62ab868c97e912923ec2e6a86ae4dc981f291127df2c1d60df"
+            }
+          },
+          "Consignment": {
+            "before": {
+              "count": 1,
+              "sha256": "5688e8f1b094f0c9828c666c32780201ee85c9f682cf05dbab02ea217109bb59"
+            },
+            "after": {
+              "count": 1,
+              "sha256": "5688e8f1b094f0c9828c666c32780201ee85c9f682cf05dbab02ea217109bb59"
+            }
+          },
+          "CrossCheckEvaluation": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "EquipmentAsset": {
+            "before": {
+              "count": 42,
+              "sha256": "8c53b296636cfbf0bb067d556b747ad24f6ab64c842bffea3251a6526cb82c42"
+            },
+            "after": {
+              "count": 42,
+              "sha256": "8c53b296636cfbf0bb067d556b747ad24f6ab64c842bffea3251a6526cb82c42"
+            }
+          },
+          "EquipmentEvent": {
+            "before": {
+              "count": 4,
+              "sha256": "739192a96ff3916aeb05d38c07e347d198a125bc4df461e44f1f927ee7732f38"
+            },
+            "after": {
+              "count": 4,
+              "sha256": "739192a96ff3916aeb05d38c07e347d198a125bc4df461e44f1f927ee7732f38"
+            }
+          },
+          "EquipmentMethodEligibility": {
+            "before": {
+              "count": 14,
+              "sha256": "e60d567e8c01cd37d071226b9039e44c921220d1ebe7e6b6d3e8d7f532ca2da3"
+            },
+            "after": {
+              "count": 14,
+              "sha256": "e60d567e8c01cd37d071226b9039e44c921220d1ebe7e6b6d3e8d7f532ca2da3"
+            }
+          },
+          "EquipmentQualification": {
+            "before": {
+              "count": 42,
+              "sha256": "15c997453d61d832c6467658c447443e4470f1037bd9eca03324e6e395ad15ed"
+            },
+            "after": {
+              "count": 42,
+              "sha256": "15c997453d61d832c6467658c447443e4470f1037bd9eca03324e6e395ad15ed"
+            }
+          },
+          "EquipmentScheduleRule": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "ExternalMapping": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "GlobalAppearanceSetting": {
+            "before": {
+              "count": 1,
+              "sha256": "468af72f7e73bcfb84b6e7052b67792a95c899550c8579a7b925daa75096a79c"
+            },
+            "after": {
+              "count": 1,
+              "sha256": "468af72f7e73bcfb84b6e7052b67792a95c899550c8579a7b925daa75096a79c"
+            }
+          },
+          "HelpArticle": {
+            "before": {
+              "count": 113,
+              "sha256": "5d7a309f4b7f75defb4daeceb9e5b4cf09e0c68acd40bc00e519623da759c485"
+            },
+            "after": {
+              "count": 113,
+              "sha256": "5d7a309f4b7f75defb4daeceb9e5b4cf09e0c68acd40bc00e519623da759c485"
+            }
+          },
+          "HelpFeedback": {
+            "before": {
+              "count": 6,
+              "sha256": "9761d0197bf41fd92e47bb75b6a287f9ccfdfa921138485fbbc9d9c81fe86e24"
+            },
+            "after": {
+              "count": 6,
+              "sha256": "9761d0197bf41fd92e47bb75b6a287f9ccfdfa921138485fbbc9d9c81fe86e24"
+            }
+          },
+          "HelpLabNote": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "HelpLocaleRevision": {
+            "before": {
+              "count": 565,
+              "sha256": "0fe7f224cf32f814a46eeed9fd7486f793e0e53dcaa1b296cd569348ca87436b"
+            },
+            "after": {
+              "count": 565,
+              "sha256": "0fe7f224cf32f814a46eeed9fd7486f793e0e53dcaa1b296cd569348ca87436b"
+            }
+          },
+          "HelpPublication": {
+            "before": {
+              "count": 366,
+              "sha256": "a9db2f0efbd7268fb2dd8a40de6b4e2a75208772b2e7df7a6bebe9d2a4db661e"
+            },
+            "after": {
+              "count": 366,
+              "sha256": "a9db2f0efbd7268fb2dd8a40de6b4e2a75208772b2e7df7a6bebe9d2a4db661e"
+            }
+          },
+          "HelpRevision": {
+            "before": {
+              "count": 113,
+              "sha256": "9f49bcdd7f36621beb3140f803865e8b7353b22cd164b6a763bb7b9aff5be185"
+            },
+            "after": {
+              "count": 113,
+              "sha256": "9f49bcdd7f36621beb3140f803865e8b7353b22cd164b6a763bb7b9aff5be185"
+            }
+          },
+          "HelpSupportConfig": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "ImportTemplate": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "InstrumentImportReceipt": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "InventoryItem": {
+            "before": {
+              "count": 127,
+              "sha256": "2407d6db98647c289ad30f4676494b7b9e44836c36fdec081ad460f1c4693de6"
+            },
+            "after": {
+              "count": 127,
+              "sha256": "2407d6db98647c289ad30f4676494b7b9e44836c36fdec081ad460f1c4693de6"
+            }
+          },
+          "InventoryLocation": {
+            "before": {
+              "count": 35,
+              "sha256": "2e724f55ffe7a12f2ce41204adc21ba86aefcc243c68be300d26beb4b66dd0c6"
+            },
+            "after": {
+              "count": 35,
+              "sha256": "2e724f55ffe7a12f2ce41204adc21ba86aefcc243c68be300d26beb4b66dd0c6"
+            }
+          },
+          "InventoryLot": {
+            "before": {
+              "count": 5,
+              "sha256": "8a4775521f6d7eeeb9a899debf9a5c75baf354e2df5188d9296f0b45263c3444"
+            },
+            "after": {
+              "count": 5,
+              "sha256": "8a4775521f6d7eeeb9a899debf9a5c75baf354e2df5188d9296f0b45263c3444"
+            }
+          },
+          "InventoryReservation": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "InventoryTransaction": {
+            "before": {
+              "count": 11,
+              "sha256": "14e4959ee27a5ca91fefcde6c51784db931730dfa84888aa2ae4bfc7ffecbf86"
+            },
+            "after": {
+              "count": 11,
+              "sha256": "14e4959ee27a5ca91fefcde6c51784db931730dfa84888aa2ae4bfc7ffecbf86"
+            }
+          },
+          "KoboConfig": {
+            "originalCount": 11,
+            "originalSha256": "c1e3ba33d47bb78dbfdd2b8120a5fb75bfbd89329f72c7fa6810ab59415fa655",
+            "preserved": true
+          },
+          "Lab": {
+            "before": {
+              "count": 10,
+              "sha256": "18839694f584409b7d813ec01d1d2453e4388181528bd46f901c53fca5f64113"
+            },
+            "after": {
+              "count": 10,
+              "sha256": "18839694f584409b7d813ec01d1d2453e4388181528bd46f901c53fca5f64113"
+            }
+          },
+          "LabAppearanceSetting": {
+            "before": {
+              "count": 1,
+              "sha256": "dba6f69aafc547318d3a90c4553df42b250244845439b762e843ae412a6a0b9e"
+            },
+            "after": {
+              "count": 1,
+              "sha256": "dba6f69aafc547318d3a90c4553df42b250244845439b762e843ae412a6a0b9e"
+            }
+          },
+          "LabLifecycleState": {
+            "before": {
+              "count": 1,
+              "sha256": "679cc6877f3b94d572ea7580f3e4a70acb8b587e624ad8be04f1feee0b9d62a3"
+            },
+            "after": {
+              "count": 1,
+              "sha256": "679cc6877f3b94d572ea7580f3e4a70acb8b587e624ad8be04f1feee0b9d62a3"
+            }
+          },
+          "LabMethodDefault": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "LabPolicy": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "LabPolicyOverride": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "LabSequence": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "Language": {
+            "before": {
+              "count": 5,
+              "sha256": "ce79903686111dd926ccbb1b08c7cafeacbfec4f3e26d84c063f8142739d44a3"
+            },
+            "after": {
+              "count": 5,
+              "sha256": "ce79903686111dd926ccbb1b08c7cafeacbfec4f3e26d84c063f8142739d44a3"
+            }
+          },
+          "Message": {
+            "before": {
+              "count": 116,
+              "sha256": "b2afc73325f32d29bbb23c7aa39e9d92121efccbcaec149b40603d98afc5fb8c"
+            },
+            "after": {
+              "count": 116,
+              "sha256": "b2afc73325f32d29bbb23c7aa39e9d92121efccbcaec149b40603d98afc5fb8c"
+            }
+          },
+          "MethodReference": {
+            "before": {
+              "count": 73,
+              "sha256": "cb59aac8d03d3e08be47ce7d34bba79e45374d34c39ae351670a9ea96d66be5b"
+            },
+            "after": {
+              "count": 73,
+              "sha256": "cb59aac8d03d3e08be47ce7d34bba79e45374d34c39ae351670a9ea96d66be5b"
+            }
+          },
+          "MethodRequirement": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "Methodology": {
+            "before": {
+              "count": 590,
+              "sha256": "72aa6deab9cae1b87a276b99740ad39c3097b7eca56a8cc860dc94fc4ff78bf3"
+            },
+            "after": {
+              "count": 590,
+              "sha256": "72aa6deab9cae1b87a276b99740ad39c3097b7eca56a8cc860dc94fc4ff78bf3"
+            }
+          },
+          "NonconformityReport": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "Notification": {
+            "originalCount": 227,
+            "originalSha256": "7a892d8e7d5c24f123cffe735522ca00d9add6e1a595aba50c4d5d6a5a193bca",
+            "preserved": true
+          },
+          "OperationalGate": {
+            "before": {
+              "count": 6,
+              "sha256": "4aef8e40b4911c4c1688f6cf38e0ca0030c1cc60ba1e581200f369f64ac3b36e"
+            },
+            "after": {
+              "count": 6,
+              "sha256": "4aef8e40b4911c4c1688f6cf38e0ca0030c1cc60ba1e581200f369f64ac3b36e"
+            }
+          },
+          "OrderLine": {
+            "before": {
+              "count": 119,
+              "sha256": "93c509e3d4003e81624132713791fc83175bf9bb09b9ce0c0844ea5689ec603c"
+            },
+            "after": {
+              "count": 119,
+              "sha256": "93c509e3d4003e81624132713791fc83175bf9bb09b9ce0c0844ea5689ec603c"
+            }
+          },
+          "PreparationRecord": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "ProficiencyRound": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "Project": {
+            "before": {
+              "count": 6,
+              "sha256": "8e9e25231a8b38e0bdaed325f064ab73c38ba25eee9759843910d29c502a64db"
+            },
+            "after": {
+              "count": 6,
+              "sha256": "8e9e25231a8b38e0bdaed325f064ab73c38ba25eee9759843910d29c502a64db"
+            }
+          },
+          "ProjectLab": {
+            "before": {
+              "count": 10,
+              "sha256": "eeef7632733f4f37069ffdc6634ebfc277e13203ab391bc36c957264e0184d69"
+            },
+            "after": {
+              "count": 10,
+              "sha256": "eeef7632733f4f37069ffdc6634ebfc277e13203ab391bc36c957264e0184d69"
+            }
+          },
+          "QcEvaluation": {
+            "before": {
+              "count": 6,
+              "sha256": "8d9707827a3fc9bb2f5810fbd16dfee2850eca78a687f85850316bebe571117d"
+            },
+            "after": {
+              "count": 6,
+              "sha256": "8d9707827a3fc9bb2f5810fbd16dfee2850eca78a687f85850316bebe571117d"
+            }
+          },
+          "QcMeasurement": {
+            "before": {
+              "count": 24,
+              "sha256": "89b6e0fcc4ae0f293ae00ec2cbb50bbd7b9a17129c7cd0ced2592e4245db1810"
+            },
+            "after": {
+              "count": 24,
+              "sha256": "89b6e0fcc4ae0f293ae00ec2cbb50bbd7b9a17129c7cd0ced2592e4245db1810"
+            }
+          },
+          "QcRule": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "ReferenceMaterial": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "ReferenceValue": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "Report": {
+            "before": {
+              "count": 4,
+              "sha256": "d94b6f1b0086bd83f6e85095b63911844295eda8ce4dda2bc29bb696526dda22"
+            },
+            "after": {
+              "count": 4,
+              "sha256": "d94b6f1b0086bd83f6e85095b63911844295eda8ce4dda2bc29bb696526dda22"
+            }
+          },
+          "ReportAccessLog": {
+            "before": {
+              "count": 4,
+              "sha256": "c6381c2f9845f3e01f174b7eb24e38af17963f29deaf25e578ca1da5a28a968d"
+            },
+            "after": {
+              "count": 4,
+              "sha256": "c6381c2f9845f3e01f174b7eb24e38af17963f29deaf25e578ca1da5a28a968d"
+            }
+          },
+          "ReportAmendmentWithdrawal": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "ReportSequence": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "ReportShareLink": {
+            "before": {
+              "count": 7,
+              "sha256": "5b0fecce66c2792449f6fa96e9d0047f49ce3b85a4073547523bae5a4f1bbb98"
+            },
+            "after": {
+              "count": 7,
+              "sha256": "5b0fecce66c2792449f6fa96e9d0047f49ce3b85a4073547523bae5a4f1bbb98"
+            }
+          },
+          "ReportedValueSelection": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "Result": {
+            "before": {
+              "count": 19,
+              "sha256": "e2df0f0da9b5372d402dc8c2585630dc0a72646717e425b79ca01055e12a5640"
+            },
+            "after": {
+              "count": 19,
+              "sha256": "e2df0f0da9b5372d402dc8c2585630dc0a72646717e425b79ca01055e12a5640"
+            }
+          },
+          "ResultCalculation": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "ResultEvidenceEvent": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "ResultOverrideRequest": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "ReviewDecision": {
+            "before": {
+              "count": 7,
+              "sha256": "0b31a7cfa80be57cd48bc085805d563c2789dcd6f321e4efeda16467c06ce2b2"
+            },
+            "after": {
+              "count": 7,
+              "sha256": "0b31a7cfa80be57cd48bc085805d563c2789dcd6f321e4efeda16467c06ce2b2"
+            }
+          },
+          "Sample": {
+            "originalCount": 38928,
+            "originalSha256": "788757f6765e4e9fdf2b44022dcf699dce75d2fe4e78f8fd7a93e46e1b83a247",
+            "preserved": true
+          },
+          "SampleAmendment": {
+            "before": {
+              "count": 1,
+              "sha256": "64915c5cdafe6172044ce7fc3823a7d7925dded3f279f7d2803b0011ed951a1c"
+            },
+            "after": {
+              "count": 1,
+              "sha256": "64915c5cdafe6172044ce7fc3823a7d7925dded3f279f7d2803b0011ed951a1c"
+            }
+          },
+          "SampleAmendmentAttempt": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "SampleHold": {
+            "originalCount": 10,
+            "originalSha256": "b5f7671a7e8cbb5157baad815815576ee2a59062f46cda1ad7871af475e2d316",
+            "preserved": true
+          },
+          "SampleOrderRevision": {
+            "before": {
+              "count": 13,
+              "sha256": "43d3e77c663b6429960030a0f654fa010d579db5617e059da5d88df051a2f6e0"
+            },
+            "after": {
+              "count": 13,
+              "sha256": "43d3e77c663b6429960030a0f654fa010d579db5617e059da5d88df051a2f6e0"
+            }
+          },
+          "SpectralData": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "StaffInvitation": {
+            "before": {
+              "count": 3,
+              "sha256": "81930a5c98a56276edc273dc7c4339d1295c51734cac20ba519aa2cdf3259ca6"
+            },
+            "after": {
+              "count": 3,
+              "sha256": "81930a5c98a56276edc273dc7c4339d1295c51734cac20ba519aa2cdf3259ca6"
+            }
+          },
+          "StaffRecoveryGrant": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "Submission": {
+            "before": {
+              "count": 7,
+              "sha256": "8473d8d6a16a8e18585dc1ca32ecae76d0cba78a48b5011cec0574c7b89b631e"
+            },
+            "after": {
+              "count": 7,
+              "sha256": "8473d8d6a16a8e18585dc1ca32ecae76d0cba78a48b5011cec0574c7b89b631e"
+            }
+          },
+          "SystemSetting": {
+            "before": {
+              "count": 1,
+              "sha256": "e3ab8859afcfce431e7a308bfbd1e2e990057ea522ba700bd0d0fb6337acdac7"
+            },
+            "after": {
+              "count": 1,
+              "sha256": "e3ab8859afcfce431e7a308bfbd1e2e990057ea522ba700bd0d0fb6337acdac7"
+            }
+          },
+          "Unit": {
+            "before": {
+              "count": 36,
+              "sha256": "2886395afba0ef3f39b13b1c747401e517a1b3451cd1fd9ef2d42d55bddb9cd9"
+            },
+            "after": {
+              "count": 36,
+              "sha256": "2886395afba0ef3f39b13b1c747401e517a1b3451cd1fd9ef2d42d55bddb9cd9"
+            }
+          },
+          "User": {
+            "before": {
+              "count": 49,
+              "sha256": "17bb491b4fc1848c4474d17d0cd7a07af94935b788e05c679f099726ce676860"
+            },
+            "after": {
+              "count": 49,
+              "sha256": "17bb491b4fc1848c4474d17d0cd7a07af94935b788e05c679f099726ce676860"
+            }
+          },
+          "UserBenchCredential": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "WorkAttempt": {
+            "before": {
+              "count": 19,
+              "sha256": "673b3d2a836544d4593255ffe592415c7101dc188677632e41140497cea12aee"
+            },
+            "after": {
+              "count": 19,
+              "sha256": "673b3d2a836544d4593255ffe592415c7101dc188677632e41140497cea12aee"
+            }
+          },
+          "WorkItem": {
+            "before": {
+              "count": 90,
+              "sha256": "7475135267076fcc65c51f4c9d00210dc9ba0e2a4c4f80a485d63f189ed6ebe6"
+            },
+            "after": {
+              "count": 90,
+              "sha256": "7475135267076fcc65c51f4c9d00210dc9ba0e2a4c4f80a485d63f189ed6ebe6"
+            }
+          },
+          "WorkItemDraft": {
+            "before": {
+              "count": 1,
+              "sha256": "0610aaff11a410ed1568e96180df8cf1fd65f812b3fb71c457b92f40311e0690"
+            },
+            "after": {
+              "count": 1,
+              "sha256": "0610aaff11a410ed1568e96180df8cf1fd65f812b3fb71c457b92f40311e0690"
+            }
+          },
+          "WorkItemEquipmentUse": {
+            "before": {
+              "count": 6,
+              "sha256": "2bd75d9608eeeb56786a0aebd852f76b83916c43f8a4293f1088164b7b1b25ef"
+            },
+            "after": {
+              "count": 6,
+              "sha256": "2bd75d9608eeeb56786a0aebd852f76b83916c43f8a4293f1088164b7b1b25ef"
+            }
+          },
+          "_exchange_batches": {
+            "before": {
+              "count": 11,
+              "sha256": "9a9a269dbda0b0c9f81885109f9de0a4f3735b27ab6082d75d29a7fe37eb8100"
+            },
+            "after": {
+              "count": 11,
+              "sha256": "9a9a269dbda0b0c9f81885109f9de0a4f3735b27ab6082d75d29a7fe37eb8100"
+            }
+          },
+          "_exchange_connection_keys": {
+            "before": {
+              "count": 4,
+              "sha256": "02563a0300777239ac127cde0fe3590a4286c3833df4f3be10c3309041d4f007"
+            },
+            "after": {
+              "count": 4,
+              "sha256": "02563a0300777239ac127cde0fe3590a4286c3833df4f3be10c3309041d4f007"
+            }
+          },
+          "_exchange_connections": {
+            "before": {
+              "count": 4,
+              "sha256": "29a0346b1c96168441bdaef2492bbedb6a8fe91d180e9c673b1e95d59b68dfe9"
+            },
+            "after": {
+              "count": 4,
+              "sha256": "29a0346b1c96168441bdaef2492bbedb6a8fe91d180e9c673b1e95d59b68dfe9"
+            }
+          },
+          "_exchange_journal": {
+            "before": {
+              "count": 3,
+              "sha256": "3eb21e51fbce15972c463566642e47726cfdc5b79c94ac15ad33dddf019f1d15"
+            },
+            "after": {
+              "count": 3,
+              "sha256": "3eb21e51fbce15972c463566642e47726cfdc5b79c94ac15ad33dddf019f1d15"
+            }
+          },
+          "_exchange_meta": {
+            "before": {
+              "count": 5,
+              "sha256": "a37f4b2e4f5fc4d5760e9842d16eabe243eed6dbdfc70b5f29421ac6517357be"
+            },
+            "after": {
+              "count": 5,
+              "sha256": "a37f4b2e4f5fc4d5760e9842d16eabe243eed6dbdfc70b5f29421ac6517357be"
+            }
+          },
+          "_exchange_receipts": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "_exchange_rotation_operations": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "_exchange_snapshot_items": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "_exchange_snapshots": {
+            "before": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "after": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "_schema_migrations": {
+            "before": {
+              "count": 39,
+              "sha256": "7b33d17b31fb890569e7ddd052c2ed74cfb07b48c01e8e60cdf4f0d590a69f08"
+            },
+            "after": {
+              "count": 39,
+              "sha256": "7b33d17b31fb890569e7ddd052c2ed74cfb07b48c01e8e60cdf4f0d590a69f08"
+            }
+          }
+        },
+        "additions": {
+          "SampleHold": [],
+          "Notification": [],
+          "AuditLog": [],
+          "Sample": []
+        },
+        "configChanges": [
+          {
+            "id": "25731264-f02a-4172-8ef1-75512b7607a5",
+            "fields": [
+              "lastSyncAt",
+              "updatedAt"
+            ],
+            "before": {
+              "lastSyncAt": "2026-10-12T14:49:37.939+00:00",
+              "updatedAt": "2026-10-12T14:49:37.940+00:00"
+            },
+            "after": {
+              "lastSyncAt": "2026-10-12T15:18:42.245+00:00",
+              "updatedAt": "2026-10-12T15:18:42.245+00:00"
+            }
+          },
+          {
+            "id": "38744747-1d3f-4f4a-8523-6f251ecd1fba",
+            "fields": [
+              "lastSyncAt",
+              "updatedAt"
+            ],
+            "before": {
+              "lastSyncAt": "2026-10-12T14:49:37.788+00:00",
+              "updatedAt": "2026-10-12T14:49:37.788+00:00"
+            },
+            "after": {
+              "lastSyncAt": "2026-10-12T15:18:42.092+00:00",
+              "updatedAt": "2026-10-12T15:18:42.093+00:00"
+            }
+          },
+          {
+            "id": "534aec5a-2b3a-49f1-9136-507f624fbf6b",
+            "fields": [
+              "lastSyncAt",
+              "updatedAt"
+            ],
+            "before": {
+              "lastSyncAt": "2026-10-12T14:48:45.189+00:00",
+              "updatedAt": "2026-10-12T14:48:45.190+00:00"
+            },
+            "after": {
+              "lastSyncAt": "2026-10-12T15:18:41.522+00:00",
+              "updatedAt": "2026-10-12T15:18:41.547+00:00"
+            }
+          },
+          {
+            "id": "6e60eebe-5d8d-4e13-8037-efeb8041b24c",
+            "fields": [
+              "lastSyncAt",
+              "updatedAt"
+            ],
+            "before": {
+              "lastSyncAt": "2026-10-12T14:49:37.706+00:00",
+              "updatedAt": "2026-10-12T14:49:37.707+00:00"
+            },
+            "after": {
+              "lastSyncAt": "2026-10-12T15:18:41.819+00:00",
+              "updatedAt": "2026-10-12T15:18:41.819+00:00"
+            }
+          },
+          {
+            "id": "78cd0dc8-f04c-4bcf-9451-bc9507ee0623",
+            "fields": [
+              "lastSyncAt",
+              "updatedAt"
+            ],
+            "before": {
+              "lastSyncAt": "2026-10-12T14:49:37.533+00:00",
+              "updatedAt": "2026-10-12T14:49:37.534+00:00"
+            },
+            "after": {
+              "lastSyncAt": "2026-10-12T15:18:41.660+00:00",
+              "updatedAt": "2026-10-12T15:18:41.661+00:00"
+            }
+          },
+          {
+            "id": "897c1fb0-d83c-40cd-b513-b3e6e6b78172",
+            "fields": [
+              "lastSyncAt",
+              "updatedAt"
+            ],
+            "before": {
+              "lastSyncAt": "2026-10-12T14:49:37.630+00:00",
+              "updatedAt": "2026-10-12T14:49:37.630+00:00"
+            },
+            "after": {
+              "lastSyncAt": "2026-10-12T15:18:41.745+00:00",
+              "updatedAt": "2026-10-12T15:18:41.745+00:00"
+            }
+          },
+          {
+            "id": "c630d7b4-5d44-4826-94e5-5851abbd2a46",
+            "fields": [
+              "lastSyncAt",
+              "updatedAt"
+            ],
+            "before": {
+              "lastSyncAt": "2026-10-12T14:49:37.864+00:00",
+              "updatedAt": "2026-10-12T14:49:37.865+00:00"
+            },
+            "after": {
+              "lastSyncAt": "2026-10-12T15:18:42.170+00:00",
+              "updatedAt": "2026-10-12T15:18:42.171+00:00"
+            }
+          }
+        ],
+        "newSubmissionIds": {},
+        "newSampleCount": {
+          "25731264-f02a-4172-8ef1-75512b7607a5": 0,
+          "38744747-1d3f-4f4a-8523-6f251ecd1fba": 0,
+          "534aec5a-2b3a-49f1-9136-507f624fbf6b": 0,
+          "6e60eebe-5d8d-4e13-8037-efeb8041b24c": 0,
+          "78cd0dc8-f04c-4bcf-9451-bc9507ee0623": 0,
+          "897c1fb0-d83c-40cd-b513-b3e6e6b78172": 0,
+          "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d": 0,
+          "c630d7b4-5d44-4826-94e5-5851abbd2a46": 0,
+          "ec5a5a67-3f5a-4682-88df-edb0e07e6485": 0,
+          "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0": 0,
+          "f24b4f7a-1da7-4320-831e-b9105647f106": 0
+        },
+        "newSamplePairs": {
+          "25731264-f02a-4172-8ef1-75512b7607a5": [],
+          "38744747-1d3f-4f4a-8523-6f251ecd1fba": [],
+          "534aec5a-2b3a-49f1-9136-507f624fbf6b": [],
+          "6e60eebe-5d8d-4e13-8037-efeb8041b24c": [],
+          "78cd0dc8-f04c-4bcf-9451-bc9507ee0623": [],
+          "897c1fb0-d83c-40cd-b513-b3e6e6b78172": [],
+          "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d": [],
+          "c630d7b4-5d44-4826-94e5-5851abbd2a46": [],
+          "ec5a5a67-3f5a-4682-88df-edb0e07e6485": [],
+          "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0": [],
+          "f24b4f7a-1da7-4320-831e-b9105647f106": []
+        },
+        "newSampleDepthSplit": {
+          "25731264-f02a-4172-8ef1-75512b7607a5": {},
+          "38744747-1d3f-4f4a-8523-6f251ecd1fba": {},
+          "534aec5a-2b3a-49f1-9136-507f624fbf6b": {},
+          "6e60eebe-5d8d-4e13-8037-efeb8041b24c": {},
+          "78cd0dc8-f04c-4bcf-9451-bc9507ee0623": {},
+          "897c1fb0-d83c-40cd-b513-b3e6e6b78172": {},
+          "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d": {},
+          "c630d7b4-5d44-4826-94e5-5851abbd2a46": {},
+          "ec5a5a67-3f5a-4682-88df-edb0e07e6485": {},
+          "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0": {},
+          "f24b4f7a-1da7-4320-831e-b9105647f106": {}
+        },
+        "protectedRefusalConfigIds": [
+          "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d",
+          "ec5a5a67-3f5a-4682-88df-edb0e07e6485",
+          "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0",
+          "f24b4f7a-1da7-4320-831e-b9105647f106"
+        ],
+        "retainedUpstreamFetchIds": {
+          "534aec5a-2b3a-49f1-9136-507f624fbf6b": [],
+          "78cd0dc8-f04c-4bcf-9451-bc9507ee0623": [],
+          "897c1fb0-d83c-40cd-b513-b3e6e6b78172": [],
+          "6e60eebe-5d8d-4e13-8037-efeb8041b24c": [],
+          "38744747-1d3f-4f4a-8523-6f251ecd1fba": [],
+          "c630d7b4-5d44-4826-94e5-5851abbd2a46": [],
+          "25731264-f02a-4172-8ef1-75512b7607a5": [],
+          "ec5a5a67-3f5a-4682-88df-edb0e07e6485": [
+            "37613",
+            "37614",
+            "37615",
+            "37616",
+            "37618",
+            "37619"
+          ],
+          "f24b4f7a-1da7-4320-831e-b9105647f106": [
+            "37613",
+            "37614",
+            "37615",
+            "37616",
+            "37618",
+            "37619"
+          ],
+          "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d": [
+            "13579",
+            "13599",
+            "13600",
+            "13601",
+            "13731",
+            "13734",
+            "13738",
+            "13740",
+            "13741",
+            "13742",
+            "13743",
+            "13744",
+            "13753",
+            "13766",
+            "13767",
+            "13768",
+            "13770",
+            "13772",
+            "13774",
+            "13775",
+            "13820",
+            "13829",
+            "13830",
+            "13839",
+            "13840",
+            "13841",
+            "13842",
+            "13843",
+            "13846",
+            "13847",
+            "13871",
+            "13872",
+            "13877",
+            "13878",
+            "13879",
+            "13880",
+            "13881",
+            "13882",
+            "13883",
+            "13884",
+            "13885",
+            "13886",
+            "13887",
+            "13888",
+            "13893",
+            "13894",
+            "13895",
+            "13931",
+            "13932",
+            "13933",
+            "13946",
+            "13950",
+            "13956",
+            "13957",
+            "14005",
+            "14008",
+            "14010",
+            "14012",
+            "14013",
+            "14015",
+            "14016",
+            "14017",
+            "14020",
+            "14021",
+            "14023",
+            "14024",
+            "14026",
+            "14027",
+            "14036",
+            "14039",
+            "14054",
+            "14059",
+            "14060",
+            "14062",
+            "14063",
+            "14064",
+            "14066",
+            "14068",
+            "14071",
+            "14072",
+            "14073",
+            "14074",
+            "14076",
+            "14078",
+            "14079",
+            "14080",
+            "14082",
+            "14086",
+            "14107",
+            "14120",
+            "14122",
+            "14124",
+            "14127",
+            "14128",
+            "14130",
+            "14133",
+            "14139",
+            "14140",
+            "14141",
+            "14142",
+            "14143",
+            "14144",
+            "14145",
+            "14146",
+            "14147",
+            "14148",
+            "14173",
+            "14175",
+            "14176",
+            "14178",
+            "14180",
+            "14181",
+            "14184",
+            "14185",
+            "14221",
+            "14222",
+            "14226",
+            "14228",
+            "14229",
+            "14231",
+            "14238",
+            "14309",
+            "14365",
+            "14366",
+            "14391",
+            "14392",
+            "14393",
+            "14394",
+            "14395",
+            "14396",
+            "14399",
+            "14400",
+            "14401",
+            "14410",
+            "14413",
+            "14415",
+            "14416",
+            "14424",
+            "14425",
+            "14426",
+            "14427",
+            "14450",
+            "14451",
+            "14452",
+            "14453",
+            "14454",
+            "14455",
+            "14456",
+            "14457",
+            "14472",
+            "14473",
+            "14474",
+            "14475",
+            "14476",
+            "14477",
+            "14478",
+            "14479",
+            "14480",
+            "14481",
+            "14482",
+            "14483",
+            "14484",
+            "14485",
+            "14493",
+            "14496",
+            "14497",
+            "14498",
+            "14540",
+            "14541",
+            "14542",
+            "14543",
+            "14544",
+            "14545",
+            "14546",
+            "14547",
+            "14548",
+            "14549",
+            "14550",
+            "14551",
+            "14552",
+            "14553",
+            "14554",
+            "14657",
+            "14658",
+            "14659",
+            "14791",
+            "14792",
+            "14793",
+            "14794",
+            "14795",
+            "14796",
+            "14797",
+            "14798",
+            "14799",
+            "14800",
+            "14801",
+            "15080",
+            "15081",
+            "15082",
+            "15083",
+            "15084",
+            "15085",
+            "15114",
+            "15115",
+            "15116",
+            "15117",
+            "15118",
+            "15119",
+            "15120",
+            "15121",
+            "15122",
+            "15123",
+            "15124",
+            "15125",
+            "15126",
+            "15127",
+            "15128",
+            "15129",
+            "15130",
+            "15131",
+            "15137",
+            "15138",
+            "15139",
+            "15140",
+            "15141",
+            "15142",
+            "15143",
+            "15144",
+            "15145",
+            "15146",
+            "15147",
+            "15148",
+            "15677",
+            "15678",
+            "15679",
+            "15681",
+            "15682",
+            "15683",
+            "15684",
+            "15685",
+            "15686",
+            "15687",
+            "15688",
+            "15689",
+            "15690",
+            "15691",
+            "15692",
+            "15693",
+            "15694",
+            "15703",
+            "15704",
+            "15705",
+            "15706",
+            "15707",
+            "15708",
+            "15709",
+            "15710",
+            "15711",
+            "15712",
+            "15713",
+            "15714",
+            "15715",
+            "15716",
+            "15717",
+            "15718",
+            "15719",
+            "16204",
+            "16205",
+            "16206",
+            "16207",
+            "16208",
+            "16605",
+            "17117",
+            "17118",
+            "17119",
+            "17120",
+            "17121",
+            "17122",
+            "17123",
+            "17124",
+            "17125",
+            "17126",
+            "17127",
+            "17128",
+            "17129",
+            "17130",
+            "17131",
+            "17132",
+            "17133",
+            "17139",
+            "17140",
+            "17141",
+            "17142",
+            "17143",
+            "17144",
+            "17145",
+            "17146",
+            "17147",
+            "17148",
+            "17149",
+            "17150",
+            "17151",
+            "17152",
+            "17153",
+            "17154",
+            "17155",
+            "17475",
+            "17476",
+            "17477",
+            "17478",
+            "17479",
+            "17480",
+            "17732",
+            "17733",
+            "17734",
+            "17735",
+            "17736",
+            "17737",
+            "17742",
+            "17757",
+            "17758",
+            "17759",
+            "18008",
+            "18011",
+            "18012",
+            "18013",
+            "18014",
+            "18015",
+            "18016",
+            "18017",
+            "18018",
+            "18019",
+            "18020",
+            "18021",
+            "18022",
+            "18023",
+            "18024",
+            "18025",
+            "18026",
+            "18027",
+            "18028",
+            "18029",
+            "18030",
+            "18031",
+            "18032",
+            "18033",
+            "18034",
+            "18035",
+            "18036",
+            "18037",
+            "18038",
+            "18039",
+            "18040",
+            "18041",
+            "18042",
+            "18043",
+            "18044",
+            "18045",
+            "18046",
+            "18047",
+            "18048",
+            "18049",
+            "18050",
+            "18051",
+            "18052",
+            "18054",
+            "18055",
+            "18056",
+            "18105",
+            "18119",
+            "18120",
+            "18121",
+            "18122",
+            "18123",
+            "18124",
+            "18125",
+            "18126",
+            "18127",
+            "18128",
+            "18129",
+            "18130",
+            "18131",
+            "18132",
+            "18133",
+            "18134",
+            "18135",
+            "18136",
+            "18137",
+            "18138",
+            "18139",
+            "18140",
+            "18141",
+            "18142",
+            "18143",
+            "18146",
+            "18147",
+            "18148",
+            "18149",
+            "18150",
+            "18151",
+            "18152",
+            "18153",
+            "18154",
+            "18155",
+            "18156",
+            "18157",
+            "18158",
+            "18159",
+            "18222",
+            "18223",
+            "18224",
+            "18225",
+            "18233",
+            "18234",
+            "18399",
+            "18400",
+            "18401",
+            "18402",
+            "18403",
+            "18405",
+            "18406",
+            "18407",
+            "18408",
+            "18409",
+            "18410",
+            "18411",
+            "18412",
+            "18413",
+            "18414",
+            "18415",
+            "18416",
+            "18417",
+            "18418",
+            "18419",
+            "18420",
+            "18421",
+            "18422",
+            "18423",
+            "18424",
+            "18425",
+            "18426",
+            "18427",
+            "18430",
+            "18431",
+            "18432",
+            "18433",
+            "18434",
+            "18435",
+            "18436",
+            "18437",
+            "18438",
+            "18439",
+            "18440",
+            "18441",
+            "18442",
+            "18447",
+            "18448",
+            "18449",
+            "18450",
+            "18451",
+            "18452",
+            "18453",
+            "18454",
+            "18455",
+            "18456",
+            "18457",
+            "18458",
+            "18459",
+            "18460",
+            "18461",
+            "18462",
+            "18463",
+            "18464",
+            "18465",
+            "18466",
+            "18467",
+            "18468",
+            "18469",
+            "18470",
+            "18471",
+            "18472",
+            "18473",
+            "18474",
+            "18475",
+            "18476",
+            "18477",
+            "18486",
+            "18495",
+            "18496",
+            "18497",
+            "18498",
+            "18499",
+            "18752",
+            "18753",
+            "18754",
+            "18755",
+            "18756",
+            "18793",
+            "18794",
+            "18800",
+            "18801",
+            "18802",
+            "18803",
+            "18804",
+            "18805",
+            "18806",
+            "18807",
+            "18808",
+            "18809",
+            "18833",
+            "18890",
+            "18895",
+            "18896",
+            "19047",
+            "19048",
+            "19049",
+            "19050",
+            "19051",
+            "19052",
+            "19053",
+            "19054",
+            "19055",
+            "19056",
+            "19057",
+            "19058",
+            "19059",
+            "19060",
+            "19061",
+            "19062",
+            "19063",
+            "19064",
+            "19065",
+            "19066",
+            "19067",
+            "19068",
+            "19069",
+            "19070",
+            "19071",
+            "19072",
+            "19073",
+            "19074",
+            "19075",
+            "19076",
+            "19077",
+            "19078",
+            "19079",
+            "19080",
+            "19081",
+            "19082",
+            "19083",
+            "19084",
+            "19085",
+            "19086",
+            "19087",
+            "19088",
+            "19089",
+            "19090",
+            "19091",
+            "19092",
+            "19093",
+            "19094",
+            "19095",
+            "19096",
+            "19286",
+            "19287",
+            "19288",
+            "19540",
+            "19542",
+            "19543",
+            "19544",
+            "19545",
+            "19546",
+            "19547",
+            "19548",
+            "19549",
+            "19550",
+            "19551",
+            "19552",
+            "19553",
+            "19554",
+            "19556",
+            "19697",
+            "19699",
+            "19701",
+            "19702",
+            "19706",
+            "19712",
+            "19714",
+            "19715",
+            "19716",
+            "19717",
+            "19718",
+            "19727",
+            "19728",
+            "19733",
+            "19886",
+            "19887",
+            "19888",
+            "19889",
+            "19890",
+            "19891",
+            "19893",
+            "19904",
+            "19907",
+            "19908",
+            "19909",
+            "19910",
+            "19911",
+            "19912",
+            "19913",
+            "19918",
+            "19919",
+            "19920",
+            "19921",
+            "19922",
+            "19923",
+            "19924",
+            "19925",
+            "19926",
+            "19927",
+            "19928",
+            "19929",
+            "19930",
+            "19931",
+            "19932",
+            "19933",
+            "19934",
+            "19935",
+            "19936",
+            "19937",
+            "19938",
+            "19939",
+            "19940",
+            "19941",
+            "19942",
+            "19943",
+            "19956",
+            "19979",
+            "19980",
+            "19981",
+            "19982",
+            "19983",
+            "19984",
+            "19985",
+            "19986",
+            "19987",
+            "19988",
+            "19989",
+            "19990",
+            "19991",
+            "19992",
+            "19993",
+            "19994",
+            "19995",
+            "19998",
+            "19999",
+            "20000",
+            "20001",
+            "20002",
+            "20003",
+            "20004",
+            "20006",
+            "20007",
+            "20008",
+            "20009",
+            "20010",
+            "20011",
+            "20012",
+            "20013",
+            "20014",
+            "20015",
+            "20016",
+            "20018",
+            "20019",
+            "20020",
+            "20021",
+            "20022",
+            "20023",
+            "20024",
+            "20025",
+            "20026",
+            "20027",
+            "20028",
+            "20029",
+            "20030",
+            "20031",
+            "20032",
+            "20033",
+            "20034",
+            "20035",
+            "20036",
+            "20037",
+            "20038",
+            "20039",
+            "20040",
+            "20041",
+            "20042",
+            "20043",
+            "20044",
+            "20045",
+            "20046",
+            "20047",
+            "20050",
+            "20051",
+            "20052",
+            "20053",
+            "20054",
+            "20055",
+            "20089",
+            "20090",
+            "20091",
+            "20093",
+            "20432",
+            "20433",
+            "20434",
+            "20435",
+            "20436",
+            "20438",
+            "20441",
+            "20442",
+            "20458",
+            "20467",
+            "20468",
+            "20469",
+            "20470",
+            "20471",
+            "20472",
+            "20473",
+            "20474",
+            "20475",
+            "20476",
+            "20477",
+            "20478",
+            "20479",
+            "20480",
+            "20481",
+            "20482",
+            "20483",
+            "20484",
+            "20485",
+            "20486",
+            "20487",
+            "20488",
+            "20489",
+            "20490",
+            "20491",
+            "20492",
+            "20493",
+            "20494",
+            "20495",
+            "20564",
+            "20565",
+            "20594",
+            "20595",
+            "20596",
+            "20597",
+            "20598",
+            "20599",
+            "20600",
+            "20601",
+            "20602",
+            "20603",
+            "20604",
+            "20605",
+            "20607",
+            "20608",
+            "20609",
+            "20610",
+            "20620",
+            "20782",
+            "20783",
+            "20784",
+            "20785",
+            "20786",
+            "20787",
+            "20805",
+            "20806",
+            "20807",
+            "20808",
+            "20809",
+            "20810",
+            "20811",
+            "20812",
+            "20823",
+            "20824",
+            "20825",
+            "20826",
+            "20831",
+            "20832",
+            "20833",
+            "21007",
+            "21080",
+            "21081",
+            "21082",
+            "21083",
+            "21084",
+            "21085",
+            "21086",
+            "21087",
+            "21088",
+            "21089",
+            "21090",
+            "21091",
+            "21092",
+            "21093",
+            "21094",
+            "21095",
+            "21096",
+            "21097",
+            "21098",
+            "21099",
+            "21100",
+            "21101",
+            "21109",
+            "21110",
+            "21111",
+            "21112",
+            "21113",
+            "21114",
+            "21115",
+            "21116",
+            "21121",
+            "21122",
+            "21123",
+            "21124",
+            "21125",
+            "21126",
+            "21127",
+            "21128",
+            "21129",
+            "21130",
+            "21131",
+            "21132",
+            "21133",
+            "21134",
+            "21135",
+            "21136",
+            "21137",
+            "21138",
+            "21139",
+            "21140",
+            "21141",
+            "21142",
+            "21143",
+            "21144",
+            "21145",
+            "21146",
+            "21147",
+            "21148",
+            "21149",
+            "21150",
+            "21151",
+            "21152",
+            "21153",
+            "21154",
+            "21155",
+            "21156",
+            "21157",
+            "21158",
+            "21159",
+            "21160",
+            "21161",
+            "21162",
+            "21163",
+            "21164",
+            "21165",
+            "21166",
+            "21167",
+            "21168",
+            "21169",
+            "21170",
+            "21171",
+            "21172",
+            "21173",
+            "21174",
+            "21175",
+            "21176",
+            "21177",
+            "21178",
+            "21179",
+            "21180",
+            "21181",
+            "21214",
+            "21215",
+            "21216",
+            "21217",
+            "21218",
+            "21219",
+            "21220",
+            "21221",
+            "21222",
+            "21223",
+            "21224",
+            "21225",
+            "21283",
+            "21289",
+            "21290",
+            "21291",
+            "21292",
+            "21296",
+            "21297",
+            "21298",
+            "21299",
+            "21300",
+            "21301",
+            "21302",
+            "21303",
+            "21304",
+            "21305",
+            "21306",
+            "21307",
+            "21308",
+            "21309",
+            "21310",
+            "21311",
+            "21312",
+            "21321",
+            "21322",
+            "21323",
+            "21324",
+            "21325",
+            "21431",
+            "21432",
+            "21433",
+            "21434",
+            "21478",
+            "21479",
+            "21480",
+            "21481",
+            "21482",
+            "21483",
+            "21484",
+            "21485",
+            "21594",
+            "21595",
+            "21596",
+            "21597",
+            "21598",
+            "21600",
+            "21601",
+            "21602",
+            "21603",
+            "21788",
+            "21789",
+            "21790",
+            "22281",
+            "22562",
+            "22564",
+            "22565",
+            "22568",
+            "22569",
+            "22570",
+            "22571",
+            "22595",
+            "22596",
+            "22597",
+            "22598",
+            "22599",
+            "22600",
+            "22601",
+            "22602",
+            "22603",
+            "22604",
+            "22605",
+            "22606",
+            "22607",
+            "22608",
+            "22609",
+            "22610",
+            "22611",
+            "22612",
+            "22613",
+            "22614",
+            "22615",
+            "22616",
+            "22617",
+            "22618",
+            "22619",
+            "22620",
+            "22930",
+            "22931",
+            "22932",
+            "22933",
+            "22934",
+            "22935",
+            "22936",
+            "22937",
+            "22938",
+            "22939",
+            "22940",
+            "22941",
+            "22942",
+            "22943",
+            "22944",
+            "22945",
+            "22946",
+            "22947",
+            "22948",
+            "22949",
+            "22950",
+            "22951",
+            "22952",
+            "22953",
+            "22954",
+            "22955",
+            "22956",
+            "22957",
+            "22958",
+            "22959",
+            "22960",
+            "22961",
+            "22962",
+            "22963",
+            "22964",
+            "22965",
+            "22966",
+            "22972",
+            "22973",
+            "22974",
+            "22975",
+            "23363",
+            "23653",
+            "23654",
+            "23655",
+            "23657",
+            "23658",
+            "23659",
+            "23660",
+            "23661",
+            "23662",
+            "23663",
+            "23664",
+            "23665",
+            "23666",
+            "23667",
+            "23668",
+            "23669",
+            "23670",
+            "23671",
+            "23672",
+            "23673",
+            "23674",
+            "23675",
+            "23958",
+            "23959",
+            "23960",
+            "23961",
+            "23962",
+            "23963",
+            "23964",
+            "23965",
+            "23966",
+            "23967",
+            "23968",
+            "23969",
+            "23970",
+            "23971",
+            "23972",
+            "23973",
+            "23974",
+            "23975",
+            "23976",
+            "23977",
+            "23978",
+            "23979",
+            "23980",
+            "23981",
+            "24136",
+            "24137",
+            "24141",
+            "24145",
+            "24147",
+            "24148",
+            "24168",
+            "24169",
+            "24170",
+            "24171",
+            "24199",
+            "24200",
+            "24201",
+            "24202",
+            "24203",
+            "24281",
+            "24283",
+            "24284",
+            "24285",
+            "24286",
+            "24287",
+            "24288",
+            "24289",
+            "24290",
+            "24291",
+            "24292",
+            "24319",
+            "24323",
+            "24324",
+            "24325",
+            "24326",
+            "24327",
+            "24328",
+            "24329",
+            "24330",
+            "24331",
+            "24333",
+            "24345",
+            "24346",
+            "24347",
+            "24348",
+            "24349",
+            "24350",
+            "24351",
+            "24352",
+            "24353",
+            "24453",
+            "24455",
+            "24456",
+            "24457",
+            "24458",
+            "24459",
+            "24460",
+            "24461",
+            "24462",
+            "24463",
+            "24464",
+            "24465",
+            "24482",
+            "24483",
+            "24484",
+            "24485",
+            "24589",
+            "24659",
+            "24660",
+            "24661",
+            "24673",
+            "24674",
+            "24675",
+            "24676",
+            "24677",
+            "24678",
+            "24680",
+            "24681",
+            "24687",
+            "24691",
+            "24692",
+            "24693",
+            "24694",
+            "24706",
+            "24707",
+            "24829",
+            "24830",
+            "24831",
+            "24832",
+            "24835",
+            "24840",
+            "24841",
+            "24842",
+            "24843",
+            "24844",
+            "24845",
+            "24846",
+            "24879",
+            "24880",
+            "24881",
+            "24882",
+            "24897",
+            "24898",
+            "24899",
+            "24900",
+            "24901",
+            "24902",
+            "24903",
+            "24904",
+            "24905",
+            "24906",
+            "25005",
+            "25006",
+            "25009",
+            "25010",
+            "25018",
+            "25024",
+            "25029",
+            "25030",
+            "25052",
+            "25057",
+            "25058",
+            "25059",
+            "25060",
+            "25061",
+            "25062",
+            "25063",
+            "25064",
+            "25065",
+            "25066",
+            "25067",
+            "25068",
+            "25069",
+            "25070",
+            "25071",
+            "25072",
+            "25073",
+            "25074",
+            "25075",
+            "25076",
+            "25077",
+            "25078",
+            "25079",
+            "25080",
+            "25081",
+            "25082",
+            "25083",
+            "25084",
+            "25085",
+            "25193",
+            "25194",
+            "25195",
+            "25196",
+            "25197",
+            "25198",
+            "25199",
+            "25200",
+            "25201",
+            "25202",
+            "25203",
+            "25204",
+            "25205",
+            "25206",
+            "25207",
+            "25208",
+            "25209",
+            "25210",
+            "25211",
+            "25212",
+            "25213",
+            "25214",
+            "25215",
+            "25216",
+            "25217",
+            "25218",
+            "25219",
+            "25220",
+            "25258",
+            "25259",
+            "25260",
+            "25261",
+            "25262",
+            "25263",
+            "25264",
+            "25265",
+            "25266",
+            "25267",
+            "25268",
+            "25269",
+            "25270",
+            "25271",
+            "25272",
+            "25273",
+            "25274",
+            "25275",
+            "25276",
+            "25277",
+            "25278",
+            "25279",
+            "25280",
+            "25281",
+            "25282",
+            "25349",
+            "25350",
+            "25351",
+            "25352",
+            "25482",
+            "25483",
+            "25484",
+            "25485",
+            "25486",
+            "25487",
+            "25490",
+            "25491",
+            "25492",
+            "25493",
+            "25533",
+            "25534",
+            "25535",
+            "25536",
+            "25550",
+            "25551",
+            "25552",
+            "25553",
+            "25554",
+            "25555",
+            "25556",
+            "25557",
+            "25558",
+            "25559",
+            "25560",
+            "25561",
+            "25562",
+            "25563",
+            "25564",
+            "25565",
+            "25566",
+            "25567",
+            "25568",
+            "25569",
+            "25570",
+            "25571",
+            "25572",
+            "25573",
+            "25574",
+            "25575",
+            "25576",
+            "25596",
+            "25597",
+            "25598",
+            "25599",
+            "25600",
+            "25601",
+            "25740",
+            "25741",
+            "25742",
+            "25743",
+            "25744",
+            "25745",
+            "25746",
+            "25747",
+            "25748",
+            "25749",
+            "25750",
+            "25753",
+            "25754",
+            "25862",
+            "25863",
+            "25864",
+            "25865",
+            "25866",
+            "25867",
+            "25868",
+            "25869",
+            "25870",
+            "25871",
+            "25872",
+            "25873",
+            "25874",
+            "25875",
+            "25876",
+            "25877",
+            "25878",
+            "25879",
+            "25880",
+            "25881",
+            "25882",
+            "25883",
+            "25884",
+            "25885",
+            "25886",
+            "25887",
+            "25986",
+            "25987",
+            "25988",
+            "25989",
+            "25990",
+            "25991",
+            "25992",
+            "25993",
+            "25994",
+            "25995",
+            "26306",
+            "26307",
+            "26308",
+            "26309",
+            "26338",
+            "26339",
+            "26625",
+            "26626",
+            "26627",
+            "26628",
+            "26629",
+            "26630",
+            "26631",
+            "26632",
+            "26633",
+            "26634",
+            "26635",
+            "26636",
+            "26637",
+            "26638",
+            "26639",
+            "26640",
+            "26641",
+            "26642",
+            "26643",
+            "26644",
+            "26695",
+            "26696",
+            "26697",
+            "26698",
+            "26729",
+            "26730",
+            "26731",
+            "26741",
+            "26742",
+            "26743",
+            "26744",
+            "26802",
+            "26803",
+            "26804",
+            "26805",
+            "26869",
+            "26870",
+            "26871",
+            "26872",
+            "26873",
+            "26874",
+            "26875",
+            "26876",
+            "26877",
+            "26878",
+            "27148",
+            "27149",
+            "27321",
+            "27322",
+            "27324",
+            "27327",
+            "27352",
+            "27353",
+            "27354",
+            "27355",
+            "27461",
+            "27462",
+            "27463",
+            "27464",
+            "27644",
+            "27645",
+            "27646",
+            "27647",
+            "27669",
+            "27670",
+            "27671",
+            "27677",
+            "27718",
+            "27719",
+            "27720",
+            "27721",
+            "27722",
+            "27723",
+            "27724",
+            "27725",
+            "27726",
+            "27727",
+            "27728",
+            "27729",
+            "27730",
+            "27863",
+            "27864",
+            "27887",
+            "27888",
+            "27889",
+            "27890",
+            "27891",
+            "27892",
+            "27893",
+            "27894",
+            "27912",
+            "27987",
+            "28000",
+            "28001",
+            "28002",
+            "28003",
+            "28004",
+            "28005",
+            "28006",
+            "28007",
+            "28008",
+            "28015",
+            "28016",
+            "28017",
+            "28018",
+            "28019",
+            "28020",
+            "28021",
+            "28022",
+            "28023",
+            "28024",
+            "28025",
+            "28026",
+            "28027",
+            "28028",
+            "28029",
+            "28030",
+            "28031",
+            "28032",
+            "28033",
+            "28034",
+            "28035",
+            "28036",
+            "28037",
+            "28038",
+            "28039",
+            "28040",
+            "28041",
+            "28042",
+            "28043",
+            "28044",
+            "28045",
+            "28046",
+            "28047",
+            "28048",
+            "28049",
+            "28050",
+            "28051",
+            "28052",
+            "28053",
+            "28054",
+            "28055",
+            "28056",
+            "28057",
+            "28058",
+            "28059",
+            "28060",
+            "28061",
+            "28062",
+            "28119",
+            "28120",
+            "28159",
+            "28206",
+            "28231",
+            "28232",
+            "28233",
+            "28234",
+            "28235",
+            "28236",
+            "28237",
+            "28238",
+            "28239",
+            "28240",
+            "28278",
+            "28279",
+            "28280",
+            "28281",
+            "28282",
+            "28381",
+            "28382",
+            "28383",
+            "28384",
+            "28385",
+            "28386",
+            "28387",
+            "28388",
+            "28389",
+            "28390",
+            "28391",
+            "28392",
+            "28393",
+            "28394",
+            "28395",
+            "28396",
+            "28397",
+            "28398",
+            "28399",
+            "28400",
+            "28401",
+            "28402",
+            "28403",
+            "28404",
+            "28405",
+            "28406",
+            "28407",
+            "28408",
+            "28409",
+            "28410",
+            "28411",
+            "28412",
+            "28413",
+            "28414",
+            "28415",
+            "28416",
+            "28417",
+            "28418",
+            "28419",
+            "28420",
+            "28421",
+            "28422",
+            "28423",
+            "28424",
+            "28426",
+            "28455",
+            "28456",
+            "28457",
+            "28458",
+            "28603",
+            "28604",
+            "28605",
+            "28606",
+            "28607",
+            "28608",
+            "28609",
+            "28610",
+            "28611",
+            "28612",
+            "28613",
+            "28630",
+            "28631",
+            "28637",
+            "28655",
+            "28656",
+            "28657",
+            "28658",
+            "28718",
+            "28729",
+            "28826",
+            "28827",
+            "28828",
+            "28829",
+            "28913",
+            "28917",
+            "28925",
+            "28934",
+            "28935",
+            "28936",
+            "28937",
+            "29029",
+            "29032",
+            "29033",
+            "29038",
+            "29133",
+            "29134",
+            "29135",
+            "29136",
+            "29190",
+            "29191",
+            "29192",
+            "29193",
+            "29194",
+            "29195",
+            "29196",
+            "29197",
+            "29198",
+            "29199",
+            "29200",
+            "29201",
+            "29202",
+            "29203",
+            "29204",
+            "29205",
+            "29206",
+            "29207",
+            "29208",
+            "29209",
+            "29210",
+            "29211",
+            "29212",
+            "29213",
+            "29214",
+            "29215",
+            "29216",
+            "29217",
+            "29218",
+            "29397",
+            "29398",
+            "29399",
+            "29513",
+            "29514",
+            "29515",
+            "29520",
+            "29521",
+            "29522",
+            "29523",
+            "29524",
+            "29525",
+            "29526",
+            "29527",
+            "29528",
+            "29529",
+            "29530",
+            "29531",
+            "29532",
+            "29533",
+            "29534",
+            "29535",
+            "29536",
+            "29537",
+            "33559",
+            "33560",
+            "33561",
+            "33562",
+            "33626",
+            "33627",
+            "33628",
+            "33629",
+            "33630",
+            "33631",
+            "33632",
+            "33633",
+            "33634",
+            "33635",
+            "33636",
+            "33637",
+            "33638",
+            "33639",
+            "33640",
+            "33641",
+            "33642",
+            "33643",
+            "33644",
+            "33645",
+            "33876",
+            "33877",
+            "33878",
+            "33879",
+            "33880",
+            "33881",
+            "33882",
+            "33883",
+            "33884",
+            "33885",
+            "33886",
+            "33887",
+            "33888",
+            "33889",
+            "33890",
+            "33891",
+            "33892",
+            "33893",
+            "33894",
+            "33895",
+            "33896",
+            "33897",
+            "33898",
+            "33899",
+            "34035",
+            "34036",
+            "34037",
+            "34038",
+            "34039",
+            "34040",
+            "34041",
+            "34059",
+            "34060",
+            "34061",
+            "34062",
+            "34063",
+            "34064",
+            "34065",
+            "34066",
+            "34067",
+            "34068",
+            "34069",
+            "34070",
+            "34071",
+            "34072",
+            "34073",
+            "34074",
+            "34075",
+            "34076",
+            "34077",
+            "34078",
+            "34079",
+            "34082",
+            "34083",
+            "34084",
+            "34085",
+            "34086",
+            "34087",
+            "34088",
+            "34089",
+            "34090",
+            "34092",
+            "34093",
+            "34094",
+            "34095",
+            "34096",
+            "34097",
+            "34098",
+            "34099",
+            "34100",
+            "34101",
+            "34102",
+            "34105",
+            "34106",
+            "34107",
+            "34108",
+            "34113",
+            "34114",
+            "34115",
+            "34116",
+            "34117",
+            "34118",
+            "34119",
+            "34120",
+            "34121",
+            "34146",
+            "34147",
+            "34148",
+            "34149",
+            "34366",
+            "34367",
+            "34368",
+            "34369",
+            "34370",
+            "34371",
+            "34372",
+            "34373",
+            "34374",
+            "34375",
+            "34376",
+            "34377",
+            "34378",
+            "34379",
+            "34380",
+            "34381",
+            "34382",
+            "34383",
+            "34384",
+            "34385",
+            "34386",
+            "34638",
+            "34639",
+            "34640",
+            "34641",
+            "34642",
+            "34643",
+            "34644",
+            "34645",
+            "34646",
+            "34698",
+            "34699",
+            "34700",
+            "34701",
+            "34702",
+            "34703",
+            "34704",
+            "34939",
+            "34940",
+            "34941",
+            "34942",
+            "34943",
+            "34944",
+            "34945",
+            "34946",
+            "35099",
+            "35100",
+            "35101",
+            "35102",
+            "35103",
+            "35110",
+            "35111",
+            "35332",
+            "35333",
+            "35334",
+            "35335",
+            "35336",
+            "35337",
+            "35338",
+            "35339",
+            "35340",
+            "35341",
+            "35342",
+            "35343",
+            "35344",
+            "35345",
+            "35346",
+            "35347",
+            "35348",
+            "35349",
+            "35350",
+            "35351",
+            "35352",
+            "35353",
+            "35354",
+            "35355",
+            "35356",
+            "35357",
+            "35358",
+            "35359",
+            "35360",
+            "35361",
+            "35362",
+            "35363",
+            "35364",
+            "35365",
+            "35371",
+            "35372",
+            "35385",
+            "35386",
+            "35387",
+            "35388",
+            "35389",
+            "35390",
+            "35391",
+            "35392",
+            "35393",
+            "35394",
+            "35395",
+            "35396",
+            "35397",
+            "35701",
+            "35702",
+            "35703",
+            "35704"
+          ],
+          "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0": [
+            "13579",
+            "13599",
+            "13600",
+            "13601",
+            "13731",
+            "13734",
+            "13738",
+            "13740",
+            "13741",
+            "13742",
+            "13743",
+            "13744",
+            "13753",
+            "13766",
+            "13767",
+            "13768",
+            "13770",
+            "13772",
+            "13774",
+            "13775",
+            "13820",
+            "13829",
+            "13830",
+            "13839",
+            "13840",
+            "13841",
+            "13842",
+            "13843",
+            "13846",
+            "13847",
+            "13871",
+            "13872",
+            "13877",
+            "13878",
+            "13879",
+            "13880",
+            "13881",
+            "13882",
+            "13883",
+            "13884",
+            "13885",
+            "13886",
+            "13887",
+            "13888",
+            "13893",
+            "13894",
+            "13895",
+            "13931",
+            "13932",
+            "13933",
+            "13946",
+            "13950",
+            "13956",
+            "13957",
+            "14005",
+            "14008",
+            "14010",
+            "14012",
+            "14013",
+            "14015",
+            "14016",
+            "14017",
+            "14020",
+            "14021",
+            "14023",
+            "14024",
+            "14026",
+            "14027",
+            "14036",
+            "14039",
+            "14054",
+            "14059",
+            "14060",
+            "14062",
+            "14063",
+            "14064",
+            "14066",
+            "14068",
+            "14071",
+            "14072",
+            "14073",
+            "14074",
+            "14076",
+            "14078",
+            "14079",
+            "14080",
+            "14082",
+            "14086",
+            "14107",
+            "14120",
+            "14122",
+            "14124",
+            "14127",
+            "14128",
+            "14130",
+            "14133",
+            "14139",
+            "14140",
+            "14141",
+            "14142",
+            "14143",
+            "14144",
+            "14145",
+            "14146",
+            "14147",
+            "14148",
+            "14173",
+            "14175",
+            "14176",
+            "14178",
+            "14180",
+            "14181",
+            "14184",
+            "14185",
+            "14221",
+            "14222",
+            "14226",
+            "14228",
+            "14229",
+            "14231",
+            "14238",
+            "14309",
+            "14365",
+            "14366",
+            "14391",
+            "14392",
+            "14393",
+            "14394",
+            "14395",
+            "14396",
+            "14399",
+            "14400",
+            "14401",
+            "14410",
+            "14413",
+            "14415",
+            "14416",
+            "14424",
+            "14425",
+            "14426",
+            "14427",
+            "14450",
+            "14451",
+            "14452",
+            "14453",
+            "14454",
+            "14455",
+            "14456",
+            "14457",
+            "14472",
+            "14473",
+            "14474",
+            "14475",
+            "14476",
+            "14477",
+            "14478",
+            "14479",
+            "14480",
+            "14481",
+            "14482",
+            "14483",
+            "14484",
+            "14485",
+            "14493",
+            "14496",
+            "14497",
+            "14498",
+            "14540",
+            "14541",
+            "14542",
+            "14543",
+            "14544",
+            "14545",
+            "14546",
+            "14547",
+            "14548",
+            "14549",
+            "14550",
+            "14551",
+            "14552",
+            "14553",
+            "14554",
+            "14657",
+            "14658",
+            "14659",
+            "14791",
+            "14792",
+            "14793",
+            "14794",
+            "14795",
+            "14796",
+            "14797",
+            "14798",
+            "14799",
+            "14800",
+            "14801",
+            "15080",
+            "15081",
+            "15082",
+            "15083",
+            "15084",
+            "15085",
+            "15114",
+            "15115",
+            "15116",
+            "15117",
+            "15118",
+            "15119",
+            "15120",
+            "15121",
+            "15122",
+            "15123",
+            "15124",
+            "15125",
+            "15126",
+            "15127",
+            "15128",
+            "15129",
+            "15130",
+            "15131",
+            "15137",
+            "15138",
+            "15139",
+            "15140",
+            "15141",
+            "15142",
+            "15143",
+            "15144",
+            "15145",
+            "15146",
+            "15147",
+            "15148",
+            "15677",
+            "15678",
+            "15679",
+            "15681",
+            "15682",
+            "15683",
+            "15684",
+            "15685",
+            "15686",
+            "15687",
+            "15688",
+            "15689",
+            "15690",
+            "15691",
+            "15692",
+            "15693",
+            "15694",
+            "15703",
+            "15704",
+            "15705",
+            "15706",
+            "15707",
+            "15708",
+            "15709",
+            "15710",
+            "15711",
+            "15712",
+            "15713",
+            "15714",
+            "15715",
+            "15716",
+            "15717",
+            "15718",
+            "15719",
+            "16204",
+            "16205",
+            "16206",
+            "16207",
+            "16208",
+            "16605",
+            "17117",
+            "17118",
+            "17119",
+            "17120",
+            "17121",
+            "17122",
+            "17123",
+            "17124",
+            "17125",
+            "17126",
+            "17127",
+            "17128",
+            "17129",
+            "17130",
+            "17131",
+            "17132",
+            "17133",
+            "17139",
+            "17140",
+            "17141",
+            "17142",
+            "17143",
+            "17144",
+            "17145",
+            "17146",
+            "17147",
+            "17148",
+            "17149",
+            "17150",
+            "17151",
+            "17152",
+            "17153",
+            "17154",
+            "17155",
+            "17475",
+            "17476",
+            "17477",
+            "17478",
+            "17479",
+            "17480",
+            "17732",
+            "17733",
+            "17734",
+            "17735",
+            "17736",
+            "17737",
+            "17742",
+            "17757",
+            "17758",
+            "17759",
+            "18008",
+            "18011",
+            "18012",
+            "18013",
+            "18014",
+            "18015",
+            "18016",
+            "18017",
+            "18018",
+            "18019",
+            "18020",
+            "18021",
+            "18022",
+            "18023",
+            "18024",
+            "18025",
+            "18026",
+            "18027",
+            "18028",
+            "18029",
+            "18030",
+            "18031",
+            "18032",
+            "18033",
+            "18034",
+            "18035",
+            "18036",
+            "18037",
+            "18038",
+            "18039",
+            "18040",
+            "18041",
+            "18042",
+            "18043",
+            "18044",
+            "18045",
+            "18046",
+            "18047",
+            "18048",
+            "18049",
+            "18050",
+            "18051",
+            "18052",
+            "18054",
+            "18055",
+            "18056",
+            "18105",
+            "18119",
+            "18120",
+            "18121",
+            "18122",
+            "18123",
+            "18124",
+            "18125",
+            "18126",
+            "18127",
+            "18128",
+            "18129",
+            "18130",
+            "18131",
+            "18132",
+            "18133",
+            "18134",
+            "18135",
+            "18136",
+            "18137",
+            "18138",
+            "18139",
+            "18140",
+            "18141",
+            "18142",
+            "18143",
+            "18146",
+            "18147",
+            "18148",
+            "18149",
+            "18150",
+            "18151",
+            "18152",
+            "18153",
+            "18154",
+            "18155",
+            "18156",
+            "18157",
+            "18158",
+            "18159",
+            "18222",
+            "18223",
+            "18224",
+            "18225",
+            "18233",
+            "18234",
+            "18399",
+            "18400",
+            "18401",
+            "18402",
+            "18403",
+            "18405",
+            "18406",
+            "18407",
+            "18408",
+            "18409",
+            "18410",
+            "18411",
+            "18412",
+            "18413",
+            "18414",
+            "18415",
+            "18416",
+            "18417",
+            "18418",
+            "18419",
+            "18420",
+            "18421",
+            "18422",
+            "18423",
+            "18424",
+            "18425",
+            "18426",
+            "18427",
+            "18430",
+            "18431",
+            "18432",
+            "18433",
+            "18434",
+            "18435",
+            "18436",
+            "18437",
+            "18438",
+            "18439",
+            "18440",
+            "18441",
+            "18442",
+            "18447",
+            "18448",
+            "18449",
+            "18450",
+            "18451",
+            "18452",
+            "18453",
+            "18454",
+            "18455",
+            "18456",
+            "18457",
+            "18458",
+            "18459",
+            "18460",
+            "18461",
+            "18462",
+            "18463",
+            "18464",
+            "18465",
+            "18466",
+            "18467",
+            "18468",
+            "18469",
+            "18470",
+            "18471",
+            "18472",
+            "18473",
+            "18474",
+            "18475",
+            "18476",
+            "18477",
+            "18486",
+            "18495",
+            "18496",
+            "18497",
+            "18498",
+            "18499",
+            "18752",
+            "18753",
+            "18754",
+            "18755",
+            "18756",
+            "18793",
+            "18794",
+            "18800",
+            "18801",
+            "18802",
+            "18803",
+            "18804",
+            "18805",
+            "18806",
+            "18807",
+            "18808",
+            "18809",
+            "18833",
+            "18890",
+            "18895",
+            "18896",
+            "19047",
+            "19048",
+            "19049",
+            "19050",
+            "19051",
+            "19052",
+            "19053",
+            "19054",
+            "19055",
+            "19056",
+            "19057",
+            "19058",
+            "19059",
+            "19060",
+            "19061",
+            "19062",
+            "19063",
+            "19064",
+            "19065",
+            "19066",
+            "19067",
+            "19068",
+            "19069",
+            "19070",
+            "19071",
+            "19072",
+            "19073",
+            "19074",
+            "19075",
+            "19076",
+            "19077",
+            "19078",
+            "19079",
+            "19080",
+            "19081",
+            "19082",
+            "19083",
+            "19084",
+            "19085",
+            "19086",
+            "19087",
+            "19088",
+            "19089",
+            "19090",
+            "19091",
+            "19092",
+            "19093",
+            "19094",
+            "19095",
+            "19096",
+            "19286",
+            "19287",
+            "19288",
+            "19540",
+            "19542",
+            "19543",
+            "19544",
+            "19545",
+            "19546",
+            "19547",
+            "19548",
+            "19549",
+            "19550",
+            "19551",
+            "19552",
+            "19553",
+            "19554",
+            "19556",
+            "19697",
+            "19699",
+            "19701",
+            "19702",
+            "19706",
+            "19712",
+            "19714",
+            "19715",
+            "19716",
+            "19717",
+            "19718",
+            "19727",
+            "19728",
+            "19733",
+            "19886",
+            "19887",
+            "19888",
+            "19889",
+            "19890",
+            "19891",
+            "19893",
+            "19904",
+            "19907",
+            "19908",
+            "19909",
+            "19910",
+            "19911",
+            "19912",
+            "19913",
+            "19918",
+            "19919",
+            "19920",
+            "19921",
+            "19922",
+            "19923",
+            "19924",
+            "19925",
+            "19926",
+            "19927",
+            "19928",
+            "19929",
+            "19930",
+            "19931",
+            "19932",
+            "19933",
+            "19934",
+            "19935",
+            "19936",
+            "19937",
+            "19938",
+            "19939",
+            "19940",
+            "19941",
+            "19942",
+            "19943",
+            "19956",
+            "19979",
+            "19980",
+            "19981",
+            "19982",
+            "19983",
+            "19984",
+            "19985",
+            "19986",
+            "19987",
+            "19988",
+            "19989",
+            "19990",
+            "19991",
+            "19992",
+            "19993",
+            "19994",
+            "19995",
+            "19998",
+            "19999",
+            "20000",
+            "20001",
+            "20002",
+            "20003",
+            "20004",
+            "20006",
+            "20007",
+            "20008",
+            "20009",
+            "20010",
+            "20011",
+            "20012",
+            "20013",
+            "20014",
+            "20015",
+            "20016",
+            "20018",
+            "20019",
+            "20020",
+            "20021",
+            "20022",
+            "20023",
+            "20024",
+            "20025",
+            "20026",
+            "20027",
+            "20028",
+            "20029",
+            "20030",
+            "20031",
+            "20032",
+            "20033",
+            "20034",
+            "20035",
+            "20036",
+            "20037",
+            "20038",
+            "20039",
+            "20040",
+            "20041",
+            "20042",
+            "20043",
+            "20044",
+            "20045",
+            "20046",
+            "20047",
+            "20050",
+            "20051",
+            "20052",
+            "20053",
+            "20054",
+            "20055",
+            "20089",
+            "20090",
+            "20091",
+            "20093",
+            "20432",
+            "20433",
+            "20434",
+            "20435",
+            "20436",
+            "20438",
+            "20441",
+            "20442",
+            "20458",
+            "20467",
+            "20468",
+            "20469",
+            "20470",
+            "20471",
+            "20472",
+            "20473",
+            "20474",
+            "20475",
+            "20476",
+            "20477",
+            "20478",
+            "20479",
+            "20480",
+            "20481",
+            "20482",
+            "20483",
+            "20484",
+            "20485",
+            "20486",
+            "20487",
+            "20488",
+            "20489",
+            "20490",
+            "20491",
+            "20492",
+            "20493",
+            "20494",
+            "20495",
+            "20564",
+            "20565",
+            "20594",
+            "20595",
+            "20596",
+            "20597",
+            "20598",
+            "20599",
+            "20600",
+            "20601",
+            "20602",
+            "20603",
+            "20604",
+            "20605",
+            "20607",
+            "20608",
+            "20609",
+            "20610",
+            "20620",
+            "20782",
+            "20783",
+            "20784",
+            "20785",
+            "20786",
+            "20787",
+            "20805",
+            "20806",
+            "20807",
+            "20808",
+            "20809",
+            "20810",
+            "20811",
+            "20812",
+            "20823",
+            "20824",
+            "20825",
+            "20826",
+            "20831",
+            "20832",
+            "20833",
+            "21007",
+            "21080",
+            "21081",
+            "21082",
+            "21083",
+            "21084",
+            "21085",
+            "21086",
+            "21087",
+            "21088",
+            "21089",
+            "21090",
+            "21091",
+            "21092",
+            "21093",
+            "21094",
+            "21095",
+            "21096",
+            "21097",
+            "21098",
+            "21099",
+            "21100",
+            "21101",
+            "21109",
+            "21110",
+            "21111",
+            "21112",
+            "21113",
+            "21114",
+            "21115",
+            "21116",
+            "21121",
+            "21122",
+            "21123",
+            "21124",
+            "21125",
+            "21126",
+            "21127",
+            "21128",
+            "21129",
+            "21130",
+            "21131",
+            "21132",
+            "21133",
+            "21134",
+            "21135",
+            "21136",
+            "21137",
+            "21138",
+            "21139",
+            "21140",
+            "21141",
+            "21142",
+            "21143",
+            "21144",
+            "21145",
+            "21146",
+            "21147",
+            "21148",
+            "21149",
+            "21150",
+            "21151",
+            "21152",
+            "21153",
+            "21154",
+            "21155",
+            "21156",
+            "21157",
+            "21158",
+            "21159",
+            "21160",
+            "21161",
+            "21162",
+            "21163",
+            "21164",
+            "21165",
+            "21166",
+            "21167",
+            "21168",
+            "21169",
+            "21170",
+            "21171",
+            "21172",
+            "21173",
+            "21174",
+            "21175",
+            "21176",
+            "21177",
+            "21178",
+            "21179",
+            "21180",
+            "21181",
+            "21214",
+            "21215",
+            "21216",
+            "21217",
+            "21218",
+            "21219",
+            "21220",
+            "21221",
+            "21222",
+            "21223",
+            "21224",
+            "21225",
+            "21283",
+            "21289",
+            "21290",
+            "21291",
+            "21292",
+            "21296",
+            "21297",
+            "21298",
+            "21299",
+            "21300",
+            "21301",
+            "21302",
+            "21303",
+            "21304",
+            "21305",
+            "21306",
+            "21307",
+            "21308",
+            "21309",
+            "21310",
+            "21311",
+            "21312",
+            "21321",
+            "21322",
+            "21323",
+            "21324",
+            "21325",
+            "21431",
+            "21432",
+            "21433",
+            "21434",
+            "21478",
+            "21479",
+            "21480",
+            "21481",
+            "21482",
+            "21483",
+            "21484",
+            "21485",
+            "21594",
+            "21595",
+            "21596",
+            "21597",
+            "21598",
+            "21600",
+            "21601",
+            "21602",
+            "21603",
+            "21788",
+            "21789",
+            "21790",
+            "22281",
+            "22562",
+            "22564",
+            "22565",
+            "22568",
+            "22569",
+            "22570",
+            "22571",
+            "22595",
+            "22596",
+            "22597",
+            "22598",
+            "22599",
+            "22600",
+            "22601",
+            "22602",
+            "22603",
+            "22604",
+            "22605",
+            "22606",
+            "22607",
+            "22608",
+            "22609",
+            "22610",
+            "22611",
+            "22612",
+            "22613",
+            "22614",
+            "22615",
+            "22616",
+            "22617",
+            "22618",
+            "22619",
+            "22620",
+            "22930",
+            "22931",
+            "22932",
+            "22933",
+            "22934",
+            "22935",
+            "22936",
+            "22937",
+            "22938",
+            "22939",
+            "22940",
+            "22941",
+            "22942",
+            "22943",
+            "22944",
+            "22945",
+            "22946",
+            "22947",
+            "22948",
+            "22949",
+            "22950",
+            "22951",
+            "22952",
+            "22953",
+            "22954",
+            "22955",
+            "22956",
+            "22957",
+            "22958",
+            "22959",
+            "22960",
+            "22961",
+            "22962",
+            "22963",
+            "22964",
+            "22965",
+            "22966",
+            "22972",
+            "22973",
+            "22974",
+            "22975",
+            "23363",
+            "23653",
+            "23654",
+            "23655",
+            "23657",
+            "23658",
+            "23659",
+            "23660",
+            "23661",
+            "23662",
+            "23663",
+            "23664",
+            "23665",
+            "23666",
+            "23667",
+            "23668",
+            "23669",
+            "23670",
+            "23671",
+            "23672",
+            "23673",
+            "23674",
+            "23675",
+            "23958",
+            "23959",
+            "23960",
+            "23961",
+            "23962",
+            "23963",
+            "23964",
+            "23965",
+            "23966",
+            "23967",
+            "23968",
+            "23969",
+            "23970",
+            "23971",
+            "23972",
+            "23973",
+            "23974",
+            "23975",
+            "23976",
+            "23977",
+            "23978",
+            "23979",
+            "23980",
+            "23981",
+            "24136",
+            "24137",
+            "24141",
+            "24145",
+            "24147",
+            "24148",
+            "24168",
+            "24169",
+            "24170",
+            "24171",
+            "24199",
+            "24200",
+            "24201",
+            "24202",
+            "24203",
+            "24281",
+            "24283",
+            "24284",
+            "24285",
+            "24286",
+            "24287",
+            "24288",
+            "24289",
+            "24290",
+            "24291",
+            "24292",
+            "24319",
+            "24323",
+            "24324",
+            "24325",
+            "24326",
+            "24327",
+            "24328",
+            "24329",
+            "24330",
+            "24331",
+            "24333",
+            "24345",
+            "24346",
+            "24347",
+            "24348",
+            "24349",
+            "24350",
+            "24351",
+            "24352",
+            "24353",
+            "24453",
+            "24455",
+            "24456",
+            "24457",
+            "24458",
+            "24459",
+            "24460",
+            "24461",
+            "24462",
+            "24463",
+            "24464",
+            "24465",
+            "24482",
+            "24483",
+            "24484",
+            "24485",
+            "24589",
+            "24659",
+            "24660",
+            "24661",
+            "24673",
+            "24674",
+            "24675",
+            "24676",
+            "24677",
+            "24678",
+            "24680",
+            "24681",
+            "24687",
+            "24691",
+            "24692",
+            "24693",
+            "24694",
+            "24706",
+            "24707",
+            "24829",
+            "24830",
+            "24831",
+            "24832",
+            "24835",
+            "24840",
+            "24841",
+            "24842",
+            "24843",
+            "24844",
+            "24845",
+            "24846",
+            "24879",
+            "24880",
+            "24881",
+            "24882",
+            "24897",
+            "24898",
+            "24899",
+            "24900",
+            "24901",
+            "24902",
+            "24903",
+            "24904",
+            "24905",
+            "24906",
+            "25005",
+            "25006",
+            "25009",
+            "25010",
+            "25018",
+            "25024",
+            "25029",
+            "25030",
+            "25052",
+            "25057",
+            "25058",
+            "25059",
+            "25060",
+            "25061",
+            "25062",
+            "25063",
+            "25064",
+            "25065",
+            "25066",
+            "25067",
+            "25068",
+            "25069",
+            "25070",
+            "25071",
+            "25072",
+            "25073",
+            "25074",
+            "25075",
+            "25076",
+            "25077",
+            "25078",
+            "25079",
+            "25080",
+            "25081",
+            "25082",
+            "25083",
+            "25084",
+            "25085",
+            "25193",
+            "25194",
+            "25195",
+            "25196",
+            "25197",
+            "25198",
+            "25199",
+            "25200",
+            "25201",
+            "25202",
+            "25203",
+            "25204",
+            "25205",
+            "25206",
+            "25207",
+            "25208",
+            "25209",
+            "25210",
+            "25211",
+            "25212",
+            "25213",
+            "25214",
+            "25215",
+            "25216",
+            "25217",
+            "25218",
+            "25219",
+            "25220",
+            "25258",
+            "25259",
+            "25260",
+            "25261",
+            "25262",
+            "25263",
+            "25264",
+            "25265",
+            "25266",
+            "25267",
+            "25268",
+            "25269",
+            "25270",
+            "25271",
+            "25272",
+            "25273",
+            "25274",
+            "25275",
+            "25276",
+            "25277",
+            "25278",
+            "25279",
+            "25280",
+            "25281",
+            "25282",
+            "25349",
+            "25350",
+            "25351",
+            "25352",
+            "25482",
+            "25483",
+            "25484",
+            "25485",
+            "25486",
+            "25487",
+            "25490",
+            "25491",
+            "25492",
+            "25493",
+            "25533",
+            "25534",
+            "25535",
+            "25536",
+            "25550",
+            "25551",
+            "25552",
+            "25553",
+            "25554",
+            "25555",
+            "25556",
+            "25557",
+            "25558",
+            "25559",
+            "25560",
+            "25561",
+            "25562",
+            "25563",
+            "25564",
+            "25565",
+            "25566",
+            "25567",
+            "25568",
+            "25569",
+            "25570",
+            "25571",
+            "25572",
+            "25573",
+            "25574",
+            "25575",
+            "25576",
+            "25596",
+            "25597",
+            "25598",
+            "25599",
+            "25600",
+            "25601",
+            "25740",
+            "25741",
+            "25742",
+            "25743",
+            "25744",
+            "25745",
+            "25746",
+            "25747",
+            "25748",
+            "25749",
+            "25750",
+            "25753",
+            "25754",
+            "25862",
+            "25863",
+            "25864",
+            "25865",
+            "25866",
+            "25867",
+            "25868",
+            "25869",
+            "25870",
+            "25871",
+            "25872",
+            "25873",
+            "25874",
+            "25875",
+            "25876",
+            "25877",
+            "25878",
+            "25879",
+            "25880",
+            "25881",
+            "25882",
+            "25883",
+            "25884",
+            "25885",
+            "25886",
+            "25887",
+            "25986",
+            "25987",
+            "25988",
+            "25989",
+            "25990",
+            "25991",
+            "25992",
+            "25993",
+            "25994",
+            "25995",
+            "26306",
+            "26307",
+            "26308",
+            "26309",
+            "26338",
+            "26339",
+            "26625",
+            "26626",
+            "26627",
+            "26628",
+            "26629",
+            "26630",
+            "26631",
+            "26632",
+            "26633",
+            "26634",
+            "26635",
+            "26636",
+            "26637",
+            "26638",
+            "26639",
+            "26640",
+            "26641",
+            "26642",
+            "26643",
+            "26644",
+            "26695",
+            "26696",
+            "26697",
+            "26698",
+            "26729",
+            "26730",
+            "26731",
+            "26741",
+            "26742",
+            "26743",
+            "26744",
+            "26802",
+            "26803",
+            "26804",
+            "26805",
+            "26869",
+            "26870",
+            "26871",
+            "26872",
+            "26873",
+            "26874",
+            "26875",
+            "26876",
+            "26877",
+            "26878",
+            "27148",
+            "27149",
+            "27321",
+            "27322",
+            "27324",
+            "27327",
+            "27352",
+            "27353",
+            "27354",
+            "27355",
+            "27461",
+            "27462",
+            "27463",
+            "27464",
+            "27644",
+            "27645",
+            "27646",
+            "27647",
+            "27669",
+            "27670",
+            "27671",
+            "27677",
+            "27718",
+            "27719",
+            "27720",
+            "27721",
+            "27722",
+            "27723",
+            "27724",
+            "27725",
+            "27726",
+            "27727",
+            "27728",
+            "27729",
+            "27730",
+            "27863",
+            "27864",
+            "27887",
+            "27888",
+            "27889",
+            "27890",
+            "27891",
+            "27892",
+            "27893",
+            "27894",
+            "27912",
+            "27987",
+            "28000",
+            "28001",
+            "28002",
+            "28003",
+            "28004",
+            "28005",
+            "28006",
+            "28007",
+            "28008",
+            "28015",
+            "28016",
+            "28017",
+            "28018",
+            "28019",
+            "28020",
+            "28021",
+            "28022",
+            "28023",
+            "28024",
+            "28025",
+            "28026",
+            "28027",
+            "28028",
+            "28029",
+            "28030",
+            "28031",
+            "28032",
+            "28033",
+            "28034",
+            "28035",
+            "28036",
+            "28037",
+            "28038",
+            "28039",
+            "28040",
+            "28041",
+            "28042",
+            "28043",
+            "28044",
+            "28045",
+            "28046",
+            "28047",
+            "28048",
+            "28049",
+            "28050",
+            "28051",
+            "28052",
+            "28053",
+            "28054",
+            "28055",
+            "28056",
+            "28057",
+            "28058",
+            "28059",
+            "28060",
+            "28061",
+            "28062",
+            "28119",
+            "28120",
+            "28159",
+            "28206",
+            "28231",
+            "28232",
+            "28233",
+            "28234",
+            "28235",
+            "28236",
+            "28237",
+            "28238",
+            "28239",
+            "28240",
+            "28278",
+            "28279",
+            "28280",
+            "28281",
+            "28282",
+            "28381",
+            "28382",
+            "28383",
+            "28384",
+            "28385",
+            "28386",
+            "28387",
+            "28388",
+            "28389",
+            "28390",
+            "28391",
+            "28392",
+            "28393",
+            "28394",
+            "28395",
+            "28396",
+            "28397",
+            "28398",
+            "28399",
+            "28400",
+            "28401",
+            "28402",
+            "28403",
+            "28404",
+            "28405",
+            "28406",
+            "28407",
+            "28408",
+            "28409",
+            "28410",
+            "28411",
+            "28412",
+            "28413",
+            "28414",
+            "28415",
+            "28416",
+            "28417",
+            "28418",
+            "28419",
+            "28420",
+            "28421",
+            "28422",
+            "28423",
+            "28424",
+            "28426",
+            "28455",
+            "28456",
+            "28457",
+            "28458",
+            "28603",
+            "28604",
+            "28605",
+            "28606",
+            "28607",
+            "28608",
+            "28609",
+            "28610",
+            "28611",
+            "28612",
+            "28613",
+            "28630",
+            "28631",
+            "28637",
+            "28655",
+            "28656",
+            "28657",
+            "28658",
+            "28718",
+            "28729",
+            "28826",
+            "28827",
+            "28828",
+            "28829",
+            "28913",
+            "28917",
+            "28925",
+            "28934",
+            "28935",
+            "28936",
+            "28937",
+            "29029",
+            "29032",
+            "29033",
+            "29038",
+            "29133",
+            "29134",
+            "29135",
+            "29136",
+            "29190",
+            "29191",
+            "29192",
+            "29193",
+            "29194",
+            "29195",
+            "29196",
+            "29197",
+            "29198",
+            "29199",
+            "29200",
+            "29201",
+            "29202",
+            "29203",
+            "29204",
+            "29205",
+            "29206",
+            "29207",
+            "29208",
+            "29209",
+            "29210",
+            "29211",
+            "29212",
+            "29213",
+            "29214",
+            "29215",
+            "29216",
+            "29217",
+            "29218",
+            "29397",
+            "29398",
+            "29399",
+            "29513",
+            "29514",
+            "29515",
+            "29520",
+            "29521",
+            "29522",
+            "29523",
+            "29524",
+            "29525",
+            "29526",
+            "29527",
+            "29528",
+            "29529",
+            "29530",
+            "29531",
+            "29532",
+            "29533",
+            "29534",
+            "29535",
+            "29536",
+            "29537",
+            "33559",
+            "33560",
+            "33561",
+            "33562",
+            "33626",
+            "33627",
+            "33628",
+            "33629",
+            "33630",
+            "33631",
+            "33632",
+            "33633",
+            "33634",
+            "33635",
+            "33636",
+            "33637",
+            "33638",
+            "33639",
+            "33640",
+            "33641",
+            "33642",
+            "33643",
+            "33644",
+            "33645",
+            "33876",
+            "33877",
+            "33878",
+            "33879",
+            "33880",
+            "33881",
+            "33882",
+            "33883",
+            "33884",
+            "33885",
+            "33886",
+            "33887",
+            "33888",
+            "33889",
+            "33890",
+            "33891",
+            "33892",
+            "33893",
+            "33894",
+            "33895",
+            "33896",
+            "33897",
+            "33898",
+            "33899",
+            "34035",
+            "34036",
+            "34037",
+            "34038",
+            "34039",
+            "34040",
+            "34041",
+            "34059",
+            "34060",
+            "34061",
+            "34062",
+            "34063",
+            "34064",
+            "34065",
+            "34066",
+            "34067",
+            "34068",
+            "34069",
+            "34070",
+            "34071",
+            "34072",
+            "34073",
+            "34074",
+            "34075",
+            "34076",
+            "34077",
+            "34078",
+            "34079",
+            "34082",
+            "34083",
+            "34084",
+            "34085",
+            "34086",
+            "34087",
+            "34088",
+            "34089",
+            "34090",
+            "34092",
+            "34093",
+            "34094",
+            "34095",
+            "34096",
+            "34097",
+            "34098",
+            "34099",
+            "34100",
+            "34101",
+            "34102",
+            "34105",
+            "34106",
+            "34107",
+            "34108",
+            "34113",
+            "34114",
+            "34115",
+            "34116",
+            "34117",
+            "34118",
+            "34119",
+            "34120",
+            "34121",
+            "34146",
+            "34147",
+            "34148",
+            "34149",
+            "34366",
+            "34367",
+            "34368",
+            "34369",
+            "34370",
+            "34371",
+            "34372",
+            "34373",
+            "34374",
+            "34375",
+            "34376",
+            "34377",
+            "34378",
+            "34379",
+            "34380",
+            "34381",
+            "34382",
+            "34383",
+            "34384",
+            "34385",
+            "34386",
+            "34638",
+            "34639",
+            "34640",
+            "34641",
+            "34642",
+            "34643",
+            "34644",
+            "34645",
+            "34646",
+            "34698",
+            "34699",
+            "34700",
+            "34701",
+            "34702",
+            "34703",
+            "34704",
+            "34939",
+            "34940",
+            "34941",
+            "34942",
+            "34943",
+            "34944",
+            "34945",
+            "34946",
+            "35099",
+            "35100",
+            "35101",
+            "35102",
+            "35103",
+            "35110",
+            "35111",
+            "35332",
+            "35333",
+            "35334",
+            "35335",
+            "35336",
+            "35337",
+            "35338",
+            "35339",
+            "35340",
+            "35341",
+            "35342",
+            "35343",
+            "35344",
+            "35345",
+            "35346",
+            "35347",
+            "35348",
+            "35349",
+            "35350",
+            "35351",
+            "35352",
+            "35353",
+            "35354",
+            "35355",
+            "35356",
+            "35357",
+            "35358",
+            "35359",
+            "35360",
+            "35361",
+            "35362",
+            "35363",
+            "35364",
+            "35365",
+            "35371",
+            "35372",
+            "35385",
+            "35386",
+            "35387",
+            "35388",
+            "35389",
+            "35390",
+            "35391",
+            "35392",
+            "35393",
+            "35394",
+            "35395",
+            "35396",
+            "35397",
+            "35701",
+            "35702",
+            "35703",
+            "35704"
+          ]
+        },
+        "copySyncIntervalMins": {
+          "25731264-f02a-4172-8ef1-75512b7607a5": 15,
+          "38744747-1d3f-4f4a-8523-6f251ecd1fba": 15,
+          "534aec5a-2b3a-49f1-9136-507f624fbf6b": 15,
+          "6e60eebe-5d8d-4e13-8037-efeb8041b24c": 15,
+          "78cd0dc8-f04c-4bcf-9451-bc9507ee0623": 15,
+          "897c1fb0-d83c-40cd-b513-b3e6e6b78172": 15,
+          "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d": 15,
+          "c630d7b4-5d44-4826-94e5-5851abbd2a46": 15,
+          "ec5a5a67-3f5a-4682-88df-edb0e07e6485": 15,
+          "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0": 15,
+          "f24b4f7a-1da7-4320-831e-b9105647f106": 15
+        },
+        "integrity": "ok",
+        "foreignKeyViolations": 0
+      }
+    }
+  },
+  "freeBytes": 75231645696,
+  "productionMutations": 0,
+  "sqliteConnections": 0
+}
