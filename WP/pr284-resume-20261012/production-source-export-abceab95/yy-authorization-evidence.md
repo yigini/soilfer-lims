@@ -1,0 +1,22 @@
+{
+  "confirmedByYY": true,
+  "source": "CLAUDE_LIMS_AUDIT_THREAD",
+  "authorizationMode": "AUTO_AFTER_REVIEW",
+  "scopeDecision": "PREPARATION_AND_RESULTS_288_290",
+  "scopeHead": "ae64f169e56e7677a920a3b60a7b1fe0dbfa4ccf",
+  "text": "Auto after review",
+  "timeUtc": "2026-10-10T15:55:00Z",
+  "timePrecision": "MINUTE_DISPLAYED_IN_NATIVE_UI",
+  "scopeText": "my go covers all",
+  "scopeTimeUtc": "2026-10-10T16:58:00Z",
+  "scopeTimeLocal": "2026-10-10 6:58 PM Europe/Rome",
+  "scopeTimePrecision": "MINUTE_DISPLAYED_IN_NATIVE_UI",
+  "sourceProject": "LIMS Audit",
+  "sourceThread": "Progress recap and remaining work",
+  "status": "ORIGINAL_HUMAN_STANDING_GO_DIRECTLY_VERIFIED",
+  "verificationMethod": "Computer Use: read and scroll only; original human message and selected Auto after review card inspected directly. No human decision card answered and no human draft edited.",
+  "claudioReply": "Understood. Your go now covers every release, not just Monday's, so later ones like instrument import or prep records deploy too once they pass review and the rehearsal. I've recorded that for Pip. The only things that still stop a deploy are failed safety checks.",
+  "claudioReportedScopeTimeUtc": "2026-10-10T16:58:15Z",
+  "claudioReportedReplyTimeUtc": "2026-10-10T16:58:33Z",
+  "note": "Pip directly read YY's later blanket instruction in the original native recap thread on October 11 around 11:18 UTC. The displayed timestamp independently confirms minute precision only; seconds above are attributed to Claudio's audit-thread reply. The later human instruction extends the standing Auto after review go to this separately reviewed #288/#290 release and supersedes the old Main now exclusion of #205. Deployment still requires the new complete fresh-copy proof, exact-kit review, fresh gates, workload pins and sufficient disk reserve. The new storage card remains pending; this file does not approve cleanup or disk expansion."
+}
