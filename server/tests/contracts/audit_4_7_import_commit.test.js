@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { randomUUID } = require('node:crypto');
+const { randomUUID, createHmac } = require('node:crypto');
 const { qcGateFixture } = require('../helpers/qcGateFixture');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const { buildNativeRun, startNativeRun } = require('../../services/qcNativeRunService');
@@ -127,4 +127,72 @@ test('mounted wizard context reads only the actual scoped native instrument/run 
         const response = await request(app).get('/api/workbench/runs/' + f.run.id + '/imports/context').set('Authorization', 'Bearer ' + token);
         expect(response.status).toBe(403); expect(await f.state()).toEqual(foreignBefore);
     }, { workbench: true });
+});
+
+
+test('HTTP preview and commit refuse another same-lab instrument mapping with 409 and zero writes', async () => {
+    const f = await fixture();
+    const instrument = await f.db.equipmentAsset.create({ data: { id: randomUUID(), labId: f.labId,
+        name: 'Other owned import instrument', assetType: 'OTHER', status: 'IN_SERVICE', criticality: 'NON_CRITICAL' } });
+    await f.db.equipmentQualification.create({ data: { id: randomUUID(), equipmentId: instrument.id, labId: f.labId,
+        calibrationStatus: 'OK', verificationStatus: 'OK', nextCalibrationDueDate: new Date('2099-01-01') } });
+    const template = await saveTemplate(f.db, f.actor, { labId: f.labId, instrumentId: instrument.id,
+        name: 'Other instrument mapping', mapping: f.template.mapping, supersedesId: null, expectedVersion: 0 });
+    const input = f.input();
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const route = '/api/workbench/runs/' + f.run.id + '/imports/';
+        // A started run's instrument and every saved mapping are immutable.
+        // Keep those guards intact. Obtain the real preview's complete context,
+        // then sign a synthetic mismatched-template context with the test-only
+        // key so HTTP commit reaches the real instrument recheck rather than
+        // stopping at a malformed-signature barrier. No owner is mocked.
+        const valid = await request(app).post(route + 'preview').set('Authorization', 'Bearer ' + token)
+            .field('templateId', f.template.id).attach('file', input.bytes, input.sourceName);
+        expect(valid.status).toBe(200); expect(valid.body.canCommit).toBe(true);
+        const context = JSON.parse(Buffer.from(valid.body.previewToken.split('.')[0], 'base64url').toString('utf8'));
+        const payload = Buffer.from(JSON.stringify({ ...context, templateId: template.id })).toString('base64url');
+        const mismatchToken = payload + '.' + createHmac('sha256', process.env.JWT_SECRET).update(payload).digest('base64url');
+        const before = await f.state(), batchBefore = await f.db.batch.findUnique({ where: { id: f.run.id } });
+        for (const action of ['preview', 'commit']) {
+            const req = request(app).post(route + action).set('Authorization', 'Bearer ' + token).field('templateId', template.id);
+            if (action === 'commit') req.field('previewToken', mismatchToken);
+            const response = await req.attach('file', input.bytes, input.sourceName);
+            expect(response.status).toBe(409);
+            expect(response.body.code).toBe('IMPORT_TEMPLATE_INSTRUMENT_MISMATCH');
+            expect(await f.state()).toEqual(before);
+            expect(await f.db.batch.findUnique({ where: { id: f.run.id } })).toEqual(batchBefore);
+        }
+    }, { workbench: true });
+});
+
+test.each([['direct sample', 1], ['QC', 3]])('dilution10 on a %s row refuses the whole file with zero writes', async (_label, index) => {
+    const f = await fixture(), rows = f.rows.map(row => [...row]); rows[index][3] = '10';
+    const before = await f.state(), input = f.input(rows), preview = await importer.preview(f.db, f.actor, input);
+    expect(preview.canCommit).toBe(false);
+    expect(preview.refusals).toEqual([expect.objectContaining({ rowNumber: index + 2,
+        analysisCode: f.analysisCode, statusCode: 409, code: 'IMPORT_DILUTION_UNSUPPORTED' })]);
+    await expect(importer.commit(f.db, f.actor, { ...input, previewToken: preview.previewToken }))
+        .rejects.toMatchObject({ statusCode: 409, code: 'IMPORT_DILUTION_UNSUPPORTED', details: { refusedRows: preview.refusals } });
+    expect(await f.state()).toEqual(before);
+});
+
+test('missing catalogue units refuse commit even with the instrument source unit, retaining every row', async () => {
+    const f = await fixture();
+    await f.db.analysis.update({ where: { code: f.analysisCode }, data: { units: null, unitCode: null } });
+    const before = await f.state(), input = f.input(), preview = await importer.preview(f.db, f.actor, input);
+    expect(preview.canCommit).toBe(false);
+    expect(preview.refusals).toEqual(expect.arrayContaining([expect.objectContaining({ code: 'IMPORT_UNIT_UNAVAILABLE', statusCode: 409 })]));
+    await expect(importer.commit(f.db, f.actor, { ...input, previewToken: preview.previewToken }))
+        .rejects.toMatchObject({ statusCode: 409, code: 'IMPORT_UNIT_UNAVAILABLE' });
+    expect(await f.state()).toEqual(before);
+});
+
+test('a QC unit mismatch refuses otherwise valid direct samples and commit with zero writes', async () => {
+    const f = await fixture(), rows = f.rows.map(row => [...row]); rows[3][2] = 'unconfigured-QC-unit';
+    const before = await f.state(), input = f.input(rows), preview = await importer.preview(f.db, f.actor, input);
+    expect(preview.canCommit).toBe(false);
+    expect(preview.refusals).toEqual([expect.objectContaining({ rowNumber: 5, code: 'IMPORT_UNIT_MISMATCH', statusCode: 409 })]);
+    await expect(importer.commit(f.db, f.actor, { ...input, previewToken: preview.previewToken }))
+        .rejects.toMatchObject({ statusCode: 409, code: 'IMPORT_UNIT_MISMATCH' });
+    expect(await f.state()).toEqual(before);
 });
