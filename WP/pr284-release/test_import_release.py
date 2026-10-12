@@ -460,3 +460,24 @@ class ReleaseTests(unittest.TestCase):
         proof['measuredTimingHeadroom']['remainingForUnmeasuredOperationsSeconds'] += 1
         with self.assertRaises(RuntimeError): release.validate_proof(proof, pin)
 
+    def test_original_raw_application_authority_cannot_be_substituted(self):
+        proof, pin = self.complete_proof()
+        source = {'head': release.REVIEWED_PROOF_SOURCE,
+            'files': {name: {'sha256': digest} for name, digest in self.proof_files.items()}}
+        authority = {'head': pin['head'], 'baseHead': release.BASE_HEAD,
+            'mergeBaseHead': release.MERGE_BASE_HEAD, 'originalProofRoot': release.EXPECTED_PROOF_ROOT,
+            'firstProofPolicy': release.FIRST_PROOF_POLICY, 'proofSourceReview': self.source_verdict(),
+            'review': {'id': release.AUDIT_REVIEW_ID,
+                'html_url': 'https://github.com/yigini/soilfer-lims/pull/999#issuecomment-999900004',
+                'body': 'Audit passed: OK to merge and deploy\n' + release.AUDITED_PR_HEAD}}
+        release.proof_authority(proof, pin, source, authority, '7' * 64)
+        for change in ['audit-id', 'audit-head', 'application-base', 'predecessor', 'first-root']:
+            altered = copy.deepcopy(authority)
+            if change == 'audit-id': altered['review']['id'] = 6121933894
+            if change == 'audit-head': altered['review']['body'] = 'Audit passed: OK to merge and deploy\n' + release.MERGE_BASE_HEAD
+            if change == 'application-base': altered['mergeBaseHead'] = release.BASE_HEAD
+            if change == 'predecessor': altered['baseHead'] = release.MERGE_BASE_HEAD
+            if change == 'first-root': altered['originalProofRoot'] += '-rerun'
+            with self.subTest(change=change), self.assertRaises(RuntimeError):
+                release.proof_authority(proof, pin, source, altered, '7' * 64)
+

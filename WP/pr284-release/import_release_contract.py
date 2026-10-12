@@ -318,7 +318,11 @@ def proof_authority(proof, pin, source, authority, authority_sha):
     require(source['head'] == REVIEWED_PROOF_SOURCE and
         {name: row['sha256'] for name, row in source['files'].items()} == REVIEWED_PROOF_FILES and
         proof['authoritySha256'] == authority_sha and authority['head'] == pin['head'] and
+        authority.get('baseHead') == BASE_HEAD and authority.get('mergeBaseHead') == MERGE_BASE_HEAD and
+        authority.get('originalProofRoot') == EXPECTED_PROOF_ROOT and
+        authority.get('firstProofPolicy') == FIRST_PROOF_POLICY and
         authority['proofSourceReview']['id'] == PROOF_SOURCE_REVIEW_ID, 'Original proof authority changed')
+    require_pr_review(authority.get('review', {}))
     source_review_pass(authority['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_FILES)
 
 
