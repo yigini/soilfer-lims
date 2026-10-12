@@ -1,0 +1,9 @@
+{
+  "recordedUtc": "2026-10-12T15:44:32.895415+00:00",
+  "status": "STOPPED_FIRST_PASS_NEW_PRODUCTION_SOURCE_REVIEW_PENDING",
+  "receiptSha256": "f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce",
+  "sourceRequestId": 6127597671,
+  "sourceRequestSha256": "63b3a163f2c66e4cd496e012f7f5e06067a23faaf8fd04160aa6668e58011143",
+  "nativeDeliveryVisuallyVerified": true,
+  "productionOperations": 0
+}

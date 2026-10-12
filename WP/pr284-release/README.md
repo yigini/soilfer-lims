@@ -1,3 +1,13 @@
+PR294 stopped first PASS / production-source review boundary 2026-10-12T15:44:32.895415+00:00
+
+The original reviewed144000Z first proof completed 2026-10-12T15:40:30.271703+00:00, PASSED_NEW_IMPORT_NATURAL_KOBO_PROOF, unit inactive/dead/exit0 and all owned writers stopped/retained. Immutable0400 receipt SHA256 f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce. Never replay/restart/retry/rebuild/retag this completed proof or its original135400Z build. Failed105200Z/134000Z roots remain permanently excluded.
+
+Actual native DRY/APPLY/immediateNO_OP passed; full104tables38receipts to106tables39receipts empty additive delta, all original rows/schema and scientific fields retained. Both default startups23NO_OP0/22READY0;31+6 read-only probes made zero changes. First natural sync 2026-10-12T15:18:41.747944016Z and second 2026-10-12T15:34:31.249133774Z passed full preservation, with zero new sample intake and original cursor/15-minute interval unchanged. Healthy soak 1027.930645942688s/0restarts/peak284602368B. Original acceptance/event, ReviewDecision.attemptId NULL and PUBLISHED report remain intact. Raw32files plus original sealed scheduler streams committed/pushed; original backups, raw triples and ledger remain retained on host.
+
+NEW separate production-source request #162/6127597671 posted ONCE and delivered/visually verified in Claudio's native thread. Exact proposed source5fa7e65f3d13a04f270e90e0b4b129f8eaf3296e,39rawfiles/62futurekitfiles, deploycoord4cc81f6428a55f50aa3d0d30514ee9de82e0e55246970a967dbde3d6d7d19b9c, contracta7a5b83de579ba5f4ff992094a25c91e92d26b44e908a115c55d67158eb485f7;185Windows+185Linux pure guards pass. All31 measured201bb/6126765238 proof bytes unchanged. Actual measured stages+repeatseal+660health total1169.471064s, leaving4230.528936s of5400unit; other costs explicitly unmeasured. Await actual NEW formal Source review: PASS; then ONE immutable kit from this original stopped PASS, NEW exact-kit audit, ONE fresh10minute gate and ONE forward deployment under standinggo. No source approval inferred, no kit/gate/production mutation/cleanup/cards. Old51f/d4eb healthy0restart/free73519087616B at terminal retention. Other application merges held until#200live/Clactualpostcheck. SAME writer continues.
+
+Previous checkpoint follows:
+
 PR294 first natural sync checkpoint 2026-10-12T15:29:31.940646+00:00
 
 The SAME approved first proof remains active at /opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z, unit lims-owned-instrument-import-proof-959d17e1-20261012t144000z.service. Source 201bb5fe8fd30cb2991f7169177a864265e6301b / review 6126765238; no terminal receipt or completed PASS. Read-only observation: 2026-10-12T15:28:26.995506+00:00.
