@@ -1,3 +1,11 @@
+PR294 corrected source ready for NEW review 2026-10-12T20:27UTC
+
+Exact proposed production source a2a1694ef3956aea0fbe12d21dfaa8f5473ac947:203/203 Windows and203/203 exact-source Linux guards PASS,0failure/error/skip/no productionDB. All43 rawGit files compile and all31 original201bb proof bytes remain identical. Windows completed20:24:59.019867UTC/11.453s; Linux20:26:05.867542UTC/16.779993s/stderrSHAd14cefb052a513d03ef143c61ed9463acf6a5c386f8749bec1f61d28d92e49ba. Complete held-entry/namespace/localproduction=True end-repeat guards pass. Final cross-check corrected an obsolete freezer healthy-entry placeholder before any request or host operation; freezer now uses the same full held-entry observation as gate/deploy before creating a destination. Earlier6b0 locally prepared proposal is NOT posted or approved.
+
+NEW source request prepared with all43 rawhashes, full catalogSHAa7639fe82ce00a01219f2f2842dfcb49dc5fc6b5d53edd8d80b2cce22bbdfb23 and actualYY/Clscope/heldreceipt/backup/triple tokens. Source is NOT yet approved. Future ONE distinct package/kit202400Z may be created ONLY after actual NEW SourcePASS from original stopped144000PASS and unchanged135400build;66 frozen files plus manifest live under frozen/. Failed161000 unit/root/gate/receipt/DRY remains burned and retained. No retry/newproof/rebuild/productionaction/cleanup. Same writer continues newSourcePASS then newkit/exactaudit/freshsingle-usegate/forwarddeploy. YY maintenancechoice verified; no human entry choice pending. Fresh held-state read-only observation is in progress, not yet a PASS.
+
+Previous checkpoint follows:
+
 PR294 held-entry correction in validation; YY decision verified 2026-10-12T20:07UTC
 
 YY's original native card was read directly: B, Stay in maintenance; You chose 10:07 PM Europe/Rome (20:07 UTC, minute precision). No card was answered by Pip. Claudio's actual entry pin is #162/6131752416; raw API SHA9788614e7c1ee3bd39714e8f3b98bb35458d12d59afbaa6ceab8ff96d1d65d4c, native-choice transcription SHA1499cd6ab9b534c8e5852cfd27fbe10632309a8f45c21f23c6abeb8870f05213. There is no remaining human entry decision.

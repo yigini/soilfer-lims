@@ -1,0 +1,293 @@
+{
+  "sourceCommit": "b1d3c383bccad94a45848442014150b1a97d5376",
+  "platform": "linux",
+  "exitCode": 0,
+  "retainedUtc": "2026-10-12T20:05:18.191376+00:00",
+  "stdoutSha256": "eb1573642425ca90bab3be10e0ce41b0ec0423fd4152351e675c753a888ff09c",
+  "stderrSha256": "ff25dbbd7876e5813115b9b9cda799681d73b770572f2fb04131203cf6b2d268",
+  "summary": {
+    "sourceCommit": "b1d3c383bccad94a45848442014150b1a97d5376",
+    "sourceHashes": {
+      "release_support": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+      "startup_common": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+      "known_core_disk_guard": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+      "known_core_disk_guard_v2": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+      "known_core_disk_guard_v3": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+      "runtime_proof_policies": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf",
+      "test_baseline_confirmation": "2ba48ec75d8d8053eb0abce160a63473090e4642254b9d442597b453d64774c0",
+      "import_source_graph": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637",
+      "import_preservation": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783",
+      "import_startup_checks": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b",
+      "import_installation": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+      "import_stage": "db27c39cfeb8ed58167f2fba108a91702498561245e57eefeaff1f5d7397aca6",
+      "import_proof_contract": "cfc8dab7db0e4861c5a5837811701e52f838111f5e72b7d82a1ea1ac27219d19",
+      "import_sealing": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401",
+      "known_core_disk_guard_import": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+      "test_import_preservation": "40b447f6f309e44d3f0ab1ee9a9bc4cc046f12cacc15921bb59a7025d016e769",
+      "test_import_startup_checks": "26ef25a4a6444c40661a6e4d70f9a21798235ff16f1112dc65ece71eeecfc5f3",
+      "test_import_installation": "b4392e41444af8e224d735c448a68c2c10b9fe4cd58191dee863d748b8a9b1f8",
+      "test_import_stage": "527e2c7c7310ba92826de482d078524f3ce287e1759e2e2bfce08059c6250145",
+      "test_import_sealing": "1905c690470f63acf97711e588187c96ee7078ba3864e8cf82f7fdefcdc1361b",
+      "test_import_authority": "2689588be52ee8f868d47b43f91445b7576d95d9fc6e97f71b5861378dc14b7f",
+      "test_import_layout": "b45447cf53e4a12d88635bf07aad6eabca840615778277da1cb8e6cb568104cc",
+      "production_output_paths": "21cad038846228a8c4003218c2b480b15b997ef4bf12b8e066daa5f1c953124f",
+      "test_production_output_paths": "0381322d565b88fb36e35cd0a3df6d35aeda72a01f8149b0bd22321d0f737e5b",
+      "import_release_contract": "90bdd924a779892b826dbcda6b6cff0ba1ad5116f608d2fd04bfb7c15aedddbc",
+      "test_import_release": "dcf9c4b1cdd4df11f8662066e70ad61f0fc9f1de69c9776467acd93a839de10b",
+      "known_core_disk_guard_import_deploy": "b012ec710362a56683a8229162acae3ade7ef53c4d6218d0bee0df22a45a3b2a",
+      "test_import_deploy_layout": "7e890dfc1e86c0cb16d6c3fdd8141dea86ad809cb13808cb202edf62fdc76572",
+      "export_freeze_import_kit": "21da0aa6ce7952e46465eae1b57833bc6b15c65116c0bbc24cce1ea3aa220d66",
+      "test_import_packaging_transport": "640e4dd04148e782e4dc02acb4fabf012fa4b7ec1201c0302fd65a7f1ee7be0a"
+    },
+    "packagingSourceHashes": {
+      "rehearse_import.py": "18984ff11f0bd2cd1871bb731d44e4985562b0b96b4bea2734b2a2e17b5ceafe",
+      "import_proof_contract.py": "cfc8dab7db0e4861c5a5837811701e52f838111f5e72b7d82a1ea1ac27219d19",
+      "import_source_graph.py": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637",
+      "import_preservation.py": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783",
+      "import_startup_checks.py": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b",
+      "import_installation.py": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+      "import_stage.py": "db27c39cfeb8ed58167f2fba108a91702498561245e57eefeaff1f5d7397aca6",
+      "import_sealing.py": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401",
+      "known_core_disk_guard_import.py": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+      "build_import.py": "50acb99cc30a2116b0421c39c4f366626dd0f8283a1ff38abbb895fc06c97494",
+      "prepare_import_build.py": "319fd4bb156ff61e82a46e6adee701aef6a41147365e68f0b06330f3b482f4f1",
+      "export_launch_import_proof.py": "2ed46d33a56e8a149e0666ed4a08ca7fc5444ef0f8a8577c4725c6e1a4dbbb2c",
+      "capture_kobo_fetch.py": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86",
+      "kobo_copy_preservation.py": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+      "known_core_disk_guard_v2.py": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+      "known_core_disk_guard_v3.py": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+      "runtime_proof_policies.py": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf",
+      "known_core_disk_guard.py": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+      "release_support.py": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+      "startup_common.py": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+      "postflight-roles.cjs": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+      "postflight-auth.cjs": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+      "postflight-reference.cjs": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+      "postflight-qc-runs.cjs": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+      "postflight-policy.cjs": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+      "readonly-smoke.cjs": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+      "migration.sql": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+      "fresh-prisma-tables.json": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+      "pre-prisma-draft-table.sql": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+      "upgraded-prisma-draft-table.sql": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+      "post205-draft-tables.json": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad",
+      "import_release_contract.py": "90bdd924a779892b826dbcda6b6cff0ba1ad5116f608d2fd04bfb7c15aedddbc",
+      "deploy_import.py": "aa8e9d39ae3e5c0beedc9a7001b3ee95db914608197f77d5f975373947e1927e",
+      "freeze_import.py": "c1226b3576ccf5cd5c549ea26a5aee40380a5a757c7cb87b9b8284e3d85160cc",
+      "known_core_disk_guard_import_deploy.py": "b012ec710362a56683a8229162acae3ade7ef53c4d6218d0bee0df22a45a3b2a",
+      "collect_import_gate.py": "d7f4c44599d9ee541101ca4537cda827cad3c7dbd9760d16d5a1cd3f24e95ee4",
+      "export_freeze_import_kit.py": "21da0aa6ce7952e46465eae1b57833bc6b15c65116c0bbc24cce1ea3aa220d66",
+      "launch_import_release.py": "4ec0870973d9a9047a65aca87c0ffd838318d3092701fb9ce35aed7c5017c357",
+      "production_output_paths.py": "21cad038846228a8c4003218c2b480b15b997ef4bf12b8e066daa5f1c953124f",
+      "yy-authorization-evidence.md": "02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1"
+    },
+    "assetHashes": {
+      "migration.sql": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+      "fresh-prisma-tables.json": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+      "pre-prisma-draft-table.sql": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+      "upgraded-prisma-draft-table.sql": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+      "post205-draft-tables.json": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+    },
+    "toolingIndex": {
+      "head": "b1d3c383bccad94a45848442014150b1a97d5376",
+      "files": {
+        "rehearse_import.py": {
+          "path": "WP/pr284-release/rehearse_import.py",
+          "blob": "5ece909642a8cc57a24fae1b90dec2f1317c83c0",
+          "bytes": 26511,
+          "sha256": "18984ff11f0bd2cd1871bb731d44e4985562b0b96b4bea2734b2a2e17b5ceafe"
+        },
+        "import_proof_contract.py": {
+          "path": "WP/pr284-release/import_proof_contract.py",
+          "blob": "103e52eac4e8f8ec187c80888bdb52e6fc788fd1",
+          "bytes": 15238,
+          "sha256": "cfc8dab7db0e4861c5a5837811701e52f838111f5e72b7d82a1ea1ac27219d19"
+        },
+        "import_source_graph.py": {
+          "path": "WP/pr284-release/import_source_graph.py",
+          "blob": "d1892e2cbef3a0d9567adf18a003ed701ec131ec",
+          "bytes": 5771,
+          "sha256": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637"
+        },
+        "import_preservation.py": {
+          "path": "WP/pr284-release/import_preservation.py",
+          "blob": "764727decbb566ab874b3a3873f0bd222ebeb430",
+          "bytes": 9307,
+          "sha256": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783"
+        },
+        "import_startup_checks.py": {
+          "path": "WP/pr284-release/import_startup_checks.py",
+          "blob": "bf6d9cb465b5a3d930e484479d790203246382f3",
+          "bytes": 5448,
+          "sha256": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b"
+        },
+        "import_installation.py": {
+          "path": "WP/pr284-release/import_installation.py",
+          "blob": "4fb61f95bf073878825083044e890b9a1864fd69",
+          "bytes": 7579,
+          "sha256": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d"
+        },
+        "import_stage.py": {
+          "path": "WP/pr284-release/import_stage.py",
+          "blob": "411de7dfb15cb453a3809148b5339f8bc0cb9f0b",
+          "bytes": 10714,
+          "sha256": "db27c39cfeb8ed58167f2fba108a91702498561245e57eefeaff1f5d7397aca6"
+        },
+        "import_sealing.py": {
+          "path": "WP/pr284-release/import_sealing.py",
+          "blob": "16cec07e45bfd23040c5dc27ec93eb828aa41ad8",
+          "bytes": 5918,
+          "sha256": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401"
+        },
+        "known_core_disk_guard_import.py": {
+          "path": "WP/pr284-release/known_core_disk_guard_import.py",
+          "blob": "eb05121b2909f624527295092c28f6fddb241817",
+          "bytes": 3839,
+          "sha256": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c"
+        },
+        "build_import.py": {
+          "path": "WP/pr284-release/build_import.py",
+          "blob": "bdf513df0161c66a31e3b8f404838507179bafd1",
+          "bytes": 8204,
+          "sha256": "50acb99cc30a2116b0421c39c4f366626dd0f8283a1ff38abbb895fc06c97494"
+        },
+        "prepare_import_build.py": {
+          "path": "WP/pr284-release/prepare_import_build.py",
+          "blob": "2d7ec3599077495f6dffd3286b337b8e4514a2e8",
+          "bytes": 11009,
+          "sha256": "319fd4bb156ff61e82a46e6adee701aef6a41147365e68f0b06330f3b482f4f1"
+        },
+        "export_launch_import_proof.py": {
+          "path": "WP/pr284-release/export_launch_import_proof.py",
+          "blob": "485f25bebdbee89e40e572c6f12a94b2513d3843",
+          "bytes": 7468,
+          "sha256": "2ed46d33a56e8a149e0666ed4a08ca7fc5444ef0f8a8577c4725c6e1a4dbbb2c"
+        },
+        "capture_kobo_fetch.py": {
+          "path": "WP/runtime-recovery-kobo/capture_kobo_fetch.py",
+          "blob": "79e2ad45eba9fd6d6e38b37cd36801243dd648d8",
+          "bytes": 4767,
+          "sha256": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86"
+        },
+        "kobo_copy_preservation.py": {
+          "path": "WP/runtime-recovery-kobo/kobo_copy_preservation.py",
+          "blob": "0f7eab699ea408bac72e05379a19ea718ed4c66a",
+          "bytes": 16701,
+          "sha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23"
+        },
+        "known_core_disk_guard_v2.py": {
+          "path": "WP/runtime-recovery-kobo/known_core_disk_guard_v2.py",
+          "blob": "265d01b09105aa69cd307e80473b02260eb25248",
+          "bytes": 5278,
+          "sha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c"
+        },
+        "known_core_disk_guard_v3.py": {
+          "path": "WP/runtime-recovery-kobo/known_core_disk_guard_v3.py",
+          "blob": "e7cb0e25eeb3585d731f42b3e8a8658944228788",
+          "bytes": 5625,
+          "sha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f"
+        },
+        "runtime_proof_policies.py": {
+          "path": "WP/runtime-recovery-kobo/proof_contract.py",
+          "blob": "f8490e268a824452d05aee30bae6f7673f13662a",
+          "bytes": 15922,
+          "sha256": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf"
+        },
+        "known_core_disk_guard.py": {
+          "path": "WP/runtime-containment-ae64f169/known_core_disk_guard.py",
+          "blob": "026e2245268324c3157eb186ba747776e7a4b55d",
+          "bytes": 5984,
+          "sha256": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169"
+        },
+        "release_support.py": {
+          "path": "WP/forward-ae64f169/release_support.py",
+          "blob": "8ea639b57cb1eec468e6794e5ccc32ba9a468e99",
+          "bytes": 20330,
+          "sha256": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810"
+        },
+        "startup_common.py": {
+          "path": "WP/forward-ae64f169/startup_common.py",
+          "blob": "757c0d350769ab58b5f0b8e4ba810af8c9bdce0d",
+          "bytes": 13858,
+          "sha256": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+        },
+        "postflight-roles.cjs": {
+          "path": "WP/forward-ae64f169/postflight-roles.cjs",
+          "blob": "bc6fe5f35ccc52e0c7b48a444a9432d05162a4a3",
+          "bytes": 12281,
+          "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da"
+        },
+        "postflight-auth.cjs": {
+          "path": "WP/forward-ae64f169/postflight-auth.cjs",
+          "blob": "6521d1c4a8f04e24641df967de4f674e9907dfb8",
+          "bytes": 2045,
+          "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192"
+        },
+        "postflight-reference.cjs": {
+          "path": "WP/forward-ae64f169/postflight-reference.cjs",
+          "blob": "6155145febed24f58efabfba236bae91f00e46a3",
+          "bytes": 2096,
+          "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526"
+        },
+        "postflight-qc-runs.cjs": {
+          "path": "WP/forward-ae64f169/postflight-qc-runs.cjs",
+          "blob": "ab7fd7f03555f6d5af423d6750e8de908965d53a",
+          "bytes": 4091,
+          "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f"
+        },
+        "postflight-policy.cjs": {
+          "path": "WP/forward-ae64f169/postflight-policy.cjs",
+          "blob": "19e12bb1c77a43f78098eb4af208d05f34f96c46",
+          "bytes": 4035,
+          "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51"
+        },
+        "readonly-smoke.cjs": {
+          "path": "WP/forward-ae64f169/readonly-smoke.cjs",
+          "blob": "555a67e4f125160eba990086fa4d0f60c6085bb8",
+          "bytes": 3255,
+          "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626"
+        },
+        "migration.sql": {
+          "path": "server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql",
+          "blob": "bc0007230856b8903a6ab7ce2425a6a55dfba91f",
+          "bytes": 4342,
+          "sha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8"
+        },
+        "fresh-prisma-tables.json": {
+          "path": "server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json",
+          "blob": "2d93236cda13929e7134762dfd587c3df373f315",
+          "bytes": 2877,
+          "sha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df"
+        },
+        "pre-prisma-draft-table.sql": {
+          "path": "server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql",
+          "blob": "b940d033dc0c857819693ad005041d2bdef3a05d",
+          "bytes": 769,
+          "sha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af"
+        },
+        "upgraded-prisma-draft-table.sql": {
+          "path": "server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql",
+          "blob": "efb20835b91e24b0bac29405e664985612332ef8",
+          "bytes": 874,
+          "sha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b"
+        },
+        "post205-draft-tables.json": {
+          "path": "server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json",
+          "blob": "ee1836b8e5171601a33b023438293ee2544a0cd1",
+          "bytes": 8105,
+          "sha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+        }
+      }
+    },
+    "tests": 196,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "elapsedSeconds": 17.9767627120018,
+    "completedUtc": "2026-10-12T20:05:17.165515+00:00",
+    "productionDatabaseAccess": false,
+    "status": "PROPOSED_SOURCE_GUARDS_ONLY_NOT_EXECUTION_AUTHORITY"
+  },
+  "productionMutations": 0,
+  "approvalGranted": false
+}
