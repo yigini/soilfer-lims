@@ -1,0 +1,1100 @@
+{
+  "observedUtc": "2026-10-12T15:15:50.174221+00:00",
+  "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "unit": "lims-owned-instrument-import-proof-959d17e1-20261012t144000z.service",
+  "unitState": {
+    "Result": "success",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "files": {
+    "migration.sql": {
+      "bytes": 4342,
+      "mode": "0o400"
+    },
+    "import_sealing.py": {
+      "bytes": 5918,
+      "mode": "0o400"
+    },
+    "readonly-smoke.stdout": {
+      "bytes": 698,
+      "mode": "0o644"
+    },
+    "import-repeat.stdout": {
+      "bytes": 1516,
+      "mode": "0o400"
+    },
+    "import-repeat-preservation.json": {
+      "bytes": 1353,
+      "mode": "0o400"
+    },
+    "post205-draft-tables.json": {
+      "bytes": 8105,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard_v2.py": {
+      "bytes": 5278,
+      "mode": "0o400"
+    },
+    "postflight-policy.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-apply.stdout": {
+      "bytes": 1557,
+      "mode": "0o400"
+    },
+    "import-install-preservation.json": {
+      "bytes": 15167,
+      "mode": "0o400"
+    },
+    "import-repeat.stderr": {
+      "bytes": 68,
+      "mode": "0o400"
+    },
+    "kobo_copy_preservation.py": {
+      "bytes": 16701,
+      "mode": "0o400"
+    },
+    "postflight-policy.cjs": {
+      "bytes": 4035,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard.py": {
+      "bytes": 5984,
+      "mode": "0o400"
+    },
+    "unit.stdout": {
+      "bytes": 172,
+      "mode": "0o644"
+    },
+    "capture_kobo_fetch.py": {
+      "bytes": 4767,
+      "mode": "0o400"
+    },
+    "postflight-reference.stdout": {
+      "bytes": 150,
+      "mode": "0o644"
+    },
+    "candidate-jobs-off-readiness.json": {
+      "bytes": 630,
+      "mode": "0o400"
+    },
+    "import-apply.stderr": {
+      "bytes": 68,
+      "mode": "0o400"
+    },
+    "api-postflight.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "postflight-qc-runs.stdout": {
+      "bytes": 393,
+      "mode": "0o644"
+    },
+    "import_startup_checks.py": {
+      "bytes": 5448,
+      "mode": "0o400"
+    },
+    "export_launch_import_proof.py": {
+      "bytes": 7468,
+      "mode": "0o400"
+    },
+    "candidate-jobs-off-stop.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "upstream-before-start.json": {
+      "bytes": 136941,
+      "mode": "0o400"
+    },
+    "import-dry-retained-inspect.stdout": {
+      "bytes": 9287,
+      "mode": "0o644"
+    },
+    "rehearse_import.py": {
+      "bytes": 26511,
+      "mode": "0o400"
+    },
+    "fresh-prisma-tables.json": {
+      "bytes": 2877,
+      "mode": "0o400"
+    },
+    "import-repeat-container.json": {
+      "bytes": 732,
+      "mode": "0o400"
+    },
+    "candidate-jobs-off-run.stdout": {
+      "bytes": 65,
+      "mode": "0o644"
+    },
+    "unit.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import_installation.py": {
+      "bytes": 7579,
+      "mode": "0o400"
+    },
+    "fresh-protected-state.json": {
+      "bytes": 7465051,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard_v3.py": {
+      "bytes": 5625,
+      "mode": "0o400"
+    },
+    "import-apply-retained-inspect.stdout": {
+      "bytes": 9263,
+      "mode": "0o644"
+    },
+    "readonly-smoke.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "postflight-auth.stdout": {
+      "bytes": 150,
+      "mode": "0o644"
+    },
+    "postflight-roles.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "upgraded-prisma-draft-table.sql": {
+      "bytes": 874,
+      "mode": "0o400"
+    },
+    "postflight-qc-runs.cjs": {
+      "bytes": 4091,
+      "mode": "0o400"
+    },
+    "import_stage.py": {
+      "bytes": 10714,
+      "mode": "0o400"
+    },
+    "import-dry-retained-inspect.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "candidate-jobs-off-run.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-dry.stderr": {
+      "bytes": 68,
+      "mode": "0o400"
+    },
+    "postflight-auth.cjs": {
+      "bytes": 2045,
+      "mode": "0o400"
+    },
+    "readonly-smoke.cjs": {
+      "bytes": 3255,
+      "mode": "0o400"
+    },
+    "import-repeat-retained-inspect.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "fresh-live-backup.db": {
+      "bytes": 563322880,
+      "mode": "0o400"
+    },
+    "postflight-roles.stdout": {
+      "bytes": 343,
+      "mode": "0o644"
+    },
+    "pre-prisma-draft-table.sql": {
+      "bytes": 769,
+      "mode": "0o400"
+    },
+    "postflight-policy.stdout": {
+      "bytes": 482,
+      "mode": "0o644"
+    },
+    "candidate-jobs-off-startup.stderr": {
+      "bytes": 1598,
+      "mode": "0o644"
+    },
+    "candidate-jobs-off-startup.stdout": {
+      "bytes": 100972,
+      "mode": "0o644"
+    },
+    "postflight-reference.cjs": {
+      "bytes": 2096,
+      "mode": "0o400"
+    },
+    "disk-allocation-observations.jsonl": {
+      "bytes": 27127074,
+      "mode": "0o644"
+    },
+    "startup_common.py": {
+      "bytes": 13858,
+      "mode": "0o400"
+    },
+    "candidate-jobs-off-stop.stdout": {
+      "bytes": 70,
+      "mode": "0o644"
+    },
+    "release_support.py": {
+      "bytes": 20330,
+      "mode": "0o400"
+    },
+    "postflight-reference.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-dry.stdout": {
+      "bytes": 705,
+      "mode": "0o400"
+    },
+    "installed-protected-state.json": {
+      "bytes": 7476444,
+      "mode": "0o400"
+    },
+    "postflight-qc-runs.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "instrument-import-attempt.json": {
+      "bytes": 281,
+      "mode": "0o400"
+    },
+    "api-postflight.stdout": {
+      "bytes": 2673,
+      "mode": "0o644"
+    },
+    "target-pin.json": {
+      "bytes": 1706,
+      "mode": "0o400"
+    },
+    "import_proof_contract.py": {
+      "bytes": 15238,
+      "mode": "0o400"
+    },
+    "candidate-jobs-off-memory.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "runtime_proof_policies.py": {
+      "bytes": 15922,
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 8418,
+      "mode": "0o400"
+    },
+    "import_preservation.py": {
+      "bytes": 9307,
+      "mode": "0o400"
+    },
+    "candidate-jobs-off-memory.stdout": {
+      "bytes": 10,
+      "mode": "0o644"
+    },
+    "prepare_import_build.py": {
+      "bytes": 11009,
+      "mode": "0o400"
+    },
+    "postflight-auth.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import_source_graph.py": {
+      "bytes": 5771,
+      "mode": "0o400"
+    },
+    "build_import.py": {
+      "bytes": 8204,
+      "mode": "0o400"
+    },
+    "import-repeat-retained-inspect.stdout": {
+      "bytes": 9264,
+      "mode": "0o644"
+    },
+    "known_core_disk_guard_import.py": {
+      "bytes": 3839,
+      "mode": "0o400"
+    },
+    "candidate-rehearsal-authority.json": {
+      "bytes": 22636,
+      "mode": "0o400"
+    },
+    "import-apply-container.json": {
+      "bytes": 728,
+      "mode": "0o400"
+    },
+    "postflight-roles.cjs": {
+      "bytes": 12281,
+      "mode": "0o400"
+    },
+    "import-dry-copy-authority.json": {
+      "bytes": 707,
+      "mode": "0o400"
+    },
+    "import-apply-retained-inspect.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-dry-container.json": {
+      "bytes": 723,
+      "mode": "0o400"
+    }
+  },
+  "receipt": null,
+  "containers": [
+    {
+      "name": "soilfer-lims",
+      "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+      "restartCount": 0,
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "OOMKilled": false,
+        "ExitCode": 0,
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-12T17:15:00.309400325+02:00",
+              "End": "2026-10-12T17:15:07.96322017+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:15:18.003035252+02:00",
+              "End": "2026-10-12T17:15:18.186880643+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:15:28.189848557+02:00",
+              "End": "2026-10-12T17:15:28.289151669+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:15:38.291435912+02:00",
+              "End": "2026-10-12T17:15:38.398468707+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:15:48.400666513+02:00",
+              "End": "2026-10-12T17:15:48.531078478+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "memoryBytes": 805306368
+    },
+    {
+      "name": "lims-owned-instrument-import-proof-959d17e1-20261012t144000z-jobs-off",
+      "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+      "restartCount": 0,
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "OOMKilled": false,
+        "ExitCode": 137,
+        "Health": {
+          "Status": "unhealthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-12T17:13:31.76500598+02:00",
+              "End": "2026-10-12T17:13:31.847879837+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:13:42.001118355+02:00",
+              "End": "2026-10-12T17:13:42.104757604+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:13:52.106480726+02:00",
+              "End": "2026-10-12T17:13:52.188642911+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:14:02.190219189+02:00",
+              "End": "2026-10-12T17:14:02.287158579+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:14:12.289124558+02:00",
+              "End": "2026-10-12T17:14:12.381045082+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "memoryBytes": 805306368
+    }
+  ],
+  "outputs": {
+    "unit.stdout": "{\"stage\": \"candidate-jobs-off\", \"elapsedSeconds\": 39.01778445999662, \"pending\": true}\n{\"stage\": \"candidate-jobs-off\", \"elapsedSeconds\": 78.15844998900138, \"pending\": true}\n",
+    "unit.stderr": ""
+  },
+  "progress": {
+    "import-dry-container.json": {
+      "sha256": "fe40e2e14903fcf4d0ec56317ecd5a380c93b10ef47c08b2adca11fec07c1b8b",
+      "value": {
+        "containerName": "lims-owned-import-cli-2b2a9dcf8451d704b09697ec",
+        "owner": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z:import-dry",
+        "memoryLimitBytes": 805306368,
+        "memorySwapLimitBytes": 805306368,
+        "networkMode": "none",
+        "timeoutSeconds": 600,
+        "elapsedSeconds": 7.368492781999521,
+        "nodeOptions": "",
+        "exitCode": 0,
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 91516928,
+          "childStatus": 0,
+          "childSignal": null
+        },
+        "retainedOwnedContainer": true,
+        "retainedArtifacts": {
+          "import-dry.stdout": "d96dc8241e3edbc9d2a2e794a0edbb6dd592f282f978571380d37544446058f3",
+          "import-dry.stderr": "56a6f4c1b7a51ebf3238ab724908c39c8fea65245b38430b834aafa6d7b8d78a"
+        }
+      }
+    },
+    "import-apply-container.json": {
+      "sha256": "7387ebac3d8fd8eac7362c68476504a7f7cdf4c4d7f0a3489595fa94c00eec90",
+      "value": {
+        "containerName": "lims-owned-import-cli-5b5879059893048f9d30178a",
+        "owner": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z:import-apply",
+        "memoryLimitBytes": 805306368,
+        "memorySwapLimitBytes": 805306368,
+        "networkMode": "none",
+        "timeoutSeconds": 600,
+        "elapsedSeconds": 74.2072544519906,
+        "nodeOptions": "",
+        "exitCode": 0,
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 92438528,
+          "childStatus": 0,
+          "childSignal": null
+        },
+        "retainedOwnedContainer": true,
+        "retainedArtifacts": {
+          "import-apply.stdout": "b6c0e0d15884446160dceaff97367fd976ff79f17bbdd120486835463bdc8245",
+          "import-apply.stderr": "bb266b268000107494fd2bbbee74cbb12f2d19f48ed095683e134e6584551e7b"
+        }
+      }
+    },
+    "import-repeat-container.json": {
+      "sha256": "6be5b70cd4b380b84e8489c1ce1aeb569700e654fb13b2a34c68b92536d1a91d",
+      "value": {
+        "containerName": "lims-owned-import-cli-858ccfc7be8e9f5e98b7f750",
+        "owner": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z:import-repeat",
+        "memoryLimitBytes": 805306368,
+        "memorySwapLimitBytes": 805306368,
+        "networkMode": "none",
+        "timeoutSeconds": 600,
+        "elapsedSeconds": 6.068385352991754,
+        "nodeOptions": "",
+        "exitCode": 0,
+        "cgroupMemoryPeak": {
+          "releaseCliPeakBytes": 54587392,
+          "childStatus": 0,
+          "childSignal": null
+        },
+        "retainedOwnedContainer": true,
+        "retainedArtifacts": {
+          "import-repeat.stdout": "241c29108bd722ba20b51d810da0bc232db4efdd1d36d13dc78d7d3e70c884ff",
+          "import-repeat.stderr": "4df899e7b48f535ac59ac6bca0bdfce5a7b5779c8b92ade3a2015f2dc1753307"
+        }
+      }
+    },
+    "import-install-preservation.json": {
+      "sha256": "18e1379bac2f9b93696cf97e19a4d68e52aa3ff2e85053adf8e9d3c5d2efaafe",
+      "value": {
+        "status": "READ_ONLY_EXACT_IMPORT_DELTA_PASS",
+        "originalTableCount": 104,
+        "originalReceiptCount": 38,
+        "candidateTableCount": 106,
+        "candidateReceiptCount": 39,
+        "allOriginalRowsAndSchemaPreserved": true,
+        "newTables": [
+          "ImportTemplate",
+          "InstrumentImportReceipt"
+        ],
+        "historicalDraftLinks": 0,
+        "scientificChanges": 0,
+        "originalRows": {
+          "Analysis": {
+            "count": 216,
+            "sha256": "5af9f232fbd41ecaa80d8a75cf0a13a9059adabb83f2895800a3bf505e1d4160"
+          },
+          "AnalysisCategory": {
+            "count": 19,
+            "sha256": "b26d3ddc40849d4291186a16965334cf3bfad183cef1c53f7dbfc679d1e242d9"
+          },
+          "AnalysisGroup": {
+            "count": 23,
+            "sha256": "e5535815f4fdc7e33ccef5955a8dae0787d1a14765f6093f69ee4b07569e6a82"
+          },
+          "ApiKey": {
+            "count": 4,
+            "sha256": "69905288549d5d9d9171b231483e019a759eb6e192c2bfac4200d13f85035091"
+          },
+          "AuditLog": {
+            "count": 12853,
+            "sha256": "261bd341c7e7ac137e7957c46a99e5c11ea7773087eca3f13cc200a84dc2172d"
+          },
+          "Batch": {
+            "count": 6,
+            "sha256": "b77a95062fa0115aec0770f6d34600cc6c1800b710e48b71d380aafba196c7c8"
+          },
+          "BatchAnalyte": {
+            "count": 6,
+            "sha256": "2ccf1f89ec85f09a835d380ff79192bf254820c84d1a33943dfe1e1e54ec8f4f"
+          },
+          "BatchDisposition": {
+            "count": 1,
+            "sha256": "80ecf7c19e9920800dc1d4668f86cb22412a0524657c5b4ef9433bc62f6bba0e"
+          },
+          "BatchEvent": {
+            "count": 28,
+            "sha256": "62ae64c863fb8664d49fc745593adbe2ecc9c6211063345ee269938434ff566d"
+          },
+          "BatchPosition": {
+            "count": 33,
+            "sha256": "760141d69879913bb941a865d2801373e042dc6464189a4929600f9a1c126a56"
+          },
+          "BatchPositionReference": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "BatchPositionWorkItem": {
+            "count": 15,
+            "sha256": "fb34ce15b6269fb57c132555ce6c1101ce4aeba90df1b676493111f03ebe0e72"
+          },
+          "BatchQcResult": {
+            "count": 18,
+            "sha256": "9777d6de101db10f5f2d6660f70681b8ee5d2d19d3c72f7baad6167742a1e9d6"
+          },
+          "BatchReagentLot": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "CalcTemplate": {
+            "count": 8,
+            "sha256": "3e81dbad5dafed347fee9a35179115ea552d758d1836e245c76443f462508c5b"
+          },
+          "CalcTemplateActivation": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "CalibrationCurve": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "CalibrationPoint": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "CommandReceipt": {
+            "count": 1,
+            "sha256": "c5f465670a39af62ab868c97e912923ec2e6a86ae4dc981f291127df2c1d60df"
+          },
+          "Consignment": {
+            "count": 1,
+            "sha256": "5688e8f1b094f0c9828c666c32780201ee85c9f682cf05dbab02ea217109bb59"
+          },
+          "CrossCheckEvaluation": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "EquipmentAsset": {
+            "count": 42,
+            "sha256": "48f48d5eca56465e3afcfd375c8bbe84745297a450791d31df2cbf2ae6d72b4e"
+          },
+          "EquipmentEvent": {
+            "count": 4,
+            "sha256": "f2f4e0bf5b60c64c339502b51e7f1805b9305bc870d651192fb986b95eea3e23"
+          },
+          "EquipmentMethodEligibility": {
+            "count": 14,
+            "sha256": "22a79210b686f0bee6034f2105b743b47fb91b8bdb4810b0ea9f428caf57fdea"
+          },
+          "EquipmentQualification": {
+            "count": 42,
+            "sha256": "fca61f7d071c9dc3ba09f8a106f8b694677fc14547d4e704fac681130287e8cb"
+          },
+          "EquipmentScheduleRule": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ExternalMapping": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "GlobalAppearanceSetting": {
+            "count": 1,
+            "sha256": "468af72f7e73bcfb84b6e7052b67792a95c899550c8579a7b925daa75096a79c"
+          },
+          "HelpArticle": {
+            "count": 113,
+            "sha256": "b37b19f5cd90d1e720324223909e76daca57649ff7932ad77b8afcb89b06e0b6"
+          },
+          "HelpFeedback": {
+            "count": 6,
+            "sha256": "fb1bd9ad2f2d2a5b04245d533f359019ef3791afbf9aacfe58e5513c50602eb3"
+          },
+          "HelpLabNote": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "HelpLocaleRevision": {
+            "count": 565,
+            "sha256": "14965d065791248bf55d149dc476796f137fbad465324373309aedde17f90192"
+          },
+          "HelpPublication": {
+            "count": 366,
+            "sha256": "d6f2df77bbfd99785f251e021fde1e797faac37e0a86ed3ad1816b34f3b7f045"
+          },
+          "HelpRevision": {
+            "count": 113,
+            "sha256": "129b70d2b04cb027fcc8dcdb2554e61e84a3fe4b32f8940d9e7ed4624e796ba1"
+          },
+          "HelpSupportConfig": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "InventoryItem": {
+            "count": 127,
+            "sha256": "d47f11d93c502d2754b983c15d6c0278eb34e0e60289df242f51f5aec941e583"
+          },
+          "InventoryLocation": {
+            "count": 35,
+            "sha256": "ec3a75b3d5f2530e512336a8815f6c88daa9b0449565866e9c57fb8986269502"
+          },
+          "InventoryLot": {
+            "count": 5,
+            "sha256": "906f766c947b05174cf67fbf060a1b6080db27211bbca0e3e10a299ed2f6d0e4"
+          },
+          "InventoryReservation": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "InventoryTransaction": {
+            "count": 11,
+            "sha256": "7f191eb057208dbac17172bde8aaf30cac38c1575c1f2e341bd6073c0e130a87"
+          },
+          "KoboConfig": {
+            "count": 11,
+            "sha256": "07775aae9b1fcc6cfd3591c5ce16ce7552f6fe14893e44717e78ce4c531e127a"
+          },
+          "Lab": {
+            "count": 10,
+            "sha256": "ea2b612c81a6afe44e1b2a3f36368bc55c91df9eecfc1727907e92aa20efaaa6"
+          },
+          "LabAppearanceSetting": {
+            "count": 1,
+            "sha256": "dba6f69aafc547318d3a90c4553df42b250244845439b762e843ae412a6a0b9e"
+          },
+          "LabLifecycleState": {
+            "count": 1,
+            "sha256": "679cc6877f3b94d572ea7580f3e4a70acb8b587e624ad8be04f1feee0b9d62a3"
+          },
+          "LabMethodDefault": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "LabPolicy": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "LabPolicyOverride": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "LabSequence": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Language": {
+            "count": 5,
+            "sha256": "761d8388189c422ba81859af0a1c5a81b41cb6ba741016cfcb6ea5a13d37f852"
+          },
+          "Message": {
+            "count": 116,
+            "sha256": "d1148111b3c3c2a417795ee4aa050141b82df015f5fc78aacd93fe1c83907ee8"
+          },
+          "MethodReference": {
+            "count": 73,
+            "sha256": "f9afd15d4b336b048ab16e2c8e8cf75cb4f515cdbc76bd5ebe67bfe2504ee582"
+          },
+          "MethodRequirement": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Methodology": {
+            "count": 590,
+            "sha256": "bd22af870919d6654e6d85b2181f0a19b51c94686ca5578f76086c1a8f0bba31"
+          },
+          "NonconformityReport": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Notification": {
+            "count": 227,
+            "sha256": "6dbb591dc5688dd3456bec43c0695ebe74384f2b4baea68896574355315bcfc3"
+          },
+          "OperationalGate": {
+            "count": 6,
+            "sha256": "7e187a9b9a6c198f3d6aa2e3b7174a213ffb6b7173d74d3c733b688771aa701a"
+          },
+          "OrderLine": {
+            "count": 119,
+            "sha256": "8352bfd2d3163da416e03529b0c35e64458f6f9eb6e783744b991980d1238df7"
+          },
+          "PreparationRecord": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ProficiencyRound": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Project": {
+            "count": 6,
+            "sha256": "a335b1b703b56ec4e3a28f4bcf3921d2bd17cebd8e898cbc98463ab83104664a"
+          },
+          "ProjectLab": {
+            "count": 10,
+            "sha256": "d896e38946204228cffd4a9ab8a804ba7ff7f7b009b53809ec7f0c04fc0e0267"
+          },
+          "QcEvaluation": {
+            "count": 6,
+            "sha256": "295c32dc2fa985fb55f61b583dfa59a71260daacb0725f7b50c706fa2c3e4ccb"
+          },
+          "QcMeasurement": {
+            "count": 24,
+            "sha256": "3fc1c1c14850b61cbac11ab1a71d1dc537d4b5bbaa0d64ecbaaf3f754ed6d10d"
+          },
+          "QcRule": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ReferenceMaterial": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ReferenceValue": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Report": {
+            "count": 4,
+            "sha256": "d94b6f1b0086bd83f6e85095b63911844295eda8ce4dda2bc29bb696526dda22"
+          },
+          "ReportAccessLog": {
+            "count": 4,
+            "sha256": "5f7326baa6236012f7eeeed00dc83ce8de013b42719621711010c01bec8b783f"
+          },
+          "ReportAmendmentWithdrawal": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ReportSequence": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ReportShareLink": {
+            "count": 7,
+            "sha256": "da42ed81025e229f76f1127befcd77dbfd7929e53f0abc2fd21d973fbc3074be"
+          },
+          "ReportedValueSelection": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Result": {
+            "count": 19,
+            "sha256": "59d5c18fc8afb9fa046a0d7a259ce9c0c4d43cf247bc67e5287d178de8c7b63a"
+          },
+          "ResultCalculation": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ResultEvidenceEvent": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ResultOverrideRequest": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "ReviewDecision": {
+            "count": 7,
+            "sha256": "4e5a29c9519bea56888728b0fc2c173a9cbfb2ebd5533fe3d4fe001a96d71976"
+          },
+          "Sample": {
+            "count": 38928,
+            "sha256": "a6dedc02356427fd8f1381b584ba6f5ce5a547d75cbc26652b74141dda814b48"
+          },
+          "SampleAmendment": {
+            "count": 1,
+            "sha256": "64915c5cdafe6172044ce7fc3823a7d7925dded3f279f7d2803b0011ed951a1c"
+          },
+          "SampleAmendmentAttempt": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "SampleHold": {
+            "count": 10,
+            "sha256": "48a5544d2e660f4b8b606b6a0494897536db45fd62a1daaa49ca014434fef930"
+          },
+          "SampleOrderRevision": {
+            "count": 13,
+            "sha256": "fcb19dc0a929fa3b0d203da2a8ec2b13f0d43ff6f106312df57f35847a91b598"
+          },
+          "SpectralData": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "StaffInvitation": {
+            "count": 3,
+            "sha256": "81930a5c98a56276edc273dc7c4339d1295c51734cac20ba519aa2cdf3259ca6"
+          },
+          "StaffRecoveryGrant": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "Submission": {
+            "count": 7,
+            "sha256": "8d04653c3c5f182bc7abfcdef72142f0c166919c2fc4e2cf37f2396c26cac486"
+          },
+          "SystemSetting": {
+            "count": 1,
+            "sha256": "e3ab8859afcfce431e7a308bfbd1e2e990057ea522ba700bd0d0fb6337acdac7"
+          },
+          "Unit": {
+            "count": 36,
+            "sha256": "19d67d8f16c0ced85928ce2d9457f2676ea2ae1e165c4ce57aaf3a13b2b4a816"
+          },
+          "User": {
+            "count": 49,
+            "sha256": "f62430eccd21a79fe625a4b5bf15cb2d8fa32f62fc4ac4646e4134673dfde36f"
+          },
+          "UserBenchCredential": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "WorkAttempt": {
+            "count": 19,
+            "sha256": "9ca69bc217bdd9f6dc8027739dabad54ad7199409e3ad192a8312d63f35ffd02"
+          },
+          "WorkItem": {
+            "count": 90,
+            "sha256": "8a05ba704af28cd23578d5106d23338e750b0c68eb6729eda366931332476669"
+          },
+          "WorkItemDraft": {
+            "count": 1,
+            "sha256": "d38a842729c3f62f9e019122d2f0fcb899e99ef5669bcf479879437edc9dd75d"
+          },
+          "WorkItemEquipmentUse": {
+            "count": 6,
+            "sha256": "2bd75d9608eeeb56786a0aebd852f76b83916c43f8a4293f1088164b7b1b25ef"
+          },
+          "_exchange_batches": {
+            "count": 11,
+            "sha256": "9a9a269dbda0b0c9f81885109f9de0a4f3735b27ab6082d75d29a7fe37eb8100"
+          },
+          "_exchange_connection_keys": {
+            "count": 4,
+            "sha256": "86575e0f8e870548e4f190b7d1cf817663dcddfdb13fa66c5ab957c072009837"
+          },
+          "_exchange_connections": {
+            "count": 4,
+            "sha256": "9b5d6a79aa6e976e7a509157ee3e6cd51ea51ef1f0607fbad5130e00289e9769"
+          },
+          "_exchange_journal": {
+            "count": 3,
+            "sha256": "61189edab12757b8de8c7a749b80ce739a99575480f1ab427b867f79c26a0ecc"
+          },
+          "_exchange_meta": {
+            "count": 5,
+            "sha256": "1d4906d757f5a227a0cd112a5651900f28151c84d5e3fcc9fbea74809810b45b"
+          },
+          "_exchange_receipts": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "_exchange_rotation_operations": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "_exchange_snapshot_items": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "_exchange_snapshots": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "_schema_migrations": {
+            "count": 38,
+            "sha256": "7246cf4754160f6d8bbadc6dc74d5214ca2a9785f16e17ed88d8bda5352d26ff"
+          }
+        },
+        "snapshotSha256": {
+          "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/fresh-live-backup.db": "8aafdf7c4325c2a9b429fa04aaf66db26f569b68d391bd18406720db336284b4",
+          "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/after-import-stopped/dev-stopped-backup.db": "142f6e0e9c0d391efe6221bd8134e3e7f6133ecaad700060cbf7e3132a587621"
+        },
+        "sources": {
+          "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+          "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+          "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+          "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+          "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+        },
+        "originalRowsSha256": "f2819dc6737b62f25ed0fa1e6057728a8b9612c5fa5068e0271e1f182f7cfb50"
+      }
+    },
+    "import-repeat-preservation.json": {
+      "sha256": "a6b464115fceebf06f14158b752b3e7fb2c51ffaf6fa4204f862d773dfdc8836",
+      "value": {
+        "policy": "EXACT_MAIN_EMPTY_WAL_BOUNDED_SHM_FULL_DETACHED_EQUALITY",
+        "mainBytesAndAttributesPreserved": true,
+        "fullInstalledStateEqual": true,
+        "beforePhysical": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880,
+            "inode": 10878978,
+            "device": 64769,
+            "mtimeNs": 1791817417648233662,
+            "mode": 420
+          },
+          "-wal": null,
+          "-shm": null
+        },
+        "afterPhysical": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880,
+            "inode": 10878978,
+            "device": 64769,
+            "mtimeNs": 1791817417648233662,
+            "mode": 420
+          },
+          "-wal": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0,
+            "inode": 10879570,
+            "device": 64769,
+            "mtimeNs": 1791817628216621206,
+            "mode": 420
+          },
+          "-shm": {
+            "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+            "bytes": 32768,
+            "inode": 10879576,
+            "device": 64769,
+            "mtimeNs": 1791817630667672278,
+            "mode": 420
+          }
+        },
+        "beforeLogicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+        "afterLogicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef"
+      }
+    },
+    "after-repeat-stopped/sealed-state.json": {
+      "sha256": "5d0ec77dae5735313792a3536c052837c1c29acfea47455cac0f8891d2b2b7a5",
+      "value": {
+        "policy": "DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL",
+        "originalFiles": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880,
+            "inode": 10878978,
+            "device": 64769,
+            "mtimeNs": 1791817417648233662,
+            "mode": 420
+          },
+          "-wal": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0,
+            "inode": 10879570,
+            "device": 64769,
+            "mtimeNs": 1791817628216621206,
+            "mode": 420
+          },
+          "-shm": {
+            "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+            "bytes": 32768,
+            "inode": 10879576,
+            "device": 64769,
+            "mtimeNs": 1791817630667672278,
+            "mode": 420
+          }
+        },
+        "rawFiles": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880,
+            "inode": 10879583,
+            "device": 64769,
+            "mtimeNs": 1791817645708985688,
+            "mode": 256
+          },
+          "-wal": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0,
+            "inode": 10879584,
+            "device": 64769,
+            "mtimeNs": 1791817649392062432,
+            "mode": 256
+          },
+          "-shm": {
+            "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+            "bytes": 32768,
+            "inode": 10879585,
+            "device": 64769,
+            "mtimeNs": 1791817649559065912,
+            "mode": 256
+          }
+        },
+        "mainOnlyStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+        "logicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+        "backupSha256": "142f6e0e9c0d391efe6221bd8134e3e7f6133ecaad700060cbf7e3132a587621",
+        "countsIncludeWal": true,
+        "matchesExpected": false,
+        "protectedTableCount": 106,
+        "protectedReceiptCount": 39,
+        "backupPath": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z/after-repeat-stopped/dev-stopped-backup.db",
+        "physical": {
+          "": {
+            "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+            "bytes": 563322880
+          },
+          "-wal": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          "-shm": {
+            "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+            "bytes": 32768
+          }
+        }
+      }
+    }
+  },
+  "freeBytes": 75953639424,
+  "productionMutations": 0,
+  "sqliteConnections": 0
+}
