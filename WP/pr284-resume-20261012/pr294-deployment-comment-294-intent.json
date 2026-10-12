@@ -1,0 +1,8 @@
+{
+  "startedUtc": "2026-10-12T22:09:10.146260+00:00",
+  "issue": 294,
+  "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "receiptSha256": "03e3309714cadd956e13e9b34576ed774f1e56c482fdc2b07a828a52c1fcb953",
+  "bodySha256": "a4ecce48af2bbf66ee67aeff8f9379ad78dac6093a3228f9e27381c88995b55c",
+  "status": "ONE_COMMENT_INTENT_NEVER_REPLAY"
+}

@@ -18,6 +18,12 @@ head=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
 remote=subprocess.check_output(['git','ls-remote','origin','refs/heads/audit/release-eb6de2e8'],text=True).split()[0]
 assert head==remote,'Evidence checkpoint must be pushed before the handoff.'
 notice='Deployed '+record['head']+' to production'
+for issue in [162,294,200]:
+ kind='pullRequest' if issue==294 else 'issue'
+ query='query { repository(owner: "yigini", name: "soilfer-lims") { '+kind+'(number:'+str(issue)+') { comments(last:20) { nodes { body } } } } }'
+ recent=subprocess.check_output(['gh','api','graphql','-f','query='+query],timeout=30)
+ nodes=json.loads(recent)['data']['repository'][kind]['comments']['nodes']
+ assert not any(row['body'].startswith(notice) for row in nodes), 'Actual deployment notice already posted on '+str(issue)
 body=f'''{notice}
 
 Completed UTC: {record['completedUtc']}. Independent read-only verification passed at {record['independentVerificationUtc']}.

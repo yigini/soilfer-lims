@@ -1,0 +1,23 @@
+{
+  "status": "DEPLOYED_INDEPENDENTLY_VERIFIED_NATIVE_HANDOFF_DELIVERED",
+  "observedUtc": "2026-10-12T22:14:58Z",
+  "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "completedUtc": "2026-10-12T22:04:33.865599+00:00",
+  "independentVerificationUtc": "2026-10-12T22:07:04.899797+00:00",
+  "productionReceiptSha256": "03e3309714cadd956e13e9b34576ed774f1e56c482fdc2b07a828a52c1fcb953",
+  "manifestSha256": "39b054dbc89889493ac02984675ca72e5fc0da1593706a6abcab450ed481b76e",
+  "coordinatorSha256": "24479eb79a6bdf9d900321dcbc25f2b15e6aa56c110aaf9028e205a5139d6d6d",
+  "nativeTarget": "LIMS Audit / Lab workflow audit and plan",
+  "freshWindowSelected": true,
+  "emptyComposerAndFocusObservedBeforeTyping": true,
+  "submittedMessageVisuallyVerified": true,
+  "claudioRespondingAfterDelivery": true,
+  "humanDraftOrDecisionCardChanged": false,
+  "deploymentCommentIds": {"162": 6133518116, "294": 6133518375, "200": 6133518636},
+  "evidenceCommit": "b47e818eeb97668c2279e0c25ad3ec37ab47383f",
+  "productionMutations": 0,
+  "activeReleaseWriter": false,
+  "actualClaudioPostcheck": "PENDING_NOT_CLAIMED",
+  "otherApplicationMerges": "HELD_UNTIL_ACTUAL_CLAUDIO_POSTCHECK",
+  "nextStep": "Claudio checks the completed receipt, independent verification and exact kit, then owns closure/ticks/handoff. Never duplicate deployment notices or replay any completed release helper."
+}
