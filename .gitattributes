@@ -105,3 +105,5 @@ WP/pr284-resume-20261012/** -text
 WP/pr284-release/*.py text eol=lf
 # Exact raw bytes of the separately reviewed202400 held-entry frozen kit.
 WP/pr284-frozen-kit-20261012T202400Z/** -text
+# Exact raw bytes of the separately reviewed213000 transport-amended kit.
+WP/pr284-frozen-kit-20261012T213000Z/** -text
