@@ -1,0 +1,11 @@
+Starting /usr/bin/python3 -B /opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z/deploy_import.py --execute-new-reviewed-import-gate...
+Started /usr/bin/python3 -B /opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z/deploy_import.py --execute-new-reviewed-import-gate.
+{"stage": "beforeQuiesceGuardsPassed", "utc": "2026-10-12T19:38:42.105554+00:00"}
+{"stage": "writersStopped", "utc": "2026-10-12T19:39:15.057178+00:00"}
+{"stage": "stoppedHashedBackupVerified", "utc": "2026-10-12T19:41:26.384693+00:00"}
+{"stage": "nativeImportInstallerAttemptedForwardOnly", "utc": "2026-10-12T19:41:26.553062+00:00"}
+{"stage": "failed", "utc": "2026-10-12T19:43:21.598020+00:00"}
+{"status": "FAILED_IMPORT_FORWARD_HOLD", "error": "[Errno 17] File exists: '/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z/import-dry-copy-authority.json'", "receiptSha256": "2a03e66071406c58b754d9c63ed8200373c55a0433c2d1ad1cbdc2836d72499e"}
+lims-release-instrument-import-release-959d17e1-20261012t161000z.service: Main process exited, code=exited, status=1/FAILURE
+lims-release-instrument-import-release-959d17e1-20261012t161000z.service: Failed with result 'exit-code'.
+lims-release-instrument-import-release-959d17e1-20261012t161000z.service: Consumed 3min 50.422s CPU time, 2.8G memory peak.

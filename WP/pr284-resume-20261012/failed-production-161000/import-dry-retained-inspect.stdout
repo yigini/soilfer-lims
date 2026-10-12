@@ -1,0 +1,239 @@
+[
+    {
+        "Id": "b7256aa2d7a6cddf601a327179e2bd6b9fdf34bbdf963ba83886aceea1a24cd8",
+        "Created": "2026-10-12T19:42:38.311919474Z",
+        "Path": "node",
+        "Args": [
+            "-e",
+            "const fs=require('node:fs'),{spawnSync}=require('node:child_process');\nconst child=spawnSync(process.execPath,process.argv.slice(1),{stdio:'inherit'});\nconst peak=Number(fs.readFileSync('/sys/fs/cgroup/memory.peak','utf8').trim());\nprocess.stderr.write(JSON.stringify({releaseCliPeakBytes:peak,childStatus:child.status,childSignal:child.signal})+'\\n');\nprocess.exit(child.status===null?1:child.status);",
+            "/app/server/scripts/install_instrument_imports.js",
+            "--db",
+            "/app/server/prisma/dev.db",
+            "--dry-run"
+        ],
+        "State": {
+            "Status": "exited",
+            "Running": false,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 0,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2026-10-12T19:42:38.40109956Z",
+            "FinishedAt": "2026-10-12T19:42:44.263945314Z"
+        },
+        "Image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+        "ResolvConfPath": "/var/lib/docker/containers/b7256aa2d7a6cddf601a327179e2bd6b9fdf34bbdf963ba83886aceea1a24cd8/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/b7256aa2d7a6cddf601a327179e2bd6b9fdf34bbdf963ba83886aceea1a24cd8/hostname",
+        "HostsPath": "/var/lib/docker/containers/b7256aa2d7a6cddf601a327179e2bd6b9fdf34bbdf963ba83886aceea1a24cd8/hosts",
+        "LogPath": "/var/lib/docker/containers/b7256aa2d7a6cddf601a327179e2bd6b9fdf34bbdf963ba83886aceea1a24cd8/b7256aa2d7a6cddf601a327179e2bd6b9fdf34bbdf963ba83886aceea1a24cd8-json.log",
+        "Name": "/lims-owned-import-cli-b2575b286d898ade220b2746",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {
+                    "max-file": "3",
+                    "max-size": "50m"
+                }
+            },
+            "NetworkMode": "none",
+            "PortBindings": {},
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": null,
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 805306368,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": [],
+            "BlkioDeviceWriteBps": [],
+            "BlkioDeviceReadIOps": [],
+            "BlkioDeviceWriteIOps": [],
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 805306368,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": [],
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "Mounts": [
+                {
+                    "Type": "bind",
+                    "Source": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z/import-dry-database",
+                    "Target": "/app/server/prisma"
+                }
+            ],
+            "MaskedPaths": [
+                "/proc/acpi",
+                "/proc/asound",
+                "/proc/interrupts",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/sys/devices/virtual/powercap",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "Storage": {
+            "RootFS": {
+                "Snapshot": {
+                    "Name": "overlayfs"
+                }
+            }
+        },
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z/import-dry-database",
+                "Destination": "/app/server/prisma",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ],
+        "Config": {
+            "Hostname": "b7256aa2d7a6",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": true,
+            "AttachStderr": true,
+            "ExposedPorts": {
+                "3000/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "NODE_OPTIONS=",
+                "ALLOW_PRISMA_DB_PUSH=false",
+                "ALLOW_AUTO_SEED=false",
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "NODE_VERSION=24.21.0",
+                "YARN_VERSION=1.22.22",
+                "NODE_ENV=production",
+                "PORT=3000"
+            ],
+            "Cmd": [
+                "-e",
+                "const fs=require('node:fs'),{spawnSync}=require('node:child_process');\nconst child=spawnSync(process.execPath,process.argv.slice(1),{stdio:'inherit'});\nconst peak=Number(fs.readFileSync('/sys/fs/cgroup/memory.peak','utf8').trim());\nprocess.stderr.write(JSON.stringify({releaseCliPeakBytes:peak,childStatus:child.status,childSignal:child.signal})+'\\n');\nprocess.exit(child.status===null?1:child.status);",
+                "/app/server/scripts/install_instrument_imports.js",
+                "--db",
+                "/app/server/prisma/dev.db",
+                "--dry-run"
+            ],
+            "Image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+            "Volumes": null,
+            "WorkingDir": "/app",
+            "Entrypoint": [
+                "node"
+            ],
+            "Labels": {
+                "io.soilfer.release-owned": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z:import-dry",
+                "org.opencontainers.image.description": "Laboratory Information Management System for Soil Analysis",
+                "org.opencontainers.image.revision": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+                "org.opencontainers.image.source": "https://github.com/yigini/soilfer-lims",
+                "org.opencontainers.image.title": "SoilFER-LIMS"
+            }
+        },
+        "NetworkSettings": {
+            "SandboxID": "",
+            "SandboxKey": "",
+            "Ports": {},
+            "Networks": {
+                "none": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "53bfc417a298e5c4429a005d00cb3d5c3d7a6a83d8687f0ae7b784c5724a84f2",
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "MacAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": null
+                }
+            }
+        },
+        "ImageManifestDescriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:77d39f27dcfea46eefe7b20428a35b5d3f1ffafb811766630dfccd879816ec88",
+            "size": 10698,
+            "platform": {
+                "architecture": "amd64",
+                "os": "linux"
+            }
+        }
+    }
+]

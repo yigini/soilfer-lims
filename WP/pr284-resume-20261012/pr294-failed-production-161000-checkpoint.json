@@ -1,0 +1,108 @@
+{
+  "observedUtc": "2026-10-12T19:45:07.498373+00:00",
+  "status": "FAILED_PRODUCTION_HELD_PHYSICAL_ORIGINALS_VERIFIED_NO_APPLY",
+  "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+  "unitState": {
+    "Result": "exit-code",
+    "ExecMainStatus": "1",
+    "ActiveState": "failed",
+    "SubState": "failed"
+  },
+  "receiptSha256": "2a03e66071406c58b754d9c63ed8200373c55a0433c2d1ad1cbdc2836d72499e",
+  "originalPhysicalTripleUnchanged": true,
+  "originalStoppedBackupHashUnchanged": true,
+  "allOriginalWritersStopped": true,
+  "ingressHeld": true,
+  "originalImageStopped": true,
+  "dryRunTotalChanges": 0,
+  "dryRunMeasurement": {
+    "containerName": "lims-owned-import-cli-b2575b286d898ade220b2746",
+    "owner": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z:import-dry",
+    "memoryLimitBytes": 805306368,
+    "memorySwapLimitBytes": 805306368,
+    "networkMode": "none",
+    "timeoutSeconds": 600,
+    "elapsedSeconds": 6.220776210990152,
+    "nodeOptions": "",
+    "exitCode": 0,
+    "cgroupMemoryPeak": {
+      "releaseCliPeakBytes": 110174208,
+      "childStatus": 0,
+      "childSignal": null
+    },
+    "retainedOwnedContainer": true,
+    "retainedArtifacts": {
+      "import-dry.stdout": "d96dc8241e3edbc9d2a2e794a0edbb6dd592f282f978571380d37544446058f3",
+      "import-dry.stderr": "fb4c151c6e0aeaccd96a98218629d15ff808f3e04a80987dab0dda5636d0caf3"
+    }
+  },
+  "noApplyOrRepeatArtifacts": true,
+  "all62FrozenFilesUnchanged": true,
+  "originalProofReceiptUnchanged": true,
+  "productionMutationsByThisVerifier": 0,
+  "liveSqliteConnections": 0,
+  "files": {
+    "production-receipt.json": {
+      "sha256": "2a03e66071406c58b754d9c63ed8200373c55a0433c2d1ad1cbdc2836d72499e",
+      "mode": "0o400",
+      "bytes": 79672
+    },
+    "execution-attempt.json": {
+      "sha256": "9c8a3d97a5016ca749ab5e6a2d903201ee8598608a3f4ac009173d0f337e5dc7",
+      "mode": "0o400",
+      "bytes": 184
+    },
+    "instrument-import-attempt.json": {
+      "sha256": "94567b4ec667844348f2ff31bc695c054e25c3261327984d61d85441deefd15d",
+      "mode": "0o400",
+      "bytes": 281
+    },
+    "import-dry.stdout": {
+      "sha256": "d96dc8241e3edbc9d2a2e794a0edbb6dd592f282f978571380d37544446058f3",
+      "mode": "0o400",
+      "bytes": 705
+    },
+    "import-dry.stderr": {
+      "sha256": "fb4c151c6e0aeaccd96a98218629d15ff808f3e04a80987dab0dda5636d0caf3",
+      "mode": "0o400",
+      "bytes": 69
+    },
+    "import-dry-container.json": {
+      "sha256": "376027f7f4a1872d08f0bf9a1005989340ee3dbe02a8309bafd4c1ddccec5a01",
+      "mode": "0o400",
+      "bytes": 726
+    },
+    "import-dry-retained-inspect.stdout": {
+      "sha256": "cb4577144f2ac342facb01e3d6f21ec7c067e02bcddb89e66a4b0fa97cf116cc",
+      "mode": "0o644",
+      "bytes": 9292
+    },
+    "import-dry-retained-inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o644",
+      "bytes": 0
+    },
+    "original-stopped-seal/sealed-state.json": {
+      "sha256": "ca2c382e52256c044ec07bd456519149868a61c1577476cd55f74a2c6829c457",
+      "mode": "0o400",
+      "bytes": 2410
+    },
+    "original-stopped-seal/raw/original-triple.json": {
+      "sha256": "c9f35fa171279243ad4b218fb226b9097f61cfe4a30825077b070fe0e274dcd9",
+      "mode": "0o400",
+      "bytes": 1421
+    },
+    "unit-journal.txt": {
+      "sha256": "946606e89f8d309d195c1cb3672f8935f5bd0e93759e4dced0124e0925f071ab",
+      "bytes": 1326
+    }
+  },
+  "/api/health": {
+    "httpStatus": 503,
+    "tlsVerified": true
+  },
+  "/login": {
+    "httpStatus": 503,
+    "tlsVerified": true
+  }
+}

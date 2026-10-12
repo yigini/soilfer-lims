@@ -20,7 +20,11 @@ for n in ['execution-attempt.json','production-receipt.in-progress','production-
 journal=subprocess.check_output(['journalctl','-u',u,'-n','12','--no-pager','-o','cat'],text=True,timeout=15)
 record['journalTail']=journal
 record['ownedRunningNames']=subprocess.check_output(['docker','ps','--format','{{.Names}}'],text=True,timeout=15).splitlines()
-print(json.dumps(record))
+summary={key:record[key] for key in ['observedUtc','unitState','journalTail']}
+if 'production-receipt.json' in record:
+ summary['receipt']={key:value for key,value in record['production-receipt.json'].items() if key!='keys'}
+summary['runningLimsNames']=[name for name in record['ownedRunningNames'] if 'lims' in name]
+print(json.dumps(summary))
 '''
 result=subprocess.run(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=15','root@46.19.33.37','python3','-B','-'],input=payload.encode(),capture_output=True,timeout=60)
 assert result.returncode==0,result.stderr.decode(errors='replace')
