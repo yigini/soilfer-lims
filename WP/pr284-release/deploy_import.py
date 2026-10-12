@@ -143,7 +143,7 @@ def execution_preflight(root, manifest_sha, require_unused_gate=False):
         for path in [pathlib.Path(str(s.LIVE) + suffix)] if path.exists())
     reserve = max(FLOOR, s.disk_reserve(database_bytes, image['Size'], assets))
     # Retain all three production stopped seals, their scratch triples and
-    # logical backups, allowing twelve full database allocations. Include
+    # logical backups and the isolated dry copy: thirteen DB allocations. Include
     # full JSON states/keyed audit rows plus assets and an allocation margin.
     required = reserve + RETAINED_DATABASE_ALLOCATION_COUNT * database_bytes + assets + 536870912
     free = s.disk_free(); require(min(free.values()) >= required, 'Backup/allocation reserve refused before quiesce')
