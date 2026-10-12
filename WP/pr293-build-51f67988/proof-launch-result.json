@@ -1,0 +1,6 @@
+{
+  "observedUtc": "2026-10-12T04:17:41.766406+00:00",
+  "exitCode": 0,
+  "stdout": "{\"root\": \"/opt/lims/releases/runtime-kobo-proof-51f67988-20261012T041721Z\", \"unit\": \"lims-owned-runtime-kobo-proof-51f67988-20261012t041721z.service\", \"sourceCommit\": \"071d61c372d48b4e283b9a4520b7044c18a7f238\", \"sourceIndexSha256\": \"93d90b3fa1ee6d54816ec5cf0831632fadab8953d7f78c3c788e9b64b97255a6\", \"coordinatorSha256\": \"c47ef37880185fa7c8ac565f28fc16fe7040b549ed3bea482ab1c0295478d5f0\", \"productionMutations\": 0, \"productionGateCollected\": false}\r\n",
+  "stderr": ""
+}

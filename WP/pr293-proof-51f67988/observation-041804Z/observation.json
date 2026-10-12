@@ -1,0 +1,26 @@
+{
+  "observedUtc": "2026-10-12T04:18:06.033513+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-51f67988-20261012T041721Z",
+  "unit": "lims-owned-runtime-kobo-proof-51f67988-20261012t041721z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "unit.stdoutTail": "",
+  "unit.stderrTail": "",
+  "files": {
+    "target-pin.json": {
+      "bytes": 1219,
+      "sha256": "49dcb7bdc7e102fe35700a0226154431465d3cbe1a7d5d9761f573aad24baddc",
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 5111,
+      "sha256": "93d90b3fa1ee6d54816ec5cf0831632fadab8953d7f78c3c788e9b64b97255a6",
+      "mode": "0o400"
+    },
+    "candidate-rehearsal-authority.json": {
+      "bytes": 18548,
+      "sha256": "b59e7bb9e33bee57a6f431d1cb50f77f60d5f3685ba4fd7d24eb09c6ede06e94",
+      "mode": "0o400"
+    }
+  }
+}

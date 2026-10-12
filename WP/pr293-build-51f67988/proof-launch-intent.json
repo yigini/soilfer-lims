@@ -1,0 +1,10 @@
+{
+  "status": "SINGLE_PROOF_LAUNCH_INTENT_NOT_YET_LAUNCHED",
+  "observedUtc": "2026-10-12T04:17:21.458086+00:00",
+  "sourceCommit": "071d61c372d48b4e283b9a4520b7044c18a7f238",
+  "sourceReviewId": 6117398054,
+  "root": "/opt/lims/releases/runtime-kobo-proof-51f67988-20261012T041721Z",
+  "unit": "lims-owned-runtime-kobo-proof-51f67988-20261012t041721z.service",
+  "mainCiRunId": 38200697950,
+  "mainCiConcluded": "success"
+}
