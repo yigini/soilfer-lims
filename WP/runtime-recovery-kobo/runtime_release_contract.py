@@ -30,6 +30,59 @@ SHARED_READINESS_SHA = 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef
 KIT_STATUS = 'PREPARED_RUNTIME_FORWARD_ONLY_NOT_EXECUTED'
 PHRASE = 'Audit passed: OK to merge and deploy'
 FAILURE_REFERENCE_POLICY = 'PASS_HEADER_NEGATED_QUOTED_FAILURE_REFERENCE_ONLY'
+WAL_RECOVERY_POLICY = 'EXACT_STOPPED_TRIPLE_WAL_AWARE_COPY_FULL_LOGICAL_ZERO_WRITE'
+WAL_SCOPE_ID = 6115903244
+FAILED_WAL_ROOT = '/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z'
+FAILED_WAL_RECEIPT_SHA = 'e274d3b8cf6514e7fe878ad7d712caa6303d3f969fd49372f8bb0147efbb6588'
+FAILED_WAL_MANIFEST_SHA = '5f75662a3394dd01a490338e0e389a0cfe5854d3ffcb170b9a48200b914c3a27'
+ORIGINAL_INGRESS_SHA = 'f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20'
+HELD_INGRESS_SHA = 'd92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c'
+HELD_TRIPLE = {
+    '': {'sha256': '44d174bdda174cc6fd81e6d0e958fd8bd48c8255e34cb9927bb562aa14cffd34', 'bytes': 563322880},
+    '-wal': {'sha256': '9f0981c7b5adad656ff544890af68a211a6daf8a52360b5c5e6cb12ffe2bb2e0', 'bytes': 4190072},
+    '-shm': {'sha256': '5ad9f8e2bdf448f719997dd8d28a3aee0351d7f86ac152df8c3d328755b0423d', 'bytes': 32768}}
+
+
+def wal_recovery_binding():
+    return {'policy': WAL_RECOVERY_POLICY, 'scopeCommentId': WAL_SCOPE_ID,
+        'predecessorRoot': FAILED_WAL_ROOT, 'failedReceiptSha256': FAILED_WAL_RECEIPT_SHA,
+        'failedManifestSha256': FAILED_WAL_MANIFEST_SHA, 'normalIngressSha256': ORIGINAL_INGRESS_SHA,
+        'heldIngressSha256': HELD_INGRESS_SHA, 'heldTriple': HELD_TRIPLE,
+        'allowedEntryStates': ['RUNNING_NORMAL', 'STOPPED_HELD']}
+
+
+def wal_review_tokens():
+    return [WAL_RECOVERY_POLICY, 'walScopeCommentId=' + str(WAL_SCOPE_ID), FAILED_WAL_ROOT,
+        FAILED_WAL_RECEIPT_SHA, FAILED_WAL_MANIFEST_SHA, ORIGINAL_INGRESS_SHA, HELD_INGRESS_SHA,
+        'RUNNING_NORMAL', 'STOPPED_HELD', 'NO_SECOND_STOP',
+        *[row['sha256'] for row in HELD_TRIPLE.values()]]
+
+
+def validate_entry_state(entry, manifest):
+    require(manifest.get('walRecovery') == wal_recovery_binding(), 'WAL recovery authority differs')
+    require(set(entry) == {'mode', 'containerId', 'image', 'restartCount', 'ingressSha256', 'originalFiles'} and
+        re.fullmatch(r'[0-9a-f]{64}', entry['containerId']) and entry['image'] == LIVE_IMAGE and
+        entry['restartCount'] == 0, 'Original entry identity differs')
+    if entry['mode'] == 'RUNNING_NORMAL':
+        require(entry['ingressSha256'] == ORIGINAL_INGRESS_SHA and entry['originalFiles'] is None,
+            'Running entry requires original open ingress')
+    elif entry['mode'] == 'STOPPED_HELD':
+        require(entry['ingressSha256'] == HELD_INGRESS_SHA and set(entry['originalFiles']) == set(HELD_TRIPLE),
+            'Held entry requires exact stopped triple')
+        for suffix, pinned in HELD_TRIPLE.items():
+            row = entry['originalFiles'][suffix]
+            require(isinstance(row, dict) and all(row.get(key) == value for key, value in pinned.items()) and
+                set(row) == {'sha256', 'bytes', 'inode', 'device', 'mtimeNs', 'mode'} and
+                all(type(row[key]) is int for key in ['bytes', 'inode', 'device', 'mtimeNs', 'mode']),
+                'Held original triple differs: ' + suffix)
+    else:
+        raise RuntimeError('Unreviewed entry state')
+
+
+def verify_entry_readiness(manifest, gate, actual):
+    validate_entry_state(actual['entryState'], manifest)
+    require(actual['entryState'] == gate['readOnlyExecutionReadiness']['entryState'],
+        'Actual writer/ingress/triple changed after the single-use gate')
 
 
 def has_failed_verdict(body, include_source=False):
@@ -183,6 +236,10 @@ def sealed_scheduler_evidence(proof, expected, stdout, stderr, first, second, fu
 
 def measurement_manifest(manifest):
     require(PROOF_SOURCE_REVIEW_ID > 0, 'Actual new proof-source review is not bound')
+    require(manifest.get('walRecovery') == wal_recovery_binding() and
+        manifest['files'].get('apache-before.conf') == ORIGINAL_INGRESS_SHA and
+        manifest['files'].get('apache-held.conf') == HELD_INGRESS_SHA,
+        'WAL recovery or original ingress authority differs')
     pairing_contract(manifest)
     require(manifest['sourceReviewId'] == PROOF_SOURCE_REVIEW_ID and
         manifest['proofToolingCommit'] == REVIEWED_PROOF_SOURCE and
@@ -215,7 +272,7 @@ def production_source_review(review, tooling, files, now=None):
         'baselineVanishedProcessPolicy=' + BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX=3',
         'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10', 'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
         'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
-    tokens += [files[name] for name in PRODUCTION_SOURCE_FILES] + pairing_review_tokens()
+    tokens += [files[name] for name in PRODUCTION_SOURCE_FILES] + pairing_review_tokens() + wal_review_tokens()
     tokens += [REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, REVIEWED_PROOF_CONTRACT_SHA,
         PROOF_BASELINE_LAYOUT_SHA, 'proofBaselineLayoutPolicy=' + PROOF_BASELINE_LAYOUT_POLICY,
         'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID), FAILURE_REFERENCE_POLICY]
@@ -245,7 +302,7 @@ def proof_authority(proof, pin, source, authority, authority_sha):
 
 
 def review_tokens(manifest, manifest_sha):
-    return release_binding_tokens() + pairing_review_tokens() + [PHRASE, FAILURE_REFERENCE_POLICY, manifest['head'], manifest['image'], manifest_sha,
+    return release_binding_tokens() + pairing_review_tokens() + wal_review_tokens() + [PHRASE, FAILURE_REFERENCE_POLICY, manifest['head'], manifest['image'], manifest_sha,
         manifest['files']['deploy_runtime.py'], manifest['files']['rehearsal-receipt.json'],
         manifest['files']['startup_common.py'], manifest['files']['yy-authorization-evidence.md'],
         manifest['files']['target-pin.json'], HISTORICAL_RECEIPT_SHA,
@@ -275,6 +332,11 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
     now = now or datetime.datetime.now(datetime.timezone.utc)
     measurement_manifest(manifest)
     pairing_contract(gate)
+    require(gate.get('walRecovery') == manifest['walRecovery'], 'Gate WAL authority differs')
+    readiness = gate['readOnlyExecutionReadiness']
+    require(readiness['ready'] is True and readiness['productionMutations'] == 0,
+        'Gate entry readiness is incomplete')
+    validate_entry_state(readiness['entryState'], manifest)
     require(manifest['status'] == KIT_STATUS and manifest['baseHead'] == BASE_HEAD and
         manifest['head'] == CANDIDATE_HEAD and manifest['tree'] == MERGED_TREE and
         manifest['naturalIntakePolicy'] == NATURAL_INTAKE_POLICY and manifest['workloadControl'] == WORKLOAD_PINS and

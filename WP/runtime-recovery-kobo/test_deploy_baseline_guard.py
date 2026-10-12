@@ -7,12 +7,17 @@ import json
 import pathlib
 import stat
 import sys
+import sqlite3
+import tempfile
 import unittest
 from unittest.mock import Mock, patch
 import known_core_disk_guard_deploy as adapter
 import known_core_disk_guard_v3 as v3
 import known_core_disk_guard_v2 as v2
 import test_baseline_confirmation as baseline_cases
+import deploy_runtime as deploy
+from runtime_release_contract import (wal_recovery_binding, HELD_TRIPLE, LIVE_IMAGE,
+    ORIGINAL_INGRESS_SHA, HELD_INGRESS_SHA)
 
 
 class AdapterConfirmationTests(baseline_cases.BaselineTests):
@@ -142,10 +147,134 @@ class AdapterLayoutTests(unittest.TestCase):
         for name in ['verify_gate', 'set_ingress']:
             self.assertLess(adapter_line, min(node.lineno for node in calls if isinstance(node.func, ast.Name) and node.func.id == name))
         self.assertLess(adapter_line, min(node.lineno for node in calls if isinstance(node.func, ast.Attribute) and node.func.attr in ['inspect', 'command']))
-        self.assertLess(adapter_line, min(node.lineno for node in calls if isinstance(node.func, ast.Attribute) and node.func.attr == 'consistent_backup'))
+        self.assertLess(adapter_line, min(node.lineno for node in calls if isinstance(node.func, ast.Name) and node.func.id == 'sealed_stopped_state'))
         launcher = source('launch_runtime_release').decode()
         self.assertIn('StandardOutput=journal', launcher); self.assertIn('StandardError=journal', launcher)
         self.assertNotIn('StandardOutput=append:', launcher)
+
+
+class StoppedWalTests(unittest.TestCase):
+    """Real SQLite fixtures in owned temporary directories, never production."""
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='lims-wal-guard-')
+        self.root = pathlib.Path(self.temp.name).resolve()
+        self.database = self.root / 'original.db'
+        self.db = sqlite3.connect(self.database)
+        for name in ['_schema_migrations', 'WorkAttempt', 'AuditLog', 'Result', 'WorkItem']:
+            self.db.execute('CREATE TABLE ' + name + '(id TEXT PRIMARY KEY)')
+        self.db.execute('CREATE TABLE Sample(id TEXT PRIMARY KEY, value TEXT)')
+        for i in range(98): self.db.execute('CREATE TABLE fixture_' + str(i) + '(id TEXT PRIMARY KEY)')
+        self.db.executemany('INSERT INTO _schema_migrations VALUES(?)', [(str(i),) for i in range(38)])
+        self.db.execute("INSERT INTO Sample VALUES('one','protected')"); self.db.commit()
+        self.db.execute('PRAGMA journal_mode=WAL'); self.db.execute('PRAGMA wal_autocheckpoint=0')
+        self.guard = Mock()
+
+    def tearDown(self):
+        self.db.close()
+        # Raw retained fixtures are read-only just like production seals.
+        for path in self.root.rglob('*'):
+            if path.is_file(): path.chmod(0o600)
+        self.temp.cleanup()
+
+    def test_committed_nonempty_wal_included_without_original_mutation(self):
+        self.db.execute("INSERT INTO Sample VALUES('two','in WAL')"); self.db.commit()
+        before = deploy.triple_state(self.database)
+        self.assertGreater(before['-wal']['bytes'], 0)
+        expected, seal = deploy.sealed_stopped_state(self.root, 'sealed', self.database, self.guard)
+        self.assertEqual(expected['tables']['Sample']['count'], 2)
+        main = json.loads((self.root / 'sealed/main-only-state.json').read_bytes())
+        self.assertEqual(main['tables']['Sample']['count'], 1)
+        self.assertEqual(deploy.triple_state(self.database), before)
+        self.assertTrue(seal['countsIncludeWal']); self.assertGreater(self.guard.check.call_count, 0)
+        backup = self.root / 'sealed/dev-stopped-backup.db'
+        self.assertEqual(deploy.s.snapshot(backup, immutable=True), expected)
+
+    def test_empty_or_absent_wal_still_seals_full_state(self):
+        before = deploy.triple_state(self.database)
+        expected, _ = deploy.sealed_stopped_state(self.root, 'sealed', self.database, self.guard)
+        self.assertEqual(expected['tables']['Sample']['count'], 1)
+        self.assertEqual(deploy.triple_state(self.database), before)
+
+    def test_original_change_during_copy_refuses(self):
+        changed = False
+        def change():
+            nonlocal changed
+            if not changed:
+                changed = True
+                with self.database.open('ab') as out: out.write(b'changed')
+        self.guard.check.side_effect = change
+        with self.assertRaisesRegex(RuntimeError, 'changed during copy'):
+            deploy.copy_triple(self.database, self.root / 'raw', self.guard)
+
+    def test_wal_folded_lower_count_or_missing_table_refuses(self):
+        main = {'tables': {'Sample': {'count': 2}}}
+        for tables in [{'Sample': {'count': 1}}, {}]:
+            with self.subTest(tables=tables), self.assertRaises(RuntimeError):
+                deploy.logical_count_guard(main, {'tables': tables})
+
+    def test_equal_counts_but_changed_protected_content_refuses_after_jobs_off(self):
+        expected, _ = deploy.sealed_stopped_state(self.root, 'before', self.database, self.guard)
+        self.db.execute("UPDATE Sample SET value='unauthorized' WHERE id='one'"); self.db.commit()
+        with self.assertRaisesRegex(RuntimeError, 'logical state changed'):
+            deploy.sealed_stopped_state(self.root, 'after', self.database, self.guard, expected)
+
+    def test_new_sidecar_during_capture_refuses(self):
+        # A fresh sidecar appearing during a copy must be caught even if the
+        # main file bytes stayed identical. No SQLite opens on originals.
+        self.db.close(); self.db = sqlite3.connect(self.database)
+        # Closed last WAL connection removed sidecars on this fixture only.
+        wal = pathlib.Path(str(self.database) + '-wal')
+        def change():
+            if not wal.exists(): wal.write_bytes(b'new sidecar')
+        self.guard.check.side_effect = change
+        with self.assertRaisesRegex(RuntimeError, 'changed during copy'):
+            deploy.copy_triple(self.database, self.root / 'raw', self.guard)
+
+
+class WalEntryTests(unittest.TestCase):
+    def setUp(self):
+        self.manifest = {'walRecovery': wal_recovery_binding()}
+        self.live = {'Id': 'a' * 64, 'Image': LIVE_IMAGE, 'RestartCount': 0,
+            'State': {'Running': False, 'ExitCode': 137, 'OOMKilled': False}}
+        self.triple = {suffix: {**row, 'inode': 42, 'device': 7, 'mtimeNs': 12, 'mode': 0o666}
+            for suffix, row in HELD_TRIPLE.items()}
+
+    def test_exact_held_and_running_entry_states(self):
+        entry = deploy.select_entry_state(self.live, HELD_INGRESS_SHA, self.triple, self.manifest)
+        self.assertEqual(entry['mode'], 'STOPPED_HELD')
+        self.live['State']['Running'] = True
+        self.assertEqual(deploy.select_entry_state(self.live, ORIGINAL_INGRESS_SHA, None,
+            self.manifest)['mode'], 'RUNNING_NORMAL')
+
+    def test_wrong_entry_and_held_triple_hash_refuse(self):
+        with self.assertRaises(RuntimeError):
+            deploy.select_entry_state(self.live, ORIGINAL_INGRESS_SHA, self.triple, self.manifest)
+        self.triple['-wal']['sha256'] = '0' * 64
+        with self.assertRaises(RuntimeError):
+            deploy.select_entry_state(self.live, HELD_INGRESS_SHA, self.triple, self.manifest)
+        self.triple['-wal']['sha256'] = HELD_TRIPLE['-wal']['sha256']
+        for key, value in [('ExitCode', 0), ('OOMKilled', True), ('Running', True)]:
+            old = self.live['State'][key]; self.live['State'][key] = value
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                deploy.select_entry_state(self.live, HELD_INGRESS_SHA, self.triple, self.manifest)
+            self.live['State'][key] = old
+
+    def test_held_path_never_stops_the_original_twice(self):
+        raw = getattr(deploy, '__raw_source__', None) or pathlib.Path(deploy.__file__).read_bytes()
+        tree = ast.parse(raw)
+        calls = [node for node in ast.walk(tree) if isinstance(node, ast.Call) and
+            isinstance(node.func, ast.Attribute) and node.func.attr == 'command' and
+            len(node.args) > 1 and isinstance(node.args[1], ast.List)]
+        original_stops = [node for node in calls if ast.literal_eval(node.args[1]) ==
+            ['docker', 'stop', '-t', '30', 'soilfer-lims']]
+        # The normal path is conditional; the failure handler only stops a
+        # running original, so the already-stopped held path never stops it.
+        parents = {child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+        for call in original_stops:
+            condition = parents[parents[call]]
+            self.assertIsInstance(condition, ast.If)
+            text = ast.unparse(condition.test)
+            self.assertTrue("'RUNNING_NORMAL'" in text or "['Running']" in text)
 
 
 if __name__ == '__main__': unittest.main()

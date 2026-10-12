@@ -43,6 +43,8 @@ class RuntimeGateTests(unittest.TestCase):
             'production-baseline-source-review.json': 'e' * 64})
         for name in PRODUCTION_SOURCE_FILES:
             self.manifest['files'].setdefault(name, 'f' * 64)
+        self.manifest.update({'walRecovery': wal_recovery_binding()})
+        self.manifest['files'].update({'apache-before.conf': ORIGINAL_INGRESS_SHA, 'apache-held.conf': HELD_INGRESS_SHA})
         self.manifest_sha = '6' * 64
         review = {'id': 7000000000, 'html_url': 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-7000000000',
             'body': '\n'.join(review_tokens(self.manifest, self.manifest_sha)), 'created_at': '2026-10-11T19:59:00Z'}
@@ -58,7 +60,11 @@ class RuntimeGateTests(unittest.TestCase):
             'mainCi': {'head_sha': self.manifest['head'], 'name': 'CI', 'event': 'push', 'status': 'completed', 'conclusion': 'success'},
             'kitReview': review, 'laterKitAuditFailure': False, 'yyGo': {'authorizationMode': 'AUTO_AFTER_REVIEW',
                 'evidenceSha256': '4' * 64, 'standingScopeText': 'my go covers all', 'releaseHead': self.manifest['head']}}
-        self.gate.update({'proofAuthoritySha256': '6' * 64, 'proofSourceIndexSha256': '7' * 64,
+        self.gate.update({'walRecovery': wal_recovery_binding(),
+            'readOnlyExecutionReadiness': {'ready': True, 'productionMutations': 0, 'entryState': {
+                'mode': 'RUNNING_NORMAL', 'containerId': 'a' * 64, 'image': LIVE_IMAGE,
+                'restartCount': 0, 'ingressSha256': ORIGINAL_INGRESS_SHA, 'originalFiles': None}},
+            'proofAuthoritySha256': '6' * 64, 'proofSourceIndexSha256': '7' * 64,
             'productionBaselineAdapterSha256': DEPLOY_BASELINE_GUARD_SHA,
             'productionBaselineScopeCommentId': PRODUCTION_BASELINE_SCOPE_ID,
             'productionBaselineSourceReviewSha256': 'e' * 64, 'laterProductionSourceAuditFailure': False,
@@ -94,7 +100,7 @@ class RuntimeGateTests(unittest.TestCase):
             'baselineVanishedProcessPolicy=' + BASELINE_POLICY, 'BASELINE_ATTEMPTS_MAX=3',
             'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10', 'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
             'labAndHubBuildsOwnedByYY=true', 'RELEASE_DAY_DISK_ABORTS_ACCEPTED']
-        production_tokens += [self.manifest['files'][name] for name in PRODUCTION_SOURCE_FILES] + pairing_review_tokens()
+        production_tokens += [self.manifest['files'][name] for name in PRODUCTION_SOURCE_FILES] + pairing_review_tokens() + wal_review_tokens()
         production_tokens += [REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, REVIEWED_PROOF_CONTRACT_SHA,
             PROOF_BASELINE_LAYOUT_SHA, 'proofBaselineLayoutPolicy=' + PROOF_BASELINE_LAYOUT_POLICY,
             'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID), FAILURE_REFERENCE_POLICY]
@@ -107,6 +113,21 @@ class RuntimeGateTests(unittest.TestCase):
 
     def test_complete_synthetic_gate(self):
         self.verify()
+
+    def test_wal_authority_and_single_entry_cannot_be_changed(self):
+        for scope in ['manifest', 'gate']:
+            row = getattr(self, scope); original = copy.deepcopy(row['walRecovery'])
+            row['walRecovery']['failedReceiptSha256'] = '0' * 64
+            with self.subTest(scope=scope), self.assertRaises(RuntimeError): self.verify()
+            row['walRecovery'] = original
+        readiness = self.gate['readOnlyExecutionReadiness']
+        original = copy.deepcopy(readiness['entryState'])
+        for key, value in [('mode', 'IGNORE_HOLD'), ('ingressSha256', HELD_INGRESS_SHA), ('restartCount', 1)]:
+            readiness['entryState'][key] = value
+            with self.subTest(key=key), self.assertRaises(RuntimeError): self.verify()
+            readiness['entryState'] = copy.deepcopy(original)
+        actual = copy.deepcopy(readiness); actual['entryState']['containerId'] = 'b' * 64
+        with self.assertRaises(RuntimeError): verify_entry_readiness(self.manifest, self.gate, actual)
 
     def test_actual_package_export_includes_every_proof_source_file(self):
         raw = getattr(packaging_exporter, '__raw_source__', None)

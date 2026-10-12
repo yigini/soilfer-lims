@@ -13,6 +13,7 @@ import release_support as s
 import startup_common as c
 from kobo_copy_preservation import verify_copy
 from runtime_release_contract import *
+from deploy_runtime import failed_wal_authority, select_entry_state, triple_state, all_writers_stopped
 
 ROOT = pathlib.Path(__file__).resolve().parent
 HISTORICAL_ROOT = pathlib.Path(HISTORICAL_ROOT_PATH)
@@ -142,13 +143,13 @@ def main():
     build_root = pathlib.Path(pin['buildRoot']); safe_root(str(build_root), 'runtime-kobo-build-')
     require(sha(build_root / 'build-receipt.json') == pin['buildReceiptSha256'], 'Original valid build changed')
     validate_candidate(pin, json.loads((build_root / 'build-receipt.json').read_bytes()), image)
-    normal = s.CONF.read_bytes()
-    require(b'R=503' not in normal and normal.count(b'SSLCertificateKeyFile ') == 1, 'Unexpected current ingress')
-    lines = normal.decode('utf-8').splitlines()
-    index = next(i for i, line in enumerate(lines) if 'SSLCertificateKeyFile ' in line)
-    lines[index + 1:index + 1] = ['', '    RewriteEngine On', '    RewriteRule .* - [R=503,L]']
-    files['apache-before.conf'] = normal
-    files['apache-held.conf'] = ('\n'.join(lines) + '\n').encode()
+    # Historical failure is retained authority, never an execution input or
+    # rehearsal PASS. Reuse only its hash-bound ingress bytes, including when
+    # the current configuration is already held. Do not invent a second hold.
+    files.update(failed_wal_authority())
+    if not live['State']['Running']: all_writers_stopped()
+    select_entry_state(live, sha(s.CONF), triple_state(s.LIVE) if not live['State']['Running'] else None,
+        {'walRecovery': wal_recovery_binding()})
     yy = json.loads(files['yy-authorization-evidence.md'])
     require(yy['confirmedByYY'] is True and yy['authorizationMode'] == 'AUTO_AFTER_REVIEW' and
         yy['scopeText'] == 'my go covers all' and yy['status'] == 'ORIGINAL_HUMAN_STANDING_GO_DIRECTLY_VERIFIED',
@@ -158,7 +159,7 @@ def main():
     manifest = {'status': KIT_STATUS, 'root': str(target), 'head': pin['head'], 'image': pin['image'], 'tree': pin['tree'],
         'baseHead': BASE_HEAD, 'naturalIntakePolicy': NATURAL_INTAKE_POLICY,
         'auditedPrTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,
-        'preparedUtc': s.utc(), 'packagingCommit': package['head'],
+        'preparedUtc': s.utc(), 'packagingCommit': package['head'], 'walRecovery': wal_recovery_binding(),
         'originalProofRoot': str(proof), 'originalProofUnit': unit, 'proofReferences': references,
         'sourceReviewId': PROOF_SOURCE_REVIEW_ID, 'proofToolingCommit': REVIEWED_PROOF_SOURCE,
         'diskMeasurementGuardSha256': MEASUREMENT_GUARD_SHA,

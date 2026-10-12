@@ -14,10 +14,10 @@ def main():
     code = '''import base64,hashlib,json,pathlib,subprocess,sys
 p=json.loads(base64.b64decode(PAYLOAD));r=pathlib.Path(p['root']);sys.path.insert(0,str(r))
 from deploy_runtime import execution_preflight
-from runtime_release_contract import verify_gate
+from runtime_release_contract import verify_gate,verify_entry_readiness
 m=json.loads((r/'prepared-manifest.json').read_bytes());g=json.loads((r/'production-gate.json').read_bytes())
 digest=hashlib.sha256((r/'prepared-manifest.json').read_bytes()).hexdigest()
-execution_preflight(r,digest);verify_gate(m,g,digest)
+actual=execution_preflight(r,digest);verify_gate(m,g,digest);verify_entry_readiness(m,g,actual)
 assert (r/'production-gate.json').stat().st_mode&0o777==0o400
 result=subprocess.run(['systemd-run','--unit='+p['unit'],'--property=Type=exec','--property=RuntimeMaxSec=2700',
  '--property=KillMode=process','--property=StandardOutput=journal',

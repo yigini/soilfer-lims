@@ -9,6 +9,7 @@ import json
 import os
 import pathlib
 import signal
+import stat
 import subprocess
 import sys
 import tarfile
@@ -20,6 +21,141 @@ from runtime_release_contract import *
 
 ROOT = pathlib.Path(__file__).resolve().parent
 HISTORICAL_ROOT = pathlib.Path(HISTORICAL_ROOT_PATH)
+
+
+def triple_state(database):
+    """Physical reads only. Never connect SQLite to the stopped originals."""
+    result = {}
+    for suffix in ['', '-wal', '-shm']:
+        path = pathlib.Path(str(database) + suffix)
+        require(not path.is_symlink(), 'SQLite triple contains a symlink')
+        if not path.exists():
+            result[suffix] = None
+            continue
+        before = path.stat()
+        require(stat.S_ISREG(before.st_mode), 'SQLite triple is not a regular file')
+        digest = sha(path); after = path.stat()
+        keys = ['st_dev', 'st_ino', 'st_size', 'st_mtime_ns', 'st_mode']
+        require(all(getattr(before, key) == getattr(after, key) for key in keys),
+            'Original SQLite file changed during physical sampling')
+        result[suffix] = {'sha256': digest, 'bytes': after.st_size, 'inode': after.st_ino,
+            'device': after.st_dev, 'mtimeNs': after.st_mtime_ns, 'mode': stat.S_IMODE(after.st_mode)}
+    require(result[''] is not None, 'Original main database is missing')
+    return result
+
+
+def copy_triple(database, directory, guard):
+    before = triple_state(database)
+    directory.mkdir(mode=0o700)
+    target = directory / 'dev.db'
+    for suffix, row in before.items():
+        if row is None:
+            continue
+        source = pathlib.Path(str(database) + suffix)
+        copied = pathlib.Path(str(target) + suffix)
+        with source.open('rb') as src, copied.open('xb') as out:
+            since_check = 0
+            while block := src.read(1024 * 1024):
+                out.write(block); since_check += len(block)
+                if since_check >= 32 * 1024 * 1024:
+                    out.flush(); guard.check(); since_check = 0
+        copied.chmod(0o400)
+        require(sha(copied) == row['sha256'] and copied.stat().st_size == row['bytes'],
+            'Copied SQLite file differs: ' + suffix)
+        guard.check()
+    after = triple_state(database)
+    require(after == before, 'Original SQLite triple changed during copy')
+    c.write_new(directory / 'original-triple.json', {'before': before, 'after': after})
+    return target, before
+
+
+def logical_count_guard(main_only, folded):
+    require(set(main_only['tables']) == set(folded['tables']) and
+        all(folded['tables'][name]['count'] >= row['count'] for name, row in main_only['tables'].items()),
+        'WAL-folded counts are lower than the main-only snapshot')
+
+
+def logical_equality(actual, expected):
+    require(actual == expected, 'Complete WAL-aware logical state changed before jobs')
+
+
+def sealed_stopped_state(root, label, database, guard, expected=None):
+    """Seal raw originals; all normal SQLite opens/backup writes use scratch copies."""
+    directory = root / label; directory.mkdir(mode=0o700)
+    raw, original = copy_triple(database, directory / 'raw', guard)
+    scratch, _ = copy_triple(raw, directory / 'scratch', guard)
+    # Scratch modes allow SQLite's own WAL/SHM handling on copies only.
+    for suffix in ['', '-wal', '-shm']:
+        path = pathlib.Path(str(scratch) + suffix)
+        if path.exists(): path.chmod(0o600)
+    main_only = s.snapshot(raw, immutable=True)
+    folded = s.snapshot(scratch)
+    logical_count_guard(main_only, folded)
+    require(len(folded['tables']) == 104 and folded['tables']['_schema_migrations']['count'] == 38 and
+        folded['integrity'] == 'ok' and folded['foreignKeyViolations'] == 0,
+        'Stopped WAL-aware logical state refused')
+    if expected is not None: logical_equality(folded, expected)
+    c.write_new(directory / 'main-only-state.json', main_only)
+    c.write_new(directory / 'wal-aware-state.json', folded)
+    backup = directory / 'dev-stopped-backup.db'
+    s.consistent_backup(scratch, backup)
+    c.exact_state(backup, folded, immutable=True)
+    require(triple_state(database) == original, 'Original triple changed during detached SQLite inspection')
+    raw_state = triple_state(raw)
+    require(all((raw_state[suffix] is None if row is None else
+        raw_state[suffix]['sha256'] == row['sha256'] and raw_state[suffix]['bytes'] == row['bytes'])
+        for suffix, row in original.items()), 'Sealed raw triple changed during logical inspection')
+    guard.check()
+    evidence = {'policy': WAL_RECOVERY_POLICY, 'originalFiles': original,
+        'rawFiles': raw_state, 'mainOnlyStateSha256': sha(directory / 'main-only-state.json'),
+        'logicalStateSha256': sha(directory / 'wal-aware-state.json'), 'backupSha256': sha(backup),
+        'countsIncludeWal': True, 'matchesExpected': expected is not None,
+        'protectedTableCount': 104, 'protectedReceiptCount': 38}
+    c.write_new(directory / 'sealed-state.json', evidence)
+    return folded, evidence
+
+
+def failed_wal_authority():
+    predecessor = pathlib.Path(FAILED_WAL_ROOT)
+    receipt_path = predecessor / 'production-receipt.json'
+    manifest_path = predecessor / 'prepared-manifest.json'
+    require(all(not path.is_symlink() and path.stat().st_mode & 0o777 == 0o400 for path in
+        [receipt_path, manifest_path]) and sha(receipt_path) == FAILED_WAL_RECEIPT_SHA and
+        sha(manifest_path) == FAILED_WAL_MANIFEST_SHA, 'Immutable predecessor failure changed')
+    receipt = json.loads(receipt_path.read_bytes()); manifest = json.loads(manifest_path.read_bytes())
+    require(receipt['status'] == 'FAILED_RUNTIME_FORWARD_HOLD' and receipt['anyEntrypointAttempted'] is False and
+        receipt['manifestSha256'] == FAILED_WAL_MANIFEST_SHA and receipt['head'] == CANDIDATE_HEAD and
+        manifest['root'] == FAILED_WAL_ROOT, 'Predecessor is not the bound pre-entrypoint hold')
+    result = {}
+    for name, digest in [('apache-before.conf', ORIGINAL_INGRESS_SHA), ('apache-held.conf', HELD_INGRESS_SHA)]:
+        path = predecessor / name
+        require(not path.is_symlink() and path.stat().st_mode & 0o777 == 0o400 and
+            manifest['files'][name] == sha(path) == digest, 'Predecessor ingress changed')
+        result[name] = path.read_bytes()
+    return result
+
+
+def select_entry_state(live, ingress_sha, original, manifest):
+    if live['State']['Running'] and ingress_sha == ORIGINAL_INGRESS_SHA:
+        mode = 'RUNNING_NORMAL'; files = None
+    else:
+        require(live['State']['Running'] is False and live['State']['ExitCode'] == 137 and
+            live['State']['OOMKilled'] is False and ingress_sha == HELD_INGRESS_SHA,
+            'Writer and ingress are neither reviewed entry state')
+        mode = 'STOPPED_HELD'; files = original
+    entry = {'mode': mode, 'containerId': live['Id'], 'image': live['Image'],
+        'restartCount': live['RestartCount'], 'ingressSha256': ingress_sha, 'originalFiles': files}
+    validate_entry_state(entry, manifest)
+    return entry
+
+
+def observe_entry_state(manifest):
+    failed_wal_authority()
+    live = c.inspect('soilfer-lims'); ingress = sha(s.CONF)
+    if not live['State']['Running']:
+        all_writers_stopped(); original = triple_state(s.LIVE)
+    else: original = None
+    return select_entry_state(live, ingress, original, manifest)
 
 
 def environment_hash(container):
@@ -70,20 +206,23 @@ def execution_preflight(root, manifest_sha, require_unused_gate=False):
     require(env.get('NODE_OPTIONS', '') == '' and env['ALLOW_PRISMA_DB_PUSH'] == env['ALLOW_AUTO_SEED'] == 'false' and
         environment_hash(live) == manifest['effectiveEnvironmentSha256'] and
         sha(pathlib.Path('/opt/lims/.env')) == manifest['envFileSha256'], 'Measured startup environment changed')
-    require(sha(s.CONF) == manifest['files']['apache-before.conf'] and b'R=503' not in s.CONF.read_bytes(),
-        'Current ingress differs from the reviewed kit')
+    entry = observe_entry_state(manifest)
     require(not any(name.startswith('lims-owned-') for name in
         subprocess.check_output(['docker', 'ps', '--format', '{{.Names}}'], text=True, timeout=15).splitlines()),
         'Another owned rehearsal writer is active')
     assets = sum(path.stat().st_size for path in s.ASSETS.rglob('*') if path.is_file())
-    wal = pathlib.Path(str(s.LIVE) + '-wal')
-    database_bytes = s.LIVE.stat().st_size + (wal.stat().st_size if wal.exists() else 0)
+    database_bytes = sum(path.stat().st_size for suffix in ['', '-wal', '-shm']
+        for path in [pathlib.Path(str(s.LIVE) + suffix)] if path.exists())
     reserve = max(FLOOR, s.disk_reserve(database_bytes, image['Size'], assets))
-    required = reserve + database_bytes + assets + 268435456
+    # Initial raw + scratch + logical backup, then a second complete stopped
+    # seal after jobs-OFF; all six allocations remain retained. Include both
+    # full JSON states/keyed audit rows plus assets and an allocation margin.
+    required = reserve + 6 * database_bytes + assets + 536870912
     free = s.disk_free(); require(min(free.values()) >= required, 'Backup/allocation reserve refused before quiesce')
     return {'ready': True, 'productionMutations': 0, 'head': pin['head'], 'image': pin['image'],
         'reserveBytes': reserve, 'requiredIncludingBackupBytes': required, 'freeBytes': free,
-        'databaseBytesWithWal': database_bytes, 'assetsBytes': assets, 'originalRestartCount': live['RestartCount']}
+        'databaseBytesWithWal': database_bytes, 'assetsBytes': assets, 'originalRestartCount': live['RestartCount'],
+        'entryState': entry}
 
 
 def all_writers_stopped():
@@ -127,6 +266,7 @@ def main():
     readiness = execution_preflight(ROOT, manifest_sha)
     require((ROOT / 'production-gate.json').stat().st_mode & 0o777 == 0o400, 'Gate is not immutable')
     verify_gate(manifest, gate, manifest_sha)
+    verify_entry_readiness(manifest, gate, readiness)
     pin = json.loads((ROOT / 'target-pin.json').read_bytes()); c.IMAGE = pin['image']; s.HEAD = pin['head']
     with (ROOT / 'execution-attempt.json').open('x', encoding='utf-8') as out:
         json.dump({'startedUtc': s.utc(), 'head': pin['head'], 'gateSha256': sha(ROOT / 'production-gate.json')}, out)
@@ -188,29 +328,28 @@ def main():
         guard.check(); save('beforeQuiesceGuardsPassed')
         # Recheck gate freshness immediately before the first live mutation.
         verify_gate(manifest, gate, manifest_sha)
-        require(c.inspect('soilfer-lims')['Image'] == LIVE_IMAGE and sha(s.CONF) ==
-            manifest['files']['apache-before.conf'], 'Live changed before quiesce')
-        quiesced = True; set_ingress('apache-held.conf')
+        verify_entry_readiness(manifest, gate, {'entryState': observe_entry_state(manifest)})
+        quiesced = True
+        if readiness['entryState']['mode'] == 'RUNNING_NORMAL':
+            set_ingress('apache-held.conf')
         for path, method in [('/api/health', 'GET'), ('/ws', 'GET'), ('/api/v2/data-exchange/receipts', 'POST')]:
             http(path, 503, 'held-' + method + '-' + path.strip('/').replace('/', '-'), method)
-        s.command(ROOT, ['docker', 'stop', '-t', '30', 'soilfer-lims'], 'stop-original-live-writer', timeout=45)
+        if readiness['entryState']['mode'] == 'RUNNING_NORMAL':
+            s.command(ROOT, ['docker', 'stop', '-t', '30', 'soilfer-lims'], 'stop-original-live-writer', timeout=45)
+        else:
+            receipt['alreadyStoppedEntryNoSecondStop'] = True
         require(not c.inspect('soilfer-lims')['State']['Running'] and c.inspect('soilfer-lims')['Image'] == LIVE_IMAGE,
             'Original writer did not stop')
         all_writers_stopped(); guard.check(); save('writersStopped')
-        physical = s.physical(s.LIVE)
-        require(physical['-wal'] is None or physical['-wal']['bytes'] == 0,
-            'Stopped original WAL remains nonempty; retain and diagnose, never delete it')
-        expected = s.snapshot(s.LIVE, immutable=True)
-        require(len(expected['tables']) == 104 and expected['tables']['_schema_migrations']['count'] == 38 and
-            expected['integrity'] == 'ok' and expected['foreignKeyViolations'] == 0, 'Stopped original state refused')
+        expected, stopped = sealed_stopped_state(ROOT, 'original-stopped-seal', s.LIVE, guard)
+        physical = stopped['originalFiles']
         c.write_new(ROOT / 'production-protected-state.json', expected)
         receipt['protectedStateSha256'] = sha(ROOT / 'production-protected-state.json')
-        backup = ROOT / 'dev-stopped-backup.db'; s.consistent_backup(s.LIVE, backup, immutable=True)
-        c.exact_state(backup, expected, immutable=True); c.main_bytes(s.LIVE, physical)
         with tarfile.open(ROOT / 'assets-stopped-backup.tar.gz', 'x:gz') as archive:
             archive.add(s.ASSETS, arcname='uploads')
         (ROOT / 'assets-stopped-backup.tar.gz').chmod(0o400)
-        receipt.update({'stoppedBackupSha256': sha(backup), 'assetsBackupSha256': sha(ROOT / 'assets-stopped-backup.tar.gz'),
+        receipt.update({'stoppedBackupSha256': stopped['backupSha256'], 'originalStoppedSeal': stopped,
+            'walRecovery': manifest['walRecovery'], 'assetsBackupSha256': sha(ROOT / 'assets-stopped-backup.tar.gz'),
             'originalDatabaseFiles': physical, 'protectedTableCount': 104, 'protectedReceiptCount': 38})
         all_writers_stopped(); guard.check(); save('stoppedHashedBackupVerified')
         frozen_files(ROOT, manifest); verify_gate(manifest, gate, manifest_sha)
@@ -228,14 +367,17 @@ def main():
             'Candidate environment differs from the measured proof')
         receipt['jobsOffChecks'] = c.startup_checks(ROOT, 'soilfer-lims', s.LIVE, expected, 'production-jobs-off')
         receipt.update(c.probes(ROOT, 'soilfer-lims', s.LIVE, expected))
-        watch.check(); c.main_bytes(s.LIVE, physical); guard.check(); save('jobsOffPreservationAndProbesPassed')
+        watch.check(); c.exact_state(s.LIVE, expected); guard.check(); save('jobsOffPreservationAndProbesPassed')
         set_ingress('apache-before.conf')
         http('/api/health', 200, 'reopened-health'); http('/login', 200, 'reopened-login')
         http('/api/v2/data-exchange/receipts', 401, 'reopened-denied-post', 'POST')
-        watch.check(); c.main_bytes(s.LIVE, physical); save('ingressReopenedBeforeJobs')
+        watch.check(); c.exact_state(s.LIVE, expected); save('ingressReopenedBeforeJobs')
         c.owned_stop(ROOT, 'soilfer-lims', 'stop-candidate-jobs-off')
         watch.check(); watch.close(); watch = None
-        c.exact_state(s.LIVE, expected); c.main_bytes(s.LIVE, physical); all_writers_stopped(); guard.check()
+        all_writers_stopped(); guard.check()
+        _, jobs_off_seal = sealed_stopped_state(ROOT, 'candidate-jobs-off-seal', s.LIVE, guard, expected)
+        receipt['jobsOffStoppedLogicalSeal'] = jobs_off_seal
+        save('jobsOffStoppedFullLogicalPreservationPassed')
         off = 'soilfer-lims-jobs-off-' + ROOT.name
         s.command(ROOT, ['docker', 'rename', 'soilfer-lims', off], 'retain-candidate-jobs-off')
         receipt['jobsOffContainerRetainedAs'] = off
@@ -266,7 +408,8 @@ def main():
         c.state_guard(c.inspect('soilfer-lims'), True); guard.check(); frozen_files(ROOT, manifest)
         require(sha(HISTORICAL_ROOT / 'production-receipt.json') == HISTORICAL_RECEIPT_SHA, 'Historical receipt changed')
         receipt.update({'status': 'DEPLOYED_NEW_RUNTIME_FORWARD', 'databaseChangesBeforeJobs': 0,
-            'mainDatabaseBytesPreservedBeforeJobs': True, 'normalApplicationWritesEnabled': True,
+            'fullLogicalStatePreservedBeforeJobs': True, 'sqliteWalRecoveryMayFoldMainBytes': True,
+            'originalRawTriplePreservedInSeals': True, 'normalApplicationWritesEnabled': True,
             'productionObservationSeconds': manifest['productionObservationSeconds'], 'peakBytes': peak,
             'retainedAcceptance': s.verify_retained_acceptance(s.LIVE.parent), 'freeBytesAfter': s.disk_free()})
         save('completed')
@@ -279,7 +422,7 @@ def main():
         receipt.update({'status': 'FAILED_RUNTIME_FORWARD_HOLD' if quiesced else 'REFUSED_BEFORE_QUIESCE', 'error': str(error)})
         if quiesced:
             try:
-                set_ingress('apache-held.conf')
+                if sha(s.CONF) != HELD_INGRESS_SHA: set_ingress('apache-held.conf')
             except BaseException as failure:
                 receipt.setdefault('holdErrors', []).append(str(failure))
             try:

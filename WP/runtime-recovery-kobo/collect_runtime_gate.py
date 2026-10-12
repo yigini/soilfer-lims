@@ -107,6 +107,7 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
         'coreDeallocationConfirmationDeadlineSeconds': CORE_CONFIRMATION_SECONDS,
         'proofSourceReview': source_review, 'laterSourceAuditFailure': later_source_failure,
         'workloadControl': WORKLOAD_PINS, 'readOnlyExecutionReadiness': readiness,
+        'walRecovery': manifest['walRecovery'],
         'pr': {'number': PR_NUMBER, 'merged': pr['merged'], 'head': pr['head']['sha'], 'mergeCommit': current,
             'tree': tree, 'auditedTree': audited_tree, 'mergeParents': MERGE_PARENTS,
             'review': review, 'checks': checks,
@@ -126,10 +127,11 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
     install = '''import base64,hashlib,json,pathlib,sys
 p=json.loads(base64.b64decode(PAYLOAD));r=pathlib.Path(p['root']);sys.path.insert(0,str(r))
 from deploy_runtime import execution_preflight
-from runtime_release_contract import verify_gate
-execution_preflight(r,p['manifestSha256'],require_unused_gate=True)
+from runtime_release_contract import verify_gate,verify_entry_readiness
+actual=execution_preflight(r,p['manifestSha256'],require_unused_gate=True)
 data=base64.b64decode(DATA);g=json.loads(data);m=json.loads((r/'prepared-manifest.json').read_bytes())
 verify_gate(m,g,p['manifestSha256'])
+verify_entry_readiness(m,g,actual)
 with (r/'production-gate.json').open('xb') as out:out.write(data)
 (r/'production-gate.json').chmod(0o400)
 print(json.dumps({'root':str(r),'gateSha256':hashlib.sha256(data).hexdigest(),'verifiedUtc':g['verifiedUtc'],
