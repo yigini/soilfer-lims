@@ -120,6 +120,14 @@ def main():
     for name, key in bound_artifacts.items():
         require(hashlib.sha256(files[name]).hexdigest() == receipt[key], 'Original proof artifact differs: ' + name)
     native = receipt['nativeImportInstallation']
+    for label, measurement in zip(['import-dry', 'import-apply', 'import-repeat'], native['measurements']):
+        metadata_path = safe_reference(proof, label + '-container.json')
+        require(json.loads(metadata_path.read_bytes()) == measurement, 'Original CLI measurement changed')
+        references[metadata_path.name] = sha(metadata_path)
+        for name, digest in measurement['retainedArtifacts'].items():
+            path = safe_reference(proof, name)
+            require(sha(path) == digest, 'Original native CLI output changed: ' + name)
+            references[name] = digest
     require(hashlib.sha256(files['import-install-preservation.json']).hexdigest() == native['preservationSha256'],
         'Original native delta proof changed')
     installed_evidence = json.loads(files['import-installed-seal.json'])
@@ -183,6 +191,10 @@ def main():
     build_root = pathlib.Path(pin['buildRoot']); safe_root(str(build_root), 'instrument-import-build-')
     require(sha(safe_reference(build_root, 'build-receipt.json')) == pin['buildReceiptSha256'], 'Original build changed')
     validate_candidate(pin, json.loads((build_root / 'build-receipt.json').read_bytes()), image)
+    built = json.loads((build_root / 'build-receipt.json').read_bytes())
+    require(sha(safe_reference(build_root, 'source.tar.gz')) == built['sourceArchiveSha256'] and
+        sha(safe_reference(build_root, 'source-index.json')) == built['sourceIndexSha256'],
+        'Original valid build archive or Git blob index changed')
     yy = json.loads(files['yy-authorization-evidence.md'])
     require(yy['confirmedByYY'] is True and yy['authorizationMode'] == 'AUTO_AFTER_REVIEW' and
         yy['scopeText'] == 'my go covers all' and yy['status'] == 'ORIGINAL_HUMAN_STANDING_GO_DIRECTLY_VERIFIED',

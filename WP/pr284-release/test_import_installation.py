@@ -1,6 +1,10 @@
 """Pure closed CLI/plan guards. Never run Docker or an installer here."""
 import copy
+import hashlib
+import json
 import pathlib
+import tempfile
+import types
 import unittest
 
 import import_installation as install
@@ -115,6 +119,34 @@ class InstallationGuards(unittest.TestCase):
         for wrong in ['../escape', 'one;two', 'one two', '']:
             with self.assertRaises(RuntimeError):
                 install.arguments('/owned/release', IMAGE, '/owned/database', '--apply', wrong, '/live')
+
+    def test_measured_cli_retains_hashes_of_original_separate_output_files(self):
+        with tempfile.TemporaryDirectory(prefix='owned-cli-outputs-') as directory:
+            root = pathlib.Path(directory)
+            peak = {'releaseCliPeakBytes': 300000000, 'childStatus': 0, 'childSignal': None}
+            calls = []
+            def command(where, args, label, **kwargs):
+                calls.append(args)
+                if args[:2] == ['docker', 'inspect']:
+                    name, owner, _ = install.arguments(root, IMAGE, root / 'database', '--dry-run', 'import-dry', '/live')
+                    value = [{'Image': IMAGE, 'RestartCount': 0,
+                        'State': {'Running': False, 'OOMKilled': False, 'ExitCode': 0},
+                        'HostConfig': {'Memory': install.LIMIT},
+                        'Config': {'Env': ['NODE_OPTIONS='], 'Labels': {'io.soilfer.release-owned': owner}}}]
+                    stdout, stderr = json.dumps(value), ''
+                else:
+                    stdout, stderr = json.dumps(plan()), json.dumps(peak) + '\n'
+                for suffix, value in [('stdout', stdout), ('stderr', stderr)]:
+                    (where / (label + '.' + suffix)).write_text(value, encoding='utf-8')
+                return types.SimpleNamespace(stdout=stdout, stderr=stderr, returncode=0)
+            support = types.SimpleNamespace(LIVE=pathlib.Path('/live/dev.db'), command=command,
+                sha=lambda path: hashlib.sha256(path.read_bytes()).hexdigest())
+            result, measurement = install.measured_cli(root, IMAGE, root / 'database', '--dry-run', 'import-dry', support)
+            self.assertEqual(result, plan())
+            self.assertEqual(measurement['retainedArtifacts'], {
+                name: support.sha(root / name) for name in ['import-dry.stdout', 'import-dry.stderr']})
+            self.assertEqual(json.loads((root / 'import-dry-container.json').read_bytes()), measurement)
+            self.assertEqual(len(calls), 2)
 
 
 if __name__ == '__main__':

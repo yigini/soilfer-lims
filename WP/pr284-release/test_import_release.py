@@ -3,7 +3,9 @@ import copy
 import datetime
 import hashlib
 import pathlib
+import stat
 import tempfile
+import types
 import unittest
 from unittest.mock import patch
 
@@ -25,8 +27,11 @@ def native():
         'dry': plan(), 'apply': applied(), 'repeat': dict(plan(), classification='COMPLETE_200', mode='NO_OP'),
         'measurements': [{'containerName': 'owned-' + str(i), 'owner': 'owned-stage-' + str(i),
             'memoryLimitBytes': release.LIMIT, 'nodeOptions': '', 'exitCode': 0,
-            'retainedOwnedContainer': True, 'cgroupMemoryPeak': {'releaseCliPeakBytes': 500000000,
-                'childStatus': 0, 'childSignal': None}} for i in range(3)]}
+            'retainedOwnedContainer': True,
+            'retainedArtifacts': {label + '.stdout': 'e' * 64, label + '.stderr': 'f' * 64},
+            'cgroupMemoryPeak': {'releaseCliPeakBytes': 500000000,
+                'childStatus': 0, 'childSignal': None}}
+            for i, label in enumerate(['import-dry', 'import-apply', 'import-repeat'])]}
 
 
 def startup(jobs):
@@ -80,6 +85,15 @@ class ReleaseTests(unittest.TestCase):
 
     def test_exact_three_native_cli_steps_pass(self):
         release.native_installation(native())
+
+    def test_native_cli_output_bindings_cannot_be_omitted_or_reordered(self):
+        for change in ['missing', 'wrong-label', 'bad-hash', 'extra']:
+            row = native(); value = row['measurements'][0]['retainedArtifacts']
+            if change == 'missing': value.clear()
+            if change == 'wrong-label': row['measurements'][0]['retainedArtifacts'] = row['measurements'][1]['retainedArtifacts']
+            if change == 'bad-hash': value['import-dry.stdout'] = 'abc'
+            if change == 'extra': value['other-file'] = 'a' * 64
+            with self.subTest(change=change), self.assertRaises(RuntimeError): release.native_installation(row)
 
     def test_old_receipts_backfill_or_missing_cli_refuse(self):
         for key, value in [('originalTableCount', 90), ('originalReceiptCount', 18),
@@ -179,6 +193,27 @@ class ReleaseTests(unittest.TestCase):
                 for name in ['../dev.db', '/opt/lims/dev.db', 'after-second-stopped/../dev.db',
                     'after-second-stopped\\dev.db', './dev.db', 'after-second-stopped//dev.db']:
                     with self.subTest(name=name), self.assertRaises(RuntimeError): release.safe_reference(root, name)
+
+    def test_nested_retained_file_accepts_and_link_or_writable_file_refuses(self):
+        with tempfile.TemporaryDirectory(prefix='owned-reference-') as directory:
+            root = pathlib.Path(directory); (root / 'stopped/raw').mkdir(parents=True)
+            path = root / 'stopped/raw/dev.db'; path.write_bytes(b'owned fixture'); path.chmod(0o400)
+            original_stat = pathlib.Path.stat
+            # Preserve the real filesystem/type observations; compensate only
+            # for Windows lacking POSIX permission bits on this owned fixture.
+            def immutable_stat(value, *args, **kwargs):
+                observed = original_stat(value, *args, **kwargs)
+                mode = (observed.st_mode & ~0o777) | (0o400 if stat.S_ISREG(observed.st_mode) else 0o700)
+                return types.SimpleNamespace(st_mode=mode)
+            with patch.object(pathlib.Path, 'stat', autospec=True, side_effect=immutable_stat):
+                self.assertEqual(release.safe_reference(root, 'stopped/raw/dev.db'), path)
+                with patch.object(pathlib.Path, 'is_symlink', autospec=True,
+                        side_effect=lambda value: value == root / 'stopped'), self.assertRaises(RuntimeError):
+                    release.safe_reference(root, 'stopped/raw/dev.db')
+                with patch.object(pathlib.Path, 'stat', return_value=types.SimpleNamespace(st_mode=stat.S_IFREG | 0o600)), \
+                        self.assertRaises(RuntimeError): release.safe_reference(root, 'stopped/raw/dev.db')
+            for name in [None, 123, '', '.']:
+                with self.subTest(name=name), self.assertRaises(RuntimeError): release.safe_reference(root, name)
 
     def test_production_source_primary_full_review_required(self):
         tokens = release.release_binding_tokens() + release.source_policy_tokens() + ['f' * 40,

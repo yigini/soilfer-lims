@@ -78,6 +78,12 @@ def measured_cli(root, image, database_dir, mode, label, support):
     metadata = {'containerName': name, 'owner': owner, 'memoryLimitBytes': LIMIT,
         'nodeOptions': '', 'exitCode': result.returncode,
         'cgroupMemoryPeak': measured[-1] if measured else None, 'retainedOwnedContainer': True}
+    metadata['retainedArtifacts'] = {}
+    for suffix in ['stdout', 'stderr']:
+        artifact = pathlib.Path(root) / (label + '.' + suffix)
+        require(artifact.is_file() and not artifact.is_symlink(), 'Native CLI output is missing or linked')
+        artifact.chmod(0o400)
+        metadata['retainedArtifacts'][artifact.name] = support.sha(artifact)
     path = pathlib.Path(root) / (label + '-container.json')
     with path.open('x', encoding='utf-8') as stream:
         json.dump(metadata, stream, indent=2)

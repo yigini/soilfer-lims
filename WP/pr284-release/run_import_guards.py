@@ -12,7 +12,8 @@ names = ['import_source_graph', 'import_proof_contract', 'import_preservation', 
     'import_installation', 'import_stage', 'import_sealing', 'known_core_disk_guard_import',
     'test_import_preservation', 'test_import_startup_checks', 'test_import_installation', 'test_import_stage',
     'test_import_sealing', 'test_import_authority', 'test_import_layout',
-    'import_release_contract', 'test_import_release']
+    'import_release_contract', 'test_import_release',
+    'known_core_disk_guard_import_deploy', 'test_import_deploy_layout']
 files = {name: subprocess.check_output(['git', 'show', head + ':WP/pr284-release/' + name + '.py']) for name in names}
 helpers = {'release_support': '9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810',
     'startup_common': 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00'}
@@ -63,6 +64,7 @@ with tempfile.TemporaryDirectory(prefix='owned-import-assets-') as directory:
  for name in ['test_import_authority','test_import_layout','test_import_release']:
   sys.modules[name].RAW_TOOLING={n:base64.b64decode(raw) for n,raw in p['tooling'].items()}
  sys.modules['test_import_release'].RAW_PACKAGE={n:base64.b64decode(raw) for n,raw in p['package'].items()}
+ sys.modules['test_import_deploy_layout'].RAW_PACKAGE={n:base64.b64decode(raw) for n,raw in p['package'].items()}
  suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromModule(sys.modules[name]) for name in p['files'] if name.startswith('test_'))
  result=unittest.TextTestRunner(verbosity=2).run(suite)
  print(json.dumps({'sourceCommit':p['sourceCommit'],'sourceHashes':{name:item['sha256'] for name,item in p['files'].items()},

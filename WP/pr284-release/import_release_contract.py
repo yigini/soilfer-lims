@@ -85,6 +85,7 @@ def safe_root(value, prefix):
 
 
 def safe_reference(root, name):
+    require(isinstance(name, str), 'Unsafe retained proof reference')
     relative = pathlib.PurePosixPath(name)
     require(isinstance(name, str) and name and '\\' not in name and str(relative) == name and
         not relative.is_absolute() and all(part not in ['', '.', '..'] for part in relative.parts),
@@ -145,7 +146,7 @@ def native_installation(row):
     measurements = row['measurements']
     require(len(measurements) == 3 and len({value['containerName'] for value in measurements}) == 3,
         'All three distinct native CLI measurements required')
-    for value in measurements:
+    for label, value in zip(['import-dry', 'import-apply', 'import-repeat'], measurements):
         peak = value['cgroupMemoryPeak']
         require(value['memoryLimitBytes'] == LIMIT and value['nodeOptions'] == '' and
             type(value['exitCode']) is int and value['exitCode'] == 0 and
@@ -153,6 +154,10 @@ def native_installation(row):
             0 < peak['releaseCliPeakBytes'] <= LIMIT and type(peak['childStatus']) is int and
             peak['childStatus'] == 0 and peak['childSignal'] is None,
             'Native CLI failed, exceeded 768MiB or used an override')
+        artifacts = value.get('retainedArtifacts', {})
+        require(set(artifacts) == {label + '.stdout', label + '.stderr'} and
+            all(isinstance(digest, str) and re.fullmatch('[a-f0-9]{64}', digest) for digest in artifacts.values()),
+            'Original separate native CLI output hashes are missing or differ')
 
 
 def startup_evidence(readiness, checks, jobs):
@@ -221,12 +226,6 @@ def validate_proof(proof, pin):
     require_final_observation(proof['firstScheduledSync'], proof['secondScheduledSync'],
         proof['jobsOnReadiness']['readyUtc'], proof['observedThroughUtc'], proof['copySyncIntervalMins'],
         0, proof['peakBytes'], proof['healthySoakSeconds'])
-
-
-def pairing_contract(row):
-    require(row['refusalPairingScopeCommentId'] == REFUSAL_PAIRING_SCOPE_COMMENT_ID and
-        row['schedulerRefusalPairing'] == REFUSAL_PAIRING_POLICY and
-        row['REFUSAL_PAIR_WINDOW_SECONDS'] == REFUSAL_PAIR_WINDOW_SECONDS, 'Original stream pairing differs')
 
 
 def proof_source_binding(proof, pin):
