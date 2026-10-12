@@ -1,0 +1,375 @@
+{
+  "observedUtc": "2026-10-12T14:25:21.127555+00:00",
+  "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+  "unit": "lims-owned-instrument-import-proof-959d17e1-20261012t134000z.service",
+  "unitState": {
+    "Result": "exit-code",
+    "ExecMainStatus": "1",
+    "ActiveState": "failed",
+    "SubState": "failed"
+  },
+  "sourceBytesUnchanged": true,
+  "containers": [
+    {
+      "name": "soilfer-lims",
+      "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+      "restartCount": 0,
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "OOMKilled": false,
+        "ExitCode": 0,
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-12T16:24:31.05530391+02:00",
+              "End": "2026-10-12T16:24:31.136423107+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T16:24:41.138460177+02:00",
+              "End": "2026-10-12T16:24:41.227358979+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T16:24:51.229292088+02:00",
+              "End": "2026-10-12T16:24:51.304133844+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T16:25:01.306093129+02:00",
+              "End": "2026-10-12T16:25:01.389070913+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T16:25:11.390306639+02:00",
+              "End": "2026-10-12T16:25:11.471771319+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "memoryBytes": 805306368
+    }
+  ],
+  "files": {
+    "migration.sql": {
+      "bytes": 4342,
+      "mode": "0o400"
+    },
+    "import_sealing.py": {
+      "bytes": 5918,
+      "mode": "0o400"
+    },
+    "import-repeat.stdout": {
+      "bytes": 1516,
+      "mode": "0o400"
+    },
+    "post205-draft-tables.json": {
+      "bytes": 8105,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard_v2.py": {
+      "bytes": 5278,
+      "mode": "0o400"
+    },
+    "import-apply.stdout": {
+      "bytes": 1557,
+      "mode": "0o400"
+    },
+    "import-install-preservation.json": {
+      "bytes": 15167,
+      "mode": "0o400"
+    },
+    "import-repeat.stderr": {
+      "bytes": 68,
+      "mode": "0o400"
+    },
+    "kobo_copy_preservation.py": {
+      "bytes": 16701,
+      "mode": "0o400"
+    },
+    "postflight-policy.cjs": {
+      "bytes": 4035,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard.py": {
+      "bytes": 5984,
+      "mode": "0o400"
+    },
+    "unit.stdout": {
+      "bytes": 216,
+      "mode": "0o644"
+    },
+    "capture_kobo_fetch.py": {
+      "bytes": 4767,
+      "mode": "0o400"
+    },
+    "import-apply.stderr": {
+      "bytes": 68,
+      "mode": "0o400"
+    },
+    "import_startup_checks.py": {
+      "bytes": 5448,
+      "mode": "0o400"
+    },
+    "export_launch_import_proof.py": {
+      "bytes": 7348,
+      "mode": "0o400"
+    },
+    "import-dry-retained-inspect.stdout": {
+      "bytes": 9287,
+      "mode": "0o644"
+    },
+    "rehearse_import.py": {
+      "bytes": 25630,
+      "mode": "0o400"
+    },
+    "fresh-prisma-tables.json": {
+      "bytes": 2877,
+      "mode": "0o400"
+    },
+    "import-repeat-container.json": {
+      "bytes": 732,
+      "mode": "0o400"
+    },
+    "unit.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import_installation.py": {
+      "bytes": 7579,
+      "mode": "0o400"
+    },
+    "rehearsal-receipt.json": {
+      "bytes": 3755,
+      "mode": "0o400"
+    },
+    "fresh-protected-state.json": {
+      "bytes": 7465051,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard_v3.py": {
+      "bytes": 5625,
+      "mode": "0o400"
+    },
+    "import-apply-retained-inspect.stdout": {
+      "bytes": 9263,
+      "mode": "0o644"
+    },
+    "upgraded-prisma-draft-table.sql": {
+      "bytes": 874,
+      "mode": "0o400"
+    },
+    "postflight-qc-runs.cjs": {
+      "bytes": 4091,
+      "mode": "0o400"
+    },
+    "import_stage.py": {
+      "bytes": 8063,
+      "mode": "0o400"
+    },
+    "import-dry-retained-inspect.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-dry.stderr": {
+      "bytes": 68,
+      "mode": "0o400"
+    },
+    "postflight-auth.cjs": {
+      "bytes": 2045,
+      "mode": "0o400"
+    },
+    "readonly-smoke.cjs": {
+      "bytes": 3255,
+      "mode": "0o400"
+    },
+    "import-repeat-retained-inspect.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "fresh-live-backup.db": {
+      "bytes": 563322880,
+      "mode": "0o400"
+    },
+    "pre-prisma-draft-table.sql": {
+      "bytes": 769,
+      "mode": "0o400"
+    },
+    "postflight-reference.cjs": {
+      "bytes": 2096,
+      "mode": "0o400"
+    },
+    "disk-allocation-observations.jsonl": {
+      "bytes": 6781948,
+      "mode": "0o400"
+    },
+    "startup_common.py": {
+      "bytes": 13858,
+      "mode": "0o400"
+    },
+    "release_support.py": {
+      "bytes": 20330,
+      "mode": "0o400"
+    },
+    "import-dry.stdout": {
+      "bytes": 705,
+      "mode": "0o400"
+    },
+    "instrument-import-attempt.json": {
+      "bytes": 281,
+      "mode": "0o400"
+    },
+    "target-pin.json": {
+      "bytes": 1139,
+      "mode": "0o400"
+    },
+    "import_proof_contract.py": {
+      "bytes": 10809,
+      "mode": "0o400"
+    },
+    "runtime_proof_policies.py": {
+      "bytes": 15922,
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 8417,
+      "mode": "0o400"
+    },
+    "import_preservation.py": {
+      "bytes": 9307,
+      "mode": "0o400"
+    },
+    "prepare_import_build.py": {
+      "bytes": 11123,
+      "mode": "0o400"
+    },
+    "import_source_graph.py": {
+      "bytes": 5771,
+      "mode": "0o400"
+    },
+    "build_import.py": {
+      "bytes": 8085,
+      "mode": "0o400"
+    },
+    "import-repeat-retained-inspect.stdout": {
+      "bytes": 9264,
+      "mode": "0o644"
+    },
+    "known_core_disk_guard_import.py": {
+      "bytes": 3839,
+      "mode": "0o400"
+    },
+    "candidate-rehearsal-authority.json": {
+      "bytes": 20408,
+      "mode": "0o400"
+    },
+    "import-apply-container.json": {
+      "bytes": 729,
+      "mode": "0o400"
+    },
+    "postflight-roles.cjs": {
+      "bytes": 12281,
+      "mode": "0o400"
+    },
+    "import-dry-copy-authority.json": {
+      "bytes": 707,
+      "mode": "0o400"
+    },
+    "import-apply-retained-inspect.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-dry-container.json": {
+      "bytes": 723,
+      "mode": "0o400"
+    }
+  },
+  "receipt": {
+    "sha256": "e85e14bbe1fd46f312027443c8911e5eb5807e14787d4641141ef60c310e4fa2",
+    "value": {
+      "status": "FAILED_NEW_IMPORT_NATURAL_KOBO_PROOF",
+      "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+      "startedUtc": "2026-10-12T14:16:01.620752+00:00",
+      "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+      "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+      "targetPinSha256": "3786a68f0df9e0762a4d7cc144251b9180297f7dbf9d5745a8591d58f9680a8f",
+      "sourceIndexSha256": "49f6a0f360f5424be3ffac8cbd7eefdf690464449ae5c1d6f28487df86eafe84",
+      "toolingCommit": "630b2354a1a45df0d88545ac5c63594361615999",
+      "coordinatorSha256": "8c65daee59ddd303adab4f7f48b1a22073472bd99203a8c45c31d9e4438fa213",
+      "buildReceiptSha256": "1a983172adebaba8b1a61959810d5469d9c12d706725bd33783d43cc8cceabe0",
+      "proofSourceReviewId": 6125544861,
+      "baseHead": "51f6798806f630773786a08432290c1b21a841da",
+      "mergeBaseHead": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+      "auditReviewId": 6125341751,
+      "originalProofRoot": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+      "firstProofPolicy": "EXACT_REVIEWED_FIRST_PROOF_ROOT_NO_REPLAY",
+      "pr": 294,
+      "tree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+      "auditedTree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+      "mergeParents": [
+        "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+        "5e65fe5b587747efc717f167f9b61469effa9afe"
+      ],
+      "naturalIntakePolicy": "ORIGINAL_CURSOR_ACTUAL_UPSTREAM",
+      "authoritySha256": "c0a182fdf674153901986df2c4262cd1c592e512cdc8b60943ffcdc38315b61d",
+      "diskMeasurementGuardSha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+      "coreDeallocationConfirmationDeadlineSeconds": 10,
+      "baselineMeasurementGuardSha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+      "proofBaselineLayoutPolicy": "EXACT_HASHED_IMPORT_PROOF_AUTHORITY_LAYOUT",
+      "proofBaselineLayoutGuardSha256": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+      "baselineVanishedProcessPolicy": "CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE",
+      "BASELINE_ATTEMPTS_MAX": 3,
+      "BASELINE_CONFIRMATION_DEADLINE_SECONDS": 10,
+      "historicalReceiptSha256": "480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515",
+      "productionMutations": 0,
+      "separateInstallerCommands": 3,
+      "importDeltaPolicy": "ONLY_200_EMPTY_ADDITIVE_IMPORT_10438_TO_10639",
+      "retainedDatabaseAllocationCount": 13,
+      "scopeCommentIds": [
+        6112209155,
+        6112305172,
+        6112436098,
+        6113601584
+      ],
+      "refusalScopeCommentId": 6113601584,
+      "schedulerRefusalPolicy": "EXACT_FRESH_COPY_CONFIG_REFUSALS",
+      "intakeCardinalityPolicy": "SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS",
+      "refusalPairingScopeCommentId": 6114143349,
+      "schedulerRefusalPairing": "STREAM_ORDER_ONE_TO_ONE",
+      "REFUSAL_PAIR_WINDOW_SECONDS": 1,
+      "copyVerifierSha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+      "proofContractSha256": "2736d3ad6b788bb2e9302bb7e31fced42bead523e2f5889e7d9987a839657d55",
+      "existingSampleVerifierPolicy": "STRICT_ORIGINAL_ROWS",
+      "effectiveUid": 0,
+      "pythonOptimize": 0,
+      "reserveBytes": 10556150894,
+      "workloadPins": {
+        "labAndHubBuildsOwnedByYY": true,
+        "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+      },
+      "baselineEnumerationErrorCount": 0,
+      "baselineAttempt": 1,
+      "freshCopyUtc": "2026-10-12T14:16:08.618242+00:00",
+      "freshCopySha256": "c5294627bededa6b1290f2d64f6741cdc404bbddd60469772d7026904d2079e3",
+      "protectedStateSha256": "5024c784545c084752e8b10fd180320bc7848fb747f5cbd99717215438d761fb",
+      "error": "Immediate repeat changed original bytes or full installed state",
+      "diskAllocationObservationsSha256": "b43f2f7e1efb469de613f28d078833c8b9590f82c3ff38f09b9a2f274b16fdd9",
+      "completedUtc": "2026-10-12T14:24:27.293103+00:00"
+    }
+  },
+  "tail": {
+    "unit.stdout": "{\"status\": \"FAILED_NEW_IMPORT_NATURAL_KOBO_PROOF\", \"root\": \"/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z\", \"receiptSha256\": \"e85e14bbe1fd46f312027443c8911e5eb5807e14787d4641141ef60c310e4fa2\"}\n",
+    "unit.stderr": ""
+  },
+  "freeBytes": 82709696512,
+  "productionMutations": 0
+}

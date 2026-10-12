@@ -1,0 +1,11 @@
+{
+  "observedUtc": "2026-10-12T14:30:54.627218+00:00",
+  "status": "FAILED_ORIGINAL_ROOT_PERMANENTLY_RETAINED_NEW_SOURCE_REQUIRED",
+  "diagnosisRecord": "pr294-repeat-failure-physical-20261012T142709326307Z.json",
+  "diagnosisSha256": "2fd03a236975cd453f4677beb231e673b49f2bb645996610f8c6db3b9f7775af",
+  "originalReceiptSha256": "e85e14bbe1fd46f312027443c8911e5eb5807e14787d4641141ef60c310e4fa2",
+  "failureCommentId": 6126290360,
+  "nativeScopeObserved": "Exact main plus bounded readonly sidecars plus full detached WAL-aware seal; no replay",
+  "newWriterStarted": false,
+  "productionMutations": 0
+}
