@@ -314,6 +314,33 @@ class ReleaseTests(unittest.TestCase):
         self.assertFalse(any(isinstance(node.func, ast.Name) and node.func.id == 'select_entry_state'
             for node in calls))
 
+    def test_local_gate_mirror_requires_platform_readonly_without_changing_remote_0400(self):
+        import ast
+        tree = ast.parse(RAW_PACKAGE['collect_import_gate.py'])
+        function = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and
+            node.name == 'local_frozen_reference')
+        namespace = {'require': release.require, 'pathlib': pathlib, 'os': types.SimpleNamespace(name='nt')}
+        exec(compile(ast.Module(body=[function], type_ignores=[]), '/owned-local-gate-reader.py', 'exec'), namespace)
+        with tempfile.TemporaryDirectory(prefix='owned-local-gate-reader-') as directory:
+            root = pathlib.Path(directory); path = root / 'owned.json'; path.write_bytes(b'owned fixture')
+            original_stat = pathlib.Path.stat
+            def observed_mode(mode):
+                def observe(value, *args, **kwargs):
+                    observed = original_stat(value, *args, **kwargs)
+                    return types.SimpleNamespace(st_mode=(observed.st_mode & ~0o777) |
+                        (mode if stat.S_ISREG(observed.st_mode) else 0o700))
+                return observe
+            for platform, expected in [('nt', 0o444), ('posix', 0o400)]:
+                namespace['os'].name = platform
+                with patch.object(pathlib.Path, 'stat', autospec=True, side_effect=observed_mode(expected)):
+                    self.assertEqual(namespace['local_frozen_reference'](root, 'owned.json'), path)
+                    with self.assertRaises(RuntimeError): release.safe_reference(root, 'owned.json') if platform == 'nt' else release.safe_reference(root, '../owned.json')
+                for writable in [0o600, 0o666]:
+                    with patch.object(pathlib.Path, 'stat', autospec=True, side_effect=observed_mode(writable)), self.assertRaises(RuntimeError):
+                        namespace['local_frozen_reference'](root, 'owned.json')
+            for name in ['../owned.json', './owned.json', '/owned.json', 'nested/owned.json', None]:
+                with self.assertRaises(RuntimeError): namespace['local_frozen_reference'](root, name)
+
     def test_nested_proof_references_refuse_traversal_or_symlink(self):
         with tempfile.TemporaryDirectory(prefix='owned-reference-') as directory:
             root = pathlib.Path(directory); (root / 'after-second-stopped').mkdir()

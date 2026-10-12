@@ -6,10 +6,28 @@ once with exclusive creation, never overwritten. This does not deploy.
 import base64
 import datetime
 import json
+import os
 import pathlib
 import subprocess
 import sys
 from import_release_contract import *
+
+
+def local_frozen_reference(root, name):
+    """Hash-bound downloaded copy; remote originals still require exact 0400.
+
+    Windows exposes its read-only file attribute as 0444. This reader is only
+    used for the local mirror; every remote preflight uses safe_reference and
+    frozen_files with unchanged exact POSIX 0400 checks.
+    """
+    require(isinstance(name, str) and pathlib.PurePosixPath(name).name == name and
+        name not in ('', '.', '..') and '\\' not in name and not root.is_symlink(),
+        'Unsafe local frozen reference')
+    path = root / name
+    mode = 0o444 if os.name == 'nt' else 0o400
+    require(path.is_file() and not path.is_symlink() and path.stat().st_mode & 0o777 == mode,
+        'Local frozen mirror is writable, linked or not a file')
+    return path
 
 
 def github(endpoint, pages=False):
@@ -32,13 +50,13 @@ def main():
     kit = pathlib.Path(kit); output = pathlib.Path(output)
     require(not output.exists(), 'Never overwrite an execution gate')
     evidence = frozen_directory(kit)
-    manifest = json.loads(safe_reference(evidence, 'prepared-manifest.json').read_bytes())
+    manifest = json.loads(local_frozen_reference(evidence, 'prepared-manifest.json').read_bytes())
     root = str(safe_root(manifest['root'], 'instrument-import-release-'))
     manifest_sha = sha(evidence / 'prepared-manifest.json')
     require_unused_outputs(kit, FROZEN_FILE_SET)
     for name, digest in manifest['files'].items():
         require(pathlib.PurePosixPath(name).name == name and
-            sha(safe_reference(evidence, name)) == digest, 'Downloaded frozen kit differs: ' + name)
+            sha(local_frozen_reference(evidence, name)) == digest, 'Downloaded frozen kit differs: ' + name)
     payload = base64.b64encode(json.dumps({'root': root, 'manifestSha256': manifest_sha}).encode()).decode()
     preflight = '''import base64,json,pathlib,sys
 p=json.loads(base64.b64decode(PAYLOAD));r=pathlib.Path(p['root']);sys.path.insert(0,str(r/'frozen'))
@@ -47,7 +65,7 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
 '''.replace('PAYLOAD', repr(payload))
     readiness = remote(preflight)
     require(readiness['productionMutations'] == 0 and readiness['ready'] is True, 'Remote kit is not ready')
-    pin = json.loads(safe_reference(evidence, 'target-pin.json').read_bytes())
+    pin = json.loads(local_frozen_reference(evidence, 'target-pin.json').read_bytes())
     pr = github('pulls/' + str(PR_NUMBER)); current = github('git/ref/heads/main')['object']['sha']
     require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD and
         pr['merge_commit_sha'] == current == pin['head'], 'Exact merged-main head changed')
@@ -66,7 +84,7 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
     kit_comments = github('issues/162/comments?per_page=100', True)
     source_review = github('issues/comments/' + str(manifest['sourceReviewId']))
     production_source = github('issues/comments/' + str(manifest['productionBaselineSourceReviewId']))
-    frozen_production_source = json.loads(safe_reference(evidence, 'production-baseline-source-review.json').read_bytes())
+    frozen_production_source = json.loads(local_frozen_reference(evidence, 'production-baseline-source-review.json').read_bytes())
     require(production_source['body'] == frozen_production_source['body'] and
         production_source['created_at'] == frozen_production_source['created_at'], 'Production source verdict changed')
     later_production_failure = any(has_failed_verdict(row['body'], include_source=True) and
@@ -77,7 +95,7 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
         for row in kit_comments)
     later_kit_failure = any(has_failed_verdict(row['body']) and row['created_at'] > kit_review['created_at']
         for row in kit_comments)
-    yy = json.loads(safe_reference(evidence, 'yy-authorization-evidence.md').read_bytes())
+    yy = json.loads(local_frozen_reference(evidence, 'yy-authorization-evidence.md').read_bytes())
     require(yy['confirmedByYY'] is True and yy['scopeText'] == 'my go covers all' and
         yy['authorizationMode'] == 'AUTO_AFTER_REVIEW', 'Original YY standing go missing')
     gate = {'status': 'FRESH_SINGLE_USE_IMPORT_GATE', 'executionRoot': root, 'head': current,
