@@ -1,0 +1,30 @@
+{
+  "root": "/opt/lims/releases/instrument-import-package-959d17e1-20261012T161000Z",
+  "files": {
+    "freeze.stdout": {
+      "sha256": "a79aee5c735d7437a12d716b6402b2c4e6a2bdea950ef2e90f51afb18c173ee1",
+      "bytes": 2197,
+      "mode": "0o400"
+    },
+    "freeze.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": "0o400"
+    },
+    "freeze-result.json": {
+      "sha256": "eb6f83fca2ac839e8ee1753281a872e8270b904e3da327a0599219518f9c2277",
+      "bytes": 148,
+      "mode": "0o400"
+    }
+  },
+  "terminalResult": {
+    "status": "PASSED",
+    "returncode": 0,
+    "timeoutSeconds": 900,
+    "elapsedSeconds": 292.0648760939948,
+    "attemptCount": 1,
+    "retried": false
+  },
+  "observedUtc": "2026-10-12T19:27:45.836085+00:00",
+  "productionOperations": 0
+}

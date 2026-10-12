@@ -1,0 +1,45 @@
+{
+  "policy": "EXACT_MAIN_EMPTY_WAL_BOUNDED_SHM_FULL_DETACHED_EQUALITY",
+  "mainBytesAndAttributesPreserved": true,
+  "fullInstalledStateEqual": true,
+  "beforePhysical": {
+    "": {
+      "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+      "bytes": 563322880,
+      "inode": 10878978,
+      "device": 64769,
+      "mtimeNs": 1791817417648233662,
+      "mode": 420
+    },
+    "-wal": null,
+    "-shm": null
+  },
+  "afterPhysical": {
+    "": {
+      "sha256": "17570e575729a086a04fe3abc8c6fe5917e82d1edab39f880ca93a20aaaa77d8",
+      "bytes": 563322880,
+      "inode": 10878978,
+      "device": 64769,
+      "mtimeNs": 1791817417648233662,
+      "mode": 420
+    },
+    "-wal": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "inode": 10879570,
+      "device": 64769,
+      "mtimeNs": 1791817628216621206,
+      "mode": 420
+    },
+    "-shm": {
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "bytes": 32768,
+      "inode": 10879576,
+      "device": 64769,
+      "mtimeNs": 1791817630667672278,
+      "mode": 420
+    }
+  },
+  "beforeLogicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef",
+  "afterLogicalStateSha256": "e17fdac6f29198a57ed6ba844452af4d246bb43433cbf39fe24e49eea87dcbef"
+}

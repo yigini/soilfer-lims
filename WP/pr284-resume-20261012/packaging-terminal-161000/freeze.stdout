@@ -1,0 +1,15 @@
+{"event": "START", "stage": "stopped-authority-and-retained-file-hashes"}
+{"event": "PASSED", "stage": "stopped-authority-and-retained-file-hashes", "elapsedSeconds": 50.441750357000274}
+{"event": "START", "stage": "native-installation-full104-original-rows", "elapsedSeconds": 50.44340469400049}
+{"event": "PASSED", "stage": "native-installation-full104-original-rows", "elapsedSeconds": 46.14419044899114, "totalElapsedSeconds": 96.58759714999178}
+{"event": "START", "stage": "repeat-full106-table-state", "elapsedSeconds": 97.39103614600026}
+{"event": "PASSED", "stage": "repeat-full106-table-state", "elapsedSeconds": 21.776348707004217, "totalElapsedSeconds": 119.16738711699145}
+{"event": "START", "stage": "first-natural-full106-preservation", "elapsedSeconds": 119.19257066499267}
+{"event": "PASSED", "stage": "first-natural-full106-preservation", "elapsedSeconds": 54.40803272600169, "totalElapsedSeconds": 173.60060473399062}
+{"event": "START", "stage": "second-natural-full106-preservation", "elapsedSeconds": 173.60142804100178}
+{"event": "PASSED", "stage": "second-natural-full106-preservation", "elapsedSeconds": 53.738118494002265, "totalElapsedSeconds": 227.33954943699064}
+{"event": "START", "stage": "full-installed-to-final106-preservation", "elapsedSeconds": 227.34015919199737}
+{"event": "PASSED", "stage": "full-installed-to-final106-preservation", "elapsedSeconds": 53.24820019499748, "totalElapsedSeconds": 280.58836162800435}
+{"event": "START", "stage": "final-hashes-live-build-and-reserve", "elapsedSeconds": 280.5888773869956}
+{"event": "PASSED", "stage": "final-hashes-live-build-and-reserve", "totalElapsedSeconds": 291.53257983700314, "destinationCreated": false}
+{"status": "PREPARED_IMPORT_FORWARD_ONLY_NOT_EXECUTED", "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z", "manifestSha256": "5392cab2c224e68e74694950336ec1fad638eb4c0bf282e6614009f58cb5c7c8", "coordinatorSha256": "4cc81f6428a55f50aa3d0d30514ee9de82e0e55246970a967dbde3d6d7d19b9c", "receiptSha256": "f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce", "targetPinSha256": "241bd693b8cfdb3e9a05440716bd925a620a807bdb371206430a4abc2a9481b1", "fileCount": 62}

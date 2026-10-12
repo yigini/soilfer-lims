@@ -1,3 +1,13 @@
+PR294 frozen kit COMPLETE / exact-kit review boundary 2026-10-12T19:28:35.168869+00:00
+
+The SAME one-shot freezer session47957 completed exit0 at 2026-10-12T19:23:55.376674+00:00; no active freezer remains. Original retained terminal result PASSED/attemptCount1/retriedfalse/292.064876s within900s. All preservation/authority/hash/live-build/reserve stages passed before destination creation. No repeat/refreeze/rebuild/newproof/production operation occurred.
+
+ONE immutable unused kit /opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z,62 frozen files plus manifest, independently re-read with0400 modes and exact rawabce sources. ManifestSHA256 5392cab2c224e68e74694950336ec1fad638eb4c0bf282e6614009f58cb5c7c8; deploycoord 4cc81f6428a55f50aa3d0d30514ee9de82e0e55246970a967dbde3d6d7d19b9c; original stopped firstPASSEDproofreceipt f2aff1624aa6b11abeca36374ffe45fc3b06c9ab78727b48b877512ba9f2fbce; targetpin 241bd693b8cfdb3e9a05440716bd925a620a807bdb371206430a4abc2a9481b1. All31 approved201bb proof bytes unchanged; actual NEW packagingSourcePASS6130963561/exactabceab95. Original135400build/image7aeb and144000proof retained unchanged. Failed105200/134000proofs and154640package permanently excluded; never replay/restart/retry/refreeze/cleanup.
+
+Raw62kit files/manifest retained WP/pr284-frozen-kit-20261012T161000Z. Original package freeze.stdout SHAa79aee5c735d7437a12d716b6402b2c4e6a2bdea950ef2e90f51afb18c173ee1 and freeze-result.json SHAeb6f83fca2ac839e8ee1753281a872e8270b904e3da327a0599219518f9c2277 retained WP/pr284-resume-20261012/packaging-terminal-161000. No execution gate/attempt/production receipt exists. Actual NEW exact-kit Audit passed: OK to merge and deploy still REQUIRED; not inferred from source review. SAME writer sends actual kit for review then fresh allgreen/currenthead/unusedkit/headroom, ONE single-use10minute gate and ONE forwarddeployment under existing automatic-after-review go. No extra YY decision required. Claudio owns actual postchecks/closure/ticks. Otherapplicationmerges held until#200live and postchecked. Live old51f/d4eb remains current; no production mutation/card/humancheckout/cleanup.
+
+Previous checkpoint follows:
+
 PR294 actual measured-source PASS / SAME read-only freeze in progress 2026-10-12T19:20:59.023617+00:00
 
 Actual NEW Source review: PASS#162/6130963561 at19:16:37UTC for exactabceab95b8d68b1b3202df9f4f9fc229d9baa2ae/all39hashes/900packaging and960SSH limits. Independently verified19:18:17/rawreviewSHAeea070fac0690382eea797fc6763cd6ba077ca72cd05d8895195b252be737da9/currentmain959d/no laterfailure; actualnative acknowledgement read. All190/190 Windows+Linux guards passed and all31 measured proof/runtime policy bytes unchanged.
