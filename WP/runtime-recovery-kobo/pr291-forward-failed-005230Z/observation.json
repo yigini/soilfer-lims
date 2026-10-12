@@ -1,0 +1,67 @@
+{
+  "observedUtc": "2026-10-12T00:53:02.122395+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z",
+  "unit": "lims-release-runtime-kobo-release-f830f900-20261012t004200z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=1\nActiveState=failed\nSubState=failed\n",
+  "journalTail": "2026-10-12T02:51:21+0200 server systemd[1]: Starting /usr/bin/python3 -B /opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z/deploy_runtime.py --execute-new-reviewed-runtime-gate...\n2026-10-12T02:51:21+0200 server systemd[1]: Started /usr/bin/python3 -B /opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z/deploy_runtime.py --execute-new-reviewed-runtime-gate.\n2026-10-12T02:51:33+0200 server python3[741527]: {\"stage\": \"beforeQuiesceGuardsPassed\", \"utc\": \"2026-10-12T00:51:33.814366+00:00\"}\n2026-10-12T02:52:08+0200 server python3[741527]: {\"stage\": \"writersStopped\", \"utc\": \"2026-10-12T00:52:08.086460+00:00\"}\n2026-10-12T02:52:12+0200 server python3[741527]: {\"stage\": \"failed\", \"utc\": \"2026-10-12T00:52:12.232543+00:00\"}\n2026-10-12T02:52:12+0200 server python3[741527]: {\"status\": \"FAILED_RUNTIME_FORWARD_HOLD\", \"error\": \"Stopped original WAL remains nonempty; retain and diagnose, never delete it\", \"receiptSha256\": \"e274d3b8cf6514e7fe878ad7d712caa6303d3f969fd49372f8bb0147efbb6588\"}\n2026-10-12T02:52:12+0200 server systemd[1]: lims-release-runtime-kobo-release-f830f900-20261012t004200z.service: Main process exited, code=exited, status=1/FAILURE\n2026-10-12T02:52:12+0200 server systemd[1]: lims-release-runtime-kobo-release-f830f900-20261012t004200z.service: Failed with result 'exit-code'.\n2026-10-12T02:52:12+0200 server systemd[1]: lims-release-runtime-kobo-release-f830f900-20261012t004200z.service: Consumed 15.080s CPU time, 11.7M memory peak.\n",
+  "live": {
+    "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+    "revision": "171dd36c5b2dbeea8763520dd18fbdb158ffca05",
+    "running": false,
+    "health": "unhealthy",
+    "restartCount": 0,
+    "oomKilled": false,
+    "memoryLimitBytes": 805306368,
+    "nodeOptions": "",
+    "jobsDisabled": "false",
+    "autoPush": "false",
+    "autoSeed": "false",
+    "volumes": [
+      {
+        "destination": "/app/server/prisma",
+        "name": "lims_lims-data",
+        "type": "volume"
+      },
+      {
+        "destination": "/app/server/uploads",
+        "name": "lims_lims-assets",
+        "type": "volume"
+      }
+    ]
+  },
+  "freeBytes": 103224688640,
+  "httpsGet": {
+    "/api/health": {
+      "curlExit": 0,
+      "httpStatus": "503",
+      "health": null
+    },
+    "/login": {
+      "curlExit": 0,
+      "httpStatus": "503"
+    }
+  },
+  "files": {
+    "prepared-manifest.json": {
+      "bytes": 7705,
+      "mode": "0o400",
+      "sha256": "5f75662a3394dd01a490338e0e389a0cfe5854d3ffcb170b9a48200b914c3a27"
+    },
+    "production-gate.json": {
+      "bytes": 51969,
+      "mode": "0o400",
+      "sha256": "ef23d76940301a4a72f2624ea280acbf1a92c8eaa85d469b49d76993248271a3"
+    },
+    "execution-attempt.json": {
+      "bytes": 184,
+      "mode": "0o400",
+      "sha256": "387e865aedcd1d263c187c0875fc21657a322ae745ea3ed1eb8454895abd737c"
+    },
+    "production-receipt.json": {
+      "bytes": 57046,
+      "mode": "0o400",
+      "sha256": "e274d3b8cf6514e7fe878ad7d712caa6303d3f969fd49372f8bb0147efbb6588"
+    }
+  }
+}
