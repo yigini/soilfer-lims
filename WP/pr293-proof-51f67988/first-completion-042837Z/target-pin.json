@@ -1,0 +1,25 @@
+{
+  "status": "TARGET_PIN_BUILT_ONLY_NOT_PROOF_OR_DEPLOYED",
+  "head": "51f6798806f630773786a08432290c1b21a841da",
+  "baseHead": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "auditedPrHead": "990a4cb535fd3ccb2a81ca019f453123b60a14b8",
+  "pr": 293,
+  "tree": "90ed6a26c72bfab5a348dfdb9d6e59876c61ee4c",
+  "auditedTree": "90ed6a26c72bfab5a348dfdb9d6e59876c61ee4c",
+  "mergeParents": [
+    "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+    "990a4cb535fd3ccb2a81ca019f453123b60a14b8"
+  ],
+  "auditReviewId": 6117307869,
+  "mainCiRunId": 38200697950,
+  "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+  "imageBytes": 413628985,
+  "buildRoot": "/opt/lims/releases/runtime-kobo-build-51f67988-20261012T035200Z",
+  "buildUnit": "lims-build-runtime-kobo-build-51f67988-20261012t035200z.service",
+  "buildReceiptSha256": "6a4bf2c918396ac50afd225afc6d9b9580a4ea2b89500dc2ee9e90ce356bb463",
+  "buildTag": "soilfer-lims:audit-runtime-kobo-build-51f67988-20261012T035200Z",
+  "toolingCommit": "071d61c372d48b4e283b9a4520b7044c18a7f238",
+  "proofSourceReviewId": 6117398054,
+  "labAndHubBuildsOwnedByYY": true,
+  "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+}
