@@ -1,0 +1,7 @@
+{
+  "returnCode": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"<stdin>\", line 42, in <module>\nAssertionError: node:internal/modules/cjs/loader:1568\n  throw err;\n  ^\n\nError: Cannot find module 'better-sqlite3'\nRequire stack:\n- /app/[eval]\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)\n    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)\n    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)\n    at Module._load (node:internal/modules/cjs/loader:1341:5)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.require (node:internal/modules/cjs/loader:1674:12)\n    at require (node:internal/modules/helpers:157:16)\n    at [eval]:1:9\n    at runScriptInThisContext (node:internal/vm:219:10) {\n  code: 'MODULE_NOT_FOUND',\n  requireStack: [ '/app/[eval]' ]\n}\n\nNode.js v24.21.0\n\n",
+  "sourceCommit": "97a3ad982b5fb3e0aecd9866f459a7d1cda3381d",
+  "root": "/opt/lims/releases/instrument-import-mount-guard-97a3ad98-20261012T103000Z"
+}

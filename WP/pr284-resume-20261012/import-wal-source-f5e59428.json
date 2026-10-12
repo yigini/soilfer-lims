@@ -1,0 +1,87 @@
+{
+  "sourceCommit": "f5e59428c1bbf19247db2555f5158bc3a2ac5fad",
+  "guards": {
+    "windows": {
+      "tests": 164,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "elapsedSeconds": 3.625,
+      "completedUtc": "2026-10-12T10:32:38.676893+00:00",
+      "stdoutSha256": "fc6ef540de3b1f565a3881e4039bf7f477f9af55510a08656b17514d73f757dc",
+      "stderrSha256": "0e5dc2118d12b70f38676c22bd4e636857aeb50727a86d27221a4247c9fdda96"
+    },
+    "linux": {
+      "tests": 164,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "elapsedSeconds": 11.301165946002584,
+      "completedUtc": "2026-10-12T10:32:47.116313+00:00",
+      "stdoutSha256": "bc64584b295b2d596b25436fe8457a3ac62f5bf33a5508a4a749c1343f9f2eba",
+      "stderrSha256": "40c6939e0aa5ee65bfc8089c404ed0fe24d7cef80af9f28f86cb6d5cd96547dd"
+    }
+  },
+  "realMountGuard": {
+    "status": "REAL_OWNED_WAL_MOUNT_GUARD_PASS",
+    "observedUtc": "2026-10-12T10:30:32.218669+00:00",
+    "sourceCommit": "ad49b19081fe697f8a10d2506cc6befa822a73c0",
+    "importInstallationSha256": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+    "root": "/opt/lims/releases/instrument-import-mount-guard-ad49b190-20261012T103100Z",
+    "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+    "walHeader": [
+      2,
+      2
+    ],
+    "mainSha256BeforeAfter": "b502ffa32e487b478c4a9b118ae8517dd2982cc25c29c4b77a441670c2092b97",
+    "applyTargetPhysicalTripleUnchanged": true,
+    "containers": [
+      {
+        "containerName": "lims-owned-import-cli-8400b878f8a87e5b59dd7687",
+        "readonlyMount": true,
+        "exitCode": 1,
+        "elapsedSeconds": 0.729065161998733,
+        "memoryBytes": 805306368,
+        "memorySwapBytes": 805306368,
+        "networkMode": "none",
+        "retained": true,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "8e69272bad9908a123f01cfc96490cfcdb88b99e20f5535485c171fb56bce51e"
+      },
+      {
+        "containerName": "lims-owned-import-cli-048570113775263d26dea4c8",
+        "readonlyMount": false,
+        "exitCode": 0,
+        "elapsedSeconds": 0.7014824979996774,
+        "memoryBytes": 805306368,
+        "memorySwapBytes": 805306368,
+        "networkMode": "none",
+        "retained": true,
+        "stdoutSha256": "bf5a4524b21b3f9c0d4bf04e89574367f625e72a0f4df4a06b2295add91b16b4",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "readonlyOpen": {
+      "rows": [
+        {
+          "id": 1,
+          "value": "owned-only"
+        }
+      ],
+      "integrity": "ok",
+      "sqliteVersion": "3.51.2"
+    },
+    "dryCopyPolicy": "SEPARATE_OWNED_0400_BACKUP_COPY_WITH_WRITABLE_SIDECAR_DIRECTORY",
+    "productionDatabaseAccess": false,
+    "installerAttempts": 0,
+    "productionMutations": 0,
+    "freeBytes": 90745688064
+  },
+  "mountGuardRawSha256": "42c9ee8e6316fa4e557394c96e206bdac8dfea64eafd607f226cf9e71f29b697",
+  "realMountGuardCodeSha256": "7b1b1d5184467066bb4c6adb049df78077cd134427c6cf67a551d5bfc350f2d4",
+  "sameMountGuardAndInstallerBytesAtReviewedSource": true,
+  "proofSourceFileCount": 31,
+  "productionDatabaseAccess": false,
+  "installerAttempts": 0,
+  "noCandidateBuildOrProof": true
+}

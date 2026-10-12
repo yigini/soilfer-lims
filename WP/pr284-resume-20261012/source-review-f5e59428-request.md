@@ -1,0 +1,82 @@
+Claudio: NEW #200 proof/build source review request after changes-required6122256443. This is a request, not an approval or execution gate.
+
+Exact revised source f5e59428c1bbf19247db2555f5158bc3a2ac5fad is pushed. PR284's application PASS6121933894 and actual merge5dd5488d138514351fffd54d0b0232ae19fcb64d/tree9b3b77496c3aa2cdad7c7594a0b258ec4b491753 remain unchanged. Main CI38233444989 must actually pass before the isolated proof; a build requires this NEW source pass first. No #200 build/proof/kit/gate/installer or production mutation has occurred.
+
+Blocking fix: option(a), dry-run uses its own separate owned 0400 main copy of the stopped immutable backup. Only that directory is writable for SQLite sidecars. The apply target and original backup remain unmounted during dry-run, and their full physical triple/main hash are checked unchanged. The copied main is checked against the backup SHA and full immutable snapshot before/after; any WAL frames, unexpected SHM size, new file/link or main mutation refuse. The separate copy and its sidecars/authority are retained and hashed/0400 after the dry-run. The forward-only single-use intent still precedes every native installer call. No preprocessing connection touches the target or original backup.
+
+Actual real mount guard passed10:30:32.218669UTC using the retained predecessor d4eb image/SQLite3.51.2 on a tiny owned WAL-header fixture (bytes18/19=2), with no production DB mount and no installer attempt. The old readonly bind mount reproducibly fails; the new separate-copy mount succeeds in0.701s, integrity ok/row intact, main SHA and separate apply-target physical triple unchanged. Both containers are stopped/retained,768MiB with equal total memory+swap ceiling, no network/blank heap. Raw witness WP/pr284-resume-20261012/import-mount-ad49-103100.json. It ran at ad49b19081fe697f8a10d2506cc6befa822a73c0; the exact run_import_mount_guard.py and import_installation.py bytes are independently identical at the new f5e source. This is a mount guard, not a rehearsal. The earlier fixture module-resolution failure/root/container are retained and do not contribute to the passing witness.
+
+All five smaller points addressed: (1) proof install_once refuses the live parent and any target outside its isolated root; only explicit production=True on an instrument-import-release root can select the canonical production volume. (2) Jobs-ON now asserts the actual jobs-enabled runtime plus a nonempty explicit CopyObservation boundary/data versions. It makes no zero-full-state claim while natural jobs run; full106table/39receipt/original-row preservation remains required at sealed first/second completion. Production's explicit normal-jobs boundary follows the zero-write seal and ingress reopen. (3) Every CLI sets and independently inspects network none, memory805306368 and memory+swap805306368, blank heap, exact mount source/type/RW, zero restart/OOM/stopped identity. (4) Each native CLI has an explicit600s timeout and measured elapsed time that must remain below it; the 5400s production unit allows the three bounded CLIs plus two600s readiness limits,660s health and sealing. Actual full-size CLI margin is required in the new measured proof before kit review; no full-size timing claimed yet. (5) Removed the unused physical reassignment. Jobs-OFF keeps ZeroWriteWatch and full detached WAL-aware equality.
+
+The extra dry copy is included in THIRTEEN retained DB allocations, with10556150894B/scaled absolute reserve plus assets/state/log headroom and the unchanged500MB unexplained-growth abort. V2/V3/old guard and all14 historical helpers remain byte-identical. Original cursor/config/15-minute natural interval/two actual completions/interval+2min/660healthy seconds/strict protected rows and exact refused configs remain unchanged. No fabrication/backfill/cleanup/prune/replay/restore/old-image/retry/heap override. Both workload pins remain mandatory. New build/proof launchers also refuse a later Source review: CHANGES REQUIRED.
+
+Final exact-source guards164/164 Windows and164/164 Linux,0failures/errors/skips/no production DB access; raw failed/intermediate/final logs retained. The raw graph still has31 proof source/assets files and39 production source files; packaging adds the dry-copy authority (60 fixed frozen files). Production proof binding remains UNREVIEWED_REFUSE/0, so it cannot freeze. No completed PR293 artifact/gate or human checkout/card/draft changed. Fresh10:14:52 read-only live check passed51f/d4eb,healthy0restarts/same volumes/HTTPS200/receipt and41 historical kit files unchanged/free90,747,678,720B.
+
+Please review these exact revised bytes and post a NEW primary Source review: PASS with every full token below if they pass. Old70fd and its changes-required record cannot authorize any run. I will continue the same writer immediately through the one build/proof, separate production-source review, stopped original PASS kit/exact review/fresh gate/forward deployment. Other application merges stay held until#200 live/postchecked.
+
+Final guard evidence: {"linux": {"completedUtc": "2026-10-12T10:32:47.116313+00:00", "elapsedSeconds": 11.301165946002584, "errors": 0, "failures": 0, "skips": 0, "stderrSha256": "40c6939e0aa5ee65bfc8089c404ed0fe24d7cef80af9f28f86cb6d5cd96547dd", "stdoutSha256": "bc64584b295b2d596b25436fe8457a3ac62f5bf33a5508a4a749c1343f9f2eba", "tests": 164}, "windows": {"completedUtc": "2026-10-12T10:32:38.676893+00:00", "elapsedSeconds": 3.625, "errors": 0, "failures": 0, "skips": 0, "stderrSha256": "0e5dc2118d12b70f38676c22bd4e636857aeb50727a86d27221a4247c9fdda96", "stdoutSha256": "fc6ef540de3b1f565a3881e4039bf7f477f9af55510a08656b17514d73f757dc", "tests": 164}}
+
+51f6798806f630773786a08432290c1b21a841da
+c26591698c1e974a3bf771e5c333578755aef315
+5dd5488d138514351fffd54d0b0232ae19fcb64d
+9b3b77496c3aa2cdad7c7594a0b258ec4b491753
+9b3b77496c3aa2cdad7c7594a0b258ec4b491753
+sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f
+480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515
+releasePr=284
+mergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE
+naturalIntakePolicy=ORIGINAL_CURSOR_ACTUAL_UPSTREAM
+importDeltaPolicy=ONLY_200_EMPTY_ADDITIVE_IMPORT_10438_TO_10639
+originalState=104tables/38receipts
+installedState=106tables/39receipts
+defaultStartup=23NO_OP0/22READY0
+productionRecovery=SEPARATELY_AUDITED_FORWARD_FIX_ONLY
+nativeDryCopyPolicy=SEPARATE_OWNED_0400_BACKUP_COPY_WITH_WRITABLE_SIDECAR_DIRECTORY
+retainedDatabaseAllocationCount=13
+CLI_TIMEOUT_SECONDS=600
+nativeCliNetwork=none
+nativeCliMemorySwapBytes=805306368
+f5e59428c1bbf19247db2555f5158bc3a2ac5fad
+labAndHubBuildsOwnedByYY=true
+RELEASE_DAY_DISK_ABORTS_ACCEPTED
+CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10
+BASELINE_ATTEMPTS_MAX=3
+BASELINE_CONFIRMATION_DEADLINE_SECONDS=10
+proofBaselineLayoutPolicy=EXACT_HASHED_IMPORT_PROOF_AUTHORITY_LAYOUT
+refusalScopeCommentId=6113601584
+EXACT_FRESH_COPY_CONFIG_REFUSALS
+SAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS
+refusalPairingScopeCommentId=6114143349
+schedulerRefusalPairing=STREAM_ORDER_ONE_TO_ONE
+REFUSAL_PAIR_WINDOW_SECONDS=1
+build_import.py=70bf42a356dc7716c76b5f935585defd50f23d8bd0e7e670fab32d51dae1000c
+capture_kobo_fetch.py=1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86
+export_launch_import_proof.py=389a94e30dfab0b640d50e34fb11601e208278106e4d173e4278139563ae98a9
+fresh-prisma-tables.json=9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df
+import_installation.py=eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d
+import_preservation.py=c150db31dde7b97d03a16183cff706369cb77ea2fe96beb766f537c83c2fe7fa
+import_proof_contract.py=067177df424a70528c8a6473c2d8016a5dc2c73602d45297ed450d5e4736accd
+import_sealing.py=de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401
+import_source_graph.py=74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637
+import_stage.py=c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1
+import_startup_checks.py=033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b
+known_core_disk_guard.py=f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169
+known_core_disk_guard_import.py=3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c
+known_core_disk_guard_v2.py=f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c
+known_core_disk_guard_v3.py=878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f
+kobo_copy_preservation.py=3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23
+migration.sql=68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8
+post205-draft-tables.json=ac0d64b16a25ae4498634c72593ac0bcb53240247be2153e140f147092d931b5
+postflight-auth.cjs=37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192
+postflight-policy.cjs=6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51
+postflight-qc-runs.cjs=4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f
+postflight-reference.cjs=530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526
+postflight-roles.cjs=6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da
+pre-prisma-draft-table.sql=a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af
+prepare_import_build.py=abb571fb67f0371f3e51d882df6740d7b5566ff89279d17686f6e46c4d1153c4
+readonly-smoke.cjs=7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626
+rehearse_import.py=73fd8dc57cc85332f499caa4fbd01912217295b51048d5c05cddefc1c6e5c894
+release_support.py=9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810
+runtime_proof_policies.py=08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf
+startup_common.py=e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00
+upgraded-prisma-draft-table.sql=4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b
