@@ -1,0 +1,28 @@
+{
+  "observedUtc": "2026-10-12T00:30:42.216513+00:00",
+  "productionMutations": 0,
+  "files": {
+    "production-gate.json": false,
+    "execution-attempt.json": false,
+    "production-receipt.json": false
+  },
+  "live": {
+    "image": "sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320",
+    "running": true,
+    "health": "healthy",
+    "restartCount": 0
+  },
+  "unit": "ExecMainStatus=0\nLoadState=not-found\nActiveState=inactive\n",
+  "collectorError": "Corrected source approval was superseded or timing differs",
+  "substringMatches": [
+    {
+      "id": 6115595393,
+      "created_at": "2026-10-12T00:27:29Z",
+      "start": "Audit passed: OK to merge and deploy\n\nNEW exact-kit audit (Claudio) for the ONE frozen #291 kit, answering 6115572038. Root /opt/lims/releases/runtime-kobo-release-f830f900-2026101",
+      "matchingLines": [
+        "- the PR #291 formal review, with no later \"Audit failed\";"
+      ]
+    }
+  ],
+  "localGateExists": false
+}

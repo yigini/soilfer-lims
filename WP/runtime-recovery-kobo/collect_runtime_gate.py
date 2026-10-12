@@ -56,7 +56,7 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
     tree = merged_commit['tree']['sha']; audited_tree = audited_commit['tree']['sha']
     review = github('issues/comments/' + str(pin['auditReviewId'])); formal_pr_review(review)
     pr_comments = github('issues/291/comments?per_page=100', True)
-    later_pr_failure = any('audit failed' in row['body'].lower() and row['created_at'] > review['created_at']
+    later_pr_failure = any(has_failed_verdict(row['body']) and row['created_at'] > review['created_at']
         for row in pr_comments)
     checks = github('commits/' + AUDITED_PR_HEAD + '/check-runs?per_page=100')['check_runs']
     ci = github('actions/runs/' + str(pin['mainCiRunId']))
@@ -67,13 +67,13 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
     frozen_production_source = json.loads((kit / 'production-baseline-source-review.json').read_bytes())
     require(production_source['body'] == frozen_production_source['body'] and
         production_source['created_at'] == frozen_production_source['created_at'], 'Production source verdict changed')
-    later_production_failure = any(('source review: failed' in row['body'].lower() or
-        'audit failed' in row['body'].lower()) and row['created_at'] > production_source['created_at']
+    later_production_failure = any(has_failed_verdict(row['body'], include_source=True) and
+        row['created_at'] > production_source['created_at']
         for row in kit_comments)
-    later_source_failure = any(('source review: failed' in row['body'].lower() or
-        'audit failed' in row['body'].lower()) and row['created_at'] > source_review['created_at']
+    later_source_failure = any(has_failed_verdict(row['body'], include_source=True) and
+        row['created_at'] > source_review['created_at']
         for row in kit_comments)
-    later_kit_failure = any('audit failed' in row['body'].lower() and row['created_at'] > kit_review['created_at']
+    later_kit_failure = any(has_failed_verdict(row['body']) and row['created_at'] > kit_review['created_at']
         for row in kit_comments)
     yy = json.loads((kit / 'yy-authorization-evidence.md').read_bytes())
     require(yy['confirmedByYY'] is True and yy['scopeText'] == 'my go covers all' and

@@ -5,7 +5,7 @@ import json
 import pathlib
 import subprocess
 import sys
-from runtime_release_contract import safe_root, require, production_source_review
+from runtime_release_contract import safe_root, require, production_source_review, has_failed_verdict
 
 
 def main():
@@ -37,7 +37,7 @@ def main():
     production_source_review(review, tooling, {name: row['sha256'] for name, row in index.items()})
     comments = json.loads(subprocess.check_output(['gh', 'api',
         'repos/yigini/soilfer-lims/issues/162/comments?per_page=100', '--paginate', '--slurp']))
-    require(not any(('source review: failed' in row['body'].lower() or 'audit failed' in row['body'].lower()) and
+    require(not any(has_failed_verdict(row['body'], include_source=True) and
         row['created_at'] > review['created_at'] for page in comments for row in page), 'Production source review superseded')
     payload = base64.b64encode(json.dumps({'tooling': tooling, 'proof': proof, 'package': package,
         'target': target, 'files': files, 'index': index, 'review': base64.b64encode(review_bytes).decode()}).encode()).decode()

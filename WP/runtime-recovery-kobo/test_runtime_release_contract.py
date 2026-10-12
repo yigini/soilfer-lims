@@ -97,7 +97,7 @@ class RuntimeGateTests(unittest.TestCase):
         production_tokens += [self.manifest['files'][name] for name in PRODUCTION_SOURCE_FILES] + pairing_review_tokens()
         production_tokens += [REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, REVIEWED_PROOF_CONTRACT_SHA,
             PROOF_BASELINE_LAYOUT_SHA, 'proofBaselineLayoutPolicy=' + PROOF_BASELINE_LAYOUT_POLICY,
-            'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID)]
+            'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID), FAILURE_REFERENCE_POLICY]
         self.gate['productionBaselineSourceReview'] = {'id': 8000000000,
             'html_url': 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-8000000000',
             'created_at': '2026-10-11T19:58:00Z', 'body': '\n'.join(production_tokens)}
@@ -419,6 +419,37 @@ class SealedSchedulerTests(unittest.TestCase):
         self.proof['firstIntakeSummary']['newSampleCount'] = 2
         self.proof['secondGenuinelyNewSubmissionIds'] = ['unrecorded']
         with self.assertRaises(RuntimeError): self.check()
+
+
+class FailureVerdictReferenceTests(unittest.TestCase):
+    def test_actual_pass_remaining_gate_wording_is_not_a_failure(self):
+        body = PHRASE + '\n\nRemaining gates:\n- the PR #291 formal review, with no later "Audit failed";'
+        self.assertFalse(has_failed_verdict(body, include_source=True))
+
+    def test_narrow_reference_needs_explicit_pass_header(self):
+        for header in ['Progress update', 'Audit failed', 'Source review: FAILED', '']:
+            with self.subTest(header=header):
+                self.assertTrue(has_failed_verdict(header + '\nno later "Audit failed"', include_source=True))
+
+    def test_real_failure_alongside_negated_reference_still_refuses(self):
+        for failure in ['Audit failed: changed manifest', '**AUDIT FAILED**', 'Source review: FAILED: changed source']:
+            with self.subTest(failure=failure):
+                self.assertTrue(has_failed_verdict(PHRASE + '\nno later "Audit failed"\n' + failure,
+                    include_source=True))
+
+    def test_only_exact_negated_paired_quote_is_exempt(self):
+        for reference in ['no later Audit failed', 'no "Audit failed"', 'later "Audit failed"',
+                'no later "Audit failed: hash changed"', 'no later "Audit failed\'', '"Audit failed"']:
+            with self.subTest(reference=reference):
+                self.assertTrue(has_failed_verdict(PHRASE + '\n' + reference, include_source=True))
+        for quote in ['"Audit failed"', "'Audit failed'", '“Audit failed”', '‘Audit failed’']:
+            with self.subTest(quote=quote):
+                self.assertFalse(has_failed_verdict(PHRASE + '\nno later ' + quote, include_source=True))
+
+    def test_source_failure_scope_and_markdown_pass_header(self):
+        self.assertFalse(has_failed_verdict('**' + PHRASE + '**\nno later "Audit failed"', include_source=True))
+        self.assertTrue(has_failed_verdict('Source review: PASS\nSource review: FAILED', include_source=True))
+        self.assertFalse(has_failed_verdict('Source review: PASS\nSource review: FAILED', include_source=False))
 
 
 if __name__ == '__main__':

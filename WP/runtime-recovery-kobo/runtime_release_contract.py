@@ -29,6 +29,18 @@ CORE_CONFIRMATION_SECONDS = 10
 SHARED_READINESS_SHA = 'e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00'
 KIT_STATUS = 'PREPARED_RUNTIME_FORWARD_ONLY_NOT_EXECUTED'
 PHRASE = 'Audit passed: OK to merge and deploy'
+FAILURE_REFERENCE_POLICY = 'PASS_HEADER_NEGATED_QUOTED_FAILURE_REFERENCE_ONLY'
+
+
+def has_failed_verdict(body, include_source=False):
+    """Keep broad refusal, except an exact negated quote inside a PASS verdict."""
+    lines = body.lstrip().splitlines()
+    first = lines[0].strip().strip('*_# ') if lines else ''
+    if first in [PHRASE, 'Source review: PASS']:
+        body = re.sub(r'\bno later[ \t]+(?:"audit failed"|\'audit failed\'|“audit failed”|‘audit failed’)',
+            '', body, flags=re.IGNORECASE)
+    normalized = body.lower()
+    return 'audit failed' in normalized or (include_source and 'source review: failed' in normalized)
 
 
 def sha(path):
@@ -206,7 +218,7 @@ def production_source_review(review, tooling, files, now=None):
     tokens += [files[name] for name in PRODUCTION_SOURCE_FILES] + pairing_review_tokens()
     tokens += [REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_SHA, REVIEWED_PROOF_CONTRACT_SHA,
         PROOF_BASELINE_LAYOUT_SHA, 'proofBaselineLayoutPolicy=' + PROOF_BASELINE_LAYOUT_POLICY,
-        'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID)]
+        'proofSourceReviewId=' + str(PROOF_SOURCE_REVIEW_ID), FAILURE_REFERENCE_POLICY]
     require(all(token in review['body'] for token in tokens), 'Exact production baseline source approval missing')
     now = now or datetime.datetime.now(datetime.timezone.utc)
     require(utc_seconds(review['created_at']) <= now.timestamp(), 'Production source review is future-dated')
@@ -233,7 +245,7 @@ def proof_authority(proof, pin, source, authority, authority_sha):
 
 
 def review_tokens(manifest, manifest_sha):
-    return release_binding_tokens() + pairing_review_tokens() + [PHRASE, manifest['head'], manifest['image'], manifest_sha,
+    return release_binding_tokens() + pairing_review_tokens() + [PHRASE, FAILURE_REFERENCE_POLICY, manifest['head'], manifest['image'], manifest_sha,
         manifest['files']['deploy_runtime.py'], manifest['files']['rehearsal-receipt.json'],
         manifest['files']['startup_common.py'], manifest['files']['yy-authorization-evidence.md'],
         manifest['files']['target-pin.json'], HISTORICAL_RECEIPT_SHA,
