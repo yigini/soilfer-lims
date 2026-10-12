@@ -1,0 +1,35 @@
+{
+  "observedUtc": "2026-10-12T00:06:06.204726+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-proof-f830f900-20261011T234650Z",
+  "productionMutations": 0,
+  "sha256": "b57bcc97a184a87b65bcf3ed9dfdb1ff2262ee5cb3f6e17e85d1a043ee14721e",
+  "mode": "0o400",
+  "bytes": 93356,
+  "completedSyncs": [
+    {
+      "utc": "2026-10-12T00:00:14.465783998Z",
+      "epochSeconds": 1791763214.465783,
+      "labId": "ZMB-LAB1",
+      "newSamples": 0,
+      "skipped": 0
+    }
+  ],
+  "protectedTableCount": 104,
+  "schemaPreserved": true,
+  "allOriginalRowsPreserved": true,
+  "integrity": "ok",
+  "foreignKeyViolations": 0,
+  "newSampleCount": {
+    "25731264-f02a-4172-8ef1-75512b7607a5": 0,
+    "38744747-1d3f-4f4a-8523-6f251ecd1fba": 0,
+    "534aec5a-2b3a-49f1-9136-507f624fbf6b": 0,
+    "6e60eebe-5d8d-4e13-8037-efeb8041b24c": 0,
+    "78cd0dc8-f04c-4bcf-9451-bc9507ee0623": 0,
+    "897c1fb0-d83c-40cd-b513-b3e6e6b78172": 0,
+    "a9fc2329-cdfc-408e-aeb2-fa1a9020e66d": 0,
+    "c630d7b4-5d44-4826-94e5-5851abbd2a46": 0,
+    "ec5a5a67-3f5a-4682-88df-edb0e07e6485": 0,
+    "edfc27ed-adfe-44f8-8ef6-f159f3ba2fc0": 0,
+    "f24b4f7a-1da7-4320-831e-b9105647f106": 0
+  }
+}
