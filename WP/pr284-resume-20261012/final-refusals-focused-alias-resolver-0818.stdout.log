@@ -1,0 +1,7 @@
+No tests found, exiting with code 1
+Run with `--passWithNoTests` to exit with code 0
+No files found in C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server.
+Make sure Jest's configuration does not exclude this directory.
+To set up Jest, make sure a package.json file exists.
+Jest Documentation: https://jestjs.io/docs/configuration
+Files: "R:/server/tests/contracts/audit_4_7_import_commit.test.js", "R:/server/tests/contracts/audit_4_7_calculation_import.test.js", "R:/server/tests/contracts/audit_4_7_import_templates.test.js", "R:/server/tests/contracts/audit_4_7_instrument_import_install.test.js", "R:/server/tests/contracts/workflow_evidence_write_authority.test.js", "R:/server/tests/contracts/spectral_stage_b.test.js", "R:/server/tests/contracts/spectral_multipart_upload.test.js", "R:/server/tests/contracts/reception_route.test.js", "R:/server/tests/contracts/audit_4_3_keyboard_playwright.test.js"

@@ -1,0 +1,207 @@
+FAIL tests/contracts/audit_4_7_import_commit.test.js (15.618 s)
+  √ preview is read-only; commit saves exact sample drafts, pending QC and a complete immutable source receipt (1946 ms)
+  √ two bad matched rows and valid sample/QC values refuse the whole file and list every row with zero writes (1072 ms)
+  √ zero matches and duplicate destinations are explicit refusals, never a skipped ambiguity or partial receipt (1102 ms)
+  √ a draft appearing after preview is rechecked at commit and retains every saved raw input (1084 ms)
+  √ changing the exact file, actor or preview signature cannot authorize a commit (1065 ms)
+  √ mounted multipart preview and commit use actual token/permission/run owners; HTTP cannot claim receipt authority (1567 ms)
+  √ mounted wizard context reads only the actual scoped native instrument/run metadata and persisted templates (1216 ms)
+  × HTTP preview and commit refuse another same-lab instrument mapping with 409 and zero writes (1173 ms)
+  √ dilution10 on a direct sample row refuses the whole file with zero writes (1074 ms)
+  √ dilution10 on a QC row refuses the whole file with zero writes (1078 ms)
+  √ missing catalogue units refuse commit even with the instrument source unit, retaining every row (1062 ms)
+  √ a QC unit mismatch refuses otherwise valid direct samples and commit with zero writes (1067 ms)
+
+  ● HTTP preview and commit refuse another same-lab instrument mapping with 409 and zero writes
+
+    PrismaClientKnownRequestError: 
+    Invalid `f.db.batch.update()` invocation in
+    C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_import_commit.test.js:147:26
+
+      144 // Obtain a real signed preview while the synthetic run selects B,
+      145 // then change its selection to A before both requests. The commit
+      146 // must reach its actual instrument recheck, not fail an invented token.
+    → 147 await f.db.batch.update(
+    Foreign key constraint violated on the foreign key
+
+      67 |
+      68 | More Information: https://pris.ly/d/execute-raw
+    > 69 | `)}var ci=({clientMethod:e,activeProvider:t})=>r=>{let n="",i;if(mr(r))n=r.sql,i={values:et(r.values),__prismaRawParameters__:!0};else if(Array.isArray(r)){let[o,...s]=r;n=o,i={values:et(s||[]),__prismaRawParameters__:!0}}else switch(t){case"sqlite":case"mysql":{n=r.sql,i={values:et(r.values),__prismaRawParameters__:!0};break}case"cockroachdb":case"postgresql":case"postgres":{n=r.text,i={values:et(r.values),__prismaRawParameters__:!0};break}case"sqlserver":{n=cl(r),i={values:et(r.values),__prismaRawParameters__:!0};break}default:throw new Error(`The ${t} provider does not support ${e}`)}return i?.values?yl(`prisma.${e}(${n}, ${i.values})`):yl(`prisma.${e}(${n})`),{query:n,parameters:i}},wl={requestArgsToMiddlewareArgs(e){return[e.strings,...e.values]},middlewareArgsToRequestArgs(e){let[t,...r]=e;return new hl.Sql(t,r)}},bl={requestArgsToMiddlewareArgs(e){return[e]},middlewareArgsToRequestArgs(e){return e[0]}};function pi(e){return function(r,n){let i,o=(s=e)=>{try{return s===void 0||s?.kind==="itx"?i??=xl(r(s)):xl(r(s))}catch(a){return Promise.reject(a)}};return{get spec(){return n},then(s,a){return o().then(s,a)},catch(s){return o().catch(s)},finally(s){return o().finally(s)},requestTransaction(s){let a=o(s);return a.requestTransaction?a.requestTransaction(s):a},[Symbol.toStringTag]:"PrismaPromise"}}}function xl(e){return typeof e.then=="function"?e:Promise.resolve(e)}var El={name:"@prisma/instrumentation-contract",version:"7.4.0",description:"Shared types and utilities for Prisma instrumentation",main:"dist/index.js",module:"dist/index.mjs",types:"dist/index.d.ts",exports:{".":{require:{types:"./dist/index.d.ts",default:"./dist/index.js"},import:{types:"./dist/index.d.mts",default:"./dist/index.mjs"}}},license:"Apache-2.0",homepage:"https://www.prisma.io",repository:{type:"git",url:"https://github.com/prisma/prisma.git",directory:"packages/instrumentation-contract"},bugs:"https://github.com/prisma/prisma/issues",scripts:{dev:"DEV=true tsx helpers/build.ts",build:"tsx helpers/build.ts",prepublishOnly:"pnpm run build",test:"vitest run"},files:["dist"],sideEffects:!1,devDependencies:{"@opentelemetry/api":"1.9.0"},peerDependencies:{"@opentelemetry/api":"^1.8"}};var lm=El.version.split(".")[0],um="PRISMA_INSTRUMENTATION",cm=`V${lm}_PRISMA_INSTRUMENTATION`,Pl=globalThis;function Tl(){let e=Pl[cm];return e?.helper?e.helper:Pl[um]?.helper}var pm={isEnabled(){return!1},getTraceParent(){return"00-10-10-00"},dispatchEngineSpans(){},getActiveContext(){},runInChildSpan(e,t){return t()}},di=class{isEnabled(){return this.getTracingHelper().isEnabled()}getTraceParent(t){return this.getTracingHelper().getTraceParent(t)}dispatchEngineSpans(t){return this.getTracingHelper().dispatchEngineSpans(t)}getActiveContext(){return this.getTracingHelper().getActiveContext()}runInChildSpan(t,r){return this.getTracingHelper().runInChildSpan(t,r)}getTracingHelper(){return Tl()??pm}};function Sl(){return new di}function Al(e,t=()=>{}){let r,n=new Promise(i=>r=i);return{then(i){return--e===0&&r(t()),i?.(n)}}}function vl(e){return typeof e=="string"?e:e.reduce((t,r)=>{let n=typeof r=="string"?r:r.level;return n==="query"?t:t&&(r==="info"||t==="info")?"info":n},void 0)}var kl=require("@prisma/client-runtime-utils");function Cl(e){if(e.action!=="findUnique"&&e.action!=="findUniqueOrThrow")return;let t=[];return e.modelName&&t.push(e.modelName),e.query.arguments&&t.push(mi(e.query.arguments)),t.push(mi(e.query.selection)),t.join("")}function mi(e){return`(${Object.keys(e).sort().map(r=>{let n=e[r];return typeof n=="object"&&n!==null?`(${r} ${mi(n)})`:r}).join(" ")})`}var dm={aggregate:!1,aggregateRaw:!1,createMany:!0,createManyAndReturn:!0,createOne:!0,deleteMany:!0,deleteOne:!0,executeRaw:!0,findFirst:!1,findFirstOrThrow:!1,findMany:!1,findRaw:!1,findUnique:!1,findUniqueOrThrow:!1,groupBy:!1,queryRaw:!1,runCommandRaw:!0,updateMany:!0,updateManyAndReturn:!0,updateOne:!0,upsertOne:!0};function fi(e){return dm[e]}var Hr=class{constructor(t){this.options=t;this.batches={}}batches;tickActive=!1;request(t){let r=this.options.batchBy(t);return r?(this.batches[r]||(this.batches[r]=[],this.tickActive||(this.tickActive=!0,process.nextTick(()=>{this.dispatchBatches(),this.tickActive=!1}))),new Promise((n,i)=>{this.batches[r].push({request:t,resolve:n,reject:i})})):this.options.singleLoader(t)}dispatchBatches(){for(let t in this.batches){let r=this.batches[t];delete this.batches[t],r.length===1?this.options.singleLoader(r[0].request).then(n=>{n instanceof Error?r[0].reject(n):r[0].resolve(n)}).catch(n=>{r[0].reject(n)}):(r.sort((n,i)=>this.options.batchOrder(n.request,i.request)),this.options.batchLoader(r.map(n=>n.request)).then(n=>{if(n instanceof Error)for(let i=0;i<r.length;i++)r[i].reject(n);else for(let i=0;i<r.length;i++){let o=n[i];o instanceof Error?r[i].reject(o):r[i].resolve(o)}}).catch(n=>{for(let i=0;i<r.length;i++)r[i].reject(n)}))}}get[Symbol.toStringTag](){return"DataLoader"}};var Rl=require("@prisma/client-runtime-utils");function Re(e,t){if(t===null)return t;switch(e){case"bigint":return BigInt(t);case"bytes":{let{buffer:r,byteOffset:n,byteLength:i}=Buffer.from(t,"base64");return new Uint8Array(r,n,i)}case"decimal":return new Rl.Decimal(t);case"datetime":case"date":return new Date(t);case"time":return new Date(`1970-01-01T${t}Z`);case"bigint-array":return t.map(r=>Re("bigint",r));case"bytes-array":return t.map(r=>Re("bytes",r));case"decimal-array":return t.map(r=>Re("decimal",r));case"datetime-array":return t.map(r=>Re("datetime",r));case"date-array":return t.map(r=>Re("date",r));case"time-array":return t.map(r=>Re("time",r));default:return t}}function Gr(e){let t=[],r=mm(e);for(let n=0;n<e.rows.length;n++){let i=e.rows[n],o={...r};for(let s=0;s<i.length;s++)o[e.columns[s]]=Re(e.types[s],i[s]);t.push(o)}return t}function mm(e){let t={};for(let r=0;r<e.columns.length;r++)t[e.columns[r]]=null;return t}var fm=F("prisma:client:request_handler"),zr=class{client;dataloader;logEmitter;constructor(t,r){this.logEmitter=r,this.client=t,this.dataloader=new Hr({batchLoader:Zo(async({requests:n,customDataProxyFetch:i})=>{let{transaction:o,otelParentCtx:s}=n[0],a=n.map(p=>p.protocolQuery),l=this.client._tracingHelper.getTraceParent(s),u=n.some(p=>fi(p.protocolQuery.action));return(await this.client._engine.requestBatch(a,{traceparent:l,transaction:gm(o),containsWrite:u,customDataProxyFetch:i})).map((p,d)=>{if(p instanceof Error)return p;try{return this.mapQueryEngineResult(n[d],p)}catch(f){return f}})}),singleLoader:async n=>{let i=n.transaction?.kind==="itx"?Il(n.transaction):void 0,o=await this.client._engine.request(n.protocolQuery,{traceparent:this.client._tracingHelper.getTraceParent(),interactiveTransaction:i,isWrite:fi(n.protocolQuery.action),customDataProxyFetch:n.customDataProxyFetch});return this.mapQueryEngineResult(n,o)},batchBy:n=>n.transaction?.id?`transaction-${n.transaction.id}`:Cl(n.protocolQuery),batchOrder(n,i){return n.transaction?.kind==="batch"&&i.transaction?.kind==="batch"?n.transaction.index-i.transaction.index:0}})}async request(t){try{return await this.dataloader.request(t)}catch(r){let{clientMethod:n,callsite:i,transaction:o,args:s,modelName:a}=t;this.handleAndLogRequestError({error:r,clientMethod:n,callsite:i,transaction:o,args:s,modelName:a,globalOmit:t.globalOmit})}}mapQueryEngineResult({dataPath:t,unpacker:r},n){let i=n?.data,o=this.unpack(i,t,r);return process.env.PRISMA_CLIENT_GET_TIME?{data:o}:o}handleAndLogRequestError(t){try{this.handleRequestError(t)}catch(r){throw this.logEmitter&&this.logEmitter.emit("error",{message:r.message,target:t.clientMethod,timestamp:new Date}),r}}handleRequestError({error:t,clientMethod:r,callsite:n,transaction:i,args:o,modelName:s,globalOmit:a}){if(fm(t),ym(t,i))throw t;if(t instanceof w.PrismaClientKnownRequestError&&hm(t)){let u=Ol(t.meta);ar({args:o,errors:[u],callsite:n,errorFormat:this.client._errorFormat,originalMethod:r,clientVersion:this.client._clientVersion,globalOmit:a})}let l=t.message;if(n&&(l=Xt({callsite:n,originalMethod:r,isPanic:t.isPanic,showColors:this.client._errorFormat==="pretty",message:l})),l=this.sanitizeMessage(l),t.code){let u=s?{modelName:s,...t.meta}:t.meta;throw new w.PrismaClientKnownRequestError(l,{code:t.code,clientVersion:this.client._clientVersion,meta:u,batchRequestIdx:t.batchRequestIdx})}else{if(t.isPanic)throw new w.PrismaClientRustPanicError(l,this.client._clientVersion);if(t instanceof w.PrismaClientUnknownRequestError)throw new w.PrismaClientUnknownRequestError(l,{clientVersion:this.client._clientVersion,batchRequestIdx:t.batchRequestIdx});if(t instanceof w.PrismaClientInitializationError)throw new w.PrismaClientInitializationError(l,this.client._clientVersion);if(t instanceof w.PrismaClientRustPanicError)throw new w.PrismaClientRustPanicError(l,this.client._clientVersion)}throw t.clientVersion=this.client._clientVersion,t}sanitizeMessage(t){return this.client._errorFormat&&this.client._errorFormat!=="pretty"?Oe(t):t}unpack(t,r,n){if(!t||(t.data&&(t=t.data),!t))return t;let i=Object.keys(t)[0],o=Object.values(t)[0],s=r.filter(u=>u!=="select"&&u!=="include"),a=bn(o,s),l=i==="queryRaw"?Gr(a):me(a);return n?n(l):l}get[Symbol.toStringTag](){return"RequestHandler"}};function gm(e){if(e){if(e.kind==="batch")return{kind:"batch",options:{isolationLevel:e.isolationLevel}};if(e.kind==="itx")return{kind:"itx",options:Il(e)};ie(e,"Unknown transaction kind")}}function Il(e){return{id:e.id,payload:e.payload}}function ym(e,t){return(0,kl.hasBatchIndex)(e)&&t?.kind==="batch"&&e.batchRequestIdx!==t.index}function hm(e){return e.code==="P2009"||e.code==="P2012"}function Ol(e){if(e.kind==="Union")return{kind:"Union",errors:e.errors.map(Ol)};if(Array.isArray(e.selectionPath)){let[,...t]=e.selectionPath;return{...e,selectionPath:t}}return e}var gi=_r;var _l=U(cn());var R=class extends Error{constructor(t){super(t+`
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ^
+      70 | Read more at https://pris.ly/d/client-constructor`),this.name="PrismaClientConstructorValidationError"}get[Symbol.toStringTag](){return"PrismaClientConstructorValidationError"}};mt(R,"PrismaClientConstructorValidationError");var Nl=["errorFormat","adapter","accelerateUrl","log","transactionOptions","omit","comments","__internal"],Dl=["pretty","colorless","minimal"],Fl=["info","query","warn","error"],wm={adapter:()=>{},accelerateUrl:e=>{if(e!==void 0){if(typeof e!="string")throw new R(`Invalid value ${JSON.stringify(e)} for "accelerateUrl" provided to PrismaClient constructor.`);if(e.trim().length===0)throw new R('"accelerateUrl" provided to PrismaClient constructor must be a non-empty string.')}},errorFormat:e=>{if(e){if(typeof e!="string")throw new R(`Invalid value ${JSON.stringify(e)} for "errorFormat" provided to PrismaClient constructor.`);if(!Dl.includes(e)){let t=jt(e,Dl);throw new R(`Invalid errorFormat ${e} provided to PrismaClient constructor.${t}`)}}},log:e=>{if(!e)return;if(!Array.isArray(e))throw new R(`Invalid value ${JSON.stringify(e)} for "log" provided to PrismaClient constructor.`);function t(r){if(typeof r=="string"&&!Fl.includes(r)){let n=jt(r,Fl);throw new R(`Invalid log level "${r}" provided to PrismaClient constructor.${n}`)}}for(let r of e){t(r);let n={level:t,emit:i=>{let o=["stdout","event"];if(!o.includes(i)){let s=jt(i,o);throw new R(`Invalid value ${JSON.stringify(i)} for "emit" in logLevel provided to PrismaClient constructor.${s}`)}}};if(r&&typeof r=="object")for(let[i,o]of Object.entries(r))if(n[i])n[i](o);else throw new R(`Invalid property ${i} for "log" provided to PrismaClient constructor`)}},transactionOptions:e=>{if(!e)return;let t=e.maxWait;if(t!=null&&t<=0)throw new R(`Invalid value ${t} for maxWait in "transactionOptions" provided to PrismaClient constructor. maxWait needs to be greater than 0`);let r=e.timeout;if(r!=null&&r<=0)throw new R(`Invalid value ${r} for timeout in "transactionOptions" provided to PrismaClient constructor. timeout needs to be greater than 0`)},omit:(e,t)=>{if(typeof e!="object")throw new R('"omit" option is expected to be an object.');if(e===null)throw new R('"omit" option can not be `null`');let r=[];for(let[n,i]of Object.entries(e)){let o=Em(n,t.runtimeDataModel);if(!o){r.push({kind:"UnknownModel",modelKey:n});continue}for(let[s,a]of Object.entries(i)){let l=o.fields.find(u=>u.name===s);if(!l){r.push({kind:"UnknownField",modelKey:n,fieldName:s});continue}if(l.relationName){r.push({kind:"RelationInOmit",modelKey:n,fieldName:s});continue}typeof a!="boolean"&&r.push({kind:"InvalidFieldValue",modelKey:n,fieldName:s})}}if(r.length>0)throw new R(Pm(e,r))},comments:e=>{if(e!==void 0){if(!Array.isArray(e))throw new R(`Invalid value ${JSON.stringify(e)} for "comments" provided to PrismaClient constructor. Expected an array of SQL commenter plugins.`);for(let t=0;t<e.length;t++)if(typeof e[t]!="function")throw new R(`Invalid value at index ${t} for "comments" provided to PrismaClient constructor. Each plugin must be a function.`)}},__internal:e=>{if(!e)return;let t=["debug","engine","configOverride"];if(typeof e!="object")throw new R(`Invalid value ${JSON.stringify(e)} for "__internal" to PrismaClient constructor`);for(let[r]of Object.entries(e))if(!t.includes(r)){let n=jt(r,t);throw new R(`Invalid property ${JSON.stringify(r)} for "__internal" provided to PrismaClient constructor.${n}`)}}};function bm(e){let t=e.adapter!==void 0,r=e.accelerateUrl!==void 0;if(t&&r)throw new R('The "adapter" and "accelerateUrl" options are mutually exclusive. Please provide only one of them.');if(!t&&!r)throw new R('Using engine type "client" requires either "adapter" or "accelerateUrl" to be provided to PrismaClient constructor.')}function Ll(e,t){for(let[r,n]of Object.entries(e)){if(!Nl.includes(r)){let i=jt(r,Nl);throw new R(`Unknown property ${r} provided to PrismaClient constructor.${i}`)}wm[r](n,t)}bm(e)}function jt(e,t){if(t.length===0||typeof e!="string")return"";let r=xm(e,t);return r?` Did you mean "${r}"?`:""}function xm(e,t){if(t.length===0)return null;let r=t.map(i=>({value:i,distance:(0,_l.default)(e,i)}));r.sort((i,o)=>i.distance<o.distance?-1:1);let n=r[0];return n.distance<3?n.value:null}function Em(e,t){return Ml(t.models,e)??Ml(t.types,e)}function Ml(e,t){let r=Object.keys(e).find(n=>ue(n)===t);if(r)return e[r]}function Pm(e,t){let r=je(e);for(let o of t)switch(o.kind){case"UnknownModel":r.arguments.getField(o.modelKey)?.markAsError(),r.addErrorMessage(()=>`Unknown model name: ${o.modelKey}.`);break;case"UnknownField":r.arguments.getDeepField([o.modelKey,o.fieldName])?.markAsError(),r.addErrorMessage(()=>`Model "${o.modelKey}" does not have a field named "${o.fieldName}".`);break;case"RelationInOmit":r.arguments.getDeepField([o.modelKey,o.fieldName])?.markAsError(),r.addErrorMessage(()=>'Relations are already excluded by default and can not be specified in "omit".');break;case"InvalidFieldValue":r.arguments.getDeepFieldValue([o.modelKey,o.fieldName])?.markAsError(),r.addErrorMessage(()=>"Omit field option value must be a boolean.");break}let{message:n,args:i}=sr(r,"colorless");return`Error validating "omit" option:
+      71 |
+      72 | ${i}
+
+      at zr.handleRequestError (prisma_client/runtime/client.js:69:8172)
+      at zr.handleRequestError [as handleAndLogRequestError] (prisma_client/runtime/client.js:69:7467)
+      at zr.handleAndLogRequestError [as request] (prisma_client/runtime/client.js:69:7174)
+      at a (prisma_client/runtime/client.js:79:5816)
+      at withQcRunHttp.workbench (tests/contracts/audit_4_7_import_commit.test.js:147:9)
+      at tests/helpers/qcRunHttpHarness.js:31:13
+      at withQcRunHttp (tests/helpers/qcRunHttpHarness.js:10:9)
+      at Object.<anonymous> (tests/contracts/audit_4_7_import_commit.test.js:142:5)
+
+PASS tests/contracts/audit_4_7_instrument_import_install.test.js
+  √ the additional current-main schema-only factory is closed and digest-bound without changing the old fixture (11 ms)
+  √ a populated predecessor retains every analytical, QC, audit and raw draft row across dry-run, apply and repeated apply (1632 ms)
+  retained historical89-model main
+    √ every template column is immutable: id (14 ms)
+    √ every template column is immutable: labId (9 ms)
+    √ every template column is immutable: instrumentId (9 ms)
+    √ every template column is immutable: name (9 ms)
+    √ every template column is immutable: version (7 ms)
+    √ every template column is immutable: mapping (9 ms)
+    √ every template column is immutable: createdBy (7 ms)
+    √ every template column is immutable: createdAt (8 ms)
+    √ every template column is immutable: supersedesId (7 ms)
+    √ every receipt column is immutable: id (9 ms)
+    √ every receipt column is immutable: labId (8 ms)
+    √ every receipt column is immutable: instrumentId (9 ms)
+    √ every receipt column is immutable: templateId (8 ms)
+    √ every receipt column is immutable: templateVersion (7 ms)
+    √ every receipt column is immutable: sourceSha256 (7 ms)
+    √ every receipt column is immutable: sourceName (7 ms)
+    √ every receipt column is immutable: mappingSnapshot (7 ms)
+    √ every receipt column is immutable: importedBy (7 ms)
+    √ every receipt column is immutable: importedAt (9 ms)
+    √ deletion of ImportTemplate is refused with its retained rows unchanged (7 ms)
+    √ deletion of InstrumentImportReceipt is refused with its retained rows unchanged (8 ms)
+    √ append-only revisions advance exactly once and preserve the original raw mapping (7 ms)
+    √ invalid template binding or revision refuses without a row: {"version":2} (8 ms)
+    √ invalid template binding or revision refuses without a row: {"instrumentId":"other-instrument"} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"mapping":"not JSON"} (8 ms)
+    √ invalid template binding or revision refuses without a row: {"labId":"other-lab","supersedesId":"mapping-v1","version":2} (7 ms)
+    √ invalid source receipt refuses without a row: {"templateVersion":2} (9 ms)
+    √ invalid source receipt refuses without a row: {"instrumentId":"other-instrument"} (8 ms)
+    √ invalid source receipt refuses without a row: {"sourceSha256":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} (8 ms)
+    √ invalid source receipt refuses without a row: {"mappingSnapshot":"not JSON"} (7 ms)
+    √ the new draft pointer is nullable and restrictive, with no historical backfill or analytical writes (9 ms)
+    √ the schema-only factory is source-bound and unavailable to runtime or another caller (36 ms)
+    √ literal pre-200 classification is read-only and does not invent a receipt (30 ms)
+    √ an unmarked upgraded schema is refused without adopting its rows (11 ms)
+    √ a foreign object in the managed import namespace is refused (9 ms)
+    √ a forged receipt refuses without changing any imported evidence (8 ms)
+    √ installer CLI refuses malformed arguments: [] (11 ms)
+    √ installer CLI refuses malformed arguments: ["--apply"] (8 ms)
+    √ installer CLI refuses malformed arguments: ["--db"] (8 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--dry-run"] (8 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--apply"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--unknown"] (7 ms)
+    √ installer CLI accepts an explicit existing-path argument and one mode (8 ms)
+    √ startup refuses a missing database without creating it (7 ms)
+  actual current92-model main after210
+    √ every template column is immutable: id (8 ms)
+    √ every template column is immutable: labId (7 ms)
+    √ every template column is immutable: instrumentId (9 ms)
+    √ every template column is immutable: name (8 ms)
+    √ every template column is immutable: version (8 ms)
+    √ every template column is immutable: mapping (7 ms)
+    √ every template column is immutable: createdBy (8 ms)
+    √ every template column is immutable: createdAt (7 ms)
+    √ every template column is immutable: supersedesId (7 ms)
+    √ every receipt column is immutable: id (7 ms)
+    √ every receipt column is immutable: labId (7 ms)
+    √ every receipt column is immutable: instrumentId (9 ms)
+    √ every receipt column is immutable: templateId (8 ms)
+    √ every receipt column is immutable: templateVersion (8 ms)
+    √ every receipt column is immutable: sourceSha256 (7 ms)
+    √ every receipt column is immutable: sourceName (9 ms)
+    √ every receipt column is immutable: mappingSnapshot (8 ms)
+    √ every receipt column is immutable: importedBy (9 ms)
+    √ every receipt column is immutable: importedAt (10 ms)
+    √ deletion of ImportTemplate is refused with its retained rows unchanged (10 ms)
+    √ deletion of InstrumentImportReceipt is refused with its retained rows unchanged (10 ms)
+    √ append-only revisions advance exactly once and preserve the original raw mapping (10 ms)
+    √ invalid template binding or revision refuses without a row: {"version":2} (9 ms)
+    √ invalid template binding or revision refuses without a row: {"instrumentId":"other-instrument"} (7 ms)
+    √ invalid template binding or revision refuses without a row: {"mapping":"not JSON"} (9 ms)
+    √ invalid template binding or revision refuses without a row: {"labId":"other-lab","supersedesId":"mapping-v1","version":2} (8 ms)
+    √ invalid source receipt refuses without a row: {"templateVersion":2} (9 ms)
+    √ invalid source receipt refuses without a row: {"instrumentId":"other-instrument"} (9 ms)
+    √ invalid source receipt refuses without a row: {"sourceSha256":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} (9 ms)
+    √ invalid source receipt refuses without a row: {"mappingSnapshot":"not JSON"} (9 ms)
+    √ the new draft pointer is nullable and restrictive, with no historical backfill or analytical writes (9 ms)
+    √ the schema-only factory is source-bound and unavailable to runtime or another caller (14 ms)
+    √ literal pre-200 classification is read-only and does not invent a receipt (24 ms)
+    √ an unmarked upgraded schema is refused without adopting its rows (9 ms)
+    √ a foreign object in the managed import namespace is refused (8 ms)
+    √ a forged receipt refuses without changing any imported evidence (8 ms)
+    √ installer CLI refuses malformed arguments: [] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--apply"] (8 ms)
+    √ installer CLI refuses malformed arguments: ["--db"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--dry-run"] (8 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--apply"] (7 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--unknown"] (8 ms)
+    √ installer CLI accepts an explicit existing-path argument and one mode (7 ms)
+    √ startup refuses a missing database without creating it (9 ms)
+  the released #293 predecessor keeps #205 records inside the exact import boundary
+    √ the additional current release schema-only fixture is closed and digest-bound (6 ms)
+    √ main51f schema and its native import ALTER are recognized without row writes or adoption (18 ms)
+    √ exact records predecessor preFresh refuses a changed type or unknown column (35 ms)
+    √ exact records predecessor preUpgraded refuses a changed type or unknown column (42 ms)
+    √ the complete installer contract has no unresolved or unauthorized SQL (32 ms)
+
+PASS tests/contracts/audit_4_3_keyboard_playwright.test.js (22.226 s)
+  √ real Chromium types and records 40 values through the production app with keyboard input only (21944 ms)
+
+PASS tests/contracts/audit_4_7_import_templates.test.js (5.276 s)
+  √ mapping preserves raw column choices and never supplies a calculation, conversion or final value (2 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"delimiter":"AUTO"} (11 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"idColumn":-1} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"idColumn":1.5} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"idType":"GUESS"}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"hasHeader":"yes"} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"conversionFactor":1000}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unit":"mg/L","unitColumn":2}]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unit":"mg/L","unitColumn":-1}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1}]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unitColumn":2,"inputs":[{"variable":"c","column":1,"unit":"mg/L"}]}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","inputs":[{"inputKey":"c","column":1,"unit":"mg/L"}]}]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","inputs":[]}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","inputs":[{"variable":"c","column":1}]}]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unit":"mg/L"},{"analysisCode":"X","valueColumn":2,"unit":"mg/L"}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"qcDetector":{"prefixes":[{"prefix":"BLK","kind":"BLANK"}]}} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"qcDetector":{"positionColumn":4,"prefixes":[{"prefix":"BLK","kind":"GUESS"}]}}
+  √ actual scoped template owner appends revisions, retains the root and audits each save (1068 ms)
+  √ another laboratory and an unprivileged actor cannot save a mapping or an audit row (1991 ms)
+  √ mounted template routes save and list through actual token, scope and permission middleware (1079 ms)
+  √ a same-lab different-instrument revision refuses with its exact code and no mapping or audit writes (994 ms)
+
+PASS tests/contracts/audit_4_7_calculation_import.test.js (5.201 s)
+  √ actual EXCH_CA/Olsen activated input imports do not calculate; later typed recording freezes the selected local definitions and verified raw input text (1316 ms)
+  √ missing/duplicate/unknown activated variables, output-unit input guesses and active direct-value mappings refuse the whole commit (1343 ms)
+  √ a calculation deactivation after preview refuses before any receipt, raw draft or scientific evidence is created (1156 ms)
+  √ QC under an input-only mapping refuses the whole file before any draft, receipt or scientific writes (1262 ms)
+
+PASS tests/contracts/spectral_stage_b.test.js
+  Spectral Library Stage B (SL-06 to SL-12)
+    √ SL-06 & SL-08 & SL-09 & SL-10: Ingest stores raw file, links equipment, and saves typed metadata (49 ms)
+    √ SL-07: Cannot approve spectrum if physical quantity is UNVERIFIED (9 ms)
+    √ SL-11: Checksum Deduplication rejects identical file in same lab (16 ms)
+    √ SL-12: Supersession marks prior scan isCurrent: false and supersedes (36 ms)
+
+PASS tests/contracts/spectral_multipart_upload.test.js
+  Spectral Multipart Raw Ingest & Byte-Identical Preservation Contract (SL-06 & SL-13)
+    √ 1. Multipart raw JCAMP-DX upload preserves exact binary bytes and downloads back byte-identical (48 ms)
+    √ 2. Multipart duplicate upload is rejected by checksum (10 ms)
+
+FAIL tests/contracts/reception_route.test.js
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open 'C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_route.test.js'
+
+      at runTestInternal (node_modules/jest-runner/build/index.js:133:27)
+
+FAIL tests/contracts/workflow_evidence_write_authority.test.js
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open 'C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\workflow_evidence_write_authority.test.js'
+
+      at runTestInternal (node_modules/jest-runner/build/index.js:133:27)
+
+Test Suites: 3 failed, 6 passed, 9 total
+Tests:       1 failed, 139 passed, 140 total
+Snapshots:   0 total
+Time:        51.974 s, estimated 58 s
+Ran all test suites within paths "tests/contracts/audit_4_7_import_commit.test.js", "tests/contracts/audit_4_7_calculation_import.test.js", "tests/contracts/audit_4_7_import_templates.test.js", "tests/contracts/audit_4_7_instrument_import_install.test.js", "tests/contracts/workflow_evidence_write_authority.test.js", "tests/contracts/spectral_stage_b.test.js", "tests/contracts/spectral_multipart_upload.test.js", "tests/contracts/reception_route.test.js", "tests/contracts/audit_4_3_keyboard_playwright.test.js".

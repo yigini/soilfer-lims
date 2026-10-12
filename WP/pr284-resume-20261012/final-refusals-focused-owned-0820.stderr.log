@@ -1,0 +1,9 @@
+Error: Jest: Got error running globalSetup - R:\server\tests\globalSetup.js, reason: Owned test template selection refuses a working, production or aliased path.
+    at globalSetup (R:\server\tests\globalSetup.js:17:423)
+    at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:3166:17
+    at ScriptTransformer.requireAndTranspileModule (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\transform\build\index.js:623:24)
+    at async runGlobalHook (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:3162:9)
+    at async runJest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:3429:5)
+    at async _run10000 (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:1543:5)
+    at async runCLI (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@jest\core\build\index.js:1444:3)
+    at async Object.run (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\jest-cli\build\index.js:656:9)
