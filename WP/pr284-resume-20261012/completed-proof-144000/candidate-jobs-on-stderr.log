@@ -1,0 +1,74 @@
+2026-10-12T15:16:42.356596233Z A94_MANUAL_REVIEW_PENDING: 3 candidate sample(s) tracked on #162 for #182/#183
+2026-10-12T15:16:42.357002114Z [{"sampleId":"GTM-LAB1","tasks":[{"id":"WI-1789582246595-545","sampleId":"GTM-LAB1","analysis":"SAND","status":"NOT_ASSIGNED","assignedTo":null},{"id":"WI-1789582246600-449","sampleId":"GTM-LAB1","analysis":"SILT","status":"NOT_ASSIGNED","assignedTo":null},{"id":"WI-1789582246606-350","sampleId":"GTM-LAB1","analysis":"CLAY","status":"NOT_ASSIGNED","assignedTo":null}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"EXCH_NA\",\"CEC\",\"SAND\",\"SILT\",\"CLAY\"]","reasons":["COMPLETE_LEGACY_FRACTION_SET","DECLARED_REQUIRED_ANALYSES"]},{"sampleId":"Prueba 1 Arturo","tasks":[{"id":"WI-1789583575821-509","sampleId":"Prueba 1 Arturo","analysis":"SAND","status":"ASSIGNED","assignedTo":"tech_gtm_2"},{"id":"WI-1789583575826-765","sampleId":"Prueba 1 Arturo","analysis":"SILT","status":"ASSIGNED","assignedTo":"tech_gtm_2"},{"id":"WI-1789583575830-22","sampleId":"Prueba 1 Arturo","analysis":"CLAY","status":"ASSIGNED","assignedTo":"tech_gtm_2"}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"EXCH_NA\",\"CEC\",\"SAND\",\"SILT\",\"CLAY\"]","reasons":["COMPLETE_LEGACY_FRACTION_SET","DECLARED_REQUIRED_ANALYSES"]},{"sampleId":"W001","tasks":[{"id":"WI-1789481393069-84","sampleId":"W001","analysis":"SAND","status":"NOT_ASSIGNED","assignedTo":null}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"CEC\",\"SAND\"]","reasons":["EXPLICIT_GROUPED_ORDER"]}]
+2026-10-12T15:18:42.257082632Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:18:42.261307425Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:18:42.265274874Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:18:42.269505628Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:19:30.869450771Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:19:30.874029775Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:19:30.880951542Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:19:30.885690058Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:20:30.871089083Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:20:30.877066268Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:20:30.886436140Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:20:30.891405008Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:21:30.872935036Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:21:30.882404452Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:21:30.888554823Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:21:30.893367620Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:22:30.872826062Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:22:30.883051526Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:22:30.887230613Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:22:30.891319867Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:23:30.884571414Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:23:30.891455134Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:23:30.896700537Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:23:30.902064887Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:24:30.886879286Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:24:30.894230439Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:24:30.898015028Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:24:30.901592658Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:25:30.895665045Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:25:30.900800406Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:25:30.905630742Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:25:30.910270312Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:26:30.891906214Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:26:30.895764917Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:26:30.899497699Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:26:30.903043751Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:27:30.892498485Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:27:30.897104356Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:27:30.901680236Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:27:30.905990337Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:28:30.902678709Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:28:30.907045183Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:28:30.911045160Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:28:30.914613668Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:29:30.896669574Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:29:30.900857571Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:29:30.904753989Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:29:30.908334802Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:30:30.893684557Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:30:30.903028013Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:30:30.907346137Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:30:30.911625480Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:31:30.904844827Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:31:30.912825275Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:31:30.918838030Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:31:30.922754873Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:32:30.911000681Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:32:30.919363224Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:32:30.923650261Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:32:30.927982754Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:33:30.909230810Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:33:30.917598725Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:33:30.921562387Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:33:30.926367541Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:34:31.565963571Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:34:31.569245100Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:34:31.572645606Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:34:31.576825042Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:35:30.925987041Z [KOBO_SCHEDULER] Error syncing lab MOZ-LAB1: [KOBO] Configured project 'MOZL' does not exist in the database.
+2026-10-12T15:35:30.932646814Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:35:30.940456726Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
+2026-10-12T15:35:30.944385427Z [KOBO_SCHEDULER] Error syncing lab TUR: LAB_INACTIVE: Laboratory 'TURSAP LAB' is inactive. Intake disallowed.
