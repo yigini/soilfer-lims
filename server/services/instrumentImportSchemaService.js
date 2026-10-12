@@ -33,10 +33,12 @@ function classifyInstrumentImportSchema(db, source) {
     const matches = values => values.some(value => draftSql === normalized(value));
     // Exact native-ALTER and Prisma emissions bind #205 records; no generic
     // extra-column allowance and no alteration of the historical variants.
-    const preDraft = matches([source.preDraftSql, source.post205Drafts.preFresh, source.post205Drafts.preUpgraded]);
+    const preDraft = matches([source.preDraftSql, source.post205Drafts.preFresh, source.post205Drafts.preUpgraded,
+        source.post205Drafts.preNativeWorkbench]);
     const freshDraft = matches([source.freshTables.WorkItemDraft, source.post205Drafts.postFresh]);
     const upgradedDraft = matches([source.upgradedDraftSql, source.post205Drafts.postUpgradedFresh,
-        source.post205Drafts.postUpgradedLegacy, source.post205Drafts.postOlderImportThen205]);
+        source.post205Drafts.postUpgradedLegacy, source.post205Drafts.postOlderImportThen205,
+        source.post205Drafts.postNativeWorkbench]);
     if (!preDraft && !freshDraft && !upgradedDraft) differences.push('WorkItemDraft differs from all captured schema variants');
     const pointer = db.prepare('PRAGMA table_xinfo(WorkItemDraft)').all().find(row => row.name === 'importReceiptId');
     if (pointer && (pointer.type !== 'TEXT' || pointer.notnull !== 0 || pointer.dflt_value !== null || pointer.pk !== 0 || pointer.hidden !== 0)) differences.push('WorkItemDraft.importReceiptId differs');
