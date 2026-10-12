@@ -1,0 +1,23 @@
+{
+  "recordedUtc": "2026-10-12T15:07:10.565576+00:00",
+  "status": "SAME_APPROVED_FIRST_PROOF_RUNNING_NOT_PASSED",
+  "sourceReviewId": 6126765238,
+  "sourceCommit": "201bb5fe8fd30cb2991f7169177a864265e6301b",
+  "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "unit": "lims-owned-instrument-import-proof-959d17e1-20261012t144000z.service",
+  "lastObservationUtc": "2026-10-12T15:05:49.397387+00:00",
+  "freeBytes": 79250960384,
+  "productionOperations": 0,
+  "nativeClaudioAcknowledgement": "Observed 15:06 UTC: source pass and launch checked; waiting for stopped PASS, then NEW production-source/exact-kit review and post-deploy check.",
+  "files": {
+    "pr294-sidecar-first-proof.intent.json": "264d4a85be5f1395048aa450e8d87a129bc81fa640186db39705a55d010513e9",
+    "pr294-sidecar-first-proof.result.json": "e657a370a4c71b7bc9ce6a1cbc2b142c9355435656a1b5549c61397969bb87f2",
+    "pr294-sidecar-first-proof.stdout.log": "b5fd4e5c7b16218bbc99b44c474b1d47663d533d4d3460fe2bb25f9e3fae9e3c",
+    "pr294-sidecar-first-proof.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-pass-6126765238.json": "20d7807ac5973b2f6b30b60a20f8dfd221c8b200a502c30e6ed02c5a51801bf0",
+    "target-pin-959d17e1-sidecar-144000.json": "241bd693b8cfdb3e9a05440716bd925a620a807bdb371206430a4abc2a9481b1",
+    "pr294-sidecar-source-pass-verification.json": "be3430ff403020f3368d1514a59af16fc049ee3a60c9d9e09e1f31ccdc716528",
+    "pr294-sidecar-proof-observation-20261012T150112617407Z.json": "075f1a61d4bc39fac5ad7078fab1b2f8dd5f6d262694bbb3efa66f5fae008ca3",
+    "pr294-sidecar-proof-observation-20261012T150549782463Z.json": "1ccc6d0fdabd44649e9df080ebf175c23f17fd522bde6e81538ee85a9b06216d"
+  }
+}

@@ -1,0 +1,275 @@
+{
+  "observedUtc": "2026-10-12T15:05:49.397387+00:00",
+  "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "unit": "lims-owned-instrument-import-proof-959d17e1-20261012t144000z.service",
+  "unitState": {
+    "Result": "success",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "files": {
+    "migration.sql": {
+      "bytes": 4342,
+      "mode": "0o400"
+    },
+    "import_sealing.py": {
+      "bytes": 5918,
+      "mode": "0o400"
+    },
+    "post205-draft-tables.json": {
+      "bytes": 8105,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard_v2.py": {
+      "bytes": 5278,
+      "mode": "0o400"
+    },
+    "import-apply.stdout": {
+      "bytes": 1557,
+      "mode": "0o400"
+    },
+    "kobo_copy_preservation.py": {
+      "bytes": 16701,
+      "mode": "0o400"
+    },
+    "postflight-policy.cjs": {
+      "bytes": 4035,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard.py": {
+      "bytes": 5984,
+      "mode": "0o400"
+    },
+    "unit.stdout": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "capture_kobo_fetch.py": {
+      "bytes": 4767,
+      "mode": "0o400"
+    },
+    "import-apply.stderr": {
+      "bytes": 68,
+      "mode": "0o400"
+    },
+    "import_startup_checks.py": {
+      "bytes": 5448,
+      "mode": "0o400"
+    },
+    "export_launch_import_proof.py": {
+      "bytes": 7468,
+      "mode": "0o400"
+    },
+    "import-dry-retained-inspect.stdout": {
+      "bytes": 9287,
+      "mode": "0o644"
+    },
+    "rehearse_import.py": {
+      "bytes": 26511,
+      "mode": "0o400"
+    },
+    "fresh-prisma-tables.json": {
+      "bytes": 2877,
+      "mode": "0o400"
+    },
+    "unit.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import_installation.py": {
+      "bytes": 7579,
+      "mode": "0o400"
+    },
+    "fresh-protected-state.json": {
+      "bytes": 7465051,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard_v3.py": {
+      "bytes": 5625,
+      "mode": "0o400"
+    },
+    "import-apply-retained-inspect.stdout": {
+      "bytes": 9263,
+      "mode": "0o644"
+    },
+    "upgraded-prisma-draft-table.sql": {
+      "bytes": 874,
+      "mode": "0o400"
+    },
+    "postflight-qc-runs.cjs": {
+      "bytes": 4091,
+      "mode": "0o400"
+    },
+    "import_stage.py": {
+      "bytes": 10714,
+      "mode": "0o400"
+    },
+    "import-dry-retained-inspect.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-dry.stderr": {
+      "bytes": 68,
+      "mode": "0o400"
+    },
+    "postflight-auth.cjs": {
+      "bytes": 2045,
+      "mode": "0o400"
+    },
+    "readonly-smoke.cjs": {
+      "bytes": 3255,
+      "mode": "0o400"
+    },
+    "fresh-live-backup.db": {
+      "bytes": 563322880,
+      "mode": "0o400"
+    },
+    "pre-prisma-draft-table.sql": {
+      "bytes": 769,
+      "mode": "0o400"
+    },
+    "postflight-reference.cjs": {
+      "bytes": 2096,
+      "mode": "0o400"
+    },
+    "disk-allocation-observations.jsonl": {
+      "bytes": 6781948,
+      "mode": "0o644"
+    },
+    "startup_common.py": {
+      "bytes": 13858,
+      "mode": "0o400"
+    },
+    "release_support.py": {
+      "bytes": 20330,
+      "mode": "0o400"
+    },
+    "import-dry.stdout": {
+      "bytes": 705,
+      "mode": "0o400"
+    },
+    "instrument-import-attempt.json": {
+      "bytes": 281,
+      "mode": "0o400"
+    },
+    "target-pin.json": {
+      "bytes": 1706,
+      "mode": "0o400"
+    },
+    "import_proof_contract.py": {
+      "bytes": 15238,
+      "mode": "0o400"
+    },
+    "runtime_proof_policies.py": {
+      "bytes": 15922,
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 8418,
+      "mode": "0o400"
+    },
+    "import_preservation.py": {
+      "bytes": 9307,
+      "mode": "0o400"
+    },
+    "prepare_import_build.py": {
+      "bytes": 11009,
+      "mode": "0o400"
+    },
+    "import_source_graph.py": {
+      "bytes": 5771,
+      "mode": "0o400"
+    },
+    "build_import.py": {
+      "bytes": 8204,
+      "mode": "0o400"
+    },
+    "known_core_disk_guard_import.py": {
+      "bytes": 3839,
+      "mode": "0o400"
+    },
+    "candidate-rehearsal-authority.json": {
+      "bytes": 22636,
+      "mode": "0o400"
+    },
+    "import-apply-container.json": {
+      "bytes": 728,
+      "mode": "0o400"
+    },
+    "postflight-roles.cjs": {
+      "bytes": 12281,
+      "mode": "0o400"
+    },
+    "import-dry-copy-authority.json": {
+      "bytes": 707,
+      "mode": "0o400"
+    },
+    "import-apply-retained-inspect.stderr": {
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "import-dry-container.json": {
+      "bytes": 723,
+      "mode": "0o400"
+    }
+  },
+  "receipt": null,
+  "containers": [
+    {
+      "name": "soilfer-lims",
+      "image": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+      "restartCount": 0,
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "OOMKilled": false,
+        "ExitCode": 0,
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-12T17:05:05.391046668+02:00",
+              "End": "2026-10-12T17:05:05.499116048+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:05:15.501110793+02:00",
+              "End": "2026-10-12T17:05:15.619435013+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:05:25.621044558+02:00",
+              "End": "2026-10-12T17:05:25.698239128+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:05:35.700068776+02:00",
+              "End": "2026-10-12T17:05:36.07908093+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-12T17:05:46.0804739+02:00",
+              "End": "2026-10-12T17:05:46.180477616+02:00",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "memoryBytes": 805306368
+    }
+  ],
+  "outputs": {
+    "unit.stdout": "",
+    "unit.stderr": ""
+  },
+  "freeBytes": 79250960384,
+  "productionMutations": 0,
+  "sqliteConnections": 0
+}
