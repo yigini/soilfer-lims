@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-12T03:08:09.868090+00:00",
+  "originalMatrixPassed": 6,
+  "originalMatrixFailedBeforeExport": 2,
+  "reason": "Independent fixture incorrectly used LT/GT; unchanged reported selection migration only permits NONE/BELOW_LOQ/ABOVE_RANGE. Corrected only new disposable test inputs, no product guard/source changes. Original test/results retained.",
+  "freshOnlyScenarios": [
+    "<5 with BELOW_LOQ",
+    ">20 with ABOVE_RANGE"
+  ],
+  "productionActions": 0
+}

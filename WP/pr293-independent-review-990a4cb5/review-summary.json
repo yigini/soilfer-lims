@@ -1,0 +1,31 @@
+{
+  "reviewedUtc": "2026-10-12T03:09:53.616828+00:00",
+  "status": "INDEPENDENT_EXACT_HEAD_CODE_AND_FOCUSED_BEHAVIOR_PASS_CI_AND_FORMAL_AUDIT_PENDING",
+  "head": "990a4cb535fd3ccb2a81ca019f453123b60a14b8",
+  "base": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "pr": 293,
+  "sourceFilesVerified": 2240,
+  "focusedSuites": 8,
+  "focusedPassedTests": 104,
+  "additionalDistinctScenariosPassed": 8,
+  "additionalScenarios": [
+    "All eight report/export surfaces NOT_REPORTABLE equality in en/es/es-419/fr/pt",
+    "Categorical Loam retained unchanged",
+    "Censored <5 with valid BELOW_LOQ retained unchanged",
+    "Censored >20 with valid ABOVE_RANGE retained unchanged"
+  ],
+  "protectedRows": "Full Result/WorkAttempt/ReviewDecision/ReportedValueSelection rows unchanged across independent exports; legitimate export audit events were allowed.",
+  "findings": [],
+  "reviewNotes": [
+    "Saved selected headline is unconverted unrounded report item value; normalized columns remain separate.",
+    "V2 remains explicitly RAW observations under the existing contract; nullable attemptId/batchId are additive provenance only, and raw rows/counts/cursors are not rewritten.",
+    "Batch ids derived from validated source Result rows; selection/attempt/source evidence retained including questioned sources and means.",
+    "Translated CSV/XLSX provenance labels present in all five locales.",
+    "PR description currently Refs#213; ask Claudio to use required Closes#213 and explicitly defer raw-v2/basis/revisions scope."
+  ],
+  "retainedReviewerSetupFailures": "Two initial local focused invocations lacked generated client. Exact-source Prisma generation fixed setup. Initial independent censored fixture used unsupported LT/GT and guard refused before exports; correct disposable BELOW_LOQ/ABOVE_RANGE inputs pass. Originals not relabeled or overwritten.",
+  "productionActions": 0,
+  "mergeReady": false,
+  "ciRun": 38197850846,
+  "ciStatus": "IN_PROGRESS; exact source currently remains990a4cb5; formal gate not collected"
+}

@@ -74,3 +74,4 @@ server/tests/helpers/fixtures/pre210_full_application_schema.sql -text
 server/tests/helpers/sampleAmendmentHistoricalFixture.js text eol=lf
 server/tests/helpers/fixtures/pre210_after201_full_application_schema.sql -text
 server/tests/helpers/sampleAmendmentMainHistoricalFixture.js text eol=lf
+WP/pr293-independent-review-990a4cb5/* -text

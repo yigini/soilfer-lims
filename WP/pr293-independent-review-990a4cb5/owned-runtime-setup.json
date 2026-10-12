@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-12T03:03:01.713816+00:00",
+  "generatorExitCode": 0,
+  "generatedFromExactExportedSchema": true,
+  "sourceSchemaSha256": "2ff44fcd5afaff7e2073f9f3c46bf2c33f7912c30822ca3c0965b7647798ca10",
+  "generatedSchemaSha256": "2f250c6ea93b63fc9cef349dbe2f264a0011b94fa1eecb777c0095b0f3aa2b7e",
+  "runtimeRoot": "C:\\Users\\yigin\\AppData\\Local\\Temp\\lims-pr293-independent-990a4cb5-20261012T025857Z\\server",
+  "setupFailures": "First two local focused invocations lacked generated server/prisma_client. Original results/logs retained. Prior generated-client raw/lexical comparisons refused formatter whitespace/block-attribute ordering, so no prior client was copied. Exact-source Prisma generate completed in this owned directory without database migration. Fresh provisioned tests use distinct result/log names. Not product/production failure.",
+  "productionActions": 0
+}
