@@ -9,9 +9,9 @@ const { parseArguments, assertInstrumentImportStartupReady, installInstrumentImp
 let db;
 const source = loadInstrumentImportMigrationSource();
 const template = { id: 'mapping-v1', labId: 'import-lab', instrumentId: 'import-instrument', name: 'Owned ICP mapping', version: 1,
-    mapping: '{"rawColumns":[" 1,0 ","Ã©"]}', createdBy: 'import-analyst', supersedesId: null };
+    mapping: '{"rawColumns":[" 1,0 ","é"]}', createdBy: 'import-analyst', supersedesId: null };
 const receipt = { id: 'source-receipt', labId: template.labId, instrumentId: template.instrumentId, templateId: template.id, templateVersion: 1,
-    sourceSha256: 'a'.repeat(64), sourceName: 'owned.csv', mappingSnapshot: '{"rawRows":[[" 1,0 ","Ã©"]]}', importedBy: template.createdBy };
+    sourceSha256: 'a'.repeat(64), sourceName: 'owned.csv', mappingSnapshot: '{"rawRows":[[" 1,0 ","é"]]}', importedBy: template.createdBy };
 function nativeWorkbenchDraft(current) {
     expect(current.prepare('SELECT count(*) n FROM WorkItemDraft').get().n).toBe(0);
     current.exec('DROP TABLE "WorkItemDraft"');
@@ -185,7 +185,7 @@ test.each(['Prisma', 'native workbench'])('a populated %s predecessor retains ev
         // Historical draft data is inserted only into this owned pre-200
         // fixture: the 94-model client cannot address its absent new column.
         // Sample, WorkItem, Result, QC and audit data use their existing owners.
-        const rawValue = ' 0007.1000 ', rawValues = '{"note":"  Ã©\\nåœŸ  "}', rawRecords = '{"retained":"  prÃ©paration åœŸ  "}';
+        const rawValue = ' 0007.1000 ', rawValues = '{"note":"  é\\n土  "}', rawRecords = '{"retained":"  préparation 土  "}';
         read(raw => raw.prepare('INSERT INTO WorkItemDraft(id,workItemId,sampleId,userId,labId,analysis,value,replicateNo,"values",records,instrumentId,updatedAt) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)')
             .run('owned-pre200-draft', f.items[0].id, f.items[0].sampleId, f.actor.username, f.labId, f.analysisCode,
                 rawValue, 1, rawValues, rawRecords, f.instrument.id, '2026-10-10T00:00:00.000Z'));
