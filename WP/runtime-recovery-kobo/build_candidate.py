@@ -33,12 +33,12 @@ def main():
     require(not (ROOT / 'build-receipt.json').exists() and not (ROOT / 'source').exists(), 'Never replay a build')
     spec = json.loads((ROOT / 'build-input.json').read_bytes())
     require(spec['rootName'] == ROOT.name and spec['head'] ==
-        'f830f900f597f20e12570b583e4e32ce9cb50a1d' and spec['auditedPrHead'] ==
-        '5d3550d709f0b62ef013f9114e9da9344f9818a1' and spec['baseHead'] ==
-        '171dd36c5b2dbeea8763520dd18fbdb158ffca05' and spec['pr'] == 291 and
+        '51f6798806f630773786a08432290c1b21a841da' and spec['auditedPrHead'] ==
+        '990a4cb535fd3ccb2a81ca019f453123b60a14b8' and spec['baseHead'] ==
+        'f830f900f597f20e12570b583e4e32ce9cb50a1d' and spec['pr'] == 293 and
         spec['mergeParents'] == [spec['baseHead'], spec['auditedPrHead']], 'Exact forward merge required')
-    require(spec['tree'] == '48678dda23fa876d8d233db812149c8d1792bf16' and
-        spec['auditedTree'] == '2292fbf2a2626ad89c5abdcc49843dffffdefd02' and
+    require(spec['tree'] == '90ed6a26c72bfab5a348dfdb9d6e59876c61ee4c' and
+        spec['auditedTree'] == '90ed6a26c72bfab5a348dfdb9d6e59876c61ee4c' and
         spec['auditReviewId'] and spec['mainCiRunId'], 'Audited merged union evidence required')
     require(spec['labAndHubBuildsOwnedByYY'] is True and
         spec['releaseWindowControl'] == 'RELEASE_DAY_DISK_ABORTS_ACCEPTED', 'Both workload pins required')

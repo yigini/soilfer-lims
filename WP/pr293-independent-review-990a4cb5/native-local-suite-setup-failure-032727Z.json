@@ -1,0 +1,19 @@
+{
+  "status": "NATIVE_OBSERVED_LOCAL_REVIEWER_SETUP_FAILURE_NOT_PRODUCTION_FAILURE",
+  "observedUtc": "2026-10-12T03:27:57.262257+00:00",
+  "pr": 293,
+  "head": "990a4cb535fd3ccb2a81ca019f453123b60a14b8",
+  "ciRun": 38197850846,
+  "ciStatus": "SUCCESS",
+  "ciSuites": 345,
+  "ciTests": 5175,
+  "originalLocalPassedSuites": 146,
+  "remainingLocalSuitesRerunning": 199,
+  "reportedCause": "Claudio separate keyboard-test side run in the same folder cleaned up the shared test database; subsequent main run failed unable to open database file",
+  "originalLocalRunStoppedAndLogRetainedByClaudio": true,
+  "remainingRunHasNoSideRuns": true,
+  "formalAuditComplete": false,
+  "nativeObservedText": "My local full-suite run on990a4cb5 was spoiled, and that was my own setup mistake, not the code. Before that happened,146 suites had passed. I have stopped the spoiled run and kept its log, and I am now rerunning the other199 suites on their own with no side runs.",
+  "originalRunRelabeledPass": false,
+  "productionMutations": 0
+}

@@ -8,6 +8,36 @@ import export_freeze_runtime_kit as packaging_exporter
 
 
 class RuntimeGateTests(unittest.TestCase):
+    def test_normal_entry_requires_healthy_unchanged_predecessor(self):
+        import deploy_runtime as coordinator
+        live = {'Id': 'a' * 64, 'Image': LIVE_IMAGE, 'RestartCount': 0,
+            'State': {'Running': True, 'OOMKilled': False, 'Health': {'Status': 'healthy'}}}
+        entry = coordinator.select_entry_state(live, ORIGINAL_INGRESS_SHA, None, self.manifest)
+        self.assertEqual(entry['mode'], 'RUNNING_NORMAL')
+        for state_change in [{'Running': False}, {'OOMKilled': True},
+                {'Health': {'Status': 'starting'}}, {'Health': {'Status': 'unhealthy'}}, {'Health': {}}]:
+            changed = copy.deepcopy(live); changed['State'].update(state_change)
+            with self.subTest(change=state_change), self.assertRaises(RuntimeError):
+                coordinator.select_entry_state(changed, ORIGINAL_INGRESS_SHA, None, self.manifest)
+        for key, value in [('Image', 'sha256:' + 'f' * 64), ('RestartCount', 1)]:
+            changed = copy.deepcopy(live); changed[key] = value
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                coordinator.select_entry_state(changed, ORIGINAL_INGRESS_SHA, None, self.manifest)
+        with self.assertRaises(RuntimeError):
+            coordinator.select_entry_state(live, HELD_INGRESS_SHA, None, self.manifest)
+
+    def test_previous_held_triple_cannot_authorize_new_entry(self):
+        import deploy_runtime as coordinator
+        original = {suffix: dict(row, inode=1, device=2, mtimeNs=3, mode=0o600)
+            for suffix, row in HELD_TRIPLE.items()}
+        held = {'mode': 'STOPPED_HELD', 'containerId': 'a' * 64, 'image': LIVE_IMAGE,
+            'restartCount': 0, 'ingressSha256': HELD_INGRESS_SHA, 'originalFiles': original}
+        with self.assertRaises(RuntimeError): validate_entry_state(held, self.manifest)
+        live = {'Id': 'a' * 64, 'Image': LIVE_IMAGE, 'RestartCount': 0,
+            'State': {'Running': False, 'OOMKilled': False, 'ExitCode': 137}}
+        with self.assertRaises(RuntimeError):
+            coordinator.select_entry_state(live, HELD_INGRESS_SHA, original, self.manifest)
+
     def setUp(self):
         self.now = datetime.datetime(2026, 10, 11, 20, 0, tzinfo=datetime.timezone.utc)
         self.manifest = {'status': KIT_STATUS, 'root': '/opt/lims/releases/runtime-kobo-release-fixture',
@@ -54,7 +84,7 @@ class RuntimeGateTests(unittest.TestCase):
             'coordinatorSha256': '1' * 64, 'rehearsalReceiptSha256': '2' * 64, 'targetPinSha256': '5' * 64,
             'yyEvidenceSha256': '4' * 64, 'pr': {'number': PR_NUMBER, 'merged': True, 'head': AUDITED_PR_HEAD,
                 'mergeCommit': self.manifest['head'], 'tree': self.manifest['tree'], 'auditedTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,
-                'laterAuditFailure': False, 'review': {'html_url': 'https://github.com/yigini/soilfer-lims/pull/291#issuecomment-1',
+                'laterAuditFailure': False, 'review': {'html_url': 'https://github.com/yigini/soilfer-lims/pull/293#issuecomment-1',
                     'body': PHRASE + '\n' + AUDITED_PR_HEAD},
                 'checks': [{'head_sha': AUDITED_PR_HEAD, 'status': 'completed', 'conclusion': 'success'}]},
             'mainCi': {'head_sha': self.manifest['head'], 'name': 'CI', 'event': 'push', 'status': 'completed', 'conclusion': 'success'},

@@ -124,7 +124,7 @@ def failed_wal_authority():
         sha(manifest_path) == FAILED_WAL_MANIFEST_SHA, 'Immutable predecessor failure changed')
     receipt = json.loads(receipt_path.read_bytes()); manifest = json.loads(manifest_path.read_bytes())
     require(receipt['status'] == 'FAILED_RUNTIME_FORWARD_HOLD' and receipt['anyEntrypointAttempted'] is False and
-        receipt['manifestSha256'] == FAILED_WAL_MANIFEST_SHA and receipt['head'] == CANDIDATE_HEAD and
+        receipt['manifestSha256'] == FAILED_WAL_MANIFEST_SHA and receipt['head'] == BASE_HEAD and
         manifest['root'] == FAILED_WAL_ROOT, 'Predecessor is not the bound pre-entrypoint hold')
     result = {}
     for name, digest in [('apache-before.conf', ORIGINAL_INGRESS_SHA), ('apache-held.conf', HELD_INGRESS_SHA)]:
@@ -136,15 +136,11 @@ def failed_wal_authority():
 
 
 def select_entry_state(live, ingress_sha, original, manifest):
-    if live['State']['Running'] and ingress_sha == ORIGINAL_INGRESS_SHA:
-        mode = 'RUNNING_NORMAL'; files = None
-    else:
-        require(live['State']['Running'] is False and live['State']['ExitCode'] == 137 and
-            live['State']['OOMKilled'] is False and ingress_sha == HELD_INGRESS_SHA,
-            'Writer and ingress are neither reviewed entry state')
-        mode = 'STOPPED_HELD'; files = original
-    entry = {'mode': mode, 'containerId': live['Id'], 'image': live['Image'],
-        'restartCount': live['RestartCount'], 'ingressSha256': ingress_sha, 'originalFiles': files}
+    require(live['State']['Running'] and not live['State']['OOMKilled'] and
+        live['State'].get('Health', {}).get('Status') == 'healthy' and
+        ingress_sha == ORIGINAL_INGRESS_SHA, 'Healthy normal predecessor required')
+    entry = {'mode': 'RUNNING_NORMAL', 'containerId': live['Id'], 'image': live['Image'],
+        'restartCount': live['RestartCount'], 'ingressSha256': ingress_sha, 'originalFiles': None}
     validate_entry_state(entry, manifest)
     return entry
 

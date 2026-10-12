@@ -28,8 +28,8 @@ def main():
         re.fullmatch(r'runtime-kobo-build-[A-Za-z0-9_-]+', root.name),
         'Unexpected fresh build root')
     require(unit == 'lims-build-' + root.name.lower() + '.service', 'Unexpected owned build unit')
-    pr = github('repos/yigini/soilfer-lims/pulls/291')
-    require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD, 'Exact audited PR291 must merge first')
+    pr = github('repos/yigini/soilfer-lims/pulls/293')
+    require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD, 'Exact audited PR293 must merge first')
     head = pr['merge_commit_sha']
     require(github('repos/yigini/soilfer-lims/git/ref/heads/main')['object']['sha'] == head, 'Current main changed')
     reviewed_commit = github('repos/yigini/soilfer-lims/git/commits/' + AUDITED_PR_HEAD)
@@ -37,11 +37,11 @@ def main():
     tree = merged_commit['tree']['sha']
     validate_merge_identity(merged_commit, reviewed_commit)
     review = github('repos/yigini/soilfer-lims/issues/comments/' + review_id)
-    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/291#') and
+    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/293#') and
         'Audit passed: OK to merge and deploy' in review['body'] and
         (AUDITED_PR_HEAD in review['body'] or AUDITED_PR_HEAD[:8] in review['body']), 'Formal audit missing')
     comments = json.loads(subprocess.check_output(['gh', 'api',
-        'repos/yigini/soilfer-lims/issues/291/comments?per_page=100', '--paginate', '--slurp'], text=True, encoding='utf-8'))
+        'repos/yigini/soilfer-lims/issues/293/comments?per_page=100', '--paginate', '--slurp'], text=True, encoding='utf-8'))
     require(not any('audit failed' in row['body'].lower() and row['created_at'] > review['created_at']
         for page in comments for row in page), 'Later audit failure exists')
     checks = github('repos/yigini/soilfer-lims/commits/' + AUDITED_PR_HEAD + '/check-runs')['check_runs']

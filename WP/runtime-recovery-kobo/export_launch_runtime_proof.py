@@ -27,9 +27,9 @@ def main():
     require(unit == 'lims-owned-' + remote.name.lower() + '.service', 'Unexpected owned unit')
     pin_bytes = pathlib.Path(pin_file).read_bytes()
     pin = json.loads(pin_bytes)
-    pr = github('repos/yigini/soilfer-lims/pulls/291')
+    pr = github('repos/yigini/soilfer-lims/pulls/293')
     require(pr['merged'] and pr['head']['sha'] == AUDITED_PR_HEAD and pr['merge_commit_sha'] == pin['head'],
-        'PR291 exact audited head must be merged first')
+        'PR293 exact audited head must be merged first')
     main_ref = github('repos/yigini/soilfer-lims/git/ref/heads/main')
     require(main_ref['object']['sha'] == pin['head'], 'Current main differs from the candidate')
     audited = github('repos/yigini/soilfer-lims/git/commits/' + AUDITED_PR_HEAD)
@@ -37,12 +37,12 @@ def main():
     validate_merge_identity(merged, audited)
     candidate_identity(pin)
     review = github('repos/yigini/soilfer-lims/issues/comments/' + str(pin['auditReviewId']))
-    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/291#') and
+    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/293#') and
         'Audit passed: OK to merge and deploy' in review['body'] and
         (AUDITED_PR_HEAD in review['body'] or AUDITED_PR_HEAD[:8] in review['body']),
         'Formal exact-head PR audit is missing')
     comments = json.loads(subprocess.check_output(['gh', 'api',
-        'repos/yigini/soilfer-lims/issues/291/comments?per_page=100', '--paginate', '--slurp'],
+        'repos/yigini/soilfer-lims/issues/293/comments?per_page=100', '--paginate', '--slurp'],
         text=True, encoding='utf-8'))
     require(not any('audit failed' in comment['body'].lower() and
         comment['created_at'] > review['created_at'] for page in comments for comment in page),

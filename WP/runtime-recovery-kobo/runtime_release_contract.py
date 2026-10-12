@@ -48,13 +48,14 @@ def wal_recovery_binding():
         'predecessorRoot': FAILED_WAL_ROOT, 'failedReceiptSha256': FAILED_WAL_RECEIPT_SHA,
         'failedManifestSha256': FAILED_WAL_MANIFEST_SHA, 'normalIngressSha256': ORIGINAL_INGRESS_SHA,
         'heldIngressSha256': HELD_INGRESS_SHA, 'heldTriple': HELD_TRIPLE,
-        'allowedEntryStates': ['RUNNING_NORMAL', 'STOPPED_HELD']}
+        'allowedEntryStates': ['RUNNING_NORMAL'], 'entryPolicy': 'HEALTHY_RUNNING_NORMAL_ONLY',
+        'historicalFailedWalEvidenceOnly': True}
 
 
 def wal_review_tokens():
     return [WAL_RECOVERY_POLICY, 'walScopeCommentId=' + str(WAL_SCOPE_ID), FAILED_WAL_ROOT,
         FAILED_WAL_RECEIPT_SHA, FAILED_WAL_MANIFEST_SHA, ORIGINAL_INGRESS_SHA, HELD_INGRESS_SHA,
-        'RUNNING_NORMAL', 'STOPPED_HELD', 'NO_SECOND_STOP',
+        'RUNNING_NORMAL', 'entryPolicy=HEALTHY_RUNNING_NORMAL_ONLY', 'historicalFailedWalEvidenceOnly=true',
         *[row['sha256'] for row in HELD_TRIPLE.values()]]
 
 
@@ -66,17 +67,8 @@ def validate_entry_state(entry, manifest):
     if entry['mode'] == 'RUNNING_NORMAL':
         require(entry['ingressSha256'] == ORIGINAL_INGRESS_SHA and entry['originalFiles'] is None,
             'Running entry requires original open ingress')
-    elif entry['mode'] == 'STOPPED_HELD':
-        require(entry['ingressSha256'] == HELD_INGRESS_SHA and set(entry['originalFiles']) == set(HELD_TRIPLE),
-            'Held entry requires exact stopped triple')
-        for suffix, pinned in HELD_TRIPLE.items():
-            row = entry['originalFiles'][suffix]
-            require(isinstance(row, dict) and all(row.get(key) == value for key, value in pinned.items()) and
-                set(row) == {'sha256', 'bytes', 'inode', 'device', 'mtimeNs', 'mode'} and
-                all(type(row[key]) is int for key in ['bytes', 'inode', 'device', 'mtimeNs', 'mode']),
-                'Held original triple differs: ' + suffix)
     else:
-        raise RuntimeError('Unreviewed entry state')
+        raise RuntimeError('Only the healthy normal predecessor is authority for this release')
 
 
 def verify_entry_readiness(manifest, gate, actual):
@@ -323,9 +315,9 @@ def review_tokens(manifest, manifest_sha):
 
 
 def formal_pr_review(review):
-    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/291#') and
+    require(review['html_url'].startswith('https://github.com/yigini/soilfer-lims/pull/293#') and
         PHRASE in review['body'] and (AUDITED_PR_HEAD in review['body'] or AUDITED_PR_HEAD[:8] in review['body']),
-        'Formal exact-head PR291 review missing')
+        'Formal exact-head PR293 review missing')
 
 
 def verify_gate(manifest, gate, manifest_sha, now=None):
