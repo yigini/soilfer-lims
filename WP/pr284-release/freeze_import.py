@@ -144,6 +144,18 @@ def main():
         'Original native delta proof changed')
     installed_evidence = json.loads(files['import-installed-seal.json'])
     installed = retained_seal(proof, 'after-import-stopped', installed_evidence, references)
+    repeat_evidence = json.loads(files['import-repeat-seal.json'])
+    require(repeat_evidence == native['repeatStoppedSeal'], 'Original readonly repeat seal differs')
+    repeat_backup = retained_seal(proof, 'after-repeat-stopped', repeat_evidence, references)
+    readonly_repeat_physical(installed_evidence['originalFiles'], repeat_evidence['originalFiles'])
+    repeat_authority = json.loads(files['import-repeat-preservation.json'])
+    require(hashlib.sha256(files['import-repeat-preservation.json']).hexdigest() == native['repeatPreservationSha256'] and
+        repeat_authority == {'policy': REPEAT_POLICY, 'mainBytesAndAttributesPreserved': True,
+            'fullInstalledStateEqual': True, 'beforePhysical': installed_evidence['originalFiles'],
+            'afterPhysical': repeat_evidence['originalFiles'],
+            'beforeLogicalStateSha256': installed_evidence['logicalStateSha256'],
+            'afterLogicalStateSha256': repeat_evidence['logicalStateSha256']},
+        'Original readonly repeat preservation authority differs')
     jobs_off = json.loads(files['import-jobs-off-seal.json'])
     require(jobs_off == receipt['jobsOffStoppedSeal'], 'Original jobs-OFF seal differs')
     retained_seal(proof, 'after-jobs-off-stopped', jobs_off, references)
@@ -160,8 +172,10 @@ def main():
     # Compare parsed complete states, not formatting-dependent JSON byte hashes.
     installed_state = json.loads(files['installed-protected-state.json'])
     require(json.loads((proof / 'after-import-stopped/wal-aware-state.json').read_bytes()) == installed_state and
+        json.loads((proof / 'after-repeat-stopped/wal-aware-state.json').read_bytes()) == installed_state and
         json.loads((proof / 'after-jobs-off-stopped/wal-aware-state.json').read_bytes()) == installed_state,
         'Original jobs-OFF full installed state changed')
+    c.exact_state(repeat_backup, installed_state, immutable=True)
     with contextlib.closing(sqlite3.connect(original.as_uri() + '?mode=ro&immutable=1', uri=True)) as db:
         db.row_factory = sqlite3.Row
         refusal_rows = expected_refusals([dict(row) for row in db.execute('SELECT id,labId,projectCode,isActive FROM KoboConfig')],
@@ -203,6 +217,12 @@ def main():
     build_root = pathlib.Path(pin['buildRoot']); safe_root(str(build_root), 'instrument-import-build-')
     require(sha(safe_reference(build_root, 'build-receipt.json')) == pin['buildReceiptSha256'], 'Original build changed')
     validate_candidate(pin, json.loads((build_root / 'build-receipt.json').read_bytes()), image)
+    build_source = json.loads(safe_reference(build_root, 'tooling-source-index.json').read_bytes())
+    build_review = json.loads(safe_reference(build_root, 'proof-source-review.json').read_bytes())
+    retained_build_authority(build_source, build_review)
+    for name, row in build_source['files'].items():
+        require(sha(safe_reference(build_root, name)) == row['sha256'],
+            'Original build source changed during packaging: ' + name)
     built = json.loads((build_root / 'build-receipt.json').read_bytes())
     require(sha(safe_reference(build_root, 'source.tar.gz')) == built['sourceArchiveSha256'] and
         sha(safe_reference(build_root, 'source-index.json')) == built['sourceIndexSha256'],
@@ -214,6 +234,7 @@ def main():
     require(min(s.disk_free().values()) >= FLOOR + sum(map(len, files.values())) + 268435456,
         'Packaging allocation reserve refused')
     manifest = {'status': KIT_STATUS, 'root': str(target), 'head': pin['head'], 'image': pin['image'], 'tree': pin['tree'],
+        **build_reuse_binding(), 'repeatPhysicalPolicy': REPEAT_POLICY,
         'baseHead': BASE_HEAD, 'mergeBaseHead': MERGE_BASE_HEAD,
         'auditReviewId': AUDIT_REVIEW_ID, 'firstProofPolicy': FIRST_PROOF_POLICY,
         'auditedPrTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,

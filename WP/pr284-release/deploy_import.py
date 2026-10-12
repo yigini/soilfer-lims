@@ -200,6 +200,7 @@ def main():
         json.dump({'startedUtc': s.utc(), 'head': pin['head'], 'gateSha256': sha(ROOT / 'production-gate.json')}, out)
     (ROOT / 'execution-attempt.json').chmod(0o400)
     receipt = {'status': 'IMPORT_FORWARD_IN_PROGRESS', 'head': pin['head'], 'image': pin['image'],
+        **build_reuse_binding(), 'repeatPhysicalPolicy': REPEAT_POLICY,
         'timesUtc': {}, 'manifestSha256': manifest_sha, 'coordinatorSha256': sha(__file__),
         'rehearsalReceiptSha256': manifest['files']['rehearsal-receipt.json'],
         'productionGateSha256': sha(ROOT / 'production-gate.json'), 'githubGate': gate,

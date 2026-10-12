@@ -11,6 +11,22 @@ import stat
 from import_installation import DRY_COPY_POLICY, measured_cli, validate_apply, validate_plan
 from import_preservation import assets, require, verify_import_installation
 
+REPEAT_POLICY = 'EXACT_MAIN_EMPTY_WAL_BOUNDED_SHM_FULL_DETACHED_EQUALITY'
+EMPTY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+
+
+def readonly_repeat_physical(before, after):
+    """Readonly WAL opens may allocate sidecars; main and committed pages cannot change."""
+    require(set(before) == set(after) == {'', '-wal', '-shm'} and
+        before[''] is not None and before[''] == after[''],
+        'Immediate repeat changed original main bytes or attributes')
+    for triple in [before, after]:
+        wal, shm = triple['-wal'], triple['-shm']
+        require(wal is None or (type(wal['bytes']) is int and wal['bytes'] == 0 and
+            wal['sha256'] == EMPTY_SHA256), 'Immediate repeat has nonempty WAL or invalid empty hash')
+        require(shm is None or (type(shm['bytes']) is int and shm['bytes'] == 32768),
+            'Immediate repeat has an unbounded SHM sidecar')
+
 
 def write_new(root, name, value, support):
     path = pathlib.Path(root) / name
@@ -115,8 +131,27 @@ def install_once(root, image, database_dir, before_backup, before_physical, sour
     physical = support.physical(database)
     repeated, repeat_measurement = measured_cli(root, image, database_dir, '--apply', 'import-repeat', support)
     validate_plan(repeated, 'COMPLETE_200', 'NO_OP')
-    require(support.physical(database) == physical,
-        'Immediate repeat changed original bytes or full installed state')
+    readonly_repeat_physical(physical, support.physical(database))
+    # Do not open SQLite on originals or disregard WAL. Retain another complete
+    # detached seal and require every installed row/schema/receipt to be equal.
+    repeat_seal = seal('after-repeat-stopped', installed=True)
+    readonly_repeat_physical(sealed['originalFiles'], repeat_seal['originalFiles'])
+    repeat_backup = pathlib.Path(repeat_seal['backupPath'])
+    require(repeat_backup.is_file() and not repeat_backup.is_symlink() and
+        repeat_backup.resolve().is_relative_to(root.resolve()) and
+        repeat_backup.resolve() not in [before_backup.resolve(), after_backup.resolve()] and
+        stat.S_IMODE(repeat_backup.stat().st_mode) == 0o400,
+        'Immediate repeat seal must be a new immutable detached backup')
+    require(support.snapshot(repeat_backup, immutable=True) == installed,
+        'Immediate repeat changed full installed state')
+    require(repeat_seal['logicalStateSha256'] == sealed['logicalStateSha256'],
+        'Immediate repeat detached full-state seal differs')
+    repeat_authority = {'policy': REPEAT_POLICY, 'mainBytesAndAttributesPreserved': True,
+        'fullInstalledStateEqual': True, 'beforePhysical': sealed['originalFiles'],
+        'afterPhysical': repeat_seal['originalFiles'],
+        'beforeLogicalStateSha256': sealed['logicalStateSha256'],
+        'afterLogicalStateSha256': repeat_seal['logicalStateSha256']}
+    repeat_authority_sha = write_new(root, 'import-repeat-preservation.json', repeat_authority, support)
     require(support.sha(before_backup) == before_sha, 'Original stopped backup changed')
     guard.check()
     return {'status': 'EXACT_NATIVE_IMPORT_DRY_APPLY_REPEAT_PASS', 'originalTableCount': 104,
@@ -124,6 +159,8 @@ def install_once(root, image, database_dir, before_backup, before_physical, sour
         'originalRowsSha256': original_hash, 'beforeBackupSha256': before_sha,
         'afterBackupSha256': support.sha(after_backup), 'preservationSha256': delta_sha,
         'measurements': [dry_measurement, apply_measurement, repeat_measurement],
+        'repeatPhysicalPolicy': REPEAT_POLICY, 'repeatStoppedSeal': repeat_seal,
+        'repeatPreservationSha256': repeat_authority_sha,
         'dryRunCopy': dry_authority, 'dryRunCopyAuthoritySha256': dry_authority_sha,
         'dry': dry, 'apply': applied, 'repeat': repeated, 'repeatDatabaseChanges': 0,
         'allOriginalRowsAndSchemaPreserved': True, 'forwardOnly': True}, installed

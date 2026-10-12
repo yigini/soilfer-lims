@@ -79,6 +79,7 @@ print(json.dumps(execution_preflight(r,p['manifestSha256'],require_unused_gate=T
     require(yy['confirmedByYY'] is True and yy['scopeText'] == 'my go covers all' and
         yy['authorizationMode'] == 'AUTO_AFTER_REVIEW', 'Original YY standing go missing')
     gate = {'status': 'FRESH_SINGLE_USE_IMPORT_GATE', 'executionRoot': root, 'head': current,
+        'buildReuseBinding': build_reuse_binding(), 'repeatPhysicalPolicy': REPEAT_POLICY,
         'frozenFiles': manifest['files'], 'currentMainHead': current, 'image': pin['image'], 'manifestSha256': manifest_sha,
         'coordinatorSha256': manifest['files']['deploy_import.py'],
         'rehearsalReceiptSha256': manifest['files']['rehearsal-receipt.json'],

@@ -5,9 +5,12 @@ Only a new reviewed source commit may bind the actual audited/merged candidate;
 no historical source pass, receipt, gate or proof is execution authority here.
 """
 import datetime
+import hashlib
+import json
 import re
 
 from import_source_graph import require_source_set
+from import_stage import REPEAT_POLICY
 
 from runtime_proof_policies import (LIMIT, FLOOR, SOAK_SECONDS, TARGET_CONFIG, TARGET_LAB,
     TARGET_PROJECT, NATURAL_INTAKE_POLICY, REFUSAL_SCOPE_COMMENT_ID, REFUSAL_POLICY,
@@ -28,18 +31,30 @@ CANDIDATE_HEAD = '959d17e11c357266f7c2a41b0c84ab76914c591e'
 AUDITED_PR_TREE = '336223df0161caeae4eb7db1e40df748d8ba110f'
 MERGED_TREE = '336223df0161caeae4eb7db1e40df748d8ba110f'
 MERGE_PARENTS = [MERGE_BASE_HEAD, AUDITED_PR_HEAD]
-EXPECTED_PROOF_ROOT = '/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z'
-FAILED_PROOF_ROOTS = {'/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z'}
+EXPECTED_PROOF_ROOT = '/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z'
+FAILED_PROOF_ROOTS = {'/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z',
+    '/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z'}
 FIRST_PROOF_POLICY = 'EXACT_REVIEWED_FIRST_PROOF_ROOT_NO_REPLAY'
 MIN_MEASURED_TIMEOUT_HEADROOM_SECONDS = 60
 PRODUCTION_UNIT_LIMIT_SECONDS = 5400
 MIN_MEASURED_UNIT_HEADROOM_SECONDS = 600
 NATIVE_DELTA_POLICY = 'ONLY_200_EMPTY_ADDITIVE_IMPORT_10438_TO_10639'
 RECOVERY_POLICY = 'SEPARATELY_AUDITED_FORWARD_FIX_ONLY'
-RETAINED_DATABASE_ALLOCATION_COUNT = 13
+RETAINED_DATABASE_ALLOCATION_COUNT = 16
+BUILD_REUSE_POLICY = 'EXACT_ORIGINAL_BUILD_AUTHORITY_NO_REBUILD_OR_RETAG'
+ORIGINAL_BUILD_ROOT = '/opt/lims/releases/instrument-import-build-959d17e1-20261012T135400Z'
+ORIGINAL_BUILD_SOURCE = '630b2354a1a45df0d88545ac5c63594361615999'
+ORIGINAL_BUILD_SOURCE_REVIEW_ID = 6125544861
+ORIGINAL_BUILD_RECEIPT_SHA256 = '1a983172adebaba8b1a61959810d5469d9c12d706725bd33783d43cc8cceabe0'
+ORIGINAL_BUILD_IMAGE = 'sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2'
+ORIGINAL_BUILD_IMAGE_BYTES = 413806636
+ORIGINAL_BUILDER_SHA256 = 'c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a'
+ORIGINAL_PREPARER_SHA256 = 'a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991'
+ORIGINAL_BUILD_SOURCE_INDEX_SHA256 = '592f749f83eb166660a649030a0020600c0f99f403e5c40f9dfb9a5e3fc30c3f'
+ORIGINAL_BUILD_REVIEW_RAW_SHA256 = 'cd3f50d2794d39b6c28d2af3bbb88d3a2fa7ec1ffe93b7f1b4458655c5b82190'
 HISTORICAL_SOURCE_REVIEWS = {6112725472, 6114217683, 6114289486, 6114935703,
     6115039634, 6115225815, 6115334499, 6117398054, 6117551195,
-    6122670828, 6122904371}
+    6122670828, 6122904371, 6125544861}
 
 
 def bound_candidate():
@@ -78,7 +93,13 @@ def release_binding_tokens():
         'originalState=104tables/38receipts', 'installedState=106tables/39receipts',
         'defaultStartup=23NO_OP0/22READY0', 'productionRecovery=' + RECOVERY_POLICY,
         'nativeDryCopyPolicy=SEPARATE_OWNED_0400_BACKUP_COPY_WITH_WRITABLE_SIDECAR_DIRECTORY',
-        'retainedDatabaseAllocationCount=13',
+        'retainedDatabaseAllocationCount=' + str(RETAINED_DATABASE_ALLOCATION_COUNT),
+        'repeatPhysicalPolicy=' + REPEAT_POLICY,
+        'buildReusePolicy=' + BUILD_REUSE_POLICY, ORIGINAL_BUILD_ROOT, ORIGINAL_BUILD_SOURCE,
+        'originalBuildSourceReviewId=' + str(ORIGINAL_BUILD_SOURCE_REVIEW_ID),
+        ORIGINAL_BUILD_RECEIPT_SHA256, ORIGINAL_BUILD_IMAGE, 'originalBuildImageBytes=' + str(ORIGINAL_BUILD_IMAGE_BYTES),
+        'originalBuilderSha256=' + ORIGINAL_BUILDER_SHA256, 'originalPreparerSha256=' + ORIGINAL_PREPARER_SHA256,
+        ORIGINAL_BUILD_SOURCE_INDEX_SHA256, ORIGINAL_BUILD_REVIEW_RAW_SHA256,
         'CLI_TIMEOUT_SECONDS=600', 'nativeCliNetwork=none', 'nativeCliMemorySwapBytes=805306368']
 
 
@@ -140,6 +161,7 @@ def validate_merge_identity(merged, audited):
 
 def validate_candidate(pin, built, image):
     candidate_identity(pin)
+    require_build_reuse(pin)
     require(type(pin.get('auditReviewId')) is int and pin['auditReviewId'] > 0 and
         type(pin.get('mainCiRunId')) is int and pin['mainCiRunId'] > 0, 'Actual audit/main CI missing')
     require(pin.get('labAndHubBuildsOwnedByYY') is True and
@@ -147,10 +169,47 @@ def validate_candidate(pin, built, image):
     require(built.get('status') == 'BUILT_ONLY_NOT_DEPLOYED' and built.get('head') == pin['head'] and
         built.get('tree') == MERGED_TREE and built.get('productionDatabaseMounts') == 0,
         'One valid newly built #200 candidate required')
+    require(pin.get('buildRoot') == ORIGINAL_BUILD_ROOT and
+        pin.get('buildReceiptSha256') == ORIGINAL_BUILD_RECEIPT_SHA256 and
+        pin.get('buildReusePolicy') == BUILD_REUSE_POLICY and
+        built.get('toolingCommit') == pin.get('buildSourceCommit') == ORIGINAL_BUILD_SOURCE and
+        built.get('proofSourceReviewId') == pin.get('buildSourceReviewId') == ORIGINAL_BUILD_SOURCE_REVIEW_ID and
+        built.get('builderSha256') == ORIGINAL_BUILDER_SHA256 and
+        built.get('toolingSourceIndexSha256') == ORIGINAL_BUILD_SOURCE_INDEX_SHA256 and
+        built.get('proofSourceReviewRawSha256') == ORIGINAL_BUILD_REVIEW_RAW_SHA256 and
+        pin['image'] == ORIGINAL_BUILD_IMAGE and pin['imageBytes'] == ORIGINAL_BUILD_IMAGE_BYTES,
+        'Only the unchanged original reviewed 959d build is eligible; no rebuild')
     require(image['Id'] == pin['image'] == built['image'] and
         type(image['Size']) is int and image['Size'] > 0 and image['Size'] == pin['imageBytes'] == built['imageBytes'] and
         image['Config']['Labels'].get('org.opencontainers.image.revision') == pin['head'],
         'Candidate image digest/size/revision differs')
+
+
+def retained_build_authority(source, review):
+    require(source.get('head') == ORIGINAL_BUILD_SOURCE and
+        hashlib.sha256(json.dumps(source, sort_keys=True).encode()).hexdigest() == ORIGINAL_BUILD_SOURCE_INDEX_SHA256 and
+        review.get('id') == ORIGINAL_BUILD_SOURCE_REVIEW_ID and
+        hashlib.sha256(json.dumps(review, sort_keys=True).encode()).hexdigest() == ORIGINAL_BUILD_REVIEW_RAW_SHA256 and
+        source['files']['build_import.py']['sha256'] == ORIGINAL_BUILDER_SHA256 and
+        source['files']['prepare_import_build.py']['sha256'] == ORIGINAL_PREPARER_SHA256,
+        'Original build source/review/preparer authority changed')
+
+
+def build_reuse_binding():
+    """Keep the completed build's authority separate from NEW proof authority."""
+    return {'buildReusePolicy': BUILD_REUSE_POLICY, 'buildRoot': ORIGINAL_BUILD_ROOT,
+        'buildReceiptSha256': ORIGINAL_BUILD_RECEIPT_SHA256,
+        'buildSourceCommit': ORIGINAL_BUILD_SOURCE, 'buildSourceReviewId': ORIGINAL_BUILD_SOURCE_REVIEW_ID,
+        'buildSourceIndexSha256': ORIGINAL_BUILD_SOURCE_INDEX_SHA256,
+        'buildSourceReviewRawSha256': ORIGINAL_BUILD_REVIEW_RAW_SHA256,
+        'originalBuilderSha256': ORIGINAL_BUILDER_SHA256, 'originalPreparerSha256': ORIGINAL_PREPARER_SHA256,
+        'image': ORIGINAL_BUILD_IMAGE, 'imageBytes': ORIGINAL_BUILD_IMAGE_BYTES}
+
+
+def require_build_reuse(row):
+    require(all(type(row.get(key)) is type(value) and row[key] == value
+        for key, value in build_reuse_binding().items()),
+        'Completed original build reuse authority differs; no rebuild or retag')
 
 
 def source_review_pass(review, tooling, files, now=None):

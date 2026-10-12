@@ -1,4 +1,4 @@
-"""Build ONE new immutable candidate from verified raw Git source, no DB mounts."""
+"""Historical build path retained below; this forward source refuses a second build."""
 import datetime
 import hashlib
 import json
@@ -28,6 +28,7 @@ def sha(path):
 
 
 def main():
+    raise RuntimeError('Original 959d build is already complete; this forward source cannot start a second build')
     require(os.geteuid() == 0 and sys.flags.optimize == 0, 'Root and plain Python required')
     require(ROOT.parent == pathlib.Path('/opt/lims/releases') and ROOT.name.startswith('instrument-import-build-'),
         'Unexpected new build root')

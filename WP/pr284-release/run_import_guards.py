@@ -8,8 +8,8 @@ import sys
 head = sys.argv[1]
 if len(head) != 40 or any(character not in '0123456789abcdef' for character in head):
     raise RuntimeError('Exact source commit required')
-names = ['import_source_graph', 'import_proof_contract', 'import_preservation', 'import_startup_checks',
-    'import_installation', 'import_stage', 'import_sealing', 'known_core_disk_guard_import',
+names = ['import_source_graph', 'import_preservation', 'import_startup_checks',
+    'import_installation', 'import_stage', 'import_proof_contract', 'import_sealing', 'known_core_disk_guard_import',
     'test_import_preservation', 'test_import_startup_checks', 'test_import_installation', 'test_import_stage',
     'test_import_sealing', 'test_import_authority', 'test_import_layout',
     'import_release_contract', 'test_import_release',
@@ -45,6 +45,9 @@ assets = {name: subprocess.check_output(['git', 'show', head + ':server/prisma/m
     for name in ['migration.sql', 'fresh-prisma-tables.json', 'pre-prisma-draft-table.sql',
         'upgraded-prisma-draft-table.sql', 'post205-draft-tables.json']}
 payload = {'sourceCommit': head, 'tooling': {name: base64.b64encode(raw).decode() for name, raw in tooling.items()},
+    'originalBuildAuthority': {key: json.loads(subprocess.check_output(['git', 'show', head +
+        ':WP/pr284-resume-20261012/build-959d17e1-135400/' + name])) for key, name in
+        [('source', 'tooling-source-index.json'), ('review', 'proof-source-review.json')]},
     'package': {name: base64.b64encode(raw).decode() for name, raw in package.items()},
     'toolingIndex': tooling_index, 'files': {name: {'data': base64.b64encode(raw).decode(),
     'sha256': hashlib.sha256(raw).hexdigest()} for name, raw in files.items()},
@@ -64,6 +67,7 @@ with tempfile.TemporaryDirectory(prefix='owned-import-assets-') as directory:
  for name in ['test_import_authority','test_import_layout','test_import_release']:
   sys.modules[name].RAW_TOOLING={n:base64.b64decode(raw) for n,raw in p['tooling'].items()}
  sys.modules['test_import_release'].RAW_PACKAGE={n:base64.b64decode(raw) for n,raw in p['package'].items()}
+ sys.modules['test_import_authority'].ORIGINAL_BUILD_AUTHORITY=p['originalBuildAuthority']
  sys.modules['test_import_deploy_layout'].RAW_PACKAGE={n:base64.b64decode(raw) for n,raw in p['package'].items()}
  suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromModule(sys.modules[name]) for name in p['files'] if name.startswith('test_'))
  result=unittest.TextTestRunner(verbosity=2).run(suite)

@@ -3,6 +3,7 @@ import copy
 import datetime
 import hashlib
 import json
+import types
 import unittest
 from unittest.mock import patch
 
@@ -10,6 +11,7 @@ import import_proof_contract as contract
 import import_source_graph as graph
 
 RAW_TOOLING = {}  # Injected exact raw Git fixtures by the guard runner.
+ORIGINAL_BUILD_AUTHORITY = {}
 
 
 class AuthorityTests(unittest.TestCase):
@@ -30,12 +32,17 @@ class AuthorityTests(unittest.TestCase):
             'originalProofRoot': contract.EXPECTED_PROOF_ROOT, 'firstProofPolicy': contract.FIRST_PROOF_POLICY,
             'auditedPrHead': contract.AUDITED_PR_HEAD, 'pr': contract.PR_NUMBER, 'tree': contract.MERGED_TREE,
             'auditedTree': contract.AUDITED_PR_TREE, 'mergeParents': contract.MERGE_PARENTS,
-            'auditReviewId': 123, 'mainCiRunId': 456, 'image': 'sha256:' + 'd' * 64, 'imageBytes': 400,
+            'auditReviewId': 123, 'mainCiRunId': 456, **contract.build_reuse_binding(),
             'labAndHubBuildsOwnedByYY': True, 'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}
         self.built = {'status': 'BUILT_ONLY_NOT_DEPLOYED', 'head': self.pin['head'],
             'tree': self.pin['tree'], 'productionDatabaseMounts': 0,
-            'image': self.pin['image'], 'imageBytes': 400}
-        self.image = {'Id': self.pin['image'], 'Size': 400,
+            'image': self.pin['image'], 'imageBytes': self.pin['imageBytes'],
+            'toolingCommit': contract.ORIGINAL_BUILD_SOURCE,
+            'proofSourceReviewId': contract.ORIGINAL_BUILD_SOURCE_REVIEW_ID,
+            'builderSha256': contract.ORIGINAL_BUILDER_SHA256,
+            'toolingSourceIndexSha256': contract.ORIGINAL_BUILD_SOURCE_INDEX_SHA256,
+            'proofSourceReviewRawSha256': contract.ORIGINAL_BUILD_REVIEW_RAW_SHA256}
+        self.image = {'Id': self.pin['image'], 'Size': self.pin['imageBytes'],
             'Config': {'Labels': {'org.opencontainers.image.revision': self.pin['head']}}}
 
     def source_review(self):
@@ -102,6 +109,35 @@ class AuthorityTests(unittest.TestCase):
         image = copy.deepcopy(self.image)
         image['Config']['Labels']['org.opencontainers.image.revision'] = contract.BASE_HEAD
         with self.assertRaises(RuntimeError): contract.validate_candidate(self.pin, self.built, image)
+
+    def test_original_build_authority_is_separate_and_cannot_be_rebound(self):
+        for key, value in contract.build_reuse_binding().items():
+            altered = {**self.pin, key: ('changed' if isinstance(value, str) else value + 1)}
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                contract.validate_candidate(altered, self.built, self.image)
+        for key in ['toolingCommit', 'proofSourceReviewId', 'builderSha256',
+                'toolingSourceIndexSha256', 'proofSourceReviewRawSha256']:
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                contract.validate_candidate(self.pin, {**self.built, key: 'new-proof-authority'}, self.image)
+
+    def test_original_raw_source_and_review_require_exact_canonical_hashes(self):
+        source, review = ORIGINAL_BUILD_AUTHORITY['source'], ORIGINAL_BUILD_AUTHORITY['review']
+        contract.retained_build_authority(source, review)
+        for key in ['source', 'review']:
+            altered = copy.deepcopy(ORIGINAL_BUILD_AUTHORITY)
+            altered[key]['unexpected'] = 'changed'
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                contract.retained_build_authority(altered['source'], altered['review'])
+
+    def test_both_new_source_build_paths_refuse_before_any_operation(self):
+        for name in ['build_import.py', 'prepare_import_build.py']:
+            module = types.ModuleType('owned_disabled_build')
+            module.__file__ = '/owned-compile-only/' + name
+            with patch('subprocess.run', side_effect=AssertionError('No operation allowed')), \
+                    patch('subprocess.check_output', side_effect=AssertionError('No operation allowed')):
+                exec(compile(RAW_TOOLING[name], module.__file__, 'exec'), module.__dict__)
+                with self.subTest(name=name), self.assertRaisesRegex(RuntimeError, 'already complete'):
+                    module.main()
 
     def test_parent_order_and_audited_tree_cannot_drift(self):
         merged = {'sha': contract.CANDIDATE_HEAD, 'tree': {'sha': contract.MERGED_TREE},

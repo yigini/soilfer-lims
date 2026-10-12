@@ -162,12 +162,24 @@ def main():
     built_root = pathlib.Path(pin['buildRoot'])
     require(built_root.parent == pathlib.Path('/opt/lims/releases') and
         built_root.name.startswith('instrument-import-build-'), 'Unexpected build root')
+    for name in ['build-receipt.json', 'source.tar.gz', 'source-index.json',
+            'tooling-source-index.json', 'proof-source-review.json']:
+        path = built_root / name
+        require(path.is_file() and not path.is_symlink() and path.stat().st_mode & 0o777 == 0o400,
+            'Original build authority is not immutable: ' + name)
     require(s.sha(built_root / 'build-receipt.json') == pin['buildReceiptSha256'], 'Build receipt changed')
     built = json.loads((built_root / 'build-receipt.json').read_bytes())
     require(s.sha(built_root / 'source.tar.gz') == built['sourceArchiveSha256'] and
         s.sha(built_root / 'source-index.json') == built['sourceIndexSha256'], 'Build source changed')
     image = json.loads(subprocess.check_output(['docker', 'image', 'inspect', pin['image']], text=True, timeout=15))[0]
     validate_candidate(pin, built, image)
+    build_source = json.loads((built_root / 'tooling-source-index.json').read_bytes())
+    build_review = json.loads((built_root / 'proof-source-review.json').read_bytes())
+    retained_build_authority(build_source, build_review)
+    for name, item in build_source['files'].items():
+        path = built_root / name
+        require(path.is_file() and not path.is_symlink() and path.stat().st_mode & 0o777 == 0o400 and
+            s.sha(path) == item['sha256'], 'Original measured build source changed')
     require(s.sha(HISTORICAL_ROOT / 'production-receipt.json') == HISTORICAL_RECEIPT_SHA, 'Historical receipt changed')
     live = c.inspect('soilfer-lims')
     require(live['State']['Running'] and live['State']['Health']['Status'] == 'healthy' and
@@ -193,6 +205,7 @@ def main():
         'sourceIndexSha256': s.sha(ROOT / 'source-index.json'), 'toolingCommit': source['head'],
         'coordinatorSha256': s.sha(__file__), 'buildReceiptSha256': pin['buildReceiptSha256'],
         'proofSourceReviewId': source_review['id'], 'baseHead': BASE_HEAD,
+        **build_reuse_binding(),
         'mergeBaseHead': MERGE_BASE_HEAD, 'auditReviewId': AUDIT_REVIEW_ID,
         'originalProofRoot': EXPECTED_PROOF_ROOT, 'firstProofPolicy': FIRST_PROOF_POLICY, 'pr': PR_NUMBER,
         'tree': MERGED_TREE, 'auditedTree': AUDITED_PR_TREE, 'mergeParents': MERGE_PARENTS,

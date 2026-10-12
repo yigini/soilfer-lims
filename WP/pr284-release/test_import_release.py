@@ -25,6 +25,9 @@ def native():
         'originalRowsSha256': 'b' * 64, 'beforeBackupSha256': 'a' * 64,
         'afterBackupSha256': 'c' * 64, 'preservationSha256': 'd' * 64,
         'dryRunCopyAuthoritySha256': 'd' * 64,
+        'repeatPhysicalPolicy': release.REPEAT_POLICY, 'repeatPreservationSha256': 'd' * 64,
+        'repeatStoppedSeal': {'policy': release.WAL_RECOVERY_POLICY, 'countsIncludeWal': True,
+            'protectedTableCount': 106, 'protectedReceiptCount': 39},
         'dryRunCopy': {'policy': release.DRY_COPY_POLICY, 'beforeBackupSha256': 'a' * 64,
             'mainSha256': 'a' * 64, 'targetPhysicalTriplePreserved': True,
             'files': {'dev.db': {'sha256': 'a' * 64, 'bytes': 1234}}},
@@ -71,6 +74,7 @@ class ReleaseTests(unittest.TestCase):
         files['apache-before.conf'] = release.ORIGINAL_INGRESS_SHA
         files['apache-held.conf'] = release.HELD_INGRESS_SHA
         return {'files': files, 'status': release.KIT_STATUS,
+            **release.build_reuse_binding(), 'repeatPhysicalPolicy': release.REPEAT_POLICY,
             'root': '/opt/lims/releases/instrument-import-release-owned',
             'originalProofRoot': '/opt/lims/releases/instrument-import-proof-owned',
             'head': release.CANDIDATE_HEAD, 'baseHead': release.BASE_HEAD,
@@ -93,7 +97,7 @@ class ReleaseTests(unittest.TestCase):
             'refusalPairingScopeCommentId': release.REFUSAL_PAIRING_SCOPE_COMMENT_ID,
             'schedulerRefusalPairing': release.REFUSAL_PAIRING_POLICY,
             'REFUSAL_PAIR_WINDOW_SECONDS': release.REFUSAL_PAIR_WINDOW_SECONDS,
-            'image': 'sha256:' + '9' * 64}
+            'image': release.ORIGINAL_BUILD_IMAGE}
 
     def test_exact_three_native_cli_steps_pass(self):
         release.native_installation(native())
@@ -136,6 +140,14 @@ class ReleaseTests(unittest.TestCase):
             if change == 'target-write': row['dryRunCopy']['targetPhysicalTriplePreserved'] = False
             if change == 'wal-frames': row['dryRunCopy']['files']['dev.db-wal'] = {'bytes': 1, 'sha256': 'f' * 64}
             with self.subTest(change=change), self.assertRaises(RuntimeError): release.native_installation(row)
+
+    def test_repeat_cannot_omit_new_sidecar_policy_or_full_detached_seal(self):
+        for key, value in [('repeatPhysicalPolicy', 'OLD_TRIPLE_EQUALITY'),
+            ('repeatPreservationSha256', ''), ('repeatStoppedSeal', {}),
+            ('repeatStoppedSeal', {'policy': release.WAL_RECOVERY_POLICY, 'countsIncludeWal': False,
+                'protectedTableCount': 106, 'protectedReceiptCount': 39})]:
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                release.native_installation(dict(native(), **{key: value}))
 
     def test_jobs_on_cannot_omit_boundary_or_claim_zero_full_state(self):
         for change in [None, {'policy': 'anything'}, {
@@ -188,6 +200,17 @@ class ReleaseTests(unittest.TestCase):
             ('root', '/opt/lims/releases/runtime-kobo-release-old')]:
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 release.measurement_manifest(dict(manifest, **{key: value}))
+
+    def test_frozen_manifest_and_gate_bind_repeat_policy_and_original_build(self):
+        manifest = self.manifest()
+        for key, value in dict(release.build_reuse_binding(), repeatPhysicalPolicy=release.REPEAT_POLICY).items():
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                release.measurement_manifest({**manifest, key: 'changed'})
+        gate = self.complete_gate(manifest)
+        now = datetime.datetime(2026, 10, 12, 0, 5, tzinfo=datetime.timezone.utc)
+        for key in ['buildReuseBinding', 'repeatPhysicalPolicy']:
+            with self.subTest(gate=key), self.assertRaises(RuntimeError):
+                release.verify_gate(manifest, {**gate, key: None}, 'a' * 64, now)
 
     def test_measured_source_missing_changed_or_extra_frozen_file_refuses(self):
         for change in ['missing', 'changed', 'extra']:
@@ -261,6 +284,7 @@ class ReleaseTests(unittest.TestCase):
     def test_old_or_stale_gate_never_passes_initial_authority(self):
         manifest = self.manifest()
         gate = {'status': 'FRESH_SINGLE_USE_IMPORT_GATE', 'executionRoot': manifest['root'],
+            'buildReuseBinding': release.build_reuse_binding(), 'repeatPhysicalPolicy': release.REPEAT_POLICY,
             'head': manifest['head'], 'currentMainHead': manifest['head'], 'image': manifest['image'],
             'manifestSha256': 'a' * 64, 'workloadControl': release.WORKLOAD_PINS,
             'entryBinding': release.entry_binding(), 'frozenFiles': manifest['files'],
@@ -309,6 +333,7 @@ class ReleaseTests(unittest.TestCase):
         pr_review = {'id': 999900004, 'html_url': 'https://github.com/yigini/soilfer-lims/pull/999#issuecomment-999900004',
             'body': release.PHRASE + '\n' + release.AUDITED_PR_HEAD, 'created_at': '2026-10-12T00:00:00Z'}
         gate = {'status': 'FRESH_SINGLE_USE_IMPORT_GATE', 'executionRoot': manifest['root'],
+            'buildReuseBinding': release.build_reuse_binding(), 'repeatPhysicalPolicy': release.REPEAT_POLICY,
             'head': manifest['head'], 'currentMainHead': manifest['head'], 'image': manifest['image'],
             'manifestSha256': 'a' * 64, 'workloadControl': release.WORKLOAD_PINS,
             'entryBinding': release.entry_binding(), 'frozenFiles': manifest['files'],
@@ -374,7 +399,7 @@ class ReleaseTests(unittest.TestCase):
         seal = {'policy': release.WAL_RECOVERY_POLICY, 'countsIncludeWal': True,
             'protectedTableCount': 106, 'protectedReceiptCount': 39, 'matchesExpected': True}
         proof = {'status': 'PASSED_NEW_IMPORT_NATURAL_KOBO_PROOF', 'head': release.CANDIDATE_HEAD,
-            'image': 'sha256:' + '9' * 64, 'buildReceiptSha256': '8' * 64,
+            **release.build_reuse_binding(),
             'baseHead': release.BASE_HEAD, 'mergeBaseHead': release.MERGE_BASE_HEAD,
             'auditReviewId': release.AUDIT_REVIEW_ID, 'root': release.EXPECTED_PROOF_ROOT,
             'originalProofRoot': release.EXPECTED_PROOF_ROOT, 'firstProofPolicy': release.FIRST_PROOF_POLICY,
@@ -410,6 +435,7 @@ class ReleaseTests(unittest.TestCase):
             'readOnlyProbeChanges': 0, 'firstScheduledSync': first, 'secondScheduledSync': second,
             'observedThroughUtc': '2026-10-12T00:18:00Z', 'copySyncIntervalMins': 15, 'healthySoakSeconds': 1080}
         pin = {'head': release.CANDIDATE_HEAD, 'baseHead': release.BASE_HEAD,
+            **release.build_reuse_binding(),
             'mergeBaseHead': release.MERGE_BASE_HEAD, 'auditReviewId': release.AUDIT_REVIEW_ID,
             'firstProofPolicy': release.FIRST_PROOF_POLICY, 'auditedPrHead': release.AUDITED_PR_HEAD,
             'pr': release.PR_NUMBER, 'originalProofRoot': release.EXPECTED_PROOF_ROOT,
@@ -465,19 +491,22 @@ class ReleaseTests(unittest.TestCase):
         source = {'head': release.REVIEWED_PROOF_SOURCE,
             'files': {name: {'sha256': digest} for name, digest in self.proof_files.items()}}
         authority = {'head': pin['head'], 'baseHead': release.BASE_HEAD,
+            'buildReuseBinding': release.build_reuse_binding(), 'repeatPhysicalPolicy': release.REPEAT_POLICY,
             'mergeBaseHead': release.MERGE_BASE_HEAD, 'originalProofRoot': release.EXPECTED_PROOF_ROOT,
             'firstProofPolicy': release.FIRST_PROOF_POLICY, 'proofSourceReview': self.source_verdict(),
             'review': {'id': release.AUDIT_REVIEW_ID,
                 'html_url': 'https://github.com/yigini/soilfer-lims/pull/999#issuecomment-999900004',
                 'body': 'Audit passed: OK to merge and deploy\n' + release.AUDITED_PR_HEAD}}
         release.proof_authority(proof, pin, source, authority, '7' * 64)
-        for change in ['audit-id', 'audit-head', 'application-base', 'predecessor', 'first-root']:
+        for change in ['audit-id', 'audit-head', 'application-base', 'predecessor', 'first-root', 'build-reuse', 'repeat']:
             altered = copy.deepcopy(authority)
             if change == 'audit-id': altered['review']['id'] = 6121933894
             if change == 'audit-head': altered['review']['body'] = 'Audit passed: OK to merge and deploy\n' + release.MERGE_BASE_HEAD
             if change == 'application-base': altered['mergeBaseHead'] = release.BASE_HEAD
             if change == 'predecessor': altered['baseHead'] = release.MERGE_BASE_HEAD
             if change == 'first-root': altered['originalProofRoot'] += '-rerun'
+            if change == 'build-reuse': altered['buildReuseBinding']['buildSourceReviewId'] = release.PROOF_SOURCE_REVIEW_ID
+            if change == 'repeat': altered['repeatPhysicalPolicy'] = 'OLD_EXACT_TRIPLE'
             with self.subTest(change=change), self.assertRaises(RuntimeError):
                 release.proof_authority(proof, pin, source, altered, '7' * 64)
 

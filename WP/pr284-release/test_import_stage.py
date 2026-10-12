@@ -53,14 +53,26 @@ class StageGuards(unittest.TestCase):
         return {suffix: {'sha256': self.sha(file), 'bytes': file.stat().st_size} if file.exists() else None
             for suffix in ['', '-wal', '-shm'] for file in [pathlib.Path(str(path) + suffix)]}
 
+    def physical_attributes(self):
+        values = self.physical(self.target)
+        for suffix, value in values.items():
+            if value is not None:
+                info = pathlib.Path(str(self.target) + suffix).stat()
+                value.update(inode=info.st_ino, device=info.st_dev, mtimeNs=info.st_mtime_ns,
+                    mode=stat.S_IMODE(info.st_mode))
+        return values
+
     def snapshot(self, path, immutable=False):
         self.assertTrue(immutable)
         self.assertNotEqual(pathlib.Path(path).resolve(), self.target.resolve(),
             'No SQLite connection to original target is permitted')
         self.snapshots.append(pathlib.Path(path))
         with closing(sqlite3.connect('file:' + str(path) + '?mode=ro&immutable=1', uri=True)) as db:
-            tables = {row[0]: {} for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")}
-            tables['_schema_migrations']['count'] = db.execute('SELECT count(*) FROM _schema_migrations').fetchone()[0]
+            tables = {}
+            for (name,) in db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"):
+                quoted = '"' + name.replace('"', '""') + '"'
+                rows = list(db.execute('SELECT * FROM ' + quoted + ' ORDER BY 1'))
+                tables[name] = {'count': len(rows), 'rowsSha256': hashlib.sha256(repr(rows).encode()).hexdigest()}
             return {'tables': tables, 'integrity': db.execute('PRAGMA integrity_check').fetchone()[0],
                 'foreignKeyViolations': len(db.execute('PRAGMA foreign_key_check').fetchall())}
 
@@ -91,20 +103,31 @@ class StageGuards(unittest.TestCase):
             with (directory / 'dev.db').open('ab') as stream: stream.write(b'unapproved-dry-copy-write')
         if self.behavior.get('wrong_plan') == label:
             value['totalChanges'] = 2
+        if self.behavior.get('readonly_sidecars') and label == 'import-repeat':
+            pathlib.Path(str(self.target) + '-wal').write_bytes(b'')
+            pathlib.Path(str(self.target) + '-shm').write_bytes(bytes(32768))
         return value, {'ownedSyntheticMeasurement': True, 'label': label}
 
     def seal(self, label, installed):
-        self.assertEqual((label, installed), ('after-import-stopped', True))
+        self.assertIn(label, ['after-import-stopped', 'after-repeat-stopped'])
+        self.assertTrue(installed)
         if self.behavior.get('wrong_original'):
             with closing(sqlite3.connect(self.target)) as db:
                 db.execute("UPDATE owned_0 SET value='changed'")
                 db.commit()
-        path = self.root / 'after-import-stopped.db'
+        path = self.root / (label + '.db')
         shutil.copyfile(self.target, path)
+        if label == 'after-repeat-stopped' and self.behavior.get('bad_repeat_logical_seal'):
+            with closing(sqlite3.connect(path)) as db:
+                db.execute("UPDATE owned_0 SET value='changed-at-same-count'")
+                db.commit()
         path.chmod(0o400)
         if self.behavior.get('reuse_backup'):
             path = self.pair.before
-        return {'backupPath': str(path), 'physical': self.physical(self.target)}
+        logical = self.snapshot(path, immutable=True)
+        return {'backupPath': str(path), 'physical': self.physical(self.target),
+            'originalFiles': self.physical_attributes(),
+            'logicalStateSha256': hashlib.sha256(json.dumps(logical, sort_keys=True).encode()).hexdigest()}
 
     def run_stage(self, **changes):
         args = dict(root=self.root, image=IMAGE, database_dir=self.target_dir,
@@ -161,6 +184,56 @@ class StageGuards(unittest.TestCase):
         self.behavior['write'] = 'import-repeat'
         with self.assertRaisesRegex(RuntimeError, 'Immediate repeat changed'):
             self.run_stage()
+
+    def test_readonly_repeat_sidecars_require_full_detached_equality(self):
+        self.behavior['readonly_sidecars'] = True
+        result, _ = self.run_stage()
+        self.assertEqual(result['repeatPhysicalPolicy'], stage.REPEAT_POLICY)
+        authority = json.loads((self.root / 'import-repeat-preservation.json').read_bytes())
+        self.assertTrue(authority['fullInstalledStateEqual'])
+        self.assertIsNone(authority['beforePhysical']['-wal'])
+        self.assertEqual(authority['afterPhysical']['-wal']['bytes'], 0)
+        self.assertEqual(authority['afterPhysical']['-shm']['bytes'], 32768)
+        self.assertEqual(authority['beforePhysical'][''], authority['afterPhysical'][''])
+        self.assertNotIn(self.target, self.snapshots)
+
+    def test_repeat_full_seal_refuses_same_count_row_change(self):
+        self.behavior.update(readonly_sidecars=True, bad_repeat_logical_seal=True)
+        with self.assertRaisesRegex(RuntimeError, 'full installed state'):
+            self.run_stage()
+        self.assertFalse((self.root / 'import-repeat-preservation.json').exists())
+
+    def test_real_sqlite_readonly_open_creates_bounded_sidecars_without_main_write(self):
+        owned = self.root / 'real-readonly.db'
+        with closing(sqlite3.connect(owned)) as db:
+            self.assertEqual(db.execute('PRAGMA journal_mode=WAL').fetchone()[0], 'wal')
+            db.execute('CREATE TABLE owned_value(value TEXT)')
+            db.execute("INSERT INTO owned_value VALUES('retained')")
+            db.commit()
+        before = self.physical(owned)
+        self.assertIsNone(before['-wal'])
+        with closing(sqlite3.connect(owned.as_uri() + '?mode=ro', uri=True)) as db:
+            self.assertEqual(db.execute('SELECT value FROM owned_value').fetchone()[0], 'retained')
+        after = self.physical(owned)
+        stage.readonly_repeat_physical(before, after)
+        self.assertEqual(after['-wal']['bytes'], 0)
+        self.assertEqual(after['-shm']['bytes'], 32768)
+
+    def test_repeat_physical_policy_refuses_frames_wrong_shm_and_main_attributes(self):
+        main = {'sha256': 'a' * 64, 'bytes': 100, 'inode': 1, 'device': 2, 'mtimeNs': 3, 'mode': 0o600}
+        before = {'': main, '-wal': None, '-shm': None}
+        good = {'': dict(main), '-wal': {'sha256': stage.EMPTY_SHA256, 'bytes': 0},
+            '-shm': {'sha256': 'b' * 64, 'bytes': 32768}}
+        stage.readonly_repeat_physical(before, good)
+        for key, value in [('sha256', 'b' * 64), ('bytes', 101), ('inode', 9),
+            ('device', 9), ('mtimeNs', 9), ('mode', 0o400)]:
+            changed = dict(good, **{'': dict(main, **{key: value})})
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                stage.readonly_repeat_physical(before, changed)
+        for change in [dict(good, **{'-wal': {'sha256': 'c' * 64, 'bytes': 1}}),
+            dict(good, **{'-wal': {'sha256': 'c' * 64, 'bytes': 0}}),
+            dict(good, **{'-shm': {'sha256': 'b' * 64, 'bytes': 32769}})]:
+            with self.assertRaises(RuntimeError): stage.readonly_repeat_physical(before, change)
 
     def test_post_backup_cannot_reuse_original(self):
         self.behavior['reuse_backup'] = True

@@ -38,6 +38,7 @@ def main():
     merged = github('repos/yigini/soilfer-lims/git/commits/' + pin['head'])
     validate_merge_identity(merged, audited)
     candidate_identity(pin)
+    require_build_reuse(pin)
     review = github('repos/yigini/soilfer-lims/issues/comments/' + str(pin['auditReviewId']))
     require_pr_review(review)
     comments = json.loads(subprocess.check_output(['gh', 'api',
@@ -54,6 +55,7 @@ def main():
         ci['status'] == 'completed' and ci['conclusion'] == 'success', 'Exact merged-main CI is not green')
     # This is rehearsal evidence, not a production execution gate.
     authority = {'observedUtc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        'buildReuseBinding': build_reuse_binding(), 'repeatPhysicalPolicy': REPEAT_POLICY,
         'head': pin['head'], 'baseHead': BASE_HEAD, 'mergeBaseHead': MERGE_BASE_HEAD,
         'originalProofRoot': EXPECTED_PROOF_ROOT, 'firstProofPolicy': FIRST_PROOF_POLICY,
         'auditedPrHead': AUDITED_PR_HEAD,

@@ -13,12 +13,13 @@ import re
 from import_proof_contract import *
 from import_source_graph import SOURCE_FILES, UNCHANGED_HELPER_HASHES
 from import_installation import CLI_TIMEOUT_SECONDS, DRY_COPY_POLICY, validate_apply, validate_plan
+from import_stage import REPEAT_POLICY, readonly_repeat_physical
 from import_startup_checks import READY_EVENTS, import_zero
 
 WORKLOAD_PINS = {'labAndHubBuildsOwnedByYY': True,
     'releaseWindowControl': 'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}
-REVIEWED_PROOF_SOURCE = '630b2354a1a45df0d88545ac5c63594361615999'
-PROOF_SOURCE_REVIEW_ID = 6125544861
+REVIEWED_PROOF_SOURCE = 'UNREVIEWED_SIDECAR_FORWARD_REFUSE'
+PROOF_SOURCE_REVIEW_ID = 0
 REVIEWED_PROOF_FILES = {
     'build_import.py': 'c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a',
     'capture_kobo_fetch.py': '1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86',
@@ -86,6 +87,8 @@ PROOF_ARTIFACTS = {
     'installed-protected-state.json': 'installed-protected-state.json',
     'import-install-preservation.json': 'import-install-preservation.json',
     'import-dry-copy-authority.json': 'import-dry-copy-authority.json',
+    'import-repeat-preservation.json': 'import-repeat-preservation.json',
+    'import-repeat-seal.json': 'after-repeat-stopped/sealed-state.json',
     'import-installed-seal.json': 'after-import-stopped/sealed-state.json',
     'import-jobs-off-seal.json': 'after-jobs-off-stopped/sealed-state.json',
     'import-final-seal.json': 'after-second-stopped/sealed-state.json'}
@@ -175,6 +178,13 @@ def native_installation(row):
     validate_plan(row['dry'], 'PRE_200', 'DRY_RUN')
     require(validate_apply(row['apply']) == row['originalRowsSha256'], 'Original row hash differs')
     validate_plan(row['repeat'], 'COMPLETE_200', 'NO_OP')
+    require(row.get('repeatPhysicalPolicy') == REPEAT_POLICY and
+        re.fullmatch('[a-f0-9]{64}', row.get('repeatPreservationSha256', '')),
+        'New readonly repeat policy and independently sealed authority required')
+    repeat_seal = row.get('repeatStoppedSeal', {})
+    require(repeat_seal.get('policy') == WAL_RECOVERY_POLICY and repeat_seal.get('countsIncludeWal') is True and
+        repeat_seal.get('protectedTableCount') == 106 and repeat_seal.get('protectedReceiptCount') == 39,
+        'Full detached installed repeat seal required')
     dry_copy = row.get('dryRunCopy', {})
     require(dry_copy.get('policy') == DRY_COPY_POLICY and
         dry_copy.get('beforeBackupSha256') == dry_copy.get('mainSha256') == row['beforeBackupSha256'] and
@@ -296,6 +306,8 @@ def validate_proof(proof, pin):
 
 def proof_source_binding(proof, pin):
     pairing_contract(proof)
+    require_build_reuse(proof)
+    require_build_reuse(pin)
     require(proof['toolingCommit'] == REVIEWED_PROOF_SOURCE and
         proof['proofSourceReviewId'] == pin['proofSourceReviewId'] == PROOF_SOURCE_REVIEW_ID and
         proof['coordinatorSha256'] == REVIEWED_PROOF_FILES['rehearse_import.py'] and
@@ -321,6 +333,8 @@ def proof_authority(proof, pin, source, authority, authority_sha):
         authority.get('baseHead') == BASE_HEAD and authority.get('mergeBaseHead') == MERGE_BASE_HEAD and
         authority.get('originalProofRoot') == EXPECTED_PROOF_ROOT and
         authority.get('firstProofPolicy') == FIRST_PROOF_POLICY and
+        authority.get('buildReuseBinding') == build_reuse_binding() and
+        authority.get('repeatPhysicalPolicy') == REPEAT_POLICY and
         authority['proofSourceReview']['id'] == PROOF_SOURCE_REVIEW_ID, 'Original proof authority changed')
     require_pr_review(authority.get('review', {}))
     source_review_pass(authority['proofSourceReview'], REVIEWED_PROOF_SOURCE, REVIEWED_PROOF_FILES)
@@ -329,7 +343,8 @@ def proof_authority(proof, pin, source, authority, authority_sha):
 def source_policy_tokens():
     return [ENTRY_POLICY, NATIVE_DELTA_POLICY, RECOVERY_POLICY, WAL_RECOVERY_POLICY,
         ORIGINAL_INGRESS_SHA, HELD_INGRESS_SHA, 'separateInstallerCommands=3',
-        'retainedDatabaseAllocationCount=13', 'defaultStartup=23NO_OP0/22READY0',
+        'retainedDatabaseAllocationCount=' + str(RETAINED_DATABASE_ALLOCATION_COUNT),
+        'repeatPhysicalPolicy=' + REPEAT_POLICY, 'defaultStartup=23NO_OP0/22READY0',
         'REQUIRED_HASHED_MANIFEST_AND_GATE', 'JOURNAL_UNIT_OUTPUT', DEPLOY_LAYOUT_POLICY,
         'BASELINE_ATTEMPTS_MAX=3', 'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10',
         'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
@@ -358,6 +373,9 @@ def production_source_review(review, tooling, files, now=None):
 
 def measurement_manifest(manifest):
     require_bound_proof_source()
+    require_build_reuse(manifest)
+    require(manifest.get('repeatPhysicalPolicy') == REPEAT_POLICY,
+        'Frozen readonly repeat policy differs')
     require(set(manifest['files']) == FROZEN_FILE_SET and
         all(re.fullmatch('[a-f0-9]{64}', digest) for digest in manifest['files'].values()) and
         {name: manifest['files'][name] for name in SOURCE_FILES} == REVIEWED_PROOF_FILES,
@@ -398,6 +416,8 @@ def review_tokens(manifest, manifest_sha):
 def verify_gate(manifest, gate, manifest_sha, now=None):
     now = now or datetime.datetime.now(datetime.timezone.utc)
     measurement_manifest(manifest)
+    require(gate.get('buildReuseBinding') == build_reuse_binding() and
+        gate.get('repeatPhysicalPolicy') == REPEAT_POLICY, 'Gate repeat or build reuse authority differs')
     require(gate['status'] == 'FRESH_SINGLE_USE_IMPORT_GATE' and gate['executionRoot'] == manifest['root'] and
         gate['head'] == gate['currentMainHead'] == manifest['head'] and gate['image'] == manifest['image'] and
         gate['manifestSha256'] == manifest_sha and gate['workloadControl'] == WORKLOAD_PINS and

@@ -1,9 +1,4 @@
-"""Prepare ONE build while merged-main CI runs; never deploy or start the app.
-
-PR audit and PR CI must already pass. Main CI may still be running because this
-operation only builds the immutable image. The rehearsal launcher separately
-requires exact merged-main CI SUCCESS before taking any fresh-copy proof.
-"""
+"""Historical preparer retained below; this forward source refuses another build."""
 import base64
 import datetime
 import hashlib
@@ -22,6 +17,7 @@ def github(endpoint):
 
 
 def main():
+    raise RuntimeError('Original 959d build is already complete; this forward source cannot prepare another build')
     tooling, review_id, ci_id, remote_root, unit, source_review_id = sys.argv[1:]
     require(len(tooling) == 40 and all(char in '0123456789abcdef' for char in tooling), 'Exact source commit required')
     root = pathlib.PurePosixPath(remote_root)
