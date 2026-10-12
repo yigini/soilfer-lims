@@ -190,6 +190,9 @@ node scripts/install_bench_credentials.js --db "${DATABASE_PATH:-$DB_FILE}" --ap
 echo "📦 Installing preparation record evidence..."
 node scripts/install_preparation_records.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
+echo "📦 Installing retained instrument import templates and receipts..."
+node scripts/install_instrument_imports.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js

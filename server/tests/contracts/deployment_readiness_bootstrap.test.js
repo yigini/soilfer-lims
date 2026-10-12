@@ -366,6 +366,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
             .toMatchObject({classification:'COMPLETE_202',backfilledCount:0});
         expect(require('../../scripts/install_preparation_records').installPreparationRecords({dbPath:targetDb,apply:true}))
             .toMatchObject({classification:'COMPLETE_205',backfilledCount:0});
+        require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: targetDb, apply: true });
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
@@ -419,6 +420,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_bench_credentials.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_preparation_records.js',
                 `node "${path.join(serverDir, 'scripts/install_preparation_records.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_instrument_imports.js',
+                `node "${path.join(serverDir, 'scripts/install_instrument_imports.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_raw_input.js',
                 `node "${path.join(serverDir, 'scripts/install_result_raw_input.js').replace(/\\/g, '/')}"`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');

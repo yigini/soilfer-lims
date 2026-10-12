@@ -1,5 +1,6 @@
-// #199 pin6089156077: closed owned-file release preparation. Only the six
-// retained QC fixture successors may call this export, with the owned db only.
+// #199 pin6089156077 and standing precedent6089928620: closed owned-file
+// release preparation. Only listed QC/workspace fixture successors may call
+// this export, with their owned database only.
 const fs = require('node:fs'), path = require('node:path');
 const Database = require('better-sqlite3');
 const { UNITS } = require('../../seeds/units');

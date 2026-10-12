@@ -94,6 +94,11 @@ COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fres
 COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql
 COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql
 COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql
+COPY server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/migration.sql
+COPY server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/fresh-prisma-tables.json
+COPY server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql
+COPY server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql
+COPY server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/post205-draft-tables.json
 
 # Copy and set entrypoint
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
