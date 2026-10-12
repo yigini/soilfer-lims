@@ -59,7 +59,9 @@ PRODUCTION_SOURCE_FILES = ['import_release_contract.py', 'deploy_import.py',
     'freeze_import.py', 'known_core_disk_guard_import_deploy.py',
     'collect_import_gate.py', 'export_freeze_import_kit.py', 'launch_import_release.py',
     'production_output_paths.py']
-PACKAGE_SOURCE_FILES = SOURCE_FILES | set(PRODUCTION_SOURCE_FILES) | {'yy-authorization-evidence.md'}
+HELD_ENTRY_FILES = {'yy-maintenance-choice-evidence.json', 'held-entry-scope-review.json',
+    'held-entry-receipt.json'}
+PACKAGE_SOURCE_FILES = SOURCE_FILES | set(PRODUCTION_SOURCE_FILES) | {'yy-authorization-evidence.md'} | HELD_ENTRY_FILES
 PROOF_BASELINE_LAYOUT_POLICY = 'EXACT_HASHED_IMPORT_PROOF_AUTHORITY_LAYOUT'
 DEPLOY_LAYOUT_POLICY = OUTPUT_NAMESPACE_POLICY
 BASELINE_POLICY = 'CONFIRMED_VANISHED_PROC_PID_FRESH_REBASELINE'
@@ -75,7 +77,16 @@ PHRASE = 'Audit passed: OK to merge and deploy'
 WAL_RECOVERY_POLICY = 'DETACHED_STOPPED_IMPORT_WAL_AWARE_SEAL'
 ORIGINAL_INGRESS_SHA = 'f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20'
 HELD_INGRESS_SHA = 'd92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c'
-ENTRY_POLICY = 'HEALTHY_RUNNING_NORMAL_51F_ONLY'
+ENTRY_POLICY = 'EXACT_YY_STAY_MAINTENANCE_STOPPED_51F_NO_APPLY_FORWARD_ONLY'
+FORWARD_FIX_SCOPE_COMMENT_ID = 6131470499
+HELD_ENTRY_SCOPE_COMMENT_ID = 6131752416
+HELD_FAILURE_ROOT_PATH = '/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z'
+HELD_FAILURE_RECEIPT_SHA = '2a03e66071406c58b754d9c63ed8200373c55a0433c2d1ad1cbdc2836d72499e'
+HELD_STOPPED_BACKUP_SHA = '70ee994b2013baa5553c5d0939b57b4891189a42e3553335c6b1fc13d90674f5'
+HELD_ORIGINAL_CONTAINER_ID = '977334bcd8d901745996f537076ebc5277c06a4e136492c323362d6fb8a2f52a'
+HELD_RAW_TRIPLE_SHA = '3dcf3f3e98d718722b4515bf9a5a8769679c41da7b2126390901da56e13552a1'
+HELD_ENTRY_SCOPE_SHA = '9788614e7c1ee3bd39714e8f3b98bb35458d12d59afbaa6ceab8ff96d1d65d4c'
+YY_MAINTENANCE_EVIDENCE_SHA = '1499cd6ab9b534c8e5852cfd27fbe10632309a8f45c21f23c6abeb8870f05213'
 PROOF_ARTIFACTS = {
     'target-pin.json': 'target-pin.json', 'rehearsal-receipt.json': 'rehearsal-receipt.json',
     'proof-source-index.json': 'source-index.json',
@@ -143,16 +154,54 @@ def entry_binding():
     return {'policy': ENTRY_POLICY, 'baseHead': BASE_HEAD, 'liveImage': LIVE_IMAGE,
         'historicalReceiptSha256': HISTORICAL_RECEIPT_SHA,
         'normalIngressSha256': ORIGINAL_INGRESS_SHA, 'heldIngressSha256': HELD_INGRESS_SHA,
-        'allowedEntryStates': ['RUNNING_NORMAL'], 'recoveryPolicy': RECOVERY_POLICY}
+        'allowedEntryStates': ['STOPPED_HELD_UNAPPLIED'], 'recoveryPolicy': RECOVERY_POLICY,
+        'forwardFixScopeCommentId': FORWARD_FIX_SCOPE_COMMENT_ID,
+        'heldEntryScopeCommentId': HELD_ENTRY_SCOPE_COMMENT_ID, 'heldEntryScopeSha256': HELD_ENTRY_SCOPE_SHA,
+        'yyMaintenanceEvidenceSha256': YY_MAINTENANCE_EVIDENCE_SHA,
+        'failedProductionRoot': HELD_FAILURE_ROOT_PATH, 'failedProductionReceiptSha256': HELD_FAILURE_RECEIPT_SHA,
+        'stoppedBackupSha256': HELD_STOPPED_BACKUP_SHA, 'originalContainerId': HELD_ORIGINAL_CONTAINER_ID,
+        'originalRawTripleSha256': HELD_RAW_TRIPLE_SHA}
+
+
+def raw_triple_digest(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'),
+        ensure_ascii=False).encode()).hexdigest()
+
+
+def held_entry_authority(receipt, choice, scope):
+    """Pure validation: failed receipt is ONLY held-entry evidence, never proof.
+
+    The original stopped PASSED rehearsal and successful build remain the sole
+    installation authority. This receipt cannot authorise replay or recovery.
+    """
+    require(choice.get('evidenceKind') == 'DIRECT_NATIVE_CARD_READ_TRANSCRIPTION' and
+        choice.get('choice') == 'STAY_IN_MAINTENANCE' and choice.get('confirmedByYY') is True and
+        choice.get('cardAnswerActionsByPip') == 0 and choice.get('entryScopeCommentId') == HELD_ENTRY_SCOPE_COMMENT_ID and
+        choice.get('entryScopeRawSha256') == HELD_ENTRY_SCOPE_SHA,
+        'Actual directly observed YY maintenance choice required')
+    require(scope.get('id') == HELD_ENTRY_SCOPE_COMMENT_ID and scope.get('html_url') ==
+        'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-' + str(HELD_ENTRY_SCOPE_COMMENT_ID) and
+        '**stay in maintenance**' in scope.get('body', ''), 'Exact Claudio held-entry scope required')
+    seal = receipt.get('originalStoppedSeal', {})
+    require(receipt.get('status') == 'FAILED_IMPORT_FORWARD_HOLD' and receipt.get('head') == CANDIDATE_HEAD and
+        receipt.get('anyEntrypointAttempted') is False and 'nativeImportInstallation' not in receipt and
+        not any(key in receipt for key in ['jobsOffReadiness', 'jobsOnReadiness', 'originalContainerRetainedAs']) and
+        receipt.get('stoppedBackupSha256') == seal.get('backupSha256') == HELD_STOPPED_BACKUP_SHA and
+        seal.get('backupPath') == HELD_FAILURE_ROOT_PATH + '/original-stopped-seal/dev-stopped-backup.db' and
+        receipt.get('originalDatabaseFiles') == seal.get('originalFiles') and
+        raw_triple_digest(receipt.get('originalDatabaseFiles')) == HELD_RAW_TRIPLE_SHA and
+        receipt.get('preflight', {}).get('entryState', {}).get('containerId') == HELD_ORIGINAL_CONTAINER_ID,
+        'Original held stopped receipt, backup or physical triple differs')
+    return receipt['originalDatabaseFiles']
 
 
 def validate_entry_state(entry, manifest):
-    require(manifest.get('entryBinding') == entry_binding(), 'Healthy predecessor authority differs')
+    require(manifest.get('entryBinding') == entry_binding(), 'Exact held predecessor authority differs')
     require(set(entry) == {'mode', 'containerId', 'image', 'restartCount', 'ingressSha256', 'originalFiles'} and
-        entry['mode'] == 'RUNNING_NORMAL' and re.fullmatch('[a-f0-9]{64}', entry['containerId']) and
+        entry['mode'] == 'STOPPED_HELD_UNAPPLIED' and entry['containerId'] == HELD_ORIGINAL_CONTAINER_ID and
         entry['image'] == LIVE_IMAGE and type(entry['restartCount']) is int and entry['restartCount'] == 0 and
-        entry['ingressSha256'] == ORIGINAL_INGRESS_SHA and entry['originalFiles'] is None,
-        'Only healthy normal unchanged predecessor is release authority')
+        entry['ingressSha256'] == HELD_INGRESS_SHA and raw_triple_digest(entry['originalFiles']) == HELD_RAW_TRIPLE_SHA,
+        'Only exact stopped unrenamed unapplied held predecessor is release authority')
 
 
 def verify_entry_readiness(manifest, gate, actual):
@@ -351,6 +400,15 @@ def source_policy_tokens():
         'REQUIRED_HASHED_MANIFEST_AND_GATE', 'JOURNAL_UNIT_OUTPUT', DEPLOY_LAYOUT_POLICY,
         'frozenDirectory=frozen', 'prospectiveOutputsAbsentBeforeQuiesce=true',
         'outputCatalogSha256=' + namespace_binding(FROZEN_FILE_SET)['catalogSha256'],
+        'forwardFixScopeCommentId=' + str(FORWARD_FIX_SCOPE_COMMENT_ID),
+        'heldEntryScopeCommentId=' + str(HELD_ENTRY_SCOPE_COMMENT_ID),
+        'heldEntryScopeSha256=' + HELD_ENTRY_SCOPE_SHA,
+        'yyMaintenanceEvidenceSha256=' + YY_MAINTENANCE_EVIDENCE_SHA,
+        'heldFailureReceiptSha256=' + HELD_FAILURE_RECEIPT_SHA,
+        'heldOriginalContainerId=' + HELD_ORIGINAL_CONTAINER_ID,
+        'heldRawTripleSha256=' + HELD_RAW_TRIPLE_SHA,
+        'heldStoppedBackupSha256=' + HELD_STOPPED_BACKUP_SHA,
+        'allowedEntryState=STOPPED_HELD_UNAPPLIED',
         'BASELINE_ATTEMPTS_MAX=3', 'BASELINE_CONFIRMATION_DEADLINE_SECONDS=10',
         'CORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10',
         'productionObservationSeconds=660', 'deadlineSeconds=600',
@@ -387,6 +445,10 @@ def measurement_manifest(manifest):
         all(re.fullmatch('[a-f0-9]{64}', digest) for digest in manifest['files'].values()) and
         {name: manifest['files'][name] for name in SOURCE_FILES} == REVIEWED_PROOF_FILES,
         'Exact complete frozen file set differs')
+    require(manifest['files']['yy-maintenance-choice-evidence.json'] == YY_MAINTENANCE_EVIDENCE_SHA and
+        manifest['files']['held-entry-scope-review.json'] == HELD_ENTRY_SCOPE_SHA and
+        manifest['files']['held-entry-receipt.json'] == HELD_FAILURE_RECEIPT_SHA,
+        'Exact YY maintenance and held-entry raw authority hashes differ')
     require(manifest['status'] == KIT_STATUS and manifest['head'] == CANDIDATE_HEAD and
         manifest['baseHead'] == BASE_HEAD and manifest.get('mergeBaseHead') == MERGE_BASE_HEAD and
         type(manifest.get('auditReviewId')) is int and manifest['auditReviewId'] == AUDIT_REVIEW_ID and
@@ -434,6 +496,9 @@ def verify_gate(manifest, gate, manifest_sha, now=None):
         'Single-use gate identity differs')
     for key, name in [('coordinatorSha256', 'deploy_import.py'), ('rehearsalReceiptSha256', 'rehearsal-receipt.json'),
         ('targetPinSha256', 'target-pin.json'), ('yyEvidenceSha256', 'yy-authorization-evidence.md'),
+        ('yyMaintenanceEvidenceSha256', 'yy-maintenance-choice-evidence.json'),
+        ('heldEntryScopeSha256', 'held-entry-scope-review.json'),
+        ('heldEntryReceiptSha256', 'held-entry-receipt.json'),
         ('proofAuthoritySha256', 'proof-authority.json'), ('proofSourceIndexSha256', 'proof-source-index.json'),
         ('diskMeasurementGuardSha256', 'known_core_disk_guard_v2.py'),
         ('baselineMeasurementGuardSha256', 'known_core_disk_guard_v3.py'),
@@ -509,6 +574,9 @@ def frozen_files(root, manifest):
     review = json.loads((root / 'production-baseline-source-review.json').read_bytes())
     require(review['id'] == manifest['productionBaselineSourceReviewId'], 'Production source review changed')
     production_source_review(review, manifest['packagingCommit'], manifest['files'])
+    held_entry_authority(json.loads(safe_reference(root, 'held-entry-receipt.json').read_bytes()),
+        json.loads(safe_reference(root, 'yy-maintenance-choice-evidence.json').read_bytes()),
+        json.loads(safe_reference(root, 'held-entry-scope-review.json').read_bytes()))
     return pin
 
 

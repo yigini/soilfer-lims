@@ -1,0 +1,29 @@
+{
+  "evidenceKind": "DIRECT_NATIVE_CARD_READ_TRANSCRIPTION",
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "originalQuestion": "Bring the LIMS back online on the old version while Pip builds the fix?",
+  "originalSelectedOption": "B — Stay in maintenance",
+  "originalChosenDisplay": "You chose · 10:07 PM",
+  "chosenUtcMinute": "2026-10-12T20:07:00Z",
+  "timePrecision": "minute",
+  "displayTimeZone": "Europe/Rome",
+  "choice": "STAY_IN_MAINTENANCE",
+  "confirmedByYY": true,
+  "observer": "Pip",
+  "observedUtc": "2026-10-12T20:10:39.999373+00:00",
+  "observationActions": [
+    "read",
+    "scroll"
+  ],
+  "cardAnswerActionsByPip": 0,
+  "entryScopeCommentId": 6131752416,
+  "entryScopeUrl": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6131752416",
+  "entryScopeRawSha256": "9788614e7c1ee3bd39714e8f3b98bb35458d12d59afbaa6ceab8ff96d1d65d4c",
+  "standingGoEvidenceRewritten": false,
+  "productionMutations": 0,
+  "yyMaintenanceEvidenceSha256": "1499cd6ab9b534c8e5852cfd27fbe10632309a8f45c21f23c6abeb8870f05213",
+  "originalStoppedBackupSha256": "70ee994b2013baa5553c5d0939b57b4891189a42e3553335c6b1fc13d90674f5",
+  "originalContainerId": "977334bcd8d901745996f537076ebc5277c06a4e136492c323362d6fb8a2f52a",
+  "originalRawTripleSha256": "3dcf3f3e98d718722b4515bf9a5a8769679c41da7b2126390901da56e13552a1"
+}

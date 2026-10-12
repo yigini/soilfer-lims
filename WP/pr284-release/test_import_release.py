@@ -222,19 +222,73 @@ class ReleaseTests(unittest.TestCase):
             if change == 'extra': row['files']['dev.db'] = '1' * 64
             with self.subTest(change=change), self.assertRaises(RuntimeError): release.measurement_manifest(row)
 
-    def test_healthy_entry_only_and_gate_entry_identity(self):
+    def held_entry(self):
+        receipt = __import__('json').loads(RAW_PACKAGE['held-entry-receipt.json'])
+        return {'mode': 'STOPPED_HELD_UNAPPLIED', 'containerId': release.HELD_ORIGINAL_CONTAINER_ID,
+            'image': release.LIVE_IMAGE, 'restartCount': 0, 'ingressSha256': release.HELD_INGRESS_SHA,
+            'originalFiles': receipt['originalDatabaseFiles']}
+
+    def test_exact_held_entry_only_and_gate_entry_identity(self):
         manifest = self.manifest()
-        entry = {'mode': 'RUNNING_NORMAL', 'containerId': '1' * 64, 'image': release.LIVE_IMAGE,
-            'restartCount': 0, 'ingressSha256': release.ORIGINAL_INGRESS_SHA, 'originalFiles': None}
+        entry = self.held_entry()
         release.validate_entry_state(entry, manifest)
-        for key, value in [('mode', 'STOPPED_HELD'), ('restartCount', 1), ('restartCount', False),
-            ('image', manifest['image']), ('ingressSha256', release.HELD_INGRESS_SHA), ('originalFiles', {})]:
+        for key, value in [('mode', 'RUNNING_NORMAL'), ('mode', 'STOPPED_HELD'),
+            ('containerId', '1' * 64), ('restartCount', 1), ('restartCount', False),
+            ('image', manifest['image']), ('ingressSha256', release.ORIGINAL_INGRESS_SHA),
+            ('originalFiles', {}), ('originalFiles', None)]:
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 release.validate_entry_state(dict(entry, **{key: value}), manifest)
         gate = {'readOnlyExecutionReadiness': {'entryState': entry}}
         release.verify_entry_readiness(manifest, gate, {'entryState': entry})
         with self.assertRaises(RuntimeError): release.verify_entry_readiness(manifest, gate,
             {'entryState': dict(entry, containerId='2' * 64)})
+
+    def test_held_entry_requires_direct_choice_scope_original_receipt_and_backup(self):
+        import json
+        receipt = json.loads(RAW_PACKAGE['held-entry-receipt.json'])
+        receipt['head'] = release.CANDIDATE_HEAD
+        choice = json.loads(RAW_PACKAGE['yy-maintenance-choice-evidence.json'])
+        scope = json.loads(RAW_PACKAGE['held-entry-scope-review.json'])
+        self.assertEqual(release.held_entry_authority(receipt, choice, scope), self.held_entry()['originalFiles'])
+        for key, value in [('choice', 'RESTORE_SERVICE'), ('confirmedByYY', False),
+            ('cardAnswerActionsByPip', 1), ('entryScopeCommentId', 6131470499),
+            ('entryScopeRawSha256', '0' * 64), ('evidenceKind', 'REPORTED_UNVERIFIED')]:
+            with self.subTest(choice=key), self.assertRaises(RuntimeError):
+                release.held_entry_authority(receipt, dict(choice, **{key: value}), scope)
+        for key, value in [('id', 6131470499), ('html_url', 'https://example.invalid'), ('body', '')]:
+            with self.subTest(scope=key), self.assertRaises(RuntimeError):
+                release.held_entry_authority(receipt, choice, dict(scope, **{key: value}))
+        for key, value in [('status', 'PASSED'), ('head', release.BASE_HEAD),
+            ('anyEntrypointAttempted', True), ('nativeImportInstallation', {}),
+            ('jobsOffReadiness', {}), ('jobsOnReadiness', {}), ('originalContainerRetainedAs', 'renamed'),
+            ('stoppedBackupSha256', '0' * 64), ('originalDatabaseFiles', {})]:
+            with self.subTest(receipt=key), self.assertRaises(RuntimeError):
+                release.held_entry_authority(dict(receipt, **{key: value}), choice, scope)
+        for key, value in [('backupSha256', '0' * 64), ('backupPath', '/other/backup.db'),
+            ('originalFiles', {})]:
+            row = copy.deepcopy(receipt); row['originalStoppedSeal'][key] = value
+            with self.subTest(seal=key), self.assertRaises(RuntimeError):
+                release.held_entry_authority(row, choice, scope)
+
+    def test_selected_entry_refuses_running_renamed_oom_or_changed_physical_state(self):
+        import ast
+        tree = ast.parse(RAW_PACKAGE['deploy_import.py'])
+        function = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and
+            node.name == 'select_entry_state')
+        namespace = dict(release.__dict__)
+        exec(compile(ast.Module(body=[function], type_ignores=[]), '/owned-select-entry.py', 'exec'), namespace)
+        entry = self.held_entry(); manifest = self.manifest()
+        live = {'Id': entry['containerId'], 'Image': entry['image'], 'RestartCount': 0,
+            'Name': '/soilfer-lims', 'State': {'Running': False, 'OOMKilled': False}}
+        select = namespace['select_entry_state']
+        self.assertEqual(select(live, release.HELD_INGRESS_SHA, entry['originalFiles'], manifest), entry)
+        for field in ['Running', 'OOMKilled']:
+            row = copy.deepcopy(live); row['State'][field] = True
+            with self.subTest(field=field), self.assertRaises(RuntimeError):
+                select(row, release.HELD_INGRESS_SHA, entry['originalFiles'], manifest)
+        for key, value in [('Name', '/renamed'), ('Id', '0' * 64), ('Image', release.ORIGINAL_BUILD_IMAGE)]:
+            with self.subTest(field=key), self.assertRaises(RuntimeError):
+                select(dict(live, **{key: value}), release.HELD_INGRESS_SHA, entry['originalFiles'], manifest)
 
     def test_nested_proof_references_refuse_traversal_or_symlink(self):
         with tempfile.TemporaryDirectory(prefix='owned-reference-') as directory:
@@ -303,6 +357,9 @@ class ReleaseTests(unittest.TestCase):
     def add_gate_hashes(self, gate, manifest):
         for key, name in [('coordinatorSha256', 'deploy_import.py'), ('rehearsalReceiptSha256', 'rehearsal-receipt.json'),
             ('targetPinSha256', 'target-pin.json'), ('yyEvidenceSha256', 'yy-authorization-evidence.md'),
+            ('yyMaintenanceEvidenceSha256', 'yy-maintenance-choice-evidence.json'),
+            ('heldEntryScopeSha256', 'held-entry-scope-review.json'),
+            ('heldEntryReceiptSha256', 'held-entry-receipt.json'),
             ('proofAuthoritySha256', 'proof-authority.json'), ('proofSourceIndexSha256', 'proof-source-index.json'),
             ('diskMeasurementGuardSha256', 'known_core_disk_guard_v2.py'),
             ('baselineMeasurementGuardSha256', 'known_core_disk_guard_v3.py'),
@@ -327,8 +384,7 @@ class ReleaseTests(unittest.TestCase):
             'created_at': '2026-10-12T00:00:00Z', 'body': 'Source review: PASS\n' + '\n'.join(tokens)}
 
     def complete_gate(self, manifest):
-        entry = {'mode': 'RUNNING_NORMAL', 'containerId': '1' * 64, 'image': release.LIVE_IMAGE,
-            'restartCount': 0, 'ingressSha256': release.ORIGINAL_INGRESS_SHA, 'originalFiles': None}
+        entry = self.held_entry()
         kit_review = {'id': 999900003, 'html_url': 'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-999900003',
             'created_at': '2026-10-12T00:00:00Z', 'body': '\n'.join(release.review_tokens(manifest, 'a' * 64))}
         # The actual verdict must be the first line, regardless of token order.

@@ -48,6 +48,7 @@ def main():
     safe_root(target, 'instrument-import-release-')
     raw, index = git_source(tooling, lambda *args: subprocess.check_output(['git', *args]))
     production_paths = {name: 'WP/pr284-release/' + name for name in PRODUCTION_SOURCE_FILES}
+    production_paths.update({name: 'WP/pr284-release/' + name for name in HELD_ENTRY_FILES})
     production_paths['yy-authorization-evidence.md'] = 'WP/forward-ae64f169/yy-authorization-evidence.md'
     for name, path in production_paths.items():
         value = subprocess.check_output(['git', 'ls-tree', tooling, '--', path]).decode().strip()

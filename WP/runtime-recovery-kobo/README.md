@@ -1,3 +1,13 @@
+PR294 held-entry correction in validation; YY decision verified 2026-10-12T20:07UTC
+
+YY's original native card was read directly: B, Stay in maintenance; You chose 10:07 PM Europe/Rome (20:07 UTC, minute precision). No card was answered by Pip. Claudio's actual entry pin is #162/6131752416; raw API SHA9788614e7c1ee3bd39714e8f3b98bb35458d12d59afbaa6ceab8ff96d1d65d4c, native-choice transcription SHA1499cd6ab9b534c8e5852cfd27fbe10632309a8f45c21f23c6abeb8870f05213. There is no remaining human entry decision.
+
+The proposed production-only correction isolates every frozen input in frozen/, enumerates all prospective outputs, and checks closed-root output absence during freeze, gate and immediately before quiesce. It binds ONLY the exact stopped, unrenamed 51f container, held ingress, unchanged raw DB/WAL/SHM and stopped-backup authority from failed receipt2a03. That receipt is entry evidence ONLY, never a proof or execution authority. The RUNNING_NORMAL branch is removed. All31 approved201bb proof bytes and original144000PASSED proof/135400build remain unchanged and are the sole proof/build authority.
+
+Previous namespace source6b5d5907 passed200/200 Windows and Linux guards, including real production=True install_once against owned synthetic data with all62 historical frozen files and stubbed CLI/seals through the completed repeat. The final held-entry additions are still in validation; those prior tests are not claimed as approval of the new source. No NEW production-source PASS, new kit, gate or production action has occurred. SAME writer continues exact-source guards, NEW source review, ONE distinct kit, NEW exact-kit review and ONE fresh single-use gate before forward deployment under existing go. Failed161000 root/unit/gate/receipt and all outputs remain burned, stopped and retained; no replay, retry, cleanup, restore, older image or new proof/build. LIMS remains maintenance/jobs held. Latest full physical preservation observation remains19:45, not a new SQL or live-state claim.
+
+Previous checkpoint follows:
+
 PR294 forward-fix scope confirmed; YY entry decision pending 2026-10-12T19:54:05.104137+00:00
 
 Claudio's actual #162 comment 6131470499 at 19:48:31 UTC confirms the four output/frozen-evidence path collisions. His scope is retained as raw API evidence; it is NOT a Source review: PASS. The original failed 161000Z root, consumed gate, receipt and DRY container remain sealed and permanently excluded from replay, retry or reuse.

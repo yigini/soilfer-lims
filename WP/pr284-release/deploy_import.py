@@ -71,21 +71,37 @@ def predecessor_ingress_authority():
 
 
 def select_entry_state(live, ingress_sha, original, manifest):
-    require(live['State']['Running'] and not live['State']['OOMKilled'] and
-        live['State'].get('Health', {}).get('Status') == 'healthy' and
-        ingress_sha == ORIGINAL_INGRESS_SHA, 'Healthy normal predecessor required')
-    entry = {'mode': 'RUNNING_NORMAL', 'containerId': live['Id'], 'image': live['Image'],
-        'restartCount': live['RestartCount'], 'ingressSha256': ingress_sha, 'originalFiles': None}
+    require(not live['State']['Running'] and not live['State']['OOMKilled'] and
+        live['Name'] == '/soilfer-lims' and ingress_sha == HELD_INGRESS_SHA,
+        'Exact stopped unrenamed held predecessor required')
+    entry = {'mode': 'STOPPED_HELD_UNAPPLIED', 'containerId': live['Id'], 'image': live['Image'],
+        'restartCount': live['RestartCount'], 'ingressSha256': ingress_sha, 'originalFiles': original}
     validate_entry_state(entry, manifest)
     return entry
 
 
 def observe_entry_state(manifest):
     predecessor_ingress_authority()
+    old_root = pathlib.Path(HELD_FAILURE_ROOT_PATH)
+    receipt_path = safe_reference(old_root, 'production-receipt.json')
+    require(sha(receipt_path) == HELD_FAILURE_RECEIPT_SHA, 'Original failed held-entry receipt changed')
+    receipt = json.loads(receipt_path.read_bytes())
+    choice_root = pathlib.Path(__file__).resolve().parent
+    original = held_entry_authority(receipt,
+        json.loads(safe_reference(choice_root, 'yy-maintenance-choice-evidence.json').read_bytes()),
+        json.loads(safe_reference(choice_root, 'held-entry-scope-review.json').read_bytes()))
+    require(sha(safe_reference(old_root, 'original-stopped-seal/dev-stopped-backup.db')) == HELD_STOPPED_BACKUP_SHA,
+        'Original stopped held-entry backup changed')
+    require(not any((old_root / name).exists() or (old_root / name).is_symlink() for name in [
+        *(label + suffix for label in ['import-apply', 'import-repeat'] for suffix in
+            ['.stdout', '.stderr', '-container.json', '-retained-inspect.stdout', '-retained-inspect.stderr']),
+        'after-import-stopped', 'after-repeat-stopped', 'candidate-jobs-off-seal',
+        'production-jobs-off-run.stdout', 'production-jobs-on-run.stdout',
+        'production-jobs-off-readiness.json', 'production-jobs-on-readiness.json']),
+        'A forbidden APPLY/repeat/startup artifact exists in the held attempt')
     live = c.inspect('soilfer-lims'); ingress = sha(s.CONF)
-    if not live['State']['Running']:
-        all_writers_stopped(); original = triple_state(s.LIVE)
-    else: original = None
+    all_writers_stopped()
+    require(triple_state(s.LIVE) == original, 'Live original physical triple differs from exact held seal')
     return select_entry_state(live, ingress, original, manifest)
 
 
@@ -291,14 +307,9 @@ def main():
         verify_entry_readiness(manifest, gate, {'entryState': observe_entry_state(manifest)})
         require_prequiesce_outputs(ROOT, FROZEN_FILE_SET)
         quiesced = True
-        if readiness['entryState']['mode'] == 'RUNNING_NORMAL':
-            set_ingress('apache-held.conf')
         for path, method in [('/api/health', 'GET'), ('/ws', 'GET'), ('/api/v2/data-exchange/receipts', 'POST')]:
             http(path, 503, 'held-' + method + '-' + path.strip('/').replace('/', '-'), method)
-        if readiness['entryState']['mode'] == 'RUNNING_NORMAL':
-            s.command(ROOT, ['docker', 'stop', '-t', '30', 'soilfer-lims'], 'stop-original-live-writer', timeout=45)
-        else:
-            receipt['alreadyStoppedEntryNoSecondStop'] = True
+        receipt['alreadyStoppedEntryNoSecondStop'] = True
         require(not c.inspect('soilfer-lims')['State']['Running'] and c.inspect('soilfer-lims')['Image'] == LIVE_IMAGE,
             'Original writer did not stop')
         all_writers_stopped(); guard.check(); save('writersStopped')

@@ -39,6 +39,8 @@ for name in production_names:
     package[name] = subprocess.check_output(['git', 'show', head + ':WP/pr284-release/' + name])
 package['yy-authorization-evidence.md'] = subprocess.check_output(['git', 'show',
     head + ':WP/forward-ae64f169/yy-authorization-evidence.md'])
+for name in ['yy-maintenance-choice-evidence.json', 'held-entry-scope-review.json', 'held-entry-receipt.json']:
+    package[name] = subprocess.check_output(['git', 'show', head + ':WP/pr284-release/' + name])
 for name, raw in package.items():
     if name.endswith('.py'): compile(raw, '/owned-compile-only/' + name, 'exec')
 for name, raw in tooling.items():
