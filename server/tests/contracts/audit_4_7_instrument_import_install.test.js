@@ -12,6 +12,38 @@ const template = { id: 'mapping-v1', labId: 'import-lab', instrumentId: 'import-
     mapping: '{"rawColumns":[" 1,0 ","é"]}', createdBy: 'import-analyst', supersedesId: null };
 const receipt = { id: 'source-receipt', labId: template.labId, instrumentId: template.instrumentId, templateId: template.id, templateVersion: 1,
     sourceSha256: 'a'.repeat(64), sourceName: 'owned.csv', mappingSnapshot: '{"rawRows":[[" 1,0 ","é"]]}', importedBy: template.createdBy };
+function nativeWorkbenchDraft(current) {
+    expect(current.prepare('SELECT count(*) n FROM WorkItemDraft').get().n).toBe(0);
+    current.exec('DROP TABLE "WorkItemDraft"');
+    // Exact migrate_workbench_drafts.js emission, followed by the additive
+    // #205 records column. Only this empty owned test table is replaced.
+    current.exec(`CREATE TABLE IF NOT EXISTS "WorkItemDraft" (
+            "id" TEXT NOT NULL PRIMARY KEY,
+            "workItemId" TEXT NOT NULL UNIQUE,
+            "sampleId" TEXT NOT NULL,
+            "userId" TEXT NOT NULL,
+            "labId" TEXT,
+            "analysis" TEXT NOT NULL,
+            "value" TEXT,
+            "values" TEXT,
+            "checks" TEXT,
+            "basis" TEXT DEFAULT 'AIR_DRY',
+            "replicateNo" INTEGER NOT NULL DEFAULT 1,
+            "instrumentId" TEXT,
+            "methodologyId" TEXT,
+            "notes" TEXT,
+            "baseVersion" INTEGER NOT NULL DEFAULT 0,
+            "draftVersion" INTEGER NOT NULL DEFAULT 1,
+            "conflictValue" TEXT,
+            "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT "WorkItemDraft_workItemId_fkey" FOREIGN KEY ("workItemId") REFERENCES "WorkItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        )`);
+    current.exec('CREATE INDEX "WorkItemDraft_userId_labId_idx" ON "WorkItemDraft"("userId", "labId")');
+    current.exec('CREATE INDEX "WorkItemDraft_sampleId_analysis_idx" ON "WorkItemDraft"("sampleId", "analysis")');
+    current.exec('ALTER TABLE "WorkItemDraft" ADD COLUMN "records" TEXT');
+    expect(current.prepare("SELECT sql FROM sqlite_master WHERE name='WorkItemDraft'").get().sql).toBe(source.post205Drafts.preNativeWorkbench);
+}
 function insert(table, row) {
     if (table === 'ImportTemplate') return db.prepare('INSERT INTO ImportTemplate(id,labId,instrumentId,name,version,mapping,createdBy,supersedesId) VALUES(?,?,?,?,?,?,?,?)')
         .run(row.id,row.labId,row.instrumentId,row.name,row.version,row.mapping,row.createdBy,row.supersedesId);
@@ -134,7 +166,7 @@ test('the additional current-main schema-only factory is closed and digest-bound
     } finally { current.close(); }
 });
 
-test('a populated predecessor retains every analytical, QC, audit and raw draft row across dry-run, apply and repeated apply', async () => {
+test.each(['Prisma', 'native workbench'])('a populated %s predecessor retains every analytical, QC, audit and raw draft row across dry-run, apply and repeated apply', async draftKind => {
     const Database = require('better-sqlite3'), { createHash } = require('node:crypto');
     const { qcGateFixture } = require('../helpers/qcGateFixture');
     const { buildNativeRun, startNativeRun } = require('../../services/qcNativeRunService');
@@ -149,6 +181,7 @@ test('a populated predecessor retains every analytical, QC, audit and raw draft 
         await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: f.analysisCode,
             measurements: [{ positionId: run.positions.find(row => row.kind === 'BLANK').id, value: ' 0.0000 ' }] });
         await f.result(f.items[1]);
+        if (draftKind === 'native workbench') read(nativeWorkbenchDraft);
         // Historical draft data is inserted only into this owned pre-200
         // fixture: the 94-model client cannot address its absent new column.
         // Sample, WorkItem, Result, QC and audit data use their existing owners.
@@ -181,6 +214,11 @@ test('a populated predecessor retains every analytical, QC, audit and raw draft 
             expect(table.name === '_schema_migrations' ? actual.all(MARKER) : actual.all()).toEqual(table.rows);
         });
         read(raw => {
+            if (draftKind === 'native workbench') {
+                expect(raw.prepare("SELECT sql FROM sqlite_master WHERE name='WorkItemDraft'").get().sql).toBe(source.post205Drafts.postNativeWorkbench);
+                expect(raw.prepare('PRAGMA table_xinfo(WorkItemDraft)').all().find(row => row.name === 'updatedAt').dflt_value).toBe('CURRENT_TIMESTAMP');
+                expect(raw.prepare('PRAGMA index_list(WorkItemDraft)').all().some(row => row.unique === 1 && row.origin === 'u')).toBe(true);
+            }
             expect(raw.prepare('SELECT value,"values",records,importReceiptId FROM WorkItemDraft').get()).toEqual({ value: rawValue, values: rawValues, records: rawRecords, importReceiptId: null });
             expect(raw.pragma('integrity_check', { simple: true })).toBe('ok'); expect(raw.pragma('foreign_key_check')).toEqual([]);
         });
@@ -194,6 +232,70 @@ test('a populated predecessor retains every analytical, QC, audit and raw draft 
 
 
 describe('the released #293 predecessor keeps #205 records inside the exact import boundary', () => {
+    test.each(['records type', 'unknown column', 'updatedAt default', 'workItem uniqueness'])('native workbench refuses the nearby foreign variant: %s', mutation => {
+        const current = createPre200After293SchemaFixture();
+        try {
+            nativeWorkbenchDraft(current);
+            if (mutation === 'records type') {
+                current.exec('ALTER TABLE "WorkItemDraft" DROP COLUMN "records"');
+                current.exec('ALTER TABLE "WorkItemDraft" ADD COLUMN "records" INTEGER');
+            } else if (mutation === 'unknown column') current.exec('ALTER TABLE "WorkItemDraft" ADD COLUMN "unknownImportAuthority" TEXT');
+            else {
+                // Change one captured constraint only; a hybrid of native and
+                // Prisma emissions has no release authority.
+                current.exec('DROP TABLE "WorkItemDraft"');
+                if (mutation === 'updatedAt default') current.exec(`CREATE TABLE "WorkItemDraft" (
+            "id" TEXT NOT NULL PRIMARY KEY,
+            "workItemId" TEXT NOT NULL UNIQUE,
+            "sampleId" TEXT NOT NULL,
+            "userId" TEXT NOT NULL,
+            "labId" TEXT,
+            "analysis" TEXT NOT NULL,
+            "value" TEXT,
+            "values" TEXT,
+            "checks" TEXT,
+            "basis" TEXT DEFAULT 'AIR_DRY',
+            "replicateNo" INTEGER NOT NULL DEFAULT 1,
+            "instrumentId" TEXT,
+            "methodologyId" TEXT,
+            "notes" TEXT,
+            "baseVersion" INTEGER NOT NULL DEFAULT 0,
+            "draftVersion" INTEGER NOT NULL DEFAULT 1,
+            "conflictValue" TEXT,
+            "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" DATETIME NOT NULL, "records" TEXT,
+            CONSTRAINT "WorkItemDraft_workItemId_fkey" FOREIGN KEY ("workItemId") REFERENCES "WorkItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        )`);
+                else current.exec(`CREATE TABLE "WorkItemDraft" (
+            "id" TEXT NOT NULL PRIMARY KEY,
+            "workItemId" TEXT NOT NULL,
+            "sampleId" TEXT NOT NULL,
+            "userId" TEXT NOT NULL,
+            "labId" TEXT,
+            "analysis" TEXT NOT NULL,
+            "value" TEXT,
+            "values" TEXT,
+            "checks" TEXT,
+            "basis" TEXT DEFAULT 'AIR_DRY',
+            "replicateNo" INTEGER NOT NULL DEFAULT 1,
+            "instrumentId" TEXT,
+            "methodologyId" TEXT,
+            "notes" TEXT,
+            "baseVersion" INTEGER NOT NULL DEFAULT 0,
+            "draftVersion" INTEGER NOT NULL DEFAULT 1,
+            "conflictValue" TEXT,
+            "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "records" TEXT,
+            CONSTRAINT "WorkItemDraft_workItemId_fkey" FOREIGN KEY ("workItemId") REFERENCES "WorkItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        )`);
+            }
+            const before = current.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all();
+            const changes = current.prepare('SELECT total_changes() n').get().n;
+            expect(() => classifyInstrumentImportSchema(current, source)).toThrow('differs from the captured release');
+            expect(current.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all()).toEqual(before);
+            expect(current.prepare('SELECT total_changes() n').get().n).toBe(changes);
+        } finally { current.close(); }
+    });
     test('the additional current release schema-only fixture is closed and digest-bound', () => {
         const file = 'tests/helpers/instrumentImportReleaseHistoricalFixture.js';
         const bytes = fs.readFileSync(path.resolve(__dirname, '../..', file), 'utf8');
