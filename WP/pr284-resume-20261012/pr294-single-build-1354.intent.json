@@ -1,0 +1,11 @@
+{
+  "createdUtc": "2026-10-12T13:53:14.871262+00:00",
+  "sourceCommit": "630b2354a1a45df0d88545ac5c63594361615999",
+  "reviewId": 6125544861,
+  "applicationAuditId": 6125341751,
+  "mainCiRunId": 38256676268,
+  "buildRoot": "/opt/lims/releases/instrument-import-build-959d17e1-20261012T135400Z",
+  "buildUnit": "lims-build-instrument-import-build-959d17e1-20261012t135400z.service",
+  "status": "SINGLE_BUILD_DISPATCH_INTENT_NO_RETRY",
+  "productionMutations": 0
+}
