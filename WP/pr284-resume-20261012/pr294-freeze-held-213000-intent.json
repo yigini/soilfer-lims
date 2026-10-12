@@ -1,0 +1,33 @@
+{
+  "startedUtc": "2026-10-12T21:14:54.269972+00:00",
+  "sourceCommit": "92e32e9464c5906aa2b8cb4c24089b8164ff1d4c",
+  "sourceReviewId": 6132712806,
+  "originalProofRoot": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T144000Z",
+  "packageRoot": "/opt/lims/releases/instrument-import-package-959d17e1-20261012T213000Z",
+  "executionRoot": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z",
+  "originalFailedRootExcluded": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+  "entryBinding": {
+    "policy": "EXACT_YY_STAY_MAINTENANCE_STOPPED_51F_NO_APPLY_FORWARD_ONLY",
+    "baseHead": "51f6798806f630773786a08432290c1b21a841da",
+    "liveImage": "sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f",
+    "historicalReceiptSha256": "480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515",
+    "normalIngressSha256": "f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20",
+    "heldIngressSha256": "d92601efd55a8112b4775d101ce5f18beea29e33686c6b53dafa6efbae811b2c",
+    "allowedEntryStates": [
+      "STOPPED_HELD_UNAPPLIED"
+    ],
+    "recoveryPolicy": "SEPARATELY_AUDITED_FORWARD_FIX_ONLY",
+    "forwardFixScopeCommentId": 6131470499,
+    "heldEntryScopeCommentId": 6131752416,
+    "heldEntryScopeSha256": "9788614e7c1ee3bd39714e8f3b98bb35458d12d59afbaa6ceab8ff96d1d65d4c",
+    "yyMaintenanceEvidenceSha256": "1499cd6ab9b534c8e5852cfd27fbe10632309a8f45c21f23c6abeb8870f05213",
+    "failedProductionRoot": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+    "failedProductionReceiptSha256": "2a03e66071406c58b754d9c63ed8200373c55a0433c2d1ad1cbdc2836d72499e",
+    "stoppedBackupSha256": "70ee994b2013baa5553c5d0939b57b4891189a42e3553335c6b1fc13d90674f5",
+    "originalContainerId": "977334bcd8d901745996f537076ebc5277c06a4e136492c323362d6fb8a2f52a",
+    "originalRawTripleSha256": "3dcf3f3e98d718722b4515bf9a5a8769679c41da7b2126390901da56e13552a1"
+  },
+  "packagingReadOnlyDeadlineSeconds": 900,
+  "status": "ONE_NEW_HELD_KIT_FREEZE_INTENT_NEVER_REPLAY",
+  "productionOperations": 0
+}

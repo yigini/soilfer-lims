@@ -1,0 +1,10 @@
+{
+  "observedUtc": "2026-10-12T21:16:26.195771+00:00",
+  "sourceCommit": "92e32e9464c5906aa2b8cb4c24089b8164ff1d4c",
+  "sourceReviewId": 6132712806,
+  "activeLocalSession": 37786,
+  "status": "ONE_FRESH_FREEZER_ACTIVE_NOT_COMPLETED",
+  "all43CommittedExportHashesVerified": true,
+  "futureRoot": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T213000Z",
+  "productionOperations": 0
+}
