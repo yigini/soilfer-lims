@@ -1,0 +1,33 @@
+{
+  "status": "BUILT_ONLY_NOT_DEPLOYED",
+  "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+  "tag": "soilfer-lims:audit-instrument-import-build-959d17e1-20261012T135400Z",
+  "sourceArchiveSha256": "99c40eef08c11ad0dbc2576b7e6f36abd56f4e0bb68e36102b187cb9fb20cbe1",
+  "sourceIndexSha256": "35c20fd965066aabb123d059a79f240223a40a9b9602ef87216ec126fa47c76a",
+  "verifiedGitBlobCount": 2286,
+  "verifiedUtc": "2026-10-12T13:55:19.757668+00:00",
+  "imageBytes": 413806636,
+  "reserveBytes": 10556150894,
+  "freeBytesBefore": {
+    "/opt/lims": 86519967744,
+    "/var/lib/docker": 86519967744
+  },
+  "freeBytesAfter": {
+    "/opt/lims": 86130003968,
+    "/var/lib/docker": 86130003968
+  },
+  "buildLogSha256": "7efa3cb02d282cc49ab079a2bbead5763c5ea1b42686a1c600b4f2f3e1d8f947",
+  "productionDatabaseMounts": 0,
+  "dockerIgnoredArchiveMembersNotExtracted": [
+    "server/node_modules"
+  ],
+  "auditReviewId": 6125341751,
+  "mainCiRunId": 38256676268,
+  "tree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+  "toolingCommit": "630b2354a1a45df0d88545ac5c63594361615999",
+  "proofSourceReviewId": 6125544861,
+  "toolingSourceIndexSha256": "592f749f83eb166660a649030a0020600c0f99f403e5c40f9dfb9a5e3fc30c3f",
+  "proofSourceReviewRawSha256": "cd3f50d2794d39b6c28d2af3bbb88d3a2fa7ec1ffe93b7f1b4458655c5b82190",
+  "builderSha256": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a"
+}

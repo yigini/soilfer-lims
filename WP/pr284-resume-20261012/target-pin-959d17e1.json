@@ -1,0 +1,24 @@
+{
+  "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "baseHead": "51f6798806f630773786a08432290c1b21a841da",
+  "auditedPrHead": "5e65fe5b587747efc717f167f9b61469effa9afe",
+  "mergeBaseHead": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+  "originalProofRoot": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+  "firstProofPolicy": "EXACT_REVIEWED_FIRST_PROOF_ROOT_NO_REPLAY",
+  "pr": 294,
+  "tree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+  "auditedTree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+  "mergeParents": [
+    "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+    "5e65fe5b587747efc717f167f9b61469effa9afe"
+  ],
+  "auditReviewId": 6125341751,
+  "mainCiRunId": 38256676268,
+  "proofSourceReviewId": 6125544861,
+  "buildRoot": "/opt/lims/releases/instrument-import-build-959d17e1-20261012T135400Z",
+  "buildReceiptSha256": "1a983172adebaba8b1a61959810d5469d9c12d706725bd33783d43cc8cceabe0",
+  "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+  "imageBytes": 413806636,
+  "labAndHubBuildsOwnedByYY": true,
+  "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+}

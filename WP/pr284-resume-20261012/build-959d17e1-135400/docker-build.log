@@ -1,0 +1,314 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 8.76kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:24-alpine
+#2 DONE 0.7s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 872B done
+#3 DONE 0.0s
+
+#4 [builder  1/12] FROM docker.io/library/node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1
+#4 resolve docker.io/library/node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 44.59MB 2.1s done
+#5 DONE 2.1s
+
+#6 [builder  2/12] WORKDIR /app
+#6 CACHED
+
+#7 [stage-1  3/52] RUN apk add --no-cache python3 make g++
+#7 CACHED
+
+#8 [stage-1  4/52] COPY server/package.json server/package-lock.json ./server/
+#8 CACHED
+
+#9 [stage-1  5/52] RUN cd server && npm ci --omit=dev --ignore-scripts
+#9 CACHED
+
+#10 [stage-1  6/52] RUN cd server && npm rebuild better-sqlite3
+#10 CACHED
+
+#11 [stage-1  7/52] RUN apk del python3 make g++
+#11 CACHED
+
+#12 [builder  4/12] RUN cd client && npm ci --ignore-scripts
+#12 CACHED
+
+#13 [builder  5/12] COPY server/package.json server/package-lock.json ./server/
+#13 CACHED
+
+#14 [builder  6/12] RUN cd server && npm ci --ignore-scripts
+#14 CACHED
+
+#15 [builder  3/12] COPY client/package.json client/package-lock.json ./client/
+#15 CACHED
+
+#16 [builder  7/12] COPY client/ ./client/
+#16 CACHED
+
+#17 [builder  8/12] COPY server/ ./server/
+#17 DONE 0.5s
+
+#18 [stage-1  8/52] COPY server/ ./server/
+#18 DONE 0.5s
+
+#19 [builder  9/12] COPY shared/ ./shared/
+#19 DONE 0.1s
+
+#20 [stage-1  9/52] COPY shared/ ./shared/
+#20 DONE 0.1s
+
+#21 [builder 10/12] COPY profiles/ ./profiles/
+#21 DONE 0.0s
+
+#22 [builder 11/12] RUN cd server && npx prisma generate
+#22 5.598 Loaded Prisma config from prisma.config.ts.
+#22 5.598 
+#22 7.567 Prisma schema loaded from prisma/schema.prisma.
+#22 13.72 
+#22 13.72 ✔ Generated Prisma Client (v7.10.0) to ./prisma_client in 4.15s
+#22 13.72 
+#22 13.72 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+#22 13.72 
+#22 13.72 
+#22 DONE 14.0s
+
+#23 [builder 12/12] RUN cd client && npm run build
+#23 0.784 
+#23 0.784 > client@1.9.0 prebuild
+#23 0.784 > node scripts/generate-workflow-contract.cjs
+#23 0.784 
+#23 0.905 
+#23 0.905 > client@1.9.0 build
+#23 0.905 > vite build
+#23 0.905 
+#23 1.592 vite v5.4.21 building for production...
+#23 1.767 transforming...
+#23 2.972 Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+#23 2.972   npx update-browserslist-db@latest
+#23 2.972   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+#23 41.80 ✓ 2711 modules transformed.
+#23 48.89 rendering chunks...
+#23 51.56 computing gzip size...
+#23 51.80 dist/index.html                                   1.69 kB │ gzip:   0.64 kB
+#23 51.81 dist/assets/SampleWorkflowMap-DxFfliMr.css       14.34 kB │ gzip:   3.55 kB
+#23 51.81 dist/assets/index-CGes9DlH.css                  215.67 kB │ gzip:  35.43 kB
+#23 51.81 dist/assets/play-EBaqlSn9.js                      0.30 kB │ gzip:   0.25 kB
+#23 51.81 dist/assets/pen-line-DaSaee1d.js                  0.36 kB │ gzip:   0.28 kB
+#23 51.81 dist/assets/plus-circle-BGG7HyQS.js               0.37 kB │ gzip:   0.28 kB
+#23 51.81 dist/assets/check-square-BsNyZznP.js              0.38 kB │ gzip:   0.28 kB
+#23 51.81 dist/assets/key-round-CRfpUT9I.js                 0.41 kB │ gzip:   0.32 kB
+#23 51.81 dist/assets/wrench-BYiwYnr_.js                    0.43 kB │ gzip:   0.31 kB
+#23 51.81 dist/assets/tag-CQl5sPqi.js                       0.50 kB │ gzip:   0.35 kB
+#23 51.81 dist/assets/share-2-BBjMCbDp.js                   0.52 kB │ gzip:   0.33 kB
+#23 51.81 dist/assets/layout-list-C98GoFFZ.js               0.53 kB │ gzip:   0.32 kB
+#23 51.81 dist/assets/scale-m0kXLCtJ.js                     0.53 kB │ gzip:   0.34 kB
+#23 51.81 dist/assets/sparkles-Dl7msXsd.js                  0.59 kB │ gzip:   0.35 kB
+#23 51.81 dist/assets/cpu-DIgJcBTL.js                       0.66 kB │ gzip:   0.36 kB
+#23 51.81 dist/assets/panels-top-left-B1LgjvOh.js           0.72 kB │ gzip:   0.36 kB
+#23 51.81 dist/assets/loader-B5ufHpXH.js                    0.73 kB │ gzip:   0.37 kB
+#23 51.81 dist/assets/thumbs-up-DUZW1V_z.js                 0.90 kB │ gzip:   0.43 kB
+#23 51.81 dist/assets/vendor-flow-BTkdDkRO.js               0.96 kB │ gzip:   0.60 kB
+#23 51.81 dist/assets/vendor-pdf-D7HrI6pR.js                1.02 kB │ gzip:   0.62 kB
+#23 51.81 dist/assets/LabPolicies-BjSsXdDj.js               1.11 kB │ gzip:   0.63 kB
+#23 51.81 dist/assets/settings-2-POhvXkUI.js                1.30 kB │ gzip:   0.52 kB
+#23 51.81 dist/assets/spreadsheetImport-B7K8n_-a.js         1.48 kB │ gzip:   0.67 kB
+#23 51.81 dist/assets/useRealtimeData-BZlKk7gm.js           2.61 kB │ gzip:   1.16 kB
+#23 51.81 dist/assets/NotFound-Cc9dAmqw.js                  2.81 kB │ gzip:   1.16 kB
+#23 51.81 dist/assets/CountryData-DY-caIYk.js               4.20 kB │ gzip:   1.34 kB
+#23 51.81 dist/assets/TopicExplorer-By32VBDL.js             4.36 kB │ gzip:   1.77 kB
+#23 51.81 dist/assets/DataSheet-UMDE-RK3.js                 5.12 kB │ gzip:   1.83 kB
+#23 51.81 dist/assets/PublicReport-DENv-fHk.js              5.21 kB │ gzip:   1.86 kB
+#23 51.81 dist/assets/FAQPage-Dyy9CmLl.js                   6.14 kB │ gzip:   2.29 kB
+#23 51.81 dist/assets/ResetPassword-BqLC6sS6.js             6.36 kB │ gzip:   1.87 kB
+#23 51.81 dist/assets/ActivateAccount-BIqc3MN4.js           7.42 kB │ gzip:   2.03 kB
+#23 51.81 dist/assets/ScanPage-SJR4JHbb.js                  7.64 kB │ gzip:   2.99 kB
+#23 51.81 dist/assets/AuditLogs-BzRmLxTk.js                 8.30 kB │ gzip:   2.87 kB
+#23 51.81 dist/assets/LegacyImport-COlPpf20.js             10.41 kB │ gzip:   3.32 kB
+#23 51.81 dist/assets/LabMethods-CGGzI7RW.js               11.50 kB │ gzip:   3.59 kB
+#23 51.81 dist/assets/MyWork-BicAq5z4.js                   14.57 kB │ gzip:   3.88 kB
+#23 51.81 dist/assets/Users-BDIXV5l1.js                    15.34 kB │ gzip:   4.64 kB
+#23 51.82 dist/assets/ResultReports-CFJCpAP9.js            16.20 kB │ gzip:   5.02 kB
+#23 51.82 dist/assets/DataResults-A2xaXVFv.js              16.78 kB │ gzip:   5.25 kB
+#23 51.82 dist/assets/QADashboard-DvfTCBtP.js              17.31 kB │ gzip:   4.26 kB
+#23 51.82 dist/assets/ManagerQueue-Cph3rl5S.js             17.98 kB │ gzip:   6.08 kB
+#23 51.82 dist/assets/LabPolicies-lRT_5G5Q.js              18.11 kB │ gzip:   5.12 kB
+#23 51.82 dist/assets/About-ruNNpNSF.js                    20.84 kB │ gzip:   4.89 kB
+#23 51.82 dist/assets/Projects-D_5-ZI4x.js                 21.67 kB │ gzip:   6.29 kB
+#23 51.82 dist/assets/TechStack-BG4YK_fe.js                22.88 kB │ gzip:   8.64 kB
+#23 51.82 dist/assets/SampleWorkflowMap-3zBOFrJ3.js        23.60 kB │ gzip:   7.13 kB
+#23 51.82 dist/assets/ArticleReader-CFD0wky7.js            23.91 kB │ gzip:   5.76 kB
+#23 51.82 dist/assets/ThemeGallery-HhcMvP6O.js             25.93 kB │ gzip:   6.48 kB
+#23 51.82 dist/assets/AdminHelpEditor-BuctT6Ao.js          28.56 kB │ gzip:   6.83 kB
+#23 51.82 dist/assets/SuspendUserModal-D-2ueRAb.js         30.92 kB │ gzip:   7.11 kB
+#23 51.82 dist/assets/BatchInspectionModal-DNo2mPvy.js     31.78 kB │ gzip:   8.09 kB
+#23 51.82 dist/assets/Profile-BtScfmpB.js                  32.30 kB │ gzip:   8.33 kB
+#23 51.82 dist/assets/SpectralLibrary-B2V6Ws3m.js          37.05 kB │ gzip:   8.73 kB
+#23 51.82 dist/assets/HelpCentre-COV5Z9LQ.js               37.95 kB │ gzip:  10.45 kB
+#23 51.82 dist/assets/Inventory-CcOxSKpB.js                41.43 kB │ gzip:   9.61 kB
+#23 51.82 dist/assets/Equipment-BnjIFwxu.js                41.60 kB │ gzip:   8.95 kB
+#23 51.82 dist/assets/LabManagement-CPxr3YmS.js            82.65 kB │ gzip:  17.54 kB
+#23 51.82 dist/assets/ProjectWorkspace-CSpeiFey.js        128.70 kB │ gzip:  27.91 kB
+#23 51.82 dist/assets/vendor-maps-DwGOs-Il.js             156.28 kB │ gzip:  45.73 kB
+#23 51.82 dist/assets/vendor-react-DoAq6ymf.js            163.50 kB │ gzip:  53.43 kB
+#23 51.82 dist/assets/AdminPanel-DUNmda6o.js              182.39 kB │ gzip:  42.58 kB
+#23 51.82 dist/assets/TechWorkbench-SK7NZoiO.js           244.74 kB │ gzip:  66.07 kB
+#23 51.82 dist/assets/vendor-charts-CqgcOpg6.js           383.30 kB │ gzip: 105.42 kB
+#23 51.82 dist/assets/vendor-excel-CKN5doRT.js            424.23 kB │ gzip: 141.75 kB
+#23 51.82 dist/assets/Reception-TA1UykHS.js               565.67 kB │ gzip: 162.60 kB
+#23 51.82 dist/assets/index-C8swTG4k.js                 1,625.25 kB │ gzip: 479.73 kB
+#23 51.82 
+#23 51.82 (!) Some chunks are larger than 1000 kB after minification. Consider:
+#23 51.82 - Using dynamic import() to code-split the application
+#23 51.82 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+#23 51.82 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+#23 51.82 ✓ built in 50.16s
+#23 DONE 52.2s
+
+#24 [stage-1 10/52] COPY --from=builder /app/server/prisma_client ./server/prisma_client/
+#24 DONE 0.2s
+
+#25 [stage-1 11/52] COPY profiles/ ./profiles/
+#25 DONE 0.1s
+
+#26 [stage-1 12/52] COPY --from=builder /app/client/dist ./client/dist/
+#26 DONE 0.2s
+
+#27 [stage-1 13/52] RUN mkdir -p /app/server/.schema-backup &&     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma
+#27 DONE 0.4s
+
+#28 [stage-1 14/52] COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql
+#28 DONE 0.0s
+
+#29 [stage-1 15/52] COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql
+#29 DONE 0.1s
+
+#30 [stage-1 16/52] COPY server/prisma/migrations/20261006000000_result_attempt_link/migration.sql /app/server/.migrations-backup/182/20261006000000_result_attempt_link/migration.sql
+#30 DONE 0.0s
+
+#31 [stage-1 17/52] COPY server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql /app/server/.migrations-backup/272/20261004064500_add_result_raw_input/migration.sql
+#31 DONE 0.0s
+
+#32 [stage-1 18/52] COPY server/prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql /app/server/.migrations-backup/183/20261006000100_sample_holds_cancellation/migration.sql
+#32 DONE 0.0s
+
+#33 [stage-1 19/52] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/migration.sql /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/migration.sql
+#33 DONE 0.0s
+
+#34 [stage-1 20/52] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/fresh-prisma-tables.json /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/fresh-prisma-tables.json
+#34 DONE 0.0s
+
+#35 [stage-1 21/52] COPY server/prisma/migrations/20261006000300_qc_rules/migration.sql /app/server/.migrations-backup/185/20261006000300_qc_rules/migration.sql
+#35 DONE 0.0s
+
+#36 [stage-1 22/52] COPY server/prisma/migrations/20261006000300_qc_rules/fresh-prisma-tables.json /app/server/.migrations-backup/185/20261006000300_qc_rules/fresh-prisma-tables.json
+#36 DONE 0.0s
+
+#37 [stage-1 23/52] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/migration.sql
+#37 DONE 0.0s
+
+#38 [stage-1 24/52] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/fresh-prisma-tables.json
+#38 DONE 0.0s
+
+#39 [stage-1 25/52] COPY server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql /app/server/.migrations-backup/187/20261007000100_qc_gate_scope/migration.sql
+#39 DONE 0.0s
+
+#40 [stage-1 26/52] COPY server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql /app/server/.migrations-backup/187/20261007000200_qc_bracket_membership/migration.sql
+#40 DONE 0.0s
+
+#41 [stage-1 27/52] COPY server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql /app/server/.migrations-backup/189/20261007000300_proficiency_evidence/migration.sql
+#41 DONE 0.0s
+
+#42 [stage-1 28/52] COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql
+#42 DONE 0.0s
+
+#43 [stage-1 29/52] COPY server/prisma/migrations/20261009000100_nonconformity_reports/migration.sql /app/server/.migrations-backup/193/20261009000100_nonconformity_reports/migration.sql
+#43 DONE 0.0s
+
+#44 [stage-1 30/52] COPY server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql /app/server/.migrations-backup/178/20261004190000_add_workitem_duplicate_marker/migration.sql
+#44 DONE 0.0s
+
+#45 [stage-1 31/52] COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql /app/server/.migrations-backup/178/20261004190100_unique_active_workitem/migration.sql
+#45 DONE 0.1s
+
+#46 [stage-1 32/52] COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql
+#46 DONE 0.0s
+
+#47 [stage-1 33/52] COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql
+#47 DONE 0.0s
+
+#48 [stage-1 34/52] COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql
+#48 DONE 0.0s
+
+#49 [stage-1 35/52] COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql
+#49 DONE 0.0s
+
+#50 [stage-1 36/52] COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql
+#50 DONE 0.0s
+
+#51 [stage-1 37/52] COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql
+#51 DONE 0.0s
+
+#52 [stage-1 38/52] COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json
+#52 DONE 0.1s
+
+#53 [stage-1 39/52] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql
+#53 DONE 0.0s
+
+#54 [stage-1 40/52] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json
+#54 DONE 0.0s
+
+#55 [stage-1 41/52] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql
+#55 DONE 0.0s
+
+#56 [stage-1 42/52] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json
+#56 DONE 0.0s
+
+#57 [stage-1 43/52] COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql
+#57 DONE 0.0s
+
+#58 [stage-1 44/52] COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql
+#58 DONE 0.0s
+
+#59 [stage-1 45/52] COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql
+#59 DONE 0.0s
+
+#60 [stage-1 46/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/migration.sql
+#60 DONE 0.0s
+
+#61 [stage-1 47/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/fresh-prisma-tables.json
+#61 DONE 0.0s
+
+#62 [stage-1 48/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql
+#62 DONE 0.0s
+
+#63 [stage-1 49/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql
+#63 DONE 0.0s
+
+#64 [stage-1 50/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/post205-draft-tables.json
+#64 DONE 0.1s
+
+#65 [stage-1 51/52] COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+#65 DONE 0.0s
+
+#66 [stage-1 52/52] RUN sed -i 's/\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
+#66 DONE 0.4s
+
+#67 exporting to image
+#67 exporting layers
+#67 exporting layers 4.3s done
+#67 exporting manifest sha256:77d39f27dcfea46eefe7b20428a35b5d3f1ffafb811766630dfccd879816ec88 0.0s done
+#67 exporting config sha256:4a43ed6a6ba8768fe2a0c8d96875eef4098c781efc3da8c7abf3ad82702c7609 done
+#67 exporting attestation manifest sha256:acdef94484ac3172665d929dcecbc66621532b44445f9e6b00a23c3cab3fed4b 0.0s done
+#67 exporting manifest list sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2 0.0s done
+#67 naming to docker.io/library/soilfer-lims:audit-instrument-import-build-959d17e1-20261012T135400Z
+#67 naming to docker.io/library/soilfer-lims:audit-instrument-import-build-959d17e1-20261012T135400Z done
+#67 unpacking to docker.io/library/soilfer-lims:audit-instrument-import-build-959d17e1-20261012T135400Z
+#67 unpacking to docker.io/library/soilfer-lims:audit-instrument-import-build-959d17e1-20261012T135400Z 2.2s done
+#67 DONE 6.8s

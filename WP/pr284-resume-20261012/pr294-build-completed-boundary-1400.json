@@ -1,0 +1,1384 @@
+{
+  "observedUtc": "2026-10-12T13:59:30.768832+00:00",
+  "status": "ORIGINAL_NEW_BUILD_INDEPENDENTLY_VERIFIED_PROOF_WAITING_FOR_MAIN_CI",
+  "buildVerification": {
+    "observedUtc": "2026-10-12T13:56:33.679345+00:00",
+    "unitState": {
+      "Result": "success",
+      "ExecMainStatus": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead"
+    },
+    "root": "/opt/lims/releases/instrument-import-build-959d17e1-20261012T135400Z",
+    "unit": "lims-build-instrument-import-build-959d17e1-20261012t135400z.service",
+    "built": {
+      "status": "BUILT_ONLY_NOT_DEPLOYED",
+      "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+      "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+      "tag": "soilfer-lims:audit-instrument-import-build-959d17e1-20261012T135400Z",
+      "sourceArchiveSha256": "99c40eef08c11ad0dbc2576b7e6f36abd56f4e0bb68e36102b187cb9fb20cbe1",
+      "sourceIndexSha256": "35c20fd965066aabb123d059a79f240223a40a9b9602ef87216ec126fa47c76a",
+      "verifiedGitBlobCount": 2286,
+      "verifiedUtc": "2026-10-12T13:55:19.757668+00:00",
+      "imageBytes": 413806636,
+      "reserveBytes": 10556150894,
+      "freeBytesBefore": {
+        "/opt/lims": 86519967744,
+        "/var/lib/docker": 86519967744
+      },
+      "freeBytesAfter": {
+        "/opt/lims": 86130003968,
+        "/var/lib/docker": 86130003968
+      },
+      "buildLogSha256": "7efa3cb02d282cc49ab079a2bbead5763c5ea1b42686a1c600b4f2f3e1d8f947",
+      "productionDatabaseMounts": 0,
+      "dockerIgnoredArchiveMembersNotExtracted": [
+        "server/node_modules"
+      ],
+      "auditReviewId": 6125341751,
+      "mainCiRunId": 38256676268,
+      "tree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+      "toolingCommit": "630b2354a1a45df0d88545ac5c63594361615999",
+      "proofSourceReviewId": 6125544861,
+      "toolingSourceIndexSha256": "592f749f83eb166660a649030a0020600c0f99f403e5c40f9dfb9a5e3fc30c3f",
+      "proofSourceReviewRawSha256": "cd3f50d2794d39b6c28d2af3bbb88d3a2fa7ec1ffe93b7f1b4458655c5b82190",
+      "builderSha256": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a"
+    },
+    "source": {
+      "head": "630b2354a1a45df0d88545ac5c63594361615999",
+      "files": {
+        "rehearse_import.py": {
+          "path": "WP/pr284-release/rehearse_import.py",
+          "blob": "3d8ae9bbc9e7f3113c88449b41172fbdadb492f0",
+          "bytes": 25630,
+          "sha256": "8c65daee59ddd303adab4f7f48b1a22073472bd99203a8c45c31d9e4438fa213"
+        },
+        "import_proof_contract.py": {
+          "path": "WP/pr284-release/import_proof_contract.py",
+          "blob": "fe5cfe5551f151091795a2e69ca43362c098aeda",
+          "bytes": 10809,
+          "sha256": "2736d3ad6b788bb2e9302bb7e31fced42bead523e2f5889e7d9987a839657d55"
+        },
+        "import_source_graph.py": {
+          "path": "WP/pr284-release/import_source_graph.py",
+          "blob": "d1892e2cbef3a0d9567adf18a003ed701ec131ec",
+          "bytes": 5771,
+          "sha256": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637"
+        },
+        "import_preservation.py": {
+          "path": "WP/pr284-release/import_preservation.py",
+          "blob": "764727decbb566ab874b3a3873f0bd222ebeb430",
+          "bytes": 9307,
+          "sha256": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783"
+        },
+        "import_startup_checks.py": {
+          "path": "WP/pr284-release/import_startup_checks.py",
+          "blob": "bf6d9cb465b5a3d930e484479d790203246382f3",
+          "bytes": 5448,
+          "sha256": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b"
+        },
+        "import_installation.py": {
+          "path": "WP/pr284-release/import_installation.py",
+          "blob": "4fb61f95bf073878825083044e890b9a1864fd69",
+          "bytes": 7579,
+          "sha256": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d"
+        },
+        "import_stage.py": {
+          "path": "WP/pr284-release/import_stage.py",
+          "blob": "fa0633fc0f2b55abe9381e1dbda22ee598d0366c",
+          "bytes": 8063,
+          "sha256": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1"
+        },
+        "import_sealing.py": {
+          "path": "WP/pr284-release/import_sealing.py",
+          "blob": "16cec07e45bfd23040c5dc27ec93eb828aa41ad8",
+          "bytes": 5918,
+          "sha256": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401"
+        },
+        "known_core_disk_guard_import.py": {
+          "path": "WP/pr284-release/known_core_disk_guard_import.py",
+          "blob": "eb05121b2909f624527295092c28f6fddb241817",
+          "bytes": 3839,
+          "sha256": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c"
+        },
+        "build_import.py": {
+          "path": "WP/pr284-release/build_import.py",
+          "blob": "4e23a4846cca0e1c104b0bb6643aca874c395fe9",
+          "bytes": 8085,
+          "sha256": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a"
+        },
+        "prepare_import_build.py": {
+          "path": "WP/pr284-release/prepare_import_build.py",
+          "blob": "1dc32e0178024432cec5fcd4fd4db30d611857f1",
+          "bytes": 11123,
+          "sha256": "a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991"
+        },
+        "export_launch_import_proof.py": {
+          "path": "WP/pr284-release/export_launch_import_proof.py",
+          "blob": "6d74f77589dfe8ad962a9376d67c2c74ab8f0b1f",
+          "bytes": 7348,
+          "sha256": "0c642b50c8996c33efc25b7e0922c0dc4dc6c104cd9db8d70231604a16b3f100"
+        },
+        "capture_kobo_fetch.py": {
+          "path": "WP/runtime-recovery-kobo/capture_kobo_fetch.py",
+          "blob": "79e2ad45eba9fd6d6e38b37cd36801243dd648d8",
+          "bytes": 4767,
+          "sha256": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86"
+        },
+        "kobo_copy_preservation.py": {
+          "path": "WP/runtime-recovery-kobo/kobo_copy_preservation.py",
+          "blob": "0f7eab699ea408bac72e05379a19ea718ed4c66a",
+          "bytes": 16701,
+          "sha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23"
+        },
+        "known_core_disk_guard_v2.py": {
+          "path": "WP/runtime-recovery-kobo/known_core_disk_guard_v2.py",
+          "blob": "265d01b09105aa69cd307e80473b02260eb25248",
+          "bytes": 5278,
+          "sha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c"
+        },
+        "known_core_disk_guard_v3.py": {
+          "path": "WP/runtime-recovery-kobo/known_core_disk_guard_v3.py",
+          "blob": "e7cb0e25eeb3585d731f42b3e8a8658944228788",
+          "bytes": 5625,
+          "sha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f"
+        },
+        "runtime_proof_policies.py": {
+          "path": "WP/runtime-recovery-kobo/proof_contract.py",
+          "blob": "f8490e268a824452d05aee30bae6f7673f13662a",
+          "bytes": 15922,
+          "sha256": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf"
+        },
+        "known_core_disk_guard.py": {
+          "path": "WP/runtime-containment-ae64f169/known_core_disk_guard.py",
+          "blob": "026e2245268324c3157eb186ba747776e7a4b55d",
+          "bytes": 5984,
+          "sha256": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169"
+        },
+        "release_support.py": {
+          "path": "WP/forward-ae64f169/release_support.py",
+          "blob": "8ea639b57cb1eec468e6794e5ccc32ba9a468e99",
+          "bytes": 20330,
+          "sha256": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810"
+        },
+        "startup_common.py": {
+          "path": "WP/forward-ae64f169/startup_common.py",
+          "blob": "757c0d350769ab58b5f0b8e4ba810af8c9bdce0d",
+          "bytes": 13858,
+          "sha256": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+        },
+        "postflight-roles.cjs": {
+          "path": "WP/forward-ae64f169/postflight-roles.cjs",
+          "blob": "bc6fe5f35ccc52e0c7b48a444a9432d05162a4a3",
+          "bytes": 12281,
+          "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da"
+        },
+        "postflight-auth.cjs": {
+          "path": "WP/forward-ae64f169/postflight-auth.cjs",
+          "blob": "6521d1c4a8f04e24641df967de4f674e9907dfb8",
+          "bytes": 2045,
+          "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192"
+        },
+        "postflight-reference.cjs": {
+          "path": "WP/forward-ae64f169/postflight-reference.cjs",
+          "blob": "6155145febed24f58efabfba236bae91f00e46a3",
+          "bytes": 2096,
+          "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526"
+        },
+        "postflight-qc-runs.cjs": {
+          "path": "WP/forward-ae64f169/postflight-qc-runs.cjs",
+          "blob": "ab7fd7f03555f6d5af423d6750e8de908965d53a",
+          "bytes": 4091,
+          "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f"
+        },
+        "postflight-policy.cjs": {
+          "path": "WP/forward-ae64f169/postflight-policy.cjs",
+          "blob": "19e12bb1c77a43f78098eb4af208d05f34f96c46",
+          "bytes": 4035,
+          "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51"
+        },
+        "readonly-smoke.cjs": {
+          "path": "WP/forward-ae64f169/readonly-smoke.cjs",
+          "blob": "555a67e4f125160eba990086fa4d0f60c6085bb8",
+          "bytes": 3255,
+          "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626"
+        },
+        "migration.sql": {
+          "path": "server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql",
+          "blob": "bc0007230856b8903a6ab7ce2425a6a55dfba91f",
+          "bytes": 4342,
+          "sha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8"
+        },
+        "fresh-prisma-tables.json": {
+          "path": "server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json",
+          "blob": "2d93236cda13929e7134762dfd587c3df373f315",
+          "bytes": 2877,
+          "sha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df"
+        },
+        "pre-prisma-draft-table.sql": {
+          "path": "server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql",
+          "blob": "b940d033dc0c857819693ad005041d2bdef3a05d",
+          "bytes": 769,
+          "sha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af"
+        },
+        "upgraded-prisma-draft-table.sql": {
+          "path": "server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql",
+          "blob": "efb20835b91e24b0bac29405e664985612332ef8",
+          "bytes": 874,
+          "sha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b"
+        },
+        "post205-draft-tables.json": {
+          "path": "server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json",
+          "blob": "ee1836b8e5171601a33b023438293ee2544a0cd1",
+          "bytes": 8105,
+          "sha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+        }
+      }
+    },
+    "sourceReview": {
+      "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6125544861",
+      "html_url": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6125544861",
+      "issue_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/162",
+      "id": 6125544861,
+      "node_id": "IC_kwDOROLhSM8AAAABbRxlnQ",
+      "user": {
+        "login": "yigini",
+        "id": 32960535,
+        "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/yigini",
+        "html_url": "https://github.com/yigini",
+        "followers_url": "https://api.github.com/users/yigini/followers",
+        "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+        "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+        "organizations_url": "https://api.github.com/users/yigini/orgs",
+        "repos_url": "https://api.github.com/users/yigini/repos",
+        "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/yigini/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "created_at": "2026-10-12T13:45:56Z",
+      "updated_at": "2026-10-12T13:45:56Z",
+      "author_association": "OWNER",
+      "body": "Source review: PASS\n\nNEW primary #200 proof/build source review (Claudio) for the native-workbench correction.\n\n- **Exact source:** 630b2354a1a45df0d88545ac5c63594361615999.\n- **Bindings:**\n  - my application audit 6125341751 of PR #294 head 5e65fe5b587747efc717f167f9b61469effa9afe;\n  - the actual merge 959d17e11c357266f7c2a41b0c84ab76914c591e, with parents 5dd5488d+5e65fe5b and tree 336223df0161caeae4eb7db1e40df748d8ba110f;\n  - ONE first proof root, /opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z.\n\nThis approves this proof/build source only. Before any production execution, all of these are still required:\n- main CI SUCCESS on 959d17e1;\n- the one new build;\n- this first proof stopped PASSED;\n- a NEW production-source review;\n- a NEW exact-kit audit;\n- one fresh single-use gate.\n\nRequired full tokens:\n51f6798806f630773786a08432290c1b21a841da\n5dd5488d138514351fffd54d0b0232ae19fcb64d\n5e65fe5b587747efc717f167f9b61469effa9afe\n959d17e11c357266f7c2a41b0c84ab76914c591e\n336223df0161caeae4eb7db1e40df748d8ba110f\n336223df0161caeae4eb7db1e40df748d8ba110f\nsha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f\n480f9e1a102533f6b8e2e1646db1bfbaeeab30f9e63a1a3611926dd82e621515\nreleasePr=294\nauditReviewId=6125341751\nmergeBaseHead=5dd5488d138514351fffd54d0b0232ae19fcb64d\noriginalProofRoot=/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z\nfirstProofPolicy=EXACT_REVIEWED_FIRST_PROOF_ROOT_NO_REPLAY\nMIN_MEASURED_TIMEOUT_HEADROOM_SECONDS=60\nPRODUCTION_UNIT_LIMIT_SECONDS=5400\nMIN_MEASURED_UNIT_HEADROOM_SECONDS=600\nmergePolicy=EXACT_REVIEWED_PARENTS_AND_UNION_TREE\nnaturalIntakePolicy=ORIGINAL_CURSOR_ACTUAL_UPSTREAM\nimportDeltaPolicy=ONLY_200_EMPTY_ADDITIVE_IMPORT_10438_TO_10639\noriginalState=104tables/38receipts\ninstalledState=106tables/39receipts\ndefaultStartup=23NO_OP0/22READY0\nproductionRecovery=SEPARATELY_AUDITED_FORWARD_FIX_ONLY\nnativeDryCopyPolicy=SEPARATE_OWNED_0400_BACKUP_COPY_WITH_WRITABLE_SIDECAR_DIRECTORY\nretainedDatabaseAllocationCount=13\nCLI_TIMEOUT_SECONDS=600\nnativeCliNetwork=none\nnativeCliMemorySwapBytes=805306368\n630b2354a1a45df0d88545ac5c63594361615999\nlabAndHubBuildsOwnedByYY=true\nRELEASE_DAY_DISK_ABORTS_ACCEPTED\nCORE_DEALLOCATION_CONFIRMATION_DEADLINE_SECONDS=10\nBASELINE_ATTEMPTS_MAX=3\nBASELINE_CONFIRMATION_DEADLINE_SECONDS=10\nproofBaselineLayoutPolicy=EXACT_HASHED_IMPORT_PROOF_AUTHORITY_LAYOUT\nrefusalScopeCommentId=6113601584\nEXACT_FRESH_COPY_CONFIG_REFUSALS\nSAMPLE_ROWS_NOT_DISTINCT_SUBMISSIONS\nrefusalPairingScopeCommentId=6114143349\nschedulerRefusalPairing=STREAM_ORDER_ONE_TO_ONE\nREFUSAL_PAIR_WINDOW_SECONDS=1\nbuild_import.py=c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a\ncapture_kobo_fetch.py=1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86\nexport_launch_import_proof.py=0c642b50c8996c33efc25b7e0922c0dc4dc6c104cd9db8d70231604a16b3f100\nfresh-prisma-tables.json=9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df\nimport_installation.py=eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d\nimport_preservation.py=2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783\nimport_proof_contract.py=2736d3ad6b788bb2e9302bb7e31fced42bead523e2f5889e7d9987a839657d55\nimport_sealing.py=de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401\nimport_source_graph.py=74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637\nimport_stage.py=c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1\nimport_startup_checks.py=033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b\nknown_core_disk_guard.py=f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169\nknown_core_disk_guard_import.py=3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c\nknown_core_disk_guard_v2.py=f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c\nknown_core_disk_guard_v3.py=878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f\nkobo_copy_preservation.py=3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23\nmigration.sql=68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8\npost205-draft-tables.json=208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad\npostflight-auth.cjs=37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192\npostflight-policy.cjs=6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51\npostflight-qc-runs.cjs=4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f\npostflight-reference.cjs=530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526\npostflight-roles.cjs=6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da\npre-prisma-draft-table.sql=a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af\nprepare_import_build.py=a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991\nreadonly-smoke.cjs=7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626\nrehearse_import.py=8c65daee59ddd303adab4f7f48b1a22073472bd99203a8c45c31d9e4438fa213\nrelease_support.py=9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810\nruntime_proof_policies.py=08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf\nstartup_common.py=e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00\nupgraded-prisma-draft-table.sql=4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b\n\nWhat I checked:\n- **Bytes:**\n  - All 31 `name=sha256` tokens above equal the raw Git blobs at 630b2354. All 31 compile.\n  - The `require_source_set` check and the 14 unchanged historical helper hashes pass.\n  - The five schema assets are byte-identical to the merged application at 959d17e1.\n- **Diff from my read-only pre-review of 4090ffcb:**\n  - Only `import_proof_contract.py` changes, plus the README.\n  - The changes are AUDIT_REVIEW_ID=6125341751, CANDIDATE_HEAD and MERGED_TREE bound to the actual merge, and EXPECTED_PROOF_ROOT bound to the exact timestamped root.\n  - I verified the merge parents and tree locally with git.\n- **First-root binding:**\n  - `require_first_proof_root` runs before any copy or CLI in `rehearse_import.py` (`main`, right after `bound_candidate`) and in `export_launch_import_proof.py`.\n  - It runs again in `validate_proof` and the freeze path.\n  - I checked locally that it accepts the bound root and refuses the failed 10:52Z root and a one-second-off sibling.\n- **Timing:** `measured_timing_headroom` needs each measured stage (dry, apply, repeat, jobs-OFF readiness and jobs-ON readiness) to be at most 540 s. It also needs at least 600 s left of 5400 s after the stages and 660 s of observation, and the frozen manifest must equal the proof value.\n  - The prior readiness of about 103 s is historical only; the new proof must measure it.\n  - A margin refusal burns this root, so another forward source would be needed.\n- **Guards:** I ran the committed `run_import_guards.py` payload locally (local `python3` instead of the ssh hop) against 630b2354. Result: 175/175 OK, 0 failures/errors/skips, completed 13:44:27 UTC, no production access.\n- **Self-check:** this body passes the 630b2354 `source_review_pass` token check with the actual file hashes.\n\nStill open, and not changed by this pass:\n- The production binding stays UNREVIEWED_NATIVE_FORWARD_REFUSE/0 until a NEW production-source review.\n- The failed f5e root (receipt 511c1951) and the old 5dd build (image 5757) are never reused.\n- Main must stay at 959d17e1, and other application merges stay held until #200 is live and post-checked.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+      "reactions": {
+        "url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments/6125544861/reactions",
+        "total_count": 0,
+        "+1": 0,
+        "-1": 0,
+        "laugh": 0,
+        "hooray": 0,
+        "confused": 0,
+        "heart": 0,
+        "rocket": 0,
+        "eyes": 0
+      },
+      "performed_via_github_app": {
+        "id": 1236702,
+        "slug": "claude",
+        "node_id": "A_kwHOBIuudM4AEt7e",
+        "owner": {
+          "login": "anthropics",
+          "id": 76263028,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjc2MjYzMDI4",
+          "avatar_url": "https://avatars.githubusercontent.com/u/76263028?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/anthropics",
+          "html_url": "https://github.com/anthropics",
+          "followers_url": "https://api.github.com/users/anthropics/followers",
+          "following_url": "https://api.github.com/users/anthropics/following{/other_user}",
+          "gists_url": "https://api.github.com/users/anthropics/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/anthropics/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/anthropics/subscriptions",
+          "organizations_url": "https://api.github.com/users/anthropics/orgs",
+          "repos_url": "https://api.github.com/users/anthropics/repos",
+          "events_url": "https://api.github.com/users/anthropics/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/anthropics/received_events",
+          "type": "Organization",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "name": "Claude",
+        "description": "Run Claude Code from your GitHub Pull Requests and Issues to respond to reviewer feedback, fix CI errors, or modify code, turning it into a virtual teammate that works alongside your development pipelines.\r\n\r\nThis is built on the publicly available Claude Code SDK.",
+        "external_url": "https://anthropic.com/claude-code",
+        "html_url": "https://github.com/apps/claude",
+        "created_at": "2025-04-30T17:54:24Z",
+        "updated_at": "2026-09-30T19:04:00Z",
+        "permissions": {
+          "actions": "write",
+          "administration": "read",
+          "checks": "write",
+          "contents": "write",
+          "discussions": "write",
+          "issues": "write",
+          "members": "read",
+          "merge_queues": "read",
+          "metadata": "read",
+          "pull_requests": "write",
+          "repository_hooks": "write",
+          "statuses": "read",
+          "workflows": "write"
+        },
+        "events": [
+          "branch_protection_rule",
+          "check_run",
+          "check_suite",
+          "commit_comment",
+          "discussion",
+          "discussion_comment",
+          "issues",
+          "issue_comment",
+          "merge_group",
+          "merge_queue_entry",
+          "pull_request",
+          "pull_request_review",
+          "pull_request_review_comment",
+          "pull_request_review_thread",
+          "push",
+          "release",
+          "repository_ruleset",
+          "status",
+          "sub_issues"
+        ]
+      },
+      "minimized": null,
+      "pin": null
+    },
+    "image": {
+      "Id": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+      "Size": 413806636,
+      "Config": {
+        "Labels": {
+          "org.opencontainers.image.description": "Laboratory Information Management System for Soil Analysis",
+          "org.opencontainers.image.revision": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+          "org.opencontainers.image.source": "https://github.com/yigini/soilfer-lims",
+          "org.opencontainers.image.title": "SoilFER-LIMS"
+        }
+      }
+    },
+    "files": {
+      "build-receipt.json": {
+        "sha256": "1a983172adebaba8b1a61959810d5469d9c12d706725bd33783d43cc8cceabe0",
+        "bytes": 1473,
+        "mode": "0400"
+      },
+      "build-input.json": {
+        "sha256": "00dae9046780a5406db0a6b5d753158880d740988f5fcf3faf11b22b7a9eb3ee",
+        "bytes": 1612,
+        "mode": "0400"
+      },
+      "source.tar.gz": {
+        "sha256": "99c40eef08c11ad0dbc2576b7e6f36abd56f4e0bb68e36102b187cb9fb20cbe1",
+        "bytes": 63049154,
+        "mode": "0400"
+      },
+      "source-index.json": {
+        "sha256": "35c20fd965066aabb123d059a79f240223a40a9b9602ef87216ec126fa47c76a",
+        "bytes": 616500,
+        "mode": "0400"
+      },
+      "tooling-source-index.json": {
+        "sha256": "cfffb76512d4d0ad46a5b1725a5e7c9f0bc45c5f3a2f48378d5d0164a961ca7f",
+        "bytes": 8607,
+        "mode": "0400"
+      },
+      "proof-source-review.json": {
+        "sha256": "706fac3911d349f9e3da86182c3f283ddef80b92a3af0d6b1ccf16702eeda877",
+        "bytes": 12197,
+        "mode": "0400"
+      },
+      "rehearse_import.py": {
+        "sha256": "8c65daee59ddd303adab4f7f48b1a22073472bd99203a8c45c31d9e4438fa213",
+        "bytes": 25630,
+        "mode": "0400"
+      },
+      "import_proof_contract.py": {
+        "sha256": "2736d3ad6b788bb2e9302bb7e31fced42bead523e2f5889e7d9987a839657d55",
+        "bytes": 10809,
+        "mode": "0400"
+      },
+      "import_source_graph.py": {
+        "sha256": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637",
+        "bytes": 5771,
+        "mode": "0400"
+      },
+      "import_preservation.py": {
+        "sha256": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783",
+        "bytes": 9307,
+        "mode": "0400"
+      },
+      "import_startup_checks.py": {
+        "sha256": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b",
+        "bytes": 5448,
+        "mode": "0400"
+      },
+      "import_installation.py": {
+        "sha256": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+        "bytes": 7579,
+        "mode": "0400"
+      },
+      "import_stage.py": {
+        "sha256": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1",
+        "bytes": 8063,
+        "mode": "0400"
+      },
+      "import_sealing.py": {
+        "sha256": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401",
+        "bytes": 5918,
+        "mode": "0400"
+      },
+      "known_core_disk_guard_import.py": {
+        "sha256": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+        "bytes": 3839,
+        "mode": "0400"
+      },
+      "build_import.py": {
+        "sha256": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a",
+        "bytes": 8085,
+        "mode": "0400"
+      },
+      "prepare_import_build.py": {
+        "sha256": "a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991",
+        "bytes": 11123,
+        "mode": "0400"
+      },
+      "export_launch_import_proof.py": {
+        "sha256": "0c642b50c8996c33efc25b7e0922c0dc4dc6c104cd9db8d70231604a16b3f100",
+        "bytes": 7348,
+        "mode": "0400"
+      },
+      "capture_kobo_fetch.py": {
+        "sha256": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86",
+        "bytes": 4767,
+        "mode": "0400"
+      },
+      "kobo_copy_preservation.py": {
+        "sha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+        "bytes": 16701,
+        "mode": "0400"
+      },
+      "known_core_disk_guard_v2.py": {
+        "sha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+        "bytes": 5278,
+        "mode": "0400"
+      },
+      "known_core_disk_guard_v3.py": {
+        "sha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+        "bytes": 5625,
+        "mode": "0400"
+      },
+      "runtime_proof_policies.py": {
+        "sha256": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf",
+        "bytes": 15922,
+        "mode": "0400"
+      },
+      "known_core_disk_guard.py": {
+        "sha256": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+        "bytes": 5984,
+        "mode": "0400"
+      },
+      "release_support.py": {
+        "sha256": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+        "bytes": 20330,
+        "mode": "0400"
+      },
+      "startup_common.py": {
+        "sha256": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+        "bytes": 13858,
+        "mode": "0400"
+      },
+      "postflight-roles.cjs": {
+        "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+        "bytes": 12281,
+        "mode": "0400"
+      },
+      "postflight-auth.cjs": {
+        "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+        "bytes": 2045,
+        "mode": "0400"
+      },
+      "postflight-reference.cjs": {
+        "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+        "bytes": 2096,
+        "mode": "0400"
+      },
+      "postflight-qc-runs.cjs": {
+        "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+        "bytes": 4091,
+        "mode": "0400"
+      },
+      "postflight-policy.cjs": {
+        "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+        "bytes": 4035,
+        "mode": "0400"
+      },
+      "readonly-smoke.cjs": {
+        "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+        "bytes": 3255,
+        "mode": "0400"
+      },
+      "migration.sql": {
+        "sha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+        "bytes": 4342,
+        "mode": "0400"
+      },
+      "fresh-prisma-tables.json": {
+        "sha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+        "bytes": 2877,
+        "mode": "0400"
+      },
+      "pre-prisma-draft-table.sql": {
+        "sha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+        "bytes": 769,
+        "mode": "0400"
+      },
+      "upgraded-prisma-draft-table.sql": {
+        "sha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+        "bytes": 874,
+        "mode": "0400"
+      },
+      "post205-draft-tables.json": {
+        "sha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad",
+        "bytes": 8105,
+        "mode": "0400"
+      }
+    },
+    "freeBytes": 86130163712,
+    "productionMutations": 0,
+    "independentRawGitIndexVerified": true
+  },
+  "pin": {
+    "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "baseHead": "51f6798806f630773786a08432290c1b21a841da",
+    "auditedPrHead": "5e65fe5b587747efc717f167f9b61469effa9afe",
+    "mergeBaseHead": "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+    "originalProofRoot": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+    "firstProofPolicy": "EXACT_REVIEWED_FIRST_PROOF_ROOT_NO_REPLAY",
+    "pr": 294,
+    "tree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+    "auditedTree": "336223df0161caeae4eb7db1e40df748d8ba110f",
+    "mergeParents": [
+      "5dd5488d138514351fffd54d0b0232ae19fcb64d",
+      "5e65fe5b587747efc717f167f9b61469effa9afe"
+    ],
+    "auditReviewId": 6125341751,
+    "mainCiRunId": 38256676268,
+    "proofSourceReviewId": 6125544861,
+    "buildRoot": "/opt/lims/releases/instrument-import-build-959d17e1-20261012T135400Z",
+    "buildReceiptSha256": "1a983172adebaba8b1a61959810d5469d9c12d706725bd33783d43cc8cceabe0",
+    "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+    "imageBytes": 413806636,
+    "labAndHubBuildsOwnedByYY": true,
+    "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+  },
+  "mainCi": {
+    "id": 38256676268,
+    "name": "CI",
+    "node_id": "WFR_kwLOROLhSM8AAAAI6EaNrA",
+    "head_branch": "main",
+    "head_sha": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "path": ".github/workflows/ci.yml",
+    "display_title": "Merge pull request #294 from yigini/codex/native-workbench-import-for\u2026",
+    "run_number": 706,
+    "event": "push",
+    "status": "in_progress",
+    "conclusion": null,
+    "workflow_id": 348556237,
+    "check_suite_id": 103650792495,
+    "check_suite_node_id": "CS_kwDOROLhSM8AAAAYIhGULw",
+    "url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38256676268",
+    "html_url": "https://github.com/yigini/soilfer-lims/actions/runs/38256676268",
+    "pull_requests": [],
+    "created_at": "2026-10-12T13:34:54Z",
+    "updated_at": "2026-10-12T13:34:58Z",
+    "actor": {
+      "login": "yigini",
+      "id": 32960535,
+      "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/yigini",
+      "html_url": "https://github.com/yigini",
+      "followers_url": "https://api.github.com/users/yigini/followers",
+      "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+      "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+      "organizations_url": "https://api.github.com/users/yigini/orgs",
+      "repos_url": "https://api.github.com/users/yigini/repos",
+      "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/yigini/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-12T13:34:54Z",
+    "triggering_actor": {
+      "login": "yigini",
+      "id": 32960535,
+      "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/yigini",
+      "html_url": "https://github.com/yigini",
+      "followers_url": "https://api.github.com/users/yigini/followers",
+      "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+      "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+      "organizations_url": "https://api.github.com/users/yigini/orgs",
+      "repos_url": "https://api.github.com/users/yigini/repos",
+      "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/yigini/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38256676268/jobs",
+    "logs_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38256676268/logs",
+    "check_suite_url": "https://api.github.com/repos/yigini/soilfer-lims/check-suites/103650792495",
+    "artifacts_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38256676268/artifacts",
+    "cancel_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38256676268/cancel",
+    "rerun_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38256676268/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/workflows/348556237",
+    "head_commit": {
+      "id": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+      "tree_id": "336223df0161caeae4eb7db1e40df748d8ba110f",
+      "message": "Merge pull request #294 from yigini/codex/native-workbench-import-forward-fix\n\nRecognize the historical native workbench schema during instrument import",
+      "timestamp": "2026-10-12T13:34:51Z",
+      "author": {
+        "name": "yigini",
+        "email": "32960535+yigini@users.noreply.github.com"
+      },
+      "committer": {
+        "name": "GitHub",
+        "email": "noreply@github.com"
+      }
+    },
+    "repository": {
+      "id": 1155719496,
+      "node_id": "R_kgDOROLhSA",
+      "name": "soilfer-lims",
+      "full_name": "yigini/soilfer-lims",
+      "private": false,
+      "owner": {
+        "login": "yigini",
+        "id": 32960535,
+        "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/yigini",
+        "html_url": "https://github.com/yigini",
+        "followers_url": "https://api.github.com/users/yigini/followers",
+        "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+        "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+        "organizations_url": "https://api.github.com/users/yigini/orgs",
+        "repos_url": "https://api.github.com/users/yigini/repos",
+        "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/yigini/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/yigini/soilfer-lims",
+      "description": "Laboratory Information Management System for Soil Analysis",
+      "fork": false,
+      "url": "https://api.github.com/repos/yigini/soilfer-lims",
+      "forks_url": "https://api.github.com/repos/yigini/soilfer-lims/forks",
+      "keys_url": "https://api.github.com/repos/yigini/soilfer-lims/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/yigini/soilfer-lims/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/yigini/soilfer-lims/teams",
+      "hooks_url": "https://api.github.com/repos/yigini/soilfer-lims/hooks",
+      "issue_events_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/yigini/soilfer-lims/events",
+      "assignees_url": "https://api.github.com/repos/yigini/soilfer-lims/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/yigini/soilfer-lims/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/yigini/soilfer-lims/tags",
+      "blobs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/yigini/soilfer-lims/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/yigini/soilfer-lims/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/yigini/soilfer-lims/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/yigini/soilfer-lims/languages",
+      "stargazers_url": "https://api.github.com/repos/yigini/soilfer-lims/stargazers",
+      "contributors_url": "https://api.github.com/repos/yigini/soilfer-lims/contributors",
+      "subscribers_url": "https://api.github.com/repos/yigini/soilfer-lims/subscribers",
+      "subscription_url": "https://api.github.com/repos/yigini/soilfer-lims/subscription",
+      "commits_url": "https://api.github.com/repos/yigini/soilfer-lims/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/yigini/soilfer-lims/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/yigini/soilfer-lims/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/yigini/soilfer-lims/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/yigini/soilfer-lims/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/yigini/soilfer-lims/merges",
+      "archive_url": "https://api.github.com/repos/yigini/soilfer-lims/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/yigini/soilfer-lims/downloads",
+      "issues_url": "https://api.github.com/repos/yigini/soilfer-lims/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/yigini/soilfer-lims/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/yigini/soilfer-lims/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/yigini/soilfer-lims/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/yigini/soilfer-lims/labels{/name}",
+      "releases_url": "https://api.github.com/repos/yigini/soilfer-lims/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/yigini/soilfer-lims/deployments"
+    },
+    "head_repository": {
+      "id": 1155719496,
+      "node_id": "R_kgDOROLhSA",
+      "name": "soilfer-lims",
+      "full_name": "yigini/soilfer-lims",
+      "private": false,
+      "owner": {
+        "login": "yigini",
+        "id": 32960535,
+        "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/yigini",
+        "html_url": "https://github.com/yigini",
+        "followers_url": "https://api.github.com/users/yigini/followers",
+        "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+        "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+        "organizations_url": "https://api.github.com/users/yigini/orgs",
+        "repos_url": "https://api.github.com/users/yigini/repos",
+        "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/yigini/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/yigini/soilfer-lims",
+      "description": "Laboratory Information Management System for Soil Analysis",
+      "fork": false,
+      "url": "https://api.github.com/repos/yigini/soilfer-lims",
+      "forks_url": "https://api.github.com/repos/yigini/soilfer-lims/forks",
+      "keys_url": "https://api.github.com/repos/yigini/soilfer-lims/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/yigini/soilfer-lims/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/yigini/soilfer-lims/teams",
+      "hooks_url": "https://api.github.com/repos/yigini/soilfer-lims/hooks",
+      "issue_events_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/yigini/soilfer-lims/events",
+      "assignees_url": "https://api.github.com/repos/yigini/soilfer-lims/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/yigini/soilfer-lims/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/yigini/soilfer-lims/tags",
+      "blobs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/yigini/soilfer-lims/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/yigini/soilfer-lims/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/yigini/soilfer-lims/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/yigini/soilfer-lims/languages",
+      "stargazers_url": "https://api.github.com/repos/yigini/soilfer-lims/stargazers",
+      "contributors_url": "https://api.github.com/repos/yigini/soilfer-lims/contributors",
+      "subscribers_url": "https://api.github.com/repos/yigini/soilfer-lims/subscribers",
+      "subscription_url": "https://api.github.com/repos/yigini/soilfer-lims/subscription",
+      "commits_url": "https://api.github.com/repos/yigini/soilfer-lims/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/yigini/soilfer-lims/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/yigini/soilfer-lims/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/yigini/soilfer-lims/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/yigini/soilfer-lims/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/yigini/soilfer-lims/merges",
+      "archive_url": "https://api.github.com/repos/yigini/soilfer-lims/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/yigini/soilfer-lims/downloads",
+      "issues_url": "https://api.github.com/repos/yigini/soilfer-lims/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/yigini/soilfer-lims/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/yigini/soilfer-lims/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/yigini/soilfer-lims/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/yigini/soilfer-lims/labels{/name}",
+      "releases_url": "https://api.github.com/repos/yigini/soilfer-lims/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/yigini/soilfer-lims/deployments"
+    }
+  },
+  "proposedProductionSource": "63761ad129afae735e83e0c330030d868dedfef4",
+  "guards": {
+    "windows": {
+      "platform": "windows",
+      "exitCode": 0,
+      "result": {
+        "sourceCommit": "63761ad129afae735e83e0c330030d868dedfef4",
+        "sourceHashes": {
+          "release_support": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+          "startup_common": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+          "known_core_disk_guard": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+          "known_core_disk_guard_v2": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+          "known_core_disk_guard_v3": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+          "runtime_proof_policies": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf",
+          "test_baseline_confirmation": "2ba48ec75d8d8053eb0abce160a63473090e4642254b9d442597b453d64774c0",
+          "import_source_graph": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637",
+          "import_proof_contract": "2736d3ad6b788bb2e9302bb7e31fced42bead523e2f5889e7d9987a839657d55",
+          "import_preservation": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783",
+          "import_startup_checks": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b",
+          "import_installation": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+          "import_stage": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1",
+          "import_sealing": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401",
+          "known_core_disk_guard_import": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+          "test_import_preservation": "40b447f6f309e44d3f0ab1ee9a9bc4cc046f12cacc15921bb59a7025d016e769",
+          "test_import_startup_checks": "26ef25a4a6444c40661a6e4d70f9a21798235ff16f1112dc65ece71eeecfc5f3",
+          "test_import_installation": "b4392e41444af8e224d735c448a68c2c10b9fe4cd58191dee863d748b8a9b1f8",
+          "test_import_stage": "2703ca976de64287cea1cfe59a543051ff15e32ed75f707c23087df99d147cf5",
+          "test_import_sealing": "1905c690470f63acf97711e588187c96ee7078ba3864e8cf82f7fdefcdc1361b",
+          "test_import_authority": "e745a609d578f55423907ca9e2c672a15039108965a3af9a8f31b106cdca9797",
+          "test_import_layout": "b45447cf53e4a12d88635bf07aad6eabca840615778277da1cb8e6cb568104cc",
+          "import_release_contract": "6411979f7c822085e0b576be9813057d2d5972fe7ee36723b31c26308e98ea02",
+          "test_import_release": "567fddedf6d790c7a9c9e939162e0377ae5694d243988b3e70e5cfde569b0706",
+          "known_core_disk_guard_import_deploy": "b02d5feff5321b72b5fca04db977c875e400e876b5c2086b1d3d30f81bba6b8c",
+          "test_import_deploy_layout": "62e42f5f568cb154ac365c70ccda9133698ee873afcf493c40c3b56972a938fd"
+        },
+        "packagingSourceHashes": {
+          "rehearse_import.py": "8c65daee59ddd303adab4f7f48b1a22073472bd99203a8c45c31d9e4438fa213",
+          "import_proof_contract.py": "2736d3ad6b788bb2e9302bb7e31fced42bead523e2f5889e7d9987a839657d55",
+          "import_source_graph.py": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637",
+          "import_preservation.py": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783",
+          "import_startup_checks.py": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b",
+          "import_installation.py": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+          "import_stage.py": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1",
+          "import_sealing.py": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401",
+          "known_core_disk_guard_import.py": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+          "build_import.py": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a",
+          "prepare_import_build.py": "a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991",
+          "export_launch_import_proof.py": "0c642b50c8996c33efc25b7e0922c0dc4dc6c104cd9db8d70231604a16b3f100",
+          "capture_kobo_fetch.py": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86",
+          "kobo_copy_preservation.py": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+          "known_core_disk_guard_v2.py": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+          "known_core_disk_guard_v3.py": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+          "runtime_proof_policies.py": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf",
+          "known_core_disk_guard.py": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+          "release_support.py": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+          "startup_common.py": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+          "postflight-roles.cjs": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+          "postflight-auth.cjs": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+          "postflight-reference.cjs": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+          "postflight-qc-runs.cjs": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+          "postflight-policy.cjs": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+          "readonly-smoke.cjs": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+          "migration.sql": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+          "fresh-prisma-tables.json": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+          "pre-prisma-draft-table.sql": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+          "upgraded-prisma-draft-table.sql": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+          "post205-draft-tables.json": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad",
+          "import_release_contract.py": "6411979f7c822085e0b576be9813057d2d5972fe7ee36723b31c26308e98ea02",
+          "deploy_import.py": "5aa582a7329c5db6866bb6e17115d054aa1d30b8974d7cd7d74ee12e443d732c",
+          "freeze_import.py": "61c6e6c1199cf17fb1c06337f141ab308b3966123ad6e139780c1937c7ebfaf7",
+          "known_core_disk_guard_import_deploy.py": "b02d5feff5321b72b5fca04db977c875e400e876b5c2086b1d3d30f81bba6b8c",
+          "collect_import_gate.py": "656e79c1de48f3fc752ddfa6647f446ddda74297d363fbea01097eec50012663",
+          "export_freeze_import_kit.py": "3d7d5b8aa80dfb81302ee467ed3893d7765e32b87ec51d3d0d449de1585ffbdf",
+          "launch_import_release.py": "e1ef11c5a9aa9c764025ffefaeb87671a3143209902d409eb44e53a311442d1e",
+          "yy-authorization-evidence.md": "02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1"
+        },
+        "assetHashes": {
+          "migration.sql": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+          "fresh-prisma-tables.json": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+          "pre-prisma-draft-table.sql": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+          "upgraded-prisma-draft-table.sql": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+          "post205-draft-tables.json": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+        },
+        "toolingIndex": {
+          "head": "63761ad129afae735e83e0c330030d868dedfef4",
+          "files": {
+            "rehearse_import.py": {
+              "path": "WP/pr284-release/rehearse_import.py",
+              "blob": "3d8ae9bbc9e7f3113c88449b41172fbdadb492f0",
+              "bytes": 25630,
+              "sha256": "8c65daee59ddd303adab4f7f48b1a22073472bd99203a8c45c31d9e4438fa213"
+            },
+            "import_proof_contract.py": {
+              "path": "WP/pr284-release/import_proof_contract.py",
+              "blob": "fe5cfe5551f151091795a2e69ca43362c098aeda",
+              "bytes": 10809,
+              "sha256": "2736d3ad6b788bb2e9302bb7e31fced42bead523e2f5889e7d9987a839657d55"
+            },
+            "import_source_graph.py": {
+              "path": "WP/pr284-release/import_source_graph.py",
+              "blob": "d1892e2cbef3a0d9567adf18a003ed701ec131ec",
+              "bytes": 5771,
+              "sha256": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637"
+            },
+            "import_preservation.py": {
+              "path": "WP/pr284-release/import_preservation.py",
+              "blob": "764727decbb566ab874b3a3873f0bd222ebeb430",
+              "bytes": 9307,
+              "sha256": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783"
+            },
+            "import_startup_checks.py": {
+              "path": "WP/pr284-release/import_startup_checks.py",
+              "blob": "bf6d9cb465b5a3d930e484479d790203246382f3",
+              "bytes": 5448,
+              "sha256": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b"
+            },
+            "import_installation.py": {
+              "path": "WP/pr284-release/import_installation.py",
+              "blob": "4fb61f95bf073878825083044e890b9a1864fd69",
+              "bytes": 7579,
+              "sha256": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d"
+            },
+            "import_stage.py": {
+              "path": "WP/pr284-release/import_stage.py",
+              "blob": "fa0633fc0f2b55abe9381e1dbda22ee598d0366c",
+              "bytes": 8063,
+              "sha256": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1"
+            },
+            "import_sealing.py": {
+              "path": "WP/pr284-release/import_sealing.py",
+              "blob": "16cec07e45bfd23040c5dc27ec93eb828aa41ad8",
+              "bytes": 5918,
+              "sha256": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401"
+            },
+            "known_core_disk_guard_import.py": {
+              "path": "WP/pr284-release/known_core_disk_guard_import.py",
+              "blob": "eb05121b2909f624527295092c28f6fddb241817",
+              "bytes": 3839,
+              "sha256": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c"
+            },
+            "build_import.py": {
+              "path": "WP/pr284-release/build_import.py",
+              "blob": "4e23a4846cca0e1c104b0bb6643aca874c395fe9",
+              "bytes": 8085,
+              "sha256": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a"
+            },
+            "prepare_import_build.py": {
+              "path": "WP/pr284-release/prepare_import_build.py",
+              "blob": "1dc32e0178024432cec5fcd4fd4db30d611857f1",
+              "bytes": 11123,
+              "sha256": "a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991"
+            },
+            "export_launch_import_proof.py": {
+              "path": "WP/pr284-release/export_launch_import_proof.py",
+              "blob": "6d74f77589dfe8ad962a9376d67c2c74ab8f0b1f",
+              "bytes": 7348,
+              "sha256": "0c642b50c8996c33efc25b7e0922c0dc4dc6c104cd9db8d70231604a16b3f100"
+            },
+            "capture_kobo_fetch.py": {
+              "path": "WP/runtime-recovery-kobo/capture_kobo_fetch.py",
+              "blob": "79e2ad45eba9fd6d6e38b37cd36801243dd648d8",
+              "bytes": 4767,
+              "sha256": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86"
+            },
+            "kobo_copy_preservation.py": {
+              "path": "WP/runtime-recovery-kobo/kobo_copy_preservation.py",
+              "blob": "0f7eab699ea408bac72e05379a19ea718ed4c66a",
+              "bytes": 16701,
+              "sha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23"
+            },
+            "known_core_disk_guard_v2.py": {
+              "path": "WP/runtime-recovery-kobo/known_core_disk_guard_v2.py",
+              "blob": "265d01b09105aa69cd307e80473b02260eb25248",
+              "bytes": 5278,
+              "sha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c"
+            },
+            "known_core_disk_guard_v3.py": {
+              "path": "WP/runtime-recovery-kobo/known_core_disk_guard_v3.py",
+              "blob": "e7cb0e25eeb3585d731f42b3e8a8658944228788",
+              "bytes": 5625,
+              "sha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f"
+            },
+            "runtime_proof_policies.py": {
+              "path": "WP/runtime-recovery-kobo/proof_contract.py",
+              "blob": "f8490e268a824452d05aee30bae6f7673f13662a",
+              "bytes": 15922,
+              "sha256": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf"
+            },
+            "known_core_disk_guard.py": {
+              "path": "WP/runtime-containment-ae64f169/known_core_disk_guard.py",
+              "blob": "026e2245268324c3157eb186ba747776e7a4b55d",
+              "bytes": 5984,
+              "sha256": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169"
+            },
+            "release_support.py": {
+              "path": "WP/forward-ae64f169/release_support.py",
+              "blob": "8ea639b57cb1eec468e6794e5ccc32ba9a468e99",
+              "bytes": 20330,
+              "sha256": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810"
+            },
+            "startup_common.py": {
+              "path": "WP/forward-ae64f169/startup_common.py",
+              "blob": "757c0d350769ab58b5f0b8e4ba810af8c9bdce0d",
+              "bytes": 13858,
+              "sha256": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+            },
+            "postflight-roles.cjs": {
+              "path": "WP/forward-ae64f169/postflight-roles.cjs",
+              "blob": "bc6fe5f35ccc52e0c7b48a444a9432d05162a4a3",
+              "bytes": 12281,
+              "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da"
+            },
+            "postflight-auth.cjs": {
+              "path": "WP/forward-ae64f169/postflight-auth.cjs",
+              "blob": "6521d1c4a8f04e24641df967de4f674e9907dfb8",
+              "bytes": 2045,
+              "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192"
+            },
+            "postflight-reference.cjs": {
+              "path": "WP/forward-ae64f169/postflight-reference.cjs",
+              "blob": "6155145febed24f58efabfba236bae91f00e46a3",
+              "bytes": 2096,
+              "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526"
+            },
+            "postflight-qc-runs.cjs": {
+              "path": "WP/forward-ae64f169/postflight-qc-runs.cjs",
+              "blob": "ab7fd7f03555f6d5af423d6750e8de908965d53a",
+              "bytes": 4091,
+              "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f"
+            },
+            "postflight-policy.cjs": {
+              "path": "WP/forward-ae64f169/postflight-policy.cjs",
+              "blob": "19e12bb1c77a43f78098eb4af208d05f34f96c46",
+              "bytes": 4035,
+              "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51"
+            },
+            "readonly-smoke.cjs": {
+              "path": "WP/forward-ae64f169/readonly-smoke.cjs",
+              "blob": "555a67e4f125160eba990086fa4d0f60c6085bb8",
+              "bytes": 3255,
+              "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626"
+            },
+            "migration.sql": {
+              "path": "server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql",
+              "blob": "bc0007230856b8903a6ab7ce2425a6a55dfba91f",
+              "bytes": 4342,
+              "sha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8"
+            },
+            "fresh-prisma-tables.json": {
+              "path": "server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json",
+              "blob": "2d93236cda13929e7134762dfd587c3df373f315",
+              "bytes": 2877,
+              "sha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df"
+            },
+            "pre-prisma-draft-table.sql": {
+              "path": "server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql",
+              "blob": "b940d033dc0c857819693ad005041d2bdef3a05d",
+              "bytes": 769,
+              "sha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af"
+            },
+            "upgraded-prisma-draft-table.sql": {
+              "path": "server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql",
+              "blob": "efb20835b91e24b0bac29405e664985612332ef8",
+              "bytes": 874,
+              "sha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b"
+            },
+            "post205-draft-tables.json": {
+              "path": "server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json",
+              "blob": "ee1836b8e5171601a33b023438293ee2544a0cd1",
+              "bytes": 8105,
+              "sha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+            }
+          }
+        },
+        "tests": 175,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "elapsedSeconds": 4.10999999998603,
+        "completedUtc": "2026-10-12T13:57:41.235390+00:00",
+        "productionDatabaseAccess": false,
+        "status": "PROPOSED_SOURCE_GUARDS_ONLY_NOT_EXECUTION_AUTHORITY"
+      },
+      "stdoutSha256": "e7b0d05023a2103e107e3e84e39dd5e8a2c692af9730f1c03a6c9ed43baa40ff",
+      "stderrSha256": "1e8274d77957832f98bc9cd3084529548f7767afd2802863280477b1befdbfe1"
+    },
+    "linux": {
+      "platform": "linux",
+      "exitCode": 0,
+      "result": {
+        "sourceCommit": "63761ad129afae735e83e0c330030d868dedfef4",
+        "sourceHashes": {
+          "release_support": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+          "startup_common": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+          "known_core_disk_guard": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+          "known_core_disk_guard_v2": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+          "known_core_disk_guard_v3": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+          "runtime_proof_policies": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf",
+          "test_baseline_confirmation": "2ba48ec75d8d8053eb0abce160a63473090e4642254b9d442597b453d64774c0",
+          "import_source_graph": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637",
+          "import_proof_contract": "2736d3ad6b788bb2e9302bb7e31fced42bead523e2f5889e7d9987a839657d55",
+          "import_preservation": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783",
+          "import_startup_checks": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b",
+          "import_installation": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+          "import_stage": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1",
+          "import_sealing": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401",
+          "known_core_disk_guard_import": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+          "test_import_preservation": "40b447f6f309e44d3f0ab1ee9a9bc4cc046f12cacc15921bb59a7025d016e769",
+          "test_import_startup_checks": "26ef25a4a6444c40661a6e4d70f9a21798235ff16f1112dc65ece71eeecfc5f3",
+          "test_import_installation": "b4392e41444af8e224d735c448a68c2c10b9fe4cd58191dee863d748b8a9b1f8",
+          "test_import_stage": "2703ca976de64287cea1cfe59a543051ff15e32ed75f707c23087df99d147cf5",
+          "test_import_sealing": "1905c690470f63acf97711e588187c96ee7078ba3864e8cf82f7fdefcdc1361b",
+          "test_import_authority": "e745a609d578f55423907ca9e2c672a15039108965a3af9a8f31b106cdca9797",
+          "test_import_layout": "b45447cf53e4a12d88635bf07aad6eabca840615778277da1cb8e6cb568104cc",
+          "import_release_contract": "6411979f7c822085e0b576be9813057d2d5972fe7ee36723b31c26308e98ea02",
+          "test_import_release": "567fddedf6d790c7a9c9e939162e0377ae5694d243988b3e70e5cfde569b0706",
+          "known_core_disk_guard_import_deploy": "b02d5feff5321b72b5fca04db977c875e400e876b5c2086b1d3d30f81bba6b8c",
+          "test_import_deploy_layout": "62e42f5f568cb154ac365c70ccda9133698ee873afcf493c40c3b56972a938fd"
+        },
+        "packagingSourceHashes": {
+          "rehearse_import.py": "8c65daee59ddd303adab4f7f48b1a22073472bd99203a8c45c31d9e4438fa213",
+          "import_proof_contract.py": "2736d3ad6b788bb2e9302bb7e31fced42bead523e2f5889e7d9987a839657d55",
+          "import_source_graph.py": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637",
+          "import_preservation.py": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783",
+          "import_startup_checks.py": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b",
+          "import_installation.py": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d",
+          "import_stage.py": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1",
+          "import_sealing.py": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401",
+          "known_core_disk_guard_import.py": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c",
+          "build_import.py": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a",
+          "prepare_import_build.py": "a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991",
+          "export_launch_import_proof.py": "0c642b50c8996c33efc25b7e0922c0dc4dc6c104cd9db8d70231604a16b3f100",
+          "capture_kobo_fetch.py": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86",
+          "kobo_copy_preservation.py": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23",
+          "known_core_disk_guard_v2.py": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c",
+          "known_core_disk_guard_v3.py": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f",
+          "runtime_proof_policies.py": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf",
+          "known_core_disk_guard.py": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169",
+          "release_support.py": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810",
+          "startup_common.py": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00",
+          "postflight-roles.cjs": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+          "postflight-auth.cjs": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+          "postflight-reference.cjs": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+          "postflight-qc-runs.cjs": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+          "postflight-policy.cjs": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+          "readonly-smoke.cjs": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+          "migration.sql": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+          "fresh-prisma-tables.json": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+          "pre-prisma-draft-table.sql": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+          "upgraded-prisma-draft-table.sql": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+          "post205-draft-tables.json": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad",
+          "import_release_contract.py": "6411979f7c822085e0b576be9813057d2d5972fe7ee36723b31c26308e98ea02",
+          "deploy_import.py": "5aa582a7329c5db6866bb6e17115d054aa1d30b8974d7cd7d74ee12e443d732c",
+          "freeze_import.py": "61c6e6c1199cf17fb1c06337f141ab308b3966123ad6e139780c1937c7ebfaf7",
+          "known_core_disk_guard_import_deploy.py": "b02d5feff5321b72b5fca04db977c875e400e876b5c2086b1d3d30f81bba6b8c",
+          "collect_import_gate.py": "656e79c1de48f3fc752ddfa6647f446ddda74297d363fbea01097eec50012663",
+          "export_freeze_import_kit.py": "3d7d5b8aa80dfb81302ee467ed3893d7765e32b87ec51d3d0d449de1585ffbdf",
+          "launch_import_release.py": "e1ef11c5a9aa9c764025ffefaeb87671a3143209902d409eb44e53a311442d1e",
+          "yy-authorization-evidence.md": "02311daec1d07150535d557ffc19dc5833bc6e4937aaa9c0394d543cc69b5bd1"
+        },
+        "assetHashes": {
+          "migration.sql": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+          "fresh-prisma-tables.json": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+          "pre-prisma-draft-table.sql": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+          "upgraded-prisma-draft-table.sql": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+          "post205-draft-tables.json": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+        },
+        "toolingIndex": {
+          "head": "63761ad129afae735e83e0c330030d868dedfef4",
+          "files": {
+            "rehearse_import.py": {
+              "path": "WP/pr284-release/rehearse_import.py",
+              "blob": "3d8ae9bbc9e7f3113c88449b41172fbdadb492f0",
+              "bytes": 25630,
+              "sha256": "8c65daee59ddd303adab4f7f48b1a22073472bd99203a8c45c31d9e4438fa213"
+            },
+            "import_proof_contract.py": {
+              "path": "WP/pr284-release/import_proof_contract.py",
+              "blob": "fe5cfe5551f151091795a2e69ca43362c098aeda",
+              "bytes": 10809,
+              "sha256": "2736d3ad6b788bb2e9302bb7e31fced42bead523e2f5889e7d9987a839657d55"
+            },
+            "import_source_graph.py": {
+              "path": "WP/pr284-release/import_source_graph.py",
+              "blob": "d1892e2cbef3a0d9567adf18a003ed701ec131ec",
+              "bytes": 5771,
+              "sha256": "74def9a854533d49e590d16677aea30d227feb91901dccb3ada64478acbe5637"
+            },
+            "import_preservation.py": {
+              "path": "WP/pr284-release/import_preservation.py",
+              "blob": "764727decbb566ab874b3a3873f0bd222ebeb430",
+              "bytes": 9307,
+              "sha256": "2e2823007822c5bffb1c938545f0ff3946f513a3b92a42156acdd7480d262783"
+            },
+            "import_startup_checks.py": {
+              "path": "WP/pr284-release/import_startup_checks.py",
+              "blob": "bf6d9cb465b5a3d930e484479d790203246382f3",
+              "bytes": 5448,
+              "sha256": "033d3b8c410d628387a189b92312861898750e7edd84e85271f132f0f0777d1b"
+            },
+            "import_installation.py": {
+              "path": "WP/pr284-release/import_installation.py",
+              "blob": "4fb61f95bf073878825083044e890b9a1864fd69",
+              "bytes": 7579,
+              "sha256": "eb2bd8ae36e0a85c7911766b33785622333d8d82d2df0205a6620f92dfeef10d"
+            },
+            "import_stage.py": {
+              "path": "WP/pr284-release/import_stage.py",
+              "blob": "fa0633fc0f2b55abe9381e1dbda22ee598d0366c",
+              "bytes": 8063,
+              "sha256": "c303f156341d40faf38181bea7352e382735d0d578463723e7c69193bc5e8ac1"
+            },
+            "import_sealing.py": {
+              "path": "WP/pr284-release/import_sealing.py",
+              "blob": "16cec07e45bfd23040c5dc27ec93eb828aa41ad8",
+              "bytes": 5918,
+              "sha256": "de2bf46ac434e14455b70743d1bb1bde91f7205c451c14ca299efa333fb73401"
+            },
+            "known_core_disk_guard_import.py": {
+              "path": "WP/pr284-release/known_core_disk_guard_import.py",
+              "blob": "eb05121b2909f624527295092c28f6fddb241817",
+              "bytes": 3839,
+              "sha256": "3e2402b5860d9a220cbb3f351e137dd9fac476445cc470e91446634cd81d922c"
+            },
+            "build_import.py": {
+              "path": "WP/pr284-release/build_import.py",
+              "blob": "4e23a4846cca0e1c104b0bb6643aca874c395fe9",
+              "bytes": 8085,
+              "sha256": "c460f0dc0ee6a3a579025653abcf562f7b73859e1191a61c0f9f4b561932877a"
+            },
+            "prepare_import_build.py": {
+              "path": "WP/pr284-release/prepare_import_build.py",
+              "blob": "1dc32e0178024432cec5fcd4fd4db30d611857f1",
+              "bytes": 11123,
+              "sha256": "a63a1cc3aaead6b0cf470efa69ca8168d65429802deb987078effc6e702a0991"
+            },
+            "export_launch_import_proof.py": {
+              "path": "WP/pr284-release/export_launch_import_proof.py",
+              "blob": "6d74f77589dfe8ad962a9376d67c2c74ab8f0b1f",
+              "bytes": 7348,
+              "sha256": "0c642b50c8996c33efc25b7e0922c0dc4dc6c104cd9db8d70231604a16b3f100"
+            },
+            "capture_kobo_fetch.py": {
+              "path": "WP/runtime-recovery-kobo/capture_kobo_fetch.py",
+              "blob": "79e2ad45eba9fd6d6e38b37cd36801243dd648d8",
+              "bytes": 4767,
+              "sha256": "1eb67091011895f7ebe7f4431c55732eca0ab529a0f21b33a6303b3c4e977e86"
+            },
+            "kobo_copy_preservation.py": {
+              "path": "WP/runtime-recovery-kobo/kobo_copy_preservation.py",
+              "blob": "0f7eab699ea408bac72e05379a19ea718ed4c66a",
+              "bytes": 16701,
+              "sha256": "3fc08d025de91f2716b0255027b2f5f1781b7cb920bb0cfaced5c9adb45b6b23"
+            },
+            "known_core_disk_guard_v2.py": {
+              "path": "WP/runtime-recovery-kobo/known_core_disk_guard_v2.py",
+              "blob": "265d01b09105aa69cd307e80473b02260eb25248",
+              "bytes": 5278,
+              "sha256": "f88ec6a91093f2ba180f268e03bb21ea67ac6ce19c1ffa5f45abd3402d87b20c"
+            },
+            "known_core_disk_guard_v3.py": {
+              "path": "WP/runtime-recovery-kobo/known_core_disk_guard_v3.py",
+              "blob": "e7cb0e25eeb3585d731f42b3e8a8658944228788",
+              "bytes": 5625,
+              "sha256": "878fd2ee7fd13c708e896f32724e3967e102e51915a10eb834e587105a40b90f"
+            },
+            "runtime_proof_policies.py": {
+              "path": "WP/runtime-recovery-kobo/proof_contract.py",
+              "blob": "f8490e268a824452d05aee30bae6f7673f13662a",
+              "bytes": 15922,
+              "sha256": "08678fb53511e6f0d6b0cac06ff549bcb0fe72894d9e1322a74079cc65d60ccf"
+            },
+            "known_core_disk_guard.py": {
+              "path": "WP/runtime-containment-ae64f169/known_core_disk_guard.py",
+              "blob": "026e2245268324c3157eb186ba747776e7a4b55d",
+              "bytes": 5984,
+              "sha256": "f4712a7cc0f6b2977d0cf547c915fc7c078319b19120acc15f7d800bd857f169"
+            },
+            "release_support.py": {
+              "path": "WP/forward-ae64f169/release_support.py",
+              "blob": "8ea639b57cb1eec468e6794e5ccc32ba9a468e99",
+              "bytes": 20330,
+              "sha256": "9db6932a9b1502bc2db65c816a925e7d9f54611d54d4027d418bb2574b837810"
+            },
+            "startup_common.py": {
+              "path": "WP/forward-ae64f169/startup_common.py",
+              "blob": "757c0d350769ab58b5f0b8e4ba810af8c9bdce0d",
+              "bytes": 13858,
+              "sha256": "e541ed5f9d48316407505bdcdf5a91d007a930abe90ae74c718b69ef90ff8e00"
+            },
+            "postflight-roles.cjs": {
+              "path": "WP/forward-ae64f169/postflight-roles.cjs",
+              "blob": "bc6fe5f35ccc52e0c7b48a444a9432d05162a4a3",
+              "bytes": 12281,
+              "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da"
+            },
+            "postflight-auth.cjs": {
+              "path": "WP/forward-ae64f169/postflight-auth.cjs",
+              "blob": "6521d1c4a8f04e24641df967de4f674e9907dfb8",
+              "bytes": 2045,
+              "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192"
+            },
+            "postflight-reference.cjs": {
+              "path": "WP/forward-ae64f169/postflight-reference.cjs",
+              "blob": "6155145febed24f58efabfba236bae91f00e46a3",
+              "bytes": 2096,
+              "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526"
+            },
+            "postflight-qc-runs.cjs": {
+              "path": "WP/forward-ae64f169/postflight-qc-runs.cjs",
+              "blob": "ab7fd7f03555f6d5af423d6750e8de908965d53a",
+              "bytes": 4091,
+              "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f"
+            },
+            "postflight-policy.cjs": {
+              "path": "WP/forward-ae64f169/postflight-policy.cjs",
+              "blob": "19e12bb1c77a43f78098eb4af208d05f34f96c46",
+              "bytes": 4035,
+              "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51"
+            },
+            "readonly-smoke.cjs": {
+              "path": "WP/forward-ae64f169/readonly-smoke.cjs",
+              "blob": "555a67e4f125160eba990086fa4d0f60c6085bb8",
+              "bytes": 3255,
+              "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626"
+            },
+            "migration.sql": {
+              "path": "server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql",
+              "blob": "bc0007230856b8903a6ab7ce2425a6a55dfba91f",
+              "bytes": 4342,
+              "sha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8"
+            },
+            "fresh-prisma-tables.json": {
+              "path": "server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json",
+              "blob": "2d93236cda13929e7134762dfd587c3df373f315",
+              "bytes": 2877,
+              "sha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df"
+            },
+            "pre-prisma-draft-table.sql": {
+              "path": "server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql",
+              "blob": "b940d033dc0c857819693ad005041d2bdef3a05d",
+              "bytes": 769,
+              "sha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af"
+            },
+            "upgraded-prisma-draft-table.sql": {
+              "path": "server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql",
+              "blob": "efb20835b91e24b0bac29405e664985612332ef8",
+              "bytes": 874,
+              "sha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b"
+            },
+            "post205-draft-tables.json": {
+              "path": "server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json",
+              "blob": "ee1836b8e5171601a33b023438293ee2544a0cd1",
+              "bytes": 8105,
+              "sha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+            }
+          }
+        },
+        "tests": 175,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "elapsedSeconds": 12.409648278000532,
+        "completedUtc": "2026-10-12T13:57:59.604378+00:00",
+        "productionDatabaseAccess": false,
+        "status": "PROPOSED_SOURCE_GUARDS_ONLY_NOT_EXECUTION_AUTHORITY"
+      },
+      "stdoutSha256": "ceea9330a52536eef7058a9dbd9188597516c7d12071f7179d32449f9d06b2a4",
+      "stderrSha256": "9c4a4f6add098eed3bbe3ecf08698eeb94b1eb8fb043206b08a0b887ea125ca6"
+    }
+  },
+  "productionSourceApproved": false,
+  "proofLaunched": false,
+  "nativeClaudioClarification": {
+    "project": "LIMS Audit",
+    "thread": "Lab workflow audit and plan",
+    "readDirectlyFromFreshCapture": true,
+    "transcription": "My sentence in the thread was too strict. The approved code and my posted review are what count, so the one build you dispatched stays eligible. The preparer allows an image-only/no-database build while main CI runs unless CI has failed. The proof launcher requires main CI38256676268 SUCCESS before any copy/proof. If CI fails, this build is unusable; new forward reviews, no second build of this source. Main stays959d17e1 throughout.",
+    "cardsAndDraftsUntouched": true
+  },
+  "productionMutations": 0
+}
