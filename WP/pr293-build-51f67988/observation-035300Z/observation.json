@@ -1,0 +1,21 @@
+{
+  "observedUtc": "2026-10-12T03:53:27.633007+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-build-51f67988-20261012T035200Z",
+  "unit": "lims-build-runtime-kobo-build-51f67988-20261012t035200z.service",
+  "productionMutations": 0,
+  "unitState": "ExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "unit.stdoutTail": "",
+  "unit.stderrTail": "",
+  "files": {
+    "build-input.json": {
+      "bytes": 1280,
+      "sha256": "badbaecbbfe09e0c09c608afc59ac12605bd9e5d46c2fdb4b4f6f9d649e9c2dc",
+      "mode": "0o400"
+    },
+    "source-index.json": {
+      "bytes": 604182,
+      "sha256": "ea9f09becfcdf549a640c907d87ad323c1f7b6cd3cddc0f8290f04cf2857aaa9",
+      "mode": "0o400"
+    }
+  }
+}

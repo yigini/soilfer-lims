@@ -1,0 +1,14 @@
+{
+  "status": "BUILD_LAUNCHED_NOT_DEPLOYED",
+  "observedUtc": "2026-10-12T03:53:26.187342+00:00",
+  "root": "/opt/lims/releases/runtime-kobo-build-51f67988-20261012T035200Z",
+  "unit": "lims-build-runtime-kobo-build-51f67988-20261012t035200z.service",
+  "head": "51f6798806f630773786a08432290c1b21a841da",
+  "toolingCommit": "071d61c372d48b4e283b9a4520b7044c18a7f238",
+  "sourceReviewId": 6117398054,
+  "auditReviewId": 6117307869,
+  "mainCiRunId": 38200697950,
+  "builderSha256": "1daa1d73c9f0b9af2be3b292764c6e585874ae551ed5dd0a1adaf4085342ffa6",
+  "productionMutations": 0,
+  "mainCiMustPassBeforeProof": true
+}
