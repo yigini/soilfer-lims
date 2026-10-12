@@ -1,0 +1,58 @@
+{
+  "status": "READ_ONLY_PRODUCTION_RECEPTION_STATIC_PASS",
+  "observedUtc": "2026-10-12T02:24:51.872434+00:00",
+  "productionMutations": 0,
+  "head": "f830f900f597f20e12570b583e4e32ce9cb50a1d",
+  "image": "sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413",
+  "receiptSha256": "0b8c3f54ab70e404d5797266f349d3b2a819151dc3afa9c5059f63a27727a8d7",
+  "requests": [
+    {
+      "path": "/reception",
+      "httpStatus": 200,
+      "contentType": "text/html",
+      "bytes": 1687,
+      "sha256": "f0b260779a1ff1819c16149095f4f322361b21cff205a0aeeef847ef06a17024",
+      "spaRootPresent": true,
+      "tlsVerified": true
+    },
+    {
+      "path": "/reception?mode=WALK_IN",
+      "httpStatus": 200,
+      "contentType": "text/html",
+      "bytes": 1687,
+      "sha256": "f0b260779a1ff1819c16149095f4f322361b21cff205a0aeeef847ef06a17024",
+      "spaRootPresent": true,
+      "tlsVerified": true
+    },
+    {
+      "path": "/assets/index-CGes9DlH.css",
+      "httpStatus": 200,
+      "contentType": "text/css",
+      "bytes": 215670,
+      "sha256": "93dd66028500b9aff87567f135a63edf2423534a3b71ba4ccace8bd91a1e2438",
+      "tlsVerified": true
+    },
+    {
+      "path": "/assets/index-fj2KHYEH.js",
+      "httpStatus": 200,
+      "contentType": "text/javascript",
+      "bytes": 1605953,
+      "sha256": "5004c0318f31642b67316b4058cc054d8826d71df83d740c4feb5f81aca73424",
+      "tlsVerified": true
+    }
+  ],
+  "externalStylesheetOriginsNotRequested": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "notRequested": true
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "version": "1.9.0",
+    "uptime": 2372.168318255
+  },
+  "restartCount": 0,
+  "limitation": "Public SPA shell and same-origin entry assets only; no authenticated reception workflow or local six-test suite claimed",
+  "earlierReadOnlyObserverRefusal": "Observer initially refused external stylesheet origin; corrected to explicitly leave external stylesheet requests out of scope; no deployment or production DB action"
+}
