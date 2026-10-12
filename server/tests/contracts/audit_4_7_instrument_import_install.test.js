@@ -211,7 +211,8 @@ describe('the released #293 predecessor keeps #205 records inside the exact impo
             expect(classifyInstrumentImportSchema(current, source)).toMatchObject({ classification: 'PRE_200', counts: { templates: 0, receipts: 0, draftLinks: 0 } });
             expect(current.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all()).toEqual(before);
             expect(current.prepare('SELECT total_changes() n').get().n).toBe(changes);
-            current.exec(source.schemaSql); current.exec(source.guardsSql);
+            const migration = loadInstrumentImportMigrationSource();
+            current.exec(migration.schemaSql); current.exec(migration.guardsSql);
             const draft = current.prepare("SELECT sql FROM sqlite_master WHERE name='WorkItemDraft'").get().sql;
             expect(draft).toBe(source.post205Drafts.postUpgradedFresh);
             expect(() => classifyInstrumentImportSchema(current, source)).toThrow('partial, foreign, unmarked or populated');
@@ -221,11 +222,61 @@ describe('the released #293 predecessor keeps #205 records inside the exact impo
         } finally { current.close(); }
     });
     test.each(['preFresh', 'preUpgraded'])('exact records predecessor %s refuses a changed type or unknown column', key => {
-        for (const ddl of [source.post205Drafts[key].replace('"records" TEXT', '"records" INTEGER'), source.post205Drafts[key]]) {
+        for (const mutation of ['type', 'column']) {
             const current = createPre200After293SchemaFixture();
             try {
-                current.exec('DROP TABLE "WorkItemDraft"'); current.exec(ddl);
-                if (ddl === source.post205Drafts[key]) current.exec('ALTER TABLE "WorkItemDraft" ADD COLUMN "unknownImportAuthority" TEXT');
+                current.exec('DROP TABLE "WorkItemDraft"');
+                // Literal DDL lets the authority scanner inspect every executed statement.
+                if (key === 'preFresh') current.exec(`CREATE TABLE "WorkItemDraft" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "workItemId" TEXT NOT NULL,
+    "sampleId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "labId" TEXT,
+    "analysis" TEXT NOT NULL,
+    "value" TEXT,
+    "values" TEXT,
+    "checks" TEXT,
+    "records" TEXT,
+    "basis" TEXT DEFAULT 'AIR_DRY',
+    "replicateNo" INTEGER NOT NULL DEFAULT 1,
+    "instrumentId" TEXT,
+    "methodologyId" TEXT,
+    "notes" TEXT,
+    "baseVersion" INTEGER NOT NULL DEFAULT 0,
+    "draftVersion" INTEGER NOT NULL DEFAULT 1,
+    "conflictValue" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "WorkItemDraft_workItemId_fkey" FOREIGN KEY ("workItemId") REFERENCES "WorkItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+)`);
+                else current.exec(`CREATE TABLE "WorkItemDraft" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "workItemId" TEXT NOT NULL,
+    "sampleId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "labId" TEXT,
+    "analysis" TEXT NOT NULL,
+    "value" TEXT,
+    "values" TEXT,
+    "checks" TEXT,
+    "basis" TEXT DEFAULT 'AIR_DRY',
+    "replicateNo" INTEGER NOT NULL DEFAULT 1,
+    "instrumentId" TEXT,
+    "methodologyId" TEXT,
+    "notes" TEXT,
+    "baseVersion" INTEGER NOT NULL DEFAULT 0,
+    "draftVersion" INTEGER NOT NULL DEFAULT 1,
+    "conflictValue" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL, "records" TEXT,
+    CONSTRAINT "WorkItemDraft_workItemId_fkey" FOREIGN KEY ("workItemId") REFERENCES "WorkItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+)`);
+                expect(current.prepare("SELECT sql FROM sqlite_master WHERE name='WorkItemDraft'").get().sql).toBe(source.post205Drafts[key]);
+                if (mutation === 'type') {
+                    current.exec('ALTER TABLE "WorkItemDraft" DROP COLUMN "records"');
+                    current.exec('ALTER TABLE "WorkItemDraft" ADD COLUMN "records" INTEGER');
+                } else current.exec('ALTER TABLE "WorkItemDraft" ADD COLUMN "unknownImportAuthority" TEXT');
                 const before = current.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY name').all();
                 const changes = current.prepare('SELECT total_changes() n').get().n;
                 expect(() => classifyInstrumentImportSchema(current, source)).toThrow('differs from the captured release');
@@ -233,5 +284,8 @@ describe('the released #293 predecessor keeps #205 records inside the exact impo
                 expect(current.prepare('SELECT total_changes() n').get().n).toBe(changes);
             } finally { current.close(); }
         }
+    });
+    test('the complete installer contract has no unresolved or unauthorized SQL', () => {
+        expect(scanSource(fs.readFileSync(__filename, 'utf8'), 'tests/contracts/audit_4_7_instrument_import_install.test.js')).toEqual([]);
     });
 });

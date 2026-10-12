@@ -1904,7 +1904,7 @@ exports.downloadRawScan = async (req, res) => {
 
             if (fs.existsSync(absolutePath)) {
                 if (scan.sha256) res.setHeader('ETag', scan.sha256);
-                return res.download(absolutePath, filename);
+                return res.download(path.basename(absolutePath), filename, { root: path.dirname(absolutePath) });
             }
         }
 
