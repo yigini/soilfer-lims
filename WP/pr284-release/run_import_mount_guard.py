@@ -49,7 +49,7 @@ def physical(path):
   result[suffix]=None if not f.exists() else {'sha256':hashlib.sha256(f.read_bytes()).hexdigest(),'bytes':f.stat().st_size,'mtimeNs':f.stat().st_mtime_ns,'inode':f.stat().st_ino}
  return result
 before=physical(original_db);main_sha=hashlib.sha256(database.read_bytes()).hexdigest();rows=[]
-script="const D=require('better-sqlite3');const d=new D('/app/server/prisma/dev.db',{readonly:true});console.log(JSON.stringify({rows:d.prepare('SELECT * FROM mount_guard').all(),integrity:d.pragma('integrity_check',{simple:true}),sqliteVersion:d.prepare('select sqlite_version() as v').get().v}));d.close();"
+script="const D=require(require.resolve('better-sqlite3',{paths:['/app/server']}));const d=new D('/app/server/prisma/dev.db',{readonly:true});console.log(JSON.stringify({rows:d.prepare('SELECT * FROM mount_guard').all(),integrity:d.pragma('integrity_check',{simple:true}),sqliteVersion:d.prepare('select sqlite_version() as v').get().v}));d.close();"
 for label,readonly in [('wal-readonly-negative',True),('wal-separate-copy-positive',False)]:
  name,owner,args=i.arguments(r,image,directory,'--dry-run',label,'/unrelated-live')
  if readonly:args[args.index('--mount')+1]+=',readonly'
