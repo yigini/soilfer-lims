@@ -1,0 +1,30 @@
+{
+  "observedUtc": "2026-10-13T08:48:32.480785+00:00",
+  "decisionComment": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6141144901",
+  "nativeTarget": "Claude / LIMS Audit / Lab workflow audit and plan",
+  "nativeHumanDelegationObserved": "can you please decide on behalf of me",
+  "nativeComposerWasEmpty": true,
+  "nativePipAcknowledgementDeliveredOnceAndVisuallyVerified": true,
+  "issue206Status": "STARTING_IMPLEMENTATION_NOT_AUDITED_NOT_DEPLOYED",
+  "issue103Scope": "READ_ONLY_LEDGER_FOR_CLAUDIO_REVIEW; APPLY_REQUIRES_YY_EXPLICIT_GO",
+  "productionMutations": 0,
+  "completedPR294Replayed": false,
+  "records": {
+    "decisions-6141144901.json": {
+      "sha256": "4d386161b2b2fa098bbc25f930d6e8e475d602fc21f05e0ee96fa20120a8ebc4",
+      "bytes": 5042
+    },
+    "issue-206.json": {
+      "sha256": "53c1366c5021fa09f02457802f4084efb5b91e61d26c544b6470e5d482c2f2f8",
+      "bytes": 8443
+    },
+    "issue-103.json": {
+      "sha256": "656c58adf35c8b5f00e4331bc96c888fe82942af85a113036b7c3be4faebd65f",
+      "bytes": 3513
+    },
+    "current-main.json": {
+      "sha256": "b80a139ba9da230bf25b4fe2a137e4420c70a9b093cfc445dbb9607f878fb920",
+      "bytes": 336
+    }
+  }
+}
