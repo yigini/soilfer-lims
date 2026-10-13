@@ -1,0 +1,89 @@
+
+> client@1.9.0 prebuild
+> node scripts/generate-workflow-contract.cjs
+
+
+> client@1.9.0 build
+> vite build
+
+vite v5.4.21 building for production...
+transforming...
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2714 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                   1.71 kB │ gzip:   0.65 kB
+dist/assets/SampleWorkflowMap-DxFfliMr.css       14.34 kB │ gzip:   3.55 kB
+dist/assets/index-CGes9DlH.css                  215.67 kB │ gzip:  35.43 kB
+dist/assets/play-DBrfWv6t.js                      0.30 kB │ gzip:   0.25 kB
+dist/assets/pen-line-DaD3ScxV.js                  0.36 kB │ gzip:   0.28 kB
+dist/assets/plus-circle-DigSdDad.js               0.37 kB │ gzip:   0.28 kB
+dist/assets/check-square-BX9aEG0N.js              0.38 kB │ gzip:   0.29 kB
+dist/assets/key-round-CuP1ESyK.js                 0.41 kB │ gzip:   0.32 kB
+dist/assets/wrench-CUXx_Qcd.js                    0.43 kB │ gzip:   0.31 kB
+dist/assets/tag-DRE9h3FJ.js                       0.50 kB │ gzip:   0.35 kB
+dist/assets/share-2-BWQIopae.js                   0.52 kB │ gzip:   0.34 kB
+dist/assets/layout-list-CT6BZppw.js               0.53 kB │ gzip:   0.33 kB
+dist/assets/scale-D87FKjHp.js                     0.53 kB │ gzip:   0.34 kB
+dist/assets/sparkles-DXmbGa5u.js                  0.59 kB │ gzip:   0.35 kB
+dist/assets/cpu-CQ_dMMFE.js                       0.66 kB │ gzip:   0.36 kB
+dist/assets/panels-top-left-Bgv7o9a2.js           0.72 kB │ gzip:   0.37 kB
+dist/assets/loader-hI1Yc95o.js                    0.73 kB │ gzip:   0.37 kB
+dist/assets/thumbs-up-D3BH1l3a.js                 0.90 kB │ gzip:   0.44 kB
+dist/assets/vendor-flow-BTkdDkRO.js               0.96 kB │ gzip:   0.60 kB
+dist/assets/vendor-pdf-D7HrI6pR.js                1.02 kB │ gzip:   0.62 kB
+dist/assets/LabPolicies-BqC_COXZ.js               1.11 kB │ gzip:   0.63 kB
+dist/assets/settings-2-CUfz1WjK.js                1.30 kB │ gzip:   0.52 kB
+dist/assets/spreadsheetImport-B7K8n_-a.js         1.48 kB │ gzip:   0.67 kB
+dist/assets/useRealtimeData-Ca-azpj7.js           2.61 kB │ gzip:   1.17 kB
+dist/assets/NotFound-BhefRRIj.js                  2.81 kB │ gzip:   1.17 kB
+dist/assets/CountryData-CGynZ7ff.js               4.20 kB │ gzip:   1.34 kB
+dist/assets/TopicExplorer-DxBc67ya.js             4.36 kB │ gzip:   1.77 kB
+dist/assets/DataSheet-D2i5PVlc.js                 5.12 kB │ gzip:   1.83 kB
+dist/assets/PublicReport-7ff7lTxf.js              5.21 kB │ gzip:   1.86 kB
+dist/assets/FAQPage-T8Qw3F0P.js                   6.14 kB │ gzip:   2.29 kB
+dist/assets/ResetPassword-BRQNWfsp.js             6.36 kB │ gzip:   1.88 kB
+dist/assets/ActivateAccount-CkD1tDLK.js           7.42 kB │ gzip:   2.03 kB
+dist/assets/ScanPage-CFUEZMQg.js                  7.64 kB │ gzip:   3.00 kB
+dist/assets/AuditLogs-SlIgpYZS.js                 8.30 kB │ gzip:   2.87 kB
+dist/assets/LegacyImport-B5Dy6Dke.js             10.41 kB │ gzip:   3.32 kB
+dist/assets/LabMethods-CAT8fbOD.js               11.50 kB │ gzip:   3.59 kB
+dist/assets/MyWork-BBB-xZH4.js                   14.57 kB │ gzip:   3.88 kB
+dist/assets/Users-ChumoPTd.js                    15.34 kB │ gzip:   4.64 kB
+dist/assets/ResultReports-BhZj9tXG.js            16.20 kB │ gzip:   5.02 kB
+dist/assets/DataResults-DYYskZH4.js              16.78 kB │ gzip:   5.25 kB
+dist/assets/QADashboard-L__CyjZp.js              17.31 kB │ gzip:   4.26 kB
+dist/assets/ManagerQueue--Q8E5XaI.js             17.98 kB │ gzip:   6.08 kB
+dist/assets/LabPolicies-QAeiKC9P.js              18.11 kB │ gzip:   5.12 kB
+dist/assets/About-DonlZ4Si.js                    20.84 kB │ gzip:   4.89 kB
+dist/assets/Projects-N6GUsNqo.js                 21.67 kB │ gzip:   6.29 kB
+dist/assets/TechStack-CGOnpFH5.js                22.88 kB │ gzip:   8.64 kB
+dist/assets/SampleWorkflowMap-yBhzb-l-.js        23.60 kB │ gzip:   7.13 kB
+dist/assets/ArticleReader-1pNU057T.js            23.91 kB │ gzip:   5.76 kB
+dist/assets/ThemeGallery-CigxBmam.js             25.93 kB │ gzip:   6.48 kB
+dist/assets/AdminHelpEditor-CG8uwGmQ.js          28.56 kB │ gzip:   6.83 kB
+dist/assets/SuspendUserModal-DQzmzjak.js         30.92 kB │ gzip:   7.11 kB
+dist/assets/BatchInspectionModal-DZZAf86M.js     31.78 kB │ gzip:   8.09 kB
+dist/assets/Profile-DJ4RxxJY.js                  32.30 kB │ gzip:   8.33 kB
+dist/assets/SpectralLibrary-BdSGwKms.js          37.05 kB │ gzip:   8.73 kB
+dist/assets/HelpCentre-BMrSnX9s.js               37.95 kB │ gzip:  10.46 kB
+dist/assets/Inventory-H4q2hHTa.js                41.43 kB │ gzip:   9.61 kB
+dist/assets/Equipment-HQW-p9qk.js                41.60 kB │ gzip:   8.95 kB
+dist/assets/LabManagement-Tov3-TSY.js            82.65 kB │ gzip:  17.54 kB
+dist/assets/ProjectWorkspace-BoizjlzE.js        128.70 kB │ gzip:  27.92 kB
+dist/assets/vendor-maps-DwGOs-Il.js             156.28 kB │ gzip:  45.73 kB
+dist/assets/vendor-react-DoAq6ymf.js            163.50 kB │ gzip:  53.43 kB
+dist/assets/AdminPanel-CiDfhFpa.js              182.39 kB │ gzip:  42.58 kB
+dist/assets/TechWorkbench-C8Jtsqly.js           246.38 kB │ gzip:  66.51 kB
+dist/assets/vendor-charts-CqgcOpg6.js           383.30 kB │ gzip: 105.42 kB
+dist/assets/vendor-excel-CKN5doRT.js            424.23 kB │ gzip: 141.75 kB
+dist/assets/Reception-DyYf-z8U.js               565.67 kB │ gzip: 162.60 kB
+dist/assets/index-DC_WH2VZ.js                 1,637.92 kB │ gzip: 483.30 kB
+
+(!) Some chunks are larger than 1000 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 7.67s

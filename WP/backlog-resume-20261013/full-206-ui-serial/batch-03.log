@@ -1,0 +1,2301 @@
+PASS tests/contracts/audit_1_1_duplicates.test.js (8.655 s, 89 MB heap size)
+  Audit 1.1: additive, audited duplicate resolution
+    √ lists every active group with result, submission and batch links, and never chooses a kept item (287 ms)
+    √ explicitly flags even completed rows, preserves every old byte and link, and audits each changed row (295 ms)
+    √ refuses unsafe resolution {"keep": "unrelated"} without any writes (299 ms)
+    √ refuses unsafe resolution {"reason": "   "} without any writes (274 ms)
+    √ refuses unsafe resolution {"actor": ""} without any writes (274 ms)
+    √ refuses unsafe resolution {"fingerprint": undefined} without any writes (279 ms)
+    √ refuses unsafe resolution {"fingerprint": "invented"} without any writes (291 ms)
+    √ a group changed after reading is refused, including result or submission changes (282 ms)
+    √ audit failure rolls back all marker writes (293 ms)
+    √ a changed Result value is refused even when its link and id are unchanged (278 ms)
+    √ a changed SpectralData value is refused even when its link and id are unchanged (284 ms)
+    √ index migration fails atomically on unresolved groups, and never removes old rows (282 ms)
+    √ CLI default uses a read-only connection before the marker migration and leaves file bytes unchanged (2803 ms)
+    √ real CLI refuses a group added after the manager reviewed its dry-run (954 ms)
+    √ real CLI refuses a group changed after the manager reviewed its dry-run (731 ms)
+    √ CLI resolution requires the reviewed fingerprint before opening a database (275 ms)
+    √ argument validation never turns a dry-run into a write or accepts ambiguous flags (285 ms)
+
+PASS tests/contracts/audit_1_1_consignment_migration.test.js (8.104 s, 113 MB heap size)
+  Audit 1.1 additive declared counts: Prisma-generated
+    √ only adds a nullable checked column; all old columns/defaults/order/indexes/FKs/values stay identical (308 ms)
+    √ saved dry-run copies positive counts, leaves zero/negative NULL, preserves tuples and repeats with zero changes (291 ms)
+    √ repeat never invents a declaration for a later unknown consignment (321 ms)
+    √ schema and back-fill share a release transaction and roll back together on later failure (2502 ms)
+    √ refuses stale source and conflicting declarations without overwriting evidence (309 ms)
+    √ preserves custom columns, generated columns, indexes and triggers without a rebuild (324 ms)
+  Audit 1.1 additive declared counts: deployed legacy defaults/order
+    √ only adds a nullable checked column; all old columns/defaults/order/indexes/FKs/values stay identical (292 ms)
+    √ saved dry-run copies positive counts, leaves zero/negative NULL, preserves tuples and repeats with zero changes (301 ms)
+    √ repeat never invents a declaration for a later unknown consignment (306 ms)
+    √ schema and back-fill share a release transaction and roll back together on later failure (2471 ms)
+    √ refuses stale source and conflicting declarations without overwriting evidence (307 ms)
+    √ preserves custom columns, generated columns, indexes and triggers without a rebuild (303 ms)
+
+PASS tests/contracts/audit_193_192_streamed_fingerprint.test.js (7.879 s, 107 MB heap size)
+  √ both historical installer fingerprints are byte-identical on the real published test template (171 ms)
+  √ ordered JSON handles empty tables, integer keys, quoted names, Unicode, BLOBs and NULL (34 ms)
+  √ PRE_193 virtual NULL column matches the old expected-row hash without changing rows (28 ms)
+  √ repeat installer explicit table/id order and virtual NULL fields match its original bytes (32 ms)
+  √ a changed historical field changes the fingerprint (29 ms)
+  √ large historical fixture matches the old digests and streams in a 48 MiB child heap (7518 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 28a8199c-c4f9-4dd3-af6c-386147b0829b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 28a8199c-c4f9-4dd3-af6c-386147b0829b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ded430c2-056d-4d19-8141-a81ba1a336e3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ded430c2-056d-4d19-8141-a81ba1a336e3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e77ed478-934b-415a-ad90-a1a7470b4fa1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e77ed478-934b-415a-ad90-a1a7470b4fa1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6398e9fb-288c-43e6-b111-8e6bd49ce094 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6398e9fb-288c-43e6-b111-8e6bd49ce094 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 72d3f275-76d4-41a1-8fd7-c35c7afce6ae (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 72d3f275-76d4-41a1-8fd7-c35c7afce6ae (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 52911de3-741a-4410-b652-cf455885523c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 52911de3-741a-4410-b652-cf455885523c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4811567a-8ca9-49bd-89e7-f9fd4ead3764 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4811567a-8ca9-49bd-89e7-f9fd4ead3764 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fe5e4c6e-4f88-4732-96c5-b0ae2db99375 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fe5e4c6e-4f88-4732-96c5-b0ae2db99375 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5bb6173e-5a01-44d2-9285-bb1be3a2fd74 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5bb6173e-5a01-44d2-9285-bb1be3a2fd74 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5bb6173e-5a01-44d2-9285-bb1be3a2fd74 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5bb6173e-5a01-44d2-9285-bb1be3a2fd74 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_lab_technician_pollabfeb7074b3e384364b7dcb98c884e9d48 (LAB_TECHNICIAN) attempted MANAGE_LAB_POLICIES. Allowed roles: ["SUPER_ADMIN","LAB_MANAGER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: fb18e62f-0850-4992-bd1f-379a7f5d46fe (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fb18e62f-0850-4992-bd1f-379a7f5d46fe (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 488fe7f1-0079-4f72-8722-1a892e8e74b3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 488fe7f1-0079-4f72-8722-1a892e8e74b3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 488fe7f1-0079-4f72-8722-1a892e8e74b3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 488fe7f1-0079-4f72-8722-1a892e8e74b3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 488fe7f1-0079-4f72-8722-1a892e8e74b3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 488fe7f1-0079-4f72-8722-1a892e8e74b3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9581747f-92d2-4d84-81bd-10f1f06fe15c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9581747f-92d2-4d84-81bd-10f1f06fe15c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9581747f-92d2-4d84-81bd-10f1f06fe15c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab POL-LAB-66a5533c-e3ae-475b-a14b-bf5c060c10d1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 9581747f-92d2-4d84-81bd-10f1f06fe15c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9581747f-92d2-4d84-81bd-10f1f06fe15c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9581747f-92d2-4d84-81bd-10f1f06fe15c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bc5dc2c3-9a17-4661-ae26-4dd97ca0445d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bc5dc2c3-9a17-4661-ae26-4dd97ca0445d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 82f36cc0-e38d-4502-839c-a018e4f07a21 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_1_0_lab_policies.test.js (5.916 s, 199 MB heap size)
+  Audit 1.0: persistent lab policies
+    √ untouched lab defines every key and does not create a policy row (230 ms)
+    √ resolution follows method, analysis, lab, preset, profile, Strict (151 ms)
+    √ cross-check thresholds persist for one lab, while an earlier policy snapshot stays frozen (148 ms)
+    √ invalid cross-check bounds refuse the whole policy change with no writes: {"key":"crossCheck.basesCecFactor","value":0.99} (125 ms)
+    √ invalid cross-check bounds refuse the whole policy change with no writes: {"key":"crossCheck.cnMin","value":25} (120 ms)
+    √ invalid cross-check bounds refuse the whole policy change with no writes: {"key":"crossCheck.cnMax","value":8} (121 ms)
+    √ invalid cross-check bounds refuse the whole policy change with no writes: {"key":"crossCheck.cnMin","value":26} (120 ms)
+    √ cross-check keys refuse analysis/method overrides and invalid profile C:N pairs (152 ms)
+    √ first override preserves profile inheritance, explicit preset wins, reset restores inheritance and preserves overrides (131 ms)
+    √ changes append immutable overrides, increment once and write one reasoned before/after audit (131 ms)
+    √ invalid qc.maxBatchSize returns 400 without writes (147 ms)
+    √ invalid qc.duplicateEvery returns 400 without writes (123 ms)
+    √ invalid qc.mode returns 400 without writes (126 ms)
+    √ invalid numbers.decimalSeparator returns 400 without writes (123 ms)
+    √ invalid qc.westgardRules returns 400 without writes (126 ms)
+    √ invalid qc.runProfiles returns 400 without writes (123 ms)
+    √ invalid qc.runProfiles returns 400 without writes (121 ms)
+    √ invalid qc.runProfiles returns 400 without writes (124 ms)
+    √ missing reason refuses; analysis-only works; invalid methodology and lab-only scopes refuse (128 ms)
+    √ lab scope isolation and technician read-only permission apply to API and service (162 ms)
+    √ profile editor writes policies, keeps compatibility metadata, requires reason and rejects stale version (147 ms)
+    √ legacy migration is dry-run by default, additive, inherited and idempotent (135 ms)
+    √ audit write failure rolls back version, revocation and replacement together (224 ms)
+    √ Policies number override and clear share the write-only rollback copy and one audit (127 ms)
+    √ a frozen parsing decision keeps both separators from its policy version (130 ms)
+    √ preset change copies an altered inherited format and leaves unchanged settings byte-identical (126 ms)
+    √ malformed settings not-json fail with no policy, audit or legacy writes (120 ms)
+    √ malformed settings [] fail with no policy, audit or legacy writes (122 ms)
+    √ malformed settings null fail with no policy, audit or legacy writes (123 ms)
+    √ malformed settings  fail with no policy, audit or legacy writes (120 ms)
+    √ reported-value export stores the exact resolved version and selection rule without changing old selections (497 ms)
+    √ QC evaluates persisted lab and method limits and leaves old evaluations unchanged on a policy edit (261 ms)
+    √ stored profile run uses the lab tray layout and keeps analytical batch size separate (131 ms)
+    √ report generation freezes the lab policy version and content across later changes (200 ms)
+  Audit 1.0: registry and pure evaluator defaults
+    √ every preset validates every key and retains shipped physical profiles (10 ms)
+    √ QC consumers contain no inline acceptance limits
+
+PASS tests/contracts/audit_1_1_declared_count_source.test.js (182 MB heap size)
+  √ application code never reads the deprecated stored consignment count; only request/response aliases and one compatibility write remain (3475 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-08
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 05b58824-8fd6-4006-8a8f-5961ba5ec925 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_0_8_report_truthfulness.test.js (234 MB heap size)
+  Audit 0.8: issued identity and truthful report evidence
+    √ two simultaneous real publications have different bases and committed counter values (239 ms)
+    √ revisions reuse the base without incrementing the counter; policy changes affect new lineages only (234 ms)
+    √ latest issued legacy number anchors rev 1; older content and v1 PDF remain exact (109 ms)
+    √ a historical base shared by another sample fails closed without a substitute or new report (129 ms)
+    √ modern base ownership also rejects another sample (147 ms)
+    √ failure after counter increment rolls it back; the next successful publication issues that value (190 ms)
+    √ year boundary is determined by lab timezone, with UTC fallback (1 ms)
+    √ additive migration preserves legacy snapshots, nullable identities and enforces revision uniqueness (2 ms)
+    √ QC_FAIL with PROCEED prints analyte, batch and reason; all reported linked batches must pass for a pass claim (170 ms)
+    √ warn-mode unevaluated QC and unlinked historical results never claim QC passed (126 ms)
+    √ en PDF uses actual publication date/status, replacement, frozen deviations and preparation (8 ms)
+    √ es PDF uses actual publication date/status, replacement, frozen deviations and preparation (6 ms)
+    √ es-419 PDF uses actual publication date/status, replacement, frozen deviations and preparation (7 ms)
+    √ fr PDF uses actual publication date/status, replacement, frozen deviations and preparation (6 ms)
+    √ pt PDF uses actual publication date/status, replacement, frozen deviations and preparation (7 ms)
+    √ internal PDF marks the issued replacement; public PDF refuses the superseded version (152 ms)
+    √ preparation claims come from complete recorded confirmations rather than sample DONE flags (1 ms)
+    √ short certificates keep footer on one page and all issue-date fields use publishedAt (5 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-07
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-07
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-07
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-07
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by test_lab_technician_labaudit07 with 1 samples: [ 'SMP-07-5f91122c-8bda-45dc-a55f-0c1fa4bc5b44' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SUBMISSION] Blocked Trojan Horse attempt by test_lab_manager_labaudit07. Invalid items: NEVER-IN-S1-da44dc71-d507-4531-9a19-ac1ee5a3ec3c
+
+      229 |         const invalidDecisions = normalizedDecisions.filter(d => !validItemSet.has(d.workItemId));
+      230 |         if (invalidDecisions.length > 0) {
+    > 231 |             console.warn(`[SUBMISSION] Blocked Trojan Horse attempt by ${user.username}. Invalid items: ${invalidDecisions.map(d => d.workItemId).join(', ')}`);
+          |                     ^
+      232 |             return res.status(403).json({ error: 'Security Violation: Attempted to review items not belonging to this submission.' });
+      233 |         }
+      234 |
+
+      at warn (controllers/submissionController.js:231:21)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-07
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by test_lab_technician_labaudit07 with 1 samples: [ 'SMP-07-6515cafb-bf40-487d-8ddc-c7614cf508a6' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SUBMISSION] Blocked Trojan Horse attempt by test_lab_manager_labaudit07. Invalid items: NEVER-IN-S1-09f09a84-1ee4-4e1a-9dbe-a7fe3b3392fd
+
+      229 |         const invalidDecisions = normalizedDecisions.filter(d => !validItemSet.has(d.workItemId));
+      230 |         if (invalidDecisions.length > 0) {
+    > 231 |             console.warn(`[SUBMISSION] Blocked Trojan Horse attempt by ${user.username}. Invalid items: ${invalidDecisions.map(d => d.workItemId).join(', ')}`);
+          |                     ^
+      232 |             return res.status(403).json({ error: 'Security Violation: Attempted to review items not belonging to this submission.' });
+      233 |         }
+      234 |
+
+      at warn (controllers/submissionController.js:231:21)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 519148e4-2a17-4fb7-9297-156429c8376a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by test_lab_technician_labaudit07 with 1 samples: [ 'SMP-07-c9394f29-fdf2-479c-8a87-29d340671fb9' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68b074b0-0ed8-499b-8dad-17bd07db6568 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_0_7_resubmission.test.js (251 MB heap size)
+  Audit 0.7: returned work can be recorded and submitted again
+    √ individual RETURN preserves the old link in history and re-recorded work appears in queue and preview (188 ms)
+    √ bulk RETURN preserves the old link in history and re-recorded work appears in queue and preview (114 ms)
+    √ submission RETURN preserves the old link in history and re-recorded work appears in queue and preview (112 ms)
+    √ QC REANALYZE detaches only mutable work and keeps the old package/reason in history (89 ms)
+    √ RETURN without an old package still records its reason and remains eligible after recording (69 ms)
+    √ individual RETURN and real S2 resubmission cannot be reviewed through S1 (223 ms)
+    √ bulk RETURN and real S2 resubmission cannot be reviewed through S1 (262 ms)
+    √ empty shorthand reconciles a stale QC-return package with one summary and no phantom item reviews (158 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-76531fb9-d88e-4832-815c-db5f13be3ab7 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: A11-76531fb9-d88e-4832-815c-db5f13be3ab7 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample A11-76531fb9-d88e-4832-815c-db5f13be3ab7 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-700129bb-685e-4eba-9f4e-08b51dc184cf by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 5bf59858-bdad-4dc2-a700-65555d035c9c linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 5bf59858-bdad-4dc2-a700-65555d035c9c with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-428b9bf0-4b51-4766-84bc-9613a2383927 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: A11-428b9bf0-4b51-4766-84bc-9613a2383927 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample A11-428b9bf0-4b51-4766-84bc-9613a2383927 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-119bc3a8-eb83-47b2-b2d8-b1b41ede282c by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: A11-119bc3a8-eb83-47b2-b2d8-b1b41ede282c linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample A11-119bc3a8-eb83-47b2-b2d8-b1b41ede282c with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-6524fb27-5e43-45d4-bde5-3149f839280c by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: A11-6524fb27-5e43-45d4-bde5-3149f839280c linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample A11-6524fb27-5e43-45d4-bde5-3149f839280c with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-6ebf0518-3769-4b4f-81da-48deaca557b6 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-a4dfa31f-b1ab-4a64-9c84-b85b8937ebf6 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: A11-a4dfa31f-b1ab-4a64-9c84-b85b8937ebf6 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-a4593881-d925-419b-a18e-8cc28d218b04 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: A11-a4593881-d925-419b-a18e-8cc28d218b04 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for 52c4d4ff-ddca-471c-b62c-3a65aa05b1cd by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample a43328b4-c847-496c-a30a-49507efd50ec with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.error
+    [intakeService] Error: synthetic gate failure
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_1_intake.test.js:85:77)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\jest-mock\build\index.js:305:39
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\jest-mock\build\index.js:312:13)
+        at Object.mockConstructor [as generate] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\jest-mock\build\index.js:102:19)
+        at generate (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\intakeService.js:52:63)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.processIntake (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\receptionController.js:27:24)
+
+      11 |     if (error.statusCode) return res.status(error.statusCode).json({ success: false, code: error.code, error: error.message, message: error.message });
+      12 |     if (error.name === 'ProfileReferenceConflictError') return res.status(409).json({ success: false, code: error.code, error: error.code, message: error.message });
+    > 13 |     console.error('[intakeService]', error);
+         |             ^
+      14 |     return res.status(500).json({ success: false, message: 'Internal server error: ' + error.message });
+      15 | }
+      16 | module.exports = { IntakeError, respond };
+
+      at Object.error [as respond] (services/intakeErrors.js:13:13)
+      at respond (controllers/receptionController.js:30:52)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-91a67654-ca3a-42f4-8924-8dcd11bbba8b by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: d0e2b462-0a28-4509-8b49-b1e5ba88d97e linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample d0e2b462-0a28-4509-8b49-b1e5ba88d97e with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-53e44e00-c65d-448e-b057-1e9222ece398 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Processing intake for A11-6c069372-b2ce-4f4e-9048-88b9d6c11c55 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: de3072f8-c468-49bf-b5ad-bf26f2b5fafc linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-57022399-8ce9-4a41-b6c9-9286aa7949ec by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 5ae85641-079d-45cb-8023-70f6da469a3d linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 5ae85641-079d-45cb-8023-70f6da469a3d with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-b4937943-8b85-4ea1-9a6f-6b9c8cb4e438 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-868e045f-6526-4461-a517-c060b6083b2c by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-55ac7d99-3fb5-4537-bec8-416caa004c94 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: c26b2a32-d3eb-43b7-8e3f-c53ccec57cdb linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample c26b2a32-d3eb-43b7-8e3f-c53ccec57cdb with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-58aa7e13-888a-4b42-98ae-603d75865c4a by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 4895b51c-e540-429c-8435-2c635348f169 linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 4895b51c-e540-429c-8435-2c635348f169 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-dcc47fd9-1751-451e-b7bd-81d2f22e3088 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: c62dea8c-bca8-46c1-a937-3f2f93344701 linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample c62dea8c-bca8-46c1-a937-3f2f93344701 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-779e66c4-fd23-4195-80d0-da1cc44da887 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: ca17be30-d71c-46fd-b5bf-c64cf6ff4dc4 linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample ca17be30-d71c-46fd-b5bf-c64cf6ff4dc4 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-a022e2a9-a57a-4d4b-828c-6e308a8a0078 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: ace4361f-256c-4901-bb19-d8ee9d80b089 linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample ace4361f-256c-4901-bb19-d8ee9d80b089 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-d8e09adf-7d9d-45d7-b0aa-9fb3ccaceb5e by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: e3dd1840-0b96-4e84-92fd-600cb9655a47 linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample e3dd1840-0b96-4e84-92fd-600cb9655a47 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-7d1b1ca4-648e-43c4-9167-422c71feb572 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 875b11db-ce04-4c6f-95c5-a3d5faeafb51 linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 875b11db-ce04-4c6f-95c5-a3d5faeafb51 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-78283afe-2039-499f-89f6-3caf84c4ac08 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: A11-78283afe-2039-499f-89f6-3caf84c4ac08 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-78283afe-2039-499f-89f6-3caf84c4ac08 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.warn
+    [INTAKE] Blocked attempt to modify locked sample A11-78283afe-2039-499f-89f6-3caf84c4ac08 (Status: RECEIVED_REJECTED, isDraft: false)
+
+      294 |
+      295 |             if (LOCKED_INTAKE_STATUSES.includes(sample.status) && !(sample.status === 'RECEIVED_REJECTED' && isResubmission === true && !isDraft)) {
+    > 296 |                 console.warn(`[INTAKE] Blocked attempt to modify locked sample ${originalId} (Status: ${sample.status}, isDraft: ${!!body.isDraft})`);
+          |                         ^
+      297 |                 throw new IntakeError(403, {
+      298 |                     success: false,
+      299 |                     error: 'SAMPLE_LOCKED',
+
+      at warn (services/intakePreparationService.js:296:25)
+      at acceptSample (services/intakeService.js:83:34)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-78283afe-2039-499f-89f6-3caf84c4ac08 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample A11-78283afe-2039-499f-89f6-3caf84c4ac08 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for W001 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for W001 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample W001 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for 1f2f40af-4981-49e3-9243-3dbfe812681e by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for W002 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for W002 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample W002 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-e084d86a-d065-4843-9b5b-bbfae85fa08e by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: A11-e084d86a-d065-4843-9b5b-bbfae85fa08e linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample A11-e084d86a-d065-4843-9b5b-bbfae85fa08e with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-fcfa7782-243a-4452-8195-1145efc5db4b by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 9befae32-3b51-4d6e-bcba-614d826eb5fa linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 9befae32-3b51-4d6e-bcba-614d826eb5fa with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for A11-f73e777a-2487-43d7-b8aa-988d48030b49 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: dc9bb0b9-9686-4454-b722-d4b59b3ece04 linked to Project: WALK-IN
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample dc9bb0b9-9686-4454-b722-d4b59b3ece04 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4d9df71-4145-4ea7-a89e-f587a43d5c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for W003 by test_lab_manager_0ba82593f2a54e4a80d592123310cb22
+
+      at log (services/intakePreparationService.js:56:13)
+
+PASS tests/contracts/audit_1_1_intake.test.js (292 MB heap size)
+  Audit 1.1: one atomic intake service
+    √ single and batch acceptance produce identical normalised work, methods, order lines and per-sample audits (157 ms)
+    √ a downstream work failure rolls back sample, code, work, orders and audits (133 ms)
+    √ a downstream order failure rolls back sample, code, work, orders and audits (19 ms)
+    √ a downstream audit failure rolls back sample, code, work, orders and audits (11 ms)
+    √ failed validation never creates an orphan or consumes a sequence ({"checklist": [Object]}) (22 ms)
+    √ failed validation never creates an orphan or consumes a sequence ({"requiredAnalyses": [Array]}) (10 ms)
+    √ failed validation never creates an orphan or consumes a sequence ({"receivedMass": 1}) (10 ms)
+    √ failed validation never creates an orphan or consumes a sequence ({"custodyHandoverAt": "not-a-date"}) (7 ms)
+    √ failed validation never creates an orphan or consumes a sequence ({"receivedMassUnit": "kg"}) (8 ms)
+    √ a failure on an existing sample keeps its state and every old field intact (30 ms)
+    √ default batch mode returns all row errors and writes nothing, including counters (18 ms)
+    √ partial mode commits passing rows, returns failures, and records one failed-row-count audit (26 ms)
+    √ all-failed partial mode has no empty consignment, audit or consumed number (21 ms)
+    √ partial mode rolls back a runtime-failed row while committing another row (38 ms)
+    √ invalid supplied expectedCount 0 is refused before any writes (6 ms)
+    √ invalid supplied expectedCount -1 is refused before any writes (12 ms)
+    √ invalid supplied expectedCount 1.5 is refused before any writes (6 ms)
+    √ invalid supplied expectedCount "2" is refused before any writes (7 ms)
+    √ invalid supplied expectedCount null is refused before any writes (6 ms)
+    √ normalizes request aliases {"expectedCount": 3} and all response aliases use the declaration (38 ms)
+    √ normalizes request aliases {"declaredExpectedCount": 3} and all response aliases use the declaration (45 ms)
+    √ normalizes request aliases {"declaredExpectedCount": 3, "expectedCount": 3} and all response aliases use the declaration (60 ms)
+    √ normalizes request aliases {} and all response aliases use the declaration (37 ms)
+    √ normalizes request aliases {"declaredExpectedCount": null, "expectedCount": null} and all response aliases use the declaration (37 ms)
+    √ conflicting request aliases return a stable 422 with no writes (7 ms)
+    √ invalid new declaration 0 is refused before writes (7 ms)
+    √ invalid new declaration -1 is refused before writes (6 ms)
+    √ invalid new declaration 1.5 is refused before writes (7 ms)
+    √ invalid new declaration "2" is refused before writes (4 ms)
+    √ invalid new declaration null is refused before writes (4 ms)
+    √ rejected receipt resubmission must be explicit and reuses the same acceptance service (50 ms)
+    √ walk-in arrival without checklist preserves RECEIVED and creates no code, work or order (58 ms)
+    √ arrival records an open provenance hold and custody; the hold blocks acceptance without writes (17 ms)
+    √ generic status PUT cannot bypass acceptance validation or create work (7 ms)
+    √ unknown discrepancy never reports a match, even for zero received rows
+    √ arrival stores an observed zero mass as zero without applying sufficiency or generating work (34 ms)
+    √ the migrated index rejects unmarked duplicates; marked rows stay in safety gates but do not drive generation (44 ms)
+    √ partial intake with only runtime failures rolls back the header, all rows, audits and both counters (39 ms)
+    √ malformed catalogue null fails both final intake routes before writes (11 ms)
+    √ malformed catalogue "analysis" fails both final intake routes before writes (10 ms)
+    √ malformed catalogue [null] fails both final intake routes before writes (9 ms)
+    √ malformed catalogue [42] fails both final intake routes before writes (10 ms)
+    √ an omitted or cleared acceptance field cannot bypass a stored zero-mass observation (15 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e131613-15a3-4944-a05e-f6011653c816 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e131613-15a3-4944-a05e-f6011653c816 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e131613-15a3-4944-a05e-f6011653c816 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e131613-15a3-4944-a05e-f6011653c816 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e131613-15a3-4944-a05e-f6011653c816 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e131613-15a3-4944-a05e-f6011653c816 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e131613-15a3-4944-a05e-f6011653c816 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e131613-15a3-4944-a05e-f6011653c816 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e131613-15a3-4944-a05e-f6011653c816 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e131613-15a3-4944-a05e-f6011653c816 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e131613-15a3-4944-a05e-f6011653c816 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [Report] Generate error: Error: synthetic publication failure
+        at Object.create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_9_public_report_superseded.test.js:125:65)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\reportController.js:199:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at generateReport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\reportController.js:140:24)
+
+      257 |                 ...(err.qcModeEvidence && { qcModeEvidence: err.qcModeEvidence }) });
+      258 |         }
+    > 259 |         console.error('[Report] Generate error:', err);
+          |                 ^
+      260 |         res.status(500).json({ error: err.message || 'Failed to generate report' });
+      261 |     }
+      262 | }
+
+      at error (controllers/reportController.js:259:17)
+
+PASS tests/contracts/audit_0_9_public_report_superseded.test.js (313 MB heap size)
+  Audit 0.9: superseded public links
+    √ publication revokes only replaced-version links and leaves current and other-sample links valid (195 ms)
+    √ legacy superseded link refuses content without a back-fill (PDF=false) (43 ms)
+    √ legacy superseded link refuses content without a back-fill (PDF=true) (45 ms)
+    √ pre-existing revocation metadata is preserved when its report is superseded (65 ms)
+    √ current manually revoked and expired links stay refused and logged (PDF=false) (42 ms)
+    √ current manually revoked and expired links stay refused and logged (PDF=true) (47 ms)
+    √ a failed publication rolls back link revocation and report supersession together (199 ms)
+    √ unknown token remains 404 without an orphaned access row (PDF=false) (2 ms)
+    √ unknown token remains 404 without an orphaned access row (PDF=true) (1 ms)
+
+PASS tests/contracts/audit_1_1_numbering.test.js (316 MB heap size)
+  Audit 1.1: laboratory consignment numbering
+    √ 50 simultaneous consignment transactions issue distinct numbers in their own namespace (191 ms)
+    √ downstream failure rolls back the consignment and its sequence together (162 ms)
+    √ yearly rollover uses the lab timezone; NEVER continues in year zero (76 ms)
+    √ project formatting is lab policy; project does not partition the sequence and missing project writes nothing (66 ms)
+    √ a historical collision is preserved and skipped; policy edits never renumber issued consignments (68 ms)
+    √ central defaults and token validator match Claude scope; bare root-client allocation is refused (61 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 59aadf0c-12d5-4601-8251-ed103fc00789 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 59aadf0c-12d5-4601-8251-ed103fc00789 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 59aadf0c-12d5-4601-8251-ed103fc00789 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 59aadf0c-12d5-4601-8251-ed103fc00789 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 59aadf0c-12d5-4601-8251-ed103fc00789 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_1_1_reconcile_duplicates.test.js (349 MB heap size)
+  Audit 1.1: duplicate references and atomic analysis reconciliation
+    √ analyses refuses removal with a put duplicate before any writes (NOT_ASSIGNED) (72 ms)
+    √ orders refuses removal with a post duplicate before any writes (NOT_ASSIGNED) (25 ms)
+    √ analyses refuses removal with a put duplicate before any writes (WAIVED) (39 ms)
+    √ orders refuses removal with a post duplicate before any writes (WAIVED) (18 ms)
+    √ an unrelated unstarted analysis can still be removed while the duplicate group is retained (33 ms)
+    √ a remaining FK failure after an earlier deletion returns 409 and rolls back rows and audits (20 ms)
+    √ an audit failure rolls back the preceding deletion instead of partially reconciling (129 ms)
+    √ cold catalogue lookups during additions stay inside the reconciliation transaction (30 ms)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:182:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:48:18)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:182:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:48:90)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:182:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:50:11)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:182:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:50:83)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:182:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:53:64)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:182:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:55:136)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:182:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:68:11)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:182:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:68:83)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:182:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:70:63)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:182:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:74:18)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:182:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:76:18)
+
+PASS tests/contracts/audit_1_0_policy_components.test.js (348 MB heap size)
+  Audit 1.0: real policy page controls
+    √ technician sees effective policies and scope selectors but has no save, edit or clear controls (112 ms)
+    √ manager changes preset with mandatory reason and current version (20 ms)
+    √ manager edits selected method scope, includes reason and version, and cannot edit lab-only keys there (50 ms)
+    √ profile defaults cannot be cleared as laboratory overrides (10 ms)
+    √ manager edits PT limits at analysis scope and submits the exact structured thresholds (43 ms)
+    √ Westgard editor keeps reject and warning lists exclusive (5 ms)
+    √ calibration action editor offers bracket repeats only for continuing checks and preserves other kinds (5 ms)
+    √ sample-code editor warns when the check character is omitted, and allows the lab to keep that format (4 ms)
+    √ all registry descriptions, UI labels and error keys exist in all five locales (53 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       173 passed, 173 total
+Snapshots:   0 total
+Time:        42.039 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_7_resubmission.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_8_report_truthfulness.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_9_public_report_superseded.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_193_192_streamed_fingerprint.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_0_lab_policies.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_0_policy_components.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_1_consignment_migration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_1_declared_count_source.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_1_duplicates.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_1_intake.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_1_numbering.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_1_reconcile_duplicates.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-ui-serial\batch-03.json

@@ -1,3 +1,13 @@
+# #206 item-context repair frozen; full regression running — 2026-10-13
+
+Current source-only head `9ae02f6ab7651d2ca887a98722f6a20ace3cc471` / `codex/issue-206-containers`; audit source `877a1d210da1124e5750695eb2da41c1645b9218`. The dilution selector now clears a prior physical aliquot when moving to another work item. The reproducing test failed before the fix and the three affected suites / 41 tests pass afterwards. Client build passes; lint has zero errors and the same 14 baseline warning tuples. Claudio's earlier LF and SPA-scope findings stay resolved.
+
+Run 16276 / `full-206-ui-serial/` was interrupted after 132 passing suites / 2,593 passing tests to freeze this repair. Its raw partial evidence remains retained and must never be called a full PASS, overwritten or resumed. ONE new frozen 362-suite regression is RUNNING in session 74560 / `full-206-context-serial/`, through `run-issue-206-full-context-serial.py`, with 12-suite sequential processes, ordinary owned fixtures, default heap and blank NODE_OPTIONS. Observe the same process; do not dispatch duplicate Jest or change frozen source. Closed evidence and exact hashes: `context-review-corrections-206.json`.
+
+No PR until the complete full suite passes. Real PR CI and actual exact-head Claudio acceptance still follow. No new release/kit/gate or production operation; every completed PR294/#200 helper, receipt and notice stays immutable. #103 remains read-only; the native clarification card is unanswered and no apply go is inferred. Human files, drafts and YY cards are untouched. Same worktree, branch and writer.
+
+---
+
 # #206 UI compatibility repaired; successor full regression running — 2026-10-13
 
 Current source-only head `61d1798524315032da62ca4f51cd08c7611a555a` / `codex/issue-206-containers`; audit source `01e05ccfa8d469122203218e939e07c0ad688c77`. Claudio's LF and SPA-scope findings stay resolved: two LF attribute additions, zero CR bytes, and `server/app.js` exactly main. Subsequent regression stopped at batch 12 with 15 UI failures (classic JSX React binding and an unnecessary null field on unselected repeat requests). Those failures are repaired. Three affected suites / 41 tests PASS, rebuilt client PASS, canonical lint zero errors and the identical 14 baseline warnings.

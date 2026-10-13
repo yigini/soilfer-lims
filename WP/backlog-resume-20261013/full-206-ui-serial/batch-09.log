@@ -1,0 +1,688 @@
+PASS tests/contracts/audit_3_1_attempt_install.test.js (78.229 s, 57 MB heap size)
+  √ read-only PRE_190 dry-run plans one attempt and one link, without changing database bytes (1272 ms)
+  √ 191 release inventory reports SUBMITTED work owned by RECORDED evidence without repairing it (1690 ms)
+  √ 191 release inventory reports ACCEPTED work owned by RECORDED evidence without repairing it (1600 ms)
+  √ atomic additive apply links every Result, records provenance, preserves original values and is idempotent (1282 ms)
+  √ all duplicate attempts are flagged without rewriting original fields, legacy evidence is retained, and frozen new evidence is copied (1284 ms)
+  √ unmapped stored REPEAT_REQUIRED refuses whole apply without schema or data changes (1269 ms)
+  √ unmapped stored REANALYSIS_REQUIRED refuses whole apply without schema or data changes (1261 ms)
+  √ unmapped stored REJECTED refuses whole apply without schema or data changes (1271 ms)
+  √ unmapped stored NOT_ASSIGNED refuses whole apply without schema or data changes (1275 ms)
+  √ unmapped stored PENDING refuses whole apply without schema or data changes (1260 ms)
+  √ unmapped stored ASSIGNED refuses whole apply without schema or data changes (1277 ms)
+  √ unmapped stored IN_PROGRESS refuses whole apply without schema or data changes (1272 ms)
+  √ unmapped stored ON_HOLD refuses whole apply without schema or data changes (1280 ms)
+  √ unmapped stored WAIVED refuses whole apply without schema or data changes (1243 ms)
+  √ unmapped stored CANCELLED refuses whole apply without schema or data changes (1264 ms)
+  √ unmapped stored unknown refuses whole apply without schema or data changes (1259 ms)
+  √ unmatched Results and current-result collisions are both reported and never partially applied (1254 ms)
+  √ a receipt-write failure rolls back metadata, attempts, links, guards and indexes together (1290 ms)
+  √ existing exchange UDF triggers compile without emitting amendments for an attemptId-only backfill (1314 ms)
+  √ historical orphan imports are separately receipted and never get fabricated work or attempts (1279 ms)
+  √ fresh Prisma gets partial uniqueness before COMPLETE (actual db push on Linux, compiler-emitted DDL on Windows) (2514 ms)
+  √ startup refuses removed or altered guards without repairing schema automatically (1313 ms)
+  √ startup refuses edited backfill provenance even when the release source fields stay unchanged (1289 ms)
+  √ fresh unmarked conflict flags are refused rather than treated as trusted migration provenance (1358 ms)
+  √ CLI requires a database, refuses conflicting modes and does not default to a production path (1 ms)
+  √ missing duplicateOf reports ABSENT without planning; apply and startup refuse without changing bytes (1270 ms)
+  √ missing duplicateOf reports FOREIGN without planning; apply and startup refuse without changing bytes (1278 ms)
+  √ ABSENT prerequisite applies the two shipped sources and receipts atomically, preserving every original row (1258 ms)
+  √ one baseline duplicate group reports every ID and refuses apply and startup with zero changes (1243 ms)
+  √ a second prerequisite receipt failure rolls back both schema objects and the first receipt (1245 ms)
+  √ empty Prisma bootstrap verifies the existing column/FK, executes only the shipped index and records honest receipts (1272 ms)
+  √ populated Prisma-shaped WorkItem without prerequisite receipts is PARTIAL and refuses all writes (1292 ms)
+  √ an empty Prisma schema with the index but no receipts is PARTIAL, never adopted or repaired (1259 ms)
+  √ Prisma-shaped historical Results prevent fresh bootstrap even when WorkItem and WorkAttempt are empty (1268 ms)
+  √ an unexpected index definition is FOREIGN and refused even on an empty owned schema (1274 ms)
+  √ legacy #178 receipts match only their source digests and remain byte-for-byte unchanged on COMPLETE NO_OP (1290 ms)
+  √ COMPLETE legacy prerequisite remains intact when the separate #190 migration later refuses (1343 ms)
+  √ a foreign prerequisite receipt (unparseable) refuses without rewriting provenance (1275 ms)
+  √ a foreign prerequisite receipt (missing-sha) refuses without rewriting provenance (1272 ms)
+  √ a foreign prerequisite receipt (wrong-sha) refuses without rewriting provenance (1323 ms)
+  √ a foreign prerequisite receipt (missing-object) refuses without rewriting provenance (1277 ms)
+  √ prerequisite CLI needs an explicit owned path and refuses duplicate, incomplete and conflicting options (2 ms)
+  √ #191 retained dry-run/apply/no-op preserves every original field and the exact #190 receipt (1779 ms)
+  √ #191 installs the same verified chain on an empty current-Prisma column shape (523 ms)
+  √ #191 broken chain (missing-186-receipt) refuses dry-run/apply/startup without changing database bytes (564 ms)
+  √ #191 broken chain (missing-187-receipt) refuses dry-run/apply/startup without changing database bytes (559 ms)
+  √ #191 broken chain (missing-190-receipt) refuses dry-run/apply/startup without changing database bytes (576 ms)
+  √ #191 broken chain (missing-191-receipt) refuses dry-run/apply/startup without changing database bytes (581 ms)
+  √ #191 broken chain (tampered-186-receipt) refuses dry-run/apply/startup without changing database bytes (589 ms)
+  √ #191 broken chain (tampered-187-receipt) refuses dry-run/apply/startup without changing database bytes (567 ms)
+  √ #191 broken chain (tampered-190-receipt) refuses dry-run/apply/startup without changing database bytes (570 ms)
+  √ #191 broken chain (tampered-191-receipt) refuses dry-run/apply/startup without changing database bytes (574 ms)
+  √ #191 broken chain (missing-successor) refuses dry-run/apply/startup without changing database bytes (555 ms)
+  √ #191 broken chain (altered-successor) refuses dry-run/apply/startup without changing database bytes (595 ms)
+  √ #191 broken chain (missing-membership-successor) refuses dry-run/apply/startup without changing database bytes (560 ms)
+  √ #191 broken chain (altered-membership-successor) refuses dry-run/apply/startup without changing database bytes (563 ms)
+  √ #191 broken chain (missing-event-guard) refuses dry-run/apply/startup without changing database bytes (567 ms)
+  √ #191 broken chain (partial-column) refuses dry-run/apply/startup without changing database bytes (532 ms)
+  √ #191 broken chain (receipt-before-guards) refuses dry-run/apply/startup without changing database bytes (513 ms)
+  √ #191 receipt-write failure rolls back columns and all guard replacements together (480 ms)
+  √ #191 actual SQLite guards permit exactly one NULL-only first fill and freeze it immediately (497 ms)
+  √ #191 refuses changing frozen id during first fill with zero changes (472 ms)
+  √ #191 refuses changing frozen workItemId during first fill with zero changes (463 ms)
+  √ #191 refuses changing frozen orderLineId during first fill with zero changes (481 ms)
+  √ #191 refuses changing frozen attemptNo during first fill with zero changes (477 ms)
+  √ #191 refuses changing frozen batchId during first fill with zero changes (470 ms)
+  √ #191 refuses changing frozen reason during first fill with zero changes (484 ms)
+  √ #191 refuses changing frozen requestedBy during first fill with zero changes (483 ms)
+  √ #191 refuses changing frozen requestedAt during first fill with zero changes (472 ms)
+  √ #191 refuses changing frozen parentAttemptId during first fill with zero changes (470 ms)
+  √ #191 refuses changing frozen note during first fill with zero changes (479 ms)
+  √ #191 refuses changing frozen rawData during first fill with zero changes (476 ms)
+  √ #191 refuses changing frozen calcVersion during first fill with zero changes (476 ms)
+  √ #191 refuses changing frozen dilutionFactor during first fill with zero changes (494 ms)
+  √ #191 refuses changing frozen aliquotId during first fill with zero changes (473 ms)
+  √ #191 refuses changing frozen legacyAttemptNoConflict during first fill with zero changes (470 ms)
+  √ #191 refuses changing frozen version during first fill with zero changes (488 ms)
+  √ #191 refuses changing frozen createdAt during first fill with zero changes (483 ms)
+  √ #191 refuses changing frozen updatedAt during first fill with zero changes (481 ms)
+  √ #191 an unreviewed added column is frozen by default under actual SQLite triggers (489 ms)
+  √ #191 attempt audit events cannot be rewritten, retagged or deleted; other audit entities retain their behaviour (500 ms)
+  √ #191 release objects include the two exact successors and both append-only event guards (1 ms)
+  #191 recorded-acceptance link between the #190 and #191 installers
+    √ dry-run names the single eligible item and its recorded decision without changing bytes (413 ms)
+    √ apply needs the exact named scope and refuses any other scope with zero writes (424 ms)
+    √ apply links the recorded ACCEPT, preserves every other row, clears the #191 gate and is idempotent (586 ms)
+    √ submitted work has no acceptance to link: the item stays unresolved and apply refuses with zero writes (424 ms)
+    √ a later rejection is the current decision: the item stays unresolved and apply refuses with zero writes (424 ms)
+    √ changed evidence for the same eligible work item refuses apply with zero writes (449 ms)
+    √ zone-less SQLite timestamps are compared as UTC, not host-local time (405 ms)
+    √ an acceptance recorded before the attempt or its Result is never linked (423 ms)
+
+PASS tests/contracts/audit_3_1_attempt_backfill_plan.test.js (14.976 s, 57 MB heap size)
+  √ the closed historical factory refuses an existing owned target without changing its bytes (293 ms)
+  √ the historical factory rejects SQL options, callbacks and unknown columns before creating a file (5 ms)
+  √ historical provenance must be supplied and no WorkItem or attempt is implicitly fabricated (281 ms)
+  √ backfill plans the pinned literal stored status COMPLETED as RECORDED without writes (288 ms)
+  √ backfill plans the pinned literal stored status AWAITING_VERIFICATION as RECORDED without writes (292 ms)
+  √ backfill plans the pinned literal stored status SUBMITTED as SUBMITTED without writes (280 ms)
+  √ backfill plans the pinned literal stored status QA_PENDING as SUBMITTED without writes (289 ms)
+  √ backfill plans the pinned literal stored status ACCEPTED as ACCEPTED without writes (360 ms)
+  √ backfill plans the pinned literal stored status APPROVED as ACCEPTED without writes (273 ms)
+  √ unmapped REPEAT_REQUIRED refuses the whole plan despite another eligible row (279 ms)
+  √ unmapped REANALYSIS_REQUIRED refuses the whole plan despite another eligible row (291 ms)
+  √ unmapped REJECTED refuses the whole plan despite another eligible row (286 ms)
+  √ unmapped NOT_ASSIGNED refuses the whole plan despite another eligible row (283 ms)
+  √ unmapped PENDING refuses the whole plan despite another eligible row (282 ms)
+  √ unmapped ASSIGNED refuses the whole plan despite another eligible row (282 ms)
+  √ unmapped IN_PROGRESS refuses the whole plan despite another eligible row (284 ms)
+  √ unmapped ON_HOLD refuses the whole plan despite another eligible row (275 ms)
+  √ unmapped WAIVED refuses the whole plan despite another eligible row (276 ms)
+  √ unmapped CANCELLED refuses the whole plan despite another eligible row (282 ms)
+  √ unmapped unknown refuses the whole plan despite another eligible row (280 ms)
+  √ one existing attempt is linked deterministically and legacy evidence/status stays byte-for-byte (288 ms)
+  √ multiple existing attempts refuse null links while retaining every already-linked Result (281 ms)
+  √ duplicate attempt numbers are fully reported with their ids and never renumbered (309 ms)
+  √ current-result collisions are reported after proposed links, distinct replicates and attempts remain separate (335 ms)
+  √ unmatched and multiple exact WorkItem candidates are reported without guessed texture aliases (274 ms)
+  √ planning CLI requires an explicit database and dry-run and refuses apply (3 ms)
+  √ only imported rows without a canonical WorkItem are exempt, including a duplicate child (299 ms)
+  √ an imported row with canonical work uses the normal historical attempt mapping (290 ms)
+  √ unmatched MEASURED has no historical-import exemption (340 ms)
+  √ unmatched PREDICTED has no historical-import exemption (302 ms)
+  √ unmatched DERIVED has no historical-import exemption (293 ms)
+  √ the actual pre-190 schema refuses NULL Result provenance instead of manufacturing it (297 ms)
+  √ unmapped statuses report grouped WorkItem and Result counts and every id (359 ms)
+  √ ordered parameters missing canonical work are reported by laboratory and parameter, without creating work (286 ms)
+  √ new historical attempts copy only identical frozen Result evidence and its instrument, with no request or equipment lookup (294 ms)
+  √ historical MISSING snapshots stay not recorded and are reported without invented evidence (419 ms)
+  √ historical DIFFERENT snapshots stay not recorded and are reported without invented evidence (352 ms)
+  √ historical INVALID snapshots stay not recorded and are reported without invented evidence (286 ms)
+  √ historical existing attempts never receive evidence copies, even when linked Results have snapshots (284 ms)
+  √ new historical batch FK plans only the single existing batch shared by all linked Results (281 ms)
+  √ missing, mixed or dangling historical batch null is reported without blocking or inventing a reference (277 ms)
+  √ missing, mixed or dangling historical batch different-batch is reported without blocking or inventing a reference (273 ms)
+  √ missing, mixed or dangling historical batch dangling-batch is reported without blocking or inventing a reference (280 ms)
+  √ existing attempts plan batch FK only from their exact qcBatchId and retain every original field (575 ms)
+  √ already populated additive batch FK is retained without re-copying historical qcBatchId (300 ms)
+  √ the pinned historical pair links only by frozen batch, preserving both attempts and their status (276 ms)
+  √ invalid historical batch pairing refuses the whole read-only plan: WorkAttempt second qcBatchId=batch-one (274 ms)
+  √ invalid historical batch pairing refuses the whole read-only plan: Result run-two batchId=null (276 ms)
+  √ invalid historical batch pairing refuses the whole read-only plan: WorkAttempt second qcBatchId=null (278 ms)
+  √ invalid historical batch pairing refuses the whole read-only plan: Result run-one isCurrent=1 (491 ms)
+  √ invalid historical batch pairing refuses the whole read-only plan: Result run-one batchId=batch-two (276 ms)
+
+PASS tests/contracts/audit_2_6_pt_startup.test.js (62 MB heap size)
+  √ direct startup refuses a fresh Prisma PT/NCR successor without guards or receipts before app/writers load, without changing the database (778 ms)
+  √ direct startup checks #187 before otherwise complete #189 evidence and makes no writes (746 ms)
+  √ direct startup refuses a corrupted PT receipt without repairing it or loading the application (782 ms)
+  √ direct startup refuses missing Result equipment guards before any application writer starts (1010 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: 7921b658-41de-46c9-8291-779f50fad4ac (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6fd1d4eb-e536-49a6-a06e-2b126430821e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 094132a0-c94e-4c55-aefc-a36a74a16753 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-190-EXECUTION
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 060aeea9-6a89-4e8d-a191-7c78e32aef56 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-190-EXECUTION
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/audit_3_1_attempt_execution.test.js (142 MB heap size)
+  √ saveResults retains fraction-only technician saves when canonical TEXTURE is owned by null (396 ms)
+  √ saveResults retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst (141 ms)
+  √ batchSave retains fraction-only technician saves when canonical TEXTURE is owned by null (159 ms)
+  √ batchSave retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst (147 ms)
+  √ a reasoned repeat allocates max+1 and preserves every old field except its legitimate QUESTIONED transition (58 ms)
+  √ all replicates in one submitted execution share one attempt; later execution preserves that evidence (53 ms)
+  √ one texture execution records all four Results and an explicitly reasoned repeat gets number2 (53 ms)
+  √ invalid texture or noncanonical reason refuses without attempt, result, cache or audit writes (19 ms)
+  √ ordered measurement without work refuses before any write (8 ms)
+  √ ordered spectral-prediction without work refuses before any write (7 ms)
+  √ separate fraction work produces one TEXTURE attempt with source ids and leaves fraction attempts untouched (63 ms)
+  √ direct derivation without TEXTURE work refuses and leaves recorded fractions unchanged (51 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8e10ab51-3c18-4696-95c2-749a12b663d2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8e10ab51-3c18-4696-95c2-749a12b663d2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8e10ab51-3c18-4696-95c2-749a12b663d2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57ead677-f815-445b-9d51-426545c71195 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57ead677-f815-445b-9d51-426545c71195 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57ead677-f815-445b-9d51-426545c71195 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0cfb8352-a5c6-4c67-9cc7-5e89ebaf4859 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0cfb8352-a5c6-4c67-9cc7-5e89ebaf4859 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0cfb8352-a5c6-4c67-9cc7-5e89ebaf4859 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3d7c22d0-9879-4e29-85e3-e712ef88db54 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3d7c22d0-9879-4e29-85e3-e712ef88db54 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3d7c22d0-9879-4e29-85e3-e712ef88db54 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb26d107-53d2-41a8-956c-b6c0082782d6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb26d107-53d2-41a8-956c-b6c0082782d6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb26d107-53d2-41a8-956c-b6c0082782d6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 29c6e334-80ce-4777-aa0f-ff3749d6105a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 29c6e334-80ce-4777-aa0f-ff3749d6105a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 29c6e334-80ce-4777-aa0f-ff3749d6105a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 093eb1a9-737f-4a3f-ae4c-fee3ea7e36c1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 093eb1a9-737f-4a3f-ae4c-fee3ea7e36c1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c90f3d5b-4391-4cfc-9cb7-c2c24276682f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c90f3d5b-4391-4cfc-9cb7-c2c24276682f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fc470d3d-d82e-49d8-b516-a44113f68724 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fc470d3d-d82e-49d8-b516-a44113f68724 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d38f1eaa-b661-417a-aa54-a8caac33a6ad (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 551ce24e-b477-4641-b71a-89609e27690e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 74e74397-8cc1-473a-8dbb-2c950a3d1b9f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 611e1faf-d07d-45a3-8a02-5abc9f84411f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3f52dc81-a2a1-4626-9db8-4261a35836f1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 931040cc-b262-4702-b023-042a7bf4e7df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 931040cc-b262-4702-b023-042a7bf4e7df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 223361b3-0a21-4878-b2c4-14ac7dc29e5e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 223361b3-0a21-4878-b2c4-14ac7dc29e5e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 958745f4-172f-41ff-904c-d4c9c45069e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 958745f4-172f-41ff-904c-d4c9c45069e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 50cbaad2-1a21-405a-b52e-7927336776e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 50cbaad2-1a21-405a-b52e-7927336776e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 50cbaad2-1a21-405a-b52e-7927336776e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 50cbaad2-1a21-405a-b52e-7927336776e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 50cbaad2-1a21-405a-b52e-7927336776e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 50cbaad2-1a21-405a-b52e-7927336776e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 50cbaad2-1a21-405a-b52e-7927336776e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2943f751-5c74-46c5-b1aa-4ccdba0136ac (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [proficiencyRound] Error: PrismaClientKnownRequestError: 
+    Invalid `tx.auditLog.create()` invocation in
+    C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\nonconformityService.js:14:24
+    
+      11 }
+      12 async function audit(tx,actor,action,before,after) {
+      13     rules.requireTransaction(tx);
+    → 14     return tx.auditLog.create(
+    Foreign key constraint violated on the foreign key
+        at zr.handleRequestError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:8172)
+        at zr.handleRequestError [as handleAndLogRequestError] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7467)
+        at zr.handleAndLogRequestError [as request] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7174)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at a (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:5816)
+        at Object.raise (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\nonconformityService.js:34:5)
+        at raiseUnsatisfactory (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\proficiencyRoundService.js:44:20)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\proficiencyRoundService.js:70:70
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.recordRound (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\ptController.js:23:23) {
+      code: 'P2003',
+      meta: {
+        modelName: 'AuditLog',
+        driverAdapterError: DriverAdapterError: ForeignKeyConstraintViolation
+            at BetterSQLite3Transaction.onError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:568:11)
+            at BetterSQLite3Transaction.performIO (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:563:12)
+            at BetterSQLite3Transaction.queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:504:63)
+            at queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43566)
+            at o (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:25753)
+            at e.xr (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:46795)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43535)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43973)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:42723)
+            at processTicksAndRejections (node:internal/process/task_queues:103:5)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:45151)
+            at e.run (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:42242)
+            at execute (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:61:815)
+            at qt.request (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:62:2327)
+            at Object.singleLoader (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:6569) {
+          cause: [Object]
+        }
+      },
+      clientVersion: '7.10.0'
+    }
+
+      4 |
+      5 | function respondError(res, error, fallback) {
+    > 6 |     if (!error.statusCode) console.error('[proficiencyRound] Error:', error);
+        |                                    ^
+      7 |     return res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : fallback,
+      8 |         ...(error.code && { code: error.code }) });
+      9 | }
+
+      at error (controllers/ptController.js:6:36)
+      at respondError (controllers/ptController.js:26:9)
+
+  console.log
+    [AUTH] Verifying token for ID: bcb13d34-d884-40ee-b15b-220b9c67ce1c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2d9e2bf7-6d48-4e48-8867-931336b92244 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User pt-tech-07c2c8b1-5395-4a4f-a528-fb5afc7aca1e (Lab: 7a7f45a4-4e01-4dc6-8a7a-fdd467f5a132) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/proficiencyRoundService.js:13:22)
+      at Object.authorize [as record] (services/proficiencyRoundService.js:62:5)
+      at record (controllers/ptController.js:23:36)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:165:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 2d9e2bf7-6d48-4e48-8867-931336b92244 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User pt-tech-07c2c8b1-5395-4a4f-a528-fb5afc7aca1e (Lab: 7a7f45a4-4e01-4dc6-8a7a-fdd467f5a132) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/proficiencyRoundService.js:13:22)
+      at authorize (services/proficiencyRoundService.js:82:9)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.updateRound (controllers/ptController.js:31:64)
+
+  console.log
+    [AUTH] Verifying token for ID: 2d9e2bf7-6d48-4e48-8867-931336b92244 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2d9e2bf7-6d48-4e48-8867-931336b92244 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_2_6_pt_http.test.js (227 MB heap size)
+  √ explicit invalid PT date null refuses create and update with zero writes (80 ms)
+  √ explicit invalid PT date 0 refuses create and update with zero writes (33 ms)
+  √ explicit invalid PT date true refuses create and update with zero writes (29 ms)
+  √ explicit invalid PT date false refuses create and update with zero writes (28 ms)
+  √ explicit invalid PT date  refuses create and update with zero writes (29 ms)
+  √ explicit invalid PT date invalid-date refuses create and update with zero writes (27 ms)
+  √ PT create resolves a known lab code and rejects an unknown lab id with a stable 4xx (25 ms)
+  √ correction away from UNSATISFACTORY retains its RAISED NCR link and audits the old/new outcomes (28 ms)
+  √ actual PT create preserves catalogue case, classifies z=3 as unsatisfactory, freezes lab/analysis policy and queues NCR evidence (33 ms)
+  √ actual PT create refuses sigma null with stable 400 and zero PT/audit writes (14 ms)
+  √ actual PT create refuses sigma undefined with stable 400 and zero PT/audit writes (13 ms)
+  √ actual PT create refuses sigma 0 with stable 400 and zero PT/audit writes (12 ms)
+  √ actual PT create refuses sigma -1 with stable 400 and zero PT/audit writes (14 ms)
+  √ actual PT create refuses sigma bad with stable 400 and zero PT/audit writes (16 ms)
+  √ actual PT create stores the unrounded near-boundary score and negative z=-3 is unsatisfactory (29 ms)
+  √ legacy flags carry a French warning; explicit sigma correction reclassifies, clears flags and retains before/after audit (28 ms)
+  √ metadata-only update preserves historical scores/classification/flags, and a numeric correction requires explicit sigma (23 ms)
+  √ manager deletion requires a reason, hides rather than erases, is idempotent and blocks later updates (51 ms)
+  √ actual PT write rolls the round back if its audit cannot be stored (149 ms)
+  √ lab-scoped technician cannot create or update another lab and cannot include deleted rounds (98 ms)
+
+PASS tests/contracts/audit_2_6_pt_backfill.test.js (211 MB heap size)
+  √ deleted unsatisfactory rounds are listed but excluded from new NCR marking (318 ms)
+  √ dry-run lists missing/nonpositive/nonfinite sigma and catalogue mismatches without changing a byte (288 ms)
+  √ reviewed apply only flags or marks pending, preserves all analytical values and old outcomes, audits each change and is idempotent (313 ms)
+  √ missing/stale dry-run fingerprint and missing actor each refuse with zero writes (315 ms)
+  √ a changed historical row invalidates the reviewed plan without silently re-scoring it (312 ms)
+  √ an audit-write fault rolls back every flag and pending marker (522 ms)
+  √ CLI defaults to dry-run and rejects conflicting or incomplete options (2 ms)
+
+PASS tests/contracts/audit_2_6_pt_install.test.js (212 MB heap size)
+  √ legacy dry-run is byte-identical; additive install preserves scores, outcomes and every old PT field; repeat is zero-write (310 ms)
+  √ the fresh-column path adds only guards and receipt, without rebuilding the table (285 ms)
+  √ a receipt-write fault rolls all additive DDL back byte-for-byte (294 ms)
+  √ a partial column installation refuses without writes (278 ms)
+  √ an altered receipt refuses startup and apply without writes (292 ms)
+  √ uninstalled startup refuses and explicit database / non-conflicting CLI arguments are required (281 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labgtm (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labgtm (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labgtm (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labgtm (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labgtm (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labgtm (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labgtm (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labgtm (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_2_6_qc_commands.test.js (260 MB heap size)
+  √ profile CREATE retains its action and sole audit, with uniform payload and matching snapshot event (85 ms)
+  √ native build, nested membership rebuild, direct rebuild, reorder and first start each write one complete pair (209 ms)
+  √ partial measurement, automatic evaluation, reopen, correction and explicit evaluation list every changed evidence row once (278 ms)
+  √ compatibility submission, correction, reopen and clear preserve old audits and produce one complete pair (208 ms)
+  √ disposition REPEAT_BATCH keeps its sole action, mandatory WorkItem state audit and idempotency (157 ms)
+  √ disposition REJECT keeps its sole action, mandatory WorkItem state audit and idempotency (138 ms)
+  √ outer mutation aggregates nested evaluation and metadata; a late snapshot insert fault rolls back all rows (215 ms)
+  √ malformed stored legacy history {unparseable returns stable HTTP 409 on read and mutation with zero writes (48 ms)
+  √ malformed stored legacy history {"not":"an array"} returns stable HTTP 409 on read and mutation with zero writes (37 ms)
+
+PASS tests/contracts/audit_2_6_result_equipment_install.test.js (253 MB heap size)
+  √ additive equipment evidence install preserves every old Result field, leaves historical evidence NULL, and repeats without writes (294 ms)
+  √ fresh Prisma column gets guards and a receipt without rebuilding; invalid inserts and changing NULL or recorded evidence refuse exactly (291 ms)
+  √ receipt failure rolls back the column and both guards byte-identically (281 ms)
+  √ partial/tampered evidence cannot start or auto-repair (286 ms)
+
+PASS tests/contracts/audit_2_6_sql_scanner.test.js (257 MB heap size)
+  √ closed loadProficiencyMigrationSource SQL is inspected while appended workflow writes remain rejected (16 ms)
+  √ closed loadResultEquipmentMigrationSource SQL is inspected while appended workflow writes remain rejected (5 ms)
+  √ shadowed, escaped and mutated loadProficiencyMigrationSource sources are still unknown SQL (4 ms)
+  √ shadowed, escaped and mutated loadResultEquipmentMigrationSource sources are still unknown SQL (2 ms)
+  √ changed loadProficiencyMigrationSource loader or DDL bytes restore the failing unknown-SQL finding (2 ms)
+  √ changed loadResultEquipmentMigrationSource loader or DDL bytes restore the failing unknown-SQL finding (2 ms)
+
+PASS tests/contracts/audit_3_1_attempt_components.test.js (258 MB heap size)
+  √ stored RETURNED appears as a read-only badge, with its author and unlinked attempt number (57 ms)
+  √ stored REJECTED appears as a read-only badge, with its author and unlinked attempt number (4 ms)
+  √ stored OLD_UNKNOWN appears as a read-only badge, with its author and unlinked attempt number (4 ms)
+  √ an imported result without an attempt never invents Attempt #1 (4 ms)
+  √ the result line uses its actual linked attempt number (3 ms)
+  √ all attempt evidence labels are present in en (3 ms)
+  √ all attempt evidence labels are present in es (2 ms)
+  √ all attempt evidence labels are present in es-419 (2 ms)
+  √ all attempt evidence labels are present in fr (2 ms)
+  √ all attempt evidence labels are present in pt (2 ms)
+
+PASS tests/contracts/audit_2_6_pt_assessment.test.js (261 MB heap size)
+  √ equipment and PT policies expose every pinned preset and scope (1 ms)
+  √ criticality policy rejects omitted, extra or illegal classifications
+  √ PT limits require finite, positive, strictly ordered thresholds and no extra fields (1 ms)
+  √ z=2 is classified without rounding as SATISFACTORY
+  √ z=2.0001 is classified without rounding as QUESTIONABLE
+  √ z=2.9999 is classified without rounding as QUESTIONABLE
+  √ z=3 is classified without rounding as UNSATISFACTORY (1 ms)
+  √ z=-3 is classified without rounding as UNSATISFACTORY
+  √ custom resolved limits govern the score and are detached for freezing
+  √ z retains full precision and numeric input never invents a missing value (9 ms)
+  √ invalid sigma null is refused rather than defaulting to one
+  √ invalid sigma undefined is refused rather than defaulting to one
+  √ invalid sigma  is refused rather than defaulting to one
+  √ invalid sigma 0 is refused rather than defaulting to one (1 ms)
+  √ invalid sigma -1 is refused rather than defaulting to one
+  √ invalid sigma Infinity is refused rather than defaulting to one
+  √ invalid sigma NaN is refused rather than defaulting to one (1 ms)
+  √ invalid sigma false is refused rather than defaulting to one
+  √ invalid sigma [] is refused rather than defaulting to one
+  √ invalid sigma bad is refused rather than defaulting to one
+  √ legacy diagnostics distinguish missing/nonpositive sigma and retain valid explicit 1.0
+
+Test Suites: 12 passed, 12 total
+Tests:       240 passed, 240 total
+Snapshots:   0 total
+Time:        109.662 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_pt_assessment.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_pt_backfill.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_pt_http.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_pt_install.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_pt_startup.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_qc_commands.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_result_equipment_install.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_sql_scanner.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_1_attempt_backfill_plan.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_1_attempt_components.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_1_attempt_execution.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_1_attempt_install.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-ui-serial\batch-09.json

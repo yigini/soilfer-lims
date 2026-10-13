@@ -1,0 +1,32 @@
+FAIL tests/contracts/issue_206_container_components.test.js
+  √ sample detail renders the physical hierarchy and the linked attempt without implying a legacy backfill (58 ms)
+  √ aliquot selector never lists bulk or disposed material and emits the explicit chosen identity (7 ms)
+  √ offline label QR encodes the issued container code and the printed card identifies its parent sample (4 ms)
+  × a dilution repeat sends the explicitly selected physical aliquot identity (14 ms)
+  √ container labels, kinds and policy keys are present in both en catalogues (28 ms)
+  √ container labels, kinds and policy keys are present in both es catalogues (7 ms)
+  √ container labels, kinds and policy keys are present in both es-419 catalogues (9 ms)
+  √ container labels, kinds and policy keys are present in both fr catalogues (5 ms)
+  √ container labels, kinds and policy keys are present in both pt catalogues (3 ms)
+
+  ● a dilution repeat sends the explicitly selected physical aliquot identity
+
+    expect(received).toBeNull()
+
+    Received: "physical-aliquot"
+
+      86 |     await host.render({ item: { ...item, workItemId: 'other-work', sampleId: 'other-sample' } });
+      87 |     const otherChooser = host.all().find(node => node.type === host.children['../sample/AliquotSelect']);
+    > 88 |     expect(otherChooser.props.value).toBeNull();
+         |                                      ^
+      89 |     await host.find('dilute-repeat').props.onClick();
+      90 |     expect(axios.post).toHaveBeenCalledWith('/api/work-items/other-work/repeats', {
+      91 |         reason: 'ABOVE_RANGE_DILUTION', note: 'Dilute this physical aliquot' });
+
+      at Object.toBeNull (tests/contracts/issue_206_container_components.test.js:88:38)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 8 passed, 9 total
+Snapshots:   0 total
+Time:        0.426 s, estimated 1 s
+Ran all test suites within paths "tests/contracts/issue_206_container_components.test.js".

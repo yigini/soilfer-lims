@@ -1,0 +1,53 @@
+PASS tests/contracts/issue_206_container_components.test.js
+  √ sample detail renders the physical hierarchy and the linked attempt without implying a legacy backfill (58 ms)
+  √ aliquot selector never lists bulk or disposed material and emits the explicit chosen identity (6 ms)
+  √ offline label QR encodes the issued container code and the printed card identifies its parent sample (4 ms)
+  √ a dilution repeat sends the explicitly selected physical aliquot identity (16 ms)
+  √ container labels, kinds and policy keys are present in both en catalogues (27 ms)
+  √ container labels, kinds and policy keys are present in both es catalogues (6 ms)
+  √ container labels, kinds and policy keys are present in both es-419 catalogues (6 ms)
+  √ container labels, kinds and policy keys are present in both fr catalogues (6 ms)
+  √ container labels, kinds and policy keys are present in both pt catalogues (8 ms)
+
+PASS tests/contracts/audit_4_2_barcode_ui.test.js
+  Audit 4.2: real DOM barcode wedge and value-cell boundaries
+    √ F2 routes GHA1-26-000123N to row 123, without filling it (272 ms)
+    √ unfocused burst routes GHA1-26-000123N to row 123, without filling it (126 ms)
+    √ SCAN_CHECK_CHARACTER_INVALID keeps focus out of the row and gives the red banner/error cue (140 ms)
+    √ SAMPLE_NOT_FOUND keeps focus out of the row and gives the red banner/error cue (126 ms)
+    √ SAMPLE_LOOKUP_AMBIGUOUS keeps focus out of the row and gives the red banner/error cue (145 ms)
+    √ exact stored original/issued label GHA1-26-000123K remains authoritative (150 ms)
+    √ exact stored original/issued label HISTORICAL-N-000123 remains authoritative (132 ms)
+    √ exact stored original/issued label LABEL-WITHOUT-CHECK remains authoritative (130 ms)
+    √ an exact sample outside the run has its own stable refusal and never focuses or fills a row (130 ms)
+    √ lookup IDs and lab identifiers cannot substitute for an exact issued label or original ID (135 ms)
+    √ a disabled result cell refuses focus even for an exact in-run sample (126 ms)
+    √ the same barcode in a real grid value cell is rejected before draft writes or Enter navigation (95 ms)
+    √ texture fraction 0 refuses a wedge without altering any fraction (26 ms)
+    √ texture fraction 1 refuses a wedge without altering any fraction (23 ms)
+    √ texture fraction 2 refuses a wedge without altering any fraction (25 ms)
+    √ QC observations refuse a wedge before preview or observation persistence (40 ms)
+    √ the single-sample editor forwards the same zero-draft wedge refusal (40 ms)
+    √ the strict inter-key boundary at 29ms preserves ordinary typing and rejects only the fast burst (18 ms)
+    √ the strict inter-key boundary at 30ms preserves ordinary typing and rejects only the fast burst (23 ms)
+    √ unmounting a buffered value editor cancels its pending draft write (19 ms)
+    √ ordinary slow locale typing and short Enter input still reach the draft callback (19 ms)
+    √ changing the run discards a late lookup response without success, focus or draft writes (117 ms)
+    √ all scan messages exist in every shipped locale (23 ms)
+
+PASS tests/contracts/audit_4_4_approval_ui.test.js
+  √ technician sends the exact typed range value/context/reason and never records a Result when requesting (51 ms)
+  √ ineligible bad number never offers an override request (5 ms)
+  √ ineligible <0.001 never offers an override request (4 ms)
+  √ ineligible 6 never offers an override request (4 ms)
+  √ using a real approved request selects only its id; cancellation calls the actual request endpoint (4 ms)
+  √ dilution is absent before recording, then calls only the unchanged repeat command when server preflight permits (4 ms)
+  √ manager queue requires a reason and a different reviewer, then sends the exact decision (5 ms)
+  √ a user without review permission cannot load the manager queue (2 ms)
+  √ all five client/server locales contain the complete approval and dilution labels (13 ms)
+
+Test Suites: 3 passed, 3 total
+Tests:       41 passed, 41 total
+Snapshots:   0 total
+Time:        2.973 s, estimated 3 s
+Ran all test suites within paths "tests/contracts/audit_4_2_barcode_ui.test.js", "tests/contracts/audit_4_4_approval_ui.test.js", "tests/contracts/issue_206_container_components.test.js".
