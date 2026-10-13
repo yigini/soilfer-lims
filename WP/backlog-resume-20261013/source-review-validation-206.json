@@ -1,0 +1,110 @@
+{
+  "observedAt": "2026-10-13T09:59:16.136966+00:00",
+  "reviewHead": "7b893c5f8f43bbbe2af1994d53306b3fd3cb0e34",
+  "focusedSuites": 6,
+  "focusedTests": 170,
+  "fullSuite": "RUNNING",
+  "productionMutations": 0,
+  "files": [
+    {
+      "path": "test-206-final-focused.log",
+      "bytes": 53020,
+      "sha256": "e24945fa05b3eea56375125b66cf45f0e993de527fda4535f6a103c476149347"
+    },
+    {
+      "path": "test-206-final-focused-exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "client-build-final-206.log",
+      "bytes": 5980,
+      "sha256": "009e41b4a7f112bb70ecaef7b746904effcaf48998aa56eea88d10d30f350abd"
+    },
+    {
+      "path": "client-lint-canonical-206.log",
+      "bytes": 2840,
+      "sha256": "144e0421a2aad33bce1569e4c631423264561a813e0726488f28199cf7e2ee5d"
+    },
+    {
+      "path": "client-lint-baseline-comparison.json",
+      "bytes": 198,
+      "sha256": "c16f1e635c4db71db8939c3eb3e29b0ab304598ec0f7fc0f41e33ff8200ae487"
+    },
+    {
+      "path": "compare-client-lint.cjs",
+      "bytes": 2425,
+      "sha256": "50438fc841e7465d5c74d3fc2a9be1007e057d9d4a67af752b4640322f9cdfa9"
+    },
+    {
+      "path": "browser-206.json",
+      "bytes": 1146,
+      "sha256": "a6e20e9f18eaba3d019dea0de05ebe13a8ba7c991563da4e644275518b97b28f"
+    },
+    {
+      "path": "ui-retention-206.json",
+      "bytes": 1618,
+      "sha256": "d4e62bcf01078b4c17ee5a0360f1f462ee431a2b76421136142e1cbd365a676b"
+    },
+    {
+      "path": "issue-206-review-ref.json",
+      "bytes": 2990,
+      "sha256": "e0a0a403ee0ea44550b3fd1a909a50097db83b255eb854ebf6f934210c377b7e"
+    },
+    {
+      "path": "issue-206-source-paths.json",
+      "bytes": 2287,
+      "sha256": "88a559e00361363dd9b6cbb50b877762b55ff645fabe55bdb0f3ea49e7a2a24b"
+    },
+    {
+      "path": "prepare-container-ui.cjs",
+      "bytes": 3380,
+      "sha256": "f9153668d771845dd44eaf42c3f701bc73f65475f569a96011fb5bfb1672adaf"
+    },
+    {
+      "path": "prepare-issue-206-review-ref.py",
+      "bytes": 3625,
+      "sha256": "3ac1441522098fd393fea3bd04ce0bffa43b4bc210165c0cba8cae9019ce3d7d"
+    },
+    {
+      "path": "prisma-fresh-schema-206.sql",
+      "bytes": 86334,
+      "sha256": "77c3635001309d40a3a19ac60503d7350cf6f483afb39fc2dc48c2ff1299a0ee"
+    },
+    {
+      "path": "server-full-206.log",
+      "bytes": 97968,
+      "sha256": "1d03b1e4c175c5b67102e877061bd60d502cd599c69a017922909d8c18b38c02"
+    },
+    {
+      "path": "server-full-repaired-206.log",
+      "bytes": 1058371,
+      "sha256": "69ea7946f886e2a3b07a7b81a52ab85da2b59474ee6b4ccd8dbdb55b225cae99"
+    },
+    {
+      "path": "server-full-repaired-206-exit.txt",
+      "bytes": 5,
+      "sha256": "92d6c70703603ae51d74dafe3c838ccb1cb675f9b0794159522910c02cf643b2"
+    },
+    {
+      "path": "test-206-initial.log",
+      "bytes": 550759,
+      "sha256": "03e046a53e09fdb51ed8e555f3f4ea263939e06550c1f7ffc08039322ea01f05"
+    },
+    {
+      "path": "test-206-repaired.log",
+      "bytes": 551171,
+      "sha256": "c5774a366fe6ff382ff9fca457c9b6872a5a0565de29f147ee84fc881312d0f9"
+    },
+    {
+      "path": "test-206-audit-log-fix.log",
+      "bytes": 6261,
+      "sha256": "ee10266b9a23de9384043ac85e4a4cd59fccbf2f203cdb6028a438235bf0cb77"
+    },
+    {
+      "path": "test-206-focused.log",
+      "bytes": 7286,
+      "sha256": "db3119f3c6d3b78126b3617916e7e2ebbbe1d883644478b79b7c45f86f5c6caa"
+    }
+  ]
+}

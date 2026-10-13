@@ -1,0 +1,12 @@
+{
+  "baselineHead": "2f10acf1ae6ddd87067ffea96d9f23437aebd96f",
+  "current": {
+    "errors": 0,
+    "warnings": 14
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 14
+  },
+  "introduced": []
+}

@@ -109,3 +109,4 @@ WP/pr284-frozen-kit-20261012T202400Z/** -text
 WP/pr284-frozen-kit-20261012T213000Z/** -text
 server/prisma/migrations/20261013000100_sample_containers/migration.sql text eol=lf
 server/services/sampleContainerMigrationSource.js text eol=lf
+WP/backlog-resume-20261013/** -text

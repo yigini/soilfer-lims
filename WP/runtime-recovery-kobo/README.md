@@ -1,3 +1,15 @@
+## 2026-10-13 #206 source review boundary
+
+YY delegated backlog decisions are live at #162/6141144901. #206 is implemented in the existing audit checkout. Audit source `72fca9cdf5882600750864302760f1262a15cd64`; source-only review ref `codex/issue-206-containers` / head `7b893c5f8f43bbbe2af1994d53306b3fd3cb0e34`, base `959d17e11c357266f7c2a41b0c84ab76914c591e`. No new checkout or production writer.
+
+Completed checks: six focused suites / 170 tests PASS, client build PASS, canonical lint zero errors with the same 14 baseline warnings, desktop/mobile hierarchy and printed 100 × 50 mm label checked. Actual Chromium keyboard recording of all 40 determinations PASS. Retained evidence and source-ref equality record: `WP/backlog-resume-20261013/`.
+
+The final serial full suite is RUNNING with between-suite garbage collection. The earlier serial run hit its local Node heap limit; its four observed regressions were repaired and all affected checks passed. Do not interpret partial results as full-suite or deployment acceptance. No PR or release is launched yet. Claudio source inspection may proceed; final acceptance still requires complete regression/CI evidence and his actual exact-head verdict.
+
+PR294/#200 production deployment and handoff stay COMPLETE and immutable. Never rerun their build, proof, installer, verifier, collector, gate or notices. #103 remains read-only; all other YY-owned cards and production state remain untouched.
+
+---
+
 Backlog resumed after actual YY delegation — 2026-10-13
 
 Actual native YY instruction "can you please decide on behalf of me" was observed in LIMS Audit / Lab workflow audit and plan; Claudio decisions #162/6141144901 at 08:05:32 UTC independently verified and retained with hashes in WP/backlog-resume-20261013. Pip acknowledgement delivered ONCE with fresh target, empty draft and focus; visually verified. Batching YES: per-issue exact-head audit PASS, one exact-kit audit, one fresh single-use gate and one forward deploy; each issue retains its own Deployed comment and actual postcheck before closure, with the entire failed batch forward-fixed together. #206 containers/aliquots is NEXT and implementation is starting in this SAME worktree/branch; no audited head, new release or production operation exists. Then #214, #209 and #216 (dependencies #207/#208/#215); #203/#204/#217 when capacity permits. #102 owned by YY for real-device testing. #103 owned by Codex ONLY for a read-only discrepancy/mapping ledger reviewed by Claudio; APPLY still requires YY own explicit go. #156 owned by Codex after Phases 4–8, through policyService and registry. Earlier statements that those decisions are pending are now historical. PR294/#200 release and handoff remain COMPLETE and may never be repeated; all existing data, evidence, workload pins and release guardrails stay in force. Human files/drafts/cards untouched; no new chat/worker/subagent/worktree/concurrent writer.

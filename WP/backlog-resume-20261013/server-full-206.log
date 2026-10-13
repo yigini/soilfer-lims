@@ -1,0 +1,1589 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-laboratory) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/nonScientificAmendmentService.js:16:8)
+      at services/nonScientificAmendmentService.js:50:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:90:3)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-laboratory) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/nonScientificAmendmentService.js:16:8)
+      at services/nonScientificAmendmentService.js:75:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:91:3)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User requester (Lab: foreign-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/scientificAmendmentService.js:43:9)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:220:2
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/scientificAmendmentService.js:79:9)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:301:2
+
+  console.log
+    [AUTH] Verifying token for ID: authoriser (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+FAIL tests/contracts/audit_6_1_non_scientific_authorisation.test.js (97.495 s)
+  √ a profile request is PENDING and cannot change sample identity, approval or existing work (1596 ms)
+  √ a distinct approver applies a clerical correction once and retains prior approval and immutable request evidence (1400 ms)
+  √ Strict refuses self-authorisation and stale versions without any persisted changes (1379 ms)
+  √ authorisation re-reads actual lab policy; ADVISORY self-authorisation is explicit in the audit (1380 ms)
+  √ a different pending correction changing the profile makes this authorisation a zero-write conflict (1316 ms)
+  √ both request and authorisation enforce approval permission and current sample scope (1478 ms)
+  √ CLERICAL correction on ARCHIVED leaves physical status and prior approval unchanged (1359 ms)
+  √ CLERICAL correction on DISPOSED leaves physical status and prior approval unchanged (1344 ms)
+  √ ORDER authorisation records affected evidence and reason without changing orders, work, reports or sample (1367 ms)
+  √ REPORT authorisation records affected evidence and reason without changing orders, work, reports or sample (1353 ms)
+  √ foreign evidence, injected authorisation fields and invalid versions refuse without writes (1408 ms)
+  √ legacy NULL-version rows cannot enter the new authorisation workflow (1402 ms)
+  √ a late audit failure rolls back both authorisation and clerical profile changes (2751 ms)
+  √ the link guard accepts its exact authorised scientific context without changing any retained evidence (1342 ms)
+  √ the link guard refuses pending with zero writes (1380 ms)
+  √ the link guard refuses legacy with zero writes (1344 ms)
+  √ the link guard refuses clerical with zero writes (1352 ms)
+  √ the link guard refuses unselected with zero writes (1370 ms)
+  × the link guard refuses recorded-parent with zero writes (1359 ms)
+  √ the link guard refuses recorded-child with zero writes (1376 ms)
+  √ the link guard refuses reason-mismatch with zero writes (1353 ms)
+  √ an unrelated parentAttemptId cannot produce a link (1357 ms)
+  √ an unrelated childAttemptId cannot produce a link (1332 ms)
+  √ an unrelated workItemId cannot produce a link (1354 ms)
+  √ an unrelated amendmentId cannot produce a link (1364 ms)
+  √ an unrelated reason cannot produce a link (1340 ms)
+  √ all seven link columns are immutable and links and referenced attempts cannot be deleted (1456 ms)
+  √ a scientific CLIENT_RETEST request remains pending and preserves every existing row (1341 ms)
+  √ a scientific CONFIRMATION request remains pending and preserves every existing row (1348 ms)
+  √ scientific requests on ARCHIVED refuse without writes (1354 ms)
+  √ scientific requests on DISPOSED refuse without writes (1338 ms)
+  √ scientific requests on PROCESSING refuse without writes (1311 ms)
+  √ scientific requests reject permission before any writes (1301 ms)
+  √ scientific requests reject tenant before any writes (1334 ms)
+  √ scientific requests reject empty-lines before any writes (1369 ms)
+  √ scientific requests reject duplicate-lines before any writes (1317 ms)
+  √ scientific requests reject foreign-line before any writes (1360 ms)
+  √ scientific requests reject reason before any writes (1330 ms)
+  √ scientific requests reject forged-capability before any writes (1379 ms)
+  √ scientific requests refuse nonaccepted work without writes (1353 ms)
+  √ scientific requests refuse nonmeasurement work without writes (1357 ms)
+  √ scientific requests refuse duplicate-marker work without writes (1346 ms)
+  √ scientific requests retain scope for affectedResults (1347 ms)
+  √ scientific requests retain scope for affectedReports (1425 ms)
+  √ a late scientific request audit failure rolls back the request without changing retained evidence (1360 ms)
+  √ scientific CLIENT_RETEST authorisation reopens only selected work, seals the accepted parent and withdraws the exact report (1428 ms)
+  √ scientific CONFIRMATION authorisation reopens only selected work, seals the accepted parent and withdraws the exact report (1391 ms)
+  √ scientific authorisation re-reads second-person policy and explicitly records ADVISORY self-authorisation (1399 ms)
+  √ scientific authorisation rejects permission with zero writes (1371 ms)
+  √ scientific authorisation rejects tenant with zero writes (1329 ms)
+  √ scientific authorisation rejects stale-version with zero writes (1336 ms)
+  √ scientific authorisation rejects forged-capability with zero writes (1370 ms)
+  √ an action string or forged capability cannot reopen a released Sample (1360 ms)
+  √ an action string or forged capability cannot reopen a released WorkItem (1370 ms)
+  √ a late scientific authorisation audit failure rolls back every reopen, child, binding and report change (1439 ms)
+  √ withdrawal binding and every report content field stay sealed after authorisation (1382 ms)
+  √ scientific repeats preserve the existing configured attempt limit and NCR refusal (1349 ms)
+  √ authorisation revalidates parent-no-longer-accepted after a valid request and refuses the whole transaction (1372 ms)
+  √ authorisation revalidates new-open-child after a valid request and refuses the whole transaction (1407 ms)
+  √ an explicit selected-line CLIENT_RETEST limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent (1389 ms)
+  √ an explicit selected-line CONFIRMATION limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent (1359 ms)
+  √ a line override without the existing NCR assessment refuses the request atomically (1338 ms)
+  √ a pending scientific amendment cannot reopen a subsequently ARCHIVED sample (1350 ms)
+  √ a pending scientific amendment cannot reopen a subsequently DISPOSED sample (1339 ms)
+  √ the actual report HTTP routes retain internal access and refuse both public formats before expiry or revocation (2792 ms)
+  √ withdrawn report numbering remains reserved and the next issuance preserves its row and takes the next revision (1400 ms)
+  √ scientific request refuses unregistered laboratory authority without policy fallback or writes (1343 ms)
+  √ scientific authorise refuses unregistered laboratory authority without policy fallback or writes (1338 ms)
+  √ a pending request cannot grant withdrawal authority and a report cannot become withdrawn without its binding (1355 ms)
+
+  ● the link guard refuses recorded-parent with zero writes
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:172:10
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User 0ed37706-008a-46cf-9de0-826cd63843ee (Lab: ba004629-988b-4fe4-a005-08b77f7cab4c) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at executionContext (services/calibrationCurveService.js:18:19)
+      at services/calibrationCurveService.js:91:25
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_6_calibration.test.js:197:5)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T09:21:12.352Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+  console.log
+    [AUTH] Verifying token for ID: df86a45e-c825-4a2a-a1dd-b8f3a2c7f3db (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: df86a45e-c825-4a2a-a1dd-b8f3a2c7f3db (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: df86a45e-c825-4a2a-a1dd-b8f3a2c7f3db (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e5c43a9f-8c0d-4fad-8b56-345f39e9d647 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User 9b50d641-2cf8-4f27-be57-c824b0c13177 (Lab: 6201fde3-fd81-4a09-85ca-6a90718c7dfb) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at executionContext (services/calibrationCurveService.js:18:19)
+      at services/calibrationCurveService.js:134:25
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at controllers/calculationTemplateController.js:19:50
+
+  console.log
+    [AUTH] Verifying token for ID: f356ff30-b131-4069-a102-73bd533206cd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 557693be-4849-4c42-8a00-3680eaf2718b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 41178752-c41b-469f-828e-3cf15e3d2384 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7cfbfdc5-801e-4d9e-96c8-61212ff7d788 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7cfbfdc5-801e-4d9e-96c8-61212ff7d788 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+FAIL tests/contracts/audit_4_6_calibration.test.js (79.701 s)
+  √ only a started native run supplies the real frozen method revision; refusal writes nothing (1968 ms)
+  √ the actual Result writer recomputes every reading, refuses tampering and atomically freezes its curve and raw inputs (1890 ms)
+  √ response 5.002 compares extract mg/L with the highest standard and retains an amber flag=true after mg/kg conversion (2036 ms)
+  √ response 4.998 compares extract mg/L with the highest standard and retains an amber flag=false after mg/kg conversion (1995 ms)
+  √ a future failed curve blocks stored completion without changing an earlier Result or its frozen calculation (1867 ms)
+  √ every replicate participates in the unweighted fit; zero counts and repeated standards add no distinct levels (1762 ms)
+  √ negative correlation fails and a degenerate fit retains four null coefficients (1777 ms)
+  √ a new reasoned revision freezes new resolved limits; an old PASS cannot bypass the latest failed curve (1823 ms)
+  √ assigned analyst, scoped manager reason, and optimistic curve head protect the immutable revision chain (1804 ms)
+  √ missing points, qualifiers, negative concentrations and a stale activation refuse with zero writes (1762 ms)
+  √ a late event failure rolls back curve, all points and calibration audit together (1957 ms)
+  √ incomplete retained point sets cannot bind, and a nondeclared AAS/ICP template needs no curve (1733 ms)
+  √ actual authenticated HTTP entry retains permission, canonical scope, active context and stable refusal codes (1935 ms)
+  √ the pinned prerequisite helper has only the closed owned successors and no runtime writer exemption (1862 ms)
+  √ LAB curveMinPoints boundary 3 retains a curve PASS=true from laboratory policy (1782 ms)
+  √ LAB curveMinPoints boundary 4 retains a curve PASS=false from laboratory policy (1793 ms)
+  √ LAB curveMinR boundary 0.9998998674099174 retains a curve PASS=true from laboratory policy (1782 ms)
+  √ LAB curveMinR boundary 0.9999018674099175 retains a curve PASS=false from laboratory policy (1787 ms)
+  √ METHOD curveMinPoints boundary 3 retains a curve PASS=true from laboratory policy (1767 ms)
+  √ METHOD curveMinPoints boundary 4 retains a curve PASS=false from laboratory policy (1791 ms)
+  √ METHOD curveMinR boundary 0.9998998674099174 retains a curve PASS=true from laboratory policy (1812 ms)
+  √ METHOD curveMinR boundary 0.9999018674099175 retains a curve PASS=false from laboratory policy (1779 ms)
+  √ a passing recalibration binds later readings to revision2 while the original Result/calculation remain on revision1 (3532 ms)
+  × no-template completion retains the historical path for lab null without writes (1730 ms)
+  × no-template completion retains the historical path for lab unresolvable-owned-lab without writes (1743 ms)
+  √ UPDATE and DELETE are refused on every calculation table, preserving all original rows (1849 ms)
+  √ an actual calculation SQL context abort becomes a stable409 through the mapped repeat controller (1795 ms)
+  √ the actual curve governs extract 1 despite generic maximum 0.1, with HTTP preview and immutable flags (2642 ms)
+  √ the actual curve governs extract 4 despite generic maximum 1000, with HTTP preview and immutable flags (1876 ms)
+  √ a method with no active calculation keeps the generic #197 calibration maximum (1800 ms)
+  √ a calculated transcription correction keeps the original basis after newer-active, preserving every original scientific field (1816 ms)
+  √ a calculated transcription correction keeps the original basis after deactivated, preserving every original scientific field (1802 ms)
+  √ a correction of a correction keeps the first calculation basis and binds its own original evidence (1802 ms)
+  √ calculated final-only, mismatched output and partial raw-input corrections refuse with exact zero-write snapshots (1804 ms)
+  √ a correction cannot request a different activationId basis (1793 ms)
+  √ a correction cannot request a different templateId basis (1820 ms)
+  √ a correction cannot request a different templateVersion basis (1787 ms)
+  √ a correction cannot request a different curveId basis (1801 ms)
+  √ a revised original curve refuses a transcription correction without writes to either Result or calculation (1850 ms)
+  √ the actual correction HTTP route recomputes the extract-range flag and binds only stored ids (2110 ms)
+  √ a calculation field on a non-calculated Result is refused, while its old final-only correction remains available (1780 ms)
+  √ the authoritative completion preview verifies nested raw calculations, refuses tampering and allocates no Result (1852 ms)
+
+  ● no-template completion retains the historical path for lab null without writes
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at tests/contracts/audit_4_6_calibration.test.js:326:20
+
+  ● no-template completion retains the historical path for lab unresolvable-owned-lab without writes
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at tests/contracts/audit_4_6_calibration.test.js:326:20
+
+FAIL tests/contracts/audit_4_6_calculation_install.test.js (64.865 s)
+  × SQL permits a deactivated original basis only through the complete existing correction witness (1587 ms)
+  × SQL refuses a historical activation with no witness, preserving all owned rows and objects byte for byte (1458 ms)
+  × SQL refuses a historical activation with Result.sampleId, preserving all owned rows and objects byte for byte (1466 ms)
+  × SQL refuses a historical activation with Result.param, preserving all owned rows and objects byte for byte (1440 ms)
+  × SQL refuses a historical activation with Result.attemptId, preserving all owned rows and objects byte for byte (1485 ms)
+  × SQL refuses a historical activation with Result.replicateNo, preserving all owned rows and objects byte for byte (1499 ms)
+  × SQL refuses a historical activation with Result.methodologyId, preserving all owned rows and objects byte for byte (1585 ms)
+  × SQL refuses a historical activation with Result.batchId, preserving all owned rows and objects byte for byte (1476 ms)
+  × SQL refuses a historical activation with Result.equipmentId, preserving all owned rows and objects byte for byte (1445 ms)
+  × SQL refuses a historical activation with Result.equipmentReadiness, preserving all owned rows and objects byte for byte (1457 ms)
+  × SQL refuses a historical activation with Result.basis, preserving all owned rows and objects byte for byte (1467 ms)
+  × SQL refuses a historical activation with Result.provenance, preserving all owned rows and objects byte for byte (1467 ms)
+  × SQL refuses a historical activation with ResultCalculation.templateId, preserving all owned rows and objects byte for byte (1492 ms)
+  × SQL refuses a historical activation with ResultCalculation.templateVersion, preserving all owned rows and objects byte for byte (1450 ms)
+  × SQL refuses a historical activation with ResultCalculation.activationId, preserving all owned rows and objects byte for byte (1463 ms)
+  × SQL refuses a historical activation with ResultCalculation.curveId, preserving all owned rows and objects byte for byte (1452 ms)
+  × SQL refuses a historical activation with ResultCalculation.parameters, preserving all owned rows and objects byte for byte (1468 ms)
+  × SQL refuses a historical activation with ResultCalculation.conversionFactor, preserving all owned rows and objects byte for byte (1439 ms)
+  × SQL refuses a historical activation with ResultCalculation.unitConversion, preserving all owned rows and objects byte for byte (1453 ms)
+  × SQL refuses a historical activation with revised curve, preserving all owned rows and objects byte for byte (1455 ms)
+  √ PRE_199 actual populated baseline retains every old row, column, foreign key, index, trigger and receipt (632 ms)
+  √ managed creation installs the same PASS guard and preserves historical results after all refused inserts (111 ms)
+  √ managed receipt failure rolls the five new tables and references back while retaining every old object and row (89 ms)
+  √ the closed factory binds its bytes and sole caller; changed helper and second callers remain violations (33 ms)
+  √ real fresh schema dry-run, additive install and repeated no-op preserve all original rows and schema objects (1936 ms)
+  √ receipt refusal rolls every new guard and reference back atomically (1386 ms)
+  √ empty fresh catalogue installs schema with eleven deferred references, then restarts without any file-byte changes (1839 ms)
+  √ absent pct_mass defers only its three references; later catalogue insertion gets three receipts and preserves all prior evidence (1546 ms)
+  √ a conflicting present controlled prerequisite % refuses before schema or receipt writes (1380 ms)
+  √ a conflicting present controlled prerequisite mg/kg refuses before schema or receipt writes (1374 ms)
+  √ a conflicting present controlled prerequisite cmol(+)/kg refuses before schema or receipt writes (1350 ms)
+  √ a late per-reference receipt failure rolls every schema/reference addition back and preserves the complete prior database (1351 ms)
+  √ refuses partial-guard with unchanged bytes before any installation writes (1386 ms)
+  √ refuses changed-column with unchanged bytes before any installation writes (1356 ms)
+  √ refuses wrong-unit with unchanged bytes before any installation writes (1358 ms)
+  √ refuses wrong-reference with unchanged bytes before any installation writes (1379 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"slope":null} (1403 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"intercept":null} (1394 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"r":null} (1415 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"rSquared":null} (1468 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"slope":0} (1510 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"slope":null} (1535 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"intercept":null} (1533 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"r":null} (1519 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"rSquared":null} (1563 ms)
+  √ the installed fresh PASS guard rejects null, nonfinite and zero slope, while a degenerate FAIL stores all-null coefficients (1467 ms)
+  √ every managed table is byte-identical to its independently emitted fresh Prisma oracle, with guards separate (2 ms)
+  √ the actual point INSERT guard refuses out-of-range ordinals before capacity and extra points after capacity (1635 ms)
+  √ CLI requires an explicit existing database and an unambiguous mode (3 ms)
+
+  ● SQL permits a deactivated original basis only through the complete existing correction witness
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at Object.<anonymous> (tests/contracts/audit_4_6_calculation_install.test.js:171:15)
+
+  ● SQL refuses a historical activation with no witness, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with Result.sampleId, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with Result.param, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with Result.attemptId, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with Result.replicateNo, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with Result.methodologyId, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with Result.batchId, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with Result.equipmentId, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with Result.equipmentReadiness, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with Result.basis, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with Result.provenance, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with ResultCalculation.templateId, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with ResultCalculation.templateVersion, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with ResultCalculation.activationId, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with ResultCalculation.curveId, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with ResultCalculation.parameters, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with ResultCalculation.conversionFactor, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with ResultCalculation.unitConversion, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  ● SQL refuses a historical activation with revised curve, preserving all owned rows and objects byte for byte
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      59 |         return existing.id;
+      60 |     }
+    > 61 |     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.sample.id, requestedAliquot);
+         |                                                                                                ^
+      62 |     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+      63 |         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
+      64 |         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
+
+      at id (services/workAttemptWriteService.js:61:96)
+      at insertExecution (tests/helpers/workAttemptFixtures.js:35:15)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:82:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at correctionSqlFixture (tests/contracts/audit_4_6_calculation_install.test.js:116:26)
+      at tests/contracts/audit_4_6_calculation_install.test.js:189:15
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_lab190evidence (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_lab190other (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_3_1_attempt_sql_guards.test.js (67.406 s)
+  √ every lab installs partial attempt uniqueness and current-result uniqueness with all guards (397 ms)
+  √ canonical insert and status update OPEN are accepted (346 ms)
+  √ canonical insert and status update RECORDED are accepted (346 ms)
+  √ canonical insert and status update SUBMITTED are accepted (442 ms)
+  √ canonical insert and status update ACCEPTED are accepted (351 ms)
+  √ canonical insert and status update QUESTIONED are accepted (341 ms)
+  √ canonical insert and status update INVALIDATED are accepted (389 ms)
+  √ canonical insert and status update SUPERSEDED are accepted (337 ms)
+  √ historical RETURNED stays stored but cannot be newly inserted or updated (371 ms)
+  √ historical REJECTED stays stored but cannot be newly inserted or updated (351 ms)
+  √ the migration can flag every historical duplicate before guards, without renumbering (367 ms)
+  √ all conflict flag updates unflagged -> flag are refused (406 ms)
+  √ all conflict flag updates flagged -> null are refused (345 ms)
+  √ all conflict flag updates flagged -> same are refused (363 ms)
+  √ all conflict flag updates unflagged -> null are refused (352 ms)
+  √ evidence field evidenceData is immutable even within its creating transaction (362 ms)
+  √ evidence field evidenceHash is immutable even within its creating transaction (344 ms)
+  √ evidence field instrumentId is immutable even within its creating transaction (372 ms)
+  √ the fixed evidence case refuses caller SQL, unknown fields and invalid parents without writes (16154 ms)
+  √ the new native FK identity cannot authorize arbitrary WorkAttempt SQL or an invalid parent (10691 ms)
+  √ recorded identity field attemptNo cannot change (360 ms)
+  √ recorded identity field workItemId cannot change (337 ms)
+  √ recorded identity field author cannot change (350 ms)
+  √ recorded identity field createdAt cannot change (342 ms)
+  √ recorded identity field updatedAt cannot change (365 ms)
+  √ recorded identity field qcBatchId cannot change (359 ms)
+  √ recorded identity field rawData cannot change (337 ms)
+  √ batch FK is additive, reference checked and write-once when recorded (394 ms)
+  √ canonical reason QC_BATCH_FAIL is accepted by both the shared contract and SQL (363 ms)
+  √ canonical reason REVIEW_OUTLIER is accepted by both the shared contract and SQL (344 ms)
+  √ canonical reason DUPLICATE_DISAGREEMENT is accepted by both the shared contract and SQL (334 ms)
+  √ canonical reason ABOVE_RANGE_DILUTION is accepted by both the shared contract and SQL (341 ms)
+  √ canonical reason INSTRUMENT_FAULT is accepted by both the shared contract and SQL (332 ms)
+  √ canonical reason PREP_ERROR is accepted by both the shared contract and SQL (342 ms)
+  √ canonical reason TRANSCRIPTION_ERROR is accepted by both the shared contract and SQL (358 ms)
+  √ canonical reason CLIENT_RETEST is accepted by both the shared contract and SQL (341 ms)
+  √ canonical reason CONFIRMATION is accepted by both the shared contract and SQL (362 ms)
+  √ canonical reason OTHER is accepted by both the shared contract and SQL (346 ms)
+  √ reason remains nullable for a second execution, while noncanonical values are refused (399 ms)
+  √ SQL and runtime canonical lookup agree: only orphan historical imports can omit an attempt (447 ms)
+  √ raw review inserts require a current attempt of the same work item and sample (432 ms)
+  √ the raw review guard permits only an unexecuted analytical OMIT with no attempt (400 ms)
+  √ SQL keeps non-measurement ARCH review on its separate evidence workflow (334 ms)
+  √ SQL keeps non-measurement ARCHIVING review on its separate evidence workflow (332 ms)
+  √ SQL keeps non-measurement Archive review on its separate evidence workflow (332 ms)
+  √ SQL keeps non-measurement DISP review on its separate evidence workflow (341 ms)
+  √ SQL keeps non-measurement DISPOSAL review on its separate evidence workflow (341 ms)
+  √ SQL keeps non-measurement DRYING review on its separate evidence workflow (360 ms)
+  √ SQL keeps non-measurement Dispose review on its separate evidence workflow (348 ms)
+  √ SQL keeps non-measurement HOMOGENIZATION review on its separate evidence workflow (342 ms)
+  √ SQL keeps non-measurement MILLING review on its separate evidence workflow (340 ms)
+  √ SQL keeps non-measurement PREP review on its separate evidence workflow (341 ms)
+  √ SQL keeps non-measurement PREPARATION review on its separate evidence workflow (336 ms)
+  √ SQL keeps non-measurement SAMPLE_PREP review on its separate evidence workflow (337 ms)
+  √ SQL keeps non-measurement SIEVING review on its separate evidence workflow (331 ms)
+  √ SQL keeps non-measurement SPEC_FTIR review on its separate evidence workflow (347 ms)
+  √ SQL keeps non-measurement SPEC_MIR review on its separate evidence workflow (372 ms)
+  √ SQL keeps non-measurement SPEC_NIR review on its separate evidence workflow (325 ms)
+  √ SQL keeps non-measurement SPEC_VIS_NIR review on its separate evidence workflow (327 ms)
+  √ the authenticated workspace returns linked and unlinked attempt metadata without evidence or cross-lab access (2897 ms)
+  #191 membership trigger SQL defence in depth (not installer or receipt evidence)
+    √ old-repeat-required refuses a direct repeat pointer clear with exact zero writes (29 ms)
+    √ parent-null-hash refuses a direct repeat pointer clear with exact zero writes (23 ms)
+    √ parent-wrong-batch refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ parent-wrong-qc-batch refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ wrong-analyte refuses a direct repeat pointer clear with exact zero writes (21 ms)
+    √ mixed-failed-membership refuses a direct repeat pointer clear with exact zero writes (23 ms)
+    √ mixed-accepted-wrong-membership refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ qc-fail refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ qc-pending refuses a direct repeat pointer clear with exact zero writes (21 ms)
+    √ open-unstarted refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ accepted-pass permits the proven SQL handoff and retains all old execution/QC evidence (21 ms)
+    √ accepted-warn permits the proven SQL handoff and retains all old execution/QC evidence (21 ms)
+    √ accepted-deviation permits the proven SQL handoff and retains all old execution/QC evidence (22 ms)
+    √ accepted-texture-alias permits the proven SQL handoff and retains all old execution/QC evidence (22 ms)
+    √ unknown name refuses before opening a scratch or caller database (27 ms)
+    √ unknown option refuses before opening a scratch or caller database (1 ms)
+    √ unknown caller refuses before opening a scratch or caller database (1 ms)
+  all #190 refusals remain effective after the receipt-verified #191 successor installation
+    √ creating-transaction evidence evidenceData still refuses and rolls back (609 ms)
+    √ creating-transaction evidence evidenceHash still refuses and rolls back (533 ms)
+    √ creating-transaction evidence instrumentId still refuses and rolls back (539 ms)
+    √ recorded identity id remains frozen (540 ms)
+    √ recorded identity workItemId remains frozen (556 ms)
+    √ recorded identity orderLineId remains frozen (546 ms)
+    √ recorded identity attemptNo remains frozen (542 ms)
+    √ recorded identity executedMethodRevision remains frozen (557 ms)
+    √ recorded identity author remains frozen (554 ms)
+    √ recorded identity authorName remains frozen (546 ms)
+    √ recorded identity materialAliquot remains frozen (575 ms)
+    √ recorded identity qcBatchId remains frozen (563 ms)
+    √ recorded identity version remains frozen (531 ms)
+    √ recorded identity createdAt remains frozen (551 ms)
+    √ recorded identity updatedAt remains frozen (568 ms)
+    √ recorded identity reason remains frozen (546 ms)
+    √ recorded identity requestedBy remains frozen (542 ms)
+    √ recorded identity requestedAt remains frozen (586 ms)
+    √ recorded identity rawData remains frozen (540 ms)
+    √ recorded identity calcVersion remains frozen (533 ms)
+    √ recorded identity dilutionFactor remains frozen (557 ms)
+    √ recorded identity aliquotId remains frozen (540 ms)
+    √ invalid status RETURNED still refuses insertion and update (559 ms)
+    √ invalid status REJECTED still refuses insertion and update (577 ms)
+    √ invalid status unknown still refuses insertion and update (567 ms)
+    √ canonical reasons, positive numbers, conflict flags and both unique indexes retain their original refusals (825 ms)
+    √ batch FK, write-once batch and deletion refusals survive the successor chain (627 ms)
+    √ Result required and immutable-link guards keep all #190 import and provenance refusal cases (743 ms)
+    √ ReviewDecision required, ownership, current-evidence and immutable-attempt guards keep every #190 refusal (712 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: 6816d2df-9df6-4c44-9ba7-1c1f92b9a14e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1e8c6f88-c419-49aa-9ad7-a3d099003764 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 734f16b4-c560-4193-bc02-9ee95e9e01be (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a27b6dd8-e86c-4d69-a00f-c47fd906e30d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0a9b87ad-8df0-48e5-b967-3f3cc71dcccd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 510bade6-371c-4f49-b3c8-3f7edecac746 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 510bade6-371c-4f49-b3c8-3f7edecac746 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 748ececd-eb2d-4e88-a55b-cda71ed88f35 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f0b53c09-7bed-4d6c-a90c-6368ca2867e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 178440fe-ffcd-4f32-9840-d26a1f9ae2f3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7d7ce35e-af4b-4399-a08f-78056fa9b207 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: faaf065e-9be2-4532-808a-a8e91b9a3431 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0e5c187d-5417-4843-a772-78b651996d55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fe05bc05-2be8-4022-829f-5d879ec3f647 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dd3d1d48-4311-456d-a0a4-736347129b53 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c664a274-a940-4e40-b3ac-dee9554b7c29 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1941a06b-084d-495f-a4fb-444d1282747d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c467fb0c-1caf-45d5-8f1d-71b460474681 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d80057e-0fba-4745-9a3c-4da7056e8a20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d80057e-0fba-4745-9a3c-4da7056e8a20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d80057e-0fba-4745-9a3c-4da7056e8a20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d80057e-0fba-4745-9a3c-4da7056e8a20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 496bff80-6d6b-49c5-82b9-e3eb9ff05732 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 82b8c77b-f938-483f-bc7a-af9ad4995a8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 82b8c77b-f938-483f-bc7a-af9ad4995a8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 82b8c77b-f938-483f-bc7a-af9ad4995a8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 82b8c77b-f938-483f-bc7a-af9ad4995a8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 82b8c77b-f938-483f-bc7a-af9ad4995a8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bd96379e-52de-4754-aded-3b93381cac51 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f7ae23f6-9df5-45e0-8f13-df3d9dd0ca3d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d73f5eee-fcb7-4b14-b540-9f632f1e549e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-b03d1358-8dab-4dc2-b618-735e6391f8ab (AUDIT_USER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: d73f5eee-fcb7-4b14-b540-9f632f1e549e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-b03d1358-8dab-4dc2-b618-735e6391f8ab (AUDIT_USER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 0a7efcea-765b-45d9-bb32-a7033f68d609 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-e46f99ef-02d2-45f0-81be-6b233ca52f87 (VIEWER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 0a7efcea-765b-45d9-bb32-a7033f68d609 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-e46f99ef-02d2-45f0-81be-6b233ca52f87 (VIEWER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 15d0d6ff-828c-4b14-b22d-2a71d6292735 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-5e437b83-47ba-45e4-aec7-eaab96c74e81 (SAMPLE_RECEPTION) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 15d0d6ff-828c-4b14-b22d-2a71d6292735 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-5e437b83-47ba-45e4-aec7-eaab96c74e81 (SAMPLE_RECEPTION) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 48ff00f2-a7e1-4fc9-9bcf-df86cd184f02 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 48ff00f2-a7e1-4fc9-9bcf-df86cd184f02 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0e41e389-22fa-4621-8a88-2ae444ef70b0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 43b0bcc3-7c46-4b19-a2a2-0b9d8c8cb39c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 43b0bcc3-7c46-4b19-a2a2-0b9d8c8cb39c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eea41850-36cb-451b-9bf4-cfd85dea73ad (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eea41850-36cb-451b-9bf4-cfd85dea73ad (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4dc0d64f-8c29-4fa6-81b7-5a9ca1a59cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4dc0d64f-8c29-4fa6-81b7-5a9ca1a59cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Record a failing required pair before adding a third reading.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:77:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_NOT_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4dc0d64f-8c29-4fa6-81b7-5a9ca1a59cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7dab533d-c71c-4c1d-abf5-07e76eb54504 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7dab533d-c71c-4c1d-abf5-07e76eb54504 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:106:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7dab533d-c71c-4c1d-abf5-07e76eb54504 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at recordedExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:71:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:103:28)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:23:45)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fd78da8b-a7be-4e12-b376-7aeb6e02de95 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 06932df3-b181-4581-a2ef-fa3e9a711363 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 32d67b23-fa0c-4d0a-9837-794060597c9f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e02143e0-db32-4c96-bbc3-7e16bb6096b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Owned replicate-event storage failure
+        at Array.Error (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_2_repeat_commands.test.js:370:92)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:9304
+        at r (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:1022)
+        at PrismaPromise.o [as then] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:1118)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94426d50-4a43-4d6f-900e-9b576ceb8cfa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94426d50-4a43-4d6f-900e-9b576ceb8cfa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 75bdcd3c-b850-4a5d-a32f-7e3e64868db0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 75bdcd3c-b850-4a5d-a32f-7e3e64868db0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b20b462a-98d7-4c0b-a40d-ddc859f6b816
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 4fa6ec64-d71b-4814-a52f-a30a1bc01377 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 936074c0-b1fd-483e-ba06-d632ca052766
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e796a2e1-fe4d-4e28-8bd6-d94000b9c37d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab e9dd0585-9911-4400-aef7-30198adc3a4d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 3420b925-592c-4945-aea5-a2ca614de3bb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a8204fe8-96a5-42ca-a019-a096481db963
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 9a3b034b-1822-44d2-8b91-97f342f0e6f1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab e46b04ca-0fba-42ab-b0de-76ed355c37d7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 781af7f9-f3f5-462d-86b6-ef9df9443a26 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1ccfe550-87a7-4deb-888e-a34fbdf59cb1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e9b9d0c2-3ff7-426a-911b-1b667c869bbf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d071af8e-eb4e-4de2-b78a-0eb05b8f0b75
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+

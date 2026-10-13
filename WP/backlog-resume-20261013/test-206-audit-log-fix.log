@@ -1,0 +1,96 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: d14d6e31-2309-4db4-9be4-64e11525587a) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleContainerService.js:21:11)
+      at Object.list (services/sampleContainerService.js:26:5)
+      at Object.<anonymous> (tests/contracts/issue_206_sample_containers.test.js:60:5)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: d14d6e31-2309-4db4-9be4-64e11525587a) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleContainerService.js:21:11)
+      at services/sampleContainerService.js:33:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/issue_206_sample_containers.test.js:61:5)
+
+  console.warn
+    [AUTH] RBAC Denied: User system:fixture (AUDIT_USER) attempted MANAGE_CONTAINERS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","SAMPLE_RECEPTION","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (tests/contracts/issue_206_sample_containers.test.js:66:103)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+PASS tests/contracts/issue_206_sample_containers.test.js (16.977 s)
+  √ bulk → fine earth → aliquot is queryable, labelled by policy and leaves sample numbers unchanged (1470 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"ALIQUOT"} (1123 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":0} (1102 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":"1"} (1095 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":null} (1105 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","code":"invented"} (1089 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"UNKNOWN"} (1328 ms)
+  √ scope, role and parent validation refuse both API reads and writes across samples/labs (2144 ms)
+  √ SQL rejects foreign parents, alias collisions, invalid kind/mass and changing or deleting identities (1140 ms)
+  √ transaction rollback returns the counter and container policy collision checks run both ways (1247 ms)
+  √ initial execution and reserved repeat link the exact aliquot without changing recorded attempts (1265 ms)
+  √ the additive attempt insert guard refuses foreign/non-aliquot links; future disposal retains recorded linkage (1150 ms)
+  √ installer dry/apply/no-op preserve all old rows and schema guards; tampered provenance fails closed (1232 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       13 passed, 13 total
+Snapshots:   0 total
+Time:        17.018 s
+Ran all test suites within paths "tests/contracts/issue_206_sample_containers.test.js".

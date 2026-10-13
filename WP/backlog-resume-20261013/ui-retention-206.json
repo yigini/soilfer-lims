@@ -1,0 +1,52 @@
+{
+  "fixtureOnly": true,
+  "productionRequests": 0,
+  "hierarchy": "BULK\u2192FINE_EARTH\u2192ALIQUOT",
+  "selectedIdentity": "ui-aliquot",
+  "creationUnderFineEarth": "observed",
+  "labelPageCount": 1,
+  "labelPagePoints": [
+    282.96,
+    142.08
+  ],
+  "consoleErrors": [
+    "fixture favicon 404"
+  ],
+  "files": [
+    {
+      "path": "hierarchy.png",
+      "sha256": "78c838f093c85c365775a4e56f85de60deefe6f245745fc6e3da9bf901f17c24",
+      "bytes": 43061
+    },
+    {
+      "path": "mobile-hierarchy.png",
+      "sha256": "0a2a895fb3197e302ac87c21004a57c3d1305ad780c742507d0ca37ad17923ac",
+      "bytes": 41609
+    },
+    {
+      "path": "label-preview.png",
+      "sha256": "a42a2dd39532056c9b48a105440b4c51db58c6c79ed7977377dc6e54ee3c9299",
+      "bytes": 51463
+    },
+    {
+      "path": "container-label-css-size.pdf",
+      "sha256": "bf69ad4b74073457e6daf19d638d256a0c734835ff5e26f00c918c5ed4444261",
+      "bytes": 35271
+    },
+    {
+      "path": "container-label-css-size.png",
+      "sha256": "7e9a7baf1f6af324e05b64797de19a21ef4c69393bdec265aefb2cd47283c3a5",
+      "bytes": 32297
+    }
+  ],
+  "keyboardScreenshot": {
+    "path": "ui-artifacts/keyboard-40.png",
+    "bytes": 148347,
+    "sha256": "5172a6d24f4c1b431612777d36729d3e86b0272ba23558dbe8942d713a3469fa"
+  },
+  "keyboardTraceRetainedLocally": {
+    "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\output\\playwright\\audit-196-keyboard-40.zip",
+    "bytes": 35312174,
+    "sha256": "9267ff387040a611923ea2271cdccaabaa73c5c743e7c5bdaa97ab354be246be"
+  }
+}
