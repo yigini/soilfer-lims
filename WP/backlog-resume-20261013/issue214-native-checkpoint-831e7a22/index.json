@@ -1,0 +1,10 @@
+{
+  "native-actual-sent.txt": {
+    "bytes": 2006,
+    "sha256": "c5c6f9e924dfe71c529670e6496db51655354c1b1b9a47458ff751280da8077b"
+  },
+  "native-delivery-record.json": {
+    "bytes": 726,
+    "sha256": "66fd61e9abd6bf3eb6ccae19a29de7475e1770474eff181eb7ef32bb2252b9ad"
+  }
+}

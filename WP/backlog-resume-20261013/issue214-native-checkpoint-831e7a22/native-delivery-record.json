@@ -1,0 +1,15 @@
+{
+  "observedUtc": "2026-10-13T19:21:34.519048+00:00",
+  "target": "Claude / LIMS Audit / Lab workflow audit and plan",
+  "returnedWindow": {
+    "id": 3408874,
+    "app": "Claude_pzs8sxrjxfjjc!Claude"
+  },
+  "before": "fresh returned unique window, correct target, both composers empty, focused right composer caret",
+  "draft": "end inspected for open full-run/no PR or gate, Ctrl+Home inspected831e7a22 and12/197 before one Return",
+  "after": "actual sent bubble with831e7a22/12suites197tests, empty right composer, Claudio Ebbing visible",
+  "sentOnce": true,
+  "kind": "progress checkpoint acknowledgement; NOT final exact-head audit request",
+  "human103Card": "UNANSWERED_AND_UNTOUCHED",
+  "productionOperations": 0
+}
