@@ -1,0 +1,52 @@
+{
+  "observedUtc": "2026-10-13T13:55:13.285447+00:00",
+  "status": "ACTUAL_EXACT_HEAD_AUDIT_PASS",
+  "pr": 295,
+  "issue": 206,
+  "head": "1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a",
+  "tree": "85350d14bdff5a607a3d2edc9615785842c9c94b",
+  "base": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "auditCommentId": 6146939836,
+  "auditCommentUrl": "https://github.com/yigini/soilfer-lims/pull/295#issuecomment-6146939836",
+  "auditCommentCreatedAt": "2026-10-13T13:43:23Z",
+  "ci": 38400174689,
+  "ciConclusion": "success",
+  "mergePerformed": false,
+  "productionOperations": 0,
+  "previousRawCiGitBlobHashesVerified": 7,
+  "nativeBoundary": "Fresh actual Claude window showed Soil Museum / GitHub issues triage and a human right-composer draft. Zero input; draft preserved. No native acknowledgement sent.",
+  "files": {
+    "actual-verdict-raw.json": {
+      "bytes": 6787,
+      "sha256": "3d504670dbe3035c87ff67d73c50782e005a1893c4665de338de9fb57ce0a25a"
+    },
+    "checks-raw.json": {
+      "bytes": 3560,
+      "sha256": "699854c3faf9deb90f3467850fe739c4c4def5d7276d714f8554b4bf210fa2fd"
+    },
+    "ci-run-raw.json": {
+      "bytes": 12701,
+      "sha256": "a3b68e07faa5e8ee3109ff4ce3f3edbd80f9b9b892d063d0ca6c20a39be03475"
+    },
+    "closing-references-raw.json": {
+      "bytes": 158,
+      "sha256": "0aaf00199d1bb8f958e52658974d9d73f826286930bb124e55c1834f60db40cd"
+    },
+    "issue-206-before-raw.json": {
+      "bytes": 8443,
+      "sha256": "3dc98dd02cf3627d100397ef67351456fd6a49c1a3b62eda9355d1ba33ef1bea"
+    },
+    "main-before-raw.json": {
+      "bytes": 336,
+      "sha256": "b80a139ba9da230bf25b4fe2a137e4420c70a9b093cfc445dbb9607f878fb920"
+    },
+    "pr-before-raw.json": {
+      "bytes": 22293,
+      "sha256": "a8a6500ec9f3ce2c9fe47e3b69234ae7ea66300df70e4a23432d1ca1cea373bd"
+    },
+    "source-commit-raw.json": {
+      "bytes": 1330,
+      "sha256": "a770cd6a38f7c31a321af7e5a541891efde190510c45b3f713b8d9dac7986647"
+    }
+  }
+}
