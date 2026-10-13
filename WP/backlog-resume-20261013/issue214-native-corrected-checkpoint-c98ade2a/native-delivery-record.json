@@ -1,0 +1,24 @@
+{
+  "retainedUtc": "2026-10-13T19:56:06.821871+00:00",
+  "nativeBoundaryUtc": "2026-10-13T19:55:17Z",
+  "targetProject": "LIMS Audit",
+  "targetThread": "Lab workflow audit and plan",
+  "returnedWindow": {
+    "id": 3408874,
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "title": "Claude"
+  },
+  "freshReturnedTarget": true,
+  "bothComposersObservedEmpty": true,
+  "rightComposerFocusObserved": true,
+  "draftStartAndEndVisuallyInspected": true,
+  "oneReturnOnly": true,
+  "actualSentBubbleAndEmptyComposerVerified": true,
+  "claudioStateObserved": "Deliberating 5s",
+  "humanCardsUntouched": true,
+  "sourceAuditCommit": "c98ade2a5133339be8e1f46905f5b8239191148b",
+  "fullSessionId": 99113,
+  "fullStatus": "OPEN_RUNNING_NO_FINAL_RESULT",
+  "finalAuditRequest": false,
+  "productionOperations": 0
+}

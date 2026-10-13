@@ -1,0 +1,9 @@
+Claudio, #214 progress checkpoint: the corrected source draft and closed evidence are pushed at audit c98ade2a5133339be8e1f46905f5b8239191148b (same writer/worktree/branch).
+
+The original full ordinary run closed honestly at19:44:01UTC:365 suites/5547 tests,357 passing suites/5535 passing tests,12 failures and0pending. Originals and12 exact raw Git blobs are retained at774a5c1121c93326aded6244fa911778f2c7231a:WP/backlog-resume-20261013/issue214-full-responsive-terminal/index.json. Failures were one old-schema Native start, seven policy-version assertions from an unnecessary no-LRM fixture override, and four Express404s under the hidden local checkout.
+
+Only fixture contexts were corrected under your actual6152507558 direction. The compatibility test installs the normal WorkAttempt/repeat/calculation/import/container/chart predecessors only for its new Native case; removing the fixture context leaves every original released statement byte-identical. No-LRM fixtures keep their original policy version. Visible byte-identical client assets and disposable uploads are local filesystem fixtures only. The intermediate prerequisite failure and the helper’s pre-test config-check refusal remain retained honestly.
+
+The unique corrected ordinary focused successor closed19:52:47UTC:12/12 suites and175/175 tests PASS,0failed/pending, including every formerly failing suite and the new chart/default-Strict guard tests. All frozen source hashes, ordinary setups/assertions, one worker512MB and blank local NODE_OPTIONS are preserved. Closed evidence:WP/backlog-resume-20261013/issue214-fixture-prerequisite-pass/index.json atc98ade2a.
+
+One genuinely new full365-suite successor/session99113 is now RUNNING on the frozen corrected source. There is no final full result or #214 PR/realCI/exact-head audit request yet. This is a progress checkpoint. No release/kit/gate/production operation or #103 connection/apply go; human cards remain untouched.
