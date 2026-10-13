@@ -53,7 +53,28 @@ async function allocateSampleCode(tx, { labReference, projectCode, issuedAt = ne
         const code = formatCode(format, { labCode: lab.code, year, sequence, projectCode });
         // Reserve historical aliases too. No max scan, timestamp fallback or
         // collision repair; any failed intake rolls its counter writes back.
-        if (!await tx.sample.findFirst({ where: { OR: [{ labSampleCode: code }, { labId: code }, { originalId: code }, { id: code }] }, select: { id: true } })) return code;
+        if (!await tx.sample.findFirst({ where: { OR: [{ labSampleCode: code }, { labId: code }, { originalId: code }, { id: code }] }, select: { id: true } }) &&
+            !await tx.sampleContainer.findUnique({ where: { code }, select: { id: true } })) return code;
+    }
+}
+// Uses its own additive counter and LAB policy; sample numbering is unaffected.
+async function allocateContainerCode(tx, { labReference, projectCode, issuedAt = new Date() }) {
+    if (!tx || typeof tx.$transaction === 'function') throw conflict('SAMPLE_CODE_TRANSACTION_REQUIRED', 'Container numbers require a transaction.');
+    const lab = await policyService.resolveLab(labReference, tx);
+    if (!lab?.isActive) throw conflict('SAMPLE_CODE_LAB_REQUIRED', 'An active registered laboratory is required.');
+    const snapshot = await policyService.snapshot(lab.id, { db: tx });
+    const format = await policyService.get(lab.id, 'container.codeFormat', { db: tx, snapshot });
+    const reset = await policyService.get(lab.id, 'container.sequenceReset', { db: tx, snapshot });
+    const year = publicationYear(issuedAt, lab.timezone), sequenceYear = reset === 'NEVER' ? 0 : year;
+    formatCode(format, { labCode: lab.code, year, sequence: 1, projectCode });
+    await tx.$executeRaw`INSERT INTO "ContainerSequence" ("labId", "year", "next") VALUES (${lab.id}, ${sequenceYear}, 1) ON CONFLICT ("labId", "year") DO NOTHING`;
+    for (;;) {
+        const [counter] = await tx.$queryRaw`UPDATE "ContainerSequence" SET "next" = "next" + 1 WHERE "labId" = ${lab.id} AND "year" = ${sequenceYear} RETURNING "next"`;
+        const sequence = Number(counter.next) - 1;
+        if (!Number.isSafeInteger(sequence) || sequence < 1) throw conflict('SAMPLE_CODE_SEQUENCE_EXHAUSTED', 'The container code sequence is exhausted.');
+        const code = formatCode(format, { labCode: lab.code, year, sequence, projectCode });
+        if (!await tx.sampleContainer.findUnique({ where: { code }, select: { id: true } }) &&
+            !await tx.sample.findFirst({ where: { OR: [{ labSampleCode: code }, { labId: code }, { originalId: code }, { id: code }] }, select: { id: true } })) return code;
     }
 }
 async function issuedCode(sample, db) {
@@ -70,4 +91,4 @@ async function issuedCode(sample, db) {
     }
     return sample.labId;
 }
-module.exports = { checkCharacter, verifyCheckCharacter, formatCode, codePolicy, allocateSampleCode, issuedCode };
+module.exports = { checkCharacter, verifyCheckCharacter, formatCode, codePolicy, allocateSampleCode, allocateContainerCode, issuedCode };

@@ -65,7 +65,7 @@ async function cleanupWorkflowFixtures(db, entity, ids, { single = false } = {})
     if (single && explicitIds.length > 1) throw new Error('Single-row cleanup requires at most one id.');
     // Normalized QC membership retains its sample and work item evidence. Keep
     // those fixture rows until the disposable database itself is torn down.
-    const tables = new Set((await db.$queryRawUnsafe("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('BatchPosition','BatchPositionWorkItem','WorkAttempt','PreparationRecord')"))
+    const tables = new Set((await db.$queryRawUnsafe("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('BatchPosition','BatchPositionWorkItem','WorkAttempt','PreparationRecord','SampleContainer')"))
         .map(row => row.name));
     const retainedIds = new Set();
     if (explicitIds.length) {
@@ -82,6 +82,10 @@ async function cleanupWorkflowFixtures(db, entity, ids, { single = false } = {})
         if (tables.has('PreparationRecord')) {
             const column = entity === 'sample' ? 'sampleId' : 'workItemId';
             const rows = await db.$queryRawUnsafe(`SELECT DISTINCT ${column} AS id FROM "PreparationRecord" WHERE ${column} IN (${placeholders})`, ...explicitIds);
+            for (const row of rows) retainedIds.add(row.id);
+        }
+        if (entity === 'sample' && tables.has('SampleContainer')) {
+            const rows = await db.$queryRawUnsafe(`SELECT DISTINCT sampleId AS id FROM SampleContainer WHERE sampleId IN (${placeholders})`, ...explicitIds);
             for (const row of rows) retainedIds.add(row.id);
         }
         if (entity === 'sample' && tables.has('BatchPosition')) {

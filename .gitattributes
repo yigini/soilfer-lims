@@ -86,3 +86,5 @@ server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-pri
 server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json text eol=lf
 server/tests/helpers/fixtures/pre200_after293_full_application_schema.sql -text
 server/tests/helpers/instrumentImportReleaseHistoricalFixture.js text eol=lf
+server/prisma/migrations/20261013000100_sample_containers/migration.sql text eol=lf
+server/services/sampleContainerMigrationSource.js text eol=lf

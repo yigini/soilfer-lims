@@ -1121,7 +1121,7 @@ exports.batchSave = async (req, res) => {
             } else {
                 ops.push(async tx => {
                     const measurement = { param: item.analysis, value: entry.value, replicateNo: entry.replicateNo,
-                        basis: entry.basis, methodologyId: item.methodologyId, equipmentId: entry.equipmentId,
+                        basis: entry.basis, aliquotId: entry.aliquotId ?? entry.values?.aliquotId, methodologyId: item.methodologyId, equipmentId: entry.equipmentId,
                         overrideReason: entry.overrideReason,
                         calculation:entry.calculation ?? entry.values?.calculation,
                         overrideRequestId: entry.overrideRequestId,

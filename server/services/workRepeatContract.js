@@ -15,7 +15,7 @@ function repeatRequest(input = {}) {
     if (!input || typeof input !== 'object' || Array.isArray(input)) {
         throw new TransitionError('The repeat request must be an object.', 400, 'REPEAT_FIELDS_INVALID');
     }
-    if (Object.keys(input).some(key => !['reason', 'note', 'sameBatchAllowed'].includes(key)) ||
+    if (Object.keys(input).some(key => !['reason', 'note', 'sameBatchAllowed', 'aliquotId'].includes(key)) ||
         input.sameBatchAllowed !== undefined && input.sameBatchAllowed !== false) {
         throw new TransitionError('A repeat cannot authorize reuse of failed QC or change execution facts.', 400, 'REPEAT_FIELDS_INVALID');
     }
@@ -30,7 +30,8 @@ function repeatRequest(input = {}) {
     if (input.note != null && typeof input.note !== 'string') throw new TransitionError('The repeat note must be text.', 400, 'REPEAT_NOTE_INVALID');
     const note = typeof input.note === 'string' ? input.note.trim() || null : null;
     if (input.reason === 'OTHER' && !note) throw new TransitionError('OTHER requires an explanatory note.', 400, 'REPEAT_NOTE_REQUIRED');
-    return { reason: input.reason, note, sameBatchAllowed: false, previousStatus: RETURN_REASON_STATUS[input.reason] };
+    const aliquotId = require('./sampleContainerService').aliquotRequest(input.aliquotId);
+    return { reason: input.reason, note, ...(aliquotId && { aliquotId }), sameBatchAllowed: false, previousStatus: RETURN_REASON_STATUS[input.reason] };
 }
 
 function repeatLimitAssessment(input = {}) {
@@ -42,10 +43,10 @@ function repeatLimitAssessment(input = {}) {
 }
 function repeatLimitOverrideRequest(input = {}) {
     if (!input || typeof input !== 'object' || Array.isArray(input) ||
-        Object.keys(input).some(key => !['reason', 'note', 'description', 'impactAssessment'].includes(key))) {
+        Object.keys(input).some(key => !['reason', 'note', 'description', 'impactAssessment', 'aliquotId'].includes(key))) {
         throw new TransitionError('The repeat-limit command accepts its reason, description and impact assessment.', 400, 'REPEAT_FIELDS_INVALID');
     }
-    const request = repeatRequest({ reason: input.reason, note: input.note });
+    const request = repeatRequest({ reason: input.reason, note: input.note, aliquotId: input.aliquotId });
     return { ...request, limitOverride: repeatLimitAssessment(input) };
 }
 

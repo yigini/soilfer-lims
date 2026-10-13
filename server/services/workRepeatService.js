@@ -49,8 +49,9 @@ async function reserveRepeat(tx, item, sample, actor, request, preflight) {
     rules.requireTransaction(tx);
     const plan = preflight || await preflightRepeat(tx, item, sample, actor, request);
     await transitionAttempt(tx, item, plan.parent.id, request.previousStatus, actor, { reason: request.reason, note: request.note });
+    const aliquotId = await require('./sampleContainerService').validateAliquot(tx, sample.id, request.aliquotId);
     const now = new Date(), id = 'att-' + item.id + '-' + randomUUID();
-    const attempt = await tx.workAttempt.create({ data: { id, workItemId: item.id, attemptNo: plan.attemptNo, status: 'OPEN',
+    const attempt = await tx.workAttempt.create({ data: { id, workItemId: item.id, attemptNo: plan.attemptNo, status: 'OPEN', aliquotId,
         parentAttemptId: plan.parent.id, reason: request.reason, note: request.note, requestedBy: rules.actorName(actor), requestedAt: now,
         createdAt: now, updatedAt: now } });
     let nonconformityId;

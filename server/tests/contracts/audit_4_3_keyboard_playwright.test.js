@@ -46,7 +46,9 @@ test('real Chromium types and records 40 values through the production app with 
             }, { token, user });
             await context.tracing.start({ screenshots: true, snapshots: true, sources: true });
             page = await context.newPage();
-            await page.goto(`http://127.0.0.1:${server.address().port}/workbench?analysis=${encodeURIComponent(f.analysisCode)}&queue=my_work`);
+            const navigation = await page.goto(`http://127.0.0.1:${server.address().port}/workbench?analysis=${encodeURIComponent(f.analysisCode)}&queue=my_work`);
+            expect(navigation.status()).toBe(200);
+            expect(navigation.headers()['content-type']).toContain('text/html');
             await page.locator('[data-testid="worksheet-grid"] input[aria-label$=" determination"]').first().waitFor();
             expect(await page.locator('[data-testid="worksheet-grid"] input[aria-label$=" determination"]').count()).toBe(40);
             const tabTo = async predicate => {

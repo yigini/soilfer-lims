@@ -432,6 +432,14 @@ test('a complete guarded database passes the read-only gate, listens and answers
     expect(createHash('sha256').update(fs.readFileSync(fixture.file)).digest('hex')).toBe(importBeforeSha);
     expect(require('../../scripts/install_instrument_imports').installInstrumentImports({dbPath:fixture.file,apply:true}))
         .toMatchObject({classification:'COMPLETE_200',newTemplateCount:0,newReceiptCount:0,backfilledCount:0,counts:{draftLinks:0}});
+    const beforeContainers=fingerprint(fixture.file);
+    const missingContainers=await realStartup(fixture.file,false);
+    expect(missingContainers.code).toBe(1);
+    expect(JSON.parse(missingContainers.stderr).error).toBe('SAMPLE_CONTAINER_STARTUP_REQUIRED');
+    expect(missingContainers.stdout).not.toMatch(/Enterprise Server running on|\[PRISMA\]|SCHEDULER/);
+    expect(fingerprint(fixture.file)).toBe(beforeContainers);
+    expect(require('../../scripts/install_sample_containers').installSampleContainers({dbPath:fixture.file,apply:true}))
+        .toMatchObject({classification:'COMPLETE_206',previousClassification:'FRESH_PRISMA_206',backfilledCount:0,totalChanges:1});
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const benchReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"BENCH_CREDENTIAL_STARTUP_READY"')));
@@ -455,6 +463,9 @@ test('a complete guarded database passes the read-only gate, listens and answers
     const importsReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"INSTRUMENT_IMPORT_STARTUP_READY"')));
     expect(importsReady).toMatchObject({classification:'COMPLETE_200',totalChanges:0});
     expect(child.stdout.indexOf('INSTRUMENT_IMPORT_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
+    const containersReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"SAMPLE_CONTAINER_STARTUP_READY"')));
+    expect(containersReady).toMatchObject({classification:'COMPLETE_206',totalChanges:0});
+    expect(child.stdout.indexOf('SAMPLE_CONTAINER_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
     const holdsReady = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"SAMPLE_HOLD_STARTUP_READY"')));
     expect(holdsReady).toMatchObject({ classification: 'COMPLETE', totalChanges: 0 });
     expect(child.stdout.indexOf('SAMPLE_HOLD_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));

@@ -29,14 +29,18 @@ async function insertExecution(tx,ctx,allocation,evidence,now,metadata={}) {
     if (JSON.stringify(JSON.parse(evidenceData).equipmentReadiness)!==(ctx.equipmentReadinessText || 'null')) {
         throw new rules.TransitionError('Attempt and Result readiness must match.',409,'WORK_ATTEMPT_EVIDENCE_MISMATCH');
     }
+    const requestedAliquot = metadata.aliquotId ?? ctx.aliquotId;
     if(allocation.existing) {
         const existing=await tx.workAttempt.findUnique({where:{id:allocation.id}});
+        if (requestedAliquot != null && requestedAliquot !== existing.aliquotId)
+            throw new rules.TransitionError('An attempt cannot change its physical aliquot.',409,'SAMPLE_CONTAINER_ALIQUOT_IMMUTABLE');
         if(existing.status!=='OPEN') {
             // Existing derived texture evidence may append a calculated value,
             // but cannot refill or alter its already recorded execution.
             if(evidence.source!=='derived')throw new rules.TransitionError('Attempt evidence has already been recorded.',409,'WORK_ATTEMPT_FIRST_FILL_REFUSED');
             return allocation.id;
         }
+        if (existing.aliquotId != null) await require('./sampleContainerService').validateAliquot(tx, ctx.item.sampleId, existing.aliquotId);
         await require('./workRepeatBatchService').assertRepeatBatchAllowed(tx,ctx.item,ctx.batchId);
         if(existing.batchId==null && ctx.batchId!=null)await tx.workAttempt.update({where:{id:existing.id},data:{batchId:ctx.batchId,updatedAt:existing.updatedAt}});
         const facts={evidenceData,evidenceHash:createHash('sha256').update(evidenceData).digest('hex'),
@@ -54,8 +58,9 @@ async function insertExecution(tx,ctx,allocation,evidence,now,metadata={}) {
             {action:'FIRST_FILL',from:'OPEN',to:'RECORDED',reason:existing.reason,note:existing.note,newResultIds:evidence.sourceResultIds || []});
         return existing.id;
     }
+    const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.item.sampleId, requestedAliquot);
     await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
-        status:assertWorkAttemptStatus('RECORDED'),reason:allocation.reason,author:ctx.performedBy,
+        status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
         instrumentId:equipmentReadiness?.equipmentId || null,
         executedMethodRevision:ctx.method?.version == null ? null:String(ctx.method.version),
