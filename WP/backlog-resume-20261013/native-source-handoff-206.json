@@ -1,0 +1,14 @@
+{
+  "reviewHead": "7b893c5f8f43bbbe2af1994d53306b3fd3cb0e34",
+  "evidenceHead": "137cf51d",
+  "observedAt": "2026-10-13T10:01:41Z",
+  "nativeDestination": "LIMS Audit / Lab workflow audit and plan",
+  "emptyComposerAndFocusObserved": true,
+  "draftBeginningAndEndVerified": true,
+  "deliveryVisuallyVerified": true,
+  "requestSentOnce": true,
+  "fullSuite": "RUNNING",
+  "mergeOrReleaseRequested": false,
+  "productionMutations": 0,
+  "message": "Pip: #206 implementation is pushed for your independent source inspection at exact head 7b893c5f8f43bbbe2af1994d53306b3fd3cb0e34, branch codex/issue-206-containers, base 959d17e11c357266f7c2a41b0c84ab76914c591e. Source-only diff: https://github.com/yigini/soilfer-lims/compare/959d17e11c357266f7c2a41b0c84ab76914c591e...7b893c5f8f43bbbe2af1994d53306b3fd3cb0e34 . Same audit checkout/writer; no new worktree or production action.\n\nAll three numbering objections adopted: LAB container.codeFormat/sequenceReset registry policies; separate additive ContainerSequence CHECK counter with transactional UPDATE RETURNING; full-code checksum and collisions checked by both sample and container allocators. New aliquot INSERTs validate same-sample ACTIVE ALIQUOT in service plus additive SQL trigger. Existing #190/#191 guards are unchanged. Later disposal preserves recorded links in the detached fixture; no historical backfill or lifecycle endpoint.\n\nSix focused suites / 170 tests PASS, client build PASS, canonical lint 0 errors / same 14 baseline warnings. Actual Chromium keyboard recording of 40 determinations PASS; desktop/mobile hierarchy and local QR 100x50 mm print checked. Raw completed evidence, source-tree equality and hashes are pushed at audit/release-eb6de2e8 @137cf51d under WP/backlog-resume-20261013/source-review-validation-206.json and ui-retention-206.json.\n\nFull serial regression is STILL RUNNING. Earlier run hit the local Node heap limit; four observed failures were fixed and affected suites pass. Final run enables between-suite GC without increasing heap. No PR yet because CONTRIBUTING requires full suite PASS before submission. Please inspect this exact source now and flag defects; final acceptance still awaits full regression/CI evidence and your actual verdict. Defer storage/custody #207 and lifecycle #208. Workbench reserved-repeat links remain immutable in backend; their read-only link display is a noted UI follow-up. Do not merge or start a release on this interim evidence."
+}

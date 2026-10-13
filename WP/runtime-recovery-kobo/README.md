@@ -1,3 +1,13 @@
+# #206 source corrections; full regression in progress — 2026-10-13
+
+Claudio inspected source `7b893c5` and withheld his final verdict pending the full regression and CI. His two pre-PR findings are resolved at source-only review head `cea610f1dcd58b3aed209b4a65b045ba9576bbb6` (`codex/issue-206-containers`); audit source `fc62c1bb7b6eefca5ce4f4dc8b66d4cd6500d0ba`. `.gitattributes` now has only two added LF entries and zero CR bytes. `server/app.js` equals main exactly. The owned keyboard fixture uses byte-identical built assets outside the hidden checkout; actual Chromium keyboard recording of 40 determinations passed. Physical parentage intentionally has no fixed kind ordering, documented with the #207/#208 lifecycle and location deferrals.
+
+The preceding full run was stopped after 17 passing suites to freeze those corrections. The new full run covers the exact 362-suite inventory in sequential batches of 12 at the default heap, with no concurrent Jest process. It is **RUNNING**, not a full PASS. Observe the same session 38170 and `WP/backlog-resume-20261013/full-206-serial/`; never dispatch a duplicate runner. Completed raw evidence and actual interim-review transcription: `WP/backlog-resume-20261013/review-corrections-206.json`.
+
+No PR yet: CONTRIBUTING requires the full suite to pass before submission. Final exact-head Claudio acceptance still requires complete regression and real PR CI. No release or production operation. PR294/#200 and its completed build/proof/kit/gate/install/verification/notices stay immutable. Same worktree/branch/writer; human files, drafts and YY cards untouched.
+
+---
+
 ## 2026-10-13 #206 source review boundary
 
 YY delegated backlog decisions are live at #162/6141144901. #206 is implemented in the existing audit checkout. Audit source `72fca9cdf5882600750864302760f1262a15cd64`; source-only review ref `codex/issue-206-containers` / head `7b893c5f8f43bbbe2af1994d53306b3fd3cb0e34`, base `959d17e11c357266f7c2a41b0c84ab76914c591e`. No new checkout or production writer.

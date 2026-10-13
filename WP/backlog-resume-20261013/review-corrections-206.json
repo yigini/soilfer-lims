@@ -1,0 +1,68 @@
+{
+  "observedUtc": "2026-10-13T10:15:25.955078+00:00",
+  "actualNativeTarget": "Claude / LIMS Audit / Lab workflow audit and plan",
+  "interimReviewHead": "7b893c5f8f43bbbe2af1994d53306b3fd3cb0e34",
+  "reviewHead": "cea610f1dcd58b3aed209b4a65b045ba9576bbb6",
+  "auditSource": "fc62c1bb7b6eefca5ce4f4dc8b66d4cd6500d0ba",
+  "actualReviewerFindings": [
+    ".gitattributes Windows line endings: restore LF and retain only the two new byte pins.",
+    "server/app.js SPA fallback is outside #206: drop it or justify its necessity in the PR."
+  ],
+  "resolutions": [
+    "Binary Git stdin: source review attributes have zero CR bytes and two LF additions.",
+    "server/app.js equals main exactly; owned keyboard fixture serves identical built assets from a visible test directory.",
+    "Physical parentage has no mandatory kind ordering; documented alongside #207/#208 deferrals."
+  ],
+  "finalVerdict": "WITHHELD pending complete regression and CI",
+  "auditPass": false,
+  "interruptedFullRun": {
+    "session": 17934,
+    "exitCode": 1,
+    "reason": "Stopped before source corrections to freeze the successor.",
+    "completedPassSuites": 17,
+    "fullSuitePass": false
+  },
+  "correctedKeyboard": {
+    "session": 37711,
+    "exitCode": 0,
+    "recordedDeterminations": 40,
+    "keyboardOnly": true
+  },
+  "activeFullRun": {
+    "session": 38170,
+    "suiteCount": 362,
+    "status": "RUNNING",
+    "batchSize": 12,
+    "concurrentJestProcesses": 1,
+    "nodeOptions": "",
+    "directory": "full-206-serial"
+  },
+  "files": {
+    "server-full-final-206.log": {
+      "bytes": 345804,
+      "sha256": "84c126d0edd1f2b384e8ac1487bca4363eb940a122825d523489a13cb3b1259f"
+    },
+    "keyboard-review-correction-206.log": {
+      "bytes": 28319,
+      "sha256": "62fa782408b99f14ff18bcc9b7fe79199daa7cefac18a05d3833ed171a5d6b35"
+    },
+    "keyboard-review-correction-206-exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "issue-206-corrected-review-ref.json": {
+      "bytes": 2973,
+      "sha256": "29dd9e5de03c1577dd13e9edbc46fbbefb2237a72a484e21db3b7ef7e7bf2790"
+    },
+    "advance-issue-206-source-review.py": {
+      "bytes": 3361,
+      "sha256": "367c69358e6230508f2fba18ddf0cc467bc7686ec2a19900ba7a3d04b402919c"
+    },
+    "run-issue-206-full-serial.py": {
+      "bytes": 4618,
+      "sha256": "af2b5cac1ca28ec6830d6c435c804cba0ced51da6ef62a35f3d35342d89e7522"
+    }
+  },
+  "productionMutations": 0,
+  "newWorktrees": 0
+}
