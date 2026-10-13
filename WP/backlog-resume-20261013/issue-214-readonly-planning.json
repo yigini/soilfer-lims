@@ -1,0 +1,41 @@
+{
+  "status": "READ_ONLY_PLANNING_ONLY",
+  "issue": 214,
+  "sourceContext": "main 959d17e1 plus frozen issue-206 source 9ae02f6a",
+  "authority": "Claudio delegated backlog decision #162/6141144901: #214 follows #206",
+  "applicationChanges": 0,
+  "productionMutations": 0,
+  "observedInterfaces": [
+    "No ControlLimitSet model is present in the current schema.",
+    "qc.westgardRules already defines the six permitted rule codes through policyRegistry and the lab policy editor.",
+    "startNativeRun freezes policy, rule, method and instrument criteria into BatchAnalyte.criteriaSnapshot.",
+    "evaluateNativeEvidence consumes the frozen criteria; writeNativeMeasurements appends an immutable QcEvaluation with criteria and measurement IDs.",
+    "Compatibility evaluations also retain a criteriaSnapshot in QcEvaluation.details.",
+    "raiseCrmFailures reads the immutable appended evaluation in the transaction, offering an existing pattern for a review-task trigger.",
+    "closureTaskService is specifically for sample archiving/disposal and is not a generic QC review-task service."
+  ],
+  "proposedBoundariesForLaterImplementation": [
+    "New append-only frozen baseline storage and source-bound additive installer, with no backfill or rewrite of prior evaluations.",
+    "Central laboratory scope and role permissions for series reads, proposals and named QA approval; no hard-coded laboratories or raw role checks.",
+    "Separate series by canonical laboratory, analysis, methodology and reference material; retain exact included/excluded measurement IDs, reason, values, ordering and baseline source.",
+    "Capture the approved baseline identity and values in new run criteria. Previously started runs use their original criteria; future baseline approval cannot alter old evaluations.",
+    "Below 20 eligible points, use the frozen QcRule fixed window and label the chart provisional, as required by the issue.",
+    "Behavioural synthetic-series tests for all six rules, cross-lab/method/reference isolation and deterministic chronology; late faults must roll back both evaluation and any new review task.",
+    "Retain replaced baselines and evaluations, with all five locales and a chart showing centre, warning/action limits, provenance and approval history."
+  ],
+  "unresolvedDesignDetails": [
+    "Select the scoped review-task owner/storage and its idempotent immutable link to an evaluation before implementing 4-1s/10x review actions.",
+    "Define explicit proposal eligibility/exclusion records and same-run versus cross-run sequence handling without silently dropping flagged or superseded observations.",
+    "Keep historical/compatibility behaviour explicit; never read a newly approved baseline to reclassify a past evaluation."
+  ],
+  "nativeBoundary": {
+    "observedAt": "2026-10-13 around 11:05 UTC",
+    "target": "LIMS Audit / Lab workflow audit and plan",
+    "leftComposer": "EMPTY; focused human composer",
+    "rightComposer": "EMPTY",
+    "issue103Clarification": "See first / Approve now remains unanswered; no apply authority inferred",
+    "issue102": "Claudio's real-phone script is visible; physical tests remain YY owned",
+    "inputActions": 0,
+    "messagesSent": 0
+  }
+}
