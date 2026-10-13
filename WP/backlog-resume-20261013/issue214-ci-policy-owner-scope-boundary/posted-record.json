@@ -1,0 +1,14 @@
+{
+  "postedUtc": "2026-10-13T21:56:10.794170+00:00",
+  "comment": 6156034087,
+  "url": "https://github.com/yigini/soilfer-lims/issues/214#issuecomment-6156034087",
+  "sourceEvidenceAudit": "015b9209aa0a19cca8b21aa7eec42cf8cbd69706",
+  "head": "e47b842c2a7f6b4f06fa4c532f7460c01797821b",
+  "run": 38467368095,
+  "questionPostedOnce": true,
+  "nativeFailureBoundarySent": false,
+  "actualScopeAnswer": "PENDING",
+  "applicationChanges": 0,
+  "ciDispatches": 0,
+  "productionOperations": 0
+}
