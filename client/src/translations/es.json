@@ -2614,7 +2614,9 @@
       "crossCheck_cnMin": "Relación C:N mínima",
       "crossCheck_cnMax": "Relación C:N máxima",
       "crossCheck_carbonatePhMin": "pH mínimo en agua para carbonatos",
-      "report_amendedStatement": "Texto del informe modificado"
+      "report_amendedStatement": "Texto del informe modificado",
+      "container_codeFormat": "Formato del código de contenedor",
+      "container_sequenceReset": "Reinicio de la secuencia de contenedores"
     },
     "title": "Políticas",
     "yes": "Sí",
@@ -3706,5 +3708,45 @@
     "matchedRow": "Coincide",
     "draftNotice": "El pegado actualiza los borradores locales. Las mediciones se guardan con Registrar.",
     "apply": "Aplicar {count} valores al borrador"
+  },
+  "containers": {
+    "title": "Contenedores y alícuotas",
+    "help": "Cree contenedores a partir del material físico y su contenedor padre registrado.",
+    "empty": "No hay contenedores registrados.",
+    "kind": "Tipo",
+    "parent": "Contenedor padre",
+    "noParent": "Contenedor inicial a granel",
+    "mass": "Masa (g, opcional)",
+    "create": "Crear contenedor",
+    "print": "Imprimir etiqueta del contenedor",
+    "sample": "Muestra",
+    "linkedAttempt": "Intento vinculado",
+    "aliquot": "Alícuota física (opcional)",
+    "unlinked": "Sin vínculo de alícuota",
+    "loadFailed": "No se pudieron cargar los contenedores.",
+    "createFailed": "No se pudo crear el contenedor.",
+    "labelFailed": "No se pudo generar la etiqueta.",
+    "kinds": {
+      "BULK": "A granel",
+      "FINE_EARTH": "Tierra fina",
+      "GROUND": "Molido",
+      "ALIQUOT": "Alícuota",
+      "ARCHIVE": "Archivo"
+    },
+    "status": {
+      "ACTIVE": "Activo",
+      "CONSUMED": "Consumido",
+      "DISPOSED": "Eliminado"
+    },
+    "errors": {
+      "SAMPLE_CONTAINER_FIELDS_INVALID": "No se pudo crear el contenedor.",
+      "SAMPLE_CONTAINER_FORBIDDEN": "No se pudo crear el contenedor.",
+      "SAMPLE_CONTAINER_PARENT_INVALID": "No se pudo crear el contenedor.",
+      "SAMPLE_CONTAINER_STATE_REFUSED": "No se pudo crear el contenedor.",
+      "SAMPLE_CONTAINER_ALIQUOT_INVALID": "No se pudo crear el contenedor.",
+      "SAMPLE_CONTAINER_ALIQUOT_IMMUTABLE": "No se pudo crear el contenedor.",
+      "SAMPLE_CONTAINER_INVALID": "No se pudo crear el contenedor.",
+      "SAMPLE_CONTAINER_IMMUTABLE": "No se pudo crear el contenedor."
+    }
   }
 }

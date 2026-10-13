@@ -92,6 +92,25 @@ test.each(['sql','schemaSql','guardsSql'])('the #193 source resolver inspects by
         expect.objectContaining({code:'RAW_WORKFLOW_SQL'})]);
 });
 
+test.each(['sql', 'schemaSql', 'prismaSql', 'counterSql', 'guardsSql'])('the #206 resolver inspects only pinned %s and retains workflow write restrictions', field => {
+    const probe = `const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource'); const release=loadSampleContainerMigrationSource(); db.exec(release.${field});`;
+    expect(scanSource(probe, 'scripts/probe.js', exceptions)).toEqual([]);
+    expect(scanSource(probe + 'db.exec("UPDATE Sample SET status=1");', 'scripts/probe.js', exceptions)).toEqual([
+        expect.objectContaining({ code: 'RAW_WORKFLOW_SQL' })]);
+});
+
+test.each(['services/sampleContainerMigrationSource.js', 'prisma/migrations/20261013000100_sample_containers/migration.sql'])('the #206 resolver refuses altered bytes in %s', filename => {
+    const probe = "const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource'); const release=loadSampleContainerMigrationSource(); db.exec(release.counterSql);";
+    const read = fs.readFileSync;
+    const spy = jest.spyOn(fs, 'readFileSync').mockImplementation((file, ...args) => {
+        const value = read(file, ...args);
+        return path.resolve(file) === path.join(serverRoot, filename) ? Buffer.from(String(value) + '\n-- changed source\n') : value;
+    });
+    try { expect(scanSource(probe, 'scripts/probe.js', exceptions)).toEqual([
+        expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]); }
+    finally { spy.mockRestore(); }
+});
+
 test('legacy CLI launchers cannot import any fixture or test module', () => {
     for (const filename of ['scripts/run_manager_dashboard_tasklist_side_by_side.cjs', 'scripts/verify_issue149_probe.cjs', 'scripts/run_test_rehearsal.cjs']) {
         for (const specifier of ['../tests/helpers/workflowFixtures', '../tests/helpers/legacyWorkflowDatabase', '../tests/rehearsals/scenario.cjs']) {

@@ -211,6 +211,7 @@ model Sample {
   orderRevisions    SampleOrderRevision[]
   amendments        SampleAmendment[]
   preparationRecords PreparationRecord[]
+  containers        SampleContainer[]
   reviewDecisions   ReviewDecision[]
   resultEvidenceEvents ResultEvidenceEvent[]
   holds             SampleHold[]
@@ -2254,4 +2255,23 @@ model PreparationRecord {
   @@unique([receiptId, gateCode])
   @@index([sampleId])
   @@index([workItemId])
+}
+
+// #206: physical identities are append-only; custody/lifecycle are #207/#208.
+model SampleContainer {
+  id                String @id
+  sampleId          String
+  sample            Sample @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  parentId          String?
+  parent            SampleContainer? @relation("ContainerHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children          SampleContainer[] @relation("ContainerHierarchy")
+  kind              String
+  code              String @unique
+  massG             Float?
+  createdAt         DateTime @default(now())
+  createdBy         String
+  storageLocationId String?
+  status            String @default("ACTIVE")
+  @@index([sampleId])
+  @@index([parentId])
 }

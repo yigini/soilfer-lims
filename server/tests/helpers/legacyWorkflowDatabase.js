@@ -253,6 +253,9 @@ function beforeGuards(options) {
                 expected.find(row => row.table === 'WorkItemDraft').fields.push('importReceiptId');
                 expected.push(...importTables.map(table => ({ table, missingTable: true })));
             }
+            // #206 adds exactly one identity model. The independent raw counter
+            // is installer-owned; captured historical DDL remains unchanged.
+            expected.push({table:'SampleContainer',missingTable:true});
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }
@@ -325,7 +328,9 @@ function beforeGuards(options) {
             }
         } else {
             const source = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
-            const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name != 'ResultEvidenceEvent'").all();
+            // #206's raw counter has CHECK constraints and installation provenance.
+            // A schema-only fresh Prisma fixture cannot clone it without its receipt.
+            const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name NOT IN ('ResultEvidenceEvent','ContainerSequence')").all();
             // Copy schema-only indexes, leaving every additive release guard
             // and partial index for its actual installer on this new file.
             const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique','WorkAttempt_workItemId_attemptNo_unique','result_one_current','ReportedValueSelection_one_root','ResultOverrideRequest_one_active_cell','Report_amendmentId_key')").all();

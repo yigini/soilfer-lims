@@ -21,6 +21,7 @@ import clsx from 'clsx';
 import { useLanguage } from '../../context/LanguageContext';
 import { canSelectInstrument, isEntryReady } from './entryReadiness';
 import PreviousResultHint from './PreviousResultHint';
+import AliquotSelect from '../sample/AliquotSelect';
 import ResultValueActions from './ResultValueActions';
 
 /**
@@ -267,6 +268,9 @@ export default function SingleSampleEditor({
                 ) : (currentItem.calculationTemplate ? (<CalculationEntry item={currentItem} disabled={disabled} onDraftChange={onDraftChange} onBarcodeRejected={onBarcodeRejected}
                     inputRef={node => onInputRef?.(currentItem.workItemId,node)}>{numericEntry}</CalculationEntry>) : numericEntry)}
                 {!isOperationalGate && <PreviousResultHint result={currentItem.previousResult} />}
+                {!isOperationalGate && !isSpectral && <AliquotSelect sampleId={currentItem.sampleId}
+                    value={draft?.values?.aliquotId} disabled={disabled || Boolean(currentItem.currentResult)}
+                    onChange={aliquotId => onDraftChange(currentItem.workItemId, null, { values: { ...(draft?.values || {}), aliquotId } })} />}
                 {!isOperationalGate && !isTexture && !isSpectral && currentItem.valueRules && <ResultValueActions item={currentItem}
                     onChooseApproval={onChooseApproval} onChanged={onChanged} />}
                 {!isOperationalGate && equipment.length > 0 && (

@@ -31,6 +31,11 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // #206: resolve only digest-bound additive container/counter DDL. No writer exception.
+    Object.freeze({ functionName: 'loadSampleContainerMigrationSource', loader: 'services/sampleContainerMigrationSource.js',
+        loaderSha256: 'ab223052522a5d74e899c4c372204a4a68574819a3f6b3c7bd8837f8ad7bb8d4',
+        directory: '20261013000100_sample_containers', sqlSha256: '2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4',
+        boundary: '-- Contract guards', containerParts: true }),
     // #201/6089928620: inspect the exact additive evidence assets, never exempt writes.
     Object.freeze({ functionName: 'loadCrossCheckMigrationSource', loader: 'services/crossCheckMigrationSource.js',
         loaderSha256: 'a9cbb4f46ca24569593b0e7d84bf2d9ac999b428b89f9d5c050023982587425a',
@@ -599,7 +604,7 @@ function scanSource(source, filename, exceptions = []) {
         } catch { return null; }
     }
     function qcEvidenceMigrationSql(p) {
-        if (!p?.isMemberExpression() || p.node.computed || !['sql', 'schemaSql', 'guardsSql'].includes(p.node.property.name)) return null;
+        if (!p?.isMemberExpression() || p.node.computed || !['sql', 'schemaSql', 'guardsSql', 'prismaSql', 'counterSql'].includes(p.node.property.name)) return null;
         const object = p.get('object');
         if (!object.isIdentifier()) return null;
         const binding = object.scope.getBinding(object.node.name);
@@ -608,6 +613,8 @@ function scanSource(source, filename, exceptions = []) {
         if (!init.isCallExpression() || init.node.arguments.length || !init.get('callee').isIdentifier()) return null;
         const source = QC_EVIDENCE_SOURCES.find(row => init.node.callee.name === row.functionName);
         if (!source) return null;
+        const fields = ['sql', 'schemaSql', 'guardsSql', 'sha256', ...(source.containerParts ? ['prismaSql', 'counterSql'] : [])];
+        if (!fields.includes(p.node.property.name)) return null;
         const loaderBinding = init.scope.getBinding(source.functionName), declaration = loaderBinding?.path;
         if (!loaderBinding || loaderBinding.kind !== 'const' || loaderBinding.constantViolations.length || !declaration?.isVariableDeclarator() || !declaration.get('id').isObjectPattern()) return null;
         const imported = declaration.get('init');
@@ -618,7 +625,7 @@ function scanSource(source, filename, exceptions = []) {
         if (!declaration.node.id.properties.some(property => property.type === 'ObjectProperty' && !property.computed && property.key.name === source.functionName && property.value.name === source.functionName)) return null;
         if (binding.referencePaths.some(reference => {
             const member = reference.parentPath;
-            if (!member.isMemberExpression() || member.node.computed || !['sql', 'schemaSql', 'guardsSql', 'sha256'].includes(member.node.property.name)) return true;
+            if (!member.isMemberExpression() || member.node.computed || !fields.includes(member.node.property.name)) return true;
             let end = member;
             while (end.parentPath?.isMemberExpression() && end.parentPath.get('object').node === end.node) end = end.parentPath;
             return (end.parentPath?.isAssignmentExpression() && end.parentPath.get('left').node === end.node) || end.parentPath?.isUpdateExpression() || end.parentPath?.isUnaryExpression({ operator: 'delete' });
@@ -636,6 +643,11 @@ function scanSource(source, filename, exceptions = []) {
             if (source.wholeSql) return p.node.property.name === 'sql' ? sql : null;
             const marker = source.boundary || 'CREATE TRIGGER', boundary = sql.indexOf(marker);
             if (boundary < 0 || source.boundary && sql.indexOf(marker, boundary + 1) !== -1) return null;
+            if (source.containerParts && ['prismaSql', 'counterSql'].includes(p.node.property.name)) {
+                const counter = sql.indexOf('CREATE TABLE "ContainerSequence"');
+                if (counter < 0 || counter >= boundary) return null;
+                return p.node.property.name === 'prismaSql' ? sql.slice(0, counter) : sql.slice(counter, boundary);
+            }
             return p.node.property.name === 'schemaSql' ? sql.slice(0, boundary) : p.node.property.name === 'guardsSql' ? sql.slice(boundary) : sql;
         } catch { return null; }
     }

@@ -25,6 +25,7 @@ import ReportContent from '../components/report/ReportContent';
 import SpectraViewer from '../components/SpectraViewer';
 import StorageMovementModal from '../components/sample/StorageMovementModal';
 import EvidenceInspectionModal from '../components/sample/EvidenceInspectionModal';
+import SampleContainersPanel from '../components/sample/SampleContainersPanel';
 import SampleHoldsPanel from '../components/sample/SampleHoldsPanel';
 
 import {
@@ -1009,6 +1010,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
 
                 {activeTab === 'work' && (
                     <div className="space-y-6">
+                        <SampleContainersPanel sampleId={sample?.id || id} sampleCode={sample?.labSampleCode || sample?.originalId}
+                            attempts={workItems.flatMap(item => item.attempts || [])} />
                         {/* Preparation Gates Card */}
                         <div className="bg-sf-surface rounded-2xl p-5 border border-sf-divider shadow-sm">
                             <div className="flex items-center justify-between mb-3">

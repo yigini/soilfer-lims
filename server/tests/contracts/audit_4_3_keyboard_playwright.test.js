@@ -1,5 +1,6 @@
 const fs = require('node:fs'), path = require('node:path');
 const { randomUUID } = require('node:crypto');
+const os = require('node:os');
 const jwt = require('jsonwebtoken');
 const { chromium } = require('playwright');
 const { qcGateFixture } = require('../helpers/qcGateFixture');
@@ -11,6 +12,13 @@ test('real Chromium types and records 40 values through the production app with 
     let browser, server, app, context, page;
     const artifactRoot = path.resolve(__dirname, '../../../output/playwright');
     fs.mkdirSync(artifactRoot, { recursive: true });
+    // Express treats dot-prefixed ancestors as hidden. Keep the application's
+    // SPA fallback unchanged and serve byte-identical built assets from an
+    // owned visible directory when this checkout lives under .codex.
+    const builtClient = path.resolve(__dirname, '../../../client/dist');
+    const ownedClient = fs.mkdtempSync(path.join(os.tmpdir(), 'lims-keyboard-client-'));
+    fs.cpSync(builtClient, ownedClient, { recursive: true });
+    expect(fs.readFileSync(path.join(ownedClient, 'index.html'))).toEqual(fs.readFileSync(path.join(builtClient, 'index.html')));
     try {
         const ids = [];
         await f.db.equipmentQualification.create({ data: { id: randomUUID(), equipmentId: f.instrument.id, labId: f.labId,
@@ -32,6 +40,11 @@ test('real Chromium types and records 40 values through the production app with 
             // Only the owned connection is injected. App, authentication,
             // permissions, scope, queue, preview and commit are the real code.
             jest.doMock('../../prisma', () => f.db);
+            jest.doMock('path', () => {
+                const actual = jest.requireActual('path');
+                return { ...actual, join: (...parts) => parts.length === 4 && actual.resolve(parts[0]) === actual.resolve(__dirname, '../..') &&
+                    parts[1] === '..' && parts[2] === 'client' && parts[3] === 'dist' ? ownedClient : actual.join(...parts) };
+            });
             app = require('../../app');
             server = await new Promise(resolve => { const listener = app.listen(0, '127.0.0.1', () => resolve(listener)); });
             const token = jwt.sign({ id: f.actor.username, tokenVersion: 0 }, process.env.JWT_SECRET, { expiresIn: '10m' });
@@ -46,7 +59,9 @@ test('real Chromium types and records 40 values through the production app with 
             }, { token, user });
             await context.tracing.start({ screenshots: true, snapshots: true, sources: true });
             page = await context.newPage();
-            await page.goto(`http://127.0.0.1:${server.address().port}/workbench?analysis=${encodeURIComponent(f.analysisCode)}&queue=my_work`);
+            const navigation = await page.goto(`http://127.0.0.1:${server.address().port}/workbench?analysis=${encodeURIComponent(f.analysisCode)}&queue=my_work`);
+            expect(navigation.status()).toBe(200);
+            expect(navigation.headers()['content-type']).toContain('text/html');
             await page.locator('[data-testid="worksheet-grid"] input[aria-label$=" determination"]').first().waitFor();
             expect(await page.locator('[data-testid="worksheet-grid"] input[aria-label$=" determination"]').count()).toBe(40);
             const tabTo = async predicate => {
@@ -113,7 +128,7 @@ test('real Chromium types and records 40 values through the production app with 
     } finally {
         await browser?.close();
         if (server) await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
-        app?.stopBackgroundSchedulers(); jest.dontMock('../../prisma');
+        app?.stopBackgroundSchedulers(); jest.dontMock('../../prisma'); jest.dontMock('path');
         if (previousServe === undefined) delete process.env.SERVE_CLIENT; else process.env.SERVE_CLIENT = previousServe;
         if (previousSecret === undefined) delete process.env.JWT_SECRET; else process.env.JWT_SECRET = previousSecret;
         await f.close();

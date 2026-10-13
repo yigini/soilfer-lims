@@ -1054,7 +1054,9 @@
       "crossCheck_cnMin": "Minimum C:N ratio",
       "crossCheck_cnMax": "Maximum C:N ratio",
       "crossCheck_carbonatePhMin": "Minimum water pH for carbonate",
-      "report_amendedStatement": "Amended report statement"
+      "report_amendedStatement": "Amended report statement",
+      "container_codeFormat": "Container code format",
+      "container_sequenceReset": "Container sequence reset"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -1934,5 +1936,45 @@
     "pending": "Request saved. Authorisation is required before changes are applied.",
     "authorised": "Amendment authorised. Scientific retests must complete the normal review and approval before a report can be reissued.",
     "failed": "The amendment could not be saved. Your input is preserved."
+  },
+  "containers": {
+    "title": "Containers and aliquots",
+    "help": "Create containers from the physical material and its recorded parent.",
+    "empty": "No containers recorded.",
+    "kind": "Kind",
+    "parent": "Parent container",
+    "noParent": "Root bulk container",
+    "mass": "Mass (g, optional)",
+    "create": "Create container",
+    "print": "Print container label",
+    "sample": "Sample",
+    "linkedAttempt": "Linked attempt",
+    "aliquot": "Physical aliquot (optional)",
+    "unlinked": "No aliquot link",
+    "loadFailed": "Could not load containers.",
+    "createFailed": "Could not create the container.",
+    "labelFailed": "Could not generate the label.",
+    "kinds": {
+      "BULK": "Bulk",
+      "FINE_EARTH": "Fine earth",
+      "GROUND": "Ground",
+      "ALIQUOT": "Aliquot",
+      "ARCHIVE": "Archive"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "CONSUMED": "Consumed",
+      "DISPOSED": "Disposed"
+    },
+    "errors": {
+      "SAMPLE_CONTAINER_FIELDS_INVALID": "Could not create the container.",
+      "SAMPLE_CONTAINER_FORBIDDEN": "Could not create the container.",
+      "SAMPLE_CONTAINER_PARENT_INVALID": "Could not create the container.",
+      "SAMPLE_CONTAINER_STATE_REFUSED": "Could not create the container.",
+      "SAMPLE_CONTAINER_ALIQUOT_INVALID": "Could not create the container.",
+      "SAMPLE_CONTAINER_ALIQUOT_IMMUTABLE": "Could not create the container.",
+      "SAMPLE_CONTAINER_INVALID": "Could not create the container.",
+      "SAMPLE_CONTAINER_IMMUTABLE": "Could not create the container."
+    }
   }
 }

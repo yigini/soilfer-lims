@@ -18,7 +18,7 @@ const ATTEMPT_ERRORS = ['RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMA
 // batchId is retained only to compare with the server-derived batch in context.
 function selectMeasurement(measurement) {
     if (!measurement || typeof measurement !== 'object') return measurement;
-    return Object.fromEntries(['param', 'value', 'unit', 'methodologyId', 'equipmentId', 'basis', 'overrideReason', 'overrideRequestId', 'replicateNo', 'batchId', 'calculation']
+    return Object.fromEntries(['param', 'value', 'unit', 'methodologyId', 'equipmentId', 'basis', 'overrideReason', 'overrideRequestId', 'replicateNo', 'batchId', 'calculation', 'aliquotId']
         .filter(key => Object.hasOwn(measurement, key)).map(key => [key, measurement[key]]));
 }
 
@@ -410,6 +410,12 @@ async function writeResultsExecutionChecked(tx, options) {
     if (ctx.recordedAttempt && prepared.some(row=>ctx.recordedResults.some(old=>old.replicateNo===Number(row.replicateNo ?? 1)))) {
         throw new TransitionError('Use the transcription correction route or request a repeat to change a recorded cell.',409,'ATTEMPT_CORRECTION_REQUIRED');
     }
+    const aliquotId = require('./sampleContainerService').aliquotRequest(prepared[0].aliquotId);
+    if (prepared.some(row => require('./sampleContainerService').aliquotRequest(row.aliquotId) !== aliquotId))
+        throw new TransitionError('Replicates must share their physical aliquot.',409,'SAMPLE_CONTAINER_ALIQUOT_INVALID');
+    if (ctx.recordedAttempt && aliquotId != null && ctx.recordedAttempt.aliquotId !== aliquotId)
+        throw new TransitionError('An attempt cannot change its physical aliquot.',409,'SAMPLE_CONTAINER_ALIQUOT_IMMUTABLE');
+    ctx.aliquotId = aliquotId;
     const allocation=ctx.recordedAttempt ? {id:ctx.recordedAttempt.id,existing:true,status:'RECORDED'} : await allocateExecution(tx,ctx,options);
     await require('./sampleReplicatePolicyService').assertSampleReplicateNumbers(tx,ctx,prepared,allocation);
     await validateExecutionReadiness(tx,ctx);
@@ -511,6 +517,7 @@ async function writeTextureDetermination(tx, options) {
         closureError:classification.closureError,sourceResultIds:[...fractionMeasurements.map(row=>row.id),classMeasurement.id],
         ...(options.syncResult && {rawValue:options.syncResult.rawValue ?? String(measurement.value ?? classification.className),
             normalizedValue:null,qualifier:null,recordedAt:now.toISOString(),resultId:classMeasurement.id})};
+    ctx.aliquotId = require('./sampleContainerService').aliquotRequest(measurement.aliquotId);
     await insertExecution(tx,ctx,allocation,evidence,now,options.attemptMetadata);
     for(const fraction of preparedFractions)await appendResult(tx,ctx,fraction.measurement,fraction.values,now);
     const row = await appendResult(tx, ctx, classMeasurement, { value: classification.className,

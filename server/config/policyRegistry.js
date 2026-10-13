@@ -95,6 +95,8 @@ key('report.ovenDryConvertible', 'boolean', false, false, false,
     { analysisEligible: (code, value) => value !== true || require('../services/ovenDryEligibility').analysisEligible(code) });
 key('report.numberFormat', 'reportFormat', 'RPT-{LAB}-{YYYY}-{SEQ:5}', undefined, undefined, { scope: 'LAB' });
 key('sample.codeFormat', 'sampleFormat', '{LAB}-{YY}-{SEQ:6}{CHK}', undefined, undefined, { scope: 'LAB' });
+key('container.codeFormat', 'sampleFormat', 'C-{LAB}-{YY}-{SEQ:6}{CHK}', undefined, undefined, { scope: 'LAB' });
+key('container.sequenceReset', 'enum', 'YEARLY', 'YEARLY', 'YEARLY', { scope: 'LAB', allowedValues: ['YEARLY', 'NEVER'] });
 key('sample.sequenceReset', 'enum', 'YEARLY', 'YEARLY', 'YEARLY', { scope: 'LAB', allowedValues: ['YEARLY', 'NEVER'] });
 key('consignment.numberFormat', 'consignmentFormat', 'CSG-{LAB}-{YYYY}-{SEQ:5}', undefined, undefined, { scope: 'LAB' });
 key('consignment.sequenceReset', 'enum', 'YEARLY', 'YEARLY', 'YEARLY', { scope: 'LAB', allowedValues: ['YEARLY', 'NEVER'] });
