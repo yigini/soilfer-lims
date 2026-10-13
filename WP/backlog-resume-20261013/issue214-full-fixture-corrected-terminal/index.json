@@ -1,0 +1,74 @@
+{
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/command.json": {
+    "bytes": 825,
+    "sha256": "8a7f5876d985f3667d42864fd90d6f08f8d6afb6a9e9cd39a68d9d9016760926"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/config-original.json": {
+    "bytes": 6307,
+    "sha256": "eff0bb58b2d8d237d26c934b6a168a3cca52e162a6cf92a05c976117c2c18b91"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/config-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/inventory-original.json": {
+    "bytes": 48871,
+    "sha256": "084156ea8374a1e37ff175ea50e60bf7075072c6a7cf8d9b5ee11ada5225a7ce"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/inventory-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/report-original.json": {
+    "bytes": 2681643,
+    "sha256": "97d36191616a3acaaf99c1021d0e6a68cac696813aae49a2868ed42f11b4b73a"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/source-after.json": {
+    "bytes": 52475,
+    "sha256": "7c60755d10b5f95670853f3f42e139d183cacd32d34d678ac2dca9fc94124cc8"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/source-before.json": {
+    "bytes": 52475,
+    "sha256": "7c60755d10b5f95670853f3f42e139d183cacd32d34d678ac2dca9fc94124cc8"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/stderr-original.log": {
+    "bytes": 2224263,
+    "sha256": "e0107ae55940216a5ed3f72fdd593a81416c7639326556f95211affae0126646"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/stdout-original.log": {
+    "bytes": 609,
+    "sha256": "3e0b71238d3aa99d2afb151fe27c99f59fe897cfe4b973d9287e51299c924522"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/summary.json": {
+    "bytes": 484,
+    "sha256": "284149ce2b82d30777db41374a0b91b245a14197973e463d4f758067df268e30"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected/visible-local-storage.json": {
+    "bytes": 10276,
+    "sha256": "f58fa7dca4a154b00ad7ec629742386ec906c710527783270e7744971dde1e96"
+  },
+  "WP/backlog-resume-20261013/issue214-full-fixture-corrected-terminal/terminal-boundary.json": {
+    "bytes": 4655,
+    "sha256": "c2933bf99bd6c19a8577ea41b6088e6ebc91e93e4701e00033c019876b3206f5"
+  },
+  "WP/backlog-resume-20261013/retain-issue214-full-fixture-corrected-terminal-once.py": {
+    "bytes": 5394,
+    "sha256": "d060fa7d82ba2378a22eaac895db99ed96c7fb8e8f4dd2bc0b94c9c6064e09ab"
+  },
+  "WP/backlog-resume-20261013/retain-issue214-full-fixture-corrected-pass-once.py": {
+    "bytes": 5083,
+    "sha256": "e9d28b9e5a8f9e9f41aef9b2a64e27e375ead7075eb5e916c8cc6a80c5282495"
+  },
+  "WP/backlog-resume-20261013/prepare-issue214-source-only-review-once.py": {
+    "bytes": 5484,
+    "sha256": "65e5d54b086d45968c4e89b217b694966543fcdea92729c6b53bbf609fb61521"
+  },
+  "WP/backlog-resume-20261013/create-issue214-source-pr-once.py": {
+    "bytes": 11192,
+    "sha256": "2569a8c41fffb3eb6d92f55b7d3d8a7a97aab840c503ab13bb317182c0bbc526"
+  }
+}
