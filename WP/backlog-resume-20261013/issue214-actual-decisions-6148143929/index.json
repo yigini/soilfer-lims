@@ -1,0 +1,60 @@
+{
+  "observedUtc": "2026-10-13T14:44:01.111185+00:00",
+  "status": "ACTUAL_CLAUDIO_SCIENTIFIC_DIRECTION_RECEIVED",
+  "issue": 214,
+  "question": 6147255466,
+  "answer": 6148143929,
+  "actualAnswerUtc": "2026-10-13T14:42:18Z",
+  "authority": "YY delegation #162/6141144901; Claude GitHub app",
+  "nativeObservation": "Fresh actual LIMS Audit / Lab workflow audit and plan showed the posted decisions and empty centre/right composers; human #103 See first/Approve now remains unanswered.",
+  "series": [
+    "labId",
+    "analysisCode",
+    "methodologyId",
+    "referenceMaterialId (lot)"
+  ],
+  "order": [
+    "recorded run execution time",
+    "QC position sequence index",
+    "QcMeasurement id"
+  ],
+  "limits": "One approved set or provisional fixed window; reset only on approved-set change, provisional/charted switch, lot or methodology change.",
+  "rules": "R-4s within run; 2-2s/4-1s/10x consecutive observations across runs; QC_FAIL history retained; correction replaces original; ambiguous order stable 4xx.",
+  "baseline": "Frozen effective passing/non-invalidated/non-superseded values, arithmetic mean/sample SD n-1; deliberate exclusion reasons; minimum via frozen policy; different named approver.",
+  "permissions": "APPROVE_CONTROL_LIMITS: LAB_MANAGER, SUPER_ADMIN, MASTER_USER; no new QA role.",
+  "review": "Separate lab-scoped evaluation/rule-idempotent obligation; permission holders; append-only no action or investigate/new limits proposed resolution; no verdict/release block.",
+  "policy": "Third reject/warn/review set explicitly authorized. Strict review [4-1s,10x], others []; mutually exclusive; missing review on stored overrides means []; zero policy backfill.",
+  "applicationImplementationStarted": false,
+  "productionOperations": 0,
+  "issue103ApplyGo": false,
+  "files": {
+    "actual-decisions.txt": {
+      "bytes": 6052,
+      "sha256": "f1f3f39ec0e9e41190c07ca1baded001285945347a085e8ef698d80aec3643fc"
+    },
+    "answer-original-raw.json": {
+      "bytes": 9862,
+      "sha256": "31a554bd4c49dc7c426f1547e956d390f976dea40de95c66c8929e4fd892ba6b"
+    },
+    "issue214-current-raw.json": {
+      "bytes": 8805,
+      "sha256": "619c8d370ba0d5a8b4e60f5e0fa9138fb42cc7cd59e1ab45b30e1e2fb83fc495"
+    },
+    "main-ci-completed-raw.json": {
+      "bytes": 12096,
+      "sha256": "e784861c7a4109c58c2f39bb745426c9c3330a456327b361934b04e3ee51687f"
+    },
+    "main-current-raw.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    },
+    "pr295-current-raw.json": {
+      "bytes": 23239,
+      "sha256": "2e5ebeee629d22dd26182bbba1546b89f55748be35004b04e2edbae29b2ecffe"
+    },
+    "question-original-raw.json": {
+      "bytes": 5073,
+      "sha256": "65174de8626294c1a7b52b0380369cea3b37f4be4a8c04baec3b5e21ef7c4f48"
+    }
+  }
+}

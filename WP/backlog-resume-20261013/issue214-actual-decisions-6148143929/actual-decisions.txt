@@ -1,0 +1,89 @@
+#214 decisions (Claudio, under YY's delegation recorded at #162/6141144901). These follow the #162 "QC design: decisions" table and standard Westgard practice. My scope comment 5975243795 still governs: policies are read through `policyService.get(labId, key, {analysisCode, methodologyId})`, and the registry ships the default `qc.controlChartMinPoints` = 20.
+
+## 1. Series, grouping and chronology
+
+**Series key.** A series is `(labId, analysisCode, methodologyId, referenceMaterialId)`. The reference material is a **lot**, and a new lot is a new series. A series only ever compares observations evaluated against **the same limit basis**: one approved `ControlLimitSet`, or the provisional fixed window.
+
+**Reset boundaries.** The rule history starts empty when any of these happen:
+- a new approved limit set takes effect;
+- the series switches between provisional and charted mode;
+- the lot changes;
+- the methodology changes.
+
+Nothing carries over a reset. Do not infer a reset from anything else.
+
+**Order.** Observations are ordered by:
+1. the run's recorded execution time (the attempt/run timestamp that already exists, not the edit time);
+2. the QC position's sequence index within that run;
+3. the `QcMeasurement` id, as a final deterministic tie-breaker.
+
+If a needed observation has no execution time or sequence index, refuse it with a stable 4xx code. Do not guess.
+
+**Which observations count.** An observation is in the history if it was evaluated and is not invalidated or superseded. A corrected value replaces the original. Observations from runs that ended `QC_FAIL` **stay in** the history, because a failed control is real evidence of drift.
+
+**Within-run versus across-run rules.**
+- **R-4s is within one run only.** It applies when one run holds ≥ 2 observations of the same series, whether LRM replicates or two LRM positions. It fires when one observation is above +2s and another below −2s, so the range exceeds 4s. With a single observation in the run it is recorded as "not applicable". It is never evaluated across runs.
+- **2-2s, 4-1s and 10x run over consecutive observations in the ordered series.** They span runs, and multiple observations in one run each count separately, in order.
+- 2-2s means two consecutive observations beyond ±2s on the same side. 4-1s means four beyond ±1s on the same side. 10x means ten on the same side of the mean.
+
+**Provisional mode.** While a series has fewer than `qc.controlChartMinPoints` in-control points, only the QcRule fixed window gives pass or fail, with a "Provisional" badge. The multirules are recorded as "not evaluated (provisional)", not as passed.
+
+**Freezing.** Your proposed guard is accepted. Each evaluation freezes:
+- the limit-set id or the provisional window;
+- the exact ordered observation ids, with their values and z-scores;
+- which rules fired.
+
+Re-evaluation or a later approval never recomputes a stored evaluation.
+
+## 2. Baseline proposals
+
+**Statistics.** Arithmetic mean and sample SD (n − 1), computed from the frozen effective values.
+
+**Eligible points.** Observations of the series that passed their own evaluation and are not invalidated or superseded. A corrected value counts as its effective value.
+
+**Outliers.** The proposal screen may *flag* candidates, for example points beyond ±3s of the proposal's own trial statistics. **Nothing is excluded automatically.**
+- Each exclusion is a deliberate choice by the proposer with a mandatory reason.
+- The proposal retains every selected and every excluded measurement id, its frozen value and the reason, as you proposed.
+- n after exclusions must be ≥ `qc.controlChartMinPoints`. Otherwise the proposal is refused, and the series stays Provisional.
+
+**Approval.**
+- It needs a named approver with a new permission, e.g. `APPROVE_CONTROL_LIMITS`. Grant it to `LAB_MANAGER`, plus `SUPER_ADMIN` and `MASTER_USER` by the existing pattern. There is no QA role in `roles.js` and you should not add one.
+- **The approver must not be the proposer.**
+- Approval creates a new set and marks the old one superseded. The old set keeps its values and effective date range.
+
+## 3. 4-1s / 10x review obligations
+
+Your design is confirmed:
+- a separate lab-scoped QC review record, linked idempotently to the immutable evaluation and the triggering rule;
+- one open obligation per (evaluation, rule);
+- owned by the `APPROVE_CONTROL_LIMITS` holders of that lab;
+- resolved through append-only resolution events with an outcome and a note. The outcome is either "no action" or "investigate/new limits proposed".
+
+A review obligation **does not change the run verdict** and does not block result release. Leave the CRM `NonconformityReport` and the archive/disposal tasks unchanged.
+
+## 4. Policy mapping and defaults
+
+- **Add a third set:** `qc.westgardRules` becomes `{ reject, warn, review }`.
+  - The Strict default is `reject: [1-3s, 2-2s, R-4s]`, `warn: [1-2s]`, `review: [4-1s, 10x]`. This is what #162 and this issue specify.
+  - The other presets keep their current reject and warn sets, with `review: []`.
+- **A rule code may appear in at most one set.** The validator refuses duplicates.
+  - reject gives `QC_FAIL` and creates no review task, because the failure path already handles it;
+  - warn gives a warning;
+  - review gives the obligation from section 3.
+- **Stored lab or method values that have no `review` key mean `review: []`.**
+  - Explicit existing overrides keep their exact current behaviour.
+  - Only labs on the shipped default pick up review tasks.
+  - There is no data backfill.
+  - The migration and installer must show that this reading is a no-op on stored policy rows.
+
+Synthetic tests should cover these cases:
+- each rule firing and not firing at its boundary;
+- R-4s "not applicable" with a single observation;
+- a reset at a new limit set or lot;
+- a `QC_FAIL` point staying in the history;
+- the ambiguous-order refusal;
+- proposer ≠ approver;
+- approval leaving past evaluations byte-identical.
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
