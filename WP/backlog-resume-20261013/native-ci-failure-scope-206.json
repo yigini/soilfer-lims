@@ -1,0 +1,13 @@
+{
+  "observedUtc": "2026-10-13T12:43:11.409882+00:00",
+  "target": "Claude / LIMS Audit / Lab workflow audit and plan",
+  "failureBoundaryMessage": "Delivered once and visually verified with exact head/run, raw evidence and scope question6145723989",
+  "beforeSend": "Fresh actual window, right thread, empty composers, focused empty right composer, full draft inspected before Return",
+  "actualScopeReply": "Yes, Jest change can stay in PR295; only server test script; config and 8GB heap unchanged; same full count, no skipped tests; document change; exact-head audit waits for green CI",
+  "githubScopeCommentId": 6145765510,
+  "minimizedWindowRecovery": "Activated actual returned Claude window, rehydrated current window and captured fresh state",
+  "humanCards": "Unanswered #103 See first / Approve now card and human drafts untouched",
+  "finalAuditHandoff": false,
+  "actualFinalAuditPass": false,
+  "productionMutations": 0
+}

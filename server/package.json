@@ -8,7 +8,7 @@
     "dev": "node index.js",
     "seed": "node seed.js",
     "provision:admin": "node scripts/provision_super_admin.js",
-    "test": "jest --runInBand",
+    "test": "jest --maxWorkers=1 --workerIdleMemoryLimit=512MB",
     "test:watch": "jest --watch",
     "test:workflow": "jest --runInBand tests/security/ tests/contracts/ tests/scenarios/",
     "check:theme-catalog": "node scripts/generate_theme_catalog.js --check",
