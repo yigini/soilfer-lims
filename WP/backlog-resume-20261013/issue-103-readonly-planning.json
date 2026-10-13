@@ -1,0 +1,32 @@
+{
+  "status": "READ_ONLY_PLANNING_ONLY; NO PRODUCTION COLLECTION YET",
+  "issue": 103,
+  "authority": "#162/6141144901 permits the read-only discrepancy/mapping ledger for Claudio review; APPLY requires YY's own explicit go",
+  "liveIssueEvidence": "#103/5759987798 requires proposed changes and effects on scoped access; programme grouping must not silently expand grants",
+  "observedSource": "main 959d17e1; projectMembershipService and reconcile_projects are unchanged by #206",
+  "observations": [
+    "getDiscrepancyReport accepts an injected client and selects Project and ProjectLab metadata.",
+    "The default service import loads server/prisma.js, which opens a writable better-sqlite3 connection and configures journal_mode=WAL and other pragmas.",
+    "The default reconcile_projects CLI imports that same module. A dry-run argument alone does not prove the whole process has no database setup writes.",
+    "The September 15 production report is historical, not a fresh live ledger. Its sample/project totals must not be copied as current facts.",
+    "Claudio's native See first / Approve now clarification remains unanswered; no apply go was observed."
+  ],
+  "proposedCollectorBoundary": [
+    "An explicitly read-only, source-pinned and bounded SELECT collector; do not import application Prisma or any installer/default entrypoint.",
+    "A single consistent read transaction containing only Project membership columns, ProjectLab roles, laboratory identity/activity metadata and sample counts by project; no analytical values.",
+    "Deny write operations explicitly, retain exact SELECT source/results/hashes locally, and report concurrent-job limits honestly rather than claiming a frozen production database.",
+    "Evaluate the actual deployed getDiscrepancyReport against an injected snapshot adapter in isolation; the default Prisma import must be inert and never connect to production.",
+    "Retain raw aliases and canonical lab candidates. Report ambiguous/inactive/missing owners, country-only records and servicing conflicts for governance review without inferred mappings.",
+    "Compute hypothetical before/after access sets separately for each explicitly proposed owner/junction omission; display any grant changes and keep ambiguous programme ownership unresolved."
+  ],
+  "applyBoundary": {
+    "authorized": false,
+    "requirements": "Claudio reviews the exact fresh ledger, YY gives explicit go for the named change set, and a separately audited forward correction rechecks that same state",
+    "completedReleaseReuse": false,
+    "historicalRollbackInstructions": "Superseded by the current forward-only recovery and preservation guardrails; no restore or older image"
+  },
+  "productionConnections": 0,
+  "productionMutations": 0,
+  "messagesSent": 0,
+  "humanCardsAnswered": 0
+}
