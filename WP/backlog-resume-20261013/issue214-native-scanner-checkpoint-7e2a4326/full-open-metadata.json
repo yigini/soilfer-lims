@@ -1,0 +1,13 @@
+{
+  "observedUtc": "2026-10-13T20:35:47.304093+00:00",
+  "status": "OPEN_RUNNING_METADATA_ONLY",
+  "sessionId": 65892,
+  "helper": "verify-issue214-scanner-call-form-full-once.py",
+  "sourceCheckpoint": "7e2a4326a94db4142abe9e4911245241f0472182",
+  "fullDiscoveredInventory": 365,
+  "frozenSourceAndFixturePaths": 415,
+  "expectedTests": 5547,
+  "actualFinalSummary": null,
+  "activeLogsCapturedAsComplete": false,
+  "productionOperations": 0
+}

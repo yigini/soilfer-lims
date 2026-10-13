@@ -1,0 +1,18 @@
+{
+  "WP/backlog-resume-20261013/issue214-native-scanner-checkpoint-7e2a4326/full-open-metadata.json": {
+    "bytes": 445,
+    "sha256": "f5b926ef01c91a6e8a99b21f4259f84dbd0e87104334e2e07d2430ad88f7329c"
+  },
+  "WP/backlog-resume-20261013/issue214-native-scanner-checkpoint-7e2a4326/native-actual-sent.txt": {
+    "bytes": 2147,
+    "sha256": "41b83f9139fcbef3ba1b516b3bb3b5d6f1a8ca707effd513704cf9f0c5a8fe1d"
+  },
+  "WP/backlog-resume-20261013/issue214-native-scanner-checkpoint-7e2a4326/native-delivery-record.json": {
+    "bytes": 822,
+    "sha256": "564671864247cbb911e6c2a757e6776a6ddd6615b192a29ecd69f74b21e4eba5"
+  },
+  "WP/backlog-resume-20261013/record-issue214-native-scanner-checkpoint-7e2a4326-once.py": {
+    "bytes": 5519,
+    "sha256": "a77ef7565526993842b617f9c013d4925edb24016a50887f3a3e414f3a50ce76"
+  }
+}
