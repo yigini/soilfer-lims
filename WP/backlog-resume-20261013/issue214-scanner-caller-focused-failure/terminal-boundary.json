@@ -1,0 +1,39 @@
+{
+  "retainedUtc": "2026-10-13T20:27:05.175416+00:00",
+  "sessionId": 72037,
+  "summary": {
+    "observedUtc": "2026-10-13T20:25:50.563703+00:00",
+    "exitCode": 1,
+    "status": "FAILED_OR_INCOMPLETE",
+    "suites": 14,
+    "tests": 293,
+    "passedSuites": 13,
+    "passedTests": 292,
+    "failed": 1,
+    "pending": 0,
+    "failedSuites": 1,
+    "sourceUnchanged": true,
+    "inventoryEqual": true,
+    "testWorkerCount": 1,
+    "workerIdleMemoryLimit": 512000000,
+    "nodeOptions": "",
+    "ordinarySetupsAndAssertions": true,
+    "localVisiblePathFixtureOnly": true,
+    "productionOperations": 0
+  },
+  "failedCases": [
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\security\\audit_1_2_state_writes.test.js",
+      "test": "all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities",
+      "failureMessages": [
+        "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 8\n\n- Array []\n+ Array [\n+   Object {\n+     \"code\": \"HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED\",\n+     \"detail\": \"../helpers/calculationReleasePrerequisites\",\n+     \"file\": \"tests/contracts/audit_2_3_compatibility_runs.test.js\",\n+     \"line\": 64,\n+   },\n+ ]\n    at Object.toEqual (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\security\\audit_1_2_state_writes.test.js:292:95)\n    at Promise.finally.completed (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n    at _callCircusTest (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n    at _runTest (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n    at _runTestsForDescribeBlock (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n    at run (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n    at runAndTransformResultsToJestFormat (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n    at jestAdapter (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\runner.js:101:19)\n    at runTestInternal (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-runner\\build\\testWorker.js:275:16)\n    at runTest (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-runner\\build\\testWorker.js:343:7)\n    at Object.worker (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-runner\\build\\testWorker.js:497:12)"
+      ]
+    }
+  ],
+  "finding": "Caller registration is present; the fixture must also use the existing destructured-import/direct-call/identifier-argument form. Do not relax scanner predicates.",
+  "unusedHelpersMustNotExecute": [
+    "retain-issue214-scanner-caller-focused-pass-once.py",
+    "verify-issue214-scanner-caller-full-once.py"
+  ],
+  "productionOperations": 0
+}

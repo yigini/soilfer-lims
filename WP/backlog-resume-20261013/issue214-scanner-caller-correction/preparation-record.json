@@ -1,0 +1,20 @@
+{
+  "preparedUtc": "2026-10-13T20:23:11.809615+00:00",
+  "auditSourceBefore": "e6911e32c2c66fd6dbd52d306b3ebed34d52f959",
+  "changedSource": [
+    "server/tests/helpers/workflowWriteScanner.js"
+  ],
+  "addedCaller": "tests/contracts/audit_2_3_compatibility_runs.test.js",
+  "actualFixtureDirection": 6152507558,
+  "pinnedPrerequisiteHelperUnchanged": true,
+  "stockAssertionsUnchanged": true,
+  "runtimeWriterExceptionsAdded": 0,
+  "preparedHelpers": [
+    "verify-issue214-scanner-caller-focused-once.py",
+    "verify-issue214-scanner-caller-full-once.py"
+  ],
+  "preparedHelpersNotExecuted": true,
+  "productionOperations": 0,
+  "sourceBeforeSha256": "80b0bf43e2a3a04a5aab8d6bfc98dd3232c30fd86518e4223016203b5f2be131",
+  "sourceAfterSha256": "1894b51320bacf9993b7b392cf5fe7621f8fa76bfbad6a7064ab722615247298"
+}

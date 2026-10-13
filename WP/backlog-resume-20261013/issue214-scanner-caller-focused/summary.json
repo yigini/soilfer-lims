@@ -1,0 +1,20 @@
+{
+  "observedUtc": "2026-10-13T20:25:50.563703+00:00",
+  "exitCode": 1,
+  "status": "FAILED_OR_INCOMPLETE",
+  "suites": 14,
+  "tests": 293,
+  "passedSuites": 13,
+  "passedTests": 292,
+  "failed": 1,
+  "pending": 0,
+  "failedSuites": 1,
+  "sourceUnchanged": true,
+  "inventoryEqual": true,
+  "testWorkerCount": 1,
+  "workerIdleMemoryLimit": 512000000,
+  "nodeOptions": "",
+  "ordinarySetupsAndAssertions": true,
+  "localVisiblePathFixtureOnly": true,
+  "productionOperations": 0
+}

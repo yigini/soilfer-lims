@@ -222,6 +222,8 @@ const CALCULATION_PREREQUISITES = Object.freeze({
     file: 'tests/helpers/calculationReleasePrerequisites.js', exportName: 'installCalculationReleasePrerequisites',
     sha256: '5b091435c1e3ce5468a5dedcddf1f278fe3d6f6238c129804959f1826287ac57',
     callers: ['tests/helpers/qcGateFixture.js', 'tests/helpers/normalizedQcFixture.js', 'tests/helpers/repeatQcPredecessors.js',
+        // Claudio6152507558: current-schema Native case in this owned compatibility fixture only.
+        'tests/contracts/audit_2_3_compatibility_runs.test.js',
         'tests/contracts/audit_2_3_native_runs.test.js', 'tests/contracts/audit_1_2_guard_installer.test.js',
         'tests/contracts/deployment_readiness_bootstrap.test.js', 'tests/contracts/audit_3_1_attempt_sql_guards.test.js']
 });
