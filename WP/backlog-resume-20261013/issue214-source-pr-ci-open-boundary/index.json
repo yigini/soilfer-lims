@@ -1,0 +1,61 @@
+{
+  "retainedUtc": "2026-10-13T21:01:43.074897+00:00",
+  "status": "OPEN_METADATA_ONLY",
+  "number": 296,
+  "url": "https://github.com/yigini/soilfer-lims/pull/296",
+  "head": "e47b842c2a7f6b4f06fa4c532f7460c01797821b",
+  "tree": "7269379790ada4e9766cae14e33abd3c91eb59fd",
+  "base": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "auditSource": "2cc71b2b11526c10f2a5a41ea307d3193feb32fa",
+  "run": 38467368095,
+  "runUrl": "https://github.com/yigini/soilfer-lims/actions/runs/38467368095",
+  "attempt": 1,
+  "runStatus": "in_progress",
+  "conclusion": null,
+  "localSuites": 365,
+  "localTests": 5547,
+  "activeLogsCaptured": false,
+  "readyNoticeSent": false,
+  "finalNativeAuditRequestSent": false,
+  "actualFinalAuditPass": false,
+  "ciDispatches": 0,
+  "productionOperations": 0,
+  "files": {
+    "pr-original.json": {
+      "bytes": 50236,
+      "sha256": "e551efbcb51f95a443daef242049066b50ab0e0e34b4a4e8037df32c32ba31a4"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    },
+    "issue214-original.json": {
+      "bytes": 8805,
+      "sha256": "94637fd70cf8b508875a534b05359fa83a2b8844bbc65585bf0c1c7ecb49cd3a"
+    },
+    "pr-comments-original.json": {
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "runs-original.json": {
+      "bytes": 12692,
+      "sha256": "0030b1a2ccb41b48e2dd244065dffef9ae86e909d7b36bb49779738994e2b367"
+    },
+    "run-original.json": {
+      "bytes": 12656,
+      "sha256": "27c7d3f255eff18482f9dfe902d6b8c45f8b96c6a01231e3ee03e742dcfe1bab"
+    },
+    "jobs-original.json": {
+      "bytes": 912,
+      "sha256": "4499e052f4b21b1ce1e0a4aec1c771dbfdb98d2ed942cedd2039743c19db6a89"
+    },
+    "closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    }
+  },
+  "preparedUnexecutedSuccessors": {
+    "retain-issue214-source-pr-ci-terminal-once.py": "ba1e9051e6f89fd5c0b98eb8664ef1205d7c25a52f7af30ae22587de1916a5c6",
+    "request-issue214-exact-head-audit-after-green-once.py": "525f30753e095532807bdba32068643481859c1ce2f567c22769c81fd3c8e6f2"
+  }
+}

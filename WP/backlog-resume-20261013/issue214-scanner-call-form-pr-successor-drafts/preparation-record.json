@@ -1,0 +1,21 @@
+{
+  "preparedUtc": "2026-10-13T20:37:54.674748+00:00",
+  "auditSource": "519262ea8628e9a036bf9ace563984df336415e8",
+  "activeFullSession": 65892,
+  "status": "PREPARED_ONLY_NOT_EXECUTED",
+  "productionOperations": 0,
+  "files": {
+    "retain-issue214-scanner-call-form-full-pass-once.py": {
+      "bytes": 5083,
+      "sha256": "f7b7339c2e889811f161d02be14b3bfe9e52582b5f47c0d036b203055317cff4"
+    },
+    "prepare-issue214-scanner-call-form-source-only-review-once.py": {
+      "bytes": 5520,
+      "sha256": "9ffb9cddd84dcdff4dd982aa8985f113c167ceb9d6350a7c9e1635c28021fa75"
+    },
+    "create-issue214-scanner-call-form-source-pr-once.py": {
+      "bytes": 11786,
+      "sha256": "c9ac731a0911edd385c44e521a186614153951bf745267ad7fb5e23e86a1e524"
+    }
+  }
+}
