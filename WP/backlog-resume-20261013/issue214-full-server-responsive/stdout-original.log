@@ -1,0 +1,4 @@
+
+> server@1.9.0 test
+> jest --maxWorkers=1 --workerIdleMemoryLimit=512MB --testMatch **/tests/**/*.test.js --json --outputFile C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\backlog-resume-20261013\issue214-full-server-responsive\report-original.json
+

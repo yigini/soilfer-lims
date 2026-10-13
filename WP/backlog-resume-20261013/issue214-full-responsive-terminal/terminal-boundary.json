@@ -1,0 +1,103 @@
+{
+  "retainedUtc": "2026-10-13T19:44:20.964661+00:00",
+  "sessionId": 49046,
+  "originalSummary": {
+    "observedUtc": "2026-10-13T19:44:01.208447+00:00",
+    "exitCode": 1,
+    "status": "FAILED_OR_INCOMPLETE",
+    "suites": 365,
+    "tests": 5547,
+    "failed": 12,
+    "pending": 0,
+    "sourceUnchanged": true,
+    "inventoryEqual": true,
+    "failedSuites": 8,
+    "pendingSuites": 0,
+    "productionOperations": 0
+  },
+  "passedSuites": 357,
+  "passedTests": 5535,
+  "failedCases": [
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_2_3_compatibility_runs.test.js",
+      "test": "a migrated REJECT_REANALYSIS item joins a new NATIVE run while preserving its old evidence and membership",
+      "status": "failed"
+    },
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_4_8_cross_check_evidence.test.js",
+      "test": "real submission retains all seven numeric-evidence checks and review reads the frozen 1.3 \u00d7 CEC flag without parsing text",
+      "status": "failed"
+    },
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_4_7_xlsx_commit.test.js",
+      "test": "real XLSX commit keeps long, exponent and rounded-display raw drafts plus immutable cell and policy evidence",
+      "status": "failed"
+    },
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_4_7_xlsx_commit.test.js",
+      "test": "numeric/text imports under{\"decimal\":\",\",\"thousands\":\".\"} keep source lexemes, verified draft text and the used policy version",
+      "status": "failed"
+    },
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_4_7_xlsx_commit.test.js",
+      "test": "numeric/text imports under{\"decimal\":\",\",\"thousands\":\" \"} keep source lexemes, verified draft text and the used policy version",
+      "status": "failed"
+    },
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_4_7_xlsx_commit.test.js",
+      "test": "numeric/text imports under{\"decimal\":\".\",\"thousands\":\",\"} keep source lexemes, verified draft text and the used policy version",
+      "status": "failed"
+    },
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_3_3_selection_backfill.test.js",
+      "test": "default dry-run writes zero bytes, reports exact outcomes, and apply preserves both published and superseded report content",
+      "status": "failed"
+    },
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_4_7_calculation_import.test.js",
+      "test": "actual EXCH_CA/Olsen activated input imports do not calculate; later typed recording freezes the selected local definitions and verified raw input text",
+      "status": "failed"
+    },
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\spectral_multipart_upload.test.js",
+      "test": "Spectral Multipart Raw Ingest & Byte-Identical Preservation Contract (SL-06 & SL-13) 1. Multipart raw JCAMP-DX upload preserves exact binary bytes and downloads back byte-identical",
+      "status": "failed"
+    },
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\reception_route_smoke.test.js",
+      "test": "Reception Route Smoke & Static Asset Verification (#113, #114, #117) 2. GET /reception returns HTTP 200 and text/html SPA shell",
+      "status": "failed"
+    },
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\reception_route_smoke.test.js",
+      "test": "Reception Route Smoke & Static Asset Verification (#113, #114, #117) 3. GET /reception?mode=WALK_IN returns HTTP 200 and text/html SPA shell",
+      "status": "failed"
+    },
+    {
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\spectral_stage_b.test.js",
+      "test": "Spectral Library Stage B (SL-06 to SL-12) SL-06 & SL-08 & SL-09 & SL-10: Ingest stores raw file, links equipment, and saves typed metadata",
+      "status": "failed"
+    }
+  ],
+  "originalCommand": {
+    "argv": [
+      "cmd.exe",
+      "/d",
+      "/c",
+      "npm.cmd",
+      "test",
+      "--",
+      "--testMatch",
+      "**/tests/**/*.test.js",
+      "--json",
+      "--outputFile",
+      "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\issue214-full-server-responsive\\report-original.json"
+    ],
+    "nodeOptions": "",
+    "ordinarySetupsAndAssertions": true,
+    "localDiscoveryFixtureOnly": true
+  },
+  "productionOperations": 0,
+  "closed": true,
+  "consumedHelperMustNeverReplay": true
+}

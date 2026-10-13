@@ -1,0 +1,14 @@
+{
+  "observedUtc": "2026-10-13T19:44:01.208447+00:00",
+  "exitCode": 1,
+  "status": "FAILED_OR_INCOMPLETE",
+  "suites": 365,
+  "tests": 5547,
+  "failed": 12,
+  "pending": 0,
+  "sourceUnchanged": true,
+  "inventoryEqual": true,
+  "failedSuites": 8,
+  "pendingSuites": 0,
+  "productionOperations": 0
+}
