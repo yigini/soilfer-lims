@@ -1,0 +1,27 @@
+{
+  "retainedUtc": "2026-10-13T19:49:43.370461+00:00",
+  "sessionId": 51135,
+  "summary": {
+    "observedUtc": "2026-10-13T19:48:33.099304+00:00",
+    "exitCode": 1,
+    "status": "FAILED_OR_INCOMPLETE",
+    "suites": 12,
+    "tests": 175,
+    "passedSuites": 11,
+    "passedTests": 147,
+    "failed": 28,
+    "pending": 0,
+    "failedSuites": 1,
+    "sourceUnchanged": true,
+    "inventoryEqual": true,
+    "testWorkerCount": 1,
+    "workerIdleMemoryLimit": 512000000,
+    "nodeOptions": "",
+    "ordinarySetupsAndAssertions": true,
+    "localVisiblePathFixtureOnly": true,
+    "productionOperations": 0
+  },
+  "reason": "The old compatibility fixture needs the normal WorkAttempt predecessor before the container/chart installers. All other 11 suites passed, including the seven policy-version and four visible-path failures.",
+  "productionOperations": 0,
+  "nativeProgressAcknowledgementSent": false
+}

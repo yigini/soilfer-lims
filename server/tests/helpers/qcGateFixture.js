@@ -8,7 +8,7 @@ const { beforeGuards } = require('./legacyWorkflowDatabase');
 const { createSampleFixture, createWorkItemFixture } = require('./workflowFixtures');
 const { installCalculationReleasePrerequisites } = require('./calculationReleasePrerequisites');
 
-async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' } = {}) {
+async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {
     const labId = randomUUID(), analysisCode = `QC-GATE-${randomUUID()}`, username = 'system:fixture';
     const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES', relatedRows: {
         Lab: [{ id: labId, code: labId, name: 'QC gate fixture', country: 'TEST', updatedAt: Date.now() }],

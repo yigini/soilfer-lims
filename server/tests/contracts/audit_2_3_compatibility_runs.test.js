@@ -57,6 +57,11 @@ async function fixture({ migrated = false, sampleMember = false, finalClear = fa
     require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: record.file, apply: true });
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: record.file, apply: true });
     require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: record.file, apply: true });
+    // New chart-mode runs use the current normal installation, retaining all legacy assertions.
+    require('../helpers/calculationReleasePrerequisites').installCalculationReleasePrerequisites(record.file);
+    require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: record.file, apply: true });
+    require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: record.file, apply: true });
+    require('../../scripts/install_control_charts').installControlCharts({ dbPath: record.file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${record.file}` }) }); record.db = db;
     const actor = { id: username, username, role: 'LAB_MANAGER', labId }, f = { db, file: record.file, actor, labId, analysisCode };
     await db.analysis.create({ data: { code: analysisCode, name: 'Compatibility fixture analysis' } });

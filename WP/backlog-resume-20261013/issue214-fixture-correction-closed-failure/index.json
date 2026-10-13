@@ -1,0 +1,106 @@
+{
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/command.json": {
+    "bytes": 2548,
+    "sha256": "5dc5b754de245cc858fe5919912c27a0f7788d96385b0ad10e2e589966d727cf"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/config-original.json": {
+    "bytes": 11237,
+    "sha256": "bc6cd1091b47723e7c204a2ae18acf0342c1ca675b7c0f77a3b63466c03eb755"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/config-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/inventory-original.json": {
+    "bytes": 48871,
+    "sha256": "81a383a17d29c52ada21c7216bc0a5e04ce8443f04c344b96596734d3091b890"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/inventory-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/report-original.json": {
+    "bytes": 213140,
+    "sha256": "de648b0e531ace3adc6254de98d7f69f5d255439c3d076e5582868beeb6dd3f7"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/source-after.json": {
+    "bytes": 52475,
+    "sha256": "83572f646d97f6be124e6ccf2e64283781b403509d3c3fee31062b071bd7f4c2"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/source-before.json": {
+    "bytes": 52475,
+    "sha256": "83572f646d97f6be124e6ccf2e64283781b403509d3c3fee31062b071bd7f4c2"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/stderr-original.log": {
+    "bytes": 87104,
+    "sha256": "993642000bcb304ff5a59086e7651921ab8926aec505ba774d8e1d5f5eab7b90"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/stdout-original.log": {
+    "bytes": 2121,
+    "sha256": "4003c24ce5f75085f3f3f22516c8b3960ccadb215a8980441acb71ec712e3aa4"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/summary.json": {
+    "bytes": 481,
+    "sha256": "b72914bd30b37f840b93188040e44221194e6565a469a36e496865fba200a62b"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused-config/visible-local-storage.json": {
+    "bytes": 10276,
+    "sha256": "8bad5ba7e0bbde598d5d8f72867e4989c590d086c8319d2b387743c9a068fb5c"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused/config-original.json": {
+    "bytes": 11236,
+    "sha256": "ab9ed15f71a008a0e1321f8863b778a4b51e4c413693fc690b4ccf703dca944b"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused/config-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused/inventory-original.json": {
+    "bytes": 48871,
+    "sha256": "e7296da8c7a09cc8c4c239b8dde484164d2fcb73562a734638bdd399bfe0a4eb"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused/inventory-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused/pre-test-refusal-boundary.json": {
+    "bytes": 435,
+    "sha256": "c92e91a3500d60ebbc77e9b1e2054269fcbca56b18efd89dcef034ca5c17f5ce"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused/source-before.json": {
+    "bytes": 52475,
+    "sha256": "83572f646d97f6be124e6ccf2e64283781b403509d3c3fee31062b071bd7f4c2"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-focused/visible-local-storage.json": {
+    "bytes": 10276,
+    "sha256": "f29660094a2a3c13593a22d4ee424406748b0e22102d823027fd4c1cf7d4c936"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-correction-closed-failure/terminal-boundary.json": {
+    "bytes": 906,
+    "sha256": "31e1c71e2d8869e5b0c1adaff017ad34b99dc32c75a2c0f1e57ff5c7d3ed15bd"
+  },
+  "WP/backlog-resume-20261013/retain-issue214-fixture-correction-closed-failure-once.py": {
+    "bytes": 4660,
+    "sha256": "09121f0b0498c1edac55b80ec4c2feee72198cf74179b49c8a6c70494778f04d"
+  },
+  "WP/backlog-resume-20261013/prepare-issue214-fixture-correction-focused-successor-once.py": {
+    "bytes": 1886,
+    "sha256": "39ec340993164cc39343f79305e2646624b226a1d65c80199a45406580a7a92b"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-fixture-correction-focused-once.py": {
+    "bytes": 6924,
+    "sha256": "8ae529fda576256b674bfc82a8c99b72b0072f7f315cd44fe2d0f5b37dde7ad6"
+  },
+  "WP/backlog-resume-20261013/prepare-issue214-fixture-correction-focused-config-successor-once.py": {
+    "bytes": 1810,
+    "sha256": "60eb4b775b17b869406c1d9efaed3f31277e0e79db86f9c45f447d2dd8c4e41a"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-fixture-correction-focused-config-once.py": {
+    "bytes": 6933,
+    "sha256": "495446fce7092f62010ed8c1848f018f2c27bfcf8ee446524e5578868ff538ae"
+  }
+}

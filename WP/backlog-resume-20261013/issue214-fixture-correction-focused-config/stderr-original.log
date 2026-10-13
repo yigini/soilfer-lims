@@ -1,0 +1,1596 @@
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User foreign (Lab: 1d8318ac-79d1-4c89-bd3d-4e8add8c81b6) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/crossCheckEvaluationService.js:13:11)
+      at services/crossCheckEvaluationService.js:109:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_8_cross_check_evidence.test.js:223:5)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User foreign (Lab: 1d8318ac-79d1-4c89-bd3d-4e8add8c81b6) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/crossCheckEvaluationService.js:13:11)
+      at recordSubmissionCrossChecks (services/crossCheckEvaluationService.js:77:20)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_8_cross_check_evidence.test.js:224:5)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c78c3a02-6a95-4ac5-b711-ef70dfde224b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c78c3a02-6a95-4ac5-b711-ef70dfde224b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c78c3a02-6a95-4ac5-b711-ef70dfde224b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c78c3a02-6a95-4ac5-b711-ef70dfde224b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c78c3a02-6a95-4ac5-b711-ef70dfde224b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c78c3a02-6a95-4ac5-b711-ef70dfde224b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d992e99e-bf92-4e84-ba11-55d9d4ef54f1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d992e99e-bf92-4e84-ba11-55d9d4ef54f1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d992e99e-bf92-4e84-ba11-55d9d4ef54f1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d992e99e-bf92-4e84-ba11-55d9d4ef54f1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d992e99e-bf92-4e84-ba11-55d9d4ef54f1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d992e99e-bf92-4e84-ba11-55d9d4ef54f1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f4ee63ba-bb67-45aa-84bb-55ac8d61696b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f4ee63ba-bb67-45aa-84bb-55ac8d61696b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f4ee63ba-bb67-45aa-84bb-55ac8d61696b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f4ee63ba-bb67-45aa-84bb-55ac8d61696b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f4ee63ba-bb67-45aa-84bb-55ac8d61696b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f4ee63ba-bb67-45aa-84bb-55ac8d61696b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 38dac10b-6cd9-4fa5-a07c-f30138a0deda
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/audit_4_8_cross_check_evidence.test.js (30.408 s)
+  √ current stored-numeric preview keeps legacy diagnostics separate for basis null and writes no evidence (1748 ms)
+  √ current stored-numeric preview keeps legacy diagnostics separate for basis AIR_DRY and writes no evidence (1419 ms)
+  √ the actual submission response retains legacy diagnostics and separate immutable crossChecks for basis null (1821 ms)
+  √ the actual submission response retains legacy diagnostics and separate immutable crossChecks for basis AIR_DRY (1517 ms)
+  √ an unregistered historical lab saves and submits through the real HTTP workflow with disclosed unavailable checks and zero evidence (1289 ms)
+  √ missing sample lab metadata discloses unavailable preview/review without a policy substitute or database writes (1345 ms)
+  √ a registered inactive lab still records immutable checks using its own configured policy (1370 ms)
+  √ the separate submission endpoint exposes cross-check evidence or its unavailable reason, registered=true (1454 ms)
+  √ the separate submission endpoint exposes cross-check evidence or its unavailable reason, registered=false (1446 ms)
+  √ real submission retains all seven numeric-evidence checks and review reads the frozen 1.3 × CEC flag without parsing text (1521 ms)
+  √ a late evidence insert refusal rolls back the complete submission, attempts, events, Sample and audits (1453 ms)
+  √ cross-check writes require a caller transaction and permission; foreign review reads and writes refuse without changes (1348 ms)
+  √ after selection the live panel uses the real saved selections, supersedes without mixing observations, and preserves submission evidence (1730 ms)
+  √ a later laboratory policy affects only live selected checks; stored submission thresholds and another lab remain fixed (3373 ms)
+  √ a partial selection never fills missing selected inputs from the still-current observations (1473 ms)
+  √ invalid retained JSON {invalid is refused with a stable4xx without adopting or changing evidence (1357 ms)
+  √ invalid retained JSON null is refused with a stable4xx without adopting or changing evidence (1351 ms)
+  √ invalid retained JSON {"values":null} is refused with a stable4xx without adopting or changing evidence (1339 ms)
+  √ invalid retained JSON {"values":[],"missing":[],"lowerBound":false} is refused with a stable4xx without adopting or changing evidence (1325 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_7_xlsx_commit.test.js (18.93 s)
+  √ real XLSX commit keeps long, exponent and rounded-display raw drafts plus immutable cell and policy evidence (1364 ms)
+  √ every mapped cell refusal lists its cell and leaves actual drafts, results, QC, attempts, audits and receipts unchanged (1437 ms)
+  √ actual lab number policy {"decimal":",","thousands":"."} controls the verified numeric1.234 lab text (1212 ms)
+  √ actual lab number policy {"decimal":",","thousands":null} controls the verified numeric1.234 lab text (1234 ms)
+  √ actual lab number policy {"decimal":".","thousands":null} controls the verified numeric1.234 lab text (1338 ms)
+  √ actual lab number policy {"decimal":".","thousands":","} controls the verified numeric1.234 lab text (1222 ms)
+  √ numeric/text imports under{"decimal":",","thousands":"."} keep source lexemes, verified draft text and the used policy version (1382 ms)
+  √ numeric/text imports under{"decimal":",","thousands":" "} keep source lexemes, verified draft text and the used policy version (1362 ms)
+  √ numeric/text imports under{"decimal":".","thousands":","} keep source lexemes, verified draft text and the used policy version (1458 ms)
+  √ shared-string1.234 remains ambiguous under comma/space policy and refuses the whole commit without transliteration (1516 ms)
+  √ policy changes after preview invalidate the actual commit before any receipt or draft (1371 ms)
+  √ mounted multipart sheets require an exact selection; changing it cannot authorize another sheet (1318 ms)
+  √ the actual multipart compressed-size cap returns the pinned XLSX code on both routes with zero writes (1297 ms)
+  √ malformed XML, macros, external parts and XML resource overflow refuse the real preview with zero writes (1252 ms)
+
+FAIL tests/contracts/audit_2_3_compatibility_runs.test.js (15.661 s)
+  × empty compatibility creation leaves all deprecated JSON null and resolves the laboratory profile (558 ms)
+  × a migrated sibling status change preserves failed/dispositioned evidence and result flags (null) (546 ms)
+  × a migrated sibling status change preserves failed/dispositioned evidence and result flags (REPEAT_BATCH) (536 ms)
+  × a migrated sibling status change preserves failed/dispositioned evidence and result flags (REJECT) (556 ms)
+  × a migrated REJECT_REANALYSIS item joins a new PROFILE run while preserving its old evidence and membership (570 ms)
+  × a migrated REJECT_REANALYSIS item joins a new NATIVE run while preserving its old evidence and membership (579 ms)
+  × a migrated never-run OPEN batch with main default empty QC arrays still accepts and removes real items (543 ms)
+  × a migrated final-clear round retains historical evidence and refuses a real item add with zero writes (587 ms)
+  × first RUNNING transition freezes compatibility membership permanently (migrated=false) (548 ms)
+  × first RUNNING transition freezes compatibility membership permanently (migrated=true) (540 ms)
+  × manual QC_FAIL contradicting a passing evaluation is refused rather than acknowledged as a no-op (568 ms)
+  × actual compatibility PUT and evaluate routes retain pass/reopen/resubmit cycles, missing-value refusals and manager authority (569 ms)
+  × actual unresolved profile membership retains reserved-slot, explicit rack and removal behavior using real SAMPLE joins (538 ms)
+  × normalized reads resolve the actor laboratory code while refusing another laboratory scope (519 ms)
+  × actual reasoned compatibility corrections retain both evaluations, supersede once and keep the full round (migrated=false) (537 ms)
+  × actual reasoned compatibility corrections retain both evaluations, supersede once and keep the full round (migrated=true) (538 ms)
+  × compatibility correction resolves the round after a reopen, refuses earlier round ids, and rolls back a late insert fault (561 ms)
+  × profile/migrated ordinary resubmission retains every preceding row and isolates the current round (migrated=false) (528 ms)
+  × profile/migrated ordinary resubmission retains every preceding row and isolates the current round (migrated=true) (528 ms)
+  × a migrated INCOMPLETE clear can receive an ordinary full submission without inventing a correction or reopen (524 ms)
+  × ordinary resubmission supersedes a changed real SAMPLE reading once and reuses an unchanged parent in the next round (530 ms)
+  × a submitted invalid value null is refused before any snapshot, position, reading or evaluation write (533 ms)
+  × a submitted invalid value  is refused before any snapshot, position, reading or evaluation write (545 ms)
+  × a submitted invalid value true is refused before any snapshot, position, reading or evaluation write (534 ms)
+  × manager authority and reason are required for reopening, and failed evidence remains locked for every role (539 ms)
+  × a late evaluation insertion failure rolls back the entire submission and both durable snapshot representations (705 ms)
+  × compatibility duplicate censoring retains raw input and null numeric observations in the new round (530 ms)
+  × the next compatibility submission resolves the current lab policy instead of freezing an empty profile method (542 ms)
+
+  ● empty compatibility creation leaves all deprecated JSON null and resolves the laboratory profile
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:88:21)
+
+  ● a migrated sibling status change preserves failed/dispositioned evidence and result flags (null)
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:103:21)
+
+  ● a migrated sibling status change preserves failed/dispositioned evidence and result flags (REPEAT_BATCH)
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:103:21)
+
+  ● a migrated sibling status change preserves failed/dispositioned evidence and result flags (REJECT)
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:103:21)
+
+  ● a migrated REJECT_REANALYSIS item joins a new PROFILE run while preserving its old evidence and membership
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:147:21)
+
+  ● a migrated REJECT_REANALYSIS item joins a new NATIVE run while preserving its old evidence and membership
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:147:21)
+
+  ● a migrated never-run OPEN batch with main default empty QC arrays still accepts and removes real items
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:187:21)
+
+  ● a migrated final-clear round retains historical evidence and refuses a real item add with zero writes
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:202:21)
+
+  ● first RUNNING transition freezes compatibility membership permanently (migrated=false)
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:216:21)
+
+  ● first RUNNING transition freezes compatibility membership permanently (migrated=true)
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:216:21)
+
+  ● manual QC_FAIL contradicting a passing evaluation is refused rather than acknowledged as a no-op
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:234:21)
+
+  ● actual compatibility PUT and evaluate routes retain pass/reopen/resubmit cycles, missing-value refusals and manager authority
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:244:21)
+
+  ● actual unresolved profile membership retains reserved-slot, explicit rack and removal behavior using real SAMPLE joins
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:283:21)
+
+  ● normalized reads resolve the actor laboratory code while refusing another laboratory scope
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:312:21)
+
+  ● actual reasoned compatibility corrections retain both evaluations, supersede once and keep the full round (migrated=false)
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:318:21)
+
+  ● actual reasoned compatibility corrections retain both evaluations, supersede once and keep the full round (migrated=true)
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:318:21)
+
+  ● compatibility correction resolves the round after a reopen, refuses earlier round ids, and rolls back a late insert fault
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:359:21)
+
+  ● profile/migrated ordinary resubmission retains every preceding row and isolates the current round (migrated=false)
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:377:21)
+
+  ● profile/migrated ordinary resubmission retains every preceding row and isolates the current round (migrated=true)
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:377:21)
+
+  ● a migrated INCOMPLETE clear can receive an ordinary full submission without inventing a correction or reopen
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:408:21)
+
+  ● ordinary resubmission supersedes a changed real SAMPLE reading once and reuses an unchanged parent in the next round
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:416:21)
+
+  ● a submitted invalid value null is refused before any snapshot, position, reading or evaluation write
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:445:21)
+
+  ● a submitted invalid value  is refused before any snapshot, position, reading or evaluation write
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:445:21)
+
+  ● a submitted invalid value true is refused before any snapshot, position, reading or evaluation write
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:445:21)
+
+  ● manager authority and reason are required for reopening, and failed evidence remains locked for every role
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:452:21)
+
+  ● a late evaluation insertion failure rolls back the entire submission and both durable snapshot representations
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:470:21)
+
+  ● compatibility duplicate censoring retains raw input and null numeric observations in the new round
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:477:21)
+
+  ● the next compatibility submission resolves the current lab policy instead of freezing an empty profile method
+
+    Install the prior application schema first.
+
+      3 | const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
+      4 | const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
+    > 5 | const fail=(code,message,differences=[])=>Object.assign(new Error(message),{statusCode:409,code,differences,totalChanges:0});
+        |                                                         ^
+      6 | const fingerprint=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+      7 | const normalized=sql=>(sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g)||[]).filter(token=>!/^\s+$/.test(token)).join('').replace(/;$/,'');
+      8 |
+
+      at fail (scripts/install_sample_containers.js:5:57)
+      at fail (scripts/install_sample_containers.js:22:10)
+      at classify (scripts/install_sample_containers.js:75:38)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installSampleContainers (scripts/install_sample_containers.js:75:62)
+      at installSampleContainers (tests/contracts/audit_2_3_compatibility_runs.test.js:63:56)
+      at Object.fixture (tests/contracts/audit_2_3_compatibility_runs.test.js:485:21)
+
+PASS tests/contracts/audit_4_7_calculation_import.test.js (5.702 s)
+  √ actual EXCH_CA/Olsen activated input imports do not calculate; later typed recording freezes the selected local definitions and verified raw input text (1480 ms)
+  √ missing/duplicate/unknown activated variables, output-unit input guesses and active direct-value mappings refuse the whole commit (1490 ms)
+  √ a calculation deactivation after preview refuses before any receipt, raw draft or scientific evidence is created (1293 ms)
+  √ QC under an input-only mapping refuses the whole file before any draft, receipt or scientific writes (1321 ms)
+
+PASS tests/contracts/audit_3_3_selection_backfill.test.js
+  √ default dry-run writes zero bytes, reports exact outcomes, and apply preserves both published and superseded report content (1837 ms)
+  √ a missing or stale dry-run fingerprint refuses with zero writes (1687 ms)
+  √ a missing named active global approver refuses dry and apply without writes (1264 ms)
+  √ CLI refuses incomplete, duplicate or contradictory arguments [] (10 ms)
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned"]
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned", "--by", "reviewer", "--apply", "--dry-run"] (1 ms)
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned", "--by", "reviewer", "--wat"]
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned", "--by", "reviewer", "--db", "other"]
+  √ CLI defaults to dry-run and requires an explicit database and actor
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+PASS tests/contracts/reception_route_smoke.test.js
+  Reception Route Smoke & Static Asset Verification (#113, #114, #117)
+    √ 1. Release Prerequisite: client production build (client/dist) must exist (1 ms)
+    √ 2. GET /reception returns HTTP 200 and text/html SPA shell (6 ms)
+    √ 3. GET /reception?mode=WALK_IN returns HTTP 200 and text/html SPA shell (3 ms)
+    √ 4. Client dist bundle contains compiled Reception page asset (97 ms)
+    √ 5. Referenced entry assets in index.html are served with HTTP 200 (12 ms)
+    √ 6. Isolated Reception parent render with WALK_IN mode completes without runtime crash (18 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 67e9b790-6840-44f0-b93e-9046e25f8c2f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 67e9b790-6840-44f0-b93e-9046e25f8c2f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 67e9b790-6840-44f0-b93e-9046e25f8c2f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 67e9b790-6840-44f0-b93e-9046e25f8c2f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate_attempt.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=3e1113e1cda1bb9ae206481e8990423cf9df02546065fd4d92f32e366b28ed88. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate_attempt.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=3e1113e1cda1bb9ae206481e8990423cf9df02546065fd4d92f32e366b28ed88. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 67e9b790-6840-44f0-b93e-9046e25f8c2f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1_rescan.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1_rescan.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 67e9b790-6840-44f0-b93e-9046e25f8c2f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [getLibrary] Query: {
+      "AND": [
+        {
+          "status": {
+            "not": "DELETED"
+          }
+        },
+        {
+          "isCurrent": true
+        },
+        {
+          "OR": [
+            {
+              "sampleId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "labId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "filename": {
+                "contains": "TEST-STAGEB-SMP-01"
+              }
+            },
+            {
+              "sampleId": {
+                "in": [
+                  "TEST-STAGEB-SMP-01"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "OR": [
+            {
+              "labId": "LAB-GTM"
+            }
+          ]
+        }
+      ]
+    }
+
+      at log (controllers/spectralController.js:124:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 67e9b790-6840-44f0-b93e-9046e25f8c2f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [getLibrary] Query: {
+      "AND": [
+        {
+          "status": {
+            "not": "DELETED"
+          }
+        },
+        {
+          "OR": [
+            {
+              "sampleId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "labId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "filename": {
+                "contains": "TEST-STAGEB-SMP-01"
+              }
+            },
+            {
+              "sampleId": {
+                "in": [
+                  "TEST-STAGEB-SMP-01"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "OR": [
+            {
+              "labId": "LAB-GTM"
+            }
+          ]
+        }
+      ]
+    }
+
+      at log (controllers/spectralController.js:124:17)
+
+PASS tests/contracts/spectral_stage_b.test.js
+  Spectral Library Stage B (SL-06 to SL-12)
+    √ SL-06 & SL-08 & SL-09 & SL-10: Ingest stores raw file, links equipment, and saves typed metadata (56 ms)
+    √ SL-07: Cannot approve spectrum if physical quantity is UNVERIFIED (10 ms)
+    √ SL-11: Checksum Deduplication rejects identical file in same lab (7 ms)
+    √ SL-12: Supersession marks prior scan isCurrent: false and supersedes (34 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 12ddbf94-74e7-4ac2-9b01-c81e74c4cea2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=TEST-MULTIPART-SMP-01_scan.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=TEST-MULTIPART-SMP-01_scan.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 12ddbf94-74e7-4ac2-9b01-c81e74c4cea2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 12ddbf94-74e7-4ac2-9b01-c81e74c4cea2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate.dx, LabID=TEST-MULTIPART-SMP-01, Modality=undefined
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=d7f07004808860cf614ea03d45c1bf973842cdab5798fde83a7cffd2acc67166. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=d7f07004808860cf614ea03d45c1bf973842cdab5798fde83a7cffd2acc67166. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+PASS tests/contracts/spectral_multipart_upload.test.js
+  Spectral Multipart Raw Ingest & Byte-Identical Preservation Contract (SL-06 & SL-13)
+    √ 1. Multipart raw JCAMP-DX upload preserves exact binary bytes and downloads back byte-identical (39 ms)
+    √ 2. Multipart duplicate upload is rejected by checksum (9 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: b38c05ba-f381-46ad-9b00-0aec45fda705) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcNativeRunService.js:18:16)
+      at services/qcNativeRunService.js:74:9
+      at transaction (services/qcNativeRunService.js:42:91)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_2_3_native_runs.test.js:1124:5)
+
+PASS tests/contracts/audit_2_3_native_runs.test.js (41.543 s)
+  √ #214 new Provisional chart-mode start refuses an unbound served LRM lot atomically (1502 ms)
+  √ a failed analyte leaves its sibling measurable, reopenable and closable (deviation=false) (980 ms)
+  √ a failed analyte leaves its sibling measurable, reopenable and closable (deviation=true) (977 ms)
+  √ an explicit method cannot replace recorded strict work-item methods with a lax QC rule (544 ms)
+  √ a real failed Native blocking run remains excluded from reports and publication after live QC becomes OFF (1116 ms)
+  √ mixed actual Native ADVISORY and compatibility live BLOCKING batches use the strictest effective report mode (641 ms)
+  √ a compatibility-only failed run retains live policy changes for report validity and publication (924 ms)
+  √ Native texture QC flags its governed fractions independently and preserves their values on deviation acceptance (676 ms)
+  √ test-owned cleanup retains QC-referenced workflow evidence and still removes unrelated explicit fixture ids (567 ms)
+  √ Native builds refuse two active attempts for a sample/analyte and never attach ACCEPTED history, with zero writes (552 ms)
+  √ sealed SUBMITTED work items cannot join Native or ordinary runs (564 ms)
+  √ sealed ACCEPTED work items cannot join Native or ordinary runs (557 ms)
+  √ sealed WAIVED work items cannot join Native or ordinary runs (565 ms)
+  √ sealed CANCELLED work items cannot join Native or ordinary runs (563 ms)
+  √ concurrent A/B first starts allocate distinct ordinals; abandoned OPEN builds do not consume C’s ordinal (797 ms)
+  √ actual OPEN reorder retains physical ids, lot evidence and duplicate parents; invalid and frozen orders write nothing (722 ms)
+  √ a late reorder event fault rolls back temporary numbering and all work-item rack changes (728 ms)
+  √ native entry, explicit evaluation and corrections before first start refuse without any write (569 ms)
+  √ partial native entry is retained; missing explicit values, malformed values and auto-evaluation while unbound refuse atomically (667 ms)
+  √ retained Native collection input uses physical ids, real duplicate parents and immutable full-precision expected values (670 ms)
+  √ the shared Native mutation rolls back evaluated observations when requested acceptance, close or metadata is refused (689 ms)
+  √ actual authenticated Native routes build, start, evaluate, reopen and correct using frozen API criteria and exact retained values (871 ms)
+  √ reasoned corrections append two evaluation versions and exact measurements using the frozen start limit (879 ms)
+  √ explicit evaluation after reopen appends fresh acceptance without rewriting retained readings (683 ms)
+  √ native censoring retains null numeric observations, canonical qualifiers and the frozen method limit (592 ms)
+  √ OFF start writes no evaluation; explicit evaluation records NOT_REQUIRED and never passing observation evidence (608 ms)
+  √ explicit evaluation records each OFF analyte without fake readings or passed QC counts (646 ms)
+  √ stored profile conversion refuses; separate direct non-calibration runs preserve free text and may start without a registered asset (623 ms)
+  √ part 13 calibration start requires a valid active scoped asset, refuses without writes and freezes its exact identity and text (675 ms)
+  √ failed Native disposition REPEAT_BATCH retains failed evidence and uses the central work transition (778 ms)
+  √ failed Native disposition REJECT retains failed evidence and uses the central work transition (774 ms)
+  √ failed membership cannot move without repeat/reject disposition (warning=false) (663 ms)
+  √ failed membership cannot move without repeat/reject disposition (warning=true) (680 ms)
+  √ actual manager disposition accepts a failed Native analyte with deviation, preserves warning flags and closes without changing failed readings (787 ms)
+  √ actual stored profile membership refuses conversion; a separate new Native run works and remains frozen after manager reopen (1183 ms)
+  √ actual Native builder refuses 23 samples at the default limit and builds the specified 23-sample sequence through a method rule (888 ms)
+  √ ADVISORY explicit evaluation records INCOMPLETE; later complete values supersede it using frozen criteria (717 ms)
+  √ mixed-analyte evaluations and flags are independent; a shared lot correction appends both verdicts atomically (927 ms)
+  √ a late evaluation insert failure rolls back measurements, every shared binding and both analyte verdicts (777 ms)
+  √ calibration CHECK_STANDARD uses the frozen CCV criterion and unbound calibration blanks never block (681 ms)
+  √ pre-start rebuild retains a bound extra and both certificate revisions when its lot changes (718 ms)
+  √ a measured extra CRM is optional at a not-due ordinal and its failure contributes to the analyte verdict (748 ms)
+  √ removing a bound analyte last member is refused without writes; an unbound analyte removal is recorded (1275 ms)
+  √ optional CRM lot correction records NOT_SERVED with intact prior evidence; a due CRM refuses the same missing value (1102 ms)
+  √ real 23-sample builder writes 28 physical members, recorded parent picks and no invented QC values or ordinal (755 ms)
+  √ positive-minimum shared LRM extras use frozen required ids; only the extra may drop optional analyte service (895 ms)
+  √ mixed calibration frequencies freeze each analyte opening, closing and first boundary pair ids independently (935 ms)
+  √ real default-capacity, missing method and cross-lab builds refuse with zero normalized, membership or audit writes (910 ms)
+  √ first start freezes the newly effective limit, number policy and method LOQ with one ordinal, instrument and real analyst (663 ms)
+  √ a first-start count revision refuses stale positions and leaves every row, actor and ordinal unchanged (600 ms)
+  √ resuming a reopened native run reuses first-start metadata and criteria without resolving later policy (777 ms)
+  √ another start consumes the forecast ordinal; a now-due missing CRM refuses atomically instead of guessing or skipping it (712 ms)
+  √ shared physical lot gets separate precise analyte snapshots; a missing second value and conflicting lot refuse the whole build (665 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User manager-92b7663e-38cc-4829-a8a4-bfeb4280fd48 (Lab: another-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/controlChartService.js:23:16)
+      at services/controlChartService.js:156:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/issue_214_control_chart_integration.test.js:207:5)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T19:48:31.331Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/issue_214_control_chart_integration.test.js (17.852 s)
+  √ the explicit SQLite read-only impact report resolves actual policy scopes and counts unbound new runs without changing database bytes (1611 ms)
+  √ an effective corrected observation replaces its original in future baselines while prior proposals and evaluations stay immutable (1355 ms)
+  √ a different reference-material lot is a new Provisional series and cannot inherit approved limits or history (1278 ms)
+  √ run-first options expose eligible chart lots and the actual start binds them in its guarded transaction (1274 ms)
+  √ chart lots freeze at start; fixed-window late binding and a pre-release started run retain their original path (3644 ms)
+  √ provisional limits, approval by a second user and supersession preserve all past and already-started criteria (1401 ms)
+  √ QC_FAIL controls remain in sequence history but cannot enter a passing baseline (1346 ms)
+  √ review rules create idempotent scoped obligations and append-only resolutions without changing verdicts (1478 ms)
+  √ every baseline exclusion is explicit and retained; ambiguous chronology and wrong scope refuse atomically (1403 ms)
+  √ HTTP scope and approval permissions use actual token validation and stable refusal codes (1334 ms)
+  √ additive installation preserves stored legacy policy bytes and old rows with DRY 0 / APPLY 1 / NO_OP 0 (1235 ms)
+
+PASS tests/contracts/issue_214_control_chart_ui.test.js
+  √ chart requests use the chosen lab and exact series; reading permission hides all requests and actions (76 ms)
+  √ baseline exclusions require a reason and submit selected identities without changing values (14 ms)
+  √ a trial outlier stays selected until the proposer explicitly excludes it (8 ms)
+  √ proposal approval is hidden from its own proposer and visible to a different named approver (14 ms)
+  √ review resolution requires a note and posts the explicit outcome without touching a run verdict (5 ms)
+  √ plot draws mean, ±2s and ±3s from the selected stored set and labels every observation (3 ms)
+  √ chart actions, statuses and policy keys exist in both en catalogues (6 ms)
+  √ chart actions, statuses and policy keys exist in both es catalogues (6 ms)
+  √ chart actions, statuses and policy keys exist in both es-419 catalogues (6 ms)
+  √ chart actions, statuses and policy keys exist in both fr catalogues (6 ms)
+  √ chart actions, statuses and policy keys exist in both pt catalogues (6 ms)
+
+PASS tests/contracts/issue_214_control_chart_rules.test.js
+  √ 1-2s fires only beyond its strict boundary
+  √ 1-3s fires only beyond its strict boundary
+  √ 2-2s fires only beyond its strict boundary
+  √ 4-1s fires only beyond its strict boundary
+  √ 10x fires only beyond its strict boundary (1 ms)
+  √ R-4s cannot compare two different runs and records one-point runs as not applicable
+  √ sequence rules span runs, include failed controls, and count multiple positions in one run (1 ms)
+  √ history cannot cross a limit-basis reset (8 ms)
+  √ provisional and fixed windows never report multirules as passed (1 ms)
+  √ explicit review mapping is independent of reject/warn verdicts
+  √ mapping rejects duplicates and preserves old overrides without a review key (1 ms)
+  √ order is execution time then QC index then deterministic id; unknown metadata refuses (1 ms)
+  √ baseline uses arithmetic mean and sample SD, refuses constant or nonfinite baselines (1 ms)
+  √ a stored evaluation is independent of later changes to input values and limits
+
+Test Suites: 1 failed, 11 passed, 12 total
+Tests:       28 failed, 147 passed, 175 total
+Snapshots:   0 total
+Time:        137.614 s, estimated 138 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_compatibility_runs.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_8_cross_check_evidence.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_xlsx_commit.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_selection_backfill.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_calculation_import.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectral_multipart_upload.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_route_smoke.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectral_stage_b.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_rules.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_integration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_native_runs.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue214-fixture-correction-focused-config\report-original.json

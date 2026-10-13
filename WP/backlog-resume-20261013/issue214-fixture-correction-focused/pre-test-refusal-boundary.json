@@ -1,0 +1,10 @@
+{
+  "observedUtc": "2026-10-13T19:46:10.583897+00:00",
+  "status": "REFUSED_BEFORE_TEST_EXECUTION",
+  "helperExitCode": 1,
+  "reason": "Helper checked configs[0].workerIdleMemoryLimit; the actual setting is globalConfig.workerIdleMemoryLimit.",
+  "actualWorkerIdleMemoryLimit": 512000000,
+  "testRunnerStarted": false,
+  "productionOperations": 0,
+  "helperSha256": "8ae529fda576256b674bfc82a8c99b72b0072f7f315cd44fe2d0f5b37dde7ad6"
+}
