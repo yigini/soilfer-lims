@@ -1,0 +1,16 @@
+Frozen source unchanged. Original failed run retained; rerun batch26 and execute all remaining suites.
+{"batch": 26, "exitCode": 0, "passedTests": 82, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": true}
+{"batch": 27, "exitCode": 0, "passedTests": 6, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 28, "exitCode": 0, "passedTests": 18, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 29, "exitCode": 0, "passedTests": 8, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 30, "exitCode": 0, "passedTests": 17, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 31, "exitCode": 0, "passedTests": 8, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 32, "exitCode": 0, "passedTests": 23, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 33, "exitCode": 0, "passedTests": 13, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 34, "exitCode": 0, "passedTests": 7, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 35, "exitCode": 0, "passedTests": 8, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 36, "exitCode": 0, "passedTests": 20, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 37, "exitCode": 0, "passedTests": 3, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 38, "exitCode": 0, "passedTests": 3, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": false}
+{"batch": 39, "exitCode": 1, "passedTests": 1, "failedTests": 1, "inventoryEquality": true, "visibleAssetOverride": false}
+Completion stopped; preserve failed evidence and investigate.

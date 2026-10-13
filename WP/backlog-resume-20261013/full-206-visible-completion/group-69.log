@@ -1,0 +1,63 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: tech_val_1791891751995 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: tech_val_1791891751995 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: tech_val_1791891751995 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: tech_val_1791891751995 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: tech_val_1791891751995 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: tech_val_1791891751995 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: tech_val_1791891751995 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: tech_val_1791891751995 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-VAL
+
+      at log (wsServer.js:305:24)
+
+PASS tests/scenarios/scientific_validation.test.js (143 MB heap size)
+  Scenario H: Scientific Validation
+    √ should BLOCK invalid numeric > 14 for pH (72 ms)
+    √ should BLOCK invalid numeric < 2 for pH (12 ms)
+    √ should BLOCK non-numeric values for numeric method (14 ms)
+    √ should ACCEPT valid result within range (92 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        1.475 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\scenarios\scientific_validation.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-69.json

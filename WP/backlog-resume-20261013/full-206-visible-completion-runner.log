@@ -1,0 +1,69 @@
+324 stock suites PASS on frozen source; completing remaining38 with full owned setup and visible test storage.
+{"batch": 39, "exitCode": 0, "passedTests": 2, "failedTests": 0, "inventoryEquality": true}
+{"batch": 40, "exitCode": 0, "passedTests": 3, "failedTests": 0, "inventoryEquality": true}
+{"batch": 41, "exitCode": 0, "passedTests": 4, "failedTests": 0, "inventoryEquality": true}
+{"batch": 42, "exitCode": 0, "passedTests": 4, "failedTests": 0, "inventoryEquality": true}
+{"batch": 43, "exitCode": 0, "passedTests": 5, "failedTests": 0, "inventoryEquality": true}
+{"batch": 44, "exitCode": 0, "passedTests": 4, "failedTests": 0, "inventoryEquality": true}
+{"batch": 45, "exitCode": 0, "passedTests": 10, "failedTests": 0, "inventoryEquality": true}
+{"batch": 46, "exitCode": 0, "passedTests": 3, "failedTests": 0, "inventoryEquality": true}
+{"batch": 47, "exitCode": 0, "passedTests": 5, "failedTests": 0, "inventoryEquality": true}
+{"batch": 48, "exitCode": 0, "passedTests": 5, "failedTests": 0, "inventoryEquality": true}
+{"batch": 49, "exitCode": 0, "passedTests": 25, "failedTests": 0, "inventoryEquality": true}
+{"batch": 50, "exitCode": 0, "passedTests": 8, "failedTests": 0, "inventoryEquality": true}
+{"batch": 51, "exitCode": 0, "passedTests": 19, "failedTests": 0, "inventoryEquality": true}
+{"batch": 52, "exitCode": 0, "passedTests": 7, "failedTests": 0, "inventoryEquality": true}
+{"batch": 53, "exitCode": 0, "passedTests": 6, "failedTests": 0, "inventoryEquality": true}
+{"batch": 54, "exitCode": 0, "passedTests": 2, "failedTests": 0, "inventoryEquality": true}
+{"batch": 55, "exitCode": 0, "passedTests": 5, "failedTests": 0, "inventoryEquality": true}
+{"batch": 56, "exitCode": 0, "passedTests": 3, "failedTests": 0, "inventoryEquality": true}
+{"batch": 57, "exitCode": 0, "passedTests": 20, "failedTests": 0, "inventoryEquality": true}
+{"batch": 58, "exitCode": 0, "passedTests": 6, "failedTests": 0, "inventoryEquality": true}
+{"batch": 59, "exitCode": 0, "passedTests": 5, "failedTests": 0, "inventoryEquality": true}
+{"batch": 60, "exitCode": 0, "passedTests": 19, "failedTests": 0, "inventoryEquality": true}
+{"batch": 61, "exitCode": 0, "passedTests": 12, "failedTests": 0, "inventoryEquality": true}
+{"batch": 62, "exitCode": 0, "passedTests": 13, "failedTests": 0, "inventoryEquality": true}
+{"batch": 63, "exitCode": 0, "passedTests": 5, "failedTests": 0, "inventoryEquality": true}
+{"batch": 64, "exitCode": 0, "passedTests": 7, "failedTests": 0, "inventoryEquality": true}
+{"batch": 65, "exitCode": 0, "passedTests": 6, "failedTests": 0, "inventoryEquality": true}
+{"batch": 66, "exitCode": 0, "passedTests": 5, "failedTests": 0, "inventoryEquality": true}
+{"batch": 67, "exitCode": 0, "passedTests": 2, "failedTests": 0, "inventoryEquality": true}
+{"batch": 68, "exitCode": 0, "passedTests": 4, "failedTests": 0, "inventoryEquality": true}
+{"batch": 69, "exitCode": 0, "passedTests": 4, "failedTests": 0, "inventoryEquality": true}
+{"batch": 70, "exitCode": 0, "passedTests": 33, "failedTests": 0, "inventoryEquality": true}
+{"batch": 71, "exitCode": 0, "passedTests": 112, "failedTests": 0, "inventoryEquality": true}
+{"batch": 72, "exitCode": 0, "passedTests": 1, "failedTests": 0, "inventoryEquality": true}
+{"batch": 73, "exitCode": 0, "passedTests": 5, "failedTests": 0, "inventoryEquality": true}
+{"batch": 74, "exitCode": 0, "passedTests": 13, "failedTests": 0, "inventoryEquality": true}
+{"batch": 75, "exitCode": 0, "passedTests": 53, "failedTests": 0, "inventoryEquality": true}
+{"batch": 76, "exitCode": 0, "passedTests": 9, "failedTests": 0, "inventoryEquality": true}
+{
+  "status": "PASS",
+  "scope": "ALL_FROZEN_SOURCE_REGRESSION_SUITE_COVERAGE",
+  "source": "877a1d210da1124e5750695eb2da41c1645b9218",
+  "reviewHead": "9ae02f6ab7651d2ca887a98722f6a20ace3cc471",
+  "suiteCount": 362,
+  "totalTests": 5508,
+  "passedTests": 5508,
+  "failedTests": 0,
+  "pendingTests": 0,
+  "batches": 76,
+  "elapsedFinalCompletionSeconds": 135.46900000004098,
+  "finishedUtc": "2026-10-13T11:43:03.835789+00:00",
+  "priorRunStatuses": {
+    "74560": "FAILED",
+    "26052": "INCOMPLETE",
+    "87152": "FAILED"
+  },
+  "originalReportsUnchanged": true,
+  "reusedPassingSuites": 324,
+  "exactInventoryCoverage": true,
+  "frozenSourceUnchanged": true,
+  "unchangedStockAssertions": true,
+  "ordinarySetupFilesPreserved": true,
+  "visibleByteIdenticalAssets": true,
+  "visibleDisposableUploads": true,
+  "productionMutations": 0,
+  "nodeOptions": "",
+  "batchesSerial": true
+}

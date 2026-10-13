@@ -1,0 +1,55 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 010bb518-03ae-4ceb-a028-be67cee5f764 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 010bb518-03ae-4ceb-a028-be67cee5f764 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 010bb518-03ae-4ceb-a028-be67cee5f764 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0cd8803f-c5ca-4775-b4c3-0497e141d088 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 010bb518-03ae-4ceb-a028-be67cee5f764 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 010bb518-03ae-4ceb-a028-be67cee5f764 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 010bb518-03ae-4ceb-a028-be67cee5f764 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/workspace_projection_p2.test.js (142 MB heap size)
+  Package P2: Sample Workspace Projection & Transactional Foundations
+    √ 1. GET /api/samples/:id/workspace returns unified 5-tab projection (92 ms)
+    √ 2. Accurately detects S003-style historical evidence gap on unverified accepted items (34 ms)
+    √ 3. Expected sample shows "Not yet received" without fabricating received date (31 ms)
+    √ 4. Cross-lab access is strictly denied (403) (10 ms)
+    √ 5. POST /api/samples/:id/orders applies revision atomically and records receipt (71 ms)
+    √ 6. POST /api/samples/:id/custody/move records physical location change and audit (9 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        1.566 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\workspace_projection_p2.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-65.json

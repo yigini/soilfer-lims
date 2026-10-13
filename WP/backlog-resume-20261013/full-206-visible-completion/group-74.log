@@ -1,0 +1,116 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c5b7227d-24c7-4228-90c2-a881af2fbf0d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 08c13615-bedb-49cb-84c0-f69ff11ad738 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fc1111f3-eaa2-49c3-b1e0-2381501ae553 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 37271efb-f32e-44b6-9c67-da6164d08b4e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 37271efb-f32e-44b6-9c67-da6164d08b4e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c5b7227d-24c7-4228-90c2-a881af2fbf0d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c5b7227d-24c7-4228-90c2-a881af2fbf0d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 37271efb-f32e-44b6-9c67-da6164d08b4e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 37271efb-f32e-44b6-9c67-da6164d08b4e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 37271efb-f32e-44b6-9c67-da6164d08b4e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 37271efb-f32e-44b6-9c67-da6164d08b4e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c5b7227d-24c7-4228-90c2-a881af2fbf0d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c5b7227d-24c7-4228-90c2-a881af2fbf0d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab GTM-LAB1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: c5b7227d-24c7-4228-90c2-a881af2fbf0d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c5b7227d-24c7-4228-90c2-a881af2fbf0d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab GTM-LAB1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/security/lab_isolation.test.js (144 MB heap size)
+  WP-41: Multi-Tenancy Lab Isolation Regression Suite
+    1. Direct Entity Access & Cross-Lab Denial
+      √ GTM Manager requesting HND sample by ID receives 403 or 404 (36 ms)
+      √ GTM Technician requesting HND sample by ID receives 403 or 404 (9 ms)
+      √ HND Manager requesting GTM sample by ID receives 403 or 404 (8 ms)
+      √ Super Admin can access both GTM and HND samples (54 ms)
+    2. List & Query Scoping (No Cross-Lab Leaks)
+      √ GET /api/samples for GTM Manager contains ONLY GTM samples (23 ms)
+      √ GET /api/users for GTM Manager contains ONLY GTM staff (18 ms)
+    3. ScopeGuard Unit Verification (Test of the Test)
+      √ buildScopedWhere isolates by labId for non-admin
+      √ buildScopedWhere returns empty object for SUPER_ADMIN
+      √ canAccessEntity returns false when lab IDs mismatch
+    4. SD-02: Work Assignment & Reassignment Sample-Bound Isolation
+      √ SUPER_ADMIN cannot assign a GTM sample work item to an HND technician (HTTP 403) (24 ms)
+      √ SUPER_ADMIN cannot reassign a GTM sample work item to an HND technician (HTTP 403) (10 ms)
+      √ GTM Manager assigning a GTM sample work item to a GTM technician succeeds (HTTP 200) (36 ms)
+      √ GTM Manager reassigning a GTM work item to another/same GTM technician succeeds (HTTP 200) (15 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       13 passed, 13 total
+Snapshots:   0 total
+Time:        1.688 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\lab_isolation.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-74.json

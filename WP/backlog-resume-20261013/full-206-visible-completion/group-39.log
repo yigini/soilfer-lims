@@ -1,0 +1,66 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 791c081e-7ad6-4318-81f1-c36bea5a02ff (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=TEST-MULTIPART-SMP-01_scan.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=TEST-MULTIPART-SMP-01_scan.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 791c081e-7ad6-4318-81f1-c36bea5a02ff (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 791c081e-7ad6-4318-81f1-c36bea5a02ff (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate.dx, LabID=TEST-MULTIPART-SMP-01, Modality=undefined
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=d7f07004808860cf614ea03d45c1bf973842cdab5798fde83a7cffd2acc67166. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=d7f07004808860cf614ea03d45c1bf973842cdab5798fde83a7cffd2acc67166. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+PASS tests/contracts/spectral_multipart_upload.test.js (154 MB heap size)
+  Spectral Multipart Raw Ingest & Byte-Identical Preservation Contract (SL-06 & SL-13)
+    √ 1. Multipart raw JCAMP-DX upload preserves exact binary bytes and downloads back byte-identical (119 ms)
+    √ 2. Multipart duplicate upload is rejected by checksum (13 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        3.978 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectral_multipart_upload.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-39.json

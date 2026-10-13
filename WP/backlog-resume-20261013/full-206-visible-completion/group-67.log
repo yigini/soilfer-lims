@@ -1,0 +1,26 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9ed890a4-6c4e-4c5c-81bb-faba25dba6b4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9ed890a4-6c4e-4c5c-81bb-faba25dba6b4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/scenarios/pt_ilc.test.js (140 MB heap size)
+  Scenario F: PT/ILC Support
+    √ should create a PT sample with Correct Metadata (53 ms)
+    √ should validate missing PT Round (6 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        1.442 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\scenarios\pt_ilc.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-67.json

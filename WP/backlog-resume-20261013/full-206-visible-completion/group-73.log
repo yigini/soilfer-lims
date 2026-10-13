@@ -1,0 +1,14 @@
+PASS tests/security/help_lab_isolation.test.js (89 MB heap size)
+  Help Lab Isolation & Security Enforcement Tests
+    √ Lab A user sees Lab A note on article (11 ms)
+    √ Lab B user NEVER sees Lab A note on article (7 ms)
+    √ Unauthenticated user NEVER sees Lab A note (6 ms)
+    √ Unauthenticated user cannot access AUTHENTICATED articles (1 ms)
+    √ Authenticated user CAN access AUTHENTICATED articles (5 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        0.571 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\help_lab_isolation.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-73.json

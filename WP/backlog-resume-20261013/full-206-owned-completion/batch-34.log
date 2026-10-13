@@ -1,0 +1,16 @@
+PASS tests/contracts/sample_transitions.test.js (105 MB heap size)
+  WP-11: Canonical Sample State Transition Authority
+    √ 1. Executes full legal lifecycle path with audit logs (231 ms)
+    √ 2. Allows legal reversions (RECEIVED -> EXPECTED) (8 ms)
+    √ 3. Rejects illegal transitions with 409 Conflict (106 ms)
+    √ 4. Terminal states cannot transition to any other status (16 ms)
+    √ 5. Rejects deprecated legacy writes with the pinned HTTP 409 (7 ms)
+    √ 6. WP-09: Block terminal transitions while work items are live (115 ms)
+    √ 7. WP-08: disposeSample creates DISPOSAL work item and leaves sample APPROVED (33 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total
+Snapshots:   0 total
+Time:        0.895 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\sample_transitions.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-owned-completion\batch-34.json

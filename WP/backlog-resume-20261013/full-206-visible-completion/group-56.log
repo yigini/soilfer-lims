@@ -1,0 +1,52 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 515e6275-ad8d-4e71-8eb8-81979cc39030 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 515e6275-ad8d-4e71-8eb8-81979cc39030 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: b03e7bbd-802b-427a-9ab2-2d707fedfde6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b03e7bbd-802b-427a-9ab2-2d707fedfde6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b03e7bbd-802b-427a-9ab2-2d707fedfde6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b03e7bbd-802b-427a-9ab2-2d707fedfde6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/work_item_transition.test.js (142 MB heap size)
+  SD-09: Work Item Status Transition Validation Contract
+    √ 1. Legal move (ASSIGNED → IN_PROGRESS) succeeds (HTTP 200) (105 ms)
+    √ 2. Illegal backward jump (IN_PROGRESS → NOT_ASSIGNED) returns HTTP 409 Conflict (11 ms)
+    √ 3. Illegal jump from final ACCEPTED state (ACCEPTED → IN_PROGRESS) returns HTTP 409 Conflict (53 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Snapshots:   0 total
+Time:        1.507 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\work_item_transition.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-56.json

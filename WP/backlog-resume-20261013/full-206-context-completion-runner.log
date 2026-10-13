@@ -1,0 +1,4 @@
+Frozen source unchanged. Original failed run retained; rerun batch26 and execute all remaining suites.
+{"batch": 26, "exitCode": 0, "passedTests": 82, "failedTests": 0, "inventoryEquality": true, "visibleAssetOverride": true}
+{"batch": 27, "exitCode": 3221226505, "passedTests": null, "failedTests": null, "inventoryEquality": false, "visibleAssetOverride": false}
+Completion stopped; preserve failed evidence and investigate.

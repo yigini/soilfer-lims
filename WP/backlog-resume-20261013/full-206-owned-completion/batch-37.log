@@ -1,0 +1,939 @@
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\audit_legacy_755480ec-4ef2-45f7-8716-ba7b4d11b2f9.db
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Applying migration: missingColumns=templateId, templateVersion, policyConfig, programmeCode, parentProjectId, missingIndex=true
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:109:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateId" (TEXT DEFAULT 'GENERIC_OPEN_INTAKE') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateVersion" (TEXT DEFAULT '1.0.0') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "policyConfig" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "programmeCode" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "parentProjectId" (TEXT REFERENCES "Project"("id") ON DELETE SET NULL ON UPDATE CASCADE) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Creating index "Project_parentProjectId_idx"...
+
+      at log (scripts/migrate_project_templates_and_policy.js:122:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] All missing columns and indexes successfully added and verified atomically.
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:155:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Migration verified successfully. 1 Project records preserved.
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:158:17)
+
+  console.log
+    
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:239:13)
+
+  console.log
+       SOILFER COUNTRY PROJECT MIGRATION & EXPLICIT KOBO MAPPING (V2)
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:240:13)
+
+  console.log
+       Mode: DRY-RUN (SIMULATION - ZERO MUTATION)
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:241:13)
+
+  console.log
+       Target DB: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\audit_legacy_755480ec-4ef2-45f7-8716-ba7b4d11b2f9.db
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:242:13)
+
+  console.log
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:243:13)
+
+  console.log
+    [STEP 0] Collecting pre-flight baseline inventory...
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:257:17)
+
+  console.log
+     Baseline Samples: 6
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:297:17)
+
+  console.log
+     Baseline Results: 4
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:298:17)
+
+  console.log
+     Baseline Reports: 3 (3 checksummed)
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:299:17)
+
+  console.log
+     Baseline Projects: 1
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:300:17)
+
+  console.log
+     Baseline KoboConfigs: 2
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:301:17)
+
+  console.log
+     Baseline Samples by Project: {
+      "SOILFER-US": 6
+    }
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:302:17)
+
+  console.log
+    
+    [STEP 1] Provisioning SoilFER Country Projects & Program Groupings...
+
+      at scripts/migrate_soilfer_countries.cjs:323:21
+
+  console.log
+      ~ Updated programme template: SoilFER Global Programme (SOILFER-US) -> SOILFER_V1
+
+      at scripts/migrate_soilfer_countries.cjs:343:33
+
+  console.log
+      + Created programme grouping: SoilFER Japan Program (SOILFER-JPN)
+
+      at scripts/migrate_soilfer_countries.cjs:334:29
+
+  console.log
+      + Created country project: SoilFER Guatemala (SOILFER-GTM) [Lab: GTM-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-GTM <-> GTM-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Honduras (SOILFER-HND) [Lab: HND-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-HND <-> HND-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Ghana (SOILFER-GHA) [Lab: GHA-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-GHA <-> GHA-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Kenya (SOILFER-KEN) [Lab: KEN-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-KEN <-> KEN-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Zambia (SOILFER-ZMB) [Lab: ZMB-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-ZMB <-> ZMB-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Mozambique (SOILFER-MOZ) [Lab: MOZ-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-MOZ <-> MOZ-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Tunisia (SOILFER-TUN) [Lab: TUN-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-TUN <-> TUN-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+    
+    [STEP 2] Classifying and migrating samples...
+
+      at scripts/migrate_soilfer_countries.cjs:404:21
+
+  console.log
+      Inspecting 6 candidate samples...
+
+      at scripts/migrate_soilfer_countries.cjs:420:21
+
+  console.log
+      Migration counts by country project:
+
+      at scripts/migrate_soilfer_countries.cjs:522:21
+
+  console.log
+       * SOILFER-GTM: 1 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-HND: 1 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-GHA: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-KEN: 1 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-ZMB: 1 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-MOZ: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-TUN: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+      Already migrated in prior run: 0
+
+      at scripts/migrate_soilfer_countries.cjs:526:21
+
+  console.log
+      Unresolved records retained: 2
+
+      at scripts/migrate_soilfer_countries.cjs:527:21
+
+  console.log
+    
+    [STEP 3] Updating Kobo configurations with explicit projectCode...
+
+      at scripts/migrate_soilfer_countries.cjs:530:21
+
+  console.log
+      ~ Updated KoboConfig [GTM-LAB1 / Form: aYU8RNGWtCtwTJh2ph6FdM] -> projectCode: SOILFER-GTM
+
+      at scripts/migrate_soilfer_countries.cjs:554:33
+
+  console.log
+      ~ Updated KoboConfig [HND-LAB1 / Form: akt25hEErmCj2G9LBhs4sS] -> projectCode: SOILFER-HND
+
+      at scripts/migrate_soilfer_countries.cjs:554:33
+
+  console.log
+      - No KoboConfig found for lab GHA-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab KEN-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab ZMB-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab MOZ-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab TUN-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+    
+    [STEP 4] Updating Lab Staff User.projects arrays...
+
+      at scripts/migrate_soilfer_countries.cjs:570:21
+
+  console.log
+      ~ User mgr_gtm (GTM-LAB1): added SOILFER-GTM
+
+      at scripts/migrate_soilfer_countries.cjs:605:29
+
+  console.log
+    
+    [STEP 5] Verifying conservation invariants...
+
+      at scripts/migrate_soilfer_countries.cjs:610:21
+
+  console.log
+     Post-migration Samples: 6 (Baseline: 6)
+
+      at scripts/migrate_soilfer_countries.cjs:626:21
+
+  console.log
+     Post-migration Results: 4 (Baseline: 4)
+
+      at scripts/migrate_soilfer_countries.cjs:627:21
+
+  console.log
+     Post-migration Reports: 3 (Baseline: 3)
+
+      at scripts/migrate_soilfer_countries.cjs:628:21
+
+  console.log
+     Post-migration QC Batches: 3 (Baseline: 3)
+
+      at scripts/migrate_soilfer_countries.cjs:629:21
+
+  console.log
+     Post-migration Orphaned Results: 0
+
+      at scripts/migrate_soilfer_countries.cjs:630:21
+
+  console.log
+     Verified 3 report checksums intact.
+
+      at scripts/migrate_soilfer_countries.cjs:667:25
+
+  console.log
+    
+    [DRY RUN] Invariants verified. Rolling back simulation transaction cleanly...
+
+      at scripts/migrate_soilfer_countries.cjs:726:25
+
+  console.log
+    
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:741:25)
+
+  console.log
+     ✅ [DRY RUN SUCCESS] Simulation completed cleanly without errors.
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:742:25)
+
+  console.log
+        All 5 conservation invariants verified.
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:743:25)
+
+  console.log
+        Target database remains 100% UNTOUCHED.
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:744:25)
+
+  console.log
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:745:25)
+
+  console.log
+    
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:239:13)
+
+  console.log
+       SOILFER COUNTRY PROJECT MIGRATION & EXPLICIT KOBO MAPPING (V2)
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:240:13)
+
+  console.log
+       Mode: COMMIT (MUTATION AUTHORIZED)
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:241:13)
+
+  console.log
+       Target DB: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\audit_legacy_755480ec-4ef2-45f7-8716-ba7b4d11b2f9.db
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:242:13)
+
+  console.log
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:243:13)
+
+  console.log
+    [STEP 0] Collecting pre-flight baseline inventory...
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:257:17)
+
+  console.log
+     Baseline Samples: 6
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:297:17)
+
+  console.log
+     Baseline Results: 4
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:298:17)
+
+  console.log
+     Baseline Reports: 3 (3 checksummed)
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:299:17)
+
+  console.log
+     Baseline Projects: 1
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:300:17)
+
+  console.log
+     Baseline KoboConfigs: 2
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:301:17)
+
+  console.log
+     Baseline Samples by Project: {
+      "SOILFER-US": 6
+    }
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:302:17)
+
+  console.log
+    
+    [STEP 1] Provisioning SoilFER Country Projects & Program Groupings...
+
+      at scripts/migrate_soilfer_countries.cjs:323:21
+
+  console.log
+      ~ Updated programme template: SoilFER Global Programme (SOILFER-US) -> SOILFER_V1
+
+      at scripts/migrate_soilfer_countries.cjs:343:33
+
+  console.log
+      + Created programme grouping: SoilFER Japan Program (SOILFER-JPN)
+
+      at scripts/migrate_soilfer_countries.cjs:334:29
+
+  console.log
+      + Created country project: SoilFER Guatemala (SOILFER-GTM) [Lab: GTM-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-GTM <-> GTM-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Honduras (SOILFER-HND) [Lab: HND-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-HND <-> HND-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Ghana (SOILFER-GHA) [Lab: GHA-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-GHA <-> GHA-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Kenya (SOILFER-KEN) [Lab: KEN-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-KEN <-> KEN-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Zambia (SOILFER-ZMB) [Lab: ZMB-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-ZMB <-> ZMB-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Mozambique (SOILFER-MOZ) [Lab: MOZ-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-MOZ <-> MOZ-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+      + Created country project: SoilFER Tunisia (SOILFER-TUN) [Lab: TUN-LAB1]
+
+      at scripts/migrate_soilfer_countries.cjs:369:29
+
+  console.log
+      + Created ProjectLab link: SOILFER-TUN <-> TUN-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:398:33
+
+  console.log
+    
+    [STEP 2] Classifying and migrating samples...
+
+      at scripts/migrate_soilfer_countries.cjs:404:21
+
+  console.log
+      Inspecting 6 candidate samples...
+
+      at scripts/migrate_soilfer_countries.cjs:420:21
+
+  console.log
+      Migration counts by country project:
+
+      at scripts/migrate_soilfer_countries.cjs:522:21
+
+  console.log
+       * SOILFER-GTM: 1 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-HND: 1 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-GHA: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-KEN: 1 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-ZMB: 1 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-MOZ: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-TUN: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+      Already migrated in prior run: 0
+
+      at scripts/migrate_soilfer_countries.cjs:526:21
+
+  console.log
+      Unresolved records retained: 2
+
+      at scripts/migrate_soilfer_countries.cjs:527:21
+
+  console.log
+    
+    [STEP 3] Updating Kobo configurations with explicit projectCode...
+
+      at scripts/migrate_soilfer_countries.cjs:530:21
+
+  console.log
+      ~ Updated KoboConfig [GTM-LAB1 / Form: aYU8RNGWtCtwTJh2ph6FdM] -> projectCode: SOILFER-GTM
+
+      at scripts/migrate_soilfer_countries.cjs:554:33
+
+  console.log
+      ~ Updated KoboConfig [HND-LAB1 / Form: akt25hEErmCj2G9LBhs4sS] -> projectCode: SOILFER-HND
+
+      at scripts/migrate_soilfer_countries.cjs:554:33
+
+  console.log
+      - No KoboConfig found for lab GHA-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab KEN-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab ZMB-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab MOZ-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab TUN-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+    
+    [STEP 4] Updating Lab Staff User.projects arrays...
+
+      at scripts/migrate_soilfer_countries.cjs:570:21
+
+  console.log
+      ~ User mgr_gtm (GTM-LAB1): added SOILFER-GTM
+
+      at scripts/migrate_soilfer_countries.cjs:605:29
+
+  console.log
+    
+    [STEP 5] Verifying conservation invariants...
+
+      at scripts/migrate_soilfer_countries.cjs:610:21
+
+  console.log
+     Post-migration Samples: 6 (Baseline: 6)
+
+      at scripts/migrate_soilfer_countries.cjs:626:21
+
+  console.log
+     Post-migration Results: 4 (Baseline: 4)
+
+      at scripts/migrate_soilfer_countries.cjs:627:21
+
+  console.log
+     Post-migration Reports: 3 (Baseline: 3)
+
+      at scripts/migrate_soilfer_countries.cjs:628:21
+
+  console.log
+     Post-migration QC Batches: 3 (Baseline: 3)
+
+      at scripts/migrate_soilfer_countries.cjs:629:21
+
+  console.log
+     Post-migration Orphaned Results: 0
+
+      at scripts/migrate_soilfer_countries.cjs:630:21
+
+  console.log
+     Verified 3 report checksums intact.
+
+      at scripts/migrate_soilfer_countries.cjs:667:25
+
+  console.log
+    
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:735:21)
+
+  console.log
+     ✅ [COMMIT SUCCESS] SoilFER country project migration committed successfully!
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:736:21)
+
+  console.log
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:737:21)
+
+  console.log
+    
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:239:13)
+
+  console.log
+       SOILFER COUNTRY PROJECT MIGRATION & EXPLICIT KOBO MAPPING (V2)
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:240:13)
+
+  console.log
+       Mode: COMMIT (MUTATION AUTHORIZED)
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:241:13)
+
+  console.log
+       Target DB: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\audit_legacy_755480ec-4ef2-45f7-8716-ba7b4d11b2f9.db
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:242:13)
+
+  console.log
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:243:13)
+
+  console.log
+    [STEP 0] Collecting pre-flight baseline inventory...
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:257:17)
+
+  console.log
+     Baseline Samples: 6
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:297:17)
+
+  console.log
+     Baseline Results: 4
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:298:17)
+
+  console.log
+     Baseline Reports: 3 (3 checksummed)
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:299:17)
+
+  console.log
+     Baseline Projects: 9
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:300:17)
+
+  console.log
+     Baseline KoboConfigs: 2
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:301:17)
+
+  console.log
+     Baseline Samples by Project: {
+      "SOILFER-GTM": 1,
+      "SOILFER-HND": 1,
+      "SOILFER-KEN": 1,
+      "SOILFER-US": 2,
+      "SOILFER-ZMB": 1
+    }
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:302:17)
+
+  console.log
+    
+    [STEP 1] Provisioning SoilFER Country Projects & Program Groupings...
+
+      at scripts/migrate_soilfer_countries.cjs:323:21
+
+  console.log
+    
+    [STEP 2] Classifying and migrating samples...
+
+      at scripts/migrate_soilfer_countries.cjs:404:21
+
+  console.log
+      Inspecting 6 candidate samples...
+
+      at scripts/migrate_soilfer_countries.cjs:420:21
+
+  console.log
+      Migration counts by country project:
+
+      at scripts/migrate_soilfer_countries.cjs:522:21
+
+  console.log
+       * SOILFER-GTM: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-HND: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-GHA: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-KEN: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-ZMB: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-MOZ: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+       * SOILFER-TUN: 0 newly migrated
+
+      at scripts/migrate_soilfer_countries.cjs:524:25
+
+  console.log
+      Already migrated in prior run: 4
+
+      at scripts/migrate_soilfer_countries.cjs:526:21
+
+  console.log
+      Unresolved records retained: 2
+
+      at scripts/migrate_soilfer_countries.cjs:527:21
+
+  console.log
+    
+    [STEP 3] Updating Kobo configurations with explicit projectCode...
+
+      at scripts/migrate_soilfer_countries.cjs:530:21
+
+  console.log
+      = KoboConfig [GTM-LAB1] already has explicit projectCode: SOILFER-GTM
+
+      at scripts/migrate_soilfer_countries.cjs:556:33
+
+  console.log
+      = KoboConfig [HND-LAB1] already has explicit projectCode: SOILFER-HND
+
+      at scripts/migrate_soilfer_countries.cjs:556:33
+
+  console.log
+      - No KoboConfig found for lab GHA-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab KEN-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab ZMB-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab MOZ-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+      - No KoboConfig found for lab TUN-LAB1
+
+      at scripts/migrate_soilfer_countries.cjs:564:33
+
+  console.log
+    
+    [STEP 4] Updating Lab Staff User.projects arrays...
+
+      at scripts/migrate_soilfer_countries.cjs:570:21
+
+  console.log
+    
+    [STEP 5] Verifying conservation invariants...
+
+      at scripts/migrate_soilfer_countries.cjs:610:21
+
+  console.log
+     Post-migration Samples: 6 (Baseline: 6)
+
+      at scripts/migrate_soilfer_countries.cjs:626:21
+
+  console.log
+     Post-migration Results: 4 (Baseline: 4)
+
+      at scripts/migrate_soilfer_countries.cjs:627:21
+
+  console.log
+     Post-migration Reports: 3 (Baseline: 3)
+
+      at scripts/migrate_soilfer_countries.cjs:628:21
+
+  console.log
+     Post-migration QC Batches: 3 (Baseline: 3)
+
+      at scripts/migrate_soilfer_countries.cjs:629:21
+
+  console.log
+     Post-migration Orphaned Results: 0
+
+      at scripts/migrate_soilfer_countries.cjs:630:21
+
+  console.log
+     Verified 3 report checksums intact.
+
+      at scripts/migrate_soilfer_countries.cjs:667:25
+
+  console.log
+    
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:735:21)
+
+  console.log
+     ✅ [COMMIT SUCCESS] SoilFER country project migration committed successfully!
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:736:21)
+
+  console.log
+    ================================================================================
+
+      at runMigration (scripts/migrate_soilfer_countries.cjs:737:21)
+
+PASS tests/contracts/soilfer_country_migration.test.js (53 MB heap size)
+  SoilFER Country Project Migration & Kobo Association (v2)
+    √ 1. Dry-run mode executes cleanly and leaves database 100% untouched (35 ms)
+    √ 2. Commit mode successfully creates country projects, migrates samples, and preserves invariants (45 ms)
+    √ 3. Idempotency: Second run produces zero duplicate projects, zero new migrations, and 100% identical counts (23 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Snapshots:   0 total
+Time:        0.78 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\soilfer_country_migration.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-owned-completion\batch-37.json

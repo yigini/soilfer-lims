@@ -1,0 +1,29 @@
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-DEFAULT
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by tech_marcos_p4 with 1 samples: [ 'SMP-P4-1791891719859' ]
+
+      at Object.log [as commitSubmissions] (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab LAB-DEFAULT
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/workbench_pipeline_twostep.test.js (102 MB heap size)
+  Workbench Two-Step Record & Submit Pipeline (Phase 4)
+    √ 1. previewCompletion separates eligible items from invalid ones (49 ms)
+    √ 2. commitCompletion records determinations, completes items and returns receipt (136 ms)
+    √ 3. previewSubmissions bundles completed items by sample (5 ms)
+    √ 4. commitSubmissions creates Submission and transitions items to SUBMITTED (47 ms)
+    √ 5. getReceipts returns recent activity receipts (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        0.89 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\workbench_pipeline_twostep.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-59.json

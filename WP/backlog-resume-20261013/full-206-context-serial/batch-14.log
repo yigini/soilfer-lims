@@ -1,0 +1,575 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User 78488bce-35ad-4d1a-ad36-6ff4d6d2c674 (Lab: 99c85526-4c43-4358-a864-542d7ca02edb) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at executionContext (services/calibrationCurveService.js:18:19)
+      at services/calibrationCurveService.js:91:25
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_6_calibration.test.js:197:5)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T11:21:07.330Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+  console.log
+    [AUTH] Verifying token for ID: 8c1f38c8-30cf-46a8-b288-2d7d0535ac56 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8c1f38c8-30cf-46a8-b288-2d7d0535ac56 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8c1f38c8-30cf-46a8-b288-2d7d0535ac56 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5bd03b40-6487-4d26-b10c-0740f27a3c1f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User 3c6ae1c5-c209-4315-ad23-acd430bc61b2 (Lab: 4d983573-0b16-4465-a246-3c85e9fd48c6) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at executionContext (services/calibrationCurveService.js:18:19)
+      at services/calibrationCurveService.js:134:25
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at controllers/calculationTemplateController.js:19:50
+
+  console.log
+    [AUTH] Verifying token for ID: 4845717f-81cd-4abe-bc4c-ba38e6ff99f5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ba880db0-5e14-48e9-ae8f-6b9e2afd6a87 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c9836f75-1467-4b28-a7f8-e1332cf2510a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8a424578-3e0d-4e63-b244-28deb739d50a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8a424578-3e0d-4e63-b244-28deb739d50a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_6_calibration.test.js (79.652 s, 162 MB heap size)
+  √ only a started native run supplies the real frozen method revision; refusal writes nothing (2240 ms)
+  √ the actual Result writer recomputes every reading, refuses tampering and atomically freezes its curve and raw inputs (1936 ms)
+  √ response 5.002 compares extract mg/L with the highest standard and retains an amber flag=true after mg/kg conversion (1795 ms)
+  √ response 4.998 compares extract mg/L with the highest standard and retains an amber flag=false after mg/kg conversion (1829 ms)
+  √ a future failed curve blocks stored completion without changing an earlier Result or its frozen calculation (1852 ms)
+  √ every replicate participates in the unweighted fit; zero counts and repeated standards add no distinct levels (1767 ms)
+  √ negative correlation fails and a degenerate fit retains four null coefficients (1805 ms)
+  √ a new reasoned revision freezes new resolved limits; an old PASS cannot bypass the latest failed curve (1806 ms)
+  √ assigned analyst, scoped manager reason, and optimistic curve head protect the immutable revision chain (2044 ms)
+  √ missing points, qualifiers, negative concentrations and a stale activation refuse with zero writes (1873 ms)
+  √ a late event failure rolls back curve, all points and calibration audit together (1886 ms)
+  √ incomplete retained point sets cannot bind, and a nondeclared AAS/ICP template needs no curve (1750 ms)
+  √ actual authenticated HTTP entry retains permission, canonical scope, active context and stable refusal codes (1929 ms)
+  √ the pinned prerequisite helper has only the closed owned successors and no runtime writer exemption (1856 ms)
+  √ LAB curveMinPoints boundary 3 retains a curve PASS=true from laboratory policy (1799 ms)
+  √ LAB curveMinPoints boundary 4 retains a curve PASS=false from laboratory policy (1782 ms)
+  √ LAB curveMinR boundary 0.9998998674099174 retains a curve PASS=true from laboratory policy (1761 ms)
+  √ LAB curveMinR boundary 0.9999018674099175 retains a curve PASS=false from laboratory policy (1823 ms)
+  √ METHOD curveMinPoints boundary 3 retains a curve PASS=true from laboratory policy (1826 ms)
+  √ METHOD curveMinPoints boundary 4 retains a curve PASS=false from laboratory policy (1810 ms)
+  √ METHOD curveMinR boundary 0.9998998674099174 retains a curve PASS=true from laboratory policy (1803 ms)
+  √ METHOD curveMinR boundary 0.9999018674099175 retains a curve PASS=false from laboratory policy (1801 ms)
+  √ a passing recalibration binds later readings to revision2 while the original Result/calculation remain on revision1 (3559 ms)
+  √ no-template completion retains the historical path for lab null without writes (1751 ms)
+  √ no-template completion retains the historical path for lab unresolvable-owned-lab without writes (1826 ms)
+  √ UPDATE and DELETE are refused on every calculation table, preserving all original rows (1892 ms)
+  √ an actual calculation SQL context abort becomes a stable409 through the mapped repeat controller (1819 ms)
+  √ the actual curve governs extract 1 despite generic maximum 0.1, with HTTP preview and immutable flags (1912 ms)
+  √ the actual curve governs extract 4 despite generic maximum 1000, with HTTP preview and immutable flags (1868 ms)
+  √ a method with no active calculation keeps the generic #197 calibration maximum (1780 ms)
+  √ a calculated transcription correction keeps the original basis after newer-active, preserving every original scientific field (1807 ms)
+  √ a calculated transcription correction keeps the original basis after deactivated, preserving every original scientific field (1829 ms)
+  √ a correction of a correction keeps the first calculation basis and binds its own original evidence (1877 ms)
+  √ calculated final-only, mismatched output and partial raw-input corrections refuse with exact zero-write snapshots (1831 ms)
+  √ a correction cannot request a different activationId basis (1815 ms)
+  √ a correction cannot request a different templateId basis (1799 ms)
+  √ a correction cannot request a different templateVersion basis (1789 ms)
+  √ a correction cannot request a different curveId basis (1792 ms)
+  √ a revised original curve refuses a transcription correction without writes to either Result or calculation (1811 ms)
+  √ the actual correction HTTP route recomputes the extract-range flag and binds only stored ids (1878 ms)
+  √ a calculation field on a non-calculated Result is refused, while its old final-only correction remains available (1825 ms)
+  √ the authoritative completion preview verifies nested raw calculations, refuses tampering and allocates no Result (1883 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: d75b44aa-fb3f-4637-858c-f42bc6a6fcf9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d75b44aa-fb3f-4637-858c-f42bc6a6fcf9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d75b44aa-fb3f-4637-858c-f42bc6a6fcf9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d75b44aa-fb3f-4637-858c-f42bc6a6fcf9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d75b44aa-fb3f-4637-858c-f42bc6a6fcf9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d75b44aa-fb3f-4637-858c-f42bc6a6fcf9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d75b44aa-fb3f-4637-858c-f42bc6a6fcf9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d75b44aa-fb3f-4637-858c-f42bc6a6fcf9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T11:22:17.840Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+  console.log
+    [AUTH] Verifying token for ID: d8623879-e211-4689-9792-e42b04716a06 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User calc_a7c5d5ce-7705-4bed-ade6-f24e09a768e4 (LAB_TECHNICIAN) attempted MANAGE_CALC_TEMPLATES. Allowed roles: ["SUPER_ADMIN","LAB_MANAGER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 19126830-16ca-432d-b1ac-53da61438d12 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_6_template_activation.test.js (15.768 s, 148 MB heap size)
+  √ all lab profiles and the inactive library resolve no implicit template or method fallback (1398 ms)
+  √ published precision in percent cannot activate for g/kg reporting; an explicit reporting-SOP clone can (1376 ms)
+  √ cloning and editing insert new versions, retain original definitions and source rules, and audit the reason/SOP (1424 ms)
+  √ Kjeldahl activation refuses missing precision, then a SOP-cited local clone supplies fixed reporting precision (1374 ms)
+  √ two labs use independently verified WB variants; changing lab policy never changes the selected immutable activation (1430 ms)
+  √ deactivation and reactivation append one exact-scope chain; stale heads refuse409 without changing evidence (1399 ms)
+  √ permissions, cross-lab clones/activations and missing verification refuse before all writes (1369 ms)
+  √ a RATIO percent native unit cannot activate for SOC mass-fraction reporting (1389 ms)
+  √ parameter edits retain dimensional units and bounds, and require positive method constants and a SOP citation (1374 ms)
+  √ actual authenticated HTTP routes list, clone, version and activate with exact scope and stable validation codes (1597 ms)
+  √ actual HTTP rejects an unauthenticated reader, technician management and another laboratory without writes (1464 ms)
+
+PASS tests/contracts/audit_4_6_reference_install.test.js (15.463 s, 131 MB heap size)
+  √ the real fresh Prisma schema gets exactly eleven inactive references with every other row/object retained, zero activations and zero backfill (1462 ms)
+  √ a differing or unreceipted existing reference is refused409 before any other reference is inserted: {"variant":"differing variant"} (1391 ms)
+  √ a differing or unreceipted existing reference is refused409 before any other reference is inserted: {"createdAt":"2026-09-01T00:00:00.000Z"} (1390 ms)
+  √ a differing or unreceipted existing reference is refused409 before any other reference is inserted: {"outputDecimals":3} (2884 ms)
+  √ a differing or unreceipted existing reference is refused409 before any other reference is inserted: {"id":"conflicting-global-reference-id"} (1336 ms)
+  √ a differing or unreceipted existing reference is refused409 before any other reference is inserted: {} (1391 ms)
+  √ a missing catalogue analysis defers its reference without creating or altering analyses (1381 ms)
+  √ an enclosing migration failure rolls all eleven reference inserts back without changing catalogue metadata (1388 ms)
+  √ a pre-existing different-source reference receipt is never adopted or rewritten (1360 ms)
+  √ a pre-existing orphan-receipt reference receipt is never adopted or rewritten (1378 ms)
+
+PASS tests/contracts/audit_4_7_import_qc_entry.test.js (15.184 s, 153 MB heap size)
+  √ importing the last required QC value leaves pending evidence and a receipt-bound event/audit until explicit evaluation (1330 ms)
+  √ invalid internal entry-only combination refuses atomically: {"references":[]} {} (1157 ms)
+  √ invalid internal entry-only combination refuses atomically: {"expectedValues":{}} {} (1139 ms)
+  √ invalid internal entry-only combination refuses atomically: {"mode":"REVIEWED_CORRECTION"} {} (1140 ms)
+  √ invalid internal entry-only combination refuses atomically: {"reason":"Correction"} {} (1143 ms)
+  √ invalid internal entry-only combination refuses atomically: {"measurements":[]} {} (1152 ms)
+  √ invalid internal entry-only combination refuses atomically: {} {"correction":true} (1129 ms)
+  √ invalid internal entry-only combination refuses atomically: {} {"explicit":true} (1149 ms)
+  √ invalid internal entry-only combination refuses atomically: {} {"entryOnly":"yes"} (1131 ms)
+  √ invalid internal entry-only combination refuses atomically: {} {"importReceiptId":null} (1170 ms)
+  √ invalid internal entry-only combination refuses atomically: {} {"importReceiptId":"unavailable"} (1139 ms)
+  √ already evaluated native analyte refuses imported values without changing retained evidence (1152 ms)
+  √ a current unevaluated QC value cannot be overwritten by another import (1156 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ca13feb2-e613-4bc9-ae54-a40dc6ff7f14 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User 3b2b0fb9-8eca-44a1-80cb-8dc4f10d3ff7 (Lab: 63271864-f24e-438a-b02d-6ea970685e82) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope [as readQcRun] (services/qcRunViewService.js:159:22)
+      at readImportRun (services/instrumentImportTemplateService.js:105:19)
+      at Object.readInstrumentImportContext (services/instrumentImportPreviewService.js:177:40)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.importContext (controllers/instrumentImportController.js:34:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_7_import_commit.test.js (14.793 s, 189 MB heap size)
+  √ preview is read-only; commit saves exact sample drafts, pending QC and a complete immutable source receipt (1323 ms)
+  √ two bad matched rows and valid sample/QC values refuse the whole file and list every row with zero writes (1159 ms)
+  √ zero matches and duplicate destinations are explicit refusals, never a skipped ambiguity or partial receipt (1202 ms)
+  √ a draft appearing after preview is rechecked at commit and retains every saved raw input (1196 ms)
+  √ changing the exact file, actor or preview signature cannot authorize a commit (1254 ms)
+  √ mounted multipart preview and commit use actual token/permission/run owners; HTTP cannot claim receipt authority (1266 ms)
+  √ mounted wizard context reads only the actual scoped native instrument/run metadata and persisted templates (1291 ms)
+  √ HTTP preview and commit refuse another same-lab instrument mapping with 409 and zero writes (1247 ms)
+  √ dilution10 on a direct sample row refuses the whole file with zero writes (1177 ms)
+  √ dilution10 on a QC row refuses the whole file with zero writes (1186 ms)
+  √ missing catalogue units refuse commit even with the instrument source unit, retaining every row (1150 ms)
+  √ a QC unit mismatch refuses otherwise valid direct samples and commit with zero writes (1186 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: Import receipts are attached by the import owner.
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:32:41)
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:33:9)
+        at Object.assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:33:9)
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:683:33)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:157:13)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\middleware\authMiddleware.js:165:9)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:157:13)
+        at Route.dispatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:117:3)
+        at handle (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:435:11)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:295:15
+        at processParams (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:582:12)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:291:5)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\middleware\authMiddleware.js:123:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 400,
+      status: 400,
+      code: 'DRAFT_FIELDS_INVALID',
+      details: {}
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at error (controllers/workbenchController.js:1332:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:165:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: Import receipts are attached by the import owner.
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:32:41)
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:33:9)
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:33:9)
+        at Object.assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\draftService.js:33:9)
+        at assertNoReceiptFields (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:683:33)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:157:13)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\middleware\authMiddleware.js:165:9)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:157:13)
+        at Route.dispatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:117:3)
+        at handle (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:435:11)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:295:15
+        at processParams (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:582:12)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:291:5)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\middleware\authMiddleware.js:123:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 400,
+      status: 400,
+      code: 'DRAFT_FIELDS_INVALID',
+      details: {}
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at error (controllers/workbenchController.js:1332:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:165:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+PASS tests/contracts/audit_4_7_import_drafts.test.js (14.284 s, 210 MB heap size)
+  √ ordinary draft owner refuses receipt fields before writing: {"importReceiptId":"forged"} (1218 ms)
+  √ ordinary draft owner refuses receipt fields before writing: {"receipt":{}} (1138 ms)
+  √ ordinary draft owner refuses receipt fields before writing: {"options":{"importReceiptId":"forged"}} (1252 ms)
+  √ ordinary draft owner refuses receipt fields before writing: {"values":{"calculation":{"receiptId":"forged"}}} (1168 ms)
+  √ mounted ordinary draft HTTP cannot reach the server receipt option: {"importReceiptId":"forged"} (1274 ms)
+  √ mounted ordinary draft HTTP cannot reach the server receipt option: {"options":{"importReceiptId":"forged"}} (1189 ms)
+  √ the server option binds exact raw input to its persisted receipt through the existing draft owner (1145 ms)
+  √ an existing populated draft blocks import and retains every row (1153 ms)
+  √ an existing receipt-linked draft blocks import and retains every row (1156 ms)
+  √ an existing empty draft blocks import and retains every row (1153 ms)
+  √ a current Result refuses the imported draft with the existing sealed-line code and retains all evidence (1154 ms)
+  √ an unavailable receipt refuses before writing; unknown non-receipt draft fields retain ordinary behavior (1137 ms)
+
+PASS tests/contracts/audit_4_7_calculation_import.test.js (5.558 s, 221 MB heap size)
+  √ actual EXCH_CA/Olsen activated input imports do not calculate; later typed recording freezes the selected local definitions and verified raw input text (1424 ms)
+  √ missing/duplicate/unknown activated variables, output-unit input guesses and active direct-value mappings refuse the whole commit (1430 ms)
+  √ a calculation deactivation after preview refuses before any receipt, raw draft or scientific evidence is created (1302 ms)
+  √ QC under an input-only mapping refuses the whole file before any draft, receipt or scientific writes (1265 ms)
+
+PASS tests/contracts/audit_4_7_icp_import.test.js (5.191 s, 224 MB heap size)
+  √ one real ICP CSV places40 samples by four analytes and six native QC rows without recording or evaluating (5076 ms)
+
+  console.log
+    [SEED] Seeding 37 controlled units...
+
+      at log (seeds/units.js:270:13)
+
+  console.log
+    [SEED] Successfully seeded 37 units.
+
+      at log (seeds/units.js:285:13)
+
+PASS tests/contracts/audit_4_6_calculation_unit.test.js (221 MB heap size)
+  √ dry-run and apply only classify an absent unit; every historical catalogue field and file byte is preserved (59 ms)
+  √ a conflicting controlled definition refuses409 before any write: {"display":"%"} (58 ms)
+  √ a conflicting controlled definition refuses409 before any write: {"quantityKind":"RATIO"} (52 ms)
+  √ a conflicting controlled definition refuses409 before any write: {"factorToBase":1} (53 ms)
+  √ a conflicting controlled definition refuses409 before any write: {"synonyms":"[\"%\"]"} (52 ms)
+  √ a conflicting controlled definition refuses409 before any write: {"synonyms":"[] "} (52 ms)
+  √ an outer schema-installation failure preserves the absent unit and every catalogue field atomically (51 ms)
+  √ the actual fresh Prisma-backed seed adds pct_mass and leaves existing percent free-text resolution distinct (112 ms)
+
+PASS tests/contracts/audit_4_6_workbench_ui.test.js (205 MB heap size)
+  √ the manager clone screen keeps the conditional Kjeldahl rule and threshold-unit ambiguity read-only (56 ms)
+  √ inactive methods retain the old editor and issue no calculation preview request (7 ms)
+  √ raw edits preserve the exact scalar and invalidate the final draft until authoritative confirmation (9 ms)
+  √ a later curve with the same numerical output cannot silently replace the preview basis (7 ms)
+  √ the matching authoritative preview retains raw measurements alongside the explicitly confirmed final value (6 ms)
+  √ recorded evidence displays the frozen raw inputs, constants and curve without any live resolver or calculation request (6 ms)
+
+PASS tests/contracts/audit_4_6_calculation_references.test.js (206 MB heap size)
+  √ the eleven published method variants form an inactive library with no lab/preset/method activation (3 ms)
+  √ minimum, conditional and unspecified source precision stay NULL until explicit local SOP verification (13 ms)
+  √ Kjeldahl retains the verbatim conditional rule and exact source location without creating a conditional rounding engine
+  √ WB1.33 has the accepted primary variant source and the shared SOP equation, without invented source precision
+  √ library values are immutable and database serialization preserves the scientific and precision evidence (15 ms)
+  √ derived moisture golden from SOP20 §9 retains dry fraction and correction separately
+  √ derived walkley-black-130 golden converts native percent to the actual SOC reporting unit before rounding
+  √ derived walkley-black-133 golden converts native percent to the actual SOC reporting unit before rounding
+  √ derived olsen-phosphorus golden uses the selected free-intercept curve and recorded scale inputs (1 ms)
+  √ derived bray1-phosphorus golden uses the selected free-intercept curve and recorded scale inputs
+  √ derived exchangeable ca golden uses the source atomic mass/charge and measured concentration without a curve
+  √ derived exchangeable mg golden uses the source atomic mass/charge and measured concentration without a curve (1 ms)
+  √ derived exchangeable k golden uses the source atomic mass/charge and measured concentration without a curve
+  √ derived exchangeable na golden uses the source atomic mass/charge and measured concentration without a curve
+  √ derived CEC golden uses actual aliquot/extract volumes and equivalent normality (1 ms)
+  √ derived Kjeldahl golden uses H+ equivalent concentration and rounds once after native percent→g/kg
+
+PASS tests/contracts/audit_4_7_import_row_match.test.js (206 MB heap size)
+  √ forty lab labels retain all four analyte destinations and six QC rows require the exact mapped physical position (7 ms)
+  √ explicit ORIGINAL_ID mapping uses its own identifier authority
+  √ explicit POSITION mapping uses its own identifier authority
+  √ unknown UNKNOWN is listed rather than guessed or imported
+  √ unknown internal-0 is listed rather than guessed or imported
+  √ unknown EXT-1 is listed rather than guessed or imported
+  √ unknown =1+1 is listed rather than guessed or imported
+  √ unknown lab-1 is listed rather than guessed or imported
+  √ duplicate original ids are ambiguous, and historical/duplicate positions never act as sample destinations
+  √ QC kind and exact physical column are required: ""
+  √ QC kind and exact physical column are required: "41.5"
+  √ QC kind and exact physical column are required: "1e2"
+  √ QC kind and exact physical column are required: "999"
+  √ QC kind and exact physical column are required: "43"
+  √ overlapping QC detectors refuse ambiguity instead of choosing a prefix
+
+Test Suites: 12 passed, 12 total
+Tests:       150 passed, 150 total
+Snapshots:   0 total
+Time:        167.294 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_6_calculation_references.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_6_calculation_unit.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_6_calibration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_6_reference_install.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_6_template_activation.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_6_workbench_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_calculation_import.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_icp_import.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_import_commit.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_import_drafts.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_import_qc_entry.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_import_row_match.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-14.json

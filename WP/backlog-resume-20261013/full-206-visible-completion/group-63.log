@@ -1,0 +1,14 @@
+PASS tests/contracts/workflow_dag.test.js (96 MB heap size)
+  WP-25: Catalogue-Driven Workflow Graph and DAG Validation
+    √ 1. Self-referential prerequisite is refused (5 ms)
+    √ 2. Two-node cyclic prerequisite is refused
+    √ 3. Multi-node cyclic prerequisite is refused (1 ms)
+    √ 4. Valid acyclic DAG dependencies are permitted
+    √ 5. Work items are generated in order of catalogue executionOrder (222 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        0.643 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\workflow_dag.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-63.json

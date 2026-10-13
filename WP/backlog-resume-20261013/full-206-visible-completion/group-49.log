@@ -1,0 +1,39 @@
+PASS tests/contracts/texture_boundary_verification.test.js (37 MB heap size)
+  USDA Soil Texture Metrology & 12-Class Boundary Verification (Contract)
+    Mandatory Audit Probes
+      √ Probe 1: 50/35/15 returns Loam under USDA definition (Finding F11) (1 ms)
+      √ Probe 2: 20/50/30 returns Silty Clay Loam under USDA definition
+      √ Probe 3: 45/20/35 returns Clay Loam under USDA definition
+    All 12 USDA Texture Class Centroids (Soil Survey Manual Ch. 3)
+      √ Class Clay (C) at [Sand 20%, Silt 20%, Clay 60%] (1 ms)
+      √ Class Silty Clay (SiC) at [Sand 5%, Silt 45%, Clay 50%]
+      √ Class Sandy Clay (SC) at [Sand 55%, Silt 5%, Clay 40%] (1 ms)
+      √ Class Clay Loam (CL) at [Sand 35%, Silt 32%, Clay 33%]
+      √ Class Silty Clay Loam (SiCL) at [Sand 10%, Silt 60%, Clay 30%]
+      √ Class Sandy Clay Loam (SCL) at [Sand 60%, Silt 15%, Clay 25%] (1 ms)
+      √ Class Sand (S) at [Sand 92%, Silt 5%, Clay 3%]
+      √ Class Loamy Sand (LS) at [Sand 82%, Silt 12%, Clay 6%]
+      √ Class Sandy Loam (SL) at [Sand 65%, Silt 25%, Clay 10%] (1 ms)
+      √ Class Silt (Si) at [Sand 5%, Silt 88%, Clay 7%]
+      √ Class Silt Loam (SiL) at [Sand 20%, Silt 65%, Clay 15%]
+      √ Class Loam (L) at [Sand 40%, Silt 42%, Clay 18%]
+    Method-Specific Closure Policy (Mandatory Correction 2)
+      √ Standard method tolerance allows slight field precision within tolerance
+      √ Fails closed when closure error exceeds method-specific tolerance
+      √ Strict mode requires exact closure to floating point precision (1 ms)
+      √ Rejects gross closure errors without silent normalization
+    Defensive Metrology: Negative, Blank, Censored and Out-of-Bounds Inputs (Finding F12)
+      √ Rejects negative fractions
+      √ Rejects empty / blank fractions
+      √ Rejects fractions greater than 100% (1 ms)
+      √ Rejects censored strings (< or >)
+      √ Parses comma-decimals properly without coercing blanks to zero
+    Ternary Coordinates Mapping
+      √ Maps 100% clay apex, 100% sand base-left, 100% silt base-right
+
+Test Suites: 1 passed, 1 total
+Tests:       25 passed, 25 total
+Snapshots:   0 total
+Time:        0.271 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\texture_boundary_verification.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-49.json

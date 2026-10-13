@@ -1,0 +1,564 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-DEFAULT
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-DEFAULT
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-DEFAULT
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-DEFAULT
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-DEFAULT
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: provenance-reviewer-1791891301805 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-DEFAULT
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/result_provenance.test.js (147 MB heap size)
+  WP-31: Result Provenance Tracking
+    √ 1. Direct prisma create defaults Result.provenance to MEASURED (32 ms)
+    √ 2. typed results ignore claimed provenance and internal predictions retain PREDICTED (155 ms)
+    √ 3. assembleReport includes provenance for each result item (1053 ms)
+    √ 4. WP-40: saveResults accepts chosen basis and stores censoring correctly (29 ms)
+    √ 5. WP-40: saveResults supports multiple replicates without overwriting previous determination (69 ms)
+    √ 6. WP-40: assembleReport embeds basis, replicateNo, and censoring on result items (214 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b591ba2-2a27-4815-81bd-52a04da969cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/sample_assignment_identity.test.js (185 MB heap size)
+  Contract: Sample and Assignment Identity, Pagination, and Server-Side Readiness (Issue #119)
+    √ 1. 26-task fixture exposes all 26 tasks with honest totals and pagination (no silent 20-item truncation) (138 ms)
+    √ 2. Disambiguates canonical ID, lab ID, and field original ID across dashboard queues and submissions (26 ms)
+    √ 3. Texture equivalence: TEXTURE requirement satisfied by 3 accepted fractions (SAND, SILT, CLAY) without false ORDER_TASK_MISMATCH (89 ms)
+    √ 4. Final approval readiness independently enforced on server: rejects premature approval with 409 and blockers (121 ms)
+    √ 5. Cross-lab assignment is strictly rejected with 403 CROSS_LAB_ASSIGNMENT_DENIED (15 ms)
+    √ 6. Workspace projection exposes accurate capabilities and nextAction reflecting readiness state (100 ms)
+    √ 7. Operational gates evaluated independently and respect SKIPPED/WAIVED states
+    √ 8. Workspace projection extracts linked QC batches and blocks final approval on QC failure (100 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73e87055-bd37-46fe-a537-8959d29a7699 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73e87055-bd37-46fe-a537-8959d29a7699 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a3470116-6f5a-405b-8077-a416075da912 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a3470116-6f5a-405b-8077-a416075da912 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73e87055-bd37-46fe-a537-8959d29a7699 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73e87055-bd37-46fe-a537-8959d29a7699 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73e87055-bd37-46fe-a537-8959d29a7699 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73e87055-bd37-46fe-a537-8959d29a7699 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a3470116-6f5a-405b-8077-a416075da912 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a3470116-6f5a-405b-8077-a416075da912 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/sample_assignment_manager_route.test.js (209 MB heap size)
+  Contract & Component Regression: Manager Queue Assignment Route (#119)
+    1. Component Render Regression: ArrowRight and Eye Definition (#119)
+      √ SampleDetail renders without ReferenceError when nextAction is ASSIGN (76 ms)
+      √ SampleDetail renders without ReferenceError when released report is present (Eye icon) (9 ms)
+    2. Task Count Isolation & Scope Aggregation (15 + 11 + 12 = 38 tasks)
+      √ SUPER_ADMIN unassigned queue aggregates 38 tasks across S005, S004, and W001 (14 ms)
+      √ LAB_MANAGER (LAB-GTM) is lab-scoped and sees only S005 (15) and S004 (11) totaling 26 tasks (9 ms)
+    3. Canonical Sample ID vs Display Lab Code Disambiguation
+      √ S005 resolves strictly to its own 15 tasks via canonical ID GTM-LAB1 (144 ms)
+      √ S005 also resolves accurately when queried via display lab code S005 (105 ms)
+      √ canonical ID query takes strict precedence over cross-column labId alias collision (63 ms)
+      √ S004 resolves strictly to its own 11 tasks (71 ms)
+      √ W001 resolves strictly to its own 12 tasks (83 ms)
+    4. Manager Queue Card Target URL and Return Context
+      √ Target URL uses canonical sampleId GTM-LAB1 and preserves returnTo queue context
+      √ Target URL forwards selectedAnalysis directly and retains method context in returnTo (#119)
+    5. Component Render Regression: Manager Guidance & Scoped Assignment Controls (#119)
+      √ SampleDetail renders Manager guidance text instead of Technician guidance when tasks are unassigned (10 ms)
+      √ SampleDetail ASSIGN action handler invokes handleFocusAssignment and eliminates loop to manager-queue (1 ms)
+    6. 12 Ordered / 9 Analytical + 2 Gates / Derived Texture Relationship (#119)
+      √ S004 workspace maintains truthful parallel facts: 2 gates + 9 analytical = 11 tasks (33 ms)
+      √ Aggregated queue across lab maintains 26 = 15 (S005) + 11 (S004) unassigned tasks (7 ms)
+    7. Safety & Immutability: Zero Live Task Assignment (#119)
+      √ All work items remain strictly in NOT_ASSIGNED state with assignedTo null (3 ms)
+    8. State Integrity, Stale Selection Isolation & Route Transition (#119)
+      √ Source probe: WorkItemsTable handleBulkAssign dispatches 0 calls when selection contains only stale IDs absent from current workItems (1 ms)
+      √ Source probe: WorkItemsTable handleBulkAssign filters out terminal status items (COMPLETED, SUBMITTED, ACCEPTED) and submits only eligible items (1 ms)
+      √ Source probe: WorkItemsTable handleBulkAssign enforces mutual exclusion (ARCHIVING vs DISPOSAL) (1 ms)
+      √ SampleDetail and WorkItemsTable component source asserts state resets across sample context transitions (1 ms)
+      √ Eligibility Reconciliation Logic: Ineligible and stale IDs are pruned from selection
+      √ Same-mounted sample parameter transition (A -> B without unmount) clears selection and resets technician (1 ms)
+      √ Mounted eligibility refresh reconciles selection, updates technician/button state, and prevents stale dispatches through real handler with intercepted mock endpoint (1 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: acda4aa9-3137-4ee5-84a3-b4628cffc7d8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: acda4aa9-3137-4ee5-84a3-b4628cffc7d8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: acda4aa9-3137-4ee5-84a3-b4628cffc7d8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: acda4aa9-3137-4ee5-84a3-b4628cffc7d8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/result_reports_filter_lifecycle.test.js (230 MB heap size)
+  Result Reports Query/Filter Lifecycle & Stale-Response Regression (#124)
+    1. Component SSR & Static Layout Regression
+      √ Renders page header, search input, and 3 filter tabs with Published active by default (48 ms)
+      √ Renders clear button when initialQuery is provided (4 ms)
+      √ Renders populated reports table rows with version and client badges (5 ms)
+      √ Renders truthful empty state when initialReports is empty (5 ms)
+    2. Synthetic Hook Harness: Component Query/Filter Lifecycle, StrictMode Replay & Scope Transitions
+      √ Initial mount executes exactly 1 query with default PUBLISHED and empty search (3 ms)
+      √ React StrictMode setup-cleanup-setup re-executes mount effect and maintains active surviving request (4 ms)
+      √ Same-instance projectId URL change cancels previous request, dispatches new request with new projectId, and preserves appliedQuery (15 ms)
+      √ Typing in search input updates draft query WITHOUT dispatching requests or resetting table (5 ms)
+      √ Submitting search form dispatches request with trimmed query and sets applied query (14 ms)
+      √ Exact transition: clicking Superseded tab retains applied query and does NOT fire empty-string request (29 ms)
+      √ Clicking All Versions tab retains applied query and dispatches status ALL (31 ms)
+      √ Clear button resets draft query, resets applied query, and dispatches unfiltered search (35 ms)
+      √ Pagination preserves applied query and status filter on page change (51 ms)
+    3. Synthetic Hook Harness: Stale Response Discard & Reversed Response Ordering
+      √ Aborts in-flight request and drops delayed stale response arriving out of order (65 ms)
+    4. Backend /api/reports/search Scope & Disambiguation Contract
+      √ GTM26-0002 in All Versions returns exactly 1 report (v1 PUBLISHED) (14 ms)
+      √ GTM26-0002 in Superseded strictly returns 0 reports (truthful no-match) (9 ms)
+      √ Unfiltered status=SUPERSEDED returns GTM26-0003 v1 (demonstrating why empty query was a bug) (5 ms)
+      √ GTM26-0003 in All Versions returns both v1 and v2 (6 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4e006b6d-bad9-4930-b9a8-9ecb0dda9f3a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4e006b6d-bad9-4930-b9a8-9ecb0dda9f3a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4e006b6d-bad9-4930-b9a8-9ecb0dda9f3a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4e006b6d-bad9-4930-b9a8-9ecb0dda9f3a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4e006b6d-bad9-4930-b9a8-9ecb0dda9f3a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4e006b6d-bad9-4930-b9a8-9ecb0dda9f3a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4e006b6d-bad9-4930-b9a8-9ecb0dda9f3a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4e006b6d-bad9-4930-b9a8-9ecb0dda9f3a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4e006b6d-bad9-4930-b9a8-9ecb0dda9f3a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4e006b6d-bad9-4930-b9a8-9ecb0dda9f3a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4e006b6d-bad9-4930-b9a8-9ecb0dda9f3a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cf59ac0c-d7d8-4576-b0d9-2f81908dff24 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/review_reports_amendments_p6.test.js (253 MB heap size)
+  Package P6: Review, Reports & Amendments Verification
+    √ 1. Review submission accepts normalized decisions and updates status to ACCEPTED (114 ms)
+    √ 2. Disposed material strictly rejects order modifications (7 ms)
+    √ 3. Generates report v1 with immutable snapshot and monotonic versioning (77 ms)
+    √ disposed material refuses orders/preview with its stable code and zero writes (9 ms)
+    √ disposed material refuses amendments with its stable code and zero writes (7 ms)
+    √ disposed material refuses custody/move with its stable code and zero writes (11 ms)
+    √ 4. Generates superseding report v2 after authorized change (38 ms)
+    √ 5. Traceable amendment creation preserves history and records audit (16 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c5716977-c59e-4728-9233-2d02e65e5c4f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c5716977-c59e-4728-9233-2d02e65e5c4f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: fd0b1943-b580-4b35-b7cc-433d7ab73688 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fd0b1943-b580-4b35-b7cc-433d7ab73688 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fd0b1943-b580-4b35-b7cc-433d7ab73688 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fd0b1943-b580-4b35-b7cc-433d7ab73688 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Sample preparation has not been completed
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:29:92)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 412
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fd0b1943-b580-4b35-b7cc-433d7ab73688 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fd0b1943-b580-4b35-b7cc-433d7ab73688 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb6e4a66-8a2a-45c5-9a40-99cf5d6a110e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/sample_detail.test.js (274 MB heap size)
+  SD-15: Comprehensive Sample Detail End-to-End Contract Suite
+    1. Cross-Laboratory Assignment Refusal for Every Role (SD-02)
+      √ 1.1. Super Admin is blocked with HTTP 403 from assigning a GTM sample to an HND technician (12 ms)
+      √ 1.2. Lab Manager is blocked with HTTP 403 from assigning to an out-of-lab technician (8 ms)
+      √ 1.3. Valid in-lab assignment succeeds (HTTP 200) (36 ms)
+    2. Prerequisite Gate on Execution & Result Entry (SD-05)
+      √ 2.1. Starting work when preparationStatus !== DONE returns HTTP 412 Precondition Failed (9 ms)
+      √ 2.2. Entering results when preparationStatus !== DONE returns HTTP 412 Precondition Failed (20 ms)
+      √ 2.3. Completing preparation unblocks startWork and execution (HTTP 200) (22 ms)
+    3. Three-Way Analysis Reconciliation Engine (SD-03)
+      √ 3.1. Removing an unstarted (NOT_ASSIGNED) analysis deletes its row (Branch A) (27 ms)
+      √ 3.2. Removing an in-progress analysis without reason is refused (HTTP 400) (Branch B) (6 ms)
+      √ 3.3. Removing an in-progress analysis with reason marks it WAIVED (Branch B) (10 ms)
+      √ 3.4. Removing an analysis with recorded results is refused with HTTP 409 Conflict (Branch C) (11 ms)
+    4. Reason-Required Rejection & Reopening (SD-10)
+      √ 4.1. Rejecting work without reason returns HTTP 400 (4 ms)
+      √ 4.2. Undoing approval requires the amendment workflow even without a reason (4 ms)
+    5. Gate Back-Fill Refusal on Reopen (SD-08)
+      √ 5.1. Refused undo never fabricates preparation evidence on an approved sample (8 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+

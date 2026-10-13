@@ -1,0 +1,1453 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr1-1791890936445 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-1791890936445 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr2-1791890936445 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-stg-1791890942306 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/manager_dashboard_overview.test.js (171 MB heap size)
+  Manager Dashboard Progress & Bottleneck Overview (Refs #120)
+    √ 1. LAB_MANAGER dashboard home includes progressOverview with analytical oversight and techWorkload (77 ms)
+    √ 2. SUPER_ADMIN scoped to a lab receives matching progressOverview (17 ms)
+    √ 3. Cross-lab isolation: Manager 2 does not see Manager 1 progress or technicians (15 ms)
+  Bounded Correctness & Stage Precedence (Review Comment 5796060402)
+    √ 4. Analytical progress denominator excludes closure tasks (ARCHIVING) and counts SUBMITTED work with READY_FOR_REVIEW badge (18 ms)
+    √ 5. Already ACCEPTED sample displays READY_FOR_APPROVAL badge (not READY_FOR_REVIEW) and excludes DISPOSAL from denominator (13 ms)
+    √ 5b. Canonical eligibility probe: missing required work or pending gates block READY_FOR_APPROVAL, while accepted-plus-waived qualifies (14 ms)
+    √ 6. Mutually exclusive stage partitioning classifies candidates with strict precedence and isolates RECEIVED to pendingIntake (13 ms)
+    √ 7. Real rendered continuation links and destination behavior: Intake and In Analysis real destinations honor lab scope and omit foreign labs (28 ms)
+    √ 8. Stage 5 Approved / Released population counts authoritative approvedAt today, ignoring updatedAt, and strictly counts APPROVED samples (16 ms)
+    √ 9. Approved / Released count-to-destination alignment & Scoped Admin isolation: Stage 5 route (/samples?status=APPROVED) matches card count, excludes unapproved, and strictly isolates by lab (53 ms)
+    √ 10. Continuation links rendered in ManagerProgressOverview preserve activeLabId when scoped (Pure route-builder contract; mounted lifecycle verified in component & CDP suites) (1 ms)
+    √ 11. /api/dashboard/live correctly scopes KPIs and recent logs when requested by SUPER_ADMIN with labId (40 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrB-WPD-1791890938356 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/lab_governance_wp_d.test.js (211 MB heap size)
+  WP-D: Laboratory Lifecycle & Project Relationships
+    1. Laboratory Workspace Scoping (GET /api/labs/:id/workspace)
+      √ Super Admin retrieves full workspace with accurate workload counts (30 ms)
+      √ Lab Manager retrieves workspace for own lab (12 ms)
+      √ Lab Manager cannot access workspace of another lab (403 Forbidden) (6 ms)
+    2. Strict Profile Allowlist & Validation (PATCH /api/labs/:id/profile)
+      √ Manager updates own lab profile with valid IANA timezone and capacity (14 ms)
+      √ Manager updates timezone independently while omitting capacity (Refs #109) (5 ms)
+      √ Manager unsets optional capacity by submitting explicit null or empty string (Refs #109) (12 ms)
+      √ Manager preserves zero capacity as zero rather than null (Refs #109) (4 ms)
+      √ Rejects invalid capacity values (decimal, negative, alphanumeric, out-of-range) with 400 INVALID_CAPACITY (Refs #109) (33 ms)
+      √ Workspace reflects configured timezone and clears MISSING_TIMEZONE attention warning (Refs #109) (32 ms)
+      √ Rejects invalid IANA time zone identifier with 400 INVALID_TIMEZONE (3 ms)
+      √ Rejects attempt to alter immutable fields (id, code, isActive) with 400 IMMUTABLE_FIELDS_REJECTED (5 ms)
+      √ Manager cannot update profile of another lab (403 Forbidden) (3 ms)
+    3. Lifecycle Transition Preview (POST /api/labs/:id/lifecycle-preview)
+      √ Super Admin previews PAUSED impact, returning open counts and signed reviewToken (5 ms)
+      √ Non-admin cannot preview lifecycle changes (403 Forbidden) (4 ms)
+    4. Lifecycle State Transitions & Anti-Cascade Safety (POST /api/labs/:id/lifecycle)
+      √ Omitting review token is blocked with 400 REVIEW_TOKEN_REQUIRED (4 ms)
+      √ Super Admin pauses laboratory with valid reviewToken: sets operationalStatus=PAUSED, lab.isActive=false (11 ms)
+      √ When laboratory is paused, new work assignments are blocked with 400 LAB_PAUSED (10 ms)
+      √ Attempting to retire a lab with open work items is blocked with 422 UNRESOLVED_WORK_ITEMS (15 ms)
+      √ Super Admin resumes laboratory with valid reviewToken: sets operationalStatus=ACTIVE, lab.isActive=true (10 ms)
+      √ Concurrent lifecycle transition with stale preview token returns 409 STALE_TARGET_REVISION (26 ms)
+      √ Injected audit failure rolls back lifecycle transaction atomically (10 ms)
+    5. Project-to-Lab Relationships (GET/PATCH /api/projects/:id/lab-access)
+      √ Project owner manager reads project lab access (5 ms)
+      √ Owner Lab Manager adds Lab B as a servicing laboratory (7 ms)
+      √ Non-owner manager cannot modify project servicing labs (403 Forbidden) (4 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa1-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa1-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa1-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-techA2-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa1-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa1-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-techA1-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-techA1-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa1-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-viewA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-viewA-WPC-1791890938933 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/lab_governance_wp_c.test.js (231 MB heap size)
+  WP-C: Staff Lifecycle, Access Control & Lockout Prevention
+    1. Safe Staff Invitations (POST /api/staff/invitations)
+      √ Super Admin can invite staff with any allowed role in any active lab (16 ms)
+      √ Lab Manager can invite subordinate staff to own lab (9 ms)
+      √ Lab Manager cannot invite staff to a foreign lab (403 Forbidden) (5 ms)
+      √ Lab Manager cannot invite a peer Manager or Admin role (403 Forbidden) (12 ms)
+      √ Invitation rejects email that already has an account (409 Conflict) (4 ms)
+      √ Invitation to paused/inactive lab is rejected with 400 LAB_PAUSED (3 ms)
+    2. Pre-change Access Review Preview (POST /api/users/:id/access-preview)
+      √ Calculates open work assignments and capability diff with signed reviewToken (6 ms)
+      √ Manager previewing user in another lab is rejected with 403 (5 ms)
+    3. Applying Access Changes & Session Revocation (PATCH /api/users/:id/access)
+      √ Demoting user updates role, increments tokenVersion, and invalidates active session (11 ms)
+      √ Demoting the last remaining Super Admin is blocked with 403 LAST_ADMIN_PROTECTED (6 ms)
+    4. Staff Suspension & Lockout Protection (POST /api/users/:id/suspend)
+      √ Self-suspension is strictly forbidden with 400 SELF_MANAGEMENT_FORBIDDEN (3 ms)
+      √ Suspending last super administrator is blocked with 403 LAST_ADMIN_PROTECTED (4 ms)
+      √ Manager suspends subordinate: sets isActive=false, bumps tokenVersion, flags open work (9 ms)
+    5. Staff Reactivation (POST /api/users/:id/reactivate)
+      √ Reactivating user sets isActive=true and preserves session revocation (new tokenVersion) (7 ms)
+      √ Reactivating user whose laboratory is paused/inactive is rejected with 400 LAB_PAUSED (8 ms)
+    6. Emergency Single-Use Recovery Grants (POST /api/users/:id/recovery)
+      √ Manager can issue single-use recovery grant for own lab staff (6 ms)
+      √ Manager cannot issue recovery grant for foreign lab staff (403 Forbidden) (5 ms)
+    7. Self-Profile Scope Enforcement (PATCH /api/auth/profile)
+      √ User can update own name, language, and theme preference (8 ms)
+      √ User cannot inject administrative fields (role, labId, projects, countries) (3 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5818bfe4-b848-44f0-b625-6bec583d1d92 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5818bfe4-b848-44f0-b625-6bec583d1d92 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5818bfe4-b848-44f0-b625-6bec583d1d92 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5818bfe4-b848-44f0-b625-6bec583d1d92 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5818bfe4-b848-44f0-b625-6bec583d1d92 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/locale_middleware_and_user_preference.test.js (250 MB heap size)
+  User Language Preference & Locale Middleware (Contracts L3, L4)
+    √ 1. PATCH /api/auth/preferences updates language to es for user (29 ms)
+    √ 2. PATCH /api/auth/preferences maps regional code es-GT to canonical es-419 (6 ms)
+    √ 3. PATCH /api/auth/preferences rejects invalid language code with 400 (5 ms)
+    √ 4. PATCH /api/auth/preferences can update both themePreference and language (6 ms)
+    √ 5. Locale middleware respects x-app-locale header over user record (4 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User import_reception (Lab: LAB-IMPORT-TEST) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (controllers/importController.js:235:23)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.exports.executeImport (controllers/importController.js:207:9)
+      at importRows (tests/contracts/legacy_import.test.js:157:9)
+      at Object.<anonymous> (tests/contracts/legacy_import.test.js:179:26)
+
+  console.error
+    [executeImport] Error: TransitionError: Access Denied: You do not have permission to access this resource.
+        at Object.assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:64:49)
+        at assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:235:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.exports.executeImport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:207:9)
+        at importRows (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\legacy_import.test.js:157:9)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\legacy_import.test.js:179:26) {
+      statusCode: 403,
+      status: 403,
+      code: 'ACCESS_DENIED_LAB',
+      details: {}
+    }
+
+      272 |         });
+      273 |     } catch (error) {
+    > 274 |         console.error('[executeImport] Error:', error);
+          |                 ^
+      275 |         const mapped = rules.mapStateError(error);
+      276 |         res.status(mapped.statusCode || 500).json({ error: 'Failed to execute legacy import: ' + mapped.message,
+      277 |             ...(mapped.code && { code: mapped.code }) });
+
+      at Object.error [as executeImport] (controllers/importController.js:274:17)
+      at importRows (tests/contracts/legacy_import.test.js:157:9)
+      at Object.<anonymous> (tests/contracts/legacy_import.test.js:179:26)
+
+PASS tests/contracts/legacy_import.test.js (268 MB heap size)
+  WP-32: Legacy Data Import Harmonisation Mandate
+    √ 1. A CSV cannot be imported without every column mapped to an analysis, a method, and a controlled unit (1 ms)
+    √ 2. Rejects import if analysis, methodology, or unit does not exist in catalogue (1 ms)
+    √ 3. Successfully imports historical results with provenance IMPORTED when fully mapped (40 ms)
+    √ 4. importing into an existing sample preserves its status and approval identity (11 ms)
+    √ 5. a cross-lab existing sample refuses and rolls back the whole import (176 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 55c69363-4d6b-480a-83b7-eacd7310adfd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 55c69363-4d6b-480a-83b7-eacd7310adfd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for FIELD-INTAKE-1791890940411 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample SMP-INTAKE-DATES-1791890940411 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 55c69363-4d6b-480a-83b7-eacd7310adfd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 55c69363-4d6b-480a-83b7-eacd7310adfd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for FIELD-CSG-EXP-mv6llml9 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample SMP-CSG-EXP-mv6llml9 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for FIELD-CSG-NEW-mv6llml9 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 8edad844-5a2a-43b9-b9ad-723965bc9707 linked to Project: PRJ-LBL-CSG-mv6llml9
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 8edad844-5a2a-43b9-b9ad-723965bc9707 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for FIELD-CSG-DATE-mv6llml9 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: eb29a847-8d13-4efc-bbbf-6b378752ec98 linked to Project: PRJ-LBL-CSG-mv6llml9
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample eb29a847-8d13-4efc-bbbf-6b378752ec98 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for FIELD-CSG-REJ-mv6llml9 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: ac905b5c-e4f3-4df3-9046-ff435cdab9bc linked to Project: PRJ-LBL-CSG-mv6llml9
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+PASS tests/contracts/label_print.test.js (305 MB heap size)
+  Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (Issue #121)
+    √ 1. GET /api/public/branding provides branding configuration without requiring auth (5 ms)
+    √ 2. Workspace projection enforces canPrintLabel capability gate based on intake rejection (40 ms)
+    √ 3. Pre-arrival EXPECTED sample allows printing with Pending permanent lab identifier (14 ms)
+    √ 4. Label format specifications match thermal printer physical dimensions
+    √ 5. Sanitizes sample identifier for document.title print naming isolation
+    √ 6. Print CSS prevents blank extra page with last-child break suppression and auto height (1 ms)
+    √ 7. Truthful date binding contract: binds persisted dates without inventing current clock (5 ms)
+    √ 8. POST /api/reception/intake returns persisted receptionDate and custodyHandoverAt (219 ms)
+    √ 9. POST /api/reception/consignments returns persisted receptionDate, custodyHandoverAt, assignedLab, projectCode, and collectionDate for batch label printing (102 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T11:29:01.241Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (app.js:99:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/localeMiddleware.js:36:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:42:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:51:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:42:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:42:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:51:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+  console.log
+    [AUTH] Verifying token for ID: 381fdee0-8b2c-4fc6-98c8-38924746c7f0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_lab_technician_labgtm (LAB_TECHNICIAN) attempted RECEIVE_SAMPLE. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","SAMPLE_RECEPTION"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: a8f4ca55-bdf3-407f-94e5-4243b6f92918 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_viewer_labgtm (VIEWER) attempted RECEIVE_SAMPLE. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","SAMPLE_RECEPTION"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: c2c13091-dca5-459c-bbd4-8eb6b380beec (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 471f65e9-dd40-4b92-a743-fb0553cc7922 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1c91a2a7-eb80-425c-8776-7c8d6a2add47 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 381fdee0-8b2c-4fc6-98c8-38924746c7f0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_lab_technician_labgtm (LAB_TECHNICIAN) attempted RECEIVE_SAMPLE. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","SAMPLE_RECEPTION"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: c2c13091-dca5-459c-bbd4-8eb6b380beec (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/legacy_import_rbac.test.js (317 MB heap size)
+  Legacy Import RBAC Contract
+    POST /api/import/preview
+      √ 1. Unauthenticated request is rejected with 401 (28 ms)
+      √ 2. Unauthorized roles (LAB_TECHNICIAN, VIEWER) receive 403 Forbidden (29 ms)
+      √ 3. Authorized role SAMPLE_RECEPTION can access preview endpoint (8 ms)
+      √ 4. Authorized role LAB_MANAGER can access preview endpoint (8 ms)
+      √ 5. Authorized role SUPER_ADMIN can access preview endpoint (7 ms)
+    POST /api/import/execute
+      √ 6. Unauthorized roles receive 403 Forbidden (5 ms)
+      √ 7. Authorized role reaches validation gate (not 401 or 403) (5 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 500b43db-4ab6-4d43-9b6c-cb60a0896f4c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 500b43db-4ab6-4d43-9b6c-cb60a0896f4c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7302a79c-24fd-4e2a-b979-068e595cbb2a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 500b43db-4ab6-4d43-9b6c-cb60a0896f4c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 500b43db-4ab6-4d43-9b6c-cb60a0896f4c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6502454f-c742-496b-9980-1a4c3d036e36 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_lab_technician_labmethoda (LAB_TECHNICIAN) attempted MANAGE_ANALYSES. Allowed roles: ["SUPER_ADMIN","LAB_MANAGER","MASTER_USER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 500b43db-4ab6-4d43-9b6c-cb60a0896f4c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7302a79c-24fd-4e2a-b979-068e595cbb2a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/lab_method_defaults.test.js (338 MB heap size)
+  WP-20: Per-Lab Methodology Defaults & Isolation
+    √ 1. Changing Lab A default to Dumas updates Lab A defaults API without affecting Lab B (90 ms)
+    √ 2. New work items in Lab A receive Dumas while Lab B receives Walkley-Black (23 ms)
+    √ 3. Cross-lab access: Lab A manager cannot view or modify Lab B defaults (403) (12 ms)
+    √ 4. Unauthorized role without MANAGE_ANALYSES cannot modify defaults (403) (78 ms)
+    √ 5. Supplying an unavailable or mismatched methodology is rejected (400) (7 ms)
+    √ 6. Fresh lab with no overrides exhibits honest empty state without cross-lab leakage (27 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrB-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrB-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrB-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrB-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrB-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrB-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-wpf-WPF-1791890942259 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [PREFLIGHT] Starting genuinely read-only laboratory governance audit...
+
+      at log (scripts/preflight_governance_report.js:25:13)
+
+  console.log
+    [PREFLIGHT] ✅ Preflight report successfully written to: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\preflight-summary.json
+
+      at log (scripts/preflight_governance_report.js:292:17)
+
+  console.log
+    [PREFLIGHT] Summary: {
+      samples: 0,
+      users: 3,
+      superAdmins: 1,
+      labs: 9,
+      projects: 9,
+      openWorkItems: 0,
+      readOnly: true
+    }
+
+      at log (scripts/preflight_governance_report.js:293:17)
+
+PASS tests/contracts/lab_governance_wp_f.test.js (359 MB heap size)
+  WP-F: Connected Services & Integration Governance
+    1. Kobo Integration Target-Lab Scope Enforcement
+      √ Manager A can read Kobo configuration for own lab (13 ms)
+      √ Manager B is rejected when attempting to read Lab A Kobo configuration (6 ms)
+      √ Manager B is rejected when attempting to update Lab A Kobo configuration (10 ms)
+      √ Manager B is rejected when attempting to trigger sync for Lab A (7 ms)
+      √ Manager A is rejected when attempting to trigger global sync-all (17 ms)
+      √ Listing Kobo configs scopes output: Manager A only receives Lab A config (8 ms)
+    2. SIS API Key Administration (LG-28)
+      √ Creating an SIS API key without explicit labs scope is rejected with 400 (7 ms)
+      √ Creating an SIS API key with empty labs array [] is rejected with 400 (5 ms)
+      √ Creating an SIS API key with nonexistent lab ID is rejected with 400 (5 ms)
+      √ Creating an SIS API key with valid lab scope succeeds and audits creation (65 ms)
+      √ Non-super-admin cannot create or list SIS API keys (8 ms)
+    3. Read-Only Governance Preflight Verification
+      √ runPreflight executes cleanly and guarantees zero secret leakage (13 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-vw-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User vw_WPB-1791890942730 (VIEWER) attempted MANAGE_USERS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-vw-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-nat-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-nat-empty-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-WPB-1791890942730 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/lab_governance_wp_b.test.js (379 MB heap size)
+  WP-B: Unified Action and Scope Model
+    1. Unified Action and Resource Policy Resolver (actionPolicyService)
+      √ Super Admin can manage any user and any lab (1 ms)
+      √ Lab Manager can manage subordinate in own lab, but not in another lab
+      √ Lab Manager cannot manage peer manager or project manager
+      √ Lab Manager cannot elevate technician to manager role
+      √ Self-role change is rejected with SELF_MANAGEMENT_FORBIDDEN
+      √ Inactive actor is denied with ACTOR_INACTIVE
+    2. Project-to-Lab Canonical Membership Resolver (projectMembershipService)
+      √ resolveProjectLabs correctly identifies owner and servicing laboratories (1 ms)
+      √ getDiscrepancyReport scans database and returns audit report without data loss (1 ms)
+      √ canManageProject allows owner lab manager and super admin; denies non-owner manager
+    3. Assignable Roles Server Catalogue (GET /api/access/assignable-roles)
+      √ Super Admin gets all 10 roles in assignableRoles (6 ms)
+      √ Lab Manager gets only ALLOWED_SUB_ROLES and sees peer/admin roles as unmanageable with reasons (6 ms)
+      √ Ordinary viewer is denied access to assignable-roles (403 Forbidden) (16 ms)
+      √ GET /api/access/capabilities returns platform role capabilities (5 ms)
+    4. Work Assignment Eligibility & Validation (A23, LG-17, A33)
+      √ A23: Assignment to deactivated technician is rejected with ASSIGNEE_INACTIVE (400) (11 ms)
+      √ A23: Assignment to technician in different lab is rejected with 403 (5 ms)
+      √ A23: Assignment in paused/inactive lab is rejected with LAB_PAUSED (400) (11 ms)
+      √ GET /api/work/eligible-assignees returns active analytical staff and excludes deactivated staff (5 ms)
+    5. Staff Directory Scoping & Bounded Pagination (LG-08, LG-22)
+      √ LG-08: National user directory is strictly scoped to labs in authorized country (7 ms)
+      √ LG-08: National user with empty country scope receives empty array (not global leak) (4 ms)
+      √ GET /api/users/directory?purpose=assignment filters to active analytical staff (4 ms)
+      √ GET /api/users enforces bounded pagination (clamps excessive limit to 100) and excludes password (7 ms)
+
+PASS tests/contracts/localization_and_user_display.test.js (377 MB heap size)
+  Localization & Multilingual Integrity Contract (#116)
+    √ 1. All 5 translation files load as valid JSON with required top-level sections (2 ms)
+    √ 2. Manager task list is properly localized without raw English on Spanish/multilingual screens
+    √ 3. Operational view selector keys exist and are localized across all 5 languages (1 ms)
+    √ 4. Queue units for pagination and card counts are localized across all 5 languages (2 ms)
+    √ 5. Map layer and fullscreen controls are localized across all 5 languages (1 ms)
+    √ 6. Scientific method codes remain standard scientific symbols in all catalogues (1 ms)
+    √ 7. Inventory subtotal, uncertainty, and status strings are localized across all 5 locales (#116) (7 ms)
+    √ 8. Dashboard manager metric labels are localized across all 5 locales (#116) (9 ms)
+    √ 9. Dashboard unit keys support pluralization across all 5 locales (#116) (6 ms)
+    √ 10. Work queue statuses, actions, contexts, and notes are localized (#116) (2 ms)
+    √ 11. Sidebar collapse labels are localized across all 5 locales (#116) (1 ms)
+    √ 12. Global header Help button labels are localized across all 5 locales (#116) (1 ms)
+  User Display Name Resolution & Audit Integrity Contract (#126)
+    √ 1. Resolves proper display name when user.name is provided
+    √ 2. Trims leading and trailing whitespace from user.name
+    √ 3. Falls back to username when user.name is null, undefined, or empty string (1 ms)
+    √ 4. Falls back to Unknown when both name and username are missing
+    √ 5. Supports direct string username fallback
+    √ 6. Audit reviewer attribution records stable username rather than mutated display string
+
+PASS tests/contracts/locale_resolution.test.js (375 MB heap size)
+  Canonical 5-Locale Resolution Contract (Finding L09, L11)
+    √ 1. Exact 5 locales are supported
+    √ 2. Latin American Spanish regions correctly normalize to es-419 (1 ms)
+    √ 3. European Spanish normalizes to es
+    √ 4. Portuguese regions normalize to pt
+    √ 5. French regions normalize to fr (1 ms)
+    √ 6. English regions normalize to en
+    √ 7. Unknown, empty, or malformed tags safely fall back to en without crashing or path injection
+    √ 8. Accept-Language header parses quality weights deterministically (1 ms)
+    √ 9. Server resolution hierarchy enforces explicit header > user preference > lab default > accept-language > global default
+
+Test Suites: 12 passed, 12 total
+Tests:       147 passed, 147 total
+Snapshots:   0 total
+Time:        7.755 s, estimated 11 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\lab_governance_wp_b.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\lab_governance_wp_c.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\lab_governance_wp_d.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\lab_governance_wp_f.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\lab_method_defaults.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\label_print.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\legacy_import.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\legacy_import_rbac.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\locale_middleware_and_user_preference.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\locale_resolution.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\localization_and_user_display.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\manager_dashboard_overview.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-22.json

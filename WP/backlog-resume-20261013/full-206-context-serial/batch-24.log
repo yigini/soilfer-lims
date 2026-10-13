@@ -1,0 +1,1496 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [SEED] Seeding 37 controlled units...
+
+      at Object.log [as seedUnits] (seeds/units.js:270:13)
+
+  console.log
+    [SEED] Successfully seeded 37 units.
+
+      at Object.log [as seedUnits] (seeds/units.js:285:13)
+
+  console.log
+    [SEED] Seeding 73 method references...
+
+      at Object.log [as seedReferences] (seeds/references.js:678:13)
+
+  console.log
+    [SEED] Successfully seeded 73 method references.
+
+      at Object.log [as seedReferences] (seeds/references.js:695:13)
+
+  console.log
+    [Catalogue Seed] Database has 0 existing analyses.
+
+      at Object.log [as seedCatalogue] (seeds/catalogue.js:30:13)
+
+  console.log
+    [Catalogue Seed] Seeding clean database with 176 standard analyses...
+
+      at Object.log [as seedCatalogue] (seeds/catalogue.js:34:17)
+
+  console.log
+    [Catalogue Seed] ✓ Clean seeding complete: 176 analyses, 467 methodologies.
+
+      at Object.log [as seedCatalogue] (seeds/catalogue.js:100:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for DEMO-BAG-A by test_sample_reception_profilefixture140lab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample PROFILE-FIXTURE-140-A with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by test_lab_technician_profilefixture140lab with 1 samples: [ 'PROFILE-FIXTURE-140-A' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for DEMO-BAG-B by test_sample_reception_profilefixture140lab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample PROFILE-FIXTURE-140-B with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by test_lab_technician_profilefixture140lab with 1 samples: [ 'PROFILE-FIXTURE-140-B' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for DEMO-BAG-DECIMAL by test_sample_reception_profilefixture140lab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample PROFILE-FIXTURE-140-DECIMAL with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by test_lab_technician_profilefixture140lab with 1 samples: [ 'PROFILE-FIXTURE-140-DECIMAL' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for DEMO-BAG-OTHER by test_sample_reception_profilefixture140lab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample PROFILE-FIXTURE-140-OTHER with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by test_lab_technician_profilefixture140lab with 1 samples: [ 'PROFILE-FIXTURE-140-OTHER' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for DEMO-BAG-UNKNOWN by test_sample_reception_profilefixture140lab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample PROFILE-FIXTURE-140-UNKNOWN with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by test_lab_technician_profilefixture140lab with 1 samples: [ 'PROFILE-FIXTURE-140-UNKNOWN' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab PROFILE-FIXTURE-140-LAB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_profilefixture140lab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/profile_fixture_workflow.test.js (166 MB heap size)
+  Guarded profile fixture through the laboratory workflow
+    √ loader refuses production and ordinary databases and is idempotent (16 ms)
+    √ separate bags retain truthful references and depth intervals after real intake, bench, review and approval (1272 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 681b54ea-ad51-47aa-b009-bc64ee16cf27 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a1ed3466-7366-4832-9b87-0c0619d2929f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_profilerouteslab (Lab: PROFILE-FOREIGN-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleAmendmentCommandService.js:12:8)
+      at services/sampleAmendmentCommandService.js:28:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.request (controllers/sampleAmendmentController.js:9:22)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 681b54ea-ad51-47aa-b009-bc64ee16cf27 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_profileforeignlab (Lab: PROFILE-FOREIGN-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleAmendmentCommandService.js:12:8)
+      at services/sampleAmendmentCommandService.js:28:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.request (controllers/sampleAmendmentController.js:9:22)
+
+  console.log
+    [AUTH] Verifying token for ID: 520842b6-c8cc-4852-ac5c-46881638f736 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/profile_identity_routes.test.js (201 MB heap size)
+  Mounted profile correction, scope and immutable export contracts
+    √ foreign manager cannot edit; valid receiving capture records server actor and preserves independent site (41 ms)
+    √ released canonical and equivalent alias edits cannot bypass the amendment (22 ms)
+    √ project movement atomically freezes the exact released legacy key (10 ms)
+    √ reasoned correction updates current export and journal while frozen snapshot and results stay unchanged (34 ms)
+    √ amendment replay is idempotent and a changed payload is a recoverable conflict (10 ms)
+    √ a past receipt does not bypass current laboratory scope (10 ms)
+    √ stale profile revision, missing reason and foreign amendments do not mutate state (13 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-1791890982476 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-1791890982476 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-1791890982476 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/project_policy_v2.test.js (230 MB heap size)
+  projectPolicyService - Templates, Admission & Capabilities
+    getEffectiveTemplate & isSoilFerTemplate
+      √ identifies SOILFER_V1 by projectType or code prefix
+      √ identifies GENERIC_KOBO for KOBO_LINKED projects without SoilFER in code
+      √ identifies GENERIC_MANIFEST for PREDEFINED_MANIFEST projects
+      √ identifies GENERIC_OPEN_INTAKE for generic open intake
+    canAdmitSample
+      √ blocks admission on CLOSED, ARCHIVED, or PAUSED projects (1 ms)
+      √ allows manifest staging on DRAFT projects but blocks desk/kobo intake
+      √ SoilFER requires Kobo or authorized exception for desk intake (1 ms)
+      √ Generic Kobo project rejects desk intake without exception (Independent Review Probe 4)
+      √ Generic Open Intake allows desk intake without exception
+      √ Projectless walk-in is always allowed
+    getProjectCapabilities
+      √ super admin has all capabilities (1 ms)
+      √ coordinating lab manager has lab-scoped management
+      √ servicing lab manager cannot manage project access or transition project
+      √ reception staff can import but not edit plan or manage connections (1 ms)
+    HTTP Trust Boundary Exception Verification (resolveAndVerifyExceptionRecord)
+      √ Client-supplied isStoredApprovalVerified boolean is strictly stripped and rejected when actor is unprivileged
+      √ Direct authority: Lab manager self-authorizes exception
+      √ Stored approval: Unprivileged reception staff with valid persisted SampleAmendment is allowed (1 ms)
+      √ Stored approval: Invalid or unapproved record fails closed
+      √ Stored approval: Cross-sample mismatch fails closed (1 ms)
+      √ Stored approval: Cross-project mismatch fails closed via schema sample relation
+      √ Stored approval: Cross-lab mismatch fails closed via schema sample relation
+      √ Monitor Probe 1: Target sample omitted fails closed
+      √ Monitor Probe 2: Batch sampleIds with only 1 covered fails closed
+      √ Monitor Probe 3: CLERICAL amendment used for MANIFEST admission fails closed
+      √ Monitor Probe 4: Admin authorized amendment for sample-A cannot be reused for unrelated TARGET-B/LAB-B
+      √ Monitor Probe 5: Empty exception object or short reason fails closed even with role-bearing manager
+      √ Monitor Probe 6: Stored APPROVED DESK_ADMISSION_EXCEPTION rejected for MANIFEST channel (1 ms)
+      √ Monitor Probe 7: Stored approval with resolution CONSUMED fails closed against replay
+      √ Monitor Probe 8: Stored approval with expired expiresAt fails closed
+      √ Monitor Probe 9: Exact channel binding for PHYSICAL_RECEIPT and WALK_IN
+    HTTP Routed Request Verification (Supertest & Schema Persisted Approvals)
+      √ HTTP 1: Manifest upload with DESK_ADMISSION_EXCEPTION fails closed with 422 channel mismatch (29 ms)
+      √ HTTP 2: Manifest upload with valid MANIFEST_ADMISSION_EXCEPTION succeeds and consumes approval (19 ms)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-DEFAULT
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-DEFAULT
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-DEFAULT
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/operational_gates_unification.test.js (230 MB heap size)
+  WP-26: Single Representation for Operational Gates
+    √ 1. updatePhaseStatus DONE synchronizes WorkItem to COMPLETED with verified receipt (78 ms)
+    √ 2. updatePhaseStatus FAILED synchronizes WorkItem to ON_HOLD (19 ms)
+    √ 3. getSampleDetail derives gate status dynamically from WorkItems (85 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [updateProjectKoboConnection] Error: Error: This laboratory is no longer authorized to manage the project connection.
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\koboConfigurationService.js:6:58)
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\koboConfigurationService.js:18:214)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.updateProjectKoboConnection (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\projectController.js:2141:25) {
+      status: 403,
+      code: 'FORBIDDEN_CONNECTION_SCOPE'
+    }
+
+      2153 |         });
+      2154 |     } catch (err) {
+    > 2155 |         console.error('[updateProjectKoboConnection] Error:', err);
+           |                 ^
+      2156 |         if (err instanceof require('../services/profileIdentityService').ProfileReferenceConflictError) return res.status(409).json({code: err.code, message: err.message});
+      2157 |         if (err.code === 'P2025') return res.status(409).json({code: 'STALE_REVISION', message: 'The connection changed. Reload it before saving.'});
+      2158 |         if ([403, 409].includes(err.status)) return res.status(err.status).json({code: err.code, message: err.message});
+
+      at error (controllers/projectController.js:2155:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cd2e6213-42e1-4fe6-ad5d-46fba6926be7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cd2e6213-42e1-4fe6-ad5d-46fba6926be7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-SAFETY-REJECT by test_sample_reception_profilesafetylab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: cd2e6213-42e1-4fe6-ad5d-46fba6926be7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cd2e6213-42e1-4fe6-ad5d-46fba6926be7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-SAFETY-CONCURRENT by test_sample_reception_profilesafetylab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Force sync sample SAFETY-BAG from PROFILE-SAFETY-LAB...
+
+      at log (controllers/koboController.js:1428:17)
+
+  console.error
+    [KOBO] Force sync sample error: ProfileReferenceConflictError: The soil profile reference needs review. Existing laboratory work is preserved.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\koboController.js:1584:240
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.syncSample (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\koboController.js:1569:9) {
+      code: 'PROFILE_REFERENCE_CONFLICT',
+      status: 409,
+      reason: 'INVALID_STORED_METADATA'
+    }
+
+      1641 |         res.json({ success: true, message: `Successfully synced ${sample.originalId} from Kobo` });
+      1642 |     } catch (error) {
+    > 1643 |         console.error('[KOBO] Force sync sample error:', error);
+           |                 ^
+      1644 |         res.status(error instanceof profileIdentity.ProfileReferenceConflictError ? 409 : 500).json({ error: error.code || 'KOBO_SYNC_FAILED', message: error instanceof profileIdentity.ProfileReferenceConflictError ? error.message : 'Could not refresh the field record.' });
+      1645 |     }
+      1646 | };
+
+      at error (controllers/koboController.js:1643:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for PROFILE-SAFETY-LAB...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for PROFILE-SAFETY-LAB: 0 new, 1 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Force sync sample SAFETY-FORCE-BAG from PROFILE-SAFETY-LAB...
+
+      at log (controllers/koboController.js:1428:17)
+
+  console.error
+    [KOBO] Force sync sample error: ProfileReferenceConflictError: The soil profile reference needs review. Existing laboratory work is preserved.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\koboController.js:1571:180
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.syncSample (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\koboController.js:1569:9) {
+      code: 'PROFILE_REFERENCE_CONFLICT',
+      status: 409,
+      reason: 'SOURCE_CONFIGURATION_CHANGED'
+    }
+
+      1641 |         res.json({ success: true, message: `Successfully synced ${sample.originalId} from Kobo` });
+      1642 |     } catch (error) {
+    > 1643 |         console.error('[KOBO] Force sync sample error:', error);
+           |                 ^
+      1644 |         res.status(error instanceof profileIdentity.ProfileReferenceConflictError ? 409 : 500).json({ error: error.code || 'KOBO_SYNC_FAILED', message: error instanceof profileIdentity.ProfileReferenceConflictError ? error.message : 'Could not refresh the field record.' });
+      1645 |     }
+      1646 | };
+
+      at error (controllers/koboController.js:1643:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f67d443f-d789-4ab8-b6a7-8e8e21ef7851 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for PROFILE-SAFETY-LAB...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for PROFILE-SAFETY-LAB: 0 new, 1 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: cd2e6213-42e1-4fe6-ad5d-46fba6926be7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cd2e6213-42e1-4fe6-ad5d-46fba6926be7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-SAFETY-BATCH-HOLD by test_sample_reception_profilesafetylab
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+PASS tests/contracts/profile_capture_safety.test.js (275 MB heap size)
+  Source capture cannot discard provenance or bypass current authority
+    √ legacy configuration saves preserve omitted mapping and explicit changes require the current revision (44 ms)
+    √ a removed servicing laboratory cannot update the retained connection (154 ms)
+    √ rejecting a specimen preserves entered reference and raw provenance (24 ms)
+    √ a concurrent source edit is not overwritten by final intake (12 ms)
+    √ force source refresh refuses malformed provenance without clearing it (39 ms)
+    √ a mapping changed during normal sync cannot create identities under the old mapping or advance the checkpoint (15 ms)
+    √ force sync also rejects a changed mapping after its fetch (11 ms)
+    √ normal source replay also preserves malformed provenance and its checkpoint (10 ms)
+    √ batch capture rechecks a durable hold added after preflight (20 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 23b4e6a9-053d-4c0d-8316-c02aa43ab39d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 23b4e6a9-053d-4c0d-8316-c02aa43ab39d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f63f306-f6d1-44c7-8805-504ee94f68fa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f63f306-f6d1-44c7-8805-504ee94f68fa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f63f306-f6d1-44c7-8805-504ee94f68fa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f63f306-f6d1-44c7-8805-504ee94f68fa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Sample preparation has not been completed
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:29:92)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 412
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f63f306-f6d1-44c7-8805-504ee94f68fa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f63f306-f6d1-44c7-8805-504ee94f68fa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f63f306-f6d1-44c7-8805-504ee94f68fa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f63f306-f6d1-44c7-8805-504ee94f68fa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/prerequisite_gate.test.js (287 MB heap size)
+  SD-05: Server-Side Prerequisite Gate Contract
+    √ 1. Assigning a work item on an un-prepared sample succeeds (HTTP 200) (33 ms)
+    √ 2. Starting work on an un-prepared sample is refused with HTTP 412 Precondition Failed (12 ms)
+    √ 3. Direct call to saveResults without preparation returns HTTP 412 Precondition Failed (17 ms)
+    √ 4. Completing preparation allows startWork to succeed (HTTP 200) (32 ms)
+    √ 5. Saving results now succeeds with preparation completed (HTTP 200) (52 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-foreign-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-foreign-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-service-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-service-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-nat-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-service-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [updateProject] Error: Error: Injected regression test audit failure
+        at Proxy.prisma.auditLog.create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\project_audit_regression.test.js:337:23)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\projectController.js:671:39)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.updateProject (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\projectController.js:628:25)
+
+      753 |             });
+      754 |         }
+    > 755 |         console.error('[updateProject] Error:', err);
+          |                 ^
+      756 |         return error(res, 500, 'PROJECT_UPDATE_ERROR', err.message);
+      757 |     }
+      758 | };
+
+      at error (controllers/projectController.js:755:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-PMREG-1791890984607 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/project_audit_regression.test.js (316 MB heap size)
+  Project Management Audit Regression & Acceptance Contracts
+    A01 / P01, P05: Scope Isolation & Foreign Access Denial
+      √ denies unrelated manager access to foreign project lab-access (403) (8 ms)
+      √ denies unrelated manager access to foreign project statistics (403) (7 ms)
+    A02 / P02, P03: Servicing Manager Sample Scoping & Statistics
+      √ servicing manager reads only samples assigned to their own lab (8 ms)
+      √ servicing manager statistics counts reflect their own lab scope (6 ms)
+      √ administrator statistics include all project samples across labs (14 ms)
+    A03 / P14: Lifecycle Status Validation & Junction Protection
+      √ rejects unknown lifecycle status with 400 INVALID_STATUS (7 ms)
+      √ rejects direct assignedLabIds modification via generic PUT (4 ms)
+    A04 / P08: National Scope Authorization
+      √ denies national role creating project owned by foreign-country lab (403) (4 ms)
+    A06 / P10: Servicing Lab Removal without Fallback Resurrection
+      √ removing servicing lab leaves canonical list empty without country fallback (12 ms)
+    A08 / P06: Archival Governance & Expected Samples Blocker
+      √ denies servicing manager archiving a project owned by another lab (403) (3 ms)
+      √ denies owner manager archiving project with pending expected samples (422) (5 ms)
+    A10 / P12: Trash Denial for Projects with Registered Samples
+      √ denies deleting project that contains registered samples (400) (7 ms)
+    A11 / P11: Atomic Rollback on Injected Audit Failure
+      √ rolls back metadata updates atomically when audit logging throws (134 ms)
+    A13, A14 / P09, P13: Import Preview & Conflict Detection
+      √ preview endpoint detects duplicates in batch and existing samples in DB (6 ms)
+      √ manifest upload response envelope contains counts in data (24 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-PAG-1791890985144 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-PAG-1791890985144 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-PAG-1791890985144 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-PAG-1791890985144 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-PAG-1791890985144 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-PAG-1791890985144 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-PAG-1791890985144 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-PAG-1791890985144 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-PAG-1791890985144 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-PAG-1791890985144 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/project_workspace_samples.test.js (327 MB heap size)
+  Project Workspace Samples Server-Side Search, Filtering & Pagination Contracts
+    √ returns page 1 with 50 samples and correct total count header of 60 (12 ms)
+    √ returns page 2 with remaining 10 samples including the beyond-page-1 sample (7 ms)
+    √ searches across the whole project and finds matching sample beyond page 1 on page 1 of results (9 ms)
+    √ filters by stage index across the entire project (stage 2 / labWork) (6 ms)
+    √ filters by named stage key across the entire project (stage=labWork) (6 ms)
+    √ filters by stage 0 (awaitingArrival) and paginates across 59 expected samples (11 ms)
+    √ combines search and stage filters accurately (7 ms)
+    √ returns empty array and zero total count when search yields no matches (5 ms)
+    √ returns empty array when page exceeds total pages without error (6 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1791890985597 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/project_governance_retry_preview.test.js (348 MB heap size)
+  Project Governance Retry Recovery & Preview Contracts (C01, C02)
+    C01: Real UI Retry Recovery & Receipt Resolution
+      √ first execution commits, retry with same key returns cached receipt with exactly 1 audit & 1 receipt (25 ms)
+      √ changed form payload reusing a pending/completed key is rejected with 409 collision (11 ms)
+      √ stale revision on PUT returns 409 STALE_REVISION (4 ms)
+      √ archiveProject supports idempotency replay, receipt lookup, and rejects stale revision (36 ms)
+    C02: Preview/Commit Agreement & Stale Revision Binding
+      √ mixed manifest (existing + new) signs validSampleIds and commits valid rows cleanly (17 ms)
+      √ stale preview token is rejected with 409 PREVIEW_STALE_REVISION even when fresh If-Match header is passed (50 ms)
+
+PASS tests/contracts/proficiency_testing.test.js (350 MB heap size)
+  WP-30: Proficiency Testing Model & Reportable Indicators
+    √ 1. evaluateProficiency calculates z-score and outcomes per ISO 13528 (1 ms)
+    √ 2. recordRound creates a proficiency round with calculated z-score and outcome (8 ms)
+    √ 3. getSummary aggregates reportable indicators per laboratory and analysis (4 ms)
+
+PASS tests/contracts/programme_readers_and_rollups.test.js (359 MB heap size)
+  Programme Readers & Rollup Contracts (Finding 6)
+    1. Programme Hierarchy & Child Expansion
+      √ expands SOILFER-US to all 5 constituent national projects
+      √ expands SOILFER-JPN to both constituent national projects
+      √ returns empty array for country projects and non-programme codes
+    2. SIS Controller Scope Expansion (buildSisWhere)
+      √ expands programme-scoped API key to child country projects (39 ms)
+      √ expands query.project=SOILFER-US to constituent country codes for global key
+      √ denies access when requested project is outside programme scope (1 ms)
+    3. ScopeGuard Project Grants & Programme Expansion
+      √ expands programme grants in buildScopedWhere for Project Managers without labId
+      √ allows access to child country sample for programme-scoped actor in canAccessEntity
+      √ denies access to foreign project sample for programme-scoped actor (1 ms)
+
+PASS tests/contracts/profile_identity.test.js (359 MB heap size)
+  Canonical profile identity and exact legacy compatibility
+    √ pit and site coexist on new capture, but an absent canonical retains the old site key (1 ms)
+    √ explicit unknown remains unknown; invalid present values do not resurrect aliases (20 ms)
+    √ valid zero is preserved (0)
+    √ valid zero is preserved ({"value":0})
+    √ valid zero is preserved ({"value":{"value":"0"}})
+    √ invalid code is rejected, never truncated ({})
+    √ invalid code is rejected, never truncated ([])
+    √ invalid code is rejected, never truncated (true)
+    √ invalid code is rejected, never truncated (null) (1 ms)
+    √ invalid code is rejected, never truncated (null)
+    √ invalid code is rejected, never truncated ("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+    √ invalid code is rejected, never truncated ("[object Object]") (1 ms)
+    √ alias conflicts are actionable while independent site is retained
+    √ false composite flags are false (false)
+    √ false composite flags are false (0)
+    √ false composite flags are false ("false")
+    √ false composite flags are false ("no")
+    √ false composite flags are false ("0")
+    √ false composite flags are false ({"value":"false"})
+    √ depth and coordinates never prove a confirmed profile
+    √ canonical namespace survives country, project and laboratory context changes (1 ms)
+    √ legacy preservation freezes the exact original key and does not promote a site to a pit
+    √ a canonical read is pure and rejects forged provenance (1 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       123 passed, 123 total
+Snapshots:   0 total
+Time:        8.41 s, estimated 10 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\operational_gates_unification.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\prerequisite_gate.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\proficiency_testing.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\profile_capture_safety.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\profile_fixture_workflow.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\profile_identity.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\profile_identity_routes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\programme_readers_and_rollups.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\project_audit_regression.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\project_governance_retry_preview.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\project_policy_v2.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\project_workspace_samples.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-24.json

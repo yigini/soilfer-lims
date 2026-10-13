@@ -1,0 +1,33 @@
+PASS tests/contracts/workbench_readiness_concurrency.test.js (40 MB heap size)
+  Workbench Validation & Readiness Engine Contracts (Phase 2)
+    1. Determination Value Parsing & Formatting
+      √ Distinguishes blank from zero (0 is valid numeric, empty is blank) (17 ms)
+      √ Normalizes locale decimal comma to dot
+      √ Detects and standardizes censored values (<LOQ and >Range) (1 ms)
+      √ Invalid string formats are caught with INVALID_FORMAT flag
+    2. Numeric Method Range Bounds
+      √ Validates values within range
+      √ Flags below min and above max as invalid (1 ms)
+      √ Flags values below LOQ with warning flag but valid if within hard bounds
+    3. Soil Texture Closure Validation (100% ± 2.0%)
+      √ Exact 100% closure produces valid USDA classification (1 ms)
+      √ Within ±2.0% tolerance is accepted and normalized (3 ms)
+      √ Closure error exceeding 2.0% is blocked with TEXTURE_CLOSURE_FAILED (1 ms)
+      √ Incomplete fractions are flagged
+    4. Operational Task Checklist Validation
+      √ Requires all required steps to be true
+    5. Task Execution Readiness & Equipment Qualification
+      √ Blocks analytical work when sample is ON_HOLD
+      √ Blocks analytical work when drying is not completed (1 ms)
+      √ Blocks analytical work when preparation is not completed
+      √ Allows DRYING task when sample is ACCEPTED even if dryingStatus is PENDING
+      √ Blocks when required instrument is missing (1 ms)
+      √ Blocks when instrument calibration is OVERDUE
+      √ Approves item when all prerequisites and instrument qualification are met
+
+Test Suites: 1 passed, 1 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        0.295 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\workbench_readiness_concurrency.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-60.json

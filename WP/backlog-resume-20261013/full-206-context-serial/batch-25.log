@@ -1,0 +1,1902 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l2mgr-1791890989522 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l2mgr-1791890989522 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User u_l2mgr_1791890989522 (Lab: LAB-118-B-1791890989517) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at controllers/qcController.js:70:75
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.getBatchById (controllers/qcController.js:70:22)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1tech-1791890989524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1tech-1791890989524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User u_l1tech_1791890989524 (LAB_TECHNICIAN) attempted APPROVE_RESULTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l2mgr-1791890989522 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l2mgr-1791890989522 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User u_l2mgr_1791890989522 (Lab: LAB-118-B-1791890989517) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at services/qcDispositionStateService.js:41:9
+      at Object.inTransaction (services/workflowStateRules.js:188:97)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at exports.dispositionBatch (controllers/qcController.js:133:25)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791890989518 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/qc_disposition_release_gate.test.js (164 MB heap size)
+  QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
+    √ 1. GET /api/qc/batches/:id returns canonical batch with actual control values, affected items, and scope protection (115 ms)
+    √ 2. Unresolved QC_FAIL strictly blocks downstream sample approval and report release (92 ms)
+    √ 3. POST /api/qc/batches/:id/disposition enforces manager role, scope, and non-empty reason (70 ms)
+    √ 4. Resending identical manager disposition is idempotent and does not create duplicate audit entries (15 ms)
+    √ 5. Manager disposition override unblocks sample approval and report publication eligibility (11 ms)
+    √ 6. Dispositioned batch clears from actionable pending exception queues while remaining in history (47 ms)
+    √ 7. Unknown disposition decision is rejected with 400 INVALID_DISPOSITION_DECISION (20 ms)
+    √ 8. flagBatchResults preserves non-QC invalidity flags (MANUAL_INVALID) and immutable released records (76 ms)
+    √ 9. REANALYZE_BATCH updates associated workItems to REPEAT_REQUIRED atomically (166 ms)
+    √ 10. audit.qc queue qcFailedCount strictly excludes dispositioned batches (15 ms)
+    √ 11. flagBatchResults preserves invalidity on QC_PASS for unflagged, unknown-flagged, and previously rejected results (24 ms)
+    √ 12. flagBatchResults strictly preserves immutability for published reports and terminal samples (ARCHIVED/DISPOSED) (19 ms)
+    √ 13. Conflicting disposition decision is rejected with 409 DISPOSITION_CONFLICT (72 ms)
+    √ 14. Concurrent identical dispositions resolve idempotently; conflicting concurrent decisions fail with 409 (64 ms)
+    √ 15. REANALYZE_BATCH updates only active work items, preserving ACCEPTED history and repeating completed active work (69 ms)
+    √ 16. Multi-step probe: initial isValid:false, flags:[] -> QC_FAIL -> QC_PASS remains isValid:false (7 ms)
+    √ 17. Multi-step probe: initial isValid:false, flags:[] -> QC_FAIL -> PROCEED_WITH_WARNING remains isValid:false (9 ms)
+    √ 18. Initially valid results (isValid:true, flags:[]) restore to valid upon QC_PASS and PROCEED_WITH_WARNING (8 ms)
+    √ 19. Results with unknown or malformed flags stay invalid across FAIL -> PASS (13 ms)
+    √ 20. flagBatchResults protects SUPERSEDED reports and fails closed on DB error (16 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d1a272e-550b-4ace-88ac-f333861987d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d1a272e-550b-4ace-88ac-f333861987d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_gtmlab1 (Lab: GTM-LAB1) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at controllers/qcController.js:70:75
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.getBatchById (controllers/qcController.js:70:22)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d1a272e-550b-4ace-88ac-f333861987d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d1a272e-550b-4ace-88ac-f333861987d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_gtmlab1 (Lab: GTM-LAB1) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at services/qcRunMutationService.js:25:21
+      at inTransaction (services/workflowStateRules.js:188:97)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at exports.updateBatch (controllers/qcController.js:76:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d1a272e-550b-4ace-88ac-f333861987d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d1a272e-550b-4ace-88ac-f333861987d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_gtmlab1 (Lab: GTM-LAB1) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at services/qcRunMutationService.js:25:21
+      at inTransaction (services/workflowStateRules.js:188:97)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at exports.evaluateBatch (controllers/qcController.js:82:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d1a272e-550b-4ace-88ac-f333861987d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d1a272e-550b-4ace-88ac-f333861987d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_gtmlab1 (Lab: GTM-LAB1) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at services/qcRunMembershipService.js:43:9
+      at inTransaction (services/workflowStateRules.js:188:97)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at exports.addItemsToBatch (controllers/qcController.js:107:27)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4eae33a-8d6c-4cd6-95f6-ef6d5e7edec0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4eae33a-8d6c-4cd6-95f6-ef6d5e7edec0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4eae33a-8d6c-4cd6-95f6-ef6d5e7edec0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4eae33a-8d6c-4cd6-95f6-ef6d5e7edec0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4eae33a-8d6c-4cd6-95f6-ef6d5e7edec0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4eae33a-8d6c-4cd6-95f6-ef6d5e7edec0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4eae33a-8d6c-4cd6-95f6-ef6d5e7edec0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4eae33a-8d6c-4cd6-95f6-ef6d5e7edec0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 40d95fc9-bb85-4459-ad82-cac3f0425ab2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4eae33a-8d6c-4cd6-95f6-ef6d5e7edec0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4eae33a-8d6c-4cd6-95f6-ef6d5e7edec0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/qc_batch_evaluation.test.js (204 MB heap size)
+  QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
+    √ Rejects adding items that exceed 40-sample capacity (336 ms)
+    √ Permits texture aliases in a TEXTURE batch and rejects mismatched analyses (55 ms)
+    √ Rejects sealed work items from being added to batch (34 ms)
+    √ Assigns and persists rackPosition (1..N) and returns runProfile (A28, A29) (53 ms)
+    √ Supports 96-place Microplate profile capacity and rejects 97th item (A28) (9 ms)
+    Cross-laboratory Batch Scope Isolation (Review Defect 1)
+      √ Rejects foreign lab manager from reading TUN-LAB1 batch (403) (18 ms)
+      √ Rejects foreign lab manager from mutating TUN-LAB1 batch (403) (18 ms)
+      √ Rejects foreign lab user from evaluating or adding items to TUN-LAB1 batch (403) (68 ms)
+    Rack Position Bounded Integers & QC Reservation Enforcement (Review Defect 2)
+      √ Rejects sample assignment to QC-reserved slot (position 1 on RACK_40) (30 ms)
+      √ Rejects duplicate rack positions within payload and across batch (63 ms)
+      √ Allows removing items from batch and freeing their rack positions (52 ms)
+      State Machine & QC General-Update Bypass Hardening (Review 4)
+        √ Rejects technician direct write of QC_PASS without QC evidence (400) (21 ms)
+        √ Rejects direct write of QC_PASS when supplied QC measurements fail (400) (24 ms)
+        √ Allows valid evaluated QC to update status to QC_PASS (200) (44 ms)
+        √ Rejects technician closing a batch (403) and manager closing an unpassed batch (400) (25 ms)
+        √ Seals CLOSED batch: rejects further modifications (400) (79 ms)
+      Review 5 Shared QC Evaluation & State Integrity Regressions
+        √ Null blank does not coerce to zero and malformed submitted QC is refused without writing evidence (25 ms)
+        √ Dedicated evaluate route rejects mutating a CLOSED batch (400) (88 ms)
+        √ Clearing QC evidence reverts QC_PASS to OPEN and invalidates stale dispositions (90 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-INTAKE-PAUSED-PM14-1791890992413 by test_sample_reception_labpm141791890992413
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-EXP-CLOSED-PM14-1791890992413 by test_sample_reception_labpm141791890992413
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-CSG-PAUSED-PM14-1791890992413 by test_sample_reception_labpm141791890992413
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DISCARD] Reverted project sample SMP-PREREG-PM14-1791890992413 to EXPECTED
+
+      at log (controllers/receptionController.js:162:21)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DISCARD] Hard deleted walk-in sample SMP-WALKIN-PM14-1791890992413
+
+      at log (controllers/receptionController.js:205:21)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-PRE-PAUSED-PM14-1791890992413 by test_sample_reception_labpm141791890992413
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-CROSS-PM14-1791890992413 by test_sample_reception_labpm141791890992413
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-PRE-ACTIVE-PM14-1791890992413 by test_sample_reception_labpm141791890992413
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DISCARD] Reverted project sample SMP-PRE-ACTIVE-PM14-1791890992413 to EXPECTED
+
+      at log (controllers/receptionController.js:162:21)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for WALK-2SAVE-PM14-1791890992413 by test_sample_reception_labpm141791890992413
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: WALK-2SAVE-PM14-1791890992413 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for WALK-2SAVE-PM14-1791890992413 by test_sample_reception_labpm141791890992413
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DISCARD] Hard deleted walk-in sample WALK-2SAVE-PM14-1791890992413
+
+      at log (controllers/receptionController.js:205:21)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_super_admin_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labpm141791890992413 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/reception_admissions_pm14.test.js (235 MB heap size)
+  PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts
+    √ blocks POST /api/reception/intake when project admissions are PAUSED (39 ms)
+    √ blocks POST /api/reception/intake on existing expected sample when project is CLOSED (15 ms)
+    √ blocks POST /api/reception/consignments when consignment targets a PAUSED project (23 ms)
+    √ reverts pre-registered sample in STANDARD project back to EXPECTED on discard (26 ms)
+    √ hard deletes ad-hoc walk-in draft sample on discard (23 ms)
+    √ does not alter Kobo lastSyncAt timestamp when updating project metadata or credentials (20 ms)
+    √ blocks POST /api/reception/intake when request specifies active project but existing sample belongs to PAUSED project (I01) (17 ms)
+    √ rejects cross-project reassignment via intake with 400 CROSS_PROJECT_CONFLICT (14 ms)
+    √ preserves pre-registered sample on discard even when client passed mutable isWalkIn: true (I02) (28 ms)
+    √ reverts pre-registered sample on DELETE /api/samples/:id even if marked isWalkIn: true (20 ms)
+    √ hard deletes unattached walk-in sample on DELETE /api/samples/:id (15 ms)
+    √ reverts pre-registered and deletes walk-in in atomic POST /api/samples/batch-delete (27 ms)
+    √ retains desk walk-in origin after reopening and saving twice, and hard deletes on discard (I03) (34 ms)
+    √ denies generic DELETE /api/samples/:id on a RELEASED sample even for SUPER_ADMIN (I04) (12 ms)
+    √ denies batch delete on RELEASED samples even for SUPER_ADMIN (I04-batch) (9 ms)
+    √ denies reception discard on sample with existing analytical results (15 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-LOCK-APPROVED-1791890993984 by test_sample_reception_labgtmpost
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.warn
+    [INTAKE] Blocked attempt to modify locked sample SMP-LOCK-APPROVED-1791890993984 (Status: APPROVED, isDraft: true)
+
+      294 |
+      295 |             if (LOCKED_INTAKE_STATUSES.includes(sample.status) && !(sample.status === 'RECEIVED_REJECTED' && isResubmission === true && !isDraft)) {
+    > 296 |                 console.warn(`[INTAKE] Blocked attempt to modify locked sample ${originalId} (Status: ${sample.status}, isDraft: ${!!body.isDraft})`);
+          |                         ^
+      297 |                 throw new IntakeError(403, {
+      298 |                     success: false,
+      299 |                     error: 'SAMPLE_LOCKED',
+
+      at warn (services/intakePreparationService.js:296:25)
+      at Object.intake (services/intakeService.js:95:55)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-LOCK-ACCEPTED-1791890994009 by test_sample_reception_labgtmpost
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.warn
+    [INTAKE] Blocked attempt to modify locked sample SMP-LOCK-ACCEPTED-1791890994009 (Status: ACCEPTED, isDraft: true)
+
+      294 |
+      295 |             if (LOCKED_INTAKE_STATUSES.includes(sample.status) && !(sample.status === 'RECEIVED_REJECTED' && isResubmission === true && !isDraft)) {
+    > 296 |                 console.warn(`[INTAKE] Blocked attempt to modify locked sample ${originalId} (Status: ${sample.status}, isDraft: ${!!body.isDraft})`);
+          |                         ^
+      297 |                 throw new IntakeError(403, {
+      298 |                     success: false,
+      299 |                     error: 'SAMPLE_LOCKED',
+
+      at warn (services/intakePreparationService.js:296:25)
+      at Object.intake (services/intakeService.js:95:55)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-LOCK-LAB_ID_ASSIGNED-1791890993519 by test_sample_reception_labgtmpost
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.warn
+    [INTAKE] Blocked attempt to modify locked sample SMP-LOCK-LAB_ID_ASSIGNED-1791890993519 (Status: LAB_ID_ASSIGNED, isDraft: true)
+
+      294 |
+      295 |             if (LOCKED_INTAKE_STATUSES.includes(sample.status) && !(sample.status === 'RECEIVED_REJECTED' && isResubmission === true && !isDraft)) {
+    > 296 |                 console.warn(`[INTAKE] Blocked attempt to modify locked sample ${originalId} (Status: ${sample.status}, isDraft: ${!!body.isDraft})`);
+          |                         ^
+      297 |                 throw new IntakeError(403, {
+      298 |                     success: false,
+      299 |                     error: 'SAMPLE_LOCKED',
+
+      at warn (services/intakePreparationService.js:296:25)
+      at Object.intake (services/intakeService.js:95:55)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-LOCK-PROCESSING-1791890994031 by test_sample_reception_labgtmpost
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.warn
+    [INTAKE] Blocked attempt to modify locked sample SMP-LOCK-PROCESSING-1791890994031 (Status: PROCESSING, isDraft: true)
+
+      294 |
+      295 |             if (LOCKED_INTAKE_STATUSES.includes(sample.status) && !(sample.status === 'RECEIVED_REJECTED' && isResubmission === true && !isDraft)) {
+    > 296 |                 console.warn(`[INTAKE] Blocked attempt to modify locked sample ${originalId} (Status: ${sample.status}, isDraft: ${!!body.isDraft})`);
+          |                         ^
+      297 |                 throw new IntakeError(403, {
+      298 |                     success: false,
+      299 |                     error: 'SAMPLE_LOCKED',
+
+      at warn (services/intakePreparationService.js:296:25)
+      at Object.intake (services/intakeService.js:95:55)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-LOCK-COMPLETED-1791890993519 by test_sample_reception_labgtmpost
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.warn
+    [INTAKE] Blocked attempt to modify locked sample SMP-LOCK-COMPLETED-1791890993519 (Status: COMPLETED, isDraft: true)
+
+      294 |
+      295 |             if (LOCKED_INTAKE_STATUSES.includes(sample.status) && !(sample.status === 'RECEIVED_REJECTED' && isResubmission === true && !isDraft)) {
+    > 296 |                 console.warn(`[INTAKE] Blocked attempt to modify locked sample ${originalId} (Status: ${sample.status}, isDraft: ${!!body.isDraft})`);
+          |                         ^
+      297 |                 throw new IntakeError(403, {
+      298 |                     success: false,
+      299 |                     error: 'SAMPLE_LOCKED',
+
+      at warn (services/intakePreparationService.js:296:25)
+      at Object.intake (services/intakeService.js:95:55)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-LOCK-ARCHIVED-1791890994049 by test_sample_reception_labgtmpost
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.warn
+    [INTAKE] Blocked attempt to modify locked sample SMP-LOCK-ARCHIVED-1791890994049 (Status: ARCHIVED, isDraft: true)
+
+      294 |
+      295 |             if (LOCKED_INTAKE_STATUSES.includes(sample.status) && !(sample.status === 'RECEIVED_REJECTED' && isResubmission === true && !isDraft)) {
+    > 296 |                 console.warn(`[INTAKE] Blocked attempt to modify locked sample ${originalId} (Status: ${sample.status}, isDraft: ${!!body.isDraft})`);
+          |                         ^
+      297 |                 throw new IntakeError(403, {
+      298 |                     success: false,
+      299 |                     error: 'SAMPLE_LOCKED',
+
+      at warn (services/intakePreparationService.js:296:25)
+      at Object.intake (services/intakeService.js:95:55)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-LOCK-DISPOSED-1791890994067 by test_sample_reception_labgtmpost
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.warn
+    [INTAKE] Blocked attempt to modify locked sample SMP-LOCK-DISPOSED-1791890994067 (Status: DISPOSED, isDraft: true)
+
+      294 |
+      295 |             if (LOCKED_INTAKE_STATUSES.includes(sample.status) && !(sample.status === 'RECEIVED_REJECTED' && isResubmission === true && !isDraft)) {
+    > 296 |                 console.warn(`[INTAKE] Blocked attempt to modify locked sample ${originalId} (Status: ${sample.status}, isDraft: ${!!body.isDraft})`);
+          |                         ^
+      297 |                 throw new IntakeError(403, {
+      298 |                     success: false,
+      299 |                     error: 'SAMPLE_LOCKED',
+
+      at warn (services/intakePreparationService.js:296:25)
+      at Object.intake (services/intakeService.js:95:55)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-LOCK-RECEIVED_REJECTED-1791890994087 by test_sample_reception_labgtmpost
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.warn
+    [INTAKE] Blocked attempt to modify locked sample SMP-LOCK-RECEIVED_REJECTED-1791890994087 (Status: RECEIVED_REJECTED, isDraft: true)
+
+      294 |
+      295 |             if (LOCKED_INTAKE_STATUSES.includes(sample.status) && !(sample.status === 'RECEIVED_REJECTED' && isResubmission === true && !isDraft)) {
+    > 296 |                 console.warn(`[INTAKE] Blocked attempt to modify locked sample ${originalId} (Status: ${sample.status}, isDraft: ${!!body.isDraft})`);
+          |                         ^
+      297 |                 throw new IntakeError(403, {
+      298 |                     success: false,
+      299 |                     error: 'SAMPLE_LOCKED',
+
+      at warn (services/intakePreparationService.js:296:25)
+      at Object.intake (services/intakeService.js:95:55)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-RCV-DRAFT-1791890994112 by test_sample_reception_labgtmpost
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-PRESERVE-PROJ-1791890994129 by test_sample_reception_labgtmpost
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-FOREIGN-LAB-1791890994147 by test_sample_reception_labgtmpost
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_sample_reception_labgtmpost (Lab: LAB-GTM-POST) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/intakePreparationService.js:289:28)
+      at Object.intake (services/intakeService.js:95:55)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.warn
+    [INTAKE] Security Block: User test_sample_reception_labgtmpost tried to intake sample SMP-FOREIGN-LAB-1791890994147 belonging to another lab.
+
+      289 |                 scopeGuard.ensureScope(user, sample, { altLabField: 'assignedLab' });
+      290 |             } catch (e) {
+    > 291 |                 console.warn(`[INTAKE] Security Block: User ${user.username} tried to intake sample ${originalId} belonging to another lab.`);
+          |                         ^
+      292 |                 throw new IntakeError(403, { success: false, message: 'Access Denied: This sample belongs to another lab.' });
+      293 |             }
+      294 |
+
+      at warn (services/intakePreparationService.js:291:25)
+      at Object.intake (services/intakeService.js:95:55)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_sample_reception_labgtmpost (Lab: LAB-GTM-POST) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (controllers/receptionController.js:825:24)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labhndforeign (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_sample_reception_labgtmpost (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/reception_post_release_correction.test.js (271 MB heap size)
+  Reception Post-Release Corrections: Lifecycle Safety, Context & Dashboard Metrics
+    1. Draft Lifecycle Integrity & Locked Status Protection
+      √ Draft save must reject regressing APPROVED sample and preserve its status (25 ms)
+      √ Draft save must reject regressing ACCEPTED sample and preserve its status (13 ms)
+      √ Draft save must reject regressing LAB_ID_ASSIGNED sample and preserve its status (9 ms)
+      √ Draft save must reject regressing PROCESSING sample and preserve its status (12 ms)
+      √ Draft save must reject regressing COMPLETED sample and preserve its status (6 ms)
+      √ Draft save must reject regressing ARCHIVED sample and preserve its status (18 ms)
+      √ Draft save must reject regressing DISPOSED sample and preserve its status (19 ms)
+      √ Draft save must reject regressing RECEIVED_REJECTED sample and preserve its status (24 ms)
+      √ Saving draft on a RECEIVED sample updates draft fields but retains status as RECEIVED (never regresses to DRAFT) (18 ms)
+      √ Saving draft with isWalkIn: true on an existing project sample preserves project link (18 ms)
+      √ Reject draft intake attempt for sample belonging to foreign lab with 403 (12 ms)
+    2. Read-Only Scoped Intake Context (GET /api/reception/sample-context)
+      √ Loads complete intake detail without stripping fieldMetadata or receptionData (14 ms)
+      √ Correctly resolves valid zero latitude/longitude (equator/prime meridian) (10 ms)
+      √ Rejects foreign lab sample context request with 403 (12 ms)
+    3. Honest Dashboard Reception Metrics (GET /api/dashboard/live)
+      √ Strictly excludes EXPECTED and DRAFT samples from pending drying and preparation (30 ms)
+      √ Sample with dryingStatus: DONE and preparationStatus: PENDING transitions to readyPreparation (12 ms)
+      √ Sample with dryingStatus: null is NOT counted in readyPreparation when drying is applicable (13 ms)
+      √ Second-Lab Fixture: Scope predicates are never overwritten by queue criteria; counts and preview rows strictly exclude other labs (28 ms)
+      √ Projects lean preview rows without transmitting raw fieldMetadata strings (9 ms)
+    4. Canonical Coordinate Resolver Unit Contract
+      √ Resolves { value, source } Kobo wrapper (1 ms)
+      √ Resolves space-separated GPS string with altitude and accuracy
+      √ Resolves valid 0,0 coordinates on the equator/prime meridian (1 ms)
+      √ Rejects invalid non-finite, out-of-bounds or boolean coordinates
+
+PASS tests/contracts/qc_disposition_flagging.test.js (277 MB heap size)
+  WP-29: QC Service & Batch Disposition Result Flagging
+    √ 1. qcService accurately computes blank threshold, duplicate RPD, and control recovery (35 ms)
+    √ 2. A batch evaluated as QC_FAIL creates typed BatchQcResult rows and flags associated results (95 ms)
+    √ 3. Manager disposition with PROCEED_WITH_WARNING overrides fail and restores result validity (62 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a06e6359-fedf-42ca-ba05-35e59f28dd2c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a06e6359-fedf-42ca-ba05-35e59f28dd2c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a06e6359-fedf-42ca-ba05-35e59f28dd2c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a06e6359-fedf-42ca-ba05-35e59f28dd2c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c59d434c-bf1f-47ea-acc2-d2808996b765 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c59d434c-bf1f-47ea-acc2-d2808996b765 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewSubmission] Error: Error: QC_GATE_FAILED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:259:9) {
+      statusCode: 409,
+      code: 'QC_GATE_FAILED',
+      details: { items: [ [Object] ] }
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c59d434c-bf1f-47ea-acc2-d2808996b765 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c59d434c-bf1f-47ea-acc2-d2808996b765 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c59d434c-bf1f-47ea-acc2-d2808996b765 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c59d434c-bf1f-47ea-acc2-d2808996b765 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a06e6359-fedf-42ca-ba05-35e59f28dd2c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a06e6359-fedf-42ca-ba05-35e59f28dd2c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a06e6359-fedf-42ca-ba05-35e59f28dd2c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a06e6359-fedf-42ca-ba05-35e59f28dd2c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/qc_controls.test.js (312 MB heap size)
+  BLK-2: Minimum Viable Typed QC Controls Contract
+    √ 1. Typed QC Pure Functions: Blank, Duplicate (RPD), and Control (Recovery %) (1 ms)
+    √ 2. Creates a QC batch and groups work items (59 ms)
+    √ 3. Batch evaluation endpoint transitions status to QC_FAIL when any control fails (54 ms)
+    √ 4. Submission review blocks acceptance (HTTP 409) if batch is in QC_FAIL without disposition (110 ms)
+    √ 5. Manager disposition override (PROCEED_WITH_WARNING) allows submission acceptance (96 ms)
+    √ 6. Batch evaluation endpoint transitions status to QC_PASS when all controls pass (53 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-PASS-COMPL-1791890995710 by test_sample_reception_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: SMP-PASS-COMPL-1791890995710 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample SMP-PASS-COMPL-1791890995710 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-NA-COC-COMPL-1791890995710 by test_sample_reception_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: SMP-NA-COC-COMPL-1791890995710 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample SMP-NA-COC-COMPL-1791890995710 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-INVALID-NA-COMPL-1791890995710 by test_sample_reception_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-INCOMPLETE-COMPL-1791890995710 by test_sample_reception_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-FAIL-RECEPT-COMPL-1791890995710 by test_sample_reception_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-NO-SELFAUTH-COMPL-1791890995710 by test_sample_reception_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: 76b3b942-16fd-46a5-91aa-a7d1eba9e61b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 76b3b942-16fd-46a5-91aa-a7d1eba9e61b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-MGR-AUTH-COMPL-1791890995710 by test_lab_manager_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: SMP-MGR-AUTH-COMPL-1791890995710 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample SMP-MGR-AUTH-COMPL-1791890995710 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-REJ-PERSIST-COMPL-1791890995710 by test_sample_reception_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: SMP-REJ-PERSIST-COMPL-1791890995710 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-DRAFT-SAVE-COMPL-1791890995710 by test_sample_reception_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: SMP-DRAFT-SAVE-COMPL-1791890995710 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-OMIT-COMPL-1791890995710 by test_sample_reception_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-EMPTY-ITEMS-COMPL-1791890995710 by test_sample_reception_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aee21ae5-ec9a-49f9-854e-f708fabf73b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for SMP-NONWALKIN-COC-NA-COMPL-1791890995710 by test_sample_reception_labcompl1791890995710
+
+      at log (services/intakePreparationService.js:56:13)
+
+PASS tests/contracts/reception_compliance.test.js (331 MB heap size)
+  Reception Compliance Checklist & Manager Exception Contracts (#117, #113)
+    √ routinely accepts sample when all compliance criteria pass (54 ms)
+    √ accepts walk-in intake with N/A for chain of custody (21 ms)
+    √ rejects intake with 400 INVALID_CHECKLIST_NA when container or label is marked N/A (7 ms)
+    √ rejects intake with 400 INCOMPLETE_COMPLIANCE_CHECKLIST when checklist items are unanswered (8 ms)
+    √ blocks reception staff with 403 COMPLIANCE_FAILURE_EXCEPTION_REQUIRED when checklist has failed criteria (7 ms)
+    √ prohibits reception staff from self-authorizing admission exceptions on failed checks (6 ms)
+    √ permits authorized laboratory manager to grant admission exception on failed check (18 ms)
+    √ persists compliance checklist and non-conformance reason when sample is rejected (14 ms)
+    √ preserves incomplete or failed checklist when saving as DRAFT without requiring exception (12 ms)
+    √ rejects intake with 400 when checklist is omitted, asserting zero sample/history mutations (7 ms)
+    √ rejects intake with 400 when checklist items are empty object, asserting zero sample mutations (7 ms)
+    √ rejects intake with 400 INVALID_CHECKLIST_NA when Chain of Custody is marked N/A on formal shipment (isWalkIn: false) (13 ms)
+    Pure Function evaluateChecklistCompliance Probes
+      √ Probe A: { items: { label: "FAIL" } } returns isComplete: false, isPassed: false, failedItems includes label (1 ms)
+      √ Probe B: { items: { labelLegible: true } } returns isComplete: false, isPassed: false, 4 unanswered
+      √ Probe C: { items: { unknown: true } } returns isComplete: false, isPassed: false, 5 unanswered, unknown tracked (1 ms)
+      √ Probe D: Fully assessed legacy boolean payload resolves to complete and passed
+      √ Probe E: Conflicting aliases fail closed (e.g. containerIntact: true but bagIntact: false)
+      √ Probe F: Omitted / null / empty returns isProvided: false, isComplete: false, isPassed: false
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bf2f5c79-b56d-4810-8ede-f4763a1b90dd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bf2f5c79-b56d-4810-8ede-f4763a1b90dd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bf2f5c79-b56d-4810-8ede-f4763a1b90dd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PKG_ORIG_16393 by pkg_mgr_1791890996396
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: PKG_ORIG_16393 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample PKG_ORIG_16393 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bf2f5c79-b56d-4810-8ede-f4763a1b90dd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bf2f5c79-b56d-4810-8ede-f4763a1b90dd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bf2f5c79-b56d-4810-8ede-f4763a1b90dd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PKG_ORIG_14804 by pkg_mgr_1791890996396
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: PKG_ORIG_14804 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: bf2f5c79-b56d-4810-8ede-f4763a1b90dd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bf2f5c79-b56d-4810-8ede-f4763a1b90dd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bf2f5c79-b56d-4810-8ede-f4763a1b90dd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PKG_ORIG_21951 by pkg_mgr_1791890996396
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: PKG_ORIG_21951 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+PASS tests/contracts/reception_package_resolution.test.js (351 MB heap size)
+  Reception Package ID Resolution & Boundary Contracts (Mandatory Correction 1)
+    Unit: resolveAnalysisGroup resolution logic
+      √ Rule 1: Exact canonical ID takes precedence over earlier fuzzy matches (1 ms)
+      √ Rule 2: Case-insensitive match works cleanly when unambiguous
+      √ Rule 3: Punctuation normalization works cleanly when unambiguous (1 ms)
+      √ Rule 4: Ambiguous normalized match fails closed
+      √ Rule 5: Non-string and empty IDs fail closed with INVALID_PACKAGE_ID
+      √ Rule 6: Unknown package fails closed with PACKAGE_NOT_FOUND (1 ms)
+    API: HTTP Boundary Enforcement in sample acceptance
+      √ Accept with exact second package ID persists canonical ID, not the first collision (54 ms)
+      √ Accept with non-string package ID returns 400 with INVALID_PACKAGE_ID (26 ms)
+      √ Accept with unknown package ID returns 400 with PACKAGE_NOT_FOUND (15 ms)
+
+PASS tests/contracts/reception_compliance_component.test.js (334 MB heap size)
+  Reception ComplianceChecklist Component & Parent State Contract (#113, #117)
+    √ 1. PASS selection atomically updates items without parent closure wipe (3 ms)
+    √ 2. FAIL selection sets nonConformance=true atomically; correcting back to PASS clears it (2 ms)
+    √ 3. General non-conformance reason preserves nonConformance even if individual items pass (1 ms)
+    √ 4. Client N/A policy: disabled on standard shipment, enabled for CoC on walk-in (3 ms)
+    √ 5. Note editing updates note without clobbering existing item status (1 ms)
+    √ 6. Rehydration / Save-and-Reload renders faithful markup and checked status (4 ms)
+    √ 7. Reception intake mode switch resets prohibited CoC N/A status
+    √ 8. All-Pass routine compliant outcome derives disabled ordinary NC control (#113) (2 ms)
+    √ 9. Permitted Walk-in CoC N/A (4 PASS + CoC N/A) derives routine compliant outcome (#113) (2 ms)
+    √ 10. Failed checklist criterion makes routine NC choice available and active (#113) (1 ms)
+    √ 11. Incomplete / unanswered checklist keeps routine NC choice unavailable (#113) (1 ms)
+    √ 12. Correction lifecycle: failed item corrected to PASS clears or preserves other-problem (#113) (2 ms)
+    √ 13. Clearly separate Other problem not covered by checklist route (#113) (3 ms)
+  Reception Parent Page Component & Intake Mode Contracts (#113, #114, #117)
+    √ 1. Real Reception parent renders to string without TDZ ReferenceError (17 ms)
+    √ 2. Real Reception parent renders initial intake mode selector and drafts dashboard (11 ms)
+    √ 3. Real Reception parent sources actual configured lab coordinates from user.lab profile (12 ms)
+    √ 4. Real Reception parent safely handles laboratory with null or unconfigured coordinates (11 ms)
+    √ 5. Reception intake mode switch enforces N/A policy cleanup (WALK_IN to PROJECT reset) (2 ms)
+  Codex Review: ComplianceChecklist Independent PR145 Bugfixes
+    √ Fix 1: Legacy uncovered-problem draft preserves effective exception flag on unrelated PASS (1 ms)
+    √ Fix 2: Routine-only FAIL + description -> PASS correctly clears Other checkbox
+    √ Fix 3: Unified description prevents overwrites (only one description textarea)
+
+PASS tests/contracts/qc_inspection_display_legacy_limits.test.js (338 MB heap size)
+  QC Batch Inspection Display & Legacy Limits Contract Tests (#118)
+    √ Audit 2.5: LEGACY_MIGRATED displays stored limits, full precision and missing fields without entry controls (3 ms)
+    √ Audit 2.5: PROFILE_ONLY displays stored limits, full precision and missing fields without entry controls (1 ms)
+    √ Audit 2.5: NATIVE displays stored limits, full precision and missing fields without entry controls (1 ms)
+    √ Audit 2.5: inspector contains no QC maths, hard-coded limits or invented rack capacity (1 ms)
+    1. Blank Upper Limit & Status Evaluation Logic
+      √ Blank with explicit numeric limit renders the exact recorded limit
+      √ Blank with explicit string limit renders the exact recorded string
+      √ Blank with upperLimit field renders upperLimit
+      √ CRITICAL: Blank with expected:0 but missing limit reports it as not stored (never 0, never implicit 0.05)
+      √ Blank with missing limit and null status returns null for evaluation (Not evaluated, no invented threshold) (1 ms)
+      √ Audit 2.5: blank without explicit status remains unevaluated even with valid measurements and limits
+      √ Numeric 0 is a valid measured value and valid limit
+      √ Missing/invalid measurements return null (Not evaluated) instead of fabricating PASS
+      √ Explicit recorded status is always preserved even when measured value is missing or non-numeric
+    2. Disposition Info Classification & Mapping
+      √ Legacy REJECT_REANALYSIS maps to LEGACY_REJECT_REANALYSIS with factual read-only note
+      √ REANALYZE_BATCH maps to REANALYSIS_REQUIRED with prominent re-analysis title
+      √ PROCEED_WITH_WARNING maps to WARNING_OVERRIDE with override logged badge
+      √ Legacy ACCEPT maps neutrally to CUSTOM_OR_UNSUPPORTED requiring review (not green formal acceptance) (1 ms)
+      √ Unsupported or custom decision maps to CUSTOM_OR_UNSUPPORTED without approval default
+      √ Missing or null disposition returns null
+    3. BatchInspectionModal Component SSR Rendering & State Assertions
+      √ Initial SSR state without injected batch renders modal container, header, and audit footer (2 ms)
+      √ BatchInspectionModal with initialBatch renders prominent banner, blank Not recorded, and read-only card while suppressing editable form (2 ms)
+
+PASS tests/contracts/reception_map_regression.test.js (337 MB heap size)
+  Reception Map Regression Contracts (Refs #114)
+    1. Batched Sampling State Preservation (WalkInForm)
+      √ Baseline flaw: stale closure spreads clobber earlier batched field updates (1 ms)
+      √ Candidate fix: functional updaters compose sequentially and preserve all batched fields (1 ms)
+      √ WalkInForm.jsx source code implements functional state updaters for both submitter and sampling (1 ms)
+    2. Laboratory Country Fallback Pass-Through
+      √ Baseline flaw: hardcoded countryCode="GT" in LocationPicker causes unconfigured African labs to center on Guatemala
+      √ Candidate fix: countryCode defaults to null, resolving unconfigured facilities to neutral centroid [0, 25]
+      √ Configured laboratory country codes resolve to appropriate regional centroids (1 ms)
+      √ LocationPicker.jsx defaults countryCode to null rather than GT
+      √ WalkInForm.jsx accepts countryCode prop and forwards it to LocationPicker
+      √ Reception.jsx passes user lab country or user country to WalkInForm
+
+PASS tests/contracts/rbac_sample_registry.test.js (339 MB heap size)
+  WP-24: Canonical RBAC Registry and Sample Controller Alignment
+    √ 1. hasPermission helper correctly evaluates permissions (1 ms)
+    √ 2. sampleController.js contains 0 occurrences of includes(user.role) (1 ms)
+    √ 3. No role map contains blacklisted legacy sample states (2 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       168 passed, 168 total
+Snapshots:   0 total
+Time:        9.003 s, estimated 10 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\qc_batch_evaluation.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\qc_controls.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\qc_disposition_flagging.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\qc_disposition_release_gate.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\qc_inspection_display_legacy_limits.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\rbac_sample_registry.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_admissions_pm14.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_compliance.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_compliance_component.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_map_regression.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_package_resolution.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_post_release_correction.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-25.json

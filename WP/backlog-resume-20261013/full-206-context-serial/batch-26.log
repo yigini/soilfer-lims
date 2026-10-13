@@ -1,0 +1,1718 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-MASS-FAIL-1791891000651 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-MASS-FAIL-1791891000651 linked to Project: PROJ-REG-1791891000355
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-MASS-PASS-1791891000766 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-MASS-PASS-1791891000766 linked to Project: PROJ-REG-1791891000355
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample REG-MASS-PASS-1791891000766 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-UNCERT-1791891000854 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-UNCERT-1791891000854 linked to Project: PROJ-REG-1791891000355
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample REG-UNCERT-1791891000854 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-CONF-RESIST-1791891000880 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-CONF-RESIST-1791891000880 linked to Project: PROJ-REG-1791891000355
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.warn
+    [INTAKE] Resisting unevidenced HIGH confidence for method DESK_PASTE (downgraded to MEDIUM)
+
+      596 |             let finalConfidence = samplingDetails.locationConfidence || maxConfidence;
+      597 |             if (finalConfidence === 'HIGH' && maxConfidence !== 'HIGH') {
+    > 598 |                 console.warn(`[INTAKE] Resisting unevidenced HIGH confidence for method ${captureMethod} (downgraded to ${maxConfidence})`);
+          |                         ^
+      599 |                 finalConfidence = maxConfidence;
+      600 |             }
+      601 |
+
+      at warn (services/intakePreparationService.js:598:25)
+      at acceptSample (services/intakeService.js:83:34)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [INTAKE] Updating sample REG-CONF-RESIST-1791891000880 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-01 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 0c020b15-f99b-43e7-8414-0e2841d239af linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 0c020b15-f99b-43e7-8414-0e2841d239af with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-02 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 845da72a-6a8f-4602-a912-79e7d1cae999 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 845da72a-6a8f-4602-a912-79e7d1cae999 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-03 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: b9158abf-4270-4957-bd5d-e3bc97987182 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample b9158abf-4270-4957-bd5d-e3bc97987182 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-04 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: b2328c02-2f6a-40b9-9b37-d4554436bdf7 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample b2328c02-2f6a-40b9-9b37-d4554436bdf7 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-05 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 1c5887a4-3889-4654-92e1-6fd65990ec28 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 1c5887a4-3889-4654-92e1-6fd65990ec28 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-06 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 7178ee27-9b7c-44d9-968d-1cdc94b310a8 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 7178ee27-9b7c-44d9-968d-1cdc94b310a8 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-07 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 2583791a-061d-4e2a-ae95-f3776c7ad080 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 2583791a-061d-4e2a-ae95-f3776c7ad080 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-08 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 4f2f7a8d-7e35-4b6e-ace5-22337a2e4241 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 4f2f7a8d-7e35-4b6e-ace5-22337a2e4241 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-09 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 2aa3e52f-0363-4f75-9545-a516b8bbb8aa linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 2aa3e52f-0363-4f75-9545-a516b8bbb8aa with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-10 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 7d1cce9b-a8cc-4cdb-a95a-d695bfcb7789 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 7d1cce9b-a8cc-4cdb-a95a-d695bfcb7789 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-11 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 091a28b8-7d8b-49fa-9020-15af264b6160 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 091a28b8-7d8b-49fa-9020-15af264b6160 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-12 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 8a1e4614-648d-41d3-8a4c-ed51a4ecec86 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 8a1e4614-648d-41d3-8a4c-ed51a4ecec86 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-13 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 91d2d170-7ec7-40ae-a1bf-7429f5fbfe6b linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-14 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 818be1e6-d6ec-4d32-bc06-9f9e440a17f9 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 818be1e6-d6ec-4d32-bc06-9f9e440a17f9 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-15 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: e1726610-3c96-457b-9274-5d3f7f937213 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample e1726610-3c96-457b-9274-5d3f7f937213 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-16 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: cbe30c84-5c34-4ae8-b963-8a28f18bff7f linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample cbe30c84-5c34-4ae8-b963-8a28f18bff7f with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-17 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 1725910b-044f-41c9-b141-c572d3319119 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 1725910b-044f-41c9-b141-c572d3319119 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-18 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: e9306f4c-b04c-4b20-8cbc-4592c1243119 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample e9306f4c-b04c-4b20-8cbc-4592c1243119 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-19 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: b69b24d7-b1c4-4fc3-ba8a-de77612f52e8 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample b69b24d7-b1c4-4fc3-ba8a-de77612f52e8 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-20 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 662efdff-5e40-49bb-b018-6ebb1f79793c linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 662efdff-5e40-49bb-b018-6ebb1f79793c with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-21 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: a2230be6-e26a-4461-9f62-60c5081e8c38 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample a2230be6-e26a-4461-9f62-60c5081e8c38 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-22 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: d78a3f4d-da05-4abd-89ac-6b5c9ca7f2cb linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample d78a3f4d-da05-4abd-89ac-6b5c9ca7f2cb with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-23 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: b2d73ff8-d040-4718-bea5-17fbdbc139b2 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample b2d73ff8-d040-4718-bea5-17fbdbc139b2 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-24 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 3040fe2f-9199-4c32-aa8e-876d2d6a3117 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 3040fe2f-9199-4c32-aa8e-876d2d6a3117 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-25 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: abd09ccb-6738-4e1a-ab6b-6f66cbe9db8a linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample abd09ccb-6738-4e1a-ab6b-6f66cbe9db8a with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-26 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: a66a48a9-2af1-42e1-bae0-f6f2841c593f linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample a66a48a9-2af1-42e1-bae0-f6f2841c593f with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-27 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 30e7d357-13b3-46cc-9d2e-8de81fd49621 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-28 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 7187c3aa-1b3a-4c7c-a761-80cb7b3ddfde linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 7187c3aa-1b3a-4c7c-a761-80cb7b3ddfde with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-29 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: e3aef1db-d8a5-4db9-8550-b32767a9eebd linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample e3aef1db-d8a5-4db9-8550-b32767a9eebd with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-30 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: ad17a9b2-d845-4b1a-b643-3f6da57d04b7 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample ad17a9b2-d845-4b1a-b643-3f6da57d04b7 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-31 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: d5c7245f-1d89-4385-9c39-f5d204470697 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample d5c7245f-1d89-4385-9c39-f5d204470697 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-32 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 75f2fc2b-059f-4759-9978-64e4e4cc14e0 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 75f2fc2b-059f-4759-9978-64e4e4cc14e0 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-33 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 75b03557-abde-46e8-8fa5-75695b678eb2 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 75b03557-abde-46e8-8fa5-75695b678eb2 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-34 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 3480aaab-7568-41d0-85cf-54e9ae819919 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 3480aaab-7568-41d0-85cf-54e9ae819919 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-35 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: afa069b0-63f3-47fd-84c6-a1289836fee1 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample afa069b0-63f3-47fd-84c6-a1289836fee1 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-36 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: c7f19949-ac36-40b8-9e71-ad6d90c428b4 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample c7f19949-ac36-40b8-9e71-ad6d90c428b4 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-37 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: d3a6fbd4-9727-498c-b664-74350e31c3da linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample d3a6fbd4-9727-498c-b664-74350e31c3da with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-38 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 1fa875ae-2c27-4eb1-b947-2931a1d20b8b linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 1fa875ae-2c27-4eb1-b947-2931a1d20b8b with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-39 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 3c48e7f3-15bc-4549-84dc-e24c13210be7 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 3c48e7f3-15bc-4549-84dc-e24c13210be7 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1791891001233-40 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 85c83465-80f5-4f01-8e9e-627aecbada03 linked to Project: PROJ-REG-1791891000355
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 85c83465-80f5-4f01-8e9e-627aecbada03 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-DISTINCT-REJ-1791891001805 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-DISTINCT-REJ-1791891001805 linked to Project: PROJ-REG-1791891000355
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] searchExpectedSamples: START. q="REG-DISTINCT-REJ-1791891001805", projectId="undefined", user="test_sample_reception_labgtm"
+
+      at log (controllers/sampleController.js:102:13)
+
+  console.log
+    [DEBUG] Building scope for user: test_sample_reception_labgtm
+
+      at log (controllers/sampleController.js:114:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 030e94ba-5fcd-489f-a6df-bb07f64f6095 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-CUSTODY-1791891001861 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-CUSTODY-1791891001861 linked to Project: PROJ-REG-1791891000355
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample REG-CUSTODY-1791891001861 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+PASS tests/contracts/reception_regression_stage_f.test.js (156 MB heap size)
+  Stage F: Reception Contract and End-to-End Regression Suite (RC-20)
+    1. Mass Sufficiency and Deficit Acknowledgement (RC-01)
+      √ calculates mass requirement accurately across catalogue + 100g retention (52 ms)
+      √ rejects under-mass sample without explicit acknowledgement (114 ms)
+      √ accepts under-mass sample WITH explicit acknowledgement and records override (65 ms)
+    2. Three Coordinate Formats Conversion (RC-05)
+      √ parses Decimal Degrees accurately (1 ms)
+      √ parses Degrees Minutes Seconds (DMS) accurately into Decimal Degrees (1 ms)
+      √ parses UTM with Zone & Hemisphere accurately into WGS84 Decimal Degrees
+      √ POST /api/reception/parse-coordinates exposes all three formats over API (20 ms)
+    3. Positional Uncertainty Defaults & Composite Depth (RC-06, RC-11)
+      √ persists uncertainty, composite radius, and numeric depths (27 ms)
+    4. Derived Location Confidence Resisting Unevidenced HIGH (RC-07)
+      √ derives HIGH confidence ONLY for evidenced GPS with tight accuracy
+      √ resists HIGH confidence for manual desk entry even if claimed tight uncertainty
+      √ downgrades intake claiming HIGH confidence on DESK_PASTE method (30 ms)
+    5. Offline Reverse Geocoding Fallback (RC-08)
+      √ falls back to offline administrative boundaries safely (322 ms)
+    6. 40-Sample Consignment Intake with 2 Exceptions (RC-12, RC-13, RC-14)
+      √ processes 40-sample atomic batch with 2 rejected exceptions resulting in PARTIAL status (573 ms)
+    7. Rejected State Distinctness (RC-19)
+      √ ensures rejected sample has status RECEIVED_REJECTED in database (2 ms)
+      √ strictly excludes rejected sample from GET /api/samples/expected backlog (23 ms)
+      √ returns rejected sample under status=RECEIVED_REJECTED query (15 ms)
+      √ enforces workflow transition bounds: permits DISPOSED, rejects PROCESSING
+    8. Custody Timestamps and Counter-Signature (RC-19)
+      √ records physical handover separate from system entry with officer counter-signature (21 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-SMP-1791891002126 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: TEST-SMP-1791891002126 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-SMP-1791891002126 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: TEST-SMP-1791891002126 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample TEST-SMP-1791891002126 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-SMP-MOIST-1791891002300 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: TEST-SMP-MOIST-1791891002300 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample TEST-SMP-MOIST-1791891002300 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-SMP-REJ-1791891002326 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: TEST-SMP-REJ-1791891002326 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-DUP-1791891002341 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: TEST-DUP-1791891002341 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample TEST-DUP-1791891002341 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49f5e13e-3183-4ae1-8a4d-805cb04a5a31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/reception_stage_a.test.js (200 MB heap size)
+  Stage A: Sample Reception Desk-Only Facts Contract (RC-01 - RC-04)
+    √ RC-01: Mass shortfall without acknowledgement returns HTTP 400 with deficit breakdown (49 ms)
+    √ RC-01: Mass shortfall WITH explicit acknowledgement succeeds (HTTP 200) and records override in history (41 ms)
+    √ RC-02: Moisture and foreign material at arrival persist on sample record (25 ms)
+    √ RC-03: Non-conformance rejection stores photographic evidence in sample record (14 ms)
+    √ RC-04: Duplicate detection identifies prior receipts and supports confirmed re-submission (32 ms)
+    √ RC-01: Mass check endpoint returns analytical requirement breakdown (6 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 972b72c6-73ad-48df-98d9-0aa3a2e4449b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] searchExpectedSamples: START. q="TEST-D-LBL-1791891003092", projectId="PROJ-D-1791891003092", user="test_sample_reception_labd1791891003092"
+
+      at log (controllers/sampleController.js:102:13)
+
+  console.log
+    [DEBUG] Building scope for user: test_sample_reception_labd1791891003092
+
+      at log (controllers/sampleController.js:114:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 972b72c6-73ad-48df-98d9-0aa3a2e4449b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 972b72c6-73ad-48df-98d9-0aa3a2e4449b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-D-LBL-1791891003092 by test_sample_reception_labd1791891003092
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample TEST-D-LBL-1791891003092 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 972b72c6-73ad-48df-98d9-0aa3a2e4449b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 972b72c6-73ad-48df-98d9-0aa3a2e4449b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-D-CSG1-1791891003661 by test_sample_reception_labd1791891003092
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 0576c77a-591b-4b41-9191-4aa24408b941 linked to Project: PROJ-D-1791891003092
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 0576c77a-591b-4b41-9191-4aa24408b941 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-D-CSG2-1791891003661 by test_sample_reception_labd1791891003092
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: f71a0dfa-a790-4c92-81ec-00cdf148edda linked to Project: PROJ-D-1791891003092
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: 972b72c6-73ad-48df-98d9-0aa3a2e4449b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 972b72c6-73ad-48df-98d9-0aa3a2e4449b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/reception_stage_d.test.js (216 MB heap size)
+  Stage D: Desk Ergonomics & Hardware Contract Tests (RC-16 - RC-18)
+    √ RC-16: Rapid wedge barcode scanner lookup returns expected sample metadata immediately (16 ms)
+    √ RC-17: Sample intake returns minted permanent Lab ID and full metadata required for label printing (469 ms)
+    √ RC-17: Consignment batch query delivers all sample barcodes and statuses for thermal batch printing (54 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.error
+    [UNHANDLED_ERROR] GET /reception: NotFoundError: Not Found
+        at createHttpError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:861:12)
+        at SendStream.error (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:168:31)
+        at SendStream.pipe (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:468:14)
+        at sendfile (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\express\lib\response.js:1014:8)
+        at ServerResponse.sendFile (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\express\lib\response.js:411:3)
+        at sendFile (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\app.js:1037:17)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at trimPrefix (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:342:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:297:9
+        at processParams (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:582:12)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:291:5)
+        at SendStream.error (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\serve-static\index.js:120:7)
+        at SendStream.emit (node:events:508:28)
+        at SendStream.error (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:168:17)
+        at SendStream.onStatError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:315:12)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:621:16)
+        at onstat (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:609:14)
+        at FSReqCallback.oncomplete (node:fs:194:21)
+
+      1045 | // Catches unhandled controller errors, prevents stack trace leaks, and ensures standard JSON responses
+      1046 | app.use((err, req, res, next) => {
+    > 1047 |     console.error(`[UNHANDLED_ERROR] ${req.method} ${req.originalUrl}:`, err);
+           |             ^
+      1048 |     if (res.headersSent) {
+      1049 |         return next(err);
+      1050 |     }
+
+      at error (app.js:1047:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/express/lib/response.js:417:7
+      at SendStream.onerror (node_modules/express/lib/response.js:955:5)
+      at SendStream.error (node_modules/send/index.js:168:17)
+      at SendStream.pipe (node_modules/send/index.js:468:14)
+      at sendfile (node_modules/express/lib/response.js:1014:8)
+      at ServerResponse.sendFile (node_modules/express/lib/response.js:411:3)
+      at sendFile (app.js:1037:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at SendStream.error (node_modules/serve-static/index.js:120:7)
+      at SendStream.error (node_modules/send/index.js:168:17)
+      at SendStream.onStatError (node_modules/send/index.js:315:12)
+      at next (node_modules/send/index.js:621:16)
+      at onstat (node_modules/send/index.js:609:14)
+
+  console.error
+    [UNHANDLED_ERROR] GET /reception?mode=WALK_IN: NotFoundError: Not Found
+        at createHttpError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:861:12)
+        at SendStream.error (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:168:31)
+        at SendStream.pipe (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:468:14)
+        at sendfile (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\express\lib\response.js:1014:8)
+        at ServerResponse.sendFile (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\express\lib\response.js:411:3)
+        at sendFile (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\app.js:1037:17)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at trimPrefix (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:342:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:297:9
+        at processParams (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:582:12)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\index.js:291:5)
+        at SendStream.error (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\serve-static\index.js:120:7)
+        at SendStream.emit (node:events:508:28)
+        at SendStream.error (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:168:17)
+        at SendStream.onStatError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:315:12)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:621:16)
+        at onstat (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:609:14)
+        at FSReqCallback.oncomplete (node:fs:194:21)
+
+      1045 | // Catches unhandled controller errors, prevents stack trace leaks, and ensures standard JSON responses
+      1046 | app.use((err, req, res, next) => {
+    > 1047 |     console.error(`[UNHANDLED_ERROR] ${req.method} ${req.originalUrl}:`, err);
+           |             ^
+      1048 |     if (res.headersSent) {
+      1049 |         return next(err);
+      1050 |     }
+
+      at error (app.js:1047:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/express/lib/response.js:417:7
+      at SendStream.onerror (node_modules/express/lib/response.js:955:5)
+      at SendStream.error (node_modules/send/index.js:168:17)
+      at SendStream.pipe (node_modules/send/index.js:468:14)
+      at sendfile (node_modules/express/lib/response.js:1014:8)
+      at ServerResponse.sendFile (node_modules/express/lib/response.js:411:3)
+      at sendFile (app.js:1037:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at SendStream.error (node_modules/serve-static/index.js:120:7)
+      at SendStream.error (node_modules/send/index.js:168:17)
+      at SendStream.onStatError (node_modules/send/index.js:315:12)
+      at next (node_modules/send/index.js:621:16)
+      at onstat (node_modules/send/index.js:609:14)
+
+FAIL tests/contracts/reception_route_smoke.test.js (234 MB heap size)
+  Reception Route Smoke & Static Asset Verification (#113, #114, #117)
+    √ 1. Release Prerequisite: client production build (client/dist) must exist (1 ms)
+    × 2. GET /reception returns HTTP 200 and text/html SPA shell (23 ms)
+    × 3. GET /reception?mode=WALK_IN returns HTTP 200 and text/html SPA shell (5 ms)
+    √ 4. Client dist bundle contains compiled Reception page asset (96 ms)
+    √ 5. Referenced entry assets in index.html are served with HTTP 200 (12 ms)
+    √ 6. Isolated Reception parent render with WALK_IN mode completes without runtime crash (17 ms)
+
+  ● Reception Route Smoke & Static Asset Verification (#113, #114, #117) › 2. GET /reception returns HTTP 200 and text/html SPA shell
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+      60 |         expect(hasDist).toBe(true);
+      61 |         const res = await request(app).get('/reception');
+    > 62 |         expect(res.status).toBe(200);
+         |                            ^
+      63 |         expect(res.headers['content-type']).toMatch(/text\/html/);
+      64 |         expect(res.text).toContain('<div id="root">');
+      65 |     });
+
+      at Object.toBe (tests/contracts/reception_route_smoke.test.js:62:28)
+
+  ● Reception Route Smoke & Static Asset Verification (#113, #114, #117) › 3. GET /reception?mode=WALK_IN returns HTTP 200 and text/html SPA shell
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+      68 |         expect(hasDist).toBe(true);
+      69 |         const res = await request(app).get('/reception?mode=WALK_IN');
+    > 70 |         expect(res.status).toBe(200);
+         |                            ^
+      71 |         expect(res.headers['content-type']).toMatch(/text\/html/);
+      72 |         expect(res.text).toContain('<div id="root">');
+      73 |     });
+
+      at Object.toBe (tests/contracts/reception_route_smoke.test.js:70:28)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791891004422 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791891004422 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791891004422 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791891004422 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791891004422 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791891004422 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/reopened_governance_scenarios.test.js (268 MB heap size)
+  Reopened Governance & Offline Parity Contract Tests
+    1. Offline Sync Draft Parity & Gating
+      √ SAVE_WORK_DRAFT rejects prerequisite-blocked sample with PREREQUISITE_INCOMPLETE (4 ms)
+      √ SAVE_WORK_DRAFT rejects unassigned technician with NOT_ASSIGNED_TECHNICIAN (2 ms)
+      √ Valid SAVE_WORK_DRAFT persists atomically and advances status from ASSIGNED to IN_PROGRESS (47 ms)
+    2. Offline Sync Spectral & Texture Determinations
+      √ COMPLETE_WORK on custom spectral method rejects scalar entry with SPECTRAL_SCALAR_REJECTED (1 ms)
+      √ COMPLETE_WORK on grouped texture rejects non-closing sum with TEXTURE_CLOSURE_FAILED (6 ms)
+      √ COMPLETE_WORK on grouped texture with valid closure atomically writes SAND, SILT, CLAY, and TEXTURE results (55 ms)
+    3. Offline Shared-Device Outbox User Partitioning & Identity Fail-Closed (IR-08)
+      √ getPendingOutboxOperations strictly fails closed with [] when identity is null, undefined, empty, or non-string (1 ms)
+      √ triggerSync fails closed with AUTH_REQUIRED / MISSING_USER_IDENTITY when user identity is absent
+      √ triggerSync fails closed when authToken is passed without valid user context
+      √ Simulated shared device: User A logout -> User B login dispatches only User B ops and preserves User A & ownerless ops intact (5 ms)
+      √ Mid-sync account switch is detected and safely aborted without cross-account attribution
+    4. Offline Pack Lease & Scope Enforcement
+      √ getPack returns 410 PACK_EXPIRED when pack lease is expired (4 ms)
+      √ getPack returns 403 PACK_ACCESS_DENIED when requested across laboratories (1 ms)
+      √ getPack returns 401 SESSION_INVALIDATED when user tokenVersion changed (1 ms)
+    5. Work Item Assignment Scoping & Receiving Lab Broadcast
+      √ assignWork via assignmentEligibilityService blocks cross-lab assignment (15 ms)
+      √ assignWork broadcasts WORKITEM_UPDATE to target receiving laboratory (18 ms)
+      √ reassignWork broadcasts WORKITEM_UPDATE to receiving laboratory (12 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4311902f-c6e2-4f04-b2a4-6e8b48380d0e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4311902f-c6e2-4f04-b2a4-6e8b48380d0e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4311902f-c6e2-4f04-b2a4-6e8b48380d0e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4311902f-c6e2-4f04-b2a4-6e8b48380d0e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4311902f-c6e2-4f04-b2a4-6e8b48380d0e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4311902f-c6e2-4f04-b2a4-6e8b48380d0e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/report_pdf.test.js (290 MB heap size)
+  BLK-3: Report & Certificate PDF Generation Contract
+    √ 1. Public PDF download returns valid binary application/pdf buffer (29 ms)
+    √ 2. Authenticated report PDF endpoint returns valid PDF (23 ms)
+    √ 3. Authenticated sample PDF endpoint generates certificate on-the-fly (17 ms)
+    √ 4. Non-existent public token returns 404 JSON (not silent 200 or crash) (3 ms)
+    √ 5. Revoked share link returns 410 Gone (16 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1c45c1ea-e0b7-49ba-8531-f2d0f08e6a18 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1c45c1ea-e0b7-49ba-8531-f2d0f08e6a18 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1c45c1ea-e0b7-49ba-8531-f2d0f08e6a18 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1c45c1ea-e0b7-49ba-8531-f2d0f08e6a18 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1c45c1ea-e0b7-49ba-8531-f2d0f08e6a18 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/reconcile_analyses.test.js (303 MB heap size)
+  SD-03: Work Item Reconciliation on Analysis List Change Contract
+    √ 1. Removing an analysis with a recorded result is refused (HTTP 409) naming analysis and result (16 ms)
+    √ 2. Removing an in-progress analysis without a reason is rejected (HTTP 400) (8 ms)
+    √ 3. Removing an in-progress analysis with a reason marks it WAIVED with audit trail (23 ms)
+    √ 4. Removing an unstarted (NOT_ASSIGNED) analysis deletes its work item row (22 ms)
+    √ 5. Progress counter immediately matches the reconciled analysis list (21 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3e6cfd29-426b-4a5e-8bcf-f0bdb9a56f7d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3e6cfd29-426b-4a5e-8bcf-f0bdb9a56f7d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-E-REJ-1791891006290 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: 3e6cfd29-426b-4a5e-8bcf-f0bdb9a56f7d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] searchExpectedSamples: START. q="TEST-E-REJ-1791891006290", projectId="PROJ-E-1791891006290", user="test_sample_reception_labgtm"
+
+      at log (controllers/sampleController.js:102:13)
+
+  console.log
+    [DEBUG] Building scope for user: test_sample_reception_labgtm
+
+      at log (controllers/sampleController.js:114:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3e6cfd29-426b-4a5e-8bcf-f0bdb9a56f7d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3e6cfd29-426b-4a5e-8bcf-f0bdb9a56f7d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-E-ACC-1791891006290 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample TEST-E-ACC-1791891006290 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3e6cfd29-426b-4a5e-8bcf-f0bdb9a56f7d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3e6cfd29-426b-4a5e-8bcf-f0bdb9a56f7d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-E-CSG1-1791891006445 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 12cca1d3-5dcd-4729-a230-ff88725ac763 linked to Project: PROJ-E-1791891006290
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 12cca1d3-5dcd-4729-a230-ff88725ac763 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-E-CSG2-1791891006445 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 39248285-b4ea-4290-949e-bd265b9f0ca7 linked to Project: PROJ-E-1791891006290
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+PASS tests/contracts/reception_stage_e.test.js (324 MB heap size)
+  Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody (RC-19)
+    √ RC-19: Intake rejection transitions sample to RECEIVED_REJECTED (not EXPECTED) and excludes it from expected backlog (39 ms)
+    √ RC-19: Accepted intake separates custody handover timestamp from system entry and immutably records officer counter-signature (37 ms)
+    √ RC-19: Consignment batch registers mixed accepted and RECEIVED_REJECTED with structured chain of custody (37 ms)
+    √ RC-19: State machine permits valid RECEIVED_REJECTED transitions and rejects illegal legacy states
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8cf5f3c6-be7d-4f3d-9a52-ca9a449d9ff1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-B-INTAKE-1791891006995 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: TEST-B-INTAKE-1791891006995 linked to Project: WALK-IN
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample TEST-B-INTAKE-1791891006995 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+PASS tests/contracts/reception_stage_b.test.js (345 MB heap size)
+  Stage B: Location, Provenance & Depth Contract (RC-05 - RC-11)
+    √ RC-05: GET /api/reception/admin-units returns structured hierarchy (9 ms)
+    √ RC-05: POST /api/reception/parse-coordinates parses UTM, DMS, and DD (18 ms)
+    √ RC-08: GET /api/reception/reverse-geocode returns location data safely (115 ms)
+    √ RC-10: GET /api/reception/batch-geometry-check flags candidate sample >40km away (15 ms)
+    √ RC-06, RC-07, RC-11: Intake persists positional uncertainty, provenance, composite radius, and numeric depths (44 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f4dca46-940d-4c03-bd85-63baa354687a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f4dca46-940d-4c03-bd85-63baa354687a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f4dca46-940d-4c03-bd85-63baa354687a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f4dca46-940d-4c03-bd85-63baa354687a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f4dca46-940d-4c03-bd85-63baa354687a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f4dca46-940d-4c03-bd85-63baa354687a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f4dca46-940d-4c03-bd85-63baa354687a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/report_search.test.js (364 MB heap size)
+  Issue #124: Result Reports Search & Query Filter Contract
+    √ 1. Default search returns only PUBLISHED reports in authorized lab (10 ms)
+    √ 2. Searching with status=SUPERSEDED discovers historical superseded report versions (7 ms)
+    √ 3. Searching with status=ALL discovers all report versions (both published and superseded) (7 ms)
+    √ 4. Searching by client name filters accurately across first and surname (7 ms)
+    √ 5. Searching by project code (projectId) filters to that project without relation crashes (7 ms)
+    √ 6. Searching by original field ID (originalId) finds the corresponding report (6 ms)
+    √ 7. Cross-lab isolation: Lab A manager searching shared client name "Mateo" does not disclose Lab B reports (7 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3c2f2ba3-ec97-4e1b-8ce2-febf421561e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3c2f2ba3-ec97-4e1b-8ce2-febf421561e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3c2f2ba3-ec97-4e1b-8ce2-febf421561e9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/reopen_audit_episodes.test.js (384 MB heap size)
+  SD-17: Reopen Audit Episodes Contract
+    √ 1. An approved sample has a single analytical episode with an approval date (21 ms)
+    √ 2. Refused undo preserves the approved analytical episode and evidence (18 ms)
+    √ 3. Certificate reportAssembly retains the approved episode after a refused undo (13 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68cbbd20-7d7d-4c66-b11f-4af1f0fb8334 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68cbbd20-7d7d-4c66-b11f-4af1f0fb8334 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 68cbbd20-7d7d-4c66-b11f-4af1f0fb8334 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/reopen_preparation_status.test.js (404 MB heap size)
+  SD-08: Stop Fabricating Preparation Records on Reopen Contract
+    √ 1. Adding orders to an approved sample refuses without fabricating NULL preparation evidence (13 ms)
+    √ 2. Adding orders to an approved sample preserves DONE preparation evidence (6 ms)
+    √ 3. Refused undo preserves approval and NULL preparation evidence (6 ms)
+
+Test Suites: 1 failed, 11 passed, 12 total
+Tests:       2 failed, 80 passed, 82 total
+Snapshots:   0 total
+Time:        9.193 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_regression_stage_f.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_route_smoke.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_stage_a.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_stage_b.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_stage_d.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_stage_e.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reconcile_analyses.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reopen_audit_episodes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reopen_preparation_status.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reopened_governance_scenarios.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\report_pdf.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\report_search.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-26.json

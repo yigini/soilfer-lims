@@ -1,0 +1,604 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 8e127851-6d28-4f1f-a5e1-127ba5ac691a) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleContainerService.js:21:11)
+      at Object.list (services/sampleContainerService.js:26:5)
+      at Object.<anonymous> (tests/contracts/issue_206_sample_containers.test.js:61:5)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 8e127851-6d28-4f1f-a5e1-127ba5ac691a) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleContainerService.js:21:11)
+      at services/sampleContainerService.js:33:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/issue_206_sample_containers.test.js:62:5)
+
+  console.warn
+    [AUTH] RBAC Denied: User system:fixture (AUDIT_USER) attempted MANAGE_CONTAINERS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","SAMPLE_RECEPTION","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (tests/contracts/issue_206_sample_containers.test.js:67:103)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+PASS tests/contracts/issue_206_sample_containers.test.js (18.12 s, 144 MB heap size)
+  √ bulk → fine earth → aliquot is queryable, labelled by policy and leaves sample numbers unchanged (1609 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"ALIQUOT"} (1132 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":0} (1107 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":"1"} (1083 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":null} (1085 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","code":"invented"} (1067 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"UNKNOWN"} (1180 ms)
+  √ scope, role and parent validation refuse both API reads and writes across samples/labs (1263 ms)
+  √ SQL rejects foreign parents, alias collisions, invalid kind/mass and changing or deleting identities (1100 ms)
+  √ transaction rollback returns the counter and container policy collision checks run both ways (1242 ms)
+  √ initial execution and reserved repeat link the exact aliquot without changing recorded attempts (1205 ms)
+  √ the additive attempt insert guard refuses foreign/non-aliquot links; future disposal retains recorded linkage (1123 ms)
+  √ installer dry/apply/no-op preserve all old rows and schema guards; tampered provenance fails closed (1222 ms)
+  √ an empty fresh Prisma table gains only its counter and guards; an unmarked populated table is refused (2237 ms)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-T205
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-T205
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-T205
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/issue_205_preparation_records.test.js (167 MB heap size)
+  #205 structured drying and preparation records
+    √ DRYING refuses a confirmation without its structured record and writes nothing (18 ms)
+    √ DRYING refuses a record with an invalid temperature (9 ms)
+    √ DRYING refuses a record with an invalid method (7 ms)
+    √ DRYING refuses a record with an invalid end before start (7 ms)
+    √ DRYING refuses a record with an invalid future end (5 ms)
+    √ DRYING refuses a record with an invalid missing start (6 ms)
+    √ a confirmed DRYING record is tied to the receipt, reports its duration and is append-only (170 ms)
+    √ the database guards refuse an invalid record written around the service (9 ms)
+    √ a sample that is received but not accepted cannot start preparation (3 ms)
+    √ a stale version is refused before any record is written (15 ms)
+    √ PREPARATION requires the active lab steps, computes the coarse fraction and refuses extra steps or foreign equipment (54 ms)
+  #205 report evidence and oven-dry basis
+    √ the report prints each structured record under its gate in en (1 ms)
+    √ the report prints each structured record under its gate in es (1 ms)
+    √ the report prints each structured record under its gate in es-419
+    √ the report prints each structured record under its gate in fr (1 ms)
+    √ the report prints each structured record under its gate in pt
+    √ the oven-dry policy is registered, off by default and translated (17 ms)
+    √ an oven-dry report refuses without a usable frozen moisture factor (0)
+    √ an oven-dry report refuses without a usable frozen moisture factor (1)
+    √ an oven-dry report refuses without a usable frozen moisture factor (2) (1 ms)
+    √ only uncensored air-dry values the lab marked convertible are converted, keeping their decimals (5 ms)
+    √ the PDF prints the moisture correction factor and the preparation records (19 ms)
+  #205 oven-dry eligibility, source printing and draft records
+    √ a lab-wide enablement converts concentrations but never pH, conductivity, texture fractions or ratios (14 ms)
+    √ enabling conversion for an excluded analysis is refused while concentrations and disabling stay allowed (14 ms)
+    √ the en PDF prints the moisture result the factor came from (8 ms)
+    √ the es PDF prints the moisture result the factor came from (18 ms)
+    √ the es-419 PDF prints the moisture result the factor came from (7 ms)
+    √ the fr PDF prints the moisture result the factor came from (7 ms)
+    √ the pt PDF prints the moisture result the factor came from (6 ms)
+    √ draft preparation records are stored, returned to the queue and bounded (13 ms)
+  #205 preparation record installer
+    √ PRE databases dry-run without writes, then apply additively with a verified receipt (329 ms)
+    √ FRESH databases dry-run without writes, then apply additively with a verified receipt (365 ms)
+    √ unmarked rows, a partial install and an altered table refuse with zero writes (529 ms)
+    √ arguments need an explicit database and one mode (2 ms)
+
+  console.error
+    [SIS_ROTATE_KEY_ERR] SqliteError: SYNTHETIC_REVIEW_INSERT_FAILURE
+        at run (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\sisController.js:1171:16)
+        at sqliteTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\better-sqlite3\lib\methods\transaction.js:65:24)
+        at Object.rotateTransaction [as rotateApiKey] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\sisController.js:1266:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue149_codex_verification.test.js:185:9) {
+      code: 'SQLITE_CONSTRAINT_TRIGGER'
+    }
+
+      1296 |             });
+      1297 |         }
+    > 1298 |         console.error('[SIS_ROTATE_KEY_ERR]', err);
+           |                 ^
+      1299 |         res.status(500).json({ error: 'Failed to rotate API Key.', message: err.message });
+      1300 |     }
+      1301 | };
+
+      at Object.error [as rotateApiKey] (controllers/sisController.js:1298:17)
+      at Object.<anonymous> (tests/contracts/issue149_codex_verification.test.js:185:9)
+
+PASS tests/contracts/issue149_codex_verification.test.js (182 MB heap size)
+  Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts
+    √ Check 1: Real publication UDF preserves spatial data for authorized snapshot consumers (50 ms)
+    √ Check 2: Live capability reduction redacts legacy sync, denies spatial route, expires old change cursor (38 ms)
+    √ Check 3: Live DISABLED connection denies actual consumer HTTP request (5 ms)
+    √ Check 4: Explicit replacement INSERT failure rolls back and preserves active old key (16 ms)
+    √ Check 5: Disjoint finite scopes evaluate to empty set and deny all data (fail closed) (9 ms)
+    √ Check 6: Wildcard key intersects with finite connection scope to yield finite scope (7 ms)
+    √ Check 7: Missing managed connection fails closed (403) and is not recreated ACTIVE (4 ms)
+    √ Check 8: Concurrent rotation of one old key succeeds exactly once (200 + 409) leaving 1 active replacement (5 ms)
+    √ Check 9: Outdated snapshot receipt is rejected (410) after connection authorization version changes (9 ms)
+    √ Check 10: API key with SUPER_ADMIN role does NOT bypass finite countries/projects or spatial projection (8 ms)
+    √ Check 11: Idempotency replay with mismatched key returns 409 conflict and preserves second key (2 ms)
+    √ Check 12: Postcommit retry recovers committed rotation from durable storage without plaintext secret, and rejects revoked replacement with 409 (4 ms)
+    √ Check 13: Managed key with missing authoritative linkage fails closed (403) (3 ms)
+    √ Check 14: Canonical migration backfill queries valid release evidence, includes observations, uses persisted identity, and emits non-null event IDs (415 ms)
+    √ Check 15: Reader operations do not mutate journal (snapshot creation is purely reader-driven) (5 ms)
+    √ Check 16: Delivered content digest hashes permitted projection and matches client received projection byte-for-byte (14 ms)
+    √ Check 17: Storage pruner accurately previews and deletes aged incremental batches and receipts (10 ms)
+
+PASS tests/contracts/issue149_codex_9ac1202_remediations.test.js (199 MB heap size)
+  Issue #149 Head 9ac1202 Remediation Contracts (Codex Independent Review)
+    √ Package 1: JSON null metadata consistently excluded across canonical predicate, sample list & count, and observations (49 ms)
+    √ Package 2: Confirm rejected with 409 when replacement key is revoked (no resurrection) (10 ms)
+    √ Package 2: Abort rejected with 409 when original key is revoked (no resurrection) (6 ms)
+    √ Package 2: Confirm and abort return 404 when no pending rotation operation exists (3 ms)
+    √ Package 2: Normal confirm retires old key and activates replacement (9 ms)
+    √ Package 2: Normal abort restores old key and revokes replacement (9 ms)
+
+PASS tests/contracts/issue149_codex_932cb6a_remediations.test.js (214 MB heap size)
+  Issue #149 Head 932cb6a Remediation Contracts (Codex Independent Review)
+    √ Package 1: Canonical hold and history predicate correctly backfills and publishes (11 ms)
+    √ Package 1: Live hold metadata mutation records journal WITHDRAWAL with null payload (5 ms)
+    √ Package 1: Escaped JSON provenance hold is semantically excluded from live HTTP queries and stats (22 ms)
+    √ Package 2: Lost first rotation response retains old key within bounded overlap (8 ms)
+    √ Package 2: Sibling key authentication preserves rotating key and updates replay truthfully (21 ms)
+    √ Package 2: Abort operation restores old key, revokes replacement, and preserves sibling keys (3 ms)
+    √ Package 2: Confirm operation retires old key, keeps replacement, and preserves sibling keys (2 ms)
+    √ Package 2: listApiKeys returns keyStatus and isRotating flags (2 ms)
+    √ Retention agreement: Prune preview and apply agree, preserving fresh receipt after snapshot expiry (17 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: sa-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: nl-gtm-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: nl-gtm-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: nl-gtm-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: mgr-a-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: sa-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: sa-INV-1791890904312 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/invitation_lifecycle.test.js (269 MB heap size)
+  Staff Invitation Lifecycle Contract Tests (I01-I04, Reissue, Scoping)
+    √ I00: Valid staff invitation creation returns 201 with manual delivery link (22 ms)
+    √ I01: Duplicate invitation for active pending email returns 409 conflict and leaves single pending record (14 ms)
+    √ I02: Transaction rollback on audit failure leaves 0 persisted invitation records (121 ms)
+    √ I03: Activation preserves explicit project grant assigned during invitation (86 ms)
+    √ I04: Service boundary denies foreign lab manager from listing or revoking invitations (6 ms)
+    √ Reissue: Reissuing invitation invalidates prior token and issues fresh valid secret (16 ms)
+    √ Pending Roster: getPendingInvitations returns sanitized records with MANUAL_LINK delivery status (21 ms)
+    √ J01: Same-day expired invitation returns 410 on verify, is marked expired in roster, and does not block new creation (11 ms)
+    √ J02: Reissue shortcut cannot revoke or replace foreign lab invitation, handles boolean tampering, and prevents audit side effects (29 ms)
+    √ J03: National Lead reissues own-country technician invitation (201) and is denied for foreign lab (403) (20 ms)
+    √ J04: Country coincidence alone does not authorize Lab Manager to grant project access (9 ms)
+    √ J05: Stale project grant rejected on activation and reissue with 400 STALE_PROJECT_GRANT (14 ms)
+    √ A41: Project update handler returns single HTTP response and idempotent retry without headers error (10 ms)
+    √ A37: Lab local day interval and DST 23/25-hour calculation (Europe/London and America/Guatemala) (2 ms)
+  Controlled Staff Invitation Conflict Resolution (Report 15 & 16 Contract)
+    √ Preflight detection identifies conflicts without mutating data (1 ms)
+    √ Missing plan for conflicting email throws and makes zero changes (4 ms)
+    √ Empty justification reason throws and makes zero changes (1 ms)
+    √ Invalid action or invalid retainId throws and makes zero changes
+    √ Valid retain choice revokes unselected duplicates and records audit log transactionally
+    √ Valid revoke_all choice revokes all conflicting rows and records audit log (1 ms)
+    √ Transactional rollback on audit failure leaves 0 mutations (2 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: admin-GAP-1791890905036 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: admin-GAP-1791890905036 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: admin-GAP-1791890905036 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: admin-GAP-1791890905036 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA-GAP-1791890905036 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA-GAP-1791890905036 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA-GAP-1791890905036 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA-GAP-1791890905036 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA2-GAP-1791890905036 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA-GAP-1791890905036 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/interim_gaps_verification.test.js (295 MB heap size)
+  Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Sync Parity & Atomicity)
+    Gap 1: Explicit Laboratory Scoping for SIS Integration Keys (IR-14)
+      √ POST /api/v1/data-exchange/keys rejects omitted or empty labs array even if countries provided (16 ms)
+      √ POST /api/v1/data-exchange/keys rejects non-existent laboratory identifier (5 ms)
+      √ POST /api/v1/data-exchange/keys succeeds with real form payload (explicit labs & countries: null) (101 ms)
+    Gap 2: Review Token Binding to Normalized Changes and Current Revision
+      √ Staff review token rejects altered changes payload (115 ms)
+      √ Staff review token rejects stale tokenVersion (concurrent modification) (4 ms)
+      √ Lab review token rejects altered targetState (34 ms)
+    Gap 3: SyncService Parity, Atomicity, and Canonical Writes
+      √ SAVE_WORK_DRAFT: stores draft and receipt atomically, duplicate returns DUPLICATE_APPLIED (33 ms)
+      √ COMPLETE_WORK rejects operational gate tasks (DRYING) with scalar value (6 ms)
+      √ COMPLETE_WORK rejects spectral tasks (SPEC_MIR) with scalar value (5 ms)
+      √ COMPLETE_WORK rejects technician not assigned to work item (8 ms)
+      √ COMPLETE_WORK creates canonical Result and WorkAttempt records in transaction (67 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-INTAKE-DRAFT by test_sample_reception_profileintakelab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-INTAKE-DRAFT by test_sample_reception_profileintakelab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-INTAKE-DRAFT by test_sample_reception_profileintakelab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-BATCH-A by test_sample_reception_profileintakelab
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 212623a9-8dcf-4ef5-ba27-885f3809461f linked to Project: PROFILE-INTAKE-PROJECT
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 212623a9-8dcf-4ef5-ba27-885f3809461f with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-BATCH-B by test_sample_reception_profileintakelab
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: dd34e6a4-a3c1-47cd-accd-309515e40144 linked to Project: PROFILE-INTAKE-PROJECT
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample dd34e6a4-a3c1-47cd-accd-309515e40144 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e8d28b77-cb5f-4d1b-aef5-bc38cd2106e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/intake_profile_capture.test.js (311 MB heap size)
+  Intake identity normalization and context preservation
+    √ new captures rewrite client actor/revision/time and preserve independent site (1 ms)
+    √ omission preserves exact legacy; explicit unknown does not resurrect source aliases
+    √ a changed project freezes the exact legacy site key without promoting a pit
+    √ untrusted namespace and server-managed compatibility are rejected (13 ms)
+    √ released records cannot be corrected through intake (1 ms)
+  Mounted intake draft and manifest paths preserve source identity
+    √ draft save, reopen and repeated save retain the reference and explicit unknown (88 ms)
+    √ manifest preview keeps row-specific zero, code and source column rather than inferring from bags (5 ms)
+    √ actual batch capture keeps separate source codes, decimal depths and distinct accessions (60 ms)
+    √ new walk-in receipt requires a registered active laboratory and cannot claim a different lab (11 ms)
+
+PASS tests/contracts/issue_206_container_components.test.js (293 MB heap size)
+  √ sample detail renders the physical hierarchy and the linked attempt without implying a legacy backfill (53 ms)
+  √ aliquot selector never lists bulk or disposed material and emits the explicit chosen identity (5 ms)
+  √ offline label QR encodes the issued container code and the printed card identifies its parent sample (4 ms)
+  √ a dilution repeat sends the explicitly selected physical aliquot identity (10 ms)
+  √ container labels, kinds and policy keys are present in both en catalogues (13 ms)
+  √ container labels, kinds and policy keys are present in both es catalogues (3 ms)
+  √ container labels, kinds and policy keys are present in both es-419 catalogues (4 ms)
+  √ container labels, kinds and policy keys are present in both fr catalogues (3 ms)
+  √ container labels, kinds and policy keys are present in both pt catalogues (4 ms)
+
+PASS tests/contracts/issue140_remediations.test.js (314 MB heap size)
+  Issue #140 Codex Remediations Contract Tests
+    R2: Immutable Frozen Snapshots (Probes 1 & 2)
+      √ An unrelated durable hold cannot hide eligible specimens in the isolated query adapter (105 ms)
+      √ Probe 1: Snapshot remains frozen after subsequent result-only edit (4 ms)
+      √ Probe 2: Snapshot row does not disappear after sample updatedAt advances (3 ms)
+    R3: Connection Identity & Credential Isolation (Probe 3)
+      √ Probe 3: Different credentials with same display name cannot access each others snapshots (3 ms)
+      √ Probe 8: Rejects unissued snapshots and negative receipt counts, enforces idempotency (4 ms)
+    R1: Monotonic Journal & Change Capture (Probes 4, 5, 6, 7)
+      √ Probe 4: Change feed sequence progresses monotonically across pages (4 ms)
+      √ Probe 5: Cancelled specimen emits WITHDRAWAL event (4 ms)
+      √ Probe 6: Result-only edit emits AMENDMENT event (5 ms)
+      √ Probe 7: Exchange journal actively stores audit rows (3 ms)
+    R5, R6, R7: Truthful Formatting and Identity (Probes 9-13)
+      √ Probe 9: Disambiguates profile reference across countries, does not infer confirmed profile (1 ms)
+      √ Probe 10: AssignedLab does not fall back to accession; truthful publicationStatus; collector null (1 ms)
+      √ Probe 11: Boolean coordinate metadata is rejected as null
+      √ Probe 12: Invalid calendar date 2026-99-99 is rejected as null (1 ms)
+      √ Probe 13: Blank result string is null, LOD/LOQ/provenance preserved (1 ms)
+    R4: Authoritative Scope Policy (Probes 14 & 15)
+      √ Probe 14: Accession matching allowed lab does not defeat assignedLab policy (1 ms)
+      √ Probe 15: Spectral query binds to parent sample relation (1 ms)
+
+PASS tests/contracts/inventory_aggregation.test.js (315 MB heap size)
+  Inventory Stock Aggregation & Lifecycle Contracts (#125)
+    Pure Aggregation Logic (computeItemStockAggregation)
+      √ 1. Zero stock fixture: no lots or 0 quantity yields usableStock=0, isOutOfStock=true, isLowStock=false (1 ms)
+      √ 2. Positive stock below threshold: usableStock=15, reorderPoint=20 yields isLowStock=true, isOutOfStock=false
+      √ 3. Positive stock at threshold: usableStock=20, reorderPoint=20 yields isLowStock=true (at or below threshold)
+      √ 4. Positive stock above threshold: usableStock=30, reorderPoint=20 yields isLowStock=false, isOutOfStock=false
+      √ 5. Missing value: lot with null currentQuantity is not treated as zero; yields hasMissingQuantity=true and usableStock=null (1 ms)
+      √ 6. All-expired lots: yields usableStock=0, isOutOfStock=true, hasExpired=true with separate expiredStock
+      √ 7. Mixed lots: both low-stock / out-of-stock and expired conditions remain visible without precedence masking
+      √ 7b. Mixed known and unknown usable lots: 0 + null does not assert isOutOfStock (1 ms)
+      √ 7c. Positive known stock below threshold with uncounted lots: isUsableStockSubtotal=true and isLowStock=true (uncertain low stock)
+      √ 7d. Positive known stock above threshold with uncounted lots: isLowStock=false (known stock alone is sufficient)
+    HTTP Endpoints & Zero Side-Effects Contracts
+      √ 8. GET /api/inventory/alerts is pure and produces ZERO database mutation side-effects (15 ms)
+      √ 9. GET /api/inventory/fefo/:itemId filters out expired lots from recommendations (4 ms)
+      √ 10. GET /api/inventory/alerts includes items with no lots as OUT_OF_STOCK and counts them in lowStock (#125) (3 ms)
+      √ 11. Expired lots produce both OUT_OF_STOCK and EXPIRED alerts without masking (#125) (3 ms)
+      √ 12. Missing quantities produce MISSING_QUANTITY alerts without asserting false OUT_OF_STOCK (#125) (2 ms)
+      √ 13. Production replica (124 no-lot + 2 expired-lot items): getItems and getAlerts match exactly at 126 out-of-stock (#125) (4 ms)
+      √ 14. Lab scoping in getAlerts and getItems: respects role scope correctly (#125) (3 ms)
+      √ 15. Multi-lot items: banner chip counts match unique affected item rows while preserving per-lot alert details (#125) (7 ms)
+
+PASS tests/contracts/issue_103_discrepancy_report.test.js (332 MB heap size)
+  Issue #103: Discrepancy Report and Reconciliation Correctness
+    √ getDiscrepancyReport flags OWNER_LAB_NOT_IN_JUNCTION when junction rows are zero (3 ms)
+    √ getDiscrepancyReport does not flag OWNER_LAB_NOT_IN_JUNCTION when owner junction row exists (2 ms)
+    √ resolveProjectLabs correctly includes both OWNER and PRIMARY roles without errors (1 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       167 passed, 167 total
+Snapshots:   0 total
+Time:        25.883 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\intake_profile_capture.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\interim_gaps_verification.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\inventory_aggregation.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\invitation_lifecycle.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue140_remediations.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue149_codex_932cb6a_remediations.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue149_codex_9ac1202_remediations.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue149_codex_verification.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_103_discrepancy_report.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_205_preparation_records.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_206_container_components.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_206_sample_containers.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-20.json

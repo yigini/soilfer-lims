@@ -1,0 +1,84 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 198d22ad-541b-462f-b2ac-90c06091fb82 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=stage_d_rep1.csv, LabID=TEST-STAGED-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=stage_d_rep1.csv, LabID=TEST-STAGED-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 198d22ad-541b-462f-b2ac-90c06091fb82 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=stage_d_rep2.csv, LabID=TEST-STAGED-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=stage_d_rep2.csv, LabID=TEST-STAGED-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 198d22ad-541b-462f-b2ac-90c06091fb82 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=stage_d_control_day1.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=stage_d_control_day1.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 198d22ad-541b-462f-b2ac-90c06091fb82 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/spectral_stage_d.test.js (143 MB heap size)
+  Spectral Library Stage D: Quality Control Worth the Name (SL-17 to SL-21)
+    √ SL-17: Quantity-aware validation passes valid absorbance of 1.4 without flagging HIGH_REFLECTANCE_VALUES (2 ms)
+    √ SL-18: Artifact detection catches local saturation, atmospheric CO2 residual, and detector splice (1 ms)
+    √ SL-19: Replicate repeatability agreement flags RMS difference above limit (115 ms)
+    √ SL-20: Library outlier screening flags background / empty cup scans
+    √ SL-21: Ingest of scanType CONTROL and retrieval via /control-drifts endpoint (19 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        1.32 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectral_stage_d.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-43.json

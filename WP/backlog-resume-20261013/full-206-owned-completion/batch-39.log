@@ -1,0 +1,119 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 919f83bc-faf1-40fe-870e-4f42d4dabe9e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=TEST-MULTIPART-SMP-01_scan.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=TEST-MULTIPART-SMP-01_scan.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 919f83bc-faf1-40fe-870e-4f42d4dabe9e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [UNHANDLED_ERROR] GET /api/spectral/spec-1791891488572-n630o/raw: NotFoundError: Not Found
+        at createHttpError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:861:12)
+        at SendStream.error (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:168:31)
+        at SendStream.pipe (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\send\index.js:468:14)
+        at sendfile (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\express\lib\response.js:1014:8)
+        at ServerResponse.sendFile (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\express\lib\response.js:411:3)
+        at ServerResponse.download (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\express\lib\response.js:488:15)
+        at download (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1907:28)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+      1045 | // Catches unhandled controller errors, prevents stack trace leaks, and ensures standard JSON responses
+      1046 | app.use((err, req, res, next) => {
+    > 1047 |     console.error(`[UNHANDLED_ERROR] ${req.method} ${req.originalUrl}:`, err);
+           |             ^
+      1048 |     if (res.headersSent) {
+      1049 |         return next(err);
+      1050 |     }
+
+      at error (app.js:1047:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/express/lib/response.js:417:7
+      at SendStream.onerror (node_modules/express/lib/response.js:955:5)
+      at SendStream.error (node_modules/send/index.js:168:17)
+      at SendStream.pipe (node_modules/send/index.js:468:14)
+      at sendfile (node_modules/express/lib/response.js:1014:8)
+      at ServerResponse.sendFile (node_modules/express/lib/response.js:411:3)
+      at ServerResponse.download (node_modules/express/lib/response.js:488:15)
+      at download (controllers/spectralController.js:1907:28)
+
+  console.log
+    [AUTH] Verifying token for ID: 919f83bc-faf1-40fe-870e-4f42d4dabe9e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate.dx, LabID=TEST-MULTIPART-SMP-01, Modality=undefined
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=d7f07004808860cf614ea03d45c1bf973842cdab5798fde83a7cffd2acc67166. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=d7f07004808860cf614ea03d45c1bf973842cdab5798fde83a7cffd2acc67166. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+FAIL tests/contracts/spectral_multipart_upload.test.js (144 MB heap size)
+  Spectral Multipart Raw Ingest & Byte-Identical Preservation Contract (SL-06 & SL-13)
+    × 1. Multipart raw JCAMP-DX upload preserves exact binary bytes and downloads back byte-identical (121 ms)
+    √ 2. Multipart duplicate upload is rejected by checksum (16 ms)
+
+  ● Spectral Multipart Raw Ingest & Byte-Identical Preservation Contract (SL-06 & SL-13) › 1. Multipart raw JCAMP-DX upload preserves exact binary bytes and downloads back byte-identical
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+      104 |             .set('Authorization', `Bearer ${techToken}`);
+      105 |
+    > 106 |         expect(downloadRes.status).toBe(200);
+          |                                    ^
+      107 |         expect(downloadRes.body.length).toBe(rawBuffer.length);
+      108 |         expect(Buffer.from(downloadRes.body).equals(rawBuffer)).toBe(true);
+      109 |     });
+
+      at Object.toBe (tests/contracts/spectral_multipart_upload.test.js:106:36)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   0 total
+Time:        1.359 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectral_multipart_upload.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-owned-completion\batch-39.json

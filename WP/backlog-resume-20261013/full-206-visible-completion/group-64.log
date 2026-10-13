@@ -1,0 +1,20 @@
+PASS tests/contracts/workflow_map_redesign.test.js (38 MB heap size)
+  Workflow Map Redesign Contract Tests
+    1. S002 Forensic Reproduction & Denominator Isolation
+      √ S002 never recommends "Complete Drying" when preparation is done (4 ms)
+      √ S002 separates preparation, execution, and review denominators cleanly (1 ms)
+      √ S002 excludes unrequested Physical and Chemical stations from the map (1 ms)
+      √ Vis-NIR carries warn tone without breaking completed execution status (1 ms)
+    2. Blocker Evaluation Order and Root Cause
+      √ blocked stage has status "blocked" and exposes blocking root cause
+    3. Dynamic Stage Pruning for Wet Chemistry Only
+      √ sample with only pH and EC only renders Chemical Analysis and Preparation
+    4. Explicit Edge DAG Validity
+      √ overview and dependency edges have valid source and destination references (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total
+Snapshots:   0 total
+Time:        0.273 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\workflow_map_redesign.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-64.json

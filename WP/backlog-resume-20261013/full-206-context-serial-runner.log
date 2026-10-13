@@ -1,0 +1,28 @@
+Frozen inventory: 362 suites; one process at a time, 12 suites per batch.
+{"batch": 1, "exitCode": 0, "elapsedSeconds": 9.172000000020489, "passedTests": 105, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 2, "exitCode": 0, "elapsedSeconds": 25.85999999998603, "passedTests": 347, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 3, "exitCode": 0, "elapsedSeconds": 43.46900000004098, "passedTests": 173, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 4, "exitCode": 0, "elapsedSeconds": 68.82799999997951, "passedTests": 216, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 5, "exitCode": 0, "elapsedSeconds": 65.09299999999348, "passedTests": 483, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 6, "exitCode": 0, "elapsedSeconds": 60.93700000003446, "passedTests": 250, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 7, "exitCode": 0, "elapsedSeconds": 143.5, "passedTests": 228, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 8, "exitCode": 0, "elapsedSeconds": 75.32900000002701, "passedTests": 114, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 9, "exitCode": 0, "elapsedSeconds": 70.375, "passedTests": 240, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 10, "exitCode": 0, "elapsedSeconds": 194.34400000004098, "passedTests": 262, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 11, "exitCode": 0, "elapsedSeconds": 149.85999999998603, "passedTests": 175, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 12, "exitCode": 0, "elapsedSeconds": 95.76599999994505, "passedTests": 165, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 13, "exitCode": 0, "elapsedSeconds": 148.21900000004098, "passedTests": 202, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 14, "exitCode": 0, "elapsedSeconds": 169.23499999998603, "passedTests": 150, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 15, "exitCode": 0, "elapsedSeconds": 70.98499999998603, "passedTests": 305, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 16, "exitCode": 0, "elapsedSeconds": 137.7970000000205, "passedTests": 198, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 17, "exitCode": 0, "elapsedSeconds": 24.811999999918044, "passedTests": 176, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 18, "exitCode": 0, "elapsedSeconds": 23.95299999997951, "passedTests": 90, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 19, "exitCode": 0, "elapsedSeconds": 11.797000000020489, "passedTests": 100, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 20, "exitCode": 0, "elapsedSeconds": 27.796999999904074, "passedTests": 167, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 21, "exitCode": 0, "elapsedSeconds": 26.56299999996554, "passedTests": 165, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 22, "exitCode": 0, "elapsedSeconds": 9.672000000020489, "passedTests": 147, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 23, "exitCode": 0, "elapsedSeconds": 32.75, "passedTests": 89, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 24, "exitCode": 0, "elapsedSeconds": 10.311999999918044, "passedTests": 123, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 25, "exitCode": 0, "elapsedSeconds": 10.968999999924563, "passedTests": 168, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 26, "exitCode": 1, "elapsedSeconds": 11.141000000061467, "passedTests": 80, "failedTests": 2, "pendingTests": 0, "inventoryEquality": true}
+Stopped at a failed/incomplete batch; preserve evidence and investigate.

@@ -1,0 +1,18 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+PASS tests/contracts/spectral_stage_e.test.js (140 MB heap size)
+  Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to SL-26)
+    √ SL-22: Scoped API key can only read its authorized laboratory spectra; absent scope is denied (96 ms)
+    √ SL-23: Rich payload contract returns signal, acquisition, preparation, qc, and paired reference chemistry (7 ms)
+    √ SL-24: Cursor pagination and ETag 304 validation (12 ms)
+    √ SL-25: Bulk export endpoint returns full JSON dataset scoped to key (7 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        1.286 s, estimated 2 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectral_stage_e.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-44.json

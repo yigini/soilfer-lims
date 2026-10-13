@@ -1,0 +1,56 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 38295e7f-8ce7-4aa6-a117-218b18117c24 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 38295e7f-8ce7-4aa6-a117-218b18117c24 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 38295e7f-8ce7-4aa6-a117-218b18117c24 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 38295e7f-8ce7-4aa6-a117-218b18117c24 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/result_reports_filter_lifecycle.test.js (141 MB heap size)
+  Result Reports Query/Filter Lifecycle & Stale-Response Regression (#124)
+    1. Component SSR & Static Layout Regression
+      √ Renders page header, search input, and 3 filter tabs with Published active by default (60 ms)
+      √ Renders clear button when initialQuery is provided (5 ms)
+      √ Renders populated reports table rows with version and client badges (11 ms)
+      √ Renders truthful empty state when initialReports is empty (4 ms)
+    2. Synthetic Hook Harness: Component Query/Filter Lifecycle, StrictMode Replay & Scope Transitions
+      √ Initial mount executes exactly 1 query with default PUBLISHED and empty search (5 ms)
+      √ React StrictMode setup-cleanup-setup re-executes mount effect and maintains active surviving request (4 ms)
+      √ Same-instance projectId URL change cancels previous request, dispatches new request with new projectId, and preserves appliedQuery (30 ms)
+      √ Typing in search input updates draft query WITHOUT dispatching requests or resetting table (5 ms)
+      √ Submitting search form dispatches request with trimmed query and sets applied query (22 ms)
+      √ Exact transition: clicking Superseded tab retains applied query and does NOT fire empty-string request (38 ms)
+      √ Clicking All Versions tab retains applied query and dispatches status ALL (31 ms)
+      √ Clear button resets draft query, resets applied query, and dispatches unfiltered search (32 ms)
+      √ Pagination preserves applied query and status filter on page change (31 ms)
+    3. Synthetic Hook Harness: Stale Response Discard & Reversed Response Ordering
+      √ Aborts in-flight request and drops delayed stale response arriving out of order (55 ms)
+    4. Backend /api/reports/search Scope & Disambiguation Contract
+      √ GTM26-0002 in All Versions returns exactly 1 report (v1 PUBLISHED) (46 ms)
+      √ GTM26-0002 in Superseded strictly returns 0 reports (truthful no-match) (12 ms)
+      √ Unfiltered status=SUPERSEDED returns GTM26-0003 v1 (demonstrating why empty query was a bug) (10 ms)
+      √ GTM26-0003 in All Versions returns both v1 and v2 (16 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       18 passed, 18 total
+Snapshots:   0 total
+Time:        1.601 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\result_reports_filter_lifecycle.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-owned-completion\batch-28.json

@@ -1,0 +1,190 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f1221f39-6c29-45f9-a615-582fdb5362ae (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f1221f39-6c29-45f9-a615-582fdb5362ae (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f1221f39-6c29-45f9-a615-582fdb5362ae (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f1221f39-6c29-45f9-a615-582fdb5362ae (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate_attempt.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=3e1113e1cda1bb9ae206481e8990423cf9df02546065fd4d92f32e366b28ed88. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate_attempt.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=3e1113e1cda1bb9ae206481e8990423cf9df02546065fd4d92f32e366b28ed88. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f1221f39-6c29-45f9-a615-582fdb5362ae (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1_rescan.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1_rescan.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f1221f39-6c29-45f9-a615-582fdb5362ae (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [getLibrary] Query: {
+      "AND": [
+        {
+          "status": {
+            "not": "DELETED"
+          }
+        },
+        {
+          "isCurrent": true
+        },
+        {
+          "OR": [
+            {
+              "sampleId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "labId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "filename": {
+                "contains": "TEST-STAGEB-SMP-01"
+              }
+            },
+            {
+              "sampleId": {
+                "in": [
+                  "TEST-STAGEB-SMP-01"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "OR": [
+            {
+              "labId": "LAB-GTM"
+            }
+          ]
+        }
+      ]
+    }
+
+      at log (controllers/spectralController.js:124:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f1221f39-6c29-45f9-a615-582fdb5362ae (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [getLibrary] Query: {
+      "AND": [
+        {
+          "status": {
+            "not": "DELETED"
+          }
+        },
+        {
+          "OR": [
+            {
+              "sampleId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "labId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "filename": {
+                "contains": "TEST-STAGEB-SMP-01"
+              }
+            },
+            {
+              "sampleId": {
+                "in": [
+                  "TEST-STAGEB-SMP-01"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "OR": [
+            {
+              "labId": "LAB-GTM"
+            }
+          ]
+        }
+      ]
+    }
+
+      at log (controllers/spectralController.js:124:17)
+
+PASS tests/contracts/spectral_stage_b.test.js (143 MB heap size)
+  Spectral Library Stage B (SL-06 to SL-12)
+    √ SL-06 & SL-08 & SL-09 & SL-10: Ingest stores raw file, links equipment, and saves typed metadata (107 ms)
+    √ SL-07: Cannot approve spectrum if physical quantity is UNVERIFIED (11 ms)
+    √ SL-11: Checksum Deduplication rejects identical file in same lab (7 ms)
+    √ SL-12: Supersession marks prior scan isCurrent: false and supersedes (51 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        1.523 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectral_stage_b.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-41.json

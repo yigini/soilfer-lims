@@ -1,0 +1,37 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 31faa057-1bd9-4800-87c6-47d7e3d6b6e7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 31faa057-1bd9-4800-87c6-47d7e3d6b6e7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 31faa057-1bd9-4800-87c6-47d7e3d6b6e7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 31faa057-1bd9-4800-87c6-47d7e3d6b6e7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/status_contract.test.js (141 MB heap size)
+  8.1 Section A: Status Contract Enforcement
+    √ Should reject sample creation attempt to override status (177 ms)
+    √ Should reject updates to unknown status (16 ms)
+    √ Should reject preparationStatus=FAILED (4 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Snapshots:   0 total
+Time:        1.353 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\status_contract.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-46.json

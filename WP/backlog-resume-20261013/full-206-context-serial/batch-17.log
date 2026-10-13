@@ -1,0 +1,1582 @@
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 110e3ff6-7b5a-4752-b294-2c0cbc91792d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 7ceab9d5-6183-41f7-abb1-bfa40f10a2e7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_6_3_report_content.test.js (13.434 s, 152 MB heap size)
+  √ uncertainty requires explicit lab policy in ISO17025_STRICT (2 ms)
+  √ uncertainty requires explicit lab policy in BASIC
+  √ uncertainty requires explicit lab policy in ADVISORY (1 ms)
+  √ declared uncertainty NOT_REPORTED/0.25/2/7/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_ABSOLUTE/0.25/2/7/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_RELATIVE_PCT/5/3/-7/censored=false follows its exact meaning (1 ms)
+  √ declared uncertainty EXPANDED_ABSOLUTE/0.25/null/7/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_ABSOLUTE/null/2/7/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_ABSOLUTE/0/2/7/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_RELATIVE_PCT/5/2/null/censored=false follows its exact meaning (1 ms)
+  √ declared uncertainty EXPANDED_RELATIVE_PCT/5/2/0/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_ABSOLUTE/0.25/2/7/censored=true follows its exact meaning
+  √ uncertainty scopes resolve per laboratory and method without changing scientific rows (1530 ms)
+  √ assembly discloses missing frozen method and approval instead of selecting current directory defaults (1161 ms)
+  √ methods and revisions follow selected source attempts and list distinct frozen methods
+  √ approval role is matched to retained actor and approval timestamp, never a current role
+  √ actual execution, acceptance and publication freeze EXPANDED_ABSOLUTE uncertainty and approval (1517 ms)
+  √ actual execution, acceptance and publication freeze EXPANDED_RELATIVE_PCT uncertainty and approval (1324 ms)
+  √ receipt and analysis dates use recorded intake and selected attempts only (1 ms)
+  √ missing approval evidence refuses new issue with stable conflict: {} (1198 ms)
+  √ missing approval evidence refuses new issue with stable conflict: {"approvedBy":"system:fixture"} (1178 ms)
+  √ missing approval evidence refuses new issue with stable conflict: {"approvedAt":"2026-10-09T10:00:00.000Z"} (1161 ms)
+  √ missing approval evidence refuses new revision with stable conflict: {} (1239 ms)
+  √ missing approval evidence refuses new revision with stable conflict: {"approvedBy":"system:fixture"} (1225 ms)
+  √ missing approval evidence refuses new revision with stable conflict: {"approvedAt":"2026-10-09T10:00:00.000Z"} (1225 ms)
+  √ unreadable approval time cannot authorize new issue (1 ms)
+  √ golden PDF {
+  name: 'normal',
+  value: '7.123456789',
+  censoring: 'NONE',
+  interpretation: 'Saved normal interpretation',
+  uncertainty: [Object],
+  expectedText: [Array]
+} preserves censoring, uncertainty, QC and publication evidence (9 ms)
+  √ golden PDF {
+  name: 'censored',
+  value: '<0.5',
+  censoring: 'BELOW_LOQ',
+  interpretation: 'Saved censored interpretation',
+  uncertainty: [Object],
+  expectedText: [Array]
+} preserves censoring, uncertainty, QC and publication evidence (8 ms)
+  √ golden PDF {
+  name: 'proceed-with-warning',
+  value: '7.123456789',
+  censoring: 'NONE',
+  interpretation: 'Saved warning interpretation',
+  warning: true,
+  uncertainty: [Object],
+  expectedText: [Array]
+} preserves censoring, uncertainty, QC and publication evidence (7 ms)
+  √ golden PDF {
+  name: 'amended',
+  value: '7.123456789',
+  censoring: 'NONE',
+  interpretation: 'Saved amended interpretation',
+  amended: true,
+  uncertainty: [Object],
+  expectedText: [Array]
+} preserves censoring, uncertainty, QC and publication evidence (6 ms)
+  √ saved interpretations retain their translated label and uncertainty in en (8 ms)
+  √ saved interpretations retain their translated label and uncertainty in es (7 ms)
+  √ saved interpretations retain their translated label and uncertainty in es-419 (7 ms)
+  √ saved interpretations retain their translated label and uncertainty in fr (7 ms)
+  √ saved interpretations retain their translated label and uncertainty in pt (9 ms)
+  √ wrapped approval and issuer evidence stays readable in en (8 ms)
+  √ wrapped approval and issuer evidence stays readable in es (7 ms)
+  √ wrapped approval and issuer evidence stays readable in es-419 (7 ms)
+  √ wrapped approval and issuer evidence stays readable in fr (7 ms)
+  √ wrapped approval and issuer evidence stays readable in pt (6 ms)
+  √ all report and uncertainty policy labels exist in en (6 ms)
+  √ all report and uncertainty policy labels exist in es (4 ms)
+  √ all report and uncertainty policy labels exist in es-419 (3 ms)
+  √ all report and uncertainty policy labels exist in fr (4 ms)
+  √ all report and uncertainty policy labels exist in pt (3 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 544c2c53-f503-45bd-b539-e39b99ad62b2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 544c2c53-f503-45bd-b539-e39b99ad62b2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b7943320-1bf8-4fed-94b8-60dee06431df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fed83212-2328-48c5-97ce-eaab0629ff67 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 544c2c53-f503-45bd-b539-e39b99ad62b2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 544c2c53-f503-45bd-b539-e39b99ad62b2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 544c2c53-f503-45bd-b539-e39b99ad62b2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b7943320-1bf8-4fed-94b8-60dee06431df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b7943320-1bf8-4fed-94b8-60dee06431df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c6ad1804-9434-4050-b53b-cf131372cece (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c6ad1804-9434-4050-b53b-cf131372cece (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c6ad1804-9434-4050-b53b-cf131372cece (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3472d107-acde-4389-aeec-7230abdbd472 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6d0503cc-fcb5-4520-9720-314171b46a01 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6d0503cc-fcb5-4520-9720-314171b46a01 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6d0503cc-fcb5-4520-9720-314171b46a01 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6d0503cc-fcb5-4520-9720-314171b46a01 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6d0503cc-fcb5-4520-9720-314171b46a01 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6d0503cc-fcb5-4520-9720-314171b46a01 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 66f19a87-50e6-49c2-8d84-660d3f2fd085 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 66f19a87-50e6-49c2-8d84-660d3f2fd085 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for FIELD-R4-1791890835504 by test_sample_reception_labr4
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: 66f19a87-50e6-49c2-8d84-660d3f2fd085 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 66f19a87-50e6-49c2-8d84-660d3f2fd085 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for FIELD-R4-FAKE-1791890835568 by test_sample_reception_labr4
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\AppData\Local\Temp\test_migration_1791890835575.db
+
+      at log (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] DRY RUN MODE: No schema modifications will be committed.
+
+      at log (scripts/migrate_project_templates_and_policy.js:29:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] DRY RUN: needsMigration=true, missingColumns=templateId, templateVersion, policyConfig, programmeCode, parentProjectId, missingIndex=true
+
+      at log (scripts/migrate_project_templates_and_policy.js:86:21)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\AppData\Local\Temp\test_missing_idx_1791890835598.db
+
+      at log (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] DRY RUN MODE: No schema modifications will be committed.
+
+      at log (scripts/migrate_project_templates_and_policy.js:29:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] DRY RUN: needsMigration=true, missingColumns=, missingIndex=true
+
+      at log (scripts/migrate_project_templates_and_policy.js:86:21)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\AppData\Local\Temp\test_missing_idx_1791890835598.db
+
+      at log (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Applying migration: missingColumns=, missingIndex=true
+
+      at log (scripts/migrate_project_templates_and_policy.js:109:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Creating index "Project_parentProjectId_idx"...
+
+      at log (scripts/migrate_project_templates_and_policy.js:122:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] All missing columns and indexes successfully added and verified atomically.
+
+      at log (scripts/migrate_project_templates_and_policy.js:155:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Migration verified successfully. 0 Project records preserved.
+
+      at log (scripts/migrate_project_templates_and_policy.js:158:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\AppData\Local\Temp\test_missing_idx_1791890835598.db
+
+      at log (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] All project template & policy columns and indexes already exist. Verification successful (no-op).
+
+      at log (scripts/migrate_project_templates_and_policy.js:104:21)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\AppData\Local\Temp\test_migration_1791890835575.db
+
+      at log (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Applying migration: missingColumns=templateId, templateVersion, policyConfig, programmeCode, parentProjectId, missingIndex=true
+
+      at log (scripts/migrate_project_templates_and_policy.js:109:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateId" (TEXT DEFAULT 'GENERIC_OPEN_INTAKE') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateVersion" (TEXT DEFAULT '1.0.0') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "policyConfig" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "programmeCode" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "parentProjectId" (TEXT REFERENCES "Project"("id") ON DELETE SET NULL ON UPDATE CASCADE) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Creating index "Project_parentProjectId_idx"...
+
+      at log (scripts/migrate_project_templates_and_policy.js:122:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] All missing columns and indexes successfully added and verified atomically.
+
+      at log (scripts/migrate_project_templates_and_policy.js:155:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Migration verified successfully. 1 Project records preserved.
+
+      at log (scripts/migrate_project_templates_and_policy.js:158:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\AppData\Local\Temp\test_migration_1791890835575.db
+
+      at log (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] All project template & policy columns and indexes already exist. Verification successful (no-op).
+
+      at log (scripts/migrate_project_templates_and_policy.js:104:21)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\AppData\Local\Temp\non_existent_db_1791890835623_missing.db
+
+      at log (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\AppData\Local\Temp\test_missing_table_1791890835627.db
+
+      at log (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.error
+    [MIGRATE-PROJECT-POLICY] Migration error: [MIGRATE-PROJECT-POLICY] Table "Project" does not exist in target database: C:\Users\yigin\AppData\Local\Temp\test_missing_table_1791890835627.db
+
+      165 |         };
+      166 |     } catch (err) {
+    > 167 |         console.error('[MIGRATE-PROJECT-POLICY] Migration error:', err.message);
+          |                 ^
+      168 |         throw err;
+      169 |     } finally {
+      170 |         db.close();
+
+      at error (scripts/migrate_project_templates_and_policy.js:167:17)
+      at migrateProjectTemplatesAndPolicy (tests/contracts/candidate_release_review_fixes.test.js:981:30)
+      at Object.<anonymous> (node_modules/expect/build/index.js:1824:9)
+      at Object.throwingMatcher [as toThrow] (node_modules/expect/build/index.js:2235:93)
+      at Object.toThrow (tests/contracts/candidate_release_review_fixes.test.js:981:84)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\audit_legacy_02c30243-3fcb-41a4-a830-c419892100c3.db
+
+      at log (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Applying migration: missingColumns=templateId, templateVersion, policyConfig, programmeCode, parentProjectId, missingIndex=true
+
+      at log (scripts/migrate_project_templates_and_policy.js:109:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateId" (TEXT DEFAULT 'GENERIC_OPEN_INTAKE') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateVersion" (TEXT DEFAULT '1.0.0') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "policyConfig" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "programmeCode" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "parentProjectId" (TEXT REFERENCES "Project"("id") ON DELETE SET NULL ON UPDATE CASCADE) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Creating index "Project_parentProjectId_idx"...
+
+      at log (scripts/migrate_project_templates_and_policy.js:122:25)
+
+  console.error
+    [MIGRATE-PROJECT-POLICY] Migration error: [MIGRATE-PROJECT-POLICY] Foreign key check failed: [{"table":"Project","rowid":1,"parent":"Parent","fkid":1}]
+
+      165 |         };
+      166 |     } catch (err) {
+    > 167 |         console.error('[MIGRATE-PROJECT-POLICY] Migration error:', err.message);
+          |                 ^
+      168 |         throw err;
+      169 |     } finally {
+      170 |         db.close();
+
+      at error (scripts/migrate_project_templates_and_policy.js:167:17)
+      at migrateProjectTemplatesAndPolicy (tests/contracts/candidate_release_review_fixes.test.js:995:30)
+      at Object.<anonymous> (node_modules/expect/build/index.js:1824:9)
+      at Object.throwingMatcher [as toThrow] (node_modules/expect/build/index.js:2235:93)
+      at Object.toThrow (tests/contracts/candidate_release_review_fixes.test.js:995:80)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\audit_legacy_ed5c5207-aae3-4f55-b193-24b88154d361.db
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Applying migration: missingColumns=templateId, templateVersion, policyConfig, programmeCode, parentProjectId, missingIndex=true
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:109:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateId" (TEXT DEFAULT 'GENERIC_OPEN_INTAKE') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateVersion" (TEXT DEFAULT '1.0.0') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "policyConfig" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "programmeCode" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "parentProjectId" (TEXT REFERENCES "Project"("id") ON DELETE SET NULL ON UPDATE CASCADE) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Creating index "Project_parentProjectId_idx"...
+
+      at log (scripts/migrate_project_templates_and_policy.js:122:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] All missing columns and indexes successfully added and verified atomically.
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:155:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Migration verified successfully. 2 Project records preserved.
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:158:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\audit_legacy_ed5c5207-aae3-4f55-b193-24b88154d361.db
+
+      at log (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] All project template & policy columns and indexes already exist. Verification successful (no-op).
+
+      at log (scripts/migrate_project_templates_and_policy.js:104:21)
+
+PASS tests/contracts/candidate_release_review_fixes.test.js (208 MB heap size)
+  Candidate Release Review Remediation (R1 - R5)
+    R1: Report Search & Detail Scoping Contract
+      √ National user (GTM) receives only GTM reports in search; out-of-scope Kenyan report excluded (19 ms)
+      √ National user (GTM) receives 403 on single report detail for out-of-scope Kenyan report (20 ms)
+      √ Project manager (Alpha) receives only Project Alpha reports; Beta report excluded (7 ms)
+      √ User with no authorized scope receives 0 reports (fail-closed) (5 ms)
+      √ Searching with status=ALL preserves superseded reports within authorized scope without leaking other scopes (6 ms)
+      √ Metadata conflict: report with own-labId but foreign sample is excluded from search and denied in detail (14 ms)
+      √ Project snapshot conflict: report claiming Project Alpha on Beta sample is excluded from Alpha search and detail (11 ms)
+      √ Technician with stale cross-lab assignment: foreign report excluded from search and denied in detail (search/detail parity) (23 ms)
+    R2: Workbench Queue & Stale Assignment Isolation Contract
+      √ Ordinary GET /api/workbench/queue excludes stale cross-lab work item (42 ms)
+      √ Deep link GET /api/workbench/queue?workItemId=... denies cross-lab item with 403 (8 ms)
+      √ Queue tab counts do not include stale cross-lab items (14 ms)
+      √ Draft scope isolation: cross-lab draft with null labId is excluded from drafts and queue counts (36 ms)
+      √ Conflicting lab IDs: work item labId=B, assignedLab=A and sample assignedLab=B, labId=A excluded from SQL count and list (25 ms)
+    R3: QC Reanalysis Workflow for Completed Work Contract
+      √ REANALYZE_BATCH transitions completed-unsubmitted work to REPEAT_REQUIRED while preserving immutable history (36 ms)
+      √ Repeated REANALYZE_BATCH request with same decision and reason is strictly idempotent (22 ms)
+    R4: Exception Precedence & Channel Policy Contract
+      √ Service check: canAdmitSample enforces requiresExceptionForDesk=true even when channel in allowedChannels (1 ms)
+      √ HTTP check: POST /api/reception/intake without exception returns 422 EXCEPTION_REQUIRED (64 ms)
+      √ HTTP check: Client boolean flag isStoredApprovalVerified is stripped and rejected (7 ms)
+    R5: Additive Schema Migration Script Contract
+      √ Dry run detects 5 missing additive columns without modifying database or sqlite_master (6 ms)
+      √ Dry run on DB with columns present but missing index never creates index or mutates sqlite_master, and apply mode creates it atomically (15 ms)
+      √ Migration successfully adds all columns, index, and default values while preserving data (8 ms)
+      √ Second migration run is strictly idempotent (no-op) (2 ms)
+      √ Fail-closed on non-existent database file path (4 ms)
+      √ Fail-closed on target database missing Project table (6 ms)
+      √ Atomic rollback guarantees database remains unmodified if foreign key check fails during migration (17 ms)
+      √ Populated upgrade rehearsal on full legacy schema preserves 100% rows, verifies result/report/history/share checksums, exercises migrated HTTP auth and supported-channel policy (1219 ms)
+
+PASS tests/contracts/audit_6_2_statement_policy.test.js (221 MB heap size)
+  √ all presets use localized defaults; the per-lab override declares exactly five locales and three placeholders (1 ms)
+  √ invalid template missingLocale refuses the entire policy value (4 ms)
+  √ invalid template extraLocale refuses the entire policy value (1 ms)
+  √ invalid template empty refuses the entire policy value
+  √ invalid template missingPlaceholder refuses the entire policy value (1 ms)
+  √ invalid template unknownPlaceholder refuses the entire policy value
+  √ invalid template duplicatePlaceholder refuses the entire policy value
+  √ invalid template brokenBrace refuses the entire policy value (1 ms)
+  √ the selected en statement preserves literal Unicode reason text without substitution syntax expansion
+  √ the selected es statement preserves literal Unicode reason text without substitution syntax expansion
+  √ the selected es-419 statement preserves literal Unicode reason text without substitution syntax expansion (1 ms)
+  √ the selected fr statement preserves literal Unicode reason text without substitution syntax expansion
+  √ the selected pt statement preserves literal Unicode reason text without substitution syntax expansion
+  √ the actual policy owner refuses invalid template changes without modifying any retained fixture row (1191 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9682f59-c468-437c-b460-dee2d5a16ff3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_6_2_report_revisions.test.js (228 MB heap size)
+  Audit 6.2: report revisions and amendment marking
+    √ revision 2 without an amendment returns 409 with zero writes (129 ms)
+    √ each amendment refusal code leaves every publication row unchanged (200 ms)
+    √ a CLERICAL revision freezes predecessor, amendment, reason, issuer and approver (77 ms)
+    √ a statement frozen at generation survives a later laboratory policy change (89 ms)
+    √ concurrent generation with one amendment creates exactly one new revision (74 ms)
+    √ a superseded public link shows a text-only tombstone with the replacing number and no link, values or reason (73 ms)
+  Audit 6.2: frozen marking and PDF rendering
+    √ changed and added results are marked, removed ones listed, and a same-display re-measurement is not marked
+    √ the revision PDF prints the replaces/reason statement, change marks and removed results (8 ms)
+
+PASS tests/contracts/audit_6_2_report_revision_install.test.js (208 MB heap size)
+  √ PRE databases dry-run without writes, then apply additively with a verified receipt (323 ms)
+  √ FRESH databases dry-run without writes, then apply additively with a verified receipt (208 ms)
+  √ unmarked populated evidence, partial installs and altered guards refuse with zero writes (177 ms)
+  √ the command line requires an explicit database and one mode (2 ms)
+
+  console.log
+    [Catalogue Seed] Database has 176 existing analyses.
+
+      at log (seeds/catalogue.js:30:13)
+
+  console.log
+    [Catalogue Seed] Seeding clean database with 176 standard analyses...
+
+      at log (seeds/catalogue.js:34:17)
+
+  console.log
+    [Catalogue Seed] ✓ Clean seeding complete: 176 analyses, 467 methodologies.
+
+      at log (seeds/catalogue.js:100:17)
+
+  console.log
+    [Catalogue Seed] Database has 176 existing analyses.
+
+      at log (seeds/catalogue.js:30:13)
+
+  console.log
+    
+    --- CATALOGUE MATCH REPORT ---
+
+      at log (seeds/catalogue.js:165:13)
+
+  console.log
+    Existing Analyses in DB: 176
+
+      at log (seeds/catalogue.js:166:13)
+
+  console.log
+    Catalogue Standard Analyses: 176
+
+      at log (seeds/catalogue.js:167:13)
+
+  console.log
+    Matched (Proposed Pairings): 176
+
+      at log (seeds/catalogue.js:168:13)
+
+  console.log
+    New Analyses to Add: 0
+
+      at log (seeds/catalogue.js:169:13)
+
+  console.log
+    Local Unmatched Analyses: 0
+
+      at log (seeds/catalogue.js:170:13)
+
+  console.log
+    [Catalogue Seed] confirmation required: Changes withheld without human confirmation.
+
+      at log (seeds/catalogue.js:174:17)
+
+  console.log
+    [Catalogue Seed] Database has 177 existing analyses.
+
+      at log (seeds/catalogue.js:30:13)
+
+  console.log
+    
+    --- CATALOGUE MATCH REPORT ---
+
+      at log (seeds/catalogue.js:165:13)
+
+  console.log
+    Existing Analyses in DB: 177
+
+      at log (seeds/catalogue.js:166:13)
+
+  console.log
+    Catalogue Standard Analyses: 176
+
+      at log (seeds/catalogue.js:167:13)
+
+  console.log
+    Matched (Proposed Pairings): 176
+
+      at log (seeds/catalogue.js:168:13)
+
+  console.log
+    New Analyses to Add: 0
+
+      at log (seeds/catalogue.js:169:13)
+
+  console.log
+    Local Unmatched Analyses: 1
+
+      at log (seeds/catalogue.js:170:13)
+
+  console.log
+    [Catalogue Seed] Confirmation received. Applying safe updates...
+
+      at log (seeds/catalogue.js:184:13)
+
+  console.log
+    [Catalogue Seed] ✓ Successfully updated database with catalogue standards.
+
+      at log (seeds/catalogue.js:264:13)
+
+PASS tests/contracts/catalogue_seeder.test.js (231 MB heap size)
+  WP-19: Analysis Catalogue Seeder Contract
+    √ Imported measurands without verified reporting definitions remain inactive without invented units (4 ms)
+    √ No synthetic count-padding parameters or methodologies ship as laboratory definitions (1 ms)
+    √ 1. A clean database seeds the configured parameter definitions (214 ms)
+    √ 2. A database with existing analyses produces a match report and changes nothing without confirmation (11 ms)
+    √ 3. Local hand-created analyses are preserved with isGlobal: false upon confirmed merge (127 ms)
+    √ 4. Environmental module parameters ship disabled (status: inactive) (2 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for W001 by mgr_clo_1791890840878
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample W001 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-CLO
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-CLO
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-CLO
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: a3ee5389-5c16-49cf-9617-8a0558b067a1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a3ee5389-5c16-49cf-9617-8a0558b067a1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-CLO
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: a3ee5389-5c16-49cf-9617-8a0558b067a1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a3ee5389-5c16-49cf-9617-8a0558b067a1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by tech_clo_1791890840878 with 1 samples: [ 'W001' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab LAB-CLO
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-CLO
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-CLO
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 13b95b4d-d513-441a-bdfa-b3150c761f17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/closure.test.js (270 MB heap size)
+  8.1 Section E: Approval & Closure Rules
+    √ Setup: Create Sample and WorkItems (129 ms)
+    √ Scenario 1: Approve Blocked on Pending/Submitted Work (13 ms)
+    √ Scenario 2: Approve Success after All Items Accepted (166 ms)
+    √ Scenario 3: Archive Blocked Logic (Pre-check) (16 ms)
+    √ Scenario 4: Archive Success (Task Created and Approved to ARCHIVED) (27 ms)
+    √ Scenario 5: Immutability (Cannot revert Archived) (4 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.error
+    [saveResults] Error: Error: Record operational evidence through the assigned checklist.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:29:17 {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at tests/contracts/catalogue_result_entry.test.js:29:17
+
+  console.error
+    [saveResults] Error: Error: Record operational evidence through the assigned checklist.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:29:17 {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at tests/contracts/catalogue_result_entry.test.js:29:17
+
+  console.error
+    [saveResults] Error: Error: Upload or link a spectrum through spectral intake; a numerical value is not a spectrum.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:29:17 {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at tests/contracts/catalogue_result_entry.test.js:29:17
+
+  console.error
+    [saveResults] Error: Error: Upload or link a spectrum through spectral intake; a numerical value is not a spectrum.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:29:17 {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at tests/contracts/catalogue_result_entry.test.js:29:17
+
+  console.error
+    [saveResults] Error: Error: A selected parameter is not available to this laboratory.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:33:26) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:33:26)
+
+  console.error
+    [saveResults] Error: Error: Configured result test is not assigned to you.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:38:17) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:38:17)
+
+  console.error
+    [saveResults] Error: Error: Configured result test: use the method assigned to this work item.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:41:17) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:41:17)
+
+  console.error
+    [saveResults] Error: Error: Configured result test: use the configured reporting unit (mg/kg).
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:42:17) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:42:17)
+
+  console.error
+    [saveResults] Error: Error: A parameter and replicate may appear only once in each save.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:49:17) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:49:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:106:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:69:52) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:69:52)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at recordedExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:71:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:103:28)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:69:52) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:69:52)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at recordedExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:71:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:103:28)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:69:52) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:69:52)
+
+  console.log
+    [AUTH] Verifying token for ID: 623b33b5-03fd-4099-aede-bd8c054d2d47 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_lab_technician_catlab1835b353 (LAB_TECHNICIAN) attempted MANAGE_ANALYSES. Allowed roles: ["SUPER_ADMIN","LAB_MANAGER","MASTER_USER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:123:9)
+
+PASS tests/contracts/catalogue_result_entry.test.js (299 MB heap size)
+  Catalogue rules also govern the sample results endpoint
+    √ DRYING cannot accept a scalar through the alternate endpoint (112 ms)
+    √ PREPARATION cannot accept a scalar through the alternate endpoint (3 ms)
+    √ SPEC_MIR cannot accept a scalar through the alternate endpoint (5 ms)
+    √ SPEC_VIS_NIR cannot accept a scalar through the alternate endpoint (3 ms)
+    √ An unknown parameter cannot be smuggled into an otherwise valid batch (20 ms)
+    √ A technician cannot record another technician’s work (4 ms)
+    √ Assigned method and reporting units must match (45 ms)
+    √ Configured lower bounds are honored when the optional LOQ is null
+    √ Duplicate replicate keys cannot create two current results (16 ms)
+    √ Valid assigned measurement is saved and still uses a human parameter name (60 ms)
+    √ Completed or submitted work cannot be edited through the sample results endpoint (73 ms)
+    √ The mounted configuration route rejects technician writes (83 ms)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB_CAT_162105fa
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB_CAT_162105fa
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/catalogue_work_execution.test.js (297 MB heap size)
+  Catalogue to operational work and numeric validation
+    √ Numeric drafts are blocked before preparation; no Result or draft is written (15 ms)
+    √ Operational queue resolves human names and checklist editors without catalogue numeric entries (22 ms)
+    √ Drying refuses numerical evidence (2 ms)
+    √ Partial checklist saves as draft without opening the drying gate (28 ms)
+    √ Missing confirmations cannot complete drying (10 ms)
+    √ Completing drying saves evidence, clears its draft and opens only drying (24 ms)
+    √ Numeric entry remains blocked until preparation also completes (44 ms)
+    √ Catalogue min/max are enforced at record time without requiring a hidden type field (4 ms)
+    √ Invalid numeric input Infinity cannot become a result
+    √ Invalid numeric input 0x10 cannot become a result
+    √ Invalid numeric input <  cannot become a result (1 ms)
+    √ Invalid numeric input >Infinity cannot become a result
+    √ Invalid numeric input NaN cannot become a result
+    √ Invalid numeric input 5abc cannot become a result
+    √ Boolean-like strings and surplus confirmations are not valid evidence
+    √ Ambiguous defaults are reported instead of silently taking the first method (10 ms)
+    √ A display-name-only catalogue update does not remove preparation prerequisites
+
+  console.log
+    [BACKUP] Starting online SQLite backup from C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\test_suite_452f3b30-66b3-442c-b79b-49063a954258.db...
+
+      at log (scripts/backup_db.js:21:17)
+
+  console.log
+    [BACKUP] Online snapshot complete (3.02 MB). Compressing with gzip...
+
+      at log (scripts/backup_db.js:34:17)
+
+  console.log
+    [BACKUP] Gzip compression successful: soilfer_lims_backup_2026-10-13T11-27-22-582Z.db.gz (0.29 MB, 90.5% reduction)
+
+      at log (scripts/backup_db.js:48:17)
+
+  console.log
+    [RESTORE] Initiating restore from: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\backups\soilfer_lims_backup_2026-10-13T11-27-22-582Z.db.gz
+
+      at log (scripts/restore_db.js:32:13)
+
+  console.log
+    [RESTORE] Target database path: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp_backup_test\restored_disposable.db
+
+      at log (scripts/restore_db.js:33:13)
+
+  console.log
+    [RESTORE] Verifying source backup integrity...
+
+      at log (scripts/restore_db.js:36:13)
+
+  console.log
+    [RESTORE] Source backup is valid. Users: 0, Samples: 0
+
+      at log (scripts/restore_db.js:41:13)
+
+  console.log
+    [RESTORE] SUCCESS: Database successfully restored to C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp_backup_test\restored_disposable.db
+
+      at log (scripts/restore_db.js:141:17)
+
+  console.log
+    [RESTORE] Initiating restore from: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\backups\soilfer_lims_backup_2026-10-13T11-27-22-582Z.db.gz
+
+      at log (scripts/restore_db.js:32:13)
+
+  console.log
+    [RESTORE] Target database path: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp_backup_test\restored_disposable.db
+
+      at log (scripts/restore_db.js:33:13)
+
+  console.log
+    [RESTORE] Verifying source backup integrity...
+
+      at log (scripts/restore_db.js:36:13)
+
+  console.log
+    [RESTORE] Source backup is valid. Users: 0, Samples: 0
+
+      at log (scripts/restore_db.js:41:13)
+
+  console.log
+    [RESTORE] Creating safety snapshot of current database: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp_backup_test\restored_disposable.db.pre_restore_2026-10-13T11-27-22-744Z.bak
+
+      at log (scripts/restore_db.js:54:17)
+
+  console.log
+    [RESTORE] Preserving safety snapshot of WAL file: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp_backup_test\restored_disposable.db.pre_restore_2026-10-13T11-27-22-744Z.wal.bak
+
+      at log (scripts/restore_db.js:62:21)
+
+  console.log
+    [RESTORE] Preserving safety snapshot of SHM file: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp_backup_test\restored_disposable.db.pre_restore_2026-10-13T11-27-22-744Z.shm.bak
+
+      at log (scripts/restore_db.js:67:21)
+
+  console.log
+    [RESTORE] Removed stale WAL file: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp_backup_test\restored_disposable.db-wal
+
+      at log (scripts/restore_db.js:76:47)
+
+  console.log
+    [RESTORE] Removed stale SHM file: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp_backup_test\restored_disposable.db-shm
+
+      at log (scripts/restore_db.js:81:47)
+
+  console.log
+    [RESTORE] SUCCESS: Database successfully restored to C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp_backup_test\restored_disposable.db
+
+      at log (scripts/restore_db.js:141:17)
+
+PASS tests/contracts/backup_restore_integrity.test.js (289 MB heap size)
+  Database Backup, Verification & Restore Contract
+    √ 1. performBackup generates a valid .db.gz archive using online backup API (55 ms)
+    √ 2. verifyBackup validates integrity and core tables in the generated archive (18 ms)
+    √ 3. verifyBackup detects corrupted or non-SQLite files (3 ms)
+    √ 4. restoreBackup safely restores into disposable target and passes integrity_check (59 ms)
+    √ 5. restoreBackup creates safety pre-restore backup when target already exists (60 ms)
+
+PASS tests/contracts/catalogue_governance.test.js (314 MB heap size)
+  Catalogue governance and connected selections
+    √ Rejects unsafe definition {"name":" ","code":"X"} (1 ms)
+    √ Rejects unsafe definition {"name":"Valid name","code":"INVALID CODE"}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","validation":{"min":20,"max":2}} (1 ms)
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","validation":{"min":"2"}}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","validation":"{broken"}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","validation":{"decimalPlaces":1.5}}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","matrix":"UNKNOWN"}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","executionOrder":"2x"}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","prerequisites":"{}"}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","status":"whatever"}
+    √ New parameters start inactive, without fabricated numeric limits or units (28 ms)
+    √ Explicit inactive status and matrix survive create and update (6 ms)
+    √ Shared definitions cannot be silently changed by a lab manager (1 ms)
+    √ Manager can create and update their own scoped definition (6 ms)
+    √ Inactive and unknown selections cannot create new orders; existing selections survive retirement (8 ms)
+    √ Placeholders and operational gates are not orderable analyses
+    √ Incorrect mass-concentration defaults and uncurated import labels are flagged for correction
+    √ Duplicate and cross-lab selections are rejected (2 ms)
+    √ Malformed validation in one legacy record does not make the entire catalogue disappear (19 ms)
+    √ A new package cannot contain inactive or unknown parameters (2 ms)
+    √ Historical results prevent deletion and unit reinterpretation (26 ms)
+    √ JSON package references and prerequisites prevent deletion (4 ms)
+    √ Unused definitions can be removed with an audit record (4 ms)
+    √ Method default resolves to this lab, never an unrelated lab (4 ms)
+    √ Mixed valid/invalid defaults request makes no partial changes (4 ms)
+    √ Referenced methods cannot be deleted, including non-FK default references (11 ms)
+    √ Cross-lab default configuration cannot be read by another manager (1 ms)
+
+PASS tests/contracts/audit_6_2_statement_ui.test.js (312 MB heap size)
+  √ the en template editor shows literal placeholder instructions and preserves the other locale strings (14 ms)
+  √ the es template editor shows literal placeholder instructions and preserves the other locale strings (4 ms)
+  √ the es-419 template editor shows literal placeholder instructions and preserves the other locale strings (4 ms)
+  √ the fr template editor shows literal placeholder instructions and preserves the other locale strings (4 ms)
+  √ the pt template editor shows literal placeholder instructions and preserves the other locale strings (3 ms)
+  √ switching between localized defaults and a custom laboratory object makes a copy and restores null explicitly (1 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       176 passed, 176 total
+Snapshots:   0 total
+Time:        22.887 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_2_report_revision_install.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_2_report_revisions.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_2_statement_policy.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_2_statement_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_3_report_content.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\backup_restore_integrity.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\candidate_release_review_fixes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_governance.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_seeder.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_work_execution.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\closure.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-17.json

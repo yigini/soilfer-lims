@@ -1,0 +1,18 @@
+PASS tests/security/wiring.test.js (63 MB heap size)
+  WP-03: Dead-Code & System Wiring Regression Tests
+    √ Audit 2.5: QC preview has the evaluate permission and uses the scoped read authority (1 ms)
+    √ 1. validateSampleMatrix is actively called in result save/submit flow
+    √ 2. workflowContract functions are exported and callable (1 ms)
+    √ 3. utils/scopeGuard.js exported functions have active call sites and no dead code (WP-28) (103 ms)
+    √ 4. config/roles.js permission keys are registered and referenced (75 ms)
+    √ 5. client/src/components are tracked for active imports (121 ms)
+    √ 6. SD-16: No client file issues a status write the user did not request (catches SD-07)
+    √ 7. SD-16: Route-level permission guards are consistent with controller authorization (catches SD-06) (1 ms)
+    √ 8. SD-16: Every gate the client renders has an active server counterpart (catches SD-05) (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       9 passed, 9 total
+Snapshots:   0 total
+Time:        0.57 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\wiring.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-76.json

@@ -1,0 +1,75 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e78bb85e-a4f3-4576-b8bf-9630e9673bdf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e78bb85e-a4f3-4576-b8bf-9630e9673bdf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bea46b93-437d-4bbd-bc56-d62ff2d7dd33 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bea46b93-437d-4bbd-bc56-d62ff2d7dd33 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e78bb85e-a4f3-4576-b8bf-9630e9673bdf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e78bb85e-a4f3-4576-b8bf-9630e9673bdf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e78bb85e-a4f3-4576-b8bf-9630e9673bdf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e78bb85e-a4f3-4576-b8bf-9630e9673bdf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 86371e15-187d-4ae2-a0b7-eed97c628ae7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e78bb85e-a4f3-4576-b8bf-9630e9673bdf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e78bb85e-a4f3-4576-b8bf-9630e9673bdf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/translation_scoping_and_freeze.test.js (147 MB heap size)
+  Translation Scoping, Lab Isolation & Report Freeze Contracts
+    √ 1. Lab manager without global rights is rejected with 403 when updating global translations (36 ms)
+    √ 2. Super Admin can publish global translations (10 ms)
+    √ 3. Lab manager can update translations scoped to their laboratory (12 ms)
+    √ 4. Lab-scoped translations overlay on top of global catalog when fetching with labId (177 ms)
+    √ 5. Updating lab default language does not bulk overwrite staff personal language preference (19 ms)
+    √ 6. Report assembly freezes snapshot with locale and terminologyVersion metadata (5 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        1.723 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\translation_scoping_and_freeze.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-53.json

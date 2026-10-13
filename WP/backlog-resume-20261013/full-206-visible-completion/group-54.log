@@ -1,0 +1,11 @@
+PASS tests/contracts/unbaked_constants.test.js (66 MB heap size)
+  WP-35: Un-baked Deployment Constants Contract
+    √ 1. server/controllers/ contains zero hardcoded project fallbacks or country mappings (7 ms)
+    √ 2. Kobo import requires explicit project configuration and fails loudly without fallback (135 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        0.418 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\unbaked_constants.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-54.json

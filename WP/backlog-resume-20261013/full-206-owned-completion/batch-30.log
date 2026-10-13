@@ -1,0 +1,241 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sample_reception-1791891459670 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-lab_technician-1791891459673 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-lab_manager-1791891459674 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-master_user-1791891459675 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-project_manager-1791891459675 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-audit_user-1791891459677 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-surveyor-1791891459677 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-external_viewer-1791891459678 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-viewer-1791891459678 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-super_admin-1791891459679 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T11:37:39.880Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (app.js:99:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/localeMiddleware.js:36:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:51:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cors (node_modules/cors/lib/index.js:188:7)
+      at node_modules/cors/lib/index.js:224:17
+      at originCallback (node_modules/cors/lib/index.js:214:15)
+      at node_modules/cors/lib/index.js:219:13
+      at optionsCallback (node_modules/cors/lib/index.js:199:9)
+      at corsMiddleware (node_modules/cors/lib/index.js:204:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at internalNext (node_modules/helmet/index.cjs:531:6)
+      at xXssProtectionMiddleware (node_modules/helmet/index.cjs:311:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xPoweredByMiddleware (node_modules/helmet/index.cjs:304:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xPermittedCrossDomainPoliciesMiddleware (node_modules/helmet/index.cjs:297:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xFrameOptionsMiddleware (node_modules/helmet/index.cjs:281:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xDownloadOptionsMiddleware (node_modules/helmet/index.cjs:261:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xDnsPrefetchControlMiddleware (node_modules/helmet/index.cjs:254:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xContentTypeOptionsMiddleware (node_modules/helmet/index.cjs:246:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at strictTransportSecurityMiddleware (node_modules/helmet/index.cjs:239:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at referrerPolicyMiddleware (node_modules/helmet/index.cjs:207:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at originAgentClusterMiddleware (node_modules/helmet/index.cjs:182:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at crossOriginResourcePolicyMiddleware (node_modules/helmet/index.cjs:175:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at crossOriginOpenerPolicyMiddleware (node_modules/helmet/index.cjs:159:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at contentSecurityPolicyMiddleware (node_modules/helmet/index.cjs:124:4)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at helmetMiddleware (node_modules/helmet/index.cjs:533:6)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+  console.log
+    [AUTH] Verifying token for ID: fake (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-lab_technician-1791891459673 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sample_reception-1791891459670 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-external_viewer-1791891459678 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-external_viewer-1791891459678 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-external_viewer-1791891459678 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [DashboardController] getQueue error for manager.review: Error: Access denied: Queue manager.review is not authorized for role EXTERNAL_VIEWER
+        at Object.getQueueRows (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\dashboardService.js:1855:21)
+        at getQueueRows (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\dashboardController.js:32:50)
+        at Layer.handleRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\layer.js:152:17)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\router\lib\route.js:157:13)
+        at next (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\middleware\authMiddleware.js:123:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 403,
+      code: 'FORBIDDEN_QUEUE'
+    }
+
+      39 |         res.json(queueData);
+      40 |     } catch (err) {
+    > 41 |         console.error(`[DashboardController] getQueue error for ${req.params?.queueKey}:`, err);
+         |                 ^
+      42 |         res.status(err.statusCode || 500).json({
+      43 |             error: err.message || 'Failed to load queue rows',
+      44 |             code: err.code || 'QUEUE_ERROR'
+
+      at error (controllers/dashboardController.js:41:17)
+
+PASS tests/contracts/role_dashboards_redesign.test.js (140 MB heap size)
+  Role Dashboards Redesign (v1) Contract Tests
+    A01: Canonical Role Home Endpoints (GET /api/dashboard/home)
+      √ Every canonical role returns a valid, tailored home response (199 ms)
+      √ Unknown or unauthenticated requests fail closed (12 ms)
+    A02 & A03: Expected Arrivals vs Physical Receipt
+      √ EXPECTED sample with legacy PENDING drying/prep flags contributes 0 to technician ready bench
+      √ Physically received sample without completed gates is waiting, not ready for result recording
+    A07: 40 pH Determinations Grouping
+      √ 40 pH determinations appear as 1 grouped method row in bench.ready (16 ms)
+    A10 & A11: Cross-Lab Isolation & Safe Query Composition
+      √ Foreign lab draft is strictly excluded from testLab1 reception.drafts queue (7 ms)
+      √ scopedWhere composes with AND and preserves top-level OR (1 ms)
+    A14: External Viewer Scoping & Report Visibility
+      √ External viewer can only search and see PUBLISHED reports, never DRAFT (10 ms)
+      √ External viewer cannot download PDF for DRAFT report (7 ms)
+      √ External viewer is forbidden from requesting manager queues (queue authorization guard) (62 ms)
+    A17, A18, A19: Final Approval Eligibility Rules
+      √ Fresh intake with zero analytical work items is rejected from final approval
+      √ Gate-only work items (DRYING, PREPARATION) do not qualify sample for final approval
+      √ All-omitted work items without authorized disposition cannot pass approval vacuously
+      √ Failed QC batch blocks final approval
+      √ AUDIT_USER is strictly disallowed from publishing reports
+    A09: Lab Local Day Interval & Timezone Fallback
+      √ America/Guatemala computes correct local date and boundaries (1 ms)
+      √ Missing/invalid timezone explicitly labels isUtcFallback: true
+
+Test Suites: 1 passed, 1 total
+Tests:       17 passed, 17 total
+Snapshots:   0 total
+Time:        1.519 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\role_dashboards_redesign.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-owned-completion\batch-30.json

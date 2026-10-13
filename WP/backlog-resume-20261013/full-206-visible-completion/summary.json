@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "scope": "ALL_FROZEN_SOURCE_REGRESSION_SUITE_COVERAGE",
+  "source": "877a1d210da1124e5750695eb2da41c1645b9218",
+  "reviewHead": "9ae02f6ab7651d2ca887a98722f6a20ace3cc471",
+  "suiteCount": 362,
+  "totalTests": 5508,
+  "passedTests": 5508,
+  "failedTests": 0,
+  "pendingTests": 0,
+  "batches": 76,
+  "elapsedFinalCompletionSeconds": 135.46900000004098,
+  "finishedUtc": "2026-10-13T11:43:03.835789+00:00",
+  "priorRunStatuses": {
+    "74560": "FAILED",
+    "26052": "INCOMPLETE",
+    "87152": "FAILED"
+  },
+  "originalReportsUnchanged": true,
+  "reusedPassingSuites": 324,
+  "exactInventoryCoverage": true,
+  "frozenSourceUnchanged": true,
+  "unchangedStockAssertions": true,
+  "ordinarySetupFilesPreserved": true,
+  "visibleByteIdenticalAssets": true,
+  "visibleDisposableUploads": true,
+  "productionMutations": 0,
+  "nodeOptions": "",
+  "batchesSerial": true
+}

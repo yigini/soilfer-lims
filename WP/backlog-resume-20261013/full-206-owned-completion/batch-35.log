@@ -1,0 +1,110 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-reset-SC-1791891477741 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-reset-SC-1791891477741 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] WebSocket server initialised on /ws
+
+      at Object.log [as init] (wsServer.js:251:13)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-target-SC-1791891477741 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] WebSocket server initialised on /ws
+
+      at Object.log [as init] (wsServer.js:251:13)
+
+  console.log
+    [WS] Broadcast USER_STATUS to 0 socket(s) in lab lab-sc-SC-1791891477741
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] User target_SC-1791891477741 (usr-target-SC-1791891477741) connected for lab lab-sc-SC-1791891477741
+
+      at log (wsServer.js:185:36)
+
+  console.log
+    [WS] WebSocket server initialised on /ws
+
+      at Object.log [as init] (wsServer.js:251:13)
+
+  console.log
+    [WS] Broadcast USER_STATUS to 0 socket(s) in lab lab-sc-SC-1791891477741
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] User target_SC-1791891477741 (usr-target-SC-1791891477741) connected for lab lab-sc-SC-1791891477741
+
+      at log (wsServer.js:185:36)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-SC-1791891477741 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast COVER_ACTOR_PING to 0 socket(s) in lab lab-sc-SC-1791891477741
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-target-SC-1791891477741 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-SC-1791891477741 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-SC-1791891477741 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-SC-1791891477741 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-admin-SC-1791891477741 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/session_and_coverage.test.js (143 MB heap size)
+  Session and Coverage Contract Tests (S01-S03, P01, C02)
+    S01: mustChangePassword Enforcement Across Channels
+      √ blocks operational HTTP requests with 403 PASSWORD_CHANGE_REQUIRED (28 ms)
+      √ blocks SIS API access with 403 PASSWORD_CHANGE_REQUIRED (7 ms)
+      √ allows auth endpoints (/api/auth/me) (7 ms)
+      √ rejects WebSocket connection with close code 4005 (15 ms)
+    S02, S03 & C02: Impersonation Actor Lifecycle & Revocation
+      √ C02: Impersonation token works on HTTP and WS while support actor is active (17 ms)
+      √ S02 & S03: Actor suspension invalidates token on HTTP/SIS and revokes established socket (153 ms)
+    P01: Workspace Staff Bounding & Pagination
+      √ returns bounded page of staff with pagination metadata (29 ms)
+      √ clamps limit to maximum of 100 (14 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        1.454 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\session_and_coverage.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-owned-completion\batch-35.json

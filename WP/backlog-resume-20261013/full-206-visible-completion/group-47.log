@@ -1,0 +1,238 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for W001 by mgr_sub_1791891680511
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample W001 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-SUB
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-SUB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-SUB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SUB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [createSubmission] Error: TransitionError: Some canonical analytical work has not been submitted.
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionLifecycleService.js:28:15)
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:49:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ], hasSubmission: true }
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SUB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-SUB
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SUB
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d497c770-e9ba-442c-b137-93aade17110f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4f0705a-ba39-4a70-939c-60d70c4d8cd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/submission.test.js (166 MB heap size)
+  8.1 Section D: Submission Rules
+    √ Setup: Create Sample and WorkItems (331 ms)
+    √ Scenario 1: Tech can Submit Partial (PH) (301 ms)
+    √ Scenario 2: Previously submitted work counts toward a full submission (72 ms)
+    √ Scenario 3: Manager accepts Submission (PH) (95 ms)
+    √ Scenario 4: Rejection (COND) (147 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        2.218 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\submission.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-47.json

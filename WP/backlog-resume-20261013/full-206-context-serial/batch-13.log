@@ -1,0 +1,1112 @@
+PASS tests/contracts/audit_4_6_calculation_install.test.js (66.013 s, 112 MB heap size)
+  √ SQL permits a deactivated original basis only through the complete existing correction witness (1780 ms)
+  √ SQL refuses a historical activation with no witness, preserving all owned rows and objects byte for byte (1576 ms)
+  √ SQL refuses a historical activation with Result.sampleId, preserving all owned rows and objects byte for byte (1530 ms)
+  √ SQL refuses a historical activation with Result.param, preserving all owned rows and objects byte for byte (1525 ms)
+  √ SQL refuses a historical activation with Result.attemptId, preserving all owned rows and objects byte for byte (1562 ms)
+  √ SQL refuses a historical activation with Result.replicateNo, preserving all owned rows and objects byte for byte (1545 ms)
+  √ SQL refuses a historical activation with Result.methodologyId, preserving all owned rows and objects byte for byte (1543 ms)
+  √ SQL refuses a historical activation with Result.batchId, preserving all owned rows and objects byte for byte (1560 ms)
+  √ SQL refuses a historical activation with Result.equipmentId, preserving all owned rows and objects byte for byte (1545 ms)
+  √ SQL refuses a historical activation with Result.equipmentReadiness, preserving all owned rows and objects byte for byte (1592 ms)
+  √ SQL refuses a historical activation with Result.basis, preserving all owned rows and objects byte for byte (1536 ms)
+  √ SQL refuses a historical activation with Result.provenance, preserving all owned rows and objects byte for byte (1527 ms)
+  √ SQL refuses a historical activation with ResultCalculation.templateId, preserving all owned rows and objects byte for byte (1548 ms)
+  √ SQL refuses a historical activation with ResultCalculation.templateVersion, preserving all owned rows and objects byte for byte (1486 ms)
+  √ SQL refuses a historical activation with ResultCalculation.activationId, preserving all owned rows and objects byte for byte (1486 ms)
+  √ SQL refuses a historical activation with ResultCalculation.curveId, preserving all owned rows and objects byte for byte (1513 ms)
+  √ SQL refuses a historical activation with ResultCalculation.parameters, preserving all owned rows and objects byte for byte (1511 ms)
+  √ SQL refuses a historical activation with ResultCalculation.conversionFactor, preserving all owned rows and objects byte for byte (1532 ms)
+  √ SQL refuses a historical activation with ResultCalculation.unitConversion, preserving all owned rows and objects byte for byte (1543 ms)
+  √ SQL refuses a historical activation with revised curve, preserving all owned rows and objects byte for byte (1539 ms)
+  √ PRE_199 actual populated baseline retains every old row, column, foreign key, index, trigger and receipt (600 ms)
+  √ managed creation installs the same PASS guard and preserves historical results after all refused inserts (109 ms)
+  √ managed receipt failure rolls the five new tables and references back while retaining every old object and row (86 ms)
+  √ the closed factory binds its bytes and sole caller; changed helper and second callers remain violations (53 ms)
+  √ real fresh schema dry-run, additive install and repeated no-op preserve all original rows and schema objects (1899 ms)
+  √ receipt refusal rolls every new guard and reference back atomically (1367 ms)
+  √ empty fresh catalogue installs schema with eleven deferred references, then restarts without any file-byte changes (1792 ms)
+  √ absent pct_mass defers only its three references; later catalogue insertion gets three receipts and preserves all prior evidence (1588 ms)
+  √ a conflicting present controlled prerequisite % refuses before schema or receipt writes (1361 ms)
+  √ a conflicting present controlled prerequisite mg/kg refuses before schema or receipt writes (1378 ms)
+  √ a conflicting present controlled prerequisite cmol(+)/kg refuses before schema or receipt writes (1397 ms)
+  √ a late per-reference receipt failure rolls every schema/reference addition back and preserves the complete prior database (1398 ms)
+  √ refuses partial-guard with unchanged bytes before any installation writes (1408 ms)
+  √ refuses changed-column with unchanged bytes before any installation writes (1374 ms)
+  √ refuses wrong-unit with unchanged bytes before any installation writes (1384 ms)
+  √ refuses wrong-reference with unchanged bytes before any installation writes (1375 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"slope":null} (1397 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"intercept":null} (1456 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"r":null} (1414 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"rSquared":null} (1436 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"slope":0} (1405 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"slope":null} (1421 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"intercept":null} (1396 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"r":null} (1430 ms)
+  √ the actual fresh schema refuses pre-existing bad PASS coefficients before any guard or receipt: {"rSquared":null} (1440 ms)
+  √ the installed fresh PASS guard rejects null, nonfinite and zero slope, while a degenerate FAIL stores all-null coefficients (1500 ms)
+  √ every managed table is byte-identical to its independently emitted fresh Prisma oracle, with guards separate (2 ms)
+  √ the actual point INSERT guard refuses out-of-range ordinals before capacity and extra points after capacity (1582 ms)
+  √ CLI requires an explicit existing database and an unambiguous mode (2 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: f7c31c02-4fab-47c4-bfd9-95308004f7d6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e96a1f95-3949-4022-b452-5c36704c14c2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f7c31c02-4fab-47c4-bfd9-95308004f7d6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f7c31c02-4fab-47c4-bfd9-95308004f7d6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f7c31c02-4fab-47c4-bfd9-95308004f7d6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: This request is not an unused approval.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:8:39)
+        at Object.fail [as available] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:94:38)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:19:9)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'OVERRIDE_REQUEST_CLOSED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d92a4dc3-32c8-4dfa-8b56-f2eb9c0f1841 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d27e49a5-3eff-4ffe-9f11-d38723c22323 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d92a4dc3-32c8-4dfa-8b56-f2eb9c0f1841 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: The value or recording context changed; cancel and request again.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:8:39)
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:102:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.preflightApprovedMeasurements (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:132:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:146:13
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'OVERRIDE_CONTEXT_CHANGED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dcb568e6-694e-471e-8cf4-7aaf33e762df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 020d7108-f18c-4974-bd79-c27938ea0e19 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dcb568e6-694e-471e-8cf4-7aaf33e762df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: The value or recording context changed; cancel and request again.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:8:39)
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:102:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.preflightApprovedMeasurements (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:132:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:146:13
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'OVERRIDE_CONTEXT_CHANGED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bfd10721-9ae7-4478-9b13-b97e3a631958 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5789c2f1-db7a-440c-9bda-c4aebd96c867 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bfd10721-9ae7-4478-9b13-b97e3a631958 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: The value or recording context changed; cancel and request again.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:8:39)
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:102:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.preflightApprovedMeasurements (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:132:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:146:13
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'OVERRIDE_CONTEXT_CHANGED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b1ad21e2-19e3-4929-b50e-0c67de6ee3ad (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7343acac-b1cd-4729-939b-dabf46971acb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b1ad21e2-19e3-4929-b50e-0c67de6ee3ad (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: The value or recording context changed; cancel and request again.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:8:39)
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:102:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.preflightApprovedMeasurements (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:132:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:146:13
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'OVERRIDE_CONTEXT_CHANGED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1a576701-1fd8-4d1e-ba5b-2f841d133635 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6f21812c-e534-41a8-a44e-50d1f217b962 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1a576701-1fd8-4d1e-ba5b-2f841d133635 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: The value or recording context changed; cancel and request again.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:8:39)
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:102:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.preflightApprovedMeasurements (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:132:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:146:13
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'OVERRIDE_CONTEXT_CHANGED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f2da5ed4-e69f-4746-bb9e-746cb341bb5a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: efd6bdc2-5aaa-45ef-a0e7-9e5868bc566b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f2da5ed4-e69f-4746-bb9e-746cb341bb5a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: The value or recording context changed; cancel and request again.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:8:39)
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:102:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.preflightApprovedMeasurements (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultOverrideService.js:132:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:146:13
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'OVERRIDE_CONTEXT_CHANGED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 64cf0efe-8e9e-41f1-8ad7-3290c4df08a8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 866fdb88-dc44-4088-ac7a-24a1ae680bd9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a457ee6d-2738-4a26-bec6-f54ccc6e296d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 47c0b80d-a2b0-489b-b833-6eb33c19f5ee (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3ed30baf-6dcb-4271-8dff-0e8e931a6328 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3ed30baf-6dcb-4271-8dff-0e8e931a6328 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bee0e4-dfa9-4777-8137-52d6a628d34d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User override-af1aa6c0-7395-42df-8041-7b9e63e38080 (Lab: 653861bb-dbe1-4dcf-b761-cbd76209a00e) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/resultOverrideService.js:17:20)
+      at rowForActor (services/resultOverrideService.js:63:5)
+      at services/resultOverrideService.js:68:22
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.decide (controllers/resultOverrideController.js:5:46)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bee0e4-dfa9-4777-8137-52d6a628d34d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User override-af1aa6c0-7395-42df-8041-7b9e63e38080 (Lab: 653861bb-dbe1-4dcf-b761-cbd76209a00e) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/resultOverrideService.js:17:20)
+      at rowForActor (services/resultOverrideService.js:63:5)
+      at services/resultOverrideService.js:80:22
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.cancel (controllers/resultOverrideController.js:6:46)
+
+  console.log
+    [AUTH] Verifying token for ID: c908bd3b-0f5a-4713-abb9-062a49f4815f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c908bd3b-0f5a-4713-abb9-062a49f4815f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c908bd3b-0f5a-4713-abb9-062a49f4815f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f451cdb-51a2-42ae-985d-80ebe5fdac82 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b217daa6-282a-404d-98d1-a1e446980433 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f451cdb-51a2-42ae-985d-80ebe5fdac82 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f451cdb-51a2-42ae-985d-80ebe5fdac82 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d36f5e-a653-4124-a955-14d06d748b48 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1b7cf659-3b38-4eae-be12-50911a9553f2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d36f5e-a653-4124-a955-14d06d748b48 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ea27582e-66aa-4718-bcce-6b0b92ea985e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 50a548e1-cbed-4ec5-aa60-0bb3881567ed (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ea27582e-66aa-4718-bcce-6b0b92ea985e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ea27582e-66aa-4718-bcce-6b0b92ea985e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b364aea5-fd04-48c6-a69a-9db38d9f594c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f1901ff0-4d14-4c7f-b562-99edc1808975 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b364aea5-fd04-48c6-a69a-9db38d9f594c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3c553c7d-b95d-4529-aec3-7abd9ad8fcaa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3f96b6ea-dfca-461c-883e-2c0130b4d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8df6d32b-48b3-4e74-8060-ac5520b68714 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3f96b6ea-dfca-461c-883e-2c0130b4d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3f96b6ea-dfca-461c-883e-2c0130b4d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab d3a63e8c-ae91-4e80-8a60-96c5bfc66a96
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 3f96b6ea-dfca-461c-883e-2c0130b4d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7ce01c6d-0e87-40de-a8d6-119fe350cf85 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7ba63b63-a290-49a6-ba17-0f8a7bc775c8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7ba63b63-a290-49a6-ba17-0f8a7bc775c8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_4_override_commands.test.js (29.053 s, 216 MB heap size)
+  √ actual HTTP override round trip records exact raw value with approval flag and read-view approver id (1972 ms)
+  √ approved value changes refuse409 with zero writes and leave approval unused (1480 ms)
+  √ approved unit changes refuse409 with zero writes and leave approval unused (1350 ms)
+  √ approved replicate changes refuse409 with zero writes and leave approval unused (1345 ms)
+  √ approved instrument changes refuse409 with zero writes and leave approval unused (1350 ms)
+  √ approved methodVersion changes refuse409 with zero writes and leave approval unused (1351 ms)
+  √ approved policy changes refuse409 with zero writes and leave approval unused (1392 ms)
+  √ ineligible bad number cannot create a request, with zero writes (1192 ms)
+  √ ineligible <0.001 cannot create a request, with zero writes (1251 ms)
+  √ ineligible 6 cannot create a request, with zero writes (1187 ms)
+  √ ineligible 3 cannot create a request, with zero writes (1201 ms)
+  √ self approval and foreign-lab approval/cancellation refuse403 with zero writes (1450 ms)
+  √ cancellation keeps exact pinned field history, approved=false, and retry is a zero-write no-op (1501 ms)
+  √ cancellation keeps exact pinned field history, approved=true, and retry is a zero-write no-op (1423 ms)
+  √ an unrelated technician cannot cancel; a second active request refuses without writes (1333 ms)
+  √ consumed and rejected requests cannot be cancelled (2738 ms)
+  √ scoped list exposes the requester own history and manager queue without foreign requests (1197 ms)
+  √ actual workbench preview and commit keep the approved id, consume it once and expose history approval (1547 ms)
+  √ workbench preview uses method LOQ and cannot approve a below-LOQ censor limit (1187 ms)
+  √ dilution opportunity reads the recorded source and unchanged repeat authority without writing (1359 ms)
+
+PASS tests/contracts/audit_4_4_override_sql.test.js (17.085 s, 207 MB heap size)
+  √ SQL refuses changes to immutable context rawValue with zero writes (1221 ms)
+  √ SQL refuses changes to immutable context unit with zero writes (1096 ms)
+  √ SQL refuses changes to immutable context basis with zero writes (1127 ms)
+  √ SQL refuses changes to immutable context methodRevision with zero writes (1114 ms)
+  √ SQL refuses changes to immutable context rulesSha256 with zero writes (1112 ms)
+  √ SQL refuses changes to immutable context reason with zero writes (1097 ms)
+  √ SQL refuses changes to immutable context requestedBy with zero writes (1103 ms)
+  √ SQL refuses deletion and terminal insertion, and enforces one active request per cell (1212 ms)
+  √ SQL refuses incomplete or self decisions self approval with zero writes (1173 ms)
+  √ SQL refuses incomplete or self decisions blank reason with zero writes (1104 ms)
+  √ SQL refuses incomplete or self decisions missing time with zero writes (1098 ms)
+  √ pending cancellation leaves decision fields null and requires its separate cancellation group (1110 ms)
+  √ approved cancellation retains the original approval byte for byte (1102 ms)
+  √ consumption requires an actual exact-context Result and preserves approval with no cancellation fields (1121 ms)
+  √ consumption refuses a different raw string despite an identical numeric meaning (1140 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Record a failing required pair before adding a third reading.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:77:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_NOT_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Record a failing required pair before adding a third reading.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:77:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_NOT_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: A new sample execution may contain at most three readings.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:68:15)
+        at assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:53)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_LIMIT',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Record a failing required pair before adding a third reading.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:77:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_NOT_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Record a failing required pair before adding a third reading.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:77:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_NOT_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Record a failing required pair before adding a third reading.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:77:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_NOT_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:106:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: A new sample execution may contain at most three readings.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:68:15)
+        at assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:53)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_LIMIT',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Record a failing required pair before adding a third reading.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:77:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_NOT_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [WS] Blocked broadcast for event WORKITEM_CHANGED: missing labId
+
+      288 | function broadcastToLab(labId, eventType, payload) {
+      289 |     if (!labId) {
+    > 290 |         if (DEBUG) console.warn(`[WS] Blocked broadcast for event ${eventType}: missing labId`);
+          |                            ^
+      291 |         return 0;
+      292 |     }
+      293 |     const data = JSON.stringify({ type: eventType, ...payload });
+
+      at warn (wsServer.js:290:28)
+      at Object.broadcastToLab [as batchSave] (controllers/workbenchController.js:1283:21)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [WS] Blocked broadcast for event WORKITEM_CHANGED: missing labId
+
+      288 | function broadcastToLab(labId, eventType, payload) {
+      289 |     if (!labId) {
+    > 290 |         if (DEBUG) console.warn(`[WS] Blocked broadcast for event ${eventType}: missing labId`);
+          |                            ^
+      291 |         return 0;
+      292 |     }
+      293 |     const data = JSON.stringify({ type: eventType, ...payload });
+
+      at warn (wsServer.js:290:28)
+      at Object.broadcastToLab [as batchSave] (controllers/workbenchController.js:1283:21)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [WS] Blocked broadcast for event WORKITEM_CHANGED: missing labId
+
+      288 | function broadcastToLab(labId, eventType, payload) {
+      289 |     if (!labId) {
+    > 290 |         if (DEBUG) console.warn(`[WS] Blocked broadcast for event ${eventType}: missing labId`);
+          |                            ^
+      291 |         return 0;
+      292 |     }
+      293 |     const data = JSON.stringify({ type: eventType, ...payload });
+
+      at warn (wsServer.js:290:28)
+      at Object.broadcastToLab [as batchSave] (controllers/workbenchController.js:1283:21)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_5_replicate_write.test.js (12.943 s, 231 MB heap size)
+  √ count 1 refuses a new first-fill replica 2 with REPLICATE_NOT_REQUIRED and zero writes (1390 ms)
+  √ count 2 refuses a new first-fill replica 3 with REPLICATE_NOT_REQUIRED and zero writes (1211 ms)
+  √ count 2 refuses a new first-fill replica 4 with REPLICATE_LIMIT and zero writes (1176 ms)
+  √ a 10 / 10.5 pair (PASS) refuses a third reading without any writes (1196 ms)
+  √ a 10 / null pair (PENDING) refuses a third reading without any writes (1193 ms)
+  √ a <0.1 / 12 pair (NOT_EVALUABLE) refuses a third reading without any writes (1201 ms)
+  √ 10 and 12 at ten percent permit one third reading in the same recorded attempt, without selecting a mean or changing QC (1340 ms)
+  √ three simultaneous first readings cannot manufacture a recorded failing pair (1175 ms)
+  √ the actual queue keeps a completed first reading editable for replica2, then exposes the failing-pair third action without writes (1608 ms)
+  √ started native sample pairing uses frozen count/limits and leaves native QC positions, measurements and evaluations byte-identical (1267 ms)
+
+PASS tests/contracts/audit_4_4_value_context.test.js (6.938 s, 246 MB heap size)
+  √ the request context is read-only and resolves actual hard/policy limits and method-only LOQ/LOD (1177 ms)
+  √ unconfigured method LOQ/LOD never falls back to Analysis.validation, and nullable limits remain null (1105 ms)
+  √ rule hashes are stable across unrelated policy changes and change with authoritative warning criteria (1125 ms)
+  √ manager inline override cannot authorize a censor limit below actual method LOQ, with zero writes (1119 ms)
+  √ existing manager inline range override remains available and retains its original flag (1127 ms)
+  √ the request context inherits the started native run instrument rather than stale WorkItem equipment (1152 ms)
+
+PASS tests/contracts/audit_4_5_replicate_view.test.js (5.967 s, 263 MB heap size)
+  √ required count defaults to one for all presets, and the registry enforces both integer bounds (2 ms)
+  √ 10.0 and 12.0 at ten percent fail without modifying either retained Result (1 ms)
+  √ a passing pair is only a read view, not a reported-value selection (1 ms)
+  √ missing observations stay pending, and count one leaves the pair unnecessary
+  √ <0.5 is not averaged or assigned a guessed verdict (1 ms)
+  √ >100 is not averaged or assigned a guessed verdict
+  √ not-a-reading is not averaged or assigned a guessed verdict
+  √ near-LOQ pairs reuse the existing absolute-difference criterion (1 ms)
+  √ absolute-mode criteria use the configured limit and never an analysis-name constant
+  √ different attemptId refuses a comparable pair (1 ms)
+  √ different unit refuses a comparable pair
+  √ different basis refuses a comparable pair
+  √ different equipmentId refuses a comparable pair
+  √ different methodologyId refuses a comparable pair
+  √ the third retained observation shows its range and leaves the verdict to review (1 ms)
+  √ current rules resolve the method-scoped count and configured duplicate keys without reading QC frequency as count (1172 ms)
+  √ a started native run retains its count, duplicate criterion and LOQ despite later policy and method changes (1201 ms)
+  √ a historical snapshot without the new count uses the current count while retaining its frozen pair criteria (1143 ms)
+  √ foreign run context refuses with scoped 403 and zero writes (1141 ms)
+  √ malformed frozen evidence refuses a stable 409 rather than substituting live limits (1192 ms)
+
+PASS tests/contracts/audit_4_6_activation_wiring.test.js (229 MB heap size)
+  √ only the policy resolver and activation write authority access the activation model throughout runtime services/controllers/routes/scripts (2873 ms)
+  √ relation/raw-SQL activation access is detected even in scripts: db.resultCalculation.findUnique({include:{activation:true}}) (1 ms)
+  √ relation/raw-SQL activation access is detected even in scripts: db.resultCalculation.findMany({select:{['activation']:{select:{id:true}}}}) (1 ms)
+  √ relation/raw-SQL activation access is detected even in scripts: db.$queryRawUnsafe('SELECT * FROM "CalcTemplateActivation"')
+  √ relation/raw-SQL activation access is detected even in scripts: db.$queryRawUnsafe(`SELECT id FROM main.CalcTemplateActivation WHERE labId=${labId}`) (1 ms)
+  √ relation/raw-SQL activation access is detected even in scripts: db.$executeRawUnsafe('DELETE FROM CalcTemplateActivation')
+  √ an alternate activation access in another consumer is detected: db.calcTemplateActivation.findMany() (1 ms)
+  √ an alternate activation access in another consumer is detected: db['calcTemplateActivation'].findFirst()
+  √ an alternate activation access in another consumer is detected: db?.calcTemplateActivation?.create({})
+  √ an alternate activation access in another consumer is detected: const {calcTemplateActivation: aliases}=db; aliases.findMany() (1 ms)
+
+PASS tests/contracts/audit_4_4_override_install.test.js (269 MB heap size)
+  √ actual installer dry-runs/applies/no-ops empty pre/fresh schema, fresh=false, retaining every row (1272 ms)
+  √ actual installer dry-runs/applies/no-ops empty pre/fresh schema, fresh=true, retaining every row (1146 ms)
+  √ partial guard installations refuse instead of repairing or overwriting evidence (1113 ms)
+
+PASS tests/contracts/audit_4_5_replicate_ui.test.js (256 MB heap size)
+  √ the grid shows two columns and keeps one durable draft/recording step at a time (54 ms)
+  √ a retained first cell is immutable and the second cell sends replica2 through the existing draft callback (5 ms)
+  √ the third action reveals only an empty third cell, never selecting the displayed mean (4 ms)
+  √ PASS shows no new third action or mean selection control (4 ms)
+  √ NOT_EVALUABLE shows no new third action or mean selection control (3 ms)
+  √ REVIEW_REQUIRED shows no new third action or mean selection control (4 ms)
+  √ all five client and server locales share every new label, source, verdict, reason and stable refusal (12 ms)
+  √ WorksheetArea uses the pair editor only for required-count2, and keeps count1 on the original scalar editor (31 ms)
+  √ SingleSampleEditor uses the pair editor only for required-count2, and keeps count1 on the original scalar editor (7 ms)
+  √ equal replica2 becomes ready independently of replica1, while a retained cell stays immutable (25 ms)
+  √ replicate Escape uses the existing client-only restore with the exact replica number (3 ms)
+  √ actual DOM keyboard movement keeps replica2 across rows with different retained cells (273 ms)
+
+PASS tests/contracts/audit_4_6_calculation_arithmetic.test.js (252 MB heap size)
+  Audit 4.6 shared, source-derived arithmetic
+    √ derived moisture: SOP-20 v1, 24 Jan 2023, p7 §9; (32-30)/(30-10)*100 = 10% (2 ms)
+    √ derived WB 1.30: SOP-02 v1, 28 Oct 2019, pp15–16 §9.1; (20-12)*0.5*0.003*100*1.30/1 = 1.56%
+    √ WB recovery remains supplied by the immutable template, including the separately published 1.33 variant (1 ms)
+    √ derived Olsen P: cb3644en, GLOSOLAN-SOP-10 v1, 13 Jan 2021 p7 §9
+    √ derived Bray-1 P: cb3460en, GLOSOLAN-SOP-09 v1, 13 Jan 2021 p8 §9
+    √ derived Ca: SOP-17 v1, 26 July 2022 p9 §9.2; (atomicMass/charge)*100/5/(atomicMass/charge*10) = 2 cmol(+)/kg
+    √ derived Mg: SOP-17 v1, 26 July 2022 p9 §9.2; (atomicMass/charge)*100/5/(atomicMass/charge*10) = 2 cmol(+)/kg
+    √ derived K: SOP-17 v1, 26 July 2022 p9 §9.2; (atomicMass/charge)*100/5/(atomicMass/charge*10) = 2 cmol(+)/kg
+    √ derived Na: SOP-17 v1, 26 July 2022 p9 §9.2; (atomicMass/charge)*100/5/(atomicMass/charge*10) = 2 cmol(+)/kg (1 ms)
+    √ derived CEC: SOP-17 v1, 26 July 2022 p9 §9.1; (2.5-0.5)*0.01*100/5*100/50 = 0.8 cmol(+)/kg
+    √ derived Kjeldahl: SOP-14 v1, 18 Jan 2021 pp10–11 §9; (10.5-0.5)*0.02*14.0067/1/10 = 0.280134% -> 0.28%
+    √ comma decimals use the supplied lab format and preserve exact input strings
+    √ WB converts full native precision to reporting g/kg before the sole rounding: 1.596% becomes15.96g/kg (1 ms)
+    √ Kjeldahl native0.280134% remains unrounded and reporting2.80134g/kg rounds once to2.801
+    √ an inactive reference can have null precision, but calculation requires verified explicit0–6 precision (15 ms)
+    √ the new controlled mass percent is distinct; existing percent and its free-text synonyms remain RATIO (1 ms)
+    √ missing or incompatible controlled units are refused instead of assuming a conversion
+    √ missing or incompatible controlled units are refused instead of assuming a conversion
+    √ missing or incompatible controlled units are refused instead of assuming a conversion
+    √ missing or incompatible controlled units are refused instead of assuming a conversion
+    √ missing raw input refuses with the pinned code (1 ms)
+    √ missing raw input refuses with the pinned code
+    √ missing raw input refuses with the pinned code (1 ms)
+    √ a qualified or malformed raw input <1 cannot pretend to be a reading
+    √ a qualified or malformed raw input NaN cannot pretend to be a reading (1 ms)
+    √ a qualified or malformed raw input Infinity cannot pretend to be a reading
+    √ a qualified or malformed raw input 10 mg cannot pretend to be a reading
+    √ invalid denominator 0 refuses rather than clamping or yielding infinity (1 ms)
+    √ invalid denominator -1 refuses rather than clamping or yielding infinity
+    √ a negative blank-corrected result remains numerical evidence; the engine applies no QC acceptance limits
+    √ templates cannot supply executable formula strings or omit required method constants (1 ms)
+    √ OLS is unweighted, free-intercept; a zero standard counts and replicate standards do not inflate distinct levels
+    √ Pearson r retains its sign; r-squared cannot turn a negative slope into a passing positive-correlation curve
+    √ degenerate standards have no usable fit, rather than invented coefficients
+    √ degenerate standards have no usable fit, rather than invented coefficients
+    √ degenerate standards have no usable fit, rather than invented coefficients (1 ms)
+
+PASS tests/contracts/audit_4_4_value_feedback_ui.test.js (254 MB heap size)
+  √ actual NumericEditor immediately classifies 65 as RED using the exact server module (52 ms)
+  √ actual NumericEditor immediately classifies <0.001 as RED using the exact server module (7 ms)
+  √ actual NumericEditor immediately classifies 6.01 as VALID using the exact server module (7 ms)
+  √ actual NumericEditor immediately classifies 3 as AMBER using the exact server module (6 ms)
+  √ actual NumericEditor immediately classifies 11 as AMBER using the exact server module (5 ms)
+  √ the less-than quick key fills exact method LOQ using the lab decimal separator (5 ms)
+  √ unconfigured LOQ disables the quick key with its stable reason; null warning bounds are disclosed (6 ms)
+  √ a barcode-protected cell waits for the actual burst boundary before expanding a single less-than character (6 ms)
+  √ WorksheetArea passes the actual per-row server rules into the numeric input (24 ms)
+  √ SingleSampleEditor passes the actual per-row server rules into the numeric input (5 ms)
+  √ all five client and server locales include every validation label and flag (13 ms)
+
+PASS tests/contracts/audit_4_4_value_classification.test.js (258 MB heap size)
+  √ 65 has the pinned immediate classification RED (1 ms)
+  √ <0.001 has the pinned immediate classification RED
+  √ not-a-number has the pinned immediate classification RED (1 ms)
+  √ 3 has the pinned immediate classification AMBER
+  √ 11 has the pinned immediate classification AMBER
+  √ 6.01 has the pinned immediate classification VALID (1 ms)
+  √ a numeric reading below method LOQ is amber and never acquires an invented hard bound
+  √ unconfigured typical and calibration checks are skipped, and unconfigured LOQ disables the quick key
+  √ the quick key uses exactly the configured LOQ and decimal separator (1 ms)
+  √ null policy defaults are per-lab/method in every preset, with no invented physical limit
+
+Test Suites: 12 passed, 12 total
+Tests:       202 passed, 202 total
+Snapshots:   0 total
+Time:        146.303 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_4_override_commands.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_4_override_install.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_4_override_sql.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_4_value_classification.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_4_value_context.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_4_value_feedback_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_5_replicate_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_5_replicate_view.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_5_replicate_write.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_6_activation_wiring.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_6_calculation_arithmetic.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_6_calculation_install.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-13.json

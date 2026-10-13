@@ -1,0 +1,12 @@
+PASS tests/contracts/spectral_mir_window.test.js (37 MB heap size)
+  WP-33: Widened MIR Spectral Window (400-4000 cm-1)
+    √ 1. A full-range KBr MIR scan (400-4000 cm-1) validates without being flagged (3 ms)
+    √ 2. A scan extending below 400 cm-1 produces WAVENUMBER_OUT_OF_RANGE warning (1 ms)
+    √ 3. Custom instrument range option allows extended Far-IR scanning
+
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Snapshots:   0 total
+Time:        0.258 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectral_mir_window.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-owned-completion\batch-38.json

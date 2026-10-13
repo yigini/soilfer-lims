@@ -1,0 +1,14 @@
+PASS tests/contracts/terminology_grouping_and_registry.test.js (95 MB heap size)
+  Terminology Grouping, Registry & Reconciled Counts Contract
+    √ 1. All 8 canonical groups + unclassified have valid definitions and metadata in all 5 locales (16 ms)
+    √ 2. Every catalog key resolves to a valid primaryGroup with optional cross-feature tags (525 ms)
+    √ 3. Deterministic key classification properly categorizes UI, scientific, and operations keys (1 ms)
+    √ 4. Cross-group search matches by key, text, and domain tags (17 ms)
+    √ 5. Shared terms update once and preserve singular translation entry (11 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        0.919 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\terminology_grouping_and_registry.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-48.json

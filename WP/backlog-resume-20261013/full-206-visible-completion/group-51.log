@@ -1,0 +1,303 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T11:41:33.519Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (app.js:99:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/localeMiddleware.js:36:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:51:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cors (node_modules/cors/lib/index.js:188:7)
+      at node_modules/cors/lib/index.js:224:17
+      at originCallback (node_modules/cors/lib/index.js:214:15)
+      at node_modules/cors/lib/index.js:219:13
+      at optionsCallback (node_modules/cors/lib/index.js:199:9)
+      at corsMiddleware (node_modules/cors/lib/index.js:204:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at internalNext (node_modules/helmet/index.cjs:531:6)
+      at xXssProtectionMiddleware (node_modules/helmet/index.cjs:311:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xPoweredByMiddleware (node_modules/helmet/index.cjs:304:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xPermittedCrossDomainPoliciesMiddleware (node_modules/helmet/index.cjs:297:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xFrameOptionsMiddleware (node_modules/helmet/index.cjs:281:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xDownloadOptionsMiddleware (node_modules/helmet/index.cjs:261:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xDnsPrefetchControlMiddleware (node_modules/helmet/index.cjs:254:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xContentTypeOptionsMiddleware (node_modules/helmet/index.cjs:246:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at strictTransportSecurityMiddleware (node_modules/helmet/index.cjs:239:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at referrerPolicyMiddleware (node_modules/helmet/index.cjs:207:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at originAgentClusterMiddleware (node_modules/helmet/index.cjs:182:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at crossOriginResourcePolicyMiddleware (node_modules/helmet/index.cjs:175:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at crossOriginOpenerPolicyMiddleware (node_modules/helmet/index.cjs:159:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at contentSecurityPolicyMiddleware (node_modules/helmet/index.cjs:124:4)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at helmetMiddleware (node_modules/helmet/index.cjs:533:6)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+  console.log
+    [AUTH] Verifying token for ID: test-tech-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-mgr-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-admin-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-tech-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-tech-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-tech-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-tech-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-tech-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-tech-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-tech-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-tech-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-tech-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_tech_themes (LAB_TECHNICIAN) attempted MANAGE_LAB_APPEARANCE. Allowed roles: ["SUPER_ADMIN","LAB_MANAGER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: test-mgr-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-mgr-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-mgr-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-mgr-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-mgr-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-mgr-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-mgr-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-mgr-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-mgr-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-mgr-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-admin-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-admin-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-admin-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-admin-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-admin-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test-admin-themes (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/theme_appearance_contract.test.js (142 MB heap size)
+  Theme Library & Appearance Contracts
+    1. Public Appearance Endpoints
+      √ GET /api/appearance/catalog returns published themes with swatches and no secrets (17 ms)
+      √ GET /api/appearance/public returns platform appearance without auth (6 ms)
+    2. User Appearance Context
+      √ GET /api/appearance/context requires authentication (16 ms)
+      √ GET /api/appearance/context returns resolved hierarchy and scope for technician (15 ms)
+      √ GET /api/appearance/context returns adoption authority for lab manager (9 ms)
+      √ GET /api/appearance/context returns adoption authority for SUPER_ADMIN (14 ms)
+    3. Personal Preferences API & Authority Restrictions
+      √ Technician can save mode preference to dark with inherited theme (21 ms)
+      √ Technician attempting to save an unauthorized theme palette receives 403 Forbidden (10 ms)
+      √ Technician CAN save Clear Contrast as personal accessibility override (9 ms)
+      √ Saving preferences with stale expectedRevision returns 409 Conflict (10 ms)
+      √ Legacy client update with themePreference works and updates uiModePreference (9 ms)
+      √ Reject conflicting legacy themePreference and new appearance.modePreference in same payload (6 ms)
+      √ Profile endpoint also accepts appearance updates and returns sanitized user (8 ms)
+    4. Laboratory Appearance Adoption & Scoping
+      √ Technician cannot update lab appearance (403) (8 ms)
+      √ Manager cannot update a foreign lab appearance (403) (7 ms)
+      √ Assigned Manager can update own lab default appearance and generates AuditLog (22 ms)
+      √ Manager update with revision conflict returns 409 (8 ms)
+    5. Platform Global Appearance Adoption
+      √ Manager cannot access global appearance management (403) (5 ms)
+      √ SUPER_ADMIN can read and update global appearance and generates AuditLog (27 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        1.467 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\theme_appearance_contract.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-51.json

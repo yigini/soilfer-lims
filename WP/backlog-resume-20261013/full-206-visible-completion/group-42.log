@@ -1,0 +1,93 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 649b3e37-164b-4450-8cc6-d579e68024ea (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_sample01.dx, LabID=TEST-STAGEC-SMP-01, Modality=undefined
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_sample01.dx, LabID=TEST-STAGEC-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 649b3e37-164b-4450-8cc6-d579e68024ea (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=scan_505.csv, LabID=TEST-STAGEC-SMP-DUMMY-0505, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=scan_505.csv, LabID=TEST-STAGEC-SMP-DUMMY-0505, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 649b3e37-164b-4450-8cc6-d579e68024ea (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [SPECTRAL] Context sample: TEST-STAGEC-SMP-01 (labId=LAB-GTM, originalId=TEST-STAGEC-SMP-01)
+
+      at log (controllers/spectralController.js:1179:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=mismatched_scan.csv, LabID=LAB-CONFLICT-MISMATCH, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Using context sample TEST-STAGEC-SMP-01 (originalId=TEST-STAGEC-SMP-01) for upload
+
+      at log (controllers/spectralController.js:1223:25)
+
+  console.log
+    [DEBUG] Processing Scan: Name=mismatched_scan.csv, LabID=LAB-CONFLICT-MISMATCH, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Using context sample TEST-STAGEC-SMP-01 (originalId=TEST-STAGEC-SMP-01) for upload
+
+      at log (controllers/spectralController.js:1223:25)
+
+PASS tests/contracts/spectral_stage_c.test.js (145 MB heap size)
+  Spectral Library Stage C (SL-13 to SL-16)
+    √ SL-13 & SL-14: Server parses raw JCAMP-DX file directly and extracts acquisition metadata (192 ms)
+    √ SL-15: Indexed sample matching succeeds past 500 samples without in-memory cap (622 ms)
+    √ SL-15: Refuses laboratory ID mismatch (6 ms)
+    √ SL-16: Route work-item status update via catalogue analysis match and audit history (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        2.033 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectral_stage_c.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-42.json

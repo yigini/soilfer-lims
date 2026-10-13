@@ -1,0 +1,666 @@
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User foreign (Lab: 2c973efa-cc81-4a4d-8e97-0e34af16e355) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/crossCheckEvaluationService.js:13:11)
+      at services/crossCheckEvaluationService.js:109:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_8_cross_check_evidence.test.js:223:5)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User foreign (Lab: 2c973efa-cc81-4a4d-8e97-0e34af16e355) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/crossCheckEvaluationService.js:13:11)
+      at recordSubmissionCrossChecks (services/crossCheckEvaluationService.js:77:20)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_8_cross_check_evidence.test.js:224:5)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bd6e2239-6bf3-40a6-b689-5cb6fefaa78a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bd6e2239-6bf3-40a6-b689-5cb6fefaa78a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bd6e2239-6bf3-40a6-b689-5cb6fefaa78a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bd6e2239-6bf3-40a6-b689-5cb6fefaa78a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bd6e2239-6bf3-40a6-b689-5cb6fefaa78a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bd6e2239-6bf3-40a6-b689-5cb6fefaa78a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d44e5359-2557-42e8-9cd5-1c8895d60503
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d44e5359-2557-42e8-9cd5-1c8895d60503
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d44e5359-2557-42e8-9cd5-1c8895d60503
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d44e5359-2557-42e8-9cd5-1c8895d60503
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d44e5359-2557-42e8-9cd5-1c8895d60503
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d44e5359-2557-42e8-9cd5-1c8895d60503
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 58f01992-a809-4e21-b023-1319ff3dc471
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 58f01992-a809-4e21-b023-1319ff3dc471
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 58f01992-a809-4e21-b023-1319ff3dc471
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 58f01992-a809-4e21-b023-1319ff3dc471
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 58f01992-a809-4e21-b023-1319ff3dc471
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 58f01992-a809-4e21-b023-1319ff3dc471
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 90e262af-dd7d-40aa-8ecd-a04a96698e0a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/audit_4_8_cross_check_evidence.test.js (29.487 s, 154 MB heap size)
+  √ current stored-numeric preview keeps legacy diagnostics separate for basis null and writes no evidence (1729 ms)
+  √ current stored-numeric preview keeps legacy diagnostics separate for basis AIR_DRY and writes no evidence (1371 ms)
+  √ the actual submission response retains legacy diagnostics and separate immutable crossChecks for basis null (1640 ms)
+  √ the actual submission response retains legacy diagnostics and separate immutable crossChecks for basis AIR_DRY (1455 ms)
+  √ an unregistered historical lab saves and submits through the real HTTP workflow with disclosed unavailable checks and zero evidence (1262 ms)
+  √ missing sample lab metadata discloses unavailable preview/review without a policy substitute or database writes (1297 ms)
+  √ a registered inactive lab still records immutable checks using its own configured policy (1318 ms)
+  √ the separate submission endpoint exposes cross-check evidence or its unavailable reason, registered=true (1423 ms)
+  √ the separate submission endpoint exposes cross-check evidence or its unavailable reason, registered=false (1367 ms)
+  √ real submission retains all seven numeric-evidence checks and review reads the frozen 1.3 × CEC flag without parsing text (1476 ms)
+  √ a late evidence insert refusal rolls back the complete submission, attempts, events, Sample and audits (1418 ms)
+  √ cross-check writes require a caller transaction and permission; foreign review reads and writes refuse without changes (1311 ms)
+  √ after selection the live panel uses the real saved selections, supersedes without mixing observations, and preserves submission evidence (1724 ms)
+  √ a later laboratory policy affects only live selected checks; stored submission thresholds and another lab remain fixed (3417 ms)
+  √ a partial selection never fills missing selected inputs from the still-current observations (1401 ms)
+  √ invalid retained JSON {invalid is refused with a stable4xx without adopting or changing evidence (1465 ms)
+  √ invalid retained JSON null is refused with a stable4xx without adopting or changing evidence (1352 ms)
+  √ invalid retained JSON {"values":null} is refused with a stable4xx without adopting or changing evidence (1326 ms)
+  √ invalid retained JSON {"values":[],"missing":[],"lowerBound":false} is refused with a stable4xx without adopting or changing evidence (1313 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_7_xlsx_commit.test.js (17.538 s, 187 MB heap size)
+  √ real XLSX commit keeps long, exponent and rounded-display raw drafts plus immutable cell and policy evidence (1322 ms)
+  √ every mapped cell refusal lists its cell and leaves actual drafts, results, QC, attempts, audits and receipts unchanged (1315 ms)
+  √ actual lab number policy {"decimal":",","thousands":"."} controls the verified numeric1.234 lab text (1176 ms)
+  √ actual lab number policy {"decimal":",","thousands":null} controls the verified numeric1.234 lab text (1145 ms)
+  √ actual lab number policy {"decimal":".","thousands":null} controls the verified numeric1.234 lab text (1161 ms)
+  √ actual lab number policy {"decimal":".","thousands":","} controls the verified numeric1.234 lab text (1157 ms)
+  √ numeric/text imports under{"decimal":",","thousands":"."} keep source lexemes, verified draft text and the used policy version (1342 ms)
+  √ numeric/text imports under{"decimal":",","thousands":" "} keep source lexemes, verified draft text and the used policy version (1343 ms)
+  √ numeric/text imports under{"decimal":".","thousands":","} keep source lexemes, verified draft text and the used policy version (1328 ms)
+  √ shared-string1.234 remains ambiguous under comma/space policy and refuses the whole commit without transliteration (1170 ms)
+  √ policy changes after preview invalidate the actual commit before any receipt or draft (1164 ms)
+  √ mounted multipart sheets require an exact selection; changing it cannot authorize another sheet (1288 ms)
+  √ the actual multipart compressed-size cap returns the pinned XLSX code on both routes with zero writes (1250 ms)
+  √ malformed XML, macros, external parts and XML resource overflow refuse the real preview with zero writes (1191 ms)
+
+PASS tests/contracts/audit_4_8_cross_check_install.test.js (9.541 s, 203 MB heap size)
+  √ PRE_201 upgrades additively with every original analytical/QC/audit field, object, FK and receipt retained (886 ms)
+  √ real direct startup refuses missing cross-check installation before app startup and preserves the owned file (986 ms)
+  √ the exact fresh Prisma table is classified separately and receives only guards/receipt with0 backfill (611 ms)
+  √ foreign/partial/unmarked state foreign-table refuses dry-run and apply with exactly0 writes (627 ms)
+  √ foreign/partial/unmarked state extra-index refuses dry-run and apply with exactly0 writes (626 ms)
+  √ foreign/partial/unmarked state wrong-guard refuses dry-run and apply with exactly0 writes (634 ms)
+  √ foreign/partial/unmarked state partial-guard refuses dry-run and apply with exactly0 writes (793 ms)
+  √ foreign/partial/unmarked state populated-fresh refuses dry-run and apply with exactly0 writes (906 ms)
+  √ foreign/partial/unmarked state unmarked-complete refuses dry-run and apply with exactly0 writes (663 ms)
+  √ foreign/partial/unmarked state forged-complete-receipt refuses dry-run and apply with exactly0 writes (663 ms)
+  √ a late receipt refusal rolls back table, indexes and guards and retains all original evidence (599 ms)
+  √ every evidence column and deletion is immutable; sample/lab FKs retain the parent rows (1261 ms)
+  √ tampered prisma/migrations/20261010000100_cross_check_evaluation/migration.sql is refused by both loader and scanner rather than trusted as SQL (32 ms)
+  √ tampered prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json is refused by both loader and scanner rather than trusted as SQL (4 ms)
+  √ closed historical factory stays byte-bound, takes no arguments, and refuses unlisted/runtime callers (14 ms)
+  √ a changed loader body or mutable/aliased/parameterized import never grants a SQL authority (4 ms)
+  √ CLI requires an explicit database and one unambiguous execution mode (3 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_7_import_templates.test.js (5.749 s, 227 MB heap size)
+  √ mapping preserves raw column choices and never supplies a calculation, conversion or final value (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"delimiter":"AUTO"} (10 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"idColumn":-1} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"idColumn":1.5}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"idType":"GUESS"}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"hasHeader":"yes"} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"conversionFactor":1000}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unit":"mg/L","unitColumn":2}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unit":"mg/L","unitColumn":-1}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1}]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unitColumn":2,"inputs":[{"variable":"c","column":1,"unit":"mg/L"}]}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","inputs":[{"inputKey":"c","column":1,"unit":"mg/L"}]}]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","inputs":[]}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","inputs":[{"variable":"c","column":1}]}]}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"analytes":[{"analysisCode":"X","valueColumn":1,"unit":"mg/L"},{"analysisCode":"X","valueColumn":2,"unit":"mg/L"}]} (1 ms)
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"qcDetector":{"prefixes":[{"prefix":"BLK","kind":"BLANK"}]}}
+  √ invalid or implicit mapping is refused without changing the supplied cells: {"qcDetector":{"positionColumn":4,"prefixes":[{"prefix":"BLK","kind":"GUESS"}]}}
+  √ actual scoped template owner appends revisions, retains the root and audits each save (1189 ms)
+  √ another laboratory and an unprivileged actor cannot save a mapping or an audit row (2182 ms)
+  √ mounted template routes save and list through actual token, scope and permission middleware (1143 ms)
+  √ a same-lab different-instrument revision refuses with its exact code and no mapping or audit writes (1093 ms)
+
+  console.info
+    IMPORT_POPULATED_PRESERVATION {"originalTableCount":97,"counts":{"Analysis":11,"AnalysisCategory":0,"AnalysisGroup":0,"ApiKey":0,"AuditLog":9,"Batch":1,"BatchAnalyte":1,"BatchDisposition":0,"BatchEvent":6,"BatchPosition":3,"BatchPositionReference":0,"BatchPositionWorkItem":2,"BatchQcResult":0,"BatchReagentLot":0,"CalcTemplate":11,"CalcTemplateActivation":0,"CalibrationCurve":0,"CalibrationPoint":0,"CommandReceipt":0,"Consignment":0,"CrossCheckEvaluation":0,"EquipmentAsset":1,"EquipmentEvent":0,"EquipmentMethodEligibility":0,"EquipmentQualification":0,"EquipmentScheduleRule":0,"ExternalMapping":0,"GlobalAppearanceSetting":1,"HelpArticle":0,"HelpFeedback":0,"HelpLabNote":0,"HelpLocaleRevision":0,"HelpPublication":0,"HelpRevision":0,"HelpSupportConfig":0,"InventoryItem":0,"InventoryLocation":0,"InventoryLot":0,"InventoryReservation":0,"InventoryTransaction":0,"KoboConfig":0,"Lab":1,"LabAppearanceSetting":0,"LabLifecycleState":0,"LabMethodDefault":0,"LabPolicy":0,"LabPolicyOverride":0,"LabSequence":0,"Language":0,"Message":0,"MethodReference":0,"MethodRequirement":0,"Methodology":1,"NonconformityReport":0,"Notification":0,"OperationalGate":0,"OrderLine":0,"PreparationRecord":0,"ProficiencyRound":0,"Project":0,"ProjectLab":0,"QcEvaluation":1,"QcMeasurement":1,"QcRule":1,"ReferenceMaterial":0,"ReferenceValue":0,"Report":0,"ReportAccessLog":0,"ReportAmendmentWithdrawal":0,"ReportSequence":0,"ReportShareLink":0,"ReportedValueSelection":0,"Result":1,"ResultCalculation":0,"ResultEvidenceEvent":0,"ResultOverrideRequest":0,"ReviewDecision":0,"Sample":2,"SampleAmendment":0,"SampleAmendmentAttempt":0,"SampleHold":0,"SampleOrderRevision":0,"SpectralData":0,"StaffInvitation":0,"StaffRecoveryGrant":0,"Submission":0,"SystemSetting":0,"Unit":6,"User":1,"UserBenchCredential":0,"WorkAttempt":1,"WorkItem":2,"WorkItemDraft":1,"WorkItemEquipmentUse":0,"_exchange_connection_keys":0,"_exchange_connections":0,"_schema_migrations":31},"beforeHash":"cbdbff8614bce3229f8b08e935c2e1b1b5211782875bb70ff2134c7d2afd9734","afterHash":"8489d1f41f31e1fa55a95d4a31c7e53ce040df27be757503ce4ad34ca07e3931","totalChanges":1,"newTemplateCount":0,"newReceiptCount":0,"backfilledCount":0}
+
+      at info (tests/contracts/audit_4_7_instrument_import_install.test.js:228:17)
+
+  console.info
+    IMPORT_POPULATED_PRESERVATION {"originalTableCount":97,"counts":{"Analysis":11,"AnalysisCategory":0,"AnalysisGroup":0,"ApiKey":0,"AuditLog":9,"Batch":1,"BatchAnalyte":1,"BatchDisposition":0,"BatchEvent":6,"BatchPosition":3,"BatchPositionReference":0,"BatchPositionWorkItem":2,"BatchQcResult":0,"BatchReagentLot":0,"CalcTemplate":11,"CalcTemplateActivation":0,"CalibrationCurve":0,"CalibrationPoint":0,"CommandReceipt":0,"Consignment":0,"CrossCheckEvaluation":0,"EquipmentAsset":1,"EquipmentEvent":0,"EquipmentMethodEligibility":0,"EquipmentQualification":0,"EquipmentScheduleRule":0,"ExternalMapping":0,"GlobalAppearanceSetting":1,"HelpArticle":0,"HelpFeedback":0,"HelpLabNote":0,"HelpLocaleRevision":0,"HelpPublication":0,"HelpRevision":0,"HelpSupportConfig":0,"InventoryItem":0,"InventoryLocation":0,"InventoryLot":0,"InventoryReservation":0,"InventoryTransaction":0,"KoboConfig":0,"Lab":1,"LabAppearanceSetting":0,"LabLifecycleState":0,"LabMethodDefault":0,"LabPolicy":0,"LabPolicyOverride":0,"LabSequence":0,"Language":0,"Message":0,"MethodReference":0,"MethodRequirement":0,"Methodology":1,"NonconformityReport":0,"Notification":0,"OperationalGate":0,"OrderLine":0,"PreparationRecord":0,"ProficiencyRound":0,"Project":0,"ProjectLab":0,"QcEvaluation":1,"QcMeasurement":1,"QcRule":1,"ReferenceMaterial":0,"ReferenceValue":0,"Report":0,"ReportAccessLog":0,"ReportAmendmentWithdrawal":0,"ReportSequence":0,"ReportShareLink":0,"ReportedValueSelection":0,"Result":1,"ResultCalculation":0,"ResultEvidenceEvent":0,"ResultOverrideRequest":0,"ReviewDecision":0,"Sample":2,"SampleAmendment":0,"SampleAmendmentAttempt":0,"SampleHold":0,"SampleOrderRevision":0,"SpectralData":0,"StaffInvitation":0,"StaffRecoveryGrant":0,"Submission":0,"SystemSetting":0,"Unit":6,"User":1,"UserBenchCredential":0,"WorkAttempt":1,"WorkItem":2,"WorkItemDraft":1,"WorkItemEquipmentUse":0,"_exchange_connection_keys":0,"_exchange_connections":0,"_schema_migrations":31},"beforeHash":"11666213c07eea368e577fe3878624c77c38500e073fdbe424eec85b2528d9cd","afterHash":"7fc05bd9c98f4626c39d906d3da709c71843036c6af958b6508ff5563a87b198","totalChanges":1,"newTemplateCount":0,"newReceiptCount":0,"backfilledCount":0}
+
+      at info (tests/contracts/audit_4_7_instrument_import_install.test.js:228:17)
+
+PASS tests/contracts/audit_4_7_instrument_import_install.test.js (234 MB heap size)
+  √ the additional current-main schema-only factory is closed and digest-bound without changing the old fixture (10 ms)
+  √ a populated Prisma predecessor retains every analytical, QC, audit and raw draft row across dry-run, apply and repeated apply (1680 ms)
+  √ a populated native workbench predecessor retains every analytical, QC, audit and raw draft row across dry-run, apply and repeated apply (1576 ms)
+  retained historical89-model main
+    √ every template column is immutable: id (15 ms)
+    √ every template column is immutable: labId (11 ms)
+    √ every template column is immutable: instrumentId (9 ms)
+    √ every template column is immutable: name (10 ms)
+    √ every template column is immutable: version (8 ms)
+    √ every template column is immutable: mapping (9 ms)
+    √ every template column is immutable: createdBy (10 ms)
+    √ every template column is immutable: createdAt (8 ms)
+    √ every template column is immutable: supersedesId (8 ms)
+    √ every receipt column is immutable: id (8 ms)
+    √ every receipt column is immutable: labId (9 ms)
+    √ every receipt column is immutable: instrumentId (8 ms)
+    √ every receipt column is immutable: templateId (9 ms)
+    √ every receipt column is immutable: templateVersion (8 ms)
+    √ every receipt column is immutable: sourceSha256 (8 ms)
+    √ every receipt column is immutable: sourceName (8 ms)
+    √ every receipt column is immutable: mappingSnapshot (9 ms)
+    √ every receipt column is immutable: importedBy (7 ms)
+    √ every receipt column is immutable: importedAt (8 ms)
+    √ deletion of ImportTemplate is refused with its retained rows unchanged (8 ms)
+    √ deletion of InstrumentImportReceipt is refused with its retained rows unchanged (9 ms)
+    √ append-only revisions advance exactly once and preserve the original raw mapping (9 ms)
+    √ invalid template binding or revision refuses without a row: {"version":2} (9 ms)
+    √ invalid template binding or revision refuses without a row: {"instrumentId":"other-instrument"} (8 ms)
+    √ invalid template binding or revision refuses without a row: {"mapping":"not JSON"} (9 ms)
+    √ invalid template binding or revision refuses without a row: {"labId":"other-lab","supersedesId":"mapping-v1","version":2} (8 ms)
+    √ invalid source receipt refuses without a row: {"templateVersion":2} (9 ms)
+    √ invalid source receipt refuses without a row: {"instrumentId":"other-instrument"} (8 ms)
+    √ invalid source receipt refuses without a row: {"sourceSha256":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} (11 ms)
+    √ invalid source receipt refuses without a row: {"mappingSnapshot":"not JSON"} (7 ms)
+    √ the new draft pointer is nullable and restrictive, with no historical backfill or analytical writes (11 ms)
+    √ the schema-only factory is source-bound and unavailable to runtime or another caller (36 ms)
+    √ literal pre-200 classification is read-only and does not invent a receipt (24 ms)
+    √ an unmarked upgraded schema is refused without adopting its rows (22 ms)
+    √ a foreign object in the managed import namespace is refused (11 ms)
+    √ a forged receipt refuses without changing any imported evidence (11 ms)
+    √ installer CLI refuses malformed arguments: [] (13 ms)
+    √ installer CLI refuses malformed arguments: ["--apply"] (9 ms)
+    √ installer CLI refuses malformed arguments: ["--db"] (11 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--dry-run"] (11 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--apply"] (10 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--unknown"] (10 ms)
+    √ installer CLI accepts an explicit existing-path argument and one mode (11 ms)
+    √ startup refuses a missing database without creating it (8 ms)
+  actual current92-model main after210
+    √ every template column is immutable: id (10 ms)
+    √ every template column is immutable: labId (11 ms)
+    √ every template column is immutable: instrumentId (10 ms)
+    √ every template column is immutable: name (10 ms)
+    √ every template column is immutable: version (11 ms)
+    √ every template column is immutable: mapping (10 ms)
+    √ every template column is immutable: createdBy (11 ms)
+    √ every template column is immutable: createdAt (9 ms)
+    √ every template column is immutable: supersedesId (10 ms)
+    √ every receipt column is immutable: id (10 ms)
+    √ every receipt column is immutable: labId (9 ms)
+    √ every receipt column is immutable: instrumentId (8 ms)
+    √ every receipt column is immutable: templateId (9 ms)
+    √ every receipt column is immutable: templateVersion (9 ms)
+    √ every receipt column is immutable: sourceSha256 (9 ms)
+    √ every receipt column is immutable: sourceName (9 ms)
+    √ every receipt column is immutable: mappingSnapshot (8 ms)
+    √ every receipt column is immutable: importedBy (10 ms)
+    √ every receipt column is immutable: importedAt (8 ms)
+    √ deletion of ImportTemplate is refused with its retained rows unchanged (9 ms)
+    √ deletion of InstrumentImportReceipt is refused with its retained rows unchanged (8 ms)
+    √ append-only revisions advance exactly once and preserve the original raw mapping (10 ms)
+    √ invalid template binding or revision refuses without a row: {"version":2} (8 ms)
+    √ invalid template binding or revision refuses without a row: {"instrumentId":"other-instrument"} (10 ms)
+    √ invalid template binding or revision refuses without a row: {"mapping":"not JSON"} (9 ms)
+    √ invalid template binding or revision refuses without a row: {"labId":"other-lab","supersedesId":"mapping-v1","version":2} (9 ms)
+    √ invalid source receipt refuses without a row: {"templateVersion":2} (9 ms)
+    √ invalid source receipt refuses without a row: {"instrumentId":"other-instrument"} (9 ms)
+    √ invalid source receipt refuses without a row: {"sourceSha256":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} (9 ms)
+    √ invalid source receipt refuses without a row: {"mappingSnapshot":"not JSON"} (8 ms)
+    √ the new draft pointer is nullable and restrictive, with no historical backfill or analytical writes (10 ms)
+    √ the schema-only factory is source-bound and unavailable to runtime or another caller (13 ms)
+    √ literal pre-200 classification is read-only and does not invent a receipt (22 ms)
+    √ an unmarked upgraded schema is refused without adopting its rows (9 ms)
+    √ a foreign object in the managed import namespace is refused (9 ms)
+    √ a forged receipt refuses without changing any imported evidence (9 ms)
+    √ installer CLI refuses malformed arguments: [] (10 ms)
+    √ installer CLI refuses malformed arguments: ["--apply"] (9 ms)
+    √ installer CLI refuses malformed arguments: ["--db"] (8 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--dry-run"] (9 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--apply","--apply"] (8 ms)
+    √ installer CLI refuses malformed arguments: ["--db","owned.db","--unknown"] (10 ms)
+    √ installer CLI accepts an explicit existing-path argument and one mode (8 ms)
+    √ startup refuses a missing database without creating it (10 ms)
+  the released #293 predecessor keeps #205 records inside the exact import boundary
+    √ native workbench refuses the nearby foreign variant: records type (32 ms)
+    √ native workbench refuses the nearby foreign variant: unknown column (23 ms)
+    √ native workbench refuses the nearby foreign variant: updatedAt default (17 ms)
+    √ native workbench refuses the nearby foreign variant: workItem uniqueness (16 ms)
+    √ the additional current release schema-only fixture is closed and digest-bound (6 ms)
+    √ main51f schema and its native import ALTER are recognized without row writes or adoption (19 ms)
+    √ exact records predecessor preFresh refuses a changed type or unknown column (36 ms)
+    √ exact records predecessor preUpgraded refuses a changed type or unknown column (35 ms)
+    √ the complete installer contract has no unresolved or unauthorized SQL (33 ms)
+
+PASS tests/contracts/audit_4_7_xlsx_archive.test.js (179 MB heap size)
+  √ stored/deflated/described archive bytes are decoded exactly in memory: {"deflate":false} (2 ms)
+  √ stored/deflated/described archive bytes are decoded exactly in memory: {"deflate":true} (2 ms)
+  √ stored/deflated/described archive bytes are decoded exactly in memory: {"deflate":true,"descriptor":true} (1 ms)
+  √ unsafe or macro/external part xl/vbaProject.bin refuses the archive (8 ms)
+  √ unsafe or macro/external part xl/externalLinks/externalLink1.xml refuses the archive (1 ms)
+  √ unsafe or macro/external part ../outside.xml refuses the archive (1 ms)
+  √ unsafe or macro/external part /absolute.xml refuses the archive (1 ms)
+  √ unsafe or macro/external part xl\workbook.xml refuses the archive
+  √ malformed headers/checksums/encryption/truncation refuse without changing supplied bytes (2 ms)
+  √ malformed headers/checksums/encryption/truncation refuse without changing supplied bytes (1 ms)
+  √ malformed headers/checksums/encryption/truncation refuse without changing supplied bytes (2 ms)
+  √ malformed headers/checksums/encryption/truncation refuse without changing supplied bytes (1 ms)
+  √ malformed headers/checksums/encryption/truncation refuse without changing supplied bytes (2 ms)
+  √ duplicate member names are refused rather than choosing one content
+  √ compressed, total declared and entry-count limits each refuse before decoding (1 ms)
+  √ a forged small size cannot bypass the real bounded inflater (215 ms)
+
+PASS tests/contracts/audit_4_7_xlsx_source.test.js (182 MB heap size)
+  √ numeric and rounding-formatted lexemes, rich Unicode strings and source bytes are exact (7 ms)
+  √ <c r="A1"><f>1+1</f><v>2</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_FORMULA_UNSUPPORTED (18 ms)
+  √ <c r="A1" t="str"><v>cached</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_FORMULA_UNSUPPORTED (1 ms)
+  √ <c r="A1" t="e"><v>#DIV/0!</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_CELL_ERROR (2 ms)
+  √ <c r="A1" t="b"><v>1</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_CELL_TYPE_UNSUPPORTED (1 ms)
+  √ <c r="A1" t="d"><v>2026-10-10</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_CELL_TYPE_UNSUPPORTED (2 ms)
+  √ <c r="A1"><v>1,234</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_INVALID (1 ms)
+  √ <c r="A1"><v>1E99999</v></c> keeps raw evidence and refuses a mapped value with IMPORT_XLSX_INVALID (1 ms)
+  √ display format 0% refuses without rendering (1 ms)
+  √ display format #,##0, refuses without rendering (1 ms)
+  √ display format #,##0,, refuses without rendering (1 ms)
+  √ display format yyyy-mm-dd refuses without rendering (1 ms)
+  √ display format [h]:mm:ss refuses without rendering (1 ms)
+  √ display format 0.00;0.00% refuses without rendering (1 ms)
+  √ implied format ID 9 refuses numeric interpretation (1 ms)
+  √ implied format ID 14 refuses numeric interpretation (2 ms)
+  √ implied format ID 27 refuses numeric interpretation (2 ms)
+  √ implied format ID 36 refuses numeric interpretation (2 ms)
+  √ implied format ID 45 refuses numeric interpretation (2 ms)
+  √ implied format ID 46 refuses numeric interpretation (2 ms)
+  √ implied format ID 50 refuses numeric interpretation (1 ms)
+  √ implied format ID 58 refuses numeric interpretation (1 ms)
+  √ inherited percentage format with boolean 0 cannot hide behind a direct General format (2 ms)
+  √ inherited percentage format with boolean false cannot hide behind a direct General format (1 ms)
+  √ inherited percentage format with boolean  false  cannot hide behind a direct General format (1 ms)
+  √ invalid style boolean is refused as malformed metadata rather than silently applying the direct format (1 ms)
+  √ plain/literal format 0.00 retains the stored value (1 ms)
+  √ plain/literal format #,##0.00 retains the stored value (1 ms)
+  √ plain/literal format 0.00E+00 retains the stored value (1 ms)
+  √ plain/literal format 0.00&quot;kg&quot; retains the stored value (1 ms)
+  √ plain/literal format 0.00\% retains the stored value (1 ms)
+  √ numeric lab text has a verified round trip while shared strings retain existing lab parsing (2 ms)
+  √ comma-decimal lab syntax preserves every digit/exponent of OOXML numeric 1.5
+  √ comma-decimal lab syntax preserves every digit/exponent of OOXML numeric 12 (1 ms)
+  √ comma-decimal lab syntax preserves every digit/exponent of OOXML numeric 1E-3
+  √ comma-decimal lab syntax preserves every digit/exponent of OOXML numeric -1.5E-3
+  √ comma-decimal lab syntax preserves every digit/exponent of OOXML numeric 1234.5 (1 ms)
+  √ multiple/hidden sheets need an exact name; explicit selection decodes that sheet (2 ms)
+  √ merged cells are empty except the top-left and sparse coordinates do not allocate dense rows
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A2"><v>1</v></c>
+  √ invalid coordinates/styles/strings/XML refuse: <c r="XFE1"><v>1</v></c> (1 ms)
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A1" t="s"><v>0</v></c> (1 ms)
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A1" s="99"><v>1</v></c> (1 ms)
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A1"><v>1</v><v>2</v></c> (1 ms)
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A1"><v>&unknown;</v></c> (1 ms)
+  √ invalid coordinates/styles/strings/XML refuse: <c r="A1"><v>1</v></c><c r="A1"><v>2</v></c> (1 ms)
+  √ unused malformed XML, DTD and external relationship content also refuse (3 ms)
+  √ XML node/depth and merge resource limits refuse before constructing import commands (280 ms)
+
+PASS tests/contracts/audit_4_7_import_ui.test.js (182 MB heap size)
+  √ new mappings use only the scoped catalogue units and exact activated SOP inputs; a manager explicitly saves them (65 ms)
+  √ a saved mapping revision retains the original, invalidates its preview and sends the precise predecessor version (25 ms)
+  √ real multipart preview and commit retain the exact file, mapping, explicit worksheet and sealed token; no receipt field is supplied (22 ms)
+  √ changing import-sheet clears the previous authorization and requires a new preview (18 ms)
+  √ changing import-template clears the previous authorization and requires a new preview (18 ms)
+  √ changing import-file clears the previous authorization and requires a new preview (18 ms)
+  √ all refused rows and their cell references are visible; the commit callback cannot send a refused preview (16 ms)
+  √ a later commit conflict lists the precise refused rows and never reports success (20 ms)
+  √ a preview response for the previous run is ignored after the operator changes runs (17 ms)
+  √ entry permission can use a saved mapping without exposing equipment-manager revision controls (8 ms)
+  √ an unavailable native run exposes no import actions or context request: {"canEdit":false} (4 ms)
+  √ an unavailable native run exposes no import actions or context request: {"batch":{"id":"owned-import-run","labId":"owned-lab","instrumentId":"owned-instrument","startedAt":null,"status":"OPEN"}} (3 ms)
+  √ an unavailable native run exposes no import actions or context request: {"batch":{"id":"owned-import-run","labId":"owned-lab","instrumentId":null,"startedAt":"2026-10-10T00:00:00Z","status":"OPEN"}} (4 ms)
+  √ an unavailable native run exposes no import actions or context request: {"batch":{"id":"owned-import-run","labId":"owned-lab","instrumentId":"owned-instrument","startedAt":"2026-10-10T00:00:00Z","status":"CLOSED"}} (3 ms)
+  √ the complete import screen and stable refusal codes exist in all five translations (29 ms)
+
+PASS tests/contracts/audit_4_7_paste_preview.test.js (184 MB heap size)
+  √ actual paste preview matches displayed lab code using "\t" and retains decoded value whitespace (52 ms)
+  √ actual paste preview matches displayed lab code using ";" and retains decoded value whitespace (8 ms)
+  √ actual paste preview matches displayed lab code using "," and retains decoded value whitespace (6 ms)
+  √ 40 labelled sample rows apply to 40 exact tasks; an unknown ID is displayed and excluded (19 ms)
+  √ internal, original and explicitly supplied lab labels remain exact aliases (17 ms)
+  √ colliding identifiers and different aliases for the same task never choose or overwrite a target (11 ms)
+  √ numeric ambiguity follows the supplied task policy and never uses the user locale as a fallback (16 ms)
+  √ malformed quotes, extra cells, empty values and non-finite values remain visible and excluded (33 ms)
+  √ edited text or delimiter requires a fresh preview and queue status changes are re-evaluated (10 ms)
+  √ explicit delimiter resolves an identifier containing another supported separator (7 ms)
+  √ quoted IDs, escaped quotes, embedded newlines, BOM and physical row numbers decode without losing cell evidence (8 ms)
+  √ all five locales contain the same complete paste-preview keys and parameter placeholders (20 ms)
+
+PASS tests/contracts/audit_4_8_cross_check_components.test.js (189 MB heap size)
+  √ en review shows the translated 1.3 × CEC flag, current and frozen source evidence, without writes (66 ms)
+  √ es review shows the translated 1.3 × CEC flag, current and frozen source evidence, without writes (11 ms)
+  √ es-419 review shows the translated 1.3 × CEC flag, current and frozen source evidence, without writes (12 ms)
+  √ fr review shows the translated 1.3 × CEC flag, current and frozen source evidence, without writes (12 ms)
+  √ pt review shows the translated 1.3 × CEC flag, current and frozen source evidence, without writes (10 ms)
+  √ before selection the panel displays only stored submission checks; a legacy sample without evidence is disclosed (3 ms)
+  √ en unavailable laboratory is disclosed without an empty pass list (3 ms)
+  √ es unavailable laboratory is disclosed without an empty pass list (3 ms)
+  √ es-419 unavailable laboratory is disclosed without an empty pass list (3 ms)
+  √ fr unavailable laboratory is disclosed without an empty pass list (3 ms)
+  √ pt unavailable laboratory is disclosed without an empty pass list (3 ms)
+  √ INPUT_MISSING is shown as a localized not-evaluated reason (5 ms)
+  √ INPUT_NOT_REPORTABLE is shown as a localized not-evaluated reason (4 ms)
+  √ INPUT_NON_NUMERIC is shown as a localized not-evaluated reason (6 ms)
+  √ INPUT_CENSORED is shown as a localized not-evaluated reason (6 ms)
+  √ MULTIPLE_CANDIDATES is shown as a localized not-evaluated reason (4 ms)
+  √ UNIT_MISMATCH is shown as a localized not-evaluated reason (5 ms)
+  √ BASIS_MISMATCH is shown as a localized not-evaluated reason (5 ms)
+  √ DENOMINATOR_NOT_POSITIVE is shown as a localized not-evaluated reason (6 ms)
+  √ missing Na is disclosed as a lower bound, and the advisory texture pass is shown alongside the existing blocking gate (6 ms)
+  √ permission loss and sample changes discard previous and late responses; unauthorized users never fetch (5 ms)
+  √ a late response for the old sample cannot replace the new sample; reload retries a translated refusal (6 ms)
+  √ all five client/server catalogues cover every outcome, rule, flag and refusal reason (23 ms)
+
+PASS tests/contracts/audit_4_7_import_units.test.js (186 MB heap size)
+  √ direct import unit mg/kg retains the exact catalogue fields and matched source
+  √ direct import unit MASS_FRACTION_CODE retains the exact catalogue fields and matched source (1 ms)
+  √ an unconfigured synonym, case, whitespace or unrelated unit MG/KG refuses (5 ms)
+  √ an unconfigured synonym, case, whitespace or unrelated unit milligrams/kilogram refuses
+  √ an unconfigured synonym, case, whitespace or unrelated unit  mg/kg  refuses (1 ms)
+  √ an unconfigured synonym, case, whitespace or unrelated unit % refuses
+  √ an absent catalogue unit refuses even when the method or source supplies a unit (1 ms)
+  √ texture fractions accept only percent on a texture analysis and retain the original catalogue values (1 ms)
+  √ QC analytes use the same catalogue authority without QUDT aliases or conversions (1 ms)
+  √ the current typed-writer analysis authority and refusal survive the #283 integration
+
+PASS tests/contracts/audit_4_7_instrument_source.test.js (187 MB heap size)
+  √ file decoding preserves the exact source digest and quoted raw cells with delimiter "\t" (1 ms)
+  √ file decoding preserves the exact source digest and quoted raw cells with delimiter ";" (1 ms)
+  √ file decoding preserves the exact source digest and quoted raw cells with delimiter ","
+  √ forty sample rows with four analyte columns and six QC rows are decoded without matching, filtering or numeric interpretation (4 ms)
+  √ an unknown label, formula-looking value and malformed row remain decoded evidence for preview refusal
+  √ undecodable or unspecified source refuses with a stable error and unchanged input (5 ms)
+  √ undecodable or unspecified source refuses with a stable error and unchanged input
+  √ undecodable or unspecified source refuses with a stable error and unchanged input
+  √ undecodable or unspecified source refuses with a stable error and unchanged input (1 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       305 passed, 305 total
+Snapshots:   0 total
+Time:        69.105 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_import_templates.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_import_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_import_units.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_instrument_import_install.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_instrument_source.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_paste_preview.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_xlsx_archive.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_xlsx_commit.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_xlsx_source.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_8_cross_check_components.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_8_cross_check_evidence.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_8_cross_check_install.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-15.json

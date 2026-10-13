@@ -1,0 +1,858 @@
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 2a8c646b-5e8b-40e1-bd1b-852ccd506ee8) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcNativeRunService.js:18:16)
+      at services/qcNativeRunService.js:74:9
+      at transaction (services/qcNativeRunService.js:42:91)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_2_3_native_runs.test.js:1098:5)
+
+PASS tests/contracts/audit_2_3_native_runs.test.js (39.657 s, 837 MB heap size)
+  √ a failed analyte leaves its sibling measurable, reopenable and closable (deviation=false) (1272 ms)
+  √ a failed analyte leaves its sibling measurable, reopenable and closable (deviation=true) (988 ms)
+  √ an explicit method cannot replace recorded strict work-item methods with a lax QC rule (554 ms)
+  √ a real failed Native blocking run remains excluded from reports and publication after live QC becomes OFF (1161 ms)
+  √ mixed actual Native ADVISORY and compatibility live BLOCKING batches use the strictest effective report mode (672 ms)
+  √ a compatibility-only failed run retains live policy changes for report validity and publication (909 ms)
+  √ Native texture QC flags its governed fractions independently and preserves their values on deviation acceptance (770 ms)
+  √ test-owned cleanup retains QC-referenced workflow evidence and still removes unrelated explicit fixture ids (718 ms)
+  √ Native builds refuse two active attempts for a sample/analyte and never attach ACCEPTED history, with zero writes (568 ms)
+  √ sealed SUBMITTED work items cannot join Native or ordinary runs (569 ms)
+  √ sealed ACCEPTED work items cannot join Native or ordinary runs (572 ms)
+  √ sealed WAIVED work items cannot join Native or ordinary runs (567 ms)
+  √ sealed CANCELLED work items cannot join Native or ordinary runs (553 ms)
+  √ concurrent A/B first starts allocate distinct ordinals; abandoned OPEN builds do not consume C’s ordinal (708 ms)
+  √ actual OPEN reorder retains physical ids, lot evidence and duplicate parents; invalid and frozen orders write nothing (711 ms)
+  √ a late reorder event fault rolls back temporary numbering and all work-item rack changes (728 ms)
+  √ native entry, explicit evaluation and corrections before first start refuse without any write (585 ms)
+  √ partial native entry is retained; missing explicit values, malformed values and auto-evaluation while unbound refuse atomically (670 ms)
+  √ retained Native collection input uses physical ids, real duplicate parents and immutable full-precision expected values (679 ms)
+  √ the shared Native mutation rolls back evaluated observations when requested acceptance, close or metadata is refused (705 ms)
+  √ actual authenticated Native routes build, start, evaluate, reopen and correct using frozen API criteria and exact retained values (849 ms)
+  √ reasoned corrections append two evaluation versions and exact measurements using the frozen start limit (875 ms)
+  √ explicit evaluation after reopen appends fresh acceptance without rewriting retained readings (672 ms)
+  √ native censoring retains null numeric observations, canonical qualifiers and the frozen method limit (604 ms)
+  √ OFF start writes no evaluation; explicit evaluation records NOT_REQUIRED and never passing observation evidence (605 ms)
+  √ explicit evaluation records each OFF analyte without fake readings or passed QC counts (626 ms)
+  √ stored profile conversion refuses; separate direct non-calibration runs preserve free text and may start without a registered asset (631 ms)
+  √ part 13 calibration start requires a valid active scoped asset, refuses without writes and freezes its exact identity and text (670 ms)
+  √ failed Native disposition REPEAT_BATCH retains failed evidence and uses the central work transition (775 ms)
+  √ failed Native disposition REJECT retains failed evidence and uses the central work transition (776 ms)
+  √ failed membership cannot move without repeat/reject disposition (warning=false) (735 ms)
+  √ failed membership cannot move without repeat/reject disposition (warning=true) (688 ms)
+  √ actual manager disposition accepts a failed Native analyte with deviation, preserves warning flags and closes without changing failed readings (767 ms)
+  √ actual stored profile membership refuses conversion; a separate new Native run works and remains frozen after manager reopen (840 ms)
+  √ actual Native builder refuses 23 samples at the default limit and builds the specified 23-sample sequence through a method rule (817 ms)
+  √ ADVISORY explicit evaluation records INCOMPLETE; later complete values supersede it using frozen criteria (654 ms)
+  √ mixed-analyte evaluations and flags are independent; a shared lot correction appends both verdicts atomically (920 ms)
+  √ a late evaluation insert failure rolls back measurements, every shared binding and both analyte verdicts (774 ms)
+  √ calibration CHECK_STANDARD uses the frozen CCV criterion and unbound calibration blanks never block (642 ms)
+  √ pre-start rebuild retains a bound extra and both certificate revisions when its lot changes (684 ms)
+  √ a measured extra CRM is optional at a not-due ordinal and its failure contributes to the analyte verdict (737 ms)
+  √ removing a bound analyte last member is refused without writes; an unbound analyte removal is recorded (1286 ms)
+  √ optional CRM lot correction records NOT_SERVED with intact prior evidence; a due CRM refuses the same missing value (1108 ms)
+  √ real 23-sample builder writes 28 physical members, recorded parent picks and no invented QC values or ordinal (759 ms)
+  √ positive-minimum shared LRM extras use frozen required ids; only the extra may drop optional analyte service (928 ms)
+  √ mixed calibration frequencies freeze each analyte opening, closing and first boundary pair ids independently (802 ms)
+  √ real default-capacity, missing method and cross-lab builds refuse with zero normalized, membership or audit writes (805 ms)
+  √ first start freezes the newly effective limit, number policy and method LOQ with one ordinal, instrument and real analyst (641 ms)
+  √ a first-start count revision refuses stale positions and leaves every row, actor and ordinal unchanged (597 ms)
+  √ resuming a reopened native run reuses first-start metadata and criteria without resolving later policy (739 ms)
+  √ another start consumes the forecast ordinal; a now-due missing CRM refuses atomically instead of guessing or skipping it (825 ms)
+  √ shared physical lot gets separate precise analyte snapshots; a missing second value and conflicting lot refuse the whole build (665 ms)
+
+PASS tests/contracts/audit_2_3_qc_run_install.test.js (23.014 s, 835 MB heap size)
+  √ fresh Prisma DDL installs deferred FKs once and records its empty-table bootstrap (Linux exercises actual db push) (1605 ms)
+  √ fresh Prisma bootstrap refuses a seeded BatchAnalyte row without changing any bytes, schema or evidence (465 ms)
+  √ fresh Prisma bootstrap refuses a seeded BatchPosition row without changing any bytes, schema or evidence (429 ms)
+  √ fresh Prisma bootstrap refuses a seeded BatchPositionWorkItem row without changing any bytes, schema or evidence (428 ms)
+  √ fresh Prisma bootstrap refuses a seeded BatchPositionReference row without changing any bytes, schema or evidence (433 ms)
+  √ fresh Prisma bootstrap refuses a seeded QcMeasurement row without changing any bytes, schema or evidence (429 ms)
+  √ fresh Prisma bootstrap refuses a seeded QcEvaluation row without changing any bytes, schema or evidence (417 ms)
+  √ fresh Prisma bootstrap refuses a seeded BatchDisposition row without changing any bytes, schema or evidence (446 ms)
+  √ fresh Prisma bootstrap refuses a seeded BatchEvent row without changing any bytes, schema or evidence (413 ms)
+  √ fresh Prisma bootstrap refuses column and preserves the exact original file (409 ms)
+  √ fresh Prisma bootstrap refuses index and preserves the exact original file (428 ms)
+  √ fresh Prisma bootstrap refuses other column and preserves the exact original file (414 ms)
+  √ fresh Prisma bootstrap refuses other index and preserves the exact original file (405 ms)
+  √ fresh Prisma bootstrap refuses trigger and preserves the exact original file (427 ms)
+  √ fresh Prisma bootstrap refuses complete and preserves the exact original file (476 ms)
+  √ fresh Prisma bootstrap refuses late failure and preserves the exact original file (445 ms)
+  √ the QcMeasurement oracle exception requires exactly its deferred self-FK and refuses other DDL changes (321 ms)
+  √ the BatchPositionReference oracle exception requires exactly its deferred self-FK and refuses other DDL changes (315 ms)
+  √ an empty pinned historical QC inventory with no duplicateOf column imports only its receipt, retaining orphan audit refusal=false (375 ms)
+  √ an empty pinned historical QC inventory with no duplicateOf column imports only its receipt, retaining orphan audit refusal=true (371 ms)
+  √ additive install on fresh=false preserves every old field and object; dry-run/repeat/startup change zero bytes (581 ms)
+  √ additive install on fresh=true preserves every old field and object; dry-run/repeat/startup change zero bytes (651 ms)
+  √ legacy attempts keep separate current membership in creation order with unchanged statuses and a dry-run group count (476 ms)
+  √ reviewed REJECT_REANALYSIS imports a repeat with exact field provenance and no new work or analytical changes (342 ms)
+  √ reviewed ACCEPT on passing QC adds opaque evidence only, preserving source bytes, results and users (351 ms)
+  √ field attribution resolves an existing username exactly without creating an actor (336 ms)
+  √ legacy texture aliases retain raw membership codes while sharing the recorded batch analyte and QC (360 ms)
+  √ field disposition retains raw missing/invalid time null without assigning import time (321 ms)
+  √ field disposition retains raw missing/invalid time unparseable original time without assigning import time (318 ms)
+  √ ACCEPT on QC_FAIL refuses dry-run/apply without a byte change (381 ms)
+  √ UNREVIEWED_DECISION on QC_PASS refuses dry-run/apply without a byte change (359 ms)
+  √ a matching AuditLog disposition wins conflicts while both original sources remain unchanged (345 ms)
+  √ snapshot attribution uses decision provenance with 0 matching QC_DISPOSITION rows (343 ms)
+  √ snapshot attribution uses decision provenance with 1 matching QC_DISPOSITION rows (346 ms)
+  √ snapshot attribution uses decision provenance with 2 matching QC_DISPOSITION rows (390 ms)
+  √ ambiguous matching disposition audits refuse rather than falling back to the Batch field (321 ms)
+  √ three snapshots with different counts and a final clear import exact isolated versions, AuditLog authority and empty current evidence (351 ms)
+  √ censored JSON wins over lossy typed rows; raw strings, null numeric values, limits and complete typed source are retained (327 ms)
+  √ unparseable or absent JSON imports typed values unchanged with explicit fallback and preserves the unparseable bytes (342 ms)
+  √ typed UUID ordering cannot manufacture conflicts or replace the authoritative JSON slot order (330 ms)
+  √ a canonical censored JSON string is kept as a null measurement with its limit, never coerced to a measured number (315 ms)
+  √ legacy method, instrument and analyst are set only from exact existing evidence and never receive a guessed start time (337 ms)
+  √ partial schema or receipt refuses with unchanged database bytes (357 ms)
+  √ marker schema or receipt refuses with unchanged database bytes (368 ms)
+  √ tampered schema or receipt refuses with unchanged database bytes (421 ms)
+  √ a negative disposition count receipt is refused by repeat install and startup without writes (408 ms)
+  √ a fractional disposition count receipt is refused by repeat install and startup without writes (412 ms)
+  √ a missing disposition count receipt is refused by repeat install and startup without writes (423 ms)
+  √ a extra disposition count receipt is refused by repeat install and startup without writes (417 ms)
+  √ a array disposition count receipt is refused by repeat install and startup without writes (414 ms)
+  √ a flat-negative disposition count receipt is refused by repeat install and startup without writes (417 ms)
+  √ receipt failure rolls back the entire reviewed import and DDL (379 ms)
+  √ measurement failure rolls back the entire reviewed import and DDL (440 ms)
+  √ a stale fingerprint and malformed history refuse without writes; migration inventory is deterministic (605 ms)
+  √ the closed normalized-QC loader resolves only digest-bound segments and refuses aliasing, mutation or a shadow loader (38 ms)
+  √ CLI defaults to dry-run and refuses repeated, conflicting or invalid arguments (1 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: OUTSIDE-FIXTURE-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at Object.<anonymous> (tests/contracts/audit_2_3_compatibility_runs.test.js:309:5)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: OUTSIDE-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcCompatibilityRunService.js:26:16)
+      at services/qcCompatibilityCorrectionService.js:24:23
+      at inTransaction (services/workflowStateRules.js:188:97)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_2_3_compatibility_runs.test.js:364:5)
+
+PASS tests/contracts/audit_2_3_compatibility_runs.test.js (49.461 s, 1271 MB heap size)
+  √ empty compatibility creation leaves all deprecated JSON null and resolves the laboratory profile (1607 ms)
+  √ a migrated sibling status change preserves failed/dispositioned evidence and result flags (null) (2106 ms)
+  √ a migrated sibling status change preserves failed/dispositioned evidence and result flags (REPEAT_BATCH) (2108 ms)
+  √ a migrated sibling status change preserves failed/dispositioned evidence and result flags (REJECT) (2087 ms)
+  √ a migrated REJECT_REANALYSIS item joins a new PROFILE run while preserving its old evidence and membership (1610 ms)
+  √ a migrated REJECT_REANALYSIS item joins a new NATIVE run while preserving its old evidence and membership (1661 ms)
+  √ a migrated never-run OPEN batch with main default empty QC arrays still accepts and removes real items (1717 ms)
+  √ a migrated final-clear round retains historical evidence and refuses a real item add with zero writes (1644 ms)
+  √ first RUNNING transition freezes compatibility membership permanently (migrated=false) (1718 ms)
+  √ first RUNNING transition freezes compatibility membership permanently (migrated=true) (1693 ms)
+  √ manual QC_FAIL contradicting a passing evaluation is refused rather than acknowledged as a no-op (1645 ms)
+  √ actual compatibility PUT and evaluate routes retain pass/reopen/resubmit cycles, missing-value refusals and manager authority (2020 ms)
+  √ actual unresolved profile membership retains reserved-slot, explicit rack and removal behavior using real SAMPLE joins (1760 ms)
+  √ normalized reads resolve the actor laboratory code while refusing another laboratory scope (1564 ms)
+  √ actual reasoned compatibility corrections retain both evaluations, supersede once and keep the full round (migrated=false) (1827 ms)
+  √ actual reasoned compatibility corrections retain both evaluations, supersede once and keep the full round (migrated=true) (1831 ms)
+  √ compatibility correction resolves the round after a reopen, refuses earlier round ids, and rolls back a late insert fault (1905 ms)
+  √ profile/migrated ordinary resubmission retains every preceding row and isolates the current round (migrated=false) (1643 ms)
+  √ profile/migrated ordinary resubmission retains every preceding row and isolates the current round (migrated=true) (1627 ms)
+  √ a migrated INCOMPLETE clear can receive an ordinary full submission without inventing a correction or reopen (1551 ms)
+  √ ordinary resubmission supersedes a changed real SAMPLE reading once and reuses an unchanged parent in the next round (1881 ms)
+  √ a submitted invalid value null is refused before any snapshot, position, reading or evaluation write (1575 ms)
+  √ a submitted invalid value  is refused before any snapshot, position, reading or evaluation write (1579 ms)
+  √ a submitted invalid value true is refused before any snapshot, position, reading or evaluation write (1539 ms)
+  √ manager authority and reason are required for reopening, and failed evidence remains locked for every role (1886 ms)
+  √ a late evaluation insertion failure rolls back the entire submission and both durable snapshot representations (1628 ms)
+  √ compatibility duplicate censoring retains raw input and null numeric observations in the new round (2162 ms)
+  √ the next compatibility submission resolves the current lab policy instead of freezing an empty profile method (1646 ms)
+
+PASS tests/contracts/audit_2_3_storage_guards.test.js (25.174 s, 1267 MB heap size)
+  √ creating a WorkItem directly cannot attach it to started or legacy-frozen sample membership (1369 ms)
+  √ QcMeasurement deferred supersession rejects dangling, self and shared targets with zero writes (1395 ms)
+  √ BatchPositionReference deferred supersession rejects dangling, self and shared targets with zero writes (1412 ms)
+  √ the application Prisma client rolls back a failed qcMeasurement deferred COMMIT and remains writable (1560 ms)
+  √ the application Prisma client rolls back a failed batchPositionReference deferred COMMIT and remains writable (1486 ms)
+  √ an imported historical position cannot accept another measurement after its import receipt event (1348 ms)
+  √ part 8 preserves frozen samples while allowing append-only compatibility QC rounds (1373 ms)
+  √ additive DDL preserves legacy JSON and typed scientific values, and their freeze guards refuse new writes (1335 ms)
+  √ native entry and evaluation refuse before start; first start and frozen criteria cannot be cleared on reopen (1357 ms)
+  √ one-time measurement supersession and consecutive evaluations preserve both original versions (1394 ms)
+  √ failed correction rolls supersession back and evaluation cannot substitute later policy criteria (1342 ms)
+  √ native duplicate uses the sample parent and only replicate one; work-item joins cannot point to the duplicate (1377 ms)
+  √ legacy unknown start remains null while its retained freeze flag cannot be cleared (1332 ms)
+  √ historical snapshot identity is immutable and unavailable to native positions (1332 ms)
+  √ one physical reference lot retains separate analyte value snapshots and rejects conflicting current lots (1388 ms)
+  √ a two-analyte lot supersession is atomic and any missing second value leaves both original bindings current (1424 ms)
+  √ calibration binding keeps its physical use, and CCB may be unbound or traceable to a blank matrix without a value (1418 ms)
+  √ CRM ordinal uniqueness rolls a concurrent start back and append-only events and dispositions resist overwrites (1406 ms)
+
+PASS tests/contracts/audit_2_3_sequence_plan.test.js (1281 MB heap size)
+  √ 23-sample plan uses method capacity and default frequencies with real sample parents and contiguous positions (48 ms)
+  √ 200 recorded seeds pick distinct eligible duplicate parents and replay the same choices (97 ms)
+  √ default capacity refuses 23 without writing a run, measurement or audit (20 ms)
+  √ replaying the recorded seed and algorithm reproduces parents including a partial final group (20 ms)
+  √ CRM planning uses the supplied forecast without consuming an ordinal or modifying a batch (9 ms)
+  √ calibration positions are opt-in and intervals count samples rather than QC positions (21 ms)
+  √ OFF inserts only samples even with configured frequencies and calibration enabled (10 ms)
+  √ lab and method frequencies differ without changing the other laboratory default (16 ms)
+  √ mixed A-only, B-only and shared samples meet each analyte need with real shared duplicate parents (19 ms)
+  √ calibration pairs use the union of each analyte sample boundaries and share coincident boundaries (31 ms)
+  √ one analyte over its own capacity refuses the mixed sequence without writing a batch or audit (18 ms)
+  √ mixed-sample calibration counts only the samples carrying that analyte (36 ms)
+
+PASS tests/contracts/audit_2_3_native_ui.test.js (1275 MB heap size)
+  √ Native form starts with empty observations, requires start, and drags actual complete position ids (83 ms)
+  √ partial entry sends only the actual position and exact raw observation; malformed numbers cannot be saved (24 ms)
+  √ recorded observations stay read-only until a reasoned correction is selected (23 ms)
+  √ accepted QC requires reasoned reopen and OFF evaluation sends zero invented readings (34 ms)
+  √ a failed sibling does not lock the selected analyte’s entry, reopen or close handlers (26 ms)
+  √ QC preview runs on cell commit only and sends exact raw observations without client limits (22 ms)
+  √ typing another value discards the old preview and a late response cannot recolour the cell (24 ms)
+  √ real submission discards preview and renders only the refetched stored verdict and limits (25 ms)
+  √ switching runs invalidates the previous in-flight preview (22 ms)
+  √ preview errors retain the entered observation and cannot submit or colour it as a pass (48 ms)
+  √ a stored evaluation without a limit never invents a policy or recomputes its status (18 ms)
+  √ the native grid opens with one row per real position, empty QC parent observation and no automatic requests (19 ms)
+  √ every required cell is needed for evaluate and the zero/comma payload contains only raw measurements (24 ms)
+  √ reference correction stays in setup and the grid refetches the new server-bound certificate without editable reference fields (24 ms)
+
+PASS tests/contracts/audit_2_2_qc_ui.test.js (1284 MB heap size)
+  √ native grid starts empty with four duplicates and two actual controls, no unused blank or add-extra action (138 ms)
+  √ ADVISORY changes the gate, never invents positions or observations (18 ms)
+  √ OFF changes the gate, never invents positions or observations (16 ms)
+  √ a partial actual duplicate pair blocks evaluation until both observations are entered (20 ms)
+  √ rule editor preserves null inheritance, requires reason, and submits expected version; reset is a new revision (42 ms)
+  √ read-only rule editor exposes resolution and history without save, reset or editable controls (6 ms)
+  √ all new messages, errors and policy descriptions exist in both en locale layers (6 ms)
+  √ all new messages, errors and policy descriptions exist in both es locale layers (5 ms)
+  √ all new messages, errors and policy descriptions exist in both es-419 locale layers (4 ms)
+  √ all new messages, errors and policy descriptions exist in both fr locale layers (4 ms)
+  √ all new messages, errors and policy descriptions exist in both pt locale layers (4 ms)
+
+PASS tests/contracts/audit_2_3_calibration_policy.test.js (1305 MB heap size)
+  √ calibration verification is opt-in in every preset and can differ by lab and method (58 ms)
+
+PASS tests/contracts/audit_2_3_qc_consumers.test.js (1318 MB heap size)
+  √ a legacy accepted batch without recorded passing evidence has an explicit localized incomplete-evidence label (3 ms)
+  √ a reopened NATIVE round retains its PASS evaluation but cannot report QC within limits (1 ms)
+  √ a reopened PROFILE_ONLY round retains its PASS evaluation but cannot report QC within limits (1 ms)
+  √ a reopened LEGACY_MIGRATED round retains its PASS evaluation but cannot report QC within limits (1 ms)
+  √ report/review gates use independent analyte verdicts and fail closed for missing membership (50 ms)
+  √ OFF evidence prints its explicit NOT_REQUIRED result in en without a passing-QC claim
+  √ OFF evidence prints its explicit NOT_REQUIRED result in es without a passing-QC claim
+  √ OFF evidence prints its explicit NOT_REQUIRED result in es-419 without a passing-QC claim
+  √ OFF evidence prints its explicit NOT_REQUIRED result in fr without a passing-QC claim
+  √ OFF evidence prints its explicit NOT_REQUIRED result in pt without a passing-QC claim (1 ms)
+  √ closed deviation acceptance allows the gate but retains failed evidence and its reason in a report
+  √ a malformed started Native mode null fails closed without live-policy fallback (1 ms)
+  √ a malformed started Native mode {broken fails closed without live-policy fallback
+  √ a malformed started Native mode {"qcMode":"UNKNOWN"} fails closed without live-policy fallback
+  √ a malformed started Native mode {} fails closed without live-policy fallback
+  √ derived texture reporting resolves the frozen mode through its governing PSA analysis (1 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User undefined (Lab: FOREIGN-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at Object.<anonymous> (tests/contracts/audit_2_3_qc_run_views.test.js:121:5)
+
+PASS tests/contracts/audit_2_3_qc_run_views.test.js (1306 MB heap size)
+  √ legacy API shape comes from current normalized measurements and real duplicate parent, preserving precision and frozen legacy bytes (3 ms)
+  √ a correction shows only replacement values while old measurements and evaluations remain in the evidence view (1 ms)
+  √ part 8 ordinary compatibility resubmission selects only its own round without altering earlier evidence (1 ms)
+  √ a migrated clear excludes every historical position/value, keeps real membership and exposes earlier snapshots in history
+  √ legacy parentless pairs use the two recorded replicates and preserve censoring without a measured number (1 ms)
+  √ mixed-analyte views never invent values or membership for the other analyte
+  √ reference views keep the selected immutable snapshot and display the position criterion use (1 ms)
+  √ reader enforces the existing lab scope and returns a stable missing-batch refusal (5 ms)
+  √ analyte dispositions and reopen events apply only to their named analyte (1 ms)
+
+PASS tests/contracts/audit_2_3_sequence_start.test.js (1310 MB heap size)
+  √ start accepts mixed sample sets, real duplicate parents and extras without altering the planned sequence (2 ms)
+  √ a policy count increase refuses a stale run while limit-only revisions and lower counts preserve its sequence (11 ms)
+  √ actual allocated CRM ordinal wins over build forecast, and an extra CRM is permitted (2 ms)
+  √ lowered capacity refuses only the over-capacity analyte using its own sample count
+  √ calibration activation or a shorter interval refuses stale ordering; mixed-analyte boundaries remain valid (2 ms)
+  √ fabricated duplicate parent, sample duplication and gaps refuse without mutating any input (1 ms)
+
+PASS tests/contracts/audit_2_3_batch_states.test.js (1311 MB heap size)
+  √ one failed analyte blocks a multi-element run despite other passing analytes (1 ms)
+  √ warning and accepted deviation remain accepted while closure requires every analyte closed
+  √ reopen preserves legacy OPEN without clearing the first start time
+  √ an unstarted run remains OPEN and IN_RUN input preserves the stored RUNNING label (9 ms)
+  √ legacy import preserves reopened QC_PENDING and the accepted-deviation lifecycle (1 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       228 passed, 228 total
+Snapshots:   0 total
+Time:        141.404 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_2_qc_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_batch_states.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_calibration_policy.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_compatibility_runs.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_native_runs.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_native_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_qc_consumers.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_qc_run_install.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_qc_run_views.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_sequence_plan.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_sequence_start.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_storage_guards.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-07.json

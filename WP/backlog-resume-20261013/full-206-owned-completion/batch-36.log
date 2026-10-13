@@ -1,0 +1,37 @@
+PASS tests/contracts/sis_adapter_service.test.js (68 MB heap size)
+  Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts
+    1. Metadata unwrapping
+      √ unwraps scalar primitives correctly (2 ms)
+      √ unwraps single-level { value, source } wrapper objects (1 ms)
+      √ unwraps nested wrappers recursively
+    2. Truthful WGS84 Coordinates Extraction
+      √ preserves exact 0.0 coordinates (equator / prime meridian) without falsy drop
+      √ extracts coordinates from wrapped fieldMetadata
+      √ returns null for missing or invalid coordinates outside WGS84 bounds
+    3. Truthful Depths Extraction
+      √ preserves floating-point decimal depths and zero top depth (1 ms)
+      √ extracts decimal depths from wrapped field metadata without truncation
+      √ does NOT invent 0-20 cm defaults when depths are genuinely missing
+    4. Truthful Dates Extraction
+      √ distinguishes field collectionDate from laboratory receptionDate (1 ms)
+      √ returns null collectionDate when missing without falling back to reception date
+    5. Profile Code and Namespace Resolution
+      √ extracts site_id from fieldMetadata with project namespace (2 ms)
+      √ unwraps nested profile code objects
+      √ returns null profileCode and UNSPECIFIED relation when absent (1 ms)
+      √ disambiguates shared programme projects with country prefix
+    6. Lossless Observations Extraction
+      √ retains all determinations including replicates without clobbering (2 ms)
+      √ preserves LOD, LOQ, provenance and treats empty string as null value
+    7. V1 Backward Compatibility & Additive Metadata
+      √ formatSampleV1 preserves legacy keys and adds non-breaking explicit identifiers (199 ms)
+    8. V2 Clean Lossless Representation
+      √ formatSampleV2 produces clean structured SOSA/GloSIS payload (1 ms)
+      √ unreleased status maps to DRAFT, cancelled to WITHDRAWN (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       20 passed, 20 total
+Snapshots:   0 total
+Time:        0.48 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\sis_adapter_service.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-owned-completion\batch-36.json

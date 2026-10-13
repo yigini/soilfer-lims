@@ -1,0 +1,82 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d9cd70d-07e1-46a2-bd48-922c30fe03e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d9cd70d-07e1-46a2-bd48-922c30fe03e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d9cd70d-07e1-46a2-bd48-922c30fe03e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d9cd70d-07e1-46a2-bd48-922c30fe03e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d9cd70d-07e1-46a2-bd48-922c30fe03e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d9cd70d-07e1-46a2-bd48-922c30fe03e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d9cd70d-07e1-46a2-bd48-922c30fe03e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d9cd70d-07e1-46a2-bd48-922c30fe03e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d9cd70d-07e1-46a2-bd48-922c30fe03e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d9cd70d-07e1-46a2-bd48-922c30fe03e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d9cd70d-07e1-46a2-bd48-922c30fe03e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 542413ab-d737-4ded-8014-fb26512c6d11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/review_reports_amendments_p6.test.js (141 MB heap size)
+  Package P6: Review, Reports & Amendments Verification
+    √ 1. Review submission accepts normalized decisions and updates status to ACCEPTED (170 ms)
+    √ 2. Disposed material strictly rejects order modifications (13 ms)
+    √ 3. Generates report v1 with immutable snapshot and monotonic versioning (94 ms)
+    √ disposed material refuses orders/preview with its stable code and zero writes (9 ms)
+    √ disposed material refuses amendments with its stable code and zero writes (10 ms)
+    √ disposed material refuses custody/move with its stable code and zero writes (6 ms)
+    √ 4. Generates superseding report v2 after authorized change (49 ms)
+    √ 5. Traceable amendment creation preserves history and records audit (19 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        1.727 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\review_reports_amendments_p6.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-owned-completion\batch-29.json

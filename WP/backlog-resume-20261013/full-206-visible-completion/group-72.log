@@ -1,0 +1,35 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: USR-TEST-TOKEN-INV (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: USR-TEST-TOKEN-INV (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: USR-TEST-TOKEN-INV (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: USR-TEST-TOKEN-INV (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/security/auth_token_invalidation.test.js (139 MB heap size)
+  WP-10: Token Invalidation on Password Change
+    √ Old token is immediately rejected after changing password (287 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        1.442 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\auth_token_invalidation.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-72.json

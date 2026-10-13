@@ -1,0 +1,110 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0991acdf-6fad-4da3-908f-aa95541792a5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0991acdf-6fad-4da3-908f-aa95541792a5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0991acdf-6fad-4da3-908f-aa95541792a5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0991acdf-6fad-4da3-908f-aa95541792a5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 419e5a25-08b8-41ef-888c-84edd88144e0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 419e5a25-08b8-41ef-888c-84edd88144e0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewSubmission] Error: Error: QC_GATE_FAILED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:259:9) {
+      statusCode: 409,
+      code: 'QC_GATE_FAILED',
+      details: { items: [ [Object] ] }
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 419e5a25-08b8-41ef-888c-84edd88144e0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 419e5a25-08b8-41ef-888c-84edd88144e0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewSubmission] Error: Error: QC_GATE_FAILED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:259:9) {
+      statusCode: 409,
+      code: 'QC_GATE_FAILED',
+      details: { items: [ [Object] ] }
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 419e5a25-08b8-41ef-888c-84edd88144e0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 419e5a25-08b8-41ef-888c-84edd88144e0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/scenarios/qc_batch.test.js (145 MB heap size)
+  Scenario E: QC Batch Management
+    √ retains a stored PROFILE_ONLY QC Batch (48 ms)
+    √ should add items to QC Batch (64 ms)
+    √ should fail submission review if Batch fails (144 ms)
+    √ should allow manager to disposition failed batch (58 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        1.718 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\scenarios\qc_batch.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-68.json

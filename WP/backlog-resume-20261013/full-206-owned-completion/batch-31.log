@@ -1,0 +1,92 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b55ac9d9-5474-4f4c-88d9-7a3f7fe2df28 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/sample_assignment_identity.test.js (143 MB heap size)
+  Contract: Sample and Assignment Identity, Pagination, and Server-Side Readiness (Issue #119)
+    √ 1. 26-task fixture exposes all 26 tasks with honest totals and pagination (no silent 20-item truncation) (179 ms)
+    √ 2. Disambiguates canonical ID, lab ID, and field original ID across dashboard queues and submissions (31 ms)
+    √ 3. Texture equivalence: TEXTURE requirement satisfied by 3 accepted fractions (SAND, SILT, CLAY) without false ORDER_TASK_MISMATCH (91 ms)
+    √ 4. Final approval readiness independently enforced on server: rejects premature approval with 409 and blockers (148 ms)
+    √ 5. Cross-lab assignment is strictly rejected with 403 CROSS_LAB_ASSIGNMENT_DENIED (17 ms)
+    √ 6. Workspace projection exposes accurate capabilities and nextAction reflecting readiness state (99 ms)
+    √ 7. Operational gates evaluated independently and respect SKIPPED/WAIVED states
+    √ 8. Workspace projection extracts linked QC batches and blocks final approval on QC failure (89 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        2.056 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\sample_assignment_identity.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-owned-completion\batch-31.json

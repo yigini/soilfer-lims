@@ -1,0 +1,1778 @@
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 4405c81f-db30-46e7-a17b-74d0484c5223
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 265148be-3d72-451e-833c-20bb5cf7b175
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 265148be-3d72-451e-833c-20bb5cf7b175
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2862e934-ed00-465f-8c22-56426959d972
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2862e934-ed00-465f-8c22-56426959d972
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/issue_213_export_equals_report.test.js (8.519 s, 154 MB heap size)
+  √ ATTEMPT selection from a batched source: every export carries the report value and its selection, attempt and batch ids (2158 ms)
+  √ MEAN of a retained questioned 12.0 and its repeat 12.6 exports 12.3 everywhere while v2 keeps its raw current row (1653 ms)
+  √ a reviewer-selected retained QUESTIONED source exports its own value, not the current repeat (1503 ms)
+  √ NOT_REPORTABLE exports the localized report text with its selection id and no source ids (1245 ms)
+  √ an analysis configured in a non-standard unit (SOC in %) keeps its unconverted headline; normalized stays in _normalized (1485 ms)
+
+PASS tests/contracts/issue_291_texture_input_authority.test.js (7.313 s, 176 MB heap size)
+  √ the shared authority refuses every non-authoritative input and widens only a valid policy value (3 ms)
+  √ a composite texture mean of g/kg fractions refuses; the same percent means derive within the tolerance (13 ms)
+  √ recording g/kg fractions derives no TEXTURE Result or attempt; the percent control derives Loam within the tolerance (2444 ms)
+  √ the selected-fraction derivation refuses g/kg, missing, mixed and duplicate proofs; the percent control is DERIVED Loam (7 ms)
+  √ a stored NULL censoring is unknown, never uncensored: recording derives nothing and the means refuse (2347 ms)
+  √ a stored out-of-range tolerance (#281) derives with exact closure only, never wider (2376 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8bd0995f-f425-44f5-b535-9f9a37220c8c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8bd0995f-f425-44f5-b535-9f9a37220c8c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8bd0995f-f425-44f5-b535-9f9a37220c8c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8bd0995f-f425-44f5-b535-9f9a37220c8c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f576b01b-494c-43a7-90a4-8dccaf92163b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f576b01b-494c-43a7-90a4-8dccaf92163b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f576b01b-494c-43a7-90a4-8dccaf92163b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f576b01b-494c-43a7-90a4-8dccaf92163b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Scientific matrix validation failed: Texture closure failed: Sand(40%) + Silt(40%) + Clay(19%) = 99.0% (must sum to 100% exactly)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:231:53
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 422,
+      status: 422,
+      code: 'BLOCKING_MATRIX_DIAGNOSTICS',
+      details: {
+        blockingErrors: [ [Object] ],
+        matrixDiagnostics: {
+          texture: [Object],
+          textureClosure: [Array],
+          retiredAdvisories: [Array],
+          advisorySuccessor: 'crossChecks',
+          warnings: [Array],
+          blockingErrors: [Array],
+          isBlocking: true,
+          texturePolicyInvalid: true
+        }
+      }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d7dad6a-d120-4f47-982f-e193e37a2644 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d7dad6a-d120-4f47-982f-e193e37a2644 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/issue_281_cross_check_bounds.test.js (209 MB heap size)
+  √ the en server and client locales disclose CROSS_CHECK_POLICY_INVALID (6 ms)
+  √ the es server and client locales disclose CROSS_CHECK_POLICY_INVALID (3 ms)
+  √ the es-419 server and client locales disclose CROSS_CHECK_POLICY_INVALID (3 ms)
+  √ the fr server and client locales disclose CROSS_CHECK_POLICY_INVALID (5 ms)
+  √ the pt server and client locales disclose CROSS_CHECK_POLICY_INVALID (4 ms)
+  #281 registry bounds
+    √ crossCheck.textureClosureTolerancePct accepts its bounds and refuses one step outside them (1 ms)
+    √ crossCheck.baseSaturationMaxPct accepts its bounds and refuses one step outside them
+    √ crossCheck.cnMin accepts its bounds and refuses one step outside them
+    √ crossCheck.cnMax accepts its bounds and refuses one step outside them (1 ms)
+    √ crossCheck.carbonatePhMin accepts its bounds and refuses one step outside them
+    √ crossCheck.basesCecFactor accepts its bounds and refuses one step outside them
+    √ defaults are unchanged (32 ms)
+    √ the policy owner refuses an out-of-range save with POLICY_VALUE_INVALID and writes nothing (88 ms)
+  #281 a stored out-of-range value
+    √ is never rewritten, keeps every other policy readable and disables only the cross-checks (419 ms)
+    √ a stored invalid texture tolerance is disclosed and the blocking gate closes exactly, never wider (431 ms)
+    √ a manager fixes it by saving a valid value as a new policy version (62 ms)
+    √ another laboratory with valid policy still records evidence (303 ms)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.error
+    [KOBO] Failed to preserve conflicting duplicate provenance: CONFIG_REVOKED: Kobo configuration 'CFG-GHA-DUP-1791890926844' is inactive, remapped, or modified
+
+      1091 |                     });
+      1092 |                 } catch (dupAuditErr) {
+    > 1093 |                     console.error('[KOBO] Failed to preserve conflicting duplicate provenance:', dupAuditErr.message);
+           |                             ^
+      1094 |                     skippedCount += crossSubDuplicates.length;
+      1095 |                     for (const { sampleData } of crossSubDuplicates) {
+      1096 |                         skippedReasons.push({
+
+      at Object.error [as _syncLabSubmissions] (controllers/koboController.js:1093:29)
+      at Object.<anonymous> (tests/contracts/kobo_duplicate_provenance.test.js:491:24)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 2 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [INTAKE] Processing intake for GHA-AMBIG-DUP-1791890926844 by admin
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-rec-DUP-1791890926844 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for INTAKE-HELD-DUP-1791890926844 by rec_DUP-1791890926844
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-rec-DUP-1791890926844 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for INTAKE-HELD-DUP-1791890926844 by rec_DUP-1791890926844
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-rec-DUP-1791890926844 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for INTAKE-NORMAL-DUP-1791890926844 by rec_DUP-1791890926844
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 2 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 2 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 2 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.error
+    [KOBO] Failed to preserve conflicting duplicate provenance: Stored hold metadata needs review.
+
+      1091 |                     });
+      1092 |                 } catch (dupAuditErr) {
+    > 1093 |                     console.error('[KOBO] Failed to preserve conflicting duplicate provenance:', dupAuditErr.message);
+           |                             ^
+      1094 |                     skippedCount += crossSubDuplicates.length;
+      1095 |                     for (const { sampleData } of crossSubDuplicates) {
+      1096 |                         skippedReasons.push({
+
+      at Object.error [as _syncLabSubmissions] (controllers/koboController.js:1093:29)
+      at tests/contracts/kobo_duplicate_provenance.test.js:1422:24
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 2 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 2 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 3 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 2 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 1 new, 0 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+  console.log
+    [KOBO] Starting sync for GHA-LAB1-DUP-1791890926844...
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for GHA-LAB1-DUP-1791890926844: 0 new, 1 skipped
+
+      at Object.log [as _syncLabSubmissions] (controllers/koboController.js:1327:13)
+
+PASS tests/contracts/kobo_duplicate_provenance.test.js (230 MB heap size)
+  Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)
+    √ 1. Intra-submission duplicate barcodes are admitted safely without unique constraint crash, preserving duplicate depth provenance in metadata and AuditLog (33 ms)
+    √ 2. Cross-submission duplicate barcode preserves conflicting field provenance and audit trail without discarding differences (17 ms)
+    √ 3. Empty submission response updates lastSyncAt to prevent rapid polling spinning (2 ms)
+    √ 4. Full idempotency on repeat sync with identical submissions (10 ms)
+    √ 5. Foreign sample collision strictly avoids mutation, reports FOREIGN_SCOPE_COLLISION, and halts cursor (6 ms)
+    √ 6. Duplicate branch enforces commit gates and rolls back transaction on revoked config (19 ms)
+    √ 7. Conflict replay idempotency: repeating the conflicting submission does not append duplicate entries or duplicate audit rows (17 ms)
+    √ 8. Case-insensitive lookup preserves evidence on lowercase existing record in DB, advancing cursor cleanly (9 ms)
+    √ 9. Ambiguous depth identity retains a durable hold through physical arrival and blocks acceptance (90 ms)
+    √ 10. Unchanged original primary replay causes zero metadata, audit, or hold changes (9 ms)
+    √ 11. Cross-form occurrences with same kobo_id and depth are preserved and not silently deduplicated (20 ms)
+    √ 12. Unknown ownership and historical samples (REJECTED/RECEIVED) are protected from mutation (9 ms)
+    √ 13. Real isolated reception intake and consignment routes block AMBIGUOUS_PROVENANCE_HOLD with HTTP 409, while normal sample succeeds (40 ms)
+    √ 14. SampleWorkspaceService blocks canAcceptIntake when AMBIGUOUS_PROVENANCE_HOLD is active (15 ms)
+    √ 15. Source-B primary record does not suppress source-A submission with same ID and depth (Finding 1) (9 ms)
+    √ 16. Primary occurrence replayed with changed coordinates or attachments creates revision hold (Finding 2) (12 ms)
+    √ 17. Conflicting occurrence replayed with changed coordinates preserves revision append-only (17 ms)
+    √ 18. Repeated revised-primary replay with identical revised evidence is idempotent (da8b561 review regression) (15 ms)
+    √ malformed hold submissions are skipped and retriable while later healthy submissions commit (mixed=false, history=false) (28 ms)
+    √ malformed hold submissions are skipped and retriable while later healthy submissions commit (mixed=true, history=false) (19 ms)
+    √ malformed hold submissions are skipped and retriable while later healthy submissions commit (mixed=false, history=true) (21 ms)
+    √ malformed hold submissions are skipped and retriable while later healthy submissions commit (mixed=true, history=true) (29 ms)
+    √ 19. The duplicate index never loads stored metadata for every Sample; only the matched specimen is read, and replay stays idempotent (runtime heap regression) (9 ms)
+
+PASS tests/contracts/issue_283_one_unit_per_analysis.test.js (257 MB heap size)
+  #283 one unit per analysis
+    √ a method QUDT override that disagrees is ignored and disclosed; an agreeing one changes nothing
+    √ a method never supplies the reporting unit on write (5 ms)
+    √ the V1 export labels the stored value with the analysis unit and never converts it (1 ms)
+  #283 V2 observations
+    √ a disagreeing method override is disclosed, the analysis unit labels the value and nothing stored changes (1170 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for LAB-A-K01-1791890929633...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for LAB-B-K01-1791890929633...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for LAB-B-K01-1791890929633...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.error
+    [KOBO] Sync error: Error: [KOBO] Configuration 'CFG-UNMAPPED-K01-1791890929633' for laboratory 'LAB-B-K01-1791890929633' lacks an explicit project mapping (projectCode). First-project fallback is disallowed.
+        at syncLabSubmissions (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\koboController.js:500:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.syncLab (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\koboController.js:270:24)
+
+      274 |         res.json(result);
+      275 |     } catch (error) {
+    > 276 |         console.error('[KOBO] Sync error:', error);
+          |                 ^
+      277 |         if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code: error.code, message: error.message, reason: error.reason});
+      278 |         if (error.message?.includes('LAB_INACTIVE') || error.message?.includes('CONFIG_INACTIVE') || error.message?.includes('CONFIG_REVOKED')) {
+      279 |             return res.status(400).json({ error: 'PRECONDITION_FAILED', message: error.message });
+
+      at error (controllers/koboController.js:276:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-a-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-b-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-c-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-c-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-b-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-b-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-a-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-nat-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-nat-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for LAB-A-K01-1791890929633...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.warn
+    [KOBO] Admission blocked for project 'PROJ-PAUSED-K01-1791890929633': Admissions for project PROJ-PAUSED-K01-1791890929633 are temporarily paused.
+
+      522 |     });
+      523 |     if (!preAdmission.allowed) {
+    > 524 |         console.warn(`[KOBO] Admission blocked for project '${projectCode}': ${preAdmission.reason}`);
+          |                 ^
+      525 |         return {
+      526 |             newSamples: 0,
+      527 |             skipped: 0,
+
+      at warn (controllers/koboController.js:524:17)
+      at exports.syncLab (controllers/koboController.js:270:24)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for LAB-C-K01-1791890929633...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.error
+    [KOBO] Sync error: Error: MEMBERSHIP_NOT_AUTHORIZED: Laboratory 'LAB-C-K01-1791890929633' is not an authorized servicing laboratory for project 'PROJ-2-K01-1791890929633'.
+        at syncLabSubmissions (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\koboController.js:514:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.syncLab (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\koboController.js:270:24)
+
+      274 |         res.json(result);
+      275 |     } catch (error) {
+    > 276 |         console.error('[KOBO] Sync error:', error);
+          |                 ^
+      277 |         if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code: error.code, message: error.message, reason: error.reason});
+      278 |         if (error.message?.includes('LAB_INACTIVE') || error.message?.includes('CONFIG_INACTIVE') || error.message?.includes('CONFIG_REVOKED')) {
+      279 |             return res.status(400).json({ error: 'PRECONDITION_FAILED', message: error.message });
+
+      at error (controllers/koboController.js:276:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for LAB-D-K01-1791890929633...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for LAB-D-K01-1791890929633: 0 new, 1 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for LAB-D-K01-1791890929633...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for LAB-D-K01-1791890929633: 0 new, 2 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for LAB-D-K01-1791890929633...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for LAB-D-K01-1791890929633: 1 new, 1 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for LAB-D-K01-1791890929633...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for LAB-D-K01-1791890929633: 1 new, 0 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-adm-K01-1791890929633 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Force sync sample ORIG-RESYNC-K01-1791890929633 from LAB-A-K01-1791890929633...
+
+      at log (controllers/koboController.js:1428:17)
+
+  console.log
+    [KOBO] ✅ Force synced ORIG-RESYNC-K01-1791890929633 (matched ORIG-RESYNC-K01-1791890929633): 0 attachments
+
+      at log (controllers/koboController.js:1640:17)
+
+PASS tests/contracts/kobo_explicit_mapping.test.js (248 MB heap size)
+  K01: Kobo Explicit Destination & Mapping Invariant Tests
+    1. Disambiguation in syncLab (POST /api/kobo/sync/:labId)
+      √ rejects with 400 AMBIGUOUS_CONFIG_TARGET when laboratory has multiple active configs without explicit configId or projectCode (16 ms)
+      √ resolves cleanly when explicit configId is specified for multi-asset lab (9 ms)
+      √ resolves cleanly when laboratory has exactly one active configuration (6 ms)
+    2. Elimination of lab.projectLabs[0] Fallback in syncLabSubmissions
+      √ throws explicit error and aborts import when config.projectCode is missing, even if lab has project assignments (31 ms)
+    3. Elimination of configs[0] Fallback in getProjectKoboConfig (GET /api/projects/:id/kobo-config)
+      √ returns ambiguous: true for global admin when multiple configurations exist across labs without explicit disambiguation (7 ms)
+      √ resolves unambiguously for lab manager whose laboratory has a configuration for the project (4 ms)
+      √ resolves unambiguously for second participating laboratory manager (4 ms)
+      √ returns 403 Access Denied when non-member laboratory attempts to access project kobo config (3 ms)
+      √ returns configured: false when authorized participating laboratory has no Kobo configuration (4 ms)
+      √ resolves unambiguously for global admin when explicit configId query parameter is provided (5 ms)
+      √ resolves unambiguously for global admin when explicit labId query parameter is provided (4 ms)
+      √ K02: rejects servicing laboratory manager attempting to access foreign lab configuration with 403 FORBIDDEN_CONFIG_SCOPE (3 ms)
+      √ K02: rejects servicing laboratory manager attempting to access foreign labId with 403 FORBIDDEN_LAB_SCOPE (5 ms)
+      √ K02: allows owner laboratory manager to coordinate and view servicing laboratory configuration (4 ms)
+      √ K02: allows national admin within their authorized country but denies foreign country configuration (6 ms)
+      √ K02: strictly redacts secret tokens from responses across all configurations (3 ms)
+    4. Admissions & Membership Commit-Time Protection in Kobo Sync
+      √ truthfully skips intake when project admissions are paused (7 ms)
+      √ rejects sync when servicing lab is not an authorized member of the project (5 ms)
+    5. Lifecycle & Invariant Protection (K03, Mid-Fetch Deactivation, Atomic Multi-Sample & Cursor Preservation)
+      √ K03: rejects sync into inactive laboratory even when sync actor is SUPER_ADMIN and creates 0 samples (5 ms)
+      √ rolls back commit transaction and preserves cursor when laboratory is deactivated mid-fetch (18 ms)
+      √ atomically rolls back multi-sample submission and preserves cursor when admissions pause mid-fetch (9 ms)
+      √ retains cursor up to highest successful submission without advancing past retriable failures, and recovers on next sync (26 ms)
+    6. Single-Sample Resync & Config Contracts (Finding 2, Finding 4)
+      √ upsertConfig rejects missing projectCode with 400 PROJECT_CODE_REQUIRED (5 ms)
+      √ syncSample fails with 404 NO_CONFIG_MATCH and does NOT fall back to arbitrary lab config (13 ms)
+      √ syncSample strictly preserves manual field overrides and updates atomically with audit log (14 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 29f8dda1-3a2b-4578-aedb-593a78dad03b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 29f8dda1-3a2b-4578-aedb-593a78dad03b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7bc556b1-92d7-4579-941b-df5b1ab072d8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7bc556b1-92d7-4579-941b-df5b1ab072d8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Scientific matrix validation failed: Texture closure failed: Sand(40%) + Silt(40%) + Clay(19%) = 99.0% (must sum to 100% ± 0.5%)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:231:53
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 422,
+      status: 422,
+      code: 'BLOCKING_MATRIX_DIAGNOSTICS',
+      details: {
+        blockingErrors: [ [Object] ],
+        matrixDiagnostics: {
+          texture: [Object],
+          textureClosure: [Array],
+          retiredAdvisories: [Array],
+          advisorySuccessor: 'crossChecks',
+          warnings: [Array],
+          blockingErrors: [Array],
+          isBlocking: true
+        }
+      }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+PASS tests/contracts/issue_278_texture_closure_policy.test.js (286 MB heap size)
+  #278 texture closure gate (pure)
+    √ 40 + 40 + 19 passes at the approved ±2 tolerance and classifies the soil (1 ms)
+    √ 40 + 40 + 18 at ±2 blocks: false (boundary is inclusive) (1 ms)
+    √ 40 + 40 + 22 at ±2 blocks: false (boundary is inclusive)
+    √ 40 + 40 + 17.9 at ±2 blocks: true (boundary is inclusive)
+    √ 40 + 40 + 22.1 at ±2 blocks: true (boundary is inclusive)
+    √ the lab tolerance, not a literal, decides (1 ms)
+    √ an invalid tolerance is refused rather than guessed (12 ms)
+    √ stored numericValue is authoritative over the result text
+    √ a non-percent unit is disclosed as not evaluated and does not block
+    √ a row without a stored unit is never given a catalogue unit and closes exactly, never within the lab tolerance (1 ms)
+    √ a row without stored censoring is never treated as uncensored and closes exactly, never within the lab tolerance
+    √ censored fractions are not evaluated and do not block (1 ms)
+    √ non-numeric fractions are not evaluated and do not block
+    √ ambiguous fractions are not evaluated and do not block
+    √ missing fractions skip the check, as before
+    √ each replicate closes on its own
+  #278 laboratory policy and the real submission gate
+    √ each laboratory gets its own tolerance; an unregistered lab gets the registry default (22 ms)
+    √ 40 + 40 + 19 is no longer refused at the default tolerance (267 ms)
+    √ a stricter lab still refuses 40 + 40 + 19 with zero writes (203 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-a-KNL-1791890931278 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for LAB-A-KNL-1791890931278...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for LAB-A-KNL-1791890931278: 1 new, 0 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-a-KNL-1791890931278 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-a-KNL-1791890931278 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-a-KNL-1791890931278 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-a-KNL-1791890931278 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-a-KNL-1791890931278 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-a-KNL-1791890931278 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-b-KNL-1791890931278 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/kobo_notification_view_link.test.js (287 MB heap size)
+  Kobo Notification Deep Link & View Parameter Lifecycle (Refs #120)
+    √ 1. Syncing Kobo submissions generates manager notification with view=expected and canonical filter params (29 ms)
+    √ 2. Notification deep link parameters open newly synced arrivals in view=expected (14 ms)
+    √ 3. Operational view separation: EXPECTED field arrivals are strictly excluded from view=daily (14 ms)
+    √ 4. Parameter lifecycle & alias backward/forward compatibility (15 ms)
+    √ 5. Cross-lab isolation: Manager B cannot view Lab A arrivals via notification route (5 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for PROFILE-KOBO-LAB...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for PROFILE-KOBO-LAB: 2 new, 0 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for PROFILE-KOBO-LAB...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for PROFILE-KOBO-LAB: 0 new, 2 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Force sync sample BAG-9001-D1 from PROFILE-KOBO-LAB...
+
+      at log (controllers/koboController.js:1428:17)
+
+  console.error
+    [KOBO] Force sync sample error: ProfileReferenceConflictError: The soil profile reference needs review. Existing laboratory work is preserved.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\koboController.js:1601:23
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.syncSample (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\koboController.js:1569:9) {
+      code: 'PROFILE_REFERENCE_CONFLICT',
+      status: 409,
+      reason: 'SOURCE_DEPTH_CHANGED'
+    }
+
+      1641 |         res.json({ success: true, message: `Successfully synced ${sample.originalId} from Kobo` });
+      1642 |     } catch (error) {
+    > 1643 |         console.error('[KOBO] Force sync sample error:', error);
+           |                 ^
+      1644 |         res.status(error instanceof profileIdentity.ProfileReferenceConflictError ? 409 : 500).json({ error: error.code || 'KOBO_SYNC_FAILED', message: error instanceof profileIdentity.ProfileReferenceConflictError ? error.message : 'Could not refresh the field record.' });
+      1645 |     }
+      1646 | };
+
+      at error (controllers/koboController.js:1643:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for PROFILE-KOBO-LAB...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for PROFILE-KOBO-LAB: 0 new, 2 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Force sync sample BAG-9001-D1 from PROFILE-KOBO-LAB...
+
+      at log (controllers/koboController.js:1428:17)
+
+  console.log
+    [KOBO] ✅ Force synced BAG-9001-D1 (matched BAG-9001-D1): 0 attachments
+
+      at log (controllers/koboController.js:1640:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for PROFILE-KOBO-LAB...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for PROFILE-KOBO-LAB: 0 new, 2 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Starting sync for PROFILE-KOBO-LAB...
+
+      at log (controllers/koboController.js:471:13)
+
+  console.log
+    [KOBO] Sync complete for PROFILE-KOBO-LAB: 0 new, 2 skipped
+
+      at log (controllers/koboController.js:1327:13)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [KOBO] Force sync sample BAG-9001-D1 from PROFILE-KOBO-LAB...
+
+      at log (controllers/koboController.js:1428:17)
+
+  console.log
+    [KOBO] ✅ Force synced BAG-9001-D1 (matched BAG-9001-D1): 0 attachments
+
+      at log (controllers/koboController.js:1640:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 945bd36d-0bf2-48b4-b773-60bcfa43ad55 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/kobo_profile_capture.test.js (325 MB heap size)
+  Kobo exact source paths and replay compatibility
+    √ two bags share a verified pit, preserve independent site and decimal depth without invented GPS (1 ms)
+    √ missing source stays unknown; interview and upload dates are not collection observations (1 ms)
+    √ an impossible recorded collection date is rejected (2026-02-30) (11 ms)
+    √ an impossible recorded collection date is rejected (2026-13-01) (1 ms)
+    √ exact nested path works and ambiguous suffixes never pick a pit
+    √ invalid source identifier true is an actionable conflict (3 ms)
+    √ invalid source identifier [] is an actionable conflict (1 ms)
+    √ invalid source identifier {} is an actionable conflict
+    √ invalid source identifier Infinity is an actionable conflict
+    √ invalid source identifier "[object Object]" is an actionable conflict
+    √ conflicting aliases are not hidden by a configured path
+    √ legacy replay hash remains comparable while new profile changes are detected separately (1 ms)
+    √ invalid paths, namespace/relation ambiguity and inferred booleans are rejected (1 ms)
+  Actual mounted Kobo capture, hold and force-refresh paths
+    √ normal sync captures two distinct EXPECTED specimens under one pit; unchanged replay creates no hold (49 ms)
+    √ force refresh keeps a changed interval pending for normal source review (156 ms)
+    √ changed profile creates one durable conflict; replay does not duplicate it or overwrite the primary (26 ms)
+    √ force refresh preserves a manual correction and blocks a released specimen before fetching (32 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e5365e8-4ee8-4e88-9e49-9b23b0059fc7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 86dc81b9-6d25-4304-8f35-af7362bbdb90 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7ace1ab1-b921-4acd-ade9-7a9cebc1f90b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T11:28:52.582Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (app.js:99:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/localeMiddleware.js:36:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:51:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cors (node_modules/cors/lib/index.js:188:7)
+      at node_modules/cors/lib/index.js:224:17
+      at originCallback (node_modules/cors/lib/index.js:214:15)
+      at node_modules/cors/lib/index.js:219:13
+      at optionsCallback (node_modules/cors/lib/index.js:199:9)
+      at corsMiddleware (node_modules/cors/lib/index.js:204:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at internalNext (node_modules/helmet/index.cjs:531:6)
+      at xXssProtectionMiddleware (node_modules/helmet/index.cjs:311:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xPoweredByMiddleware (node_modules/helmet/index.cjs:304:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xPermittedCrossDomainPoliciesMiddleware (node_modules/helmet/index.cjs:297:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xFrameOptionsMiddleware (node_modules/helmet/index.cjs:281:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xDownloadOptionsMiddleware (node_modules/helmet/index.cjs:261:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xDnsPrefetchControlMiddleware (node_modules/helmet/index.cjs:254:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xContentTypeOptionsMiddleware (node_modules/helmet/index.cjs:246:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at strictTransportSecurityMiddleware (node_modules/helmet/index.cjs:239:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at referrerPolicyMiddleware (node_modules/helmet/index.cjs:207:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at originAgentClusterMiddleware (node_modules/helmet/index.cjs:182:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at crossOriginResourcePolicyMiddleware (node_modules/helmet/index.cjs:175:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at crossOriginOpenerPolicyMiddleware (node_modules/helmet/index.cjs:159:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at contentSecurityPolicyMiddleware (node_modules/helmet/index.cjs:124:4)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at helmetMiddleware (node_modules/helmet/index.cjs:533:6)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e5365e8-4ee8-4e88-9e49-9b23b0059fc7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e5365e8-4ee8-4e88-9e49-9b23b0059fc7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e5365e8-4ee8-4e88-9e49-9b23b0059fc7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e5365e8-4ee8-4e88-9e49-9b23b0059fc7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e5365e8-4ee8-4e88-9e49-9b23b0059fc7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e5365e8-4ee8-4e88-9e49-9b23b0059fc7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e5365e8-4ee8-4e88-9e49-9b23b0059fc7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e5365e8-4ee8-4e88-9e49-9b23b0059fc7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/lab_directory_and_auth_profile.test.js (336 MB heap size)
+  Lab Directory Policy & Auth Profile Contract (#114)
+    √ 1. Login and /api/auth/me populate user.lab and user.labLocation for configured lab (72 ms)
+    √ 2. Login and /api/auth/me return null lab location for unconfigured lab (64 ms)
+    √ 3. Login and /api/auth/me return null lab and labLocation for unassigned user (65 ms)
+    √ 4. GET /api/labs/:id enforces directory policy and authentication (17 ms)
+    √ 5. Scoped authorization: directory lookup succeeds across labs while workspace access fails closed (403) (14 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-view-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-view-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User view_WPA-1791890932901 (VIEWER) attempted MANAGE_USERS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-techC-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa1-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa1-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-nat-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-nat-empty-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrB-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-techA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-techA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-techA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa1-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa1-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-WPA-1791890932901 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/lab_governance_wp_a.test.js (358 MB heap size)
+  WP-A: Laboratory Governance Security & Access Repairs
+    1. Cross-Lab Staff Actions & Role Hierarchy (A01, A02, A03, LG-01, LG-03)
+      √ A01: Manager A cannot reset password of staff in Lab B (403 Forbidden) (10 ms)
+      √ A01: Manager A cannot toggle staff active state in Lab B (403 Forbidden) (9 ms)
+      √ A02: Manager A cannot reset password of another manager in Lab A (403 Forbidden) (17 ms)
+      √ A03: Manager A CAN reset password of subordinate technician in Lab A; increments tokenVersion and returns random password (123 ms)
+      √ A03: Viewer user cannot reset staff password (403 Forbidden) (6 ms)
+    2. Lab Update Allowlist & Lifecycle Mutation Protection (A07, LG-02, LG-04, LG-05, A33)
+      √ A07: Lab PUT rejects attempts to inject immutable fields (id, isActive, createdAt) (4 ms)
+      √ A07: Lab PUT succeeds with allowlisted fields and does not alter immutable ID (7 ms)
+      √ A01: Manager A cannot update Lab B via PUT (403 Forbidden) (6 ms)
+      √ LG-04: Non-admin cannot create a laboratory via POST /api/labs (403 Forbidden) (5 ms)
+      √ A33: Inactive lab technician can access /api/auth/me for read/history access with labIsActive=false (IR-10) (6 ms)
+    3. User Administration, Last-Admin Protection & Validation (A08, A09, A10, LG-06, LG-07, LG-08)
+      √ A09: Administrator self-deletion is prevented (SELF_DELETION_FORBIDDEN) (6 ms)
+      √ LG-07: User creation rejects foreign labId for manager (403 Forbidden) (5 ms)
+      √ LG-07: User update rejects empty string role (5 ms)
+      √ LG-08: National user getUsers returns only staff in national country labs (8 ms)
+      √ LG-08: National user with empty country scope receives empty array (not global leak) (7 ms)
+    4. Project Scoping & Kobo Credential Redaction (A24, A27, LG-11, LG-13, LG-27)
+      √ A27: Kobo configuration endpoint redacts API token (LG-13) (6 ms)
+      √ A24: Manager of another lab cannot delete project (LG-11) (5 ms)
+    5. Equipment Scoping & Management Isolation (A30, LG-18)
+      √ A30: Manager A cannot change equipment status in Lab B (403 Forbidden) (7 ms)
+    6. Offline Synchronization & Work Pack Scoping (A16, A17, A18, A19, LG-14, LG-15)
+      √ A18: Viewer cannot complete work via sync batch (LG-14) (2 ms)
+      √ A18: Technician B cannot complete Lab A work item via sync batch (3 ms)
+      √ A19: SAVE_WORK_DRAFT persists to WorkItemDraft table and returns APPLIED (23 ms)
+      √ A17: Non-admin without labId is denied work pack preparation (LG-15) (14 ms)
+    7. Session Revocation & Impersonation Safety (A13, A14, LG-16, LG-28)
+      √ A13: Stale tokenVersion is rejected by HTTP auth with 401 SESSION_INVALIDATED (4 ms)
+      √ A14: Impersonated session is invalidated when actor administrator is deactivated (12 ms)
+    8. Timezone Intervals & DST Calculation (A37, LG-29)
+      √ A37: Europe/London spring-forward DST (2026-03-29) produces exactly 23 hours (6 ms)
+      √ A37: Europe/London fall-back DST (2026-10-25) produces exactly 25 hours (1 ms)
+      √ A04: National user cannot switch dashboard scope to an out-of-country lab (2 ms)
+    9. Global Locale Management Protection (A32, LG-20)
+      √ A32: Core platform locales (en, es, es-419, fr, pt) cannot be deleted (7 ms)
+      √ A32: Ordinary lab manager cannot delete languages (403 Forbidden) (5 ms)
+
+  console.warn
+    [DB_ISOLATION] Refusing to clean up directory outside owned runner pattern: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers
+
+      146 |
+      147 |     if (!isOwnedRunnerDir) {
+    > 148 |         console.warn(`[DB_ISOLATION] Refusing to clean up directory outside owned runner pattern: ${resolved}`);
+          |                 ^
+      149 |         return;
+      150 |     }
+      151 |     createdDisposableDatabases.delete(resolved);
+
+      at cleanupDisposableDatabase (scripts/journey_db_isolation.cjs:148:17)
+      at Object.cleanupDisposableDatabase (tests/contracts/journey_runner_db_refusal.test.js:120:9)
+
+PASS tests/contracts/journey_runner_db_refusal.test.js (359 MB heap size)
+  Browser Journey Database Isolation & Refusal Contract
+    √ 1. Rejects null, undefined, or whitespace candidate paths (8 ms)
+    √ 2. Refuses direct reference to working development database (dev.db)
+    √ 3. Refuses any database path ending with reserved "dev.db" name (1 ms)
+    √ 4. Refuses candidate database located outside runner temporary directory (1 ms)
+    √ 5. Accepts valid isolated database strictly inside runner temporary directory
+    √ 6. createDisposableDatabase builds an isolated guarded release schema without accessing working data (28 ms)
+    √ 7. cleanupDisposableDatabase refuses to delete directories without runner prefix or outside pattern (2 ms)
+    √ 8. Refusal guard enforces working dev.db immutability when inherited (1 ms)
+    √ 9. cleanupDisposableDatabase strictly confines cleanup to exact owned root and preserves other active runs (1 ms)
+    √ 10. Production-mode browser fixtures require fresh ownership and use both real creation authorities (78 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       165 passed, 165 total
+Snapshots:   0 total
+Time:        24.689 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_213_export_equals_report.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_278_texture_closure_policy.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_281_cross_check_bounds.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_283_one_unit_per_analysis.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_291_texture_input_authority.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\journey_runner_db_refusal.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\kobo_duplicate_provenance.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\kobo_explicit_mapping.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\kobo_notification_view_link.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\kobo_profile_capture.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\lab_directory_and_auth_profile.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\lab_governance_wp_a.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-21.json

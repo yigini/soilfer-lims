@@ -1,0 +1,146 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c9356b2-1ca2-40b0-a600-c36dca636470 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/workbench_search.test.js (143 MB heap size)
+  Issue #123: Workbench Search & Multi-Field Query Contract
+    √ 1. Search by canonical sample UUID returns matching item in Lab A queue (112 ms)
+    √ 2. Search by labId returns matching work item (24 ms)
+    √ 3. Search by original field ID returns matching work item (18 ms)
+    √ 4. Search by analysis code (e.g. PH) filters work items to that method (20 ms)
+    √ 5. Search by analysis display name (e.g. "Soil Organic Carbon") resolves to SOC work items (16 ms)
+    √ 6. Non-matching search returns empty array with honest state (11 ms)
+    √ 7. Clearing search (empty search param) restores full authorized queue (23 ms)
+    √ 8. Cross-lab search isolation: searching for a shared term excludes items from other laboratories (14 ms)
+    √ 9. Specimen code labId work items are visible in default queue (Issue #123 root cause) (26 ms)
+    √ 10. Search by methodology name filters to work items with that methodology assigned (26 ms)
+    √ 11. Search by methodology standard filters to work items with that methodology assigned (17 ms)
+    √ 12. Search by specimen labId (e.g. GHA0816-1-1C-S) filters to that sample (16 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       12 passed, 12 total
+Snapshots:   0 total
+Time:        1.569 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\workbench_search.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-61.json

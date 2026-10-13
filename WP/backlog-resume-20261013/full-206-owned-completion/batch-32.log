@@ -1,0 +1,95 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 43c30cc2-6acc-46e3-a433-04b6396022fb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 43c30cc2-6acc-46e3-a433-04b6396022fb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 88f9d50a-af7c-4479-9321-4108c060904c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 88f9d50a-af7c-4479-9321-4108c060904c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 43c30cc2-6acc-46e3-a433-04b6396022fb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 43c30cc2-6acc-46e3-a433-04b6396022fb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 43c30cc2-6acc-46e3-a433-04b6396022fb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 43c30cc2-6acc-46e3-a433-04b6396022fb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 88f9d50a-af7c-4479-9321-4108c060904c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 88f9d50a-af7c-4479-9321-4108c060904c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/sample_assignment_manager_route.test.js (142 MB heap size)
+  Contract & Component Regression: Manager Queue Assignment Route (#119)
+    1. Component Render Regression: ArrowRight and Eye Definition (#119)
+      √ SampleDetail renders without ReferenceError when nextAction is ASSIGN (88 ms)
+      √ SampleDetail renders without ReferenceError when released report is present (Eye icon) (8 ms)
+    2. Task Count Isolation & Scope Aggregation (15 + 11 + 12 = 38 tasks)
+      √ SUPER_ADMIN unassigned queue aggregates 38 tasks across S005, S004, and W001 (48 ms)
+      √ LAB_MANAGER (LAB-GTM) is lab-scoped and sees only S005 (15) and S004 (11) totaling 26 tasks (48 ms)
+    3. Canonical Sample ID vs Display Lab Code Disambiguation
+      √ S005 resolves strictly to its own 15 tasks via canonical ID GTM-LAB1 (139 ms)
+      √ S005 also resolves accurately when queried via display lab code S005 (112 ms)
+      √ canonical ID query takes strict precedence over cross-column labId alias collision (63 ms)
+      √ S004 resolves strictly to its own 11 tasks (72 ms)
+      √ W001 resolves strictly to its own 12 tasks (83 ms)
+    4. Manager Queue Card Target URL and Return Context
+      √ Target URL uses canonical sampleId GTM-LAB1 and preserves returnTo queue context
+      √ Target URL forwards selectedAnalysis directly and retains method context in returnTo (#119) (1 ms)
+    5. Component Render Regression: Manager Guidance & Scoped Assignment Controls (#119)
+      √ SampleDetail renders Manager guidance text instead of Technician guidance when tasks are unassigned (11 ms)
+      √ SampleDetail ASSIGN action handler invokes handleFocusAssignment and eliminates loop to manager-queue (1 ms)
+    6. 12 Ordered / 9 Analytical + 2 Gates / Derived Texture Relationship (#119)
+      √ S004 workspace maintains truthful parallel facts: 2 gates + 9 analytical = 11 tasks (34 ms)
+      √ Aggregated queue across lab maintains 26 = 15 (S005) + 11 (S004) unassigned tasks (8 ms)
+    7. Safety & Immutability: Zero Live Task Assignment (#119)
+      √ All work items remain strictly in NOT_ASSIGNED state with assignedTo null (5 ms)
+    8. State Integrity, Stale Selection Isolation & Route Transition (#119)
+      √ Source probe: WorkItemsTable handleBulkAssign dispatches 0 calls when selection contains only stale IDs absent from current workItems (2 ms)
+      √ Source probe: WorkItemsTable handleBulkAssign filters out terminal status items (COMPLETED, SUBMITTED, ACCEPTED) and submits only eligible items (1 ms)
+      √ Source probe: WorkItemsTable handleBulkAssign enforces mutual exclusion (ARCHIVING vs DISPOSAL) (1 ms)
+      √ SampleDetail and WorkItemsTable component source asserts state resets across sample context transitions (2 ms)
+      √ Eligibility Reconciliation Logic: Ineligible and stale IDs are pruned from selection
+      √ Same-mounted sample parameter transition (A -> B without unmount) clears selection and resets technician
+      √ Mounted eligibility refresh reconciles selection, updates technician/button state, and prevents stale dispatches through real handler with intercepted mock endpoint (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       23 passed, 23 total
+Snapshots:   0 total
+Time:        2.109 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\sample_assignment_manager_route.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-owned-completion\batch-32.json

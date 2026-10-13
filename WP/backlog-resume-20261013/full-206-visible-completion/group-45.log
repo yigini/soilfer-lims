@@ -1,0 +1,24 @@
+PASS tests/contracts/spectroscopy_operational_corrections.test.js (102 MB heap size)
+  Spectroscopy Operational Corrections Contract & Regression
+    Monotonic QC Severity (Amendment 5)
+      √ escalateQCStatus escalates PASS -> WARN -> FAIL monotonically (3 ms)
+      √ validateSpectra retains FAIL when saturated or flat signal occurs (1 ms)
+    Scalar Lockout on Spectral Tasks
+      √ batchSave blocks scalar value entry on SPEC_MIR task (35 ms)
+      √ previewCompletion excludes spectral items from scalar completion (4 ms)
+    Spectral Parser Strictness
+      √ throws INCOMPATIBLE_MODALITY_UNITS when wavelength file is fed into MIR context (21 ms)
+      √ parses valid MIR CSV with wavenumber units and preserves axis metadata
+    Batch Commit & Replicate Completeness with Zero Result Rows
+      √ commitBatch fails if equipmentId is missing (3 ms)
+      √ commitBatch saves spectrum, completes workItem, and leaves Result table untouched (54 ms)
+    Task Linking Rules
+      √ cannot link scan with FAIL qcStatus (2 ms)
+      √ cannot link incompatible modality (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       10 passed, 10 total
+Snapshots:   0 total
+Time:        0.782 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectroscopy_operational_corrections.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-45.json

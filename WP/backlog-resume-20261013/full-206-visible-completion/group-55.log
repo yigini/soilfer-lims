@@ -1,0 +1,19 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+PASS tests/contracts/versioning.test.js (112 MB heap size)
+  PIP / Versioning & Documentation Contracts
+    √ 1. server/package.json and client/package.json versions must match strictly (2 ms)
+    √ 2. VERSIONING.md exists and establishes SemVer policy (2 ms)
+    √ 3. CHANGELOG.md documents current version under Keep a Changelog standard (1 ms)
+    √ 4. GET /api/health and GET /api/version expose server package version (730 ms)
+    √ 5. Client views do not contain obsolete hardcoded version strings (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        1.067 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\versioning.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-55.json

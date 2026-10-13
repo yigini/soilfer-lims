@@ -1,0 +1,99 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab TUN-LAB1
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/texture_work_item_atomic.test.js (151 MB heap size)
+  Texture Work Item & Atomic Linked Results Contracts (Mandatory Corrections 3 & 4)
+    Unit: normalizeAnalysisCodes & compound expansion
+      √ maps all texture aliases to canonical TEXTURE (2 ms)
+      √ deduplicates individual fractions (SAND, SILT, CLAY) when TEXTURE is present
+      √ preserves individual fractions if TEXTURE is NOT ordered (1 ms)
+    HTTP & Workflow: Atomic Texture Workbench Execution
+      √ Draft saving: persists { sand, silt, clay } object without skipping (137 ms)
+      √ Queue reload contract: GET /api/workbench/queue returns parsed { sand, silt, clay } without positional array dependency (77 ms)
+      √ Preview completion: fails closed if fractions are missing or closure exceeds tolerance (28 ms)
+      √ Batch completion: rejects direct commit without fractions (13 ms)
+      √ Batch completion: atomically writes 4 linked results and WorkAttempt on valid fractions (194 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        1.655 s, estimated 2 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\texture_work_item_atomic.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-visible-completion\group-50.json

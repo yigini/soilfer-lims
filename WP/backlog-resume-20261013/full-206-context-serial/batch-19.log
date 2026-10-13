@@ -1,0 +1,537 @@
+PASS tests/contracts/exchange_publication_hold_candidates.test.js (104 MB heap size)
+  Narrow publication hold candidates preserve conservative exclusions
+    √ malformed, non-object and actual holds are excluded in APPROVED (570 ms)
+    √ malformed, non-object and actual holds are excluded in RELEASED (403 ms)
+    √ malformed, non-object and actual holds are excluded in ARCHIVED (428 ms)
+    √ malformed, non-object and actual holds are excluded in DISPOSED (436 ms)
+    √ unpublished rows and never-approved archived rows are not scanned for restricted publication (492 ms)
+    √ missing publication columns retain broad conservative discovery (486 ms)
+    √ a database failure remains an error, never a successful empty list (410 ms)
+
+PASS tests/contracts/help_acceptance_criteria.test.js (117 MB heap size)
+  Help System Full Acceptance & Release Verification
+    √ 1. Every article is present with revision 1 and validated locale entries (117 ms)
+    √ 2. FAQ and Article summary consistency across all 27 articles (authorized preview) (347 ms)
+    √ 3. Route coverage: All mapped routes resolve cleanly (80 ms)
+    √ 4. Live Blocker Diagnostics: All machine-readable codes map to valid explanatory articles (191 ms)
+    √ 5. Zero mutation assertion: Calling help services does NOT mutate operational tables (97 ms)
+    √ 6. Accented and typo-tolerant search across topics and synonyms (65 ms)
+    √ 7. Multi-language collections: all 5 locale files exist with 113 translated articles (77 ms)
+    √ 8. Public vs Authenticated Visibility: unauthenticated visitor only receives explicitly public articles (5 ms)
+    √ 9. Runtime data decoupling: help service reads exclusively from server/data/help/
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-nat-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-nat-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] WebSocket server initialised on /ws
+
+      at Object.log [as init] (wsServer.js:251:13)
+
+  console.log
+    [WS] Broadcast USER_STATUS to 0 socket(s) in lab lab-gtm-FINAL-1791890874634
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] User tech_FINAL-1791890874634 (usr-tech-FINAL-1791890874634) connected for lab lab-gtm-FINAL-1791890874634
+
+      at log (wsServer.js:185:36)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgr-FINAL-1791890874634 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast TEST_POST_SUSPEND_PING to 0 socket(s) in lab lab-gtm-FINAL-1791890874634
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [WS] WebSocket server initialised on /ws
+
+      at Object.log [as init] (wsServer.js:251:13)
+
+  console.log
+    [WS] Broadcast USER_STATUS to 0 socket(s) in lab lab-gtm-FINAL-1791890874634
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] User commit_FINAL-1791890874634 (usr-commit-FINAL-1791890874634) connected for lab lab-gtm-FINAL-1791890874634
+
+      at log (wsServer.js:185:36)
+
+PASS tests/contracts/final_governance_probes.test.js (185 MB heap size)
+  Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
+    1. F01 & C01: National Invitation Authority & Scope Enforcement
+      √ F01: Guatemala national lead cannot invite staff into France lab (403, 0 persisted) (34 ms)
+      √ C01: Guatemala national lead can invite staff inside their own country (201) (11 ms)
+      √ National lead can perform actions in own country without proposed-lab field
+      √ National lead fails closed when target country scope is missing
+    2. F02 & Onboarding Journey: SETUP Status & Pending Manager
+      √ F02: Administrator appoints pending manager while lab is in SETUP (201) (8 ms)
+      √ Work item assignment is blocked in SETUP lab (400 LAB_PAUSED) (36 ms)
+      √ Pending manager redeems invitation token in SETUP lab to create active account (77 ms)
+    3. F03 & F04: Workspace Scoping & Workload Pipeline Math
+      √ F03: Junction-only servicing project appears in laboratory workspace (28 ms)
+      √ F04: Workload excludes EXPECTED and APPROVED from active analytical work (13 ms)
+    4. F05: Unfinished Work Accounting Across Canonical Lifecycle
+      √ F05: Access preview accounts for SUBMITTED work awaiting review (13 ms)
+      √ Access preview accounts for REPEAT_REQUIRED work needing rework (11 ms)
+      √ Access preview accounts for COMPLETED results without submission (unsubmitted bench work) (10 ms)
+      √ Access preview retains assigned ON_HOLD work in its unfinished count (10 ms)
+      √ Access preview retains assigned AWAITING_VERIFICATION work in its unfinished count (10 ms)
+    5. F06 & F07: Legacy Token Version Handling & WebSocket Revocation
+      √ F06: Revoked legacy JWT without tokenVersion claim is rejected by HTTP and SIS (12 ms)
+      √ F07: Account suspension closes active WebSocket connection and prevents receiving lab broadcasts (125 ms)
+      √ Outer transaction rollback safety: failed transaction does not revoke sockets prematurely and preserves DB state (4 ms)
+      √ Outer transaction contract: unsupported outer transaction without afterCommit fails closed (1 ms)
+      √ Outer transaction commit: successful outer commit revokes established socket after commit (113 ms)
+
+  console.log
+    [HELP_RELEASE] Starting Help Knowledge Base Release publication (dryRun: false)...
+
+      at publishHelpRelease (scripts/publish_help_release.cjs:12:13)
+
+  console.log
+    [HELP_RELEASE] Auditing 113 application guides across 5 languages...
+
+      at publishHelpRelease (scripts/publish_help_release.cjs:40:13)
+
+  console.log
+    [HELP_RELEASE] Release manifest written to C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\data\help\RELEASE_MANIFEST_v1.json
+
+      at publishHelpRelease (scripts/publish_help_release.cjs:170:17)
+
+  console.log
+    [HELP_RELEASE] Successfully published 113 guides across all 5 languages (en, es, es-419, fr, pt).
+
+      at publishHelpRelease (scripts/publish_help_release.cjs:173:13)
+
+PASS tests/contracts/help_release_rollout.test.js (196 MB heap size)
+  Help Release Rollout & Live Reader Journeys Contract Tests
+    √ 1. Release manifest matches published collection and 5-language coverage (1 ms)
+    √ 2. All published articles have active publications with approved locales in DB (92 ms)
+    √ 3. Representative Journey — Public Visitor on /login (normal reader, no preview) (4 ms)
+    √ 4. Representative Journey — Anonymous visitor on /workbench receives AUTH_REQUIRED (5 ms)
+    √ 5. Representative Journey — Authenticated Technician on /workbench (7 ms)
+    √ 6. Representative Journey — Technician with live blocker on /workbench (6 ms)
+    √ 7. Representative Journey — Reception Staff on /reception (2 ms)
+    √ 8. Representative Journey — Lab Manager on /manager-queue (2 ms)
+    √ 9. Multilingual Delivery across all 5 languages without false fallback labels (19 ms)
+    √ 10. Public Topics endpoint returns non-zero article counts for normal readers (8 ms)
+    √ 11. Offline Pack generation includes published articles for normal readers (33 ms)
+    √ 12. Operational Safety: Zero mutations on operational tables (2 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr_viewer_regr (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_viewer_regr (VIEWER) attempted HELP_EDIT_LAB. Allowed roles: ["SUPER_ADMIN","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: usr_tech_regr (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr_tech_regr (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr_mgr_regr (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [HELP_SEED] Starting help content seeding from server/data/help/...
+
+      at seedHelpContent (scripts/seed_help_content.cjs:20:13)
+
+  console.log
+    [HELP_SEED] Superseded 1 unreviewed accidental seed publications (audit history preserved).
+
+      at seedHelpContent (scripts/seed_help_content.cjs:215:17)
+
+  console.log
+    [HELP_SEED] Seeding completed: 0 created, 113 updated. 0 unreviewed drafts published.
+
+      at seedHelpContent (scripts/seed_help_content.cjs:218:13)
+
+PASS tests/contracts/help_release_regressions.test.js (231 MB heap size)
+  Help Centre Release Regressions & Governance Gates (Finding 1, 3, 4)
+    1. Lab Note Governance & Access Control (Finding 4)
+      √ User without HELP_EDIT_LAB (e.g. VIEWER) cannot edit lab note (403) (10 ms)
+      √ Technician with HELP_EDIT_LAB can save a draft note (isActive: false) (8 ms)
+      √ Technician with HELP_EDIT_LAB cannot directly publish lab note (403) (5 ms)
+      √ Lab Manager can publish lab note (isActive: true) (4 ms)
+      √ Published note is visible to Lab A user but hidden from Lab B user (10 ms)
+    2. Publication Audit History Preservation (Finding 4)
+      √ Targeted supersession: Accidental seed publication is marked isCurrent: false and not deleted (250 ms)
+    3. Authoritative HTTP Error Handling Contract (Finding 1 & 3)
+      √ Unauthenticated access to authenticated endpoint returns 401/403 directly (4 ms)
+      √ Requesting non-existent article returns 404 cleanly (3 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for W001 by test_lab_manager_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample W001 with status RECEIVED
+
+      at log (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0ac59d6d-b048-4692-97ca-2f7275da6ce6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/gates_clean.test.js (263 MB heap size)
+  8.1 Section B: Gate Enforcement (Clean Flow)
+    √ Progressive Gate Unlocking (285 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 93b7ff51-fe8e-4986-b4c2-5058075236b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 93b7ff51-fe8e-4986-b4c2-5058075236b5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/export_normalization.test.js (284 MB heap size)
+  WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)
+    √ 1. Export controller emits dual columns (soc_as_measured, soc_unit, soc_normalized, soc_controlled_unit) (24 ms)
+    √ 2. SIS GeoJSON export emits dual columns in flat properties (84 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+PASS tests/contracts/exchange_error_semantics.test.js (306 MB heap size)
+  Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants
+    E07-min: Unforgeable Request Correlation & Headers
+      √ Generates server-assigned X-Request-Id prefixed with xchg_ even before authentication (6 ms)
+      √ Preserves client correlation ID format or overwrites with unforgeable server ID (3 ms)
+    E02 & E05: Baseline Publication Invariants & Genuine Empty
+      √ Returns 200 OK with eligible approved sample and excludes processing & held samples (37 ms)
+      √ E02: Genuine empty query returns 200 OK with empty array (never 503) (25 ms)
+    E03: Single Policy Resolution & Total Coherence
+      √ buildSampleWhere is called once per getSamples request, avoiding duplicate hold scans (7 ms)
+    E01: Fail-Closed HTTP 503 Error Semantics Across All 4 Aliases & Endpoints
+      √ 1. All 4 exchange aliases fail-closed with 503, Retry-After: 5, and X-Request-Id on /samples (15 ms)
+      √ 2. Single sample detail endpoints fail-closed with 503 (6 ms)
+      √ 3. GeoJSON endpoints fail-closed with 503 (6 ms)
+      √ 4. V1 Results matrix fails-closed with 503 (2 ms)
+      √ 5. V2 Observations endpoint fails-closed with 503 (3 ms)
+      √ 6. Spectra endpoints fail-closed with 503 (4 ms)
+      √ 7. V1 Sync endpoint fails-closed with 503 (3 ms)
+      √ 8. Stats endpoints fail-closed with 503 (5 ms)
+      √ 9. Snapshot and changes error routing through handleExchangeError with 503 (6 ms)
+    Client Error (4xx) Preservation
+      √ Preserves 400 Bad Request on invalid parameter without converting to 503 (2 ms)
+      √ Preserves 404 Not Found on non-existent specimen without converting to 503 (5 ms)
+      √ Preserves 401 Unauthorized on invalid API key token (2 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-HELPGOV-1791890878359 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-HELPGOV-1791890878359 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-tech-HELPGOV-1791890878359 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User tech_HELPGOV-1791890878359 (LAB_TECHNICIAN) attempted HELP_PUBLISH_GLOBAL. Allowed roles: ["SUPER_ADMIN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-HELPGOV-1791890878359 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-HELPGOV-1791890878359 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-HELPGOV-1791890878359 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-HELPGOV-1791890878359 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-HELPGOV-1791890878359 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-HELPGOV-1791890878359 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-sa-HELPGOV-1791890878359 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/help_publication_governance.test.js (326 MB heap size)
+  Help Publication & Governance Security Contract Tests
+    √ 1. Negative Gate: Publishing unreviewed revision is rejected with 422 (10 ms)
+    √ 2. Negative Gate: Publishing with unapproved or missing locale is rejected with 422 (4 ms)
+    √ 3. Negative Gate: Non-super-admin / non-publisher cannot approve revisions (403) (4 ms)
+    √ 4. Dedicated Review & Approval Workflow: Request review transitions status to IN_REVIEW (6 ms)
+    √ 5. Approval and Atomic Publication: After approval, publication succeeds atomically (14 ms)
+    √ 6. Immutability Gate: Once published, editing revision 1 returns 409 Conflict (4 ms)
+    √ 7. New Revision Workflow: Creating revision 2 creates a new draft without mutating published revision 1 (8 ms)
+    √ 8. Concurrency Gate: Publication with mismatched expectedRevisionNumber returns 409 Conflict (5 ms)
+
+PASS tests/contracts/help_content_service.test.js (327 MB heap size)
+  Help Content Service Contract Tests
+    √ getTopics returns 12 categories with article counts in authorized preview (49 ms)
+    √ getArticles filters by role and category in authorized preview (8 ms)
+    √ getArticleById returns article details and steps for draft article in preview (5 ms)
+    √ getArticleById returns explicit fallback notice for unreviewed translation (8 ms)
+    √ searchHelp finds spectra article by MIR keyword in preview (37 ms)
+    √ searchHelp handles search queries safely with special characters (30 ms)
+    √ recordFeedback stores feedback without mutating article (3 ms)
+    √ getArticleById returns rich v2 blocks for bench-batch and prep-drying (8 ms)
+    √ getArticleById resolves legacy article ID via alias (4 ms)
+    √ getFaqs returns problem symptoms across topics (2 ms)
+
+PASS tests/contracts/help_offline_and_context.test.js (342 MB heap size)
+  Help Offline, Context & Isolation Contract Tests
+    √ 1. Blocker isolation: Context help with blocker does NOT contaminate subsequent calls without blocker (35 ms)
+    √ 2. Unknown blocker code resolves safely to bench-blocked fallback (7 ms)
+    √ 3. Public vs Authenticated Filtering: Unauthenticated user cannot access authenticated-only operational articles (5 ms)
+    √ 4. Offline pack generation: returns localized categories, route mapping, and pack metadata (18 ms)
+
+PASS tests/contracts/external_mapping_shelf.test.js (357 MB heap size)
+  WP-37: External Mapping Shelf Contract
+    √ 1. Analysis and Methodology tables contain 0 dormant glosis_* columns (15 ms)
+    √ 2. ExternalMapping table exists and stores external ontology cross-references (4 ms)
+    √ 3. GlosisExplorer UI component is deleted (1 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       100 passed, 100 total
+Snapshots:   0 total
+Time:        9.894 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\exchange_error_semantics.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\exchange_publication_hold_candidates.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\export_normalization.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\external_mapping_shelf.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\final_governance_probes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\gates_clean.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\help_acceptance_criteria.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\help_content_service.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\help_offline_and_context.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\help_publication_governance.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\help_release_regressions.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\help_release_rollout.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-19.json

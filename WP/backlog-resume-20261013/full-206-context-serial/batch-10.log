@@ -1,0 +1,1591 @@
+  console.log
+    [AUTH] Verifying token for ID: da65377d-e854-422d-8890-a7d586d50641 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d99eaeea-ab46-4b18-aa0f-c98723c24e8a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c0095300-98ea-4189-b748-86b7922e508e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 400d409a-45bf-4bda-b1d3-a089f4766b5a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7d45d319-9e3b-4023-8e20-f2b631c44e5c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 34f8c036-67a8-4bbf-8f99-a8c7e9c075e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 34f8c036-67a8-4bbf-8f99-a8c7e9c075e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d971d151-f024-42b1-98e5-5638abaac7ac (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cad82589-d5e0-43eb-ad65-b7707b8f0ffc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ee8f6e18-7463-4010-8242-b8989996a0b4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 405f8234-01c5-4b98-8e1f-538ce2283911 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 84312825-cd7f-436f-80e8-b4aeda309213 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c97b9806-9b96-48ae-a8d1-52db12c0e497 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d22a4f61-de12-4951-892b-55a63812df6e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0f72037e-2142-48a3-9a50-bc1a39d2c723 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 24050a1d-cd06-4d4f-ab44-09d7fa12006c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ce60dc32-56b9-4370-9a4a-a5fd727fd92e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d3b60118-1a2d-420c-a592-d1bf6b657bd1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 58011b46-8cd7-4a0c-97f1-a78aee987c21 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 58011b46-8cd7-4a0c-97f1-a78aee987c21 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 58011b46-8cd7-4a0c-97f1-a78aee987c21 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 58011b46-8cd7-4a0c-97f1-a78aee987c21 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 15919c19-e1eb-49ad-a1f1-e2da870761ca (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dc96824c-b57b-4a25-9d42-efe37d4d4de2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dc96824c-b57b-4a25-9d42-efe37d4d4de2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dc96824c-b57b-4a25-9d42-efe37d4d4de2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dc96824c-b57b-4a25-9d42-efe37d4d4de2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dc96824c-b57b-4a25-9d42-efe37d4d4de2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a63511f0-0e17-431b-b755-9d8a17eb30ab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9885d483-9141-4488-9b59-c76b7a501d82 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b4d51cdd-b790-4936-8fcf-5d79ae40cad1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-a8237fdb-bd6f-4aae-b4c3-c00dfcef9fde (AUDIT_USER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: b4d51cdd-b790-4936-8fcf-5d79ae40cad1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-a8237fdb-bd6f-4aae-b4c3-c00dfcef9fde (AUDIT_USER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: a43da26a-5958-4cb2-acbb-0d23b7d1b596 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-a7607c56-4e7c-4029-bff0-449e8fbe40a7 (VIEWER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: a43da26a-5958-4cb2-acbb-0d23b7d1b596 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-a7607c56-4e7c-4029-bff0-449e8fbe40a7 (VIEWER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 4b464523-d460-41d3-a810-db11aa345859 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-216f36a5-3517-43d0-9bff-a6dfc78581e8 (SAMPLE_RECEPTION) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 4b464523-d460-41d3-a810-db11aa345859 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-216f36a5-3517-43d0-9bff-a6dfc78581e8 (SAMPLE_RECEPTION) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f6c3664-b555-431d-8eff-e9500be23980 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5f6c3664-b555-431d-8eff-e9500be23980 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5b8c7823-ad39-4d28-a2f9-d59710fc8d62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2d0cea0d-ba56-4976-8024-d006e0244e00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2d0cea0d-ba56-4976-8024-d006e0244e00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8e130f0c-b419-42a1-8a83-adecb123d74d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8e130f0c-b419-42a1-8a83-adecb123d74d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 636d2a2b-935e-4980-8dfc-13548c8e90a5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 636d2a2b-935e-4980-8dfc-13548c8e90a5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Record a failing required pair before adding a third reading.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:77:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_NOT_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 636d2a2b-935e-4980-8dfc-13548c8e90a5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 39b03b42-2d86-4baf-9680-c3b2f9fe31be (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 39b03b42-2d86-4baf-9680-c3b2f9fe31be (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:106:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 39b03b42-2d86-4baf-9680-c3b2f9fe31be (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at recordedExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:71:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:103:28)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:23:45)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 578a0712-c62e-4cb0-81ba-ec5257b36d46 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7750cc67-b3d7-4b9f-a398-817bd571515e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0c49a7ea-240d-4693-9158-b7190eed5120 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9499fb3b-bfce-4ba9-aee1-ed16d0cf6309 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Owned replicate-event storage failure
+        at Array.Error (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_2_repeat_commands.test.js:370:92)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:9304
+        at r (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:1022)
+        at PrismaPromise.o [as then] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:1118)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5c8e409b-bcf5-4306-bb63-8de8ee87633a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5c8e409b-bcf5-4306-bb63-8de8ee87633a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 92f83d38-613a-4c4f-8d3a-ef61fd8ae763 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 92f83d38-613a-4c4f-8d3a-ef61fd8ae763 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 67fcd7d6-34c3-477d-98ab-7ababd9a2378
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 05db5af3-388e-4ccd-9e7d-9c8a93c2adad (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f33eec49-096f-4b73-a6d0-1b0dc24ecab1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: eee301c8-011f-4d38-81eb-09c80cb972f3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f13f5419-d80f-46bb-8e7d-6db036e99fa6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 0184ef42-33d2-4ed3-ad3f-10b98681cf8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 212c8c30-cf74-479d-8e1f-9aaf537cecd7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: aba09176-f63e-41a0-b443-a197e6d6fde9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 439fca8c-6d16-4fd2-b725-8235275149d8
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 0fa047ef-9cd0-4c23-8733-835296bb56d5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2accdf9e-5bdc-4194-9519-768c9d000e50
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f7067d7a-0476-4062-8bf1-4f7d42edb5ec (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 00c0bb56-f98c-4dc6-97de-9fc5276622d8
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f406f9af-ab2d-4cf9-a297-9258cb94b4e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2922860c-793b-4755-b0d5-b149a0238720
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f4622e43-bc30-4b3a-bbb6-534853d3b61e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 5e501b15-9409-48af-afde-d5c88be2d2a1
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 603ab2ff-ca0b-4e03-b00c-8a53b45458e2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: A repeat reason code is required.
+        at Object.repeatRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workRepeatContract.js:22:30)
+        at repeatRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:61:63)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORK_ATTEMPT_REASON_REQUIRED',
+      details: {}
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9e31718f-0894-4cdb-b749-67aa4272d778 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User repeat-reviewer-9288e49a-40eb-4773-85e9-3fd1978ef93b (Lab: 2264d7c9-f74d-4f58-aeb6-f5c608dfc8f0) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/workRepeatService.js:20:11)
+      at preflightRepeat (services/workRepeatService.js:82:28)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.requestRepeat (controllers/workRepeatController.js:8:32)
+
+  console.log
+    [AUTH] Verifying token for ID: 9e31718f-0894-4cdb-b749-67aa4272d778 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User repeat-reviewer-9288e49a-40eb-4773-85e9-3fd1978ef93b (Lab: 2264d7c9-f74d-4f58-aeb6-f5c608dfc8f0) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/workAttemptCorrectionService.js:31:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.correctAttempt (controllers/workRepeatController.js:16:32)
+
+  console.log
+    [AUTH] Verifying token for ID: 0b1e9d18-e687-4680-a89d-cc69692d82ee (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0b1e9d18-e687-4680-a89d-cc69692d82ee (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 50287534-2cab-46d4-a7ed-838cf3749e12 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d22f6ae2-8da3-4bc0-bcfc-88d2b631cb08 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ada51cea-eb59-4339-8286-d67f72d8b9a5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dbb41b10-c60b-4b58-a44a-5b0aa366b5ee (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 8680aa8b-e57c-40db-b544-ae93ac8fd555
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 39dfbce1-847e-48cc-ba23-ab26e3da3802 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b1ab2799-dd6f-489b-beec-6565b152ed01
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8bc4af4f-94c9-490a-b768-cd35ded5d540 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 54cbd9d1-bf20-446f-9829-833b888fa60d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/audit_3_2_repeat_commands.test.js (67.928 s, 174 MB heap size)
+  √ the narrow owned fixture records explicit replicas together, retains literal evidence and refuses reuse (1607 ms)
+  √ the owned result-set fixture refuses duplicate current replicas before any execution or Result writes (1150 ms)
+  √ an unknown correction key status refuses with zero writes (1340 ms)
+  √ an unknown correction key equipmentId refuses with zero writes (1181 ms)
+  √ an unknown correction key timestamp refuses with zero writes (1193 ms)
+  √ an unknown correction key sourceEventIds refuses with zero writes (1330 ms)
+  √ the four named compatibility keys cannot affect a correction Result, event or response (1199 ms)
+  √ a scoped technician requests INSTRUMENT_FAULT before submission, reserving exactly one immutable OPEN attempt (1225 ms)
+  √ the actual repeat API refuses {} with zero evidence/state writes (1162 ms)
+  √ the actual repeat API refuses {"reason":"guess"} with zero evidence/state writes (1198 ms)
+  √ the actual repeat API refuses {"reason":"TRANSCRIPTION_ERROR"} with zero evidence/state writes (1351 ms)
+  √ the actual repeat API refuses {"reason":"CLIENT_RETEST"} with zero evidence/state writes (1183 ms)
+  √ the actual repeat API refuses {"reason":"OTHER"} with zero evidence/state writes (1168 ms)
+  √ the actual repeat API refuses {"reason":"INSTRUMENT_FAULT","sameBatchAllowed":true} with zero evidence/state writes (1161 ms)
+  √ the actual repeat API refuses {"reason":"INSTRUMENT_FAULT","author":"caller"} with zero evidence/state writes (1154 ms)
+  √ the actual repeat API refuses {"reason":"INSTRUMENT_FAULT","ncrId":"unverified"} with zero evidence/state writes (1175 ms)
+  √ the actual repeat API refuses {"reason":"INSTRUMENT_FAULT","override":false} with zero evidence/state writes (1305 ms)
+  √ the configured self-repeat disablement refuses a technician with zero writes (1168 ms)
+  √ an OPEN repeat fills once in the real Result transaction and keeps every request/version/time field frozen (1209 ms)
+  √ the fourth attempt refuses at the lab limit, while zero policy means unlimited (1354 ms)
+  √ a single-result transcription correction appends within the same attempt and preserves its evidence exactly (1251 ms)
+  √ a multi-replicate correction requires an explicit valid current selector and leaves every other replicate byte for byte (2670 ms)
+  √ a reviewer may request REVIEW_OUTLIER and a technician cannot request it (1251 ms)
+  √ the route permission admits a scoped MASTER_USER reviewer and refuses read-only roles before any writes (1511 ms)
+  √ a failed attempt event rolls back the parent transition, OPEN request and WorkItem together (1113 ms)
+  √ a failed first Result rolls back its first fill and immutable event, allowing the same OPEN request to be retried (1289 ms)
+  √ a failed correction event rolls back the new Result, old supersession and review metadata without deleting audit rows (1286 ms)
+  √ a repeat with 2 parent replicas and 1 filled refuses missing [2] even with extra replica null (1333 ms)
+  √ a repeat with 3 parent replicas and 2 filled refuses missing [3] even with extra replica null (1339 ms)
+  √ a repeat with 2 parent replicas and 1 filled refuses missing [2] even with extra replica 3 (1374 ms)
+  √ the ordinary save appends an absent replicate to the same frozen RECORDED attempt, then refuses cell changes and post-submit additions (1331 ms)
+  √ an unbatched recorded execution cannot append a replica after the completed WorkItem joins an open run (1358 ms)
+  √ an incremental replicate refuses a changed frozen instrument with zero writes (1173 ms)
+  √ an incremental replicate refuses a changed frozen method with zero writes (1171 ms)
+  √ failure to append the replicate event rolls back its Result, cache and every audit row (1178 ms)
+  √ actual submission changes only the attempt status; a technician cannot repeat or correct afterwards (1217 ms)
+  √ a submitted reviewer correction preserves submitted execution evidence and needs a new explicit acceptance (1544 ms)
+  √ actual reviewer RETURN with REVIEW_OUTLIER records QUESTIONED and a new OPEN request atomically (1203 ms)
+  √ actual reviewer RETURN with DUPLICATE_DISAGREEMENT records QUESTIONED and a new OPEN request atomically (1222 ms)
+  √ actual reviewer RETURN with CONFIRMATION records QUESTIONED and a new OPEN request atomically (1192 ms)
+  √ actual reviewer RETURN with QC_BATCH_FAIL records INVALIDATED and a new OPEN request atomically (1201 ms)
+  √ actual reviewer RETURN with ABOVE_RANGE_DILUTION records INVALIDATED and a new OPEN request atomically (1309 ms)
+  √ actual reviewer RETURN with INSTRUMENT_FAULT records INVALIDATED and a new OPEN request atomically (1212 ms)
+  √ actual reviewer RETURN with PREP_ERROR records INVALIDATED and a new OPEN request atomically (1207 ms)
+  √ actual reviewer RETURN with OTHER records QUESTIONED and a new OPEN request atomically (1201 ms)
+  √ missing RETURN reason and a cross-lab repeat/correction preserve the complete owned evidence (1336 ms)
+  √ a failed undispositioned native run refuses atomically; after REPEAT_BATCH a request records only in a new run (1660 ms)
+  √ an open or pending native run refuses {"started":false,"blankValue":null} without any request or evidence writes (1428 ms)
+  √ an open or pending native run refuses {"started":true,"blankValue":null} without any request or evidence writes (1208 ms)
+  √ RETURN from an accepted native run ({ status: 'QC_PASS', blankValue: 0 }) hands off one WorkItem and preserves all original membership and QC evidence byte for byte (1296 ms)
+  √ RETURN from an accepted native run ({ status: 'QC_WARN', blankValue: 9.123456789, criteria: [Object] }) hands off one WorkItem and preserves all original membership and QC evidence byte for byte (1285 ms)
+  √ RETURN from an accepted native run ({
+  status: 'ACCEPTED_WITH_DEVIATION',
+  blankValue: 9.123456789,
+  disposition: true
+}) hands off one WorkItem and preserves all original membership and QC evidence byte for byte (1316 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_lab190evidence (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_lab190other (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_3_1_attempt_sql_guards.test.js (66.652 s, 202 MB heap size)
+  √ every lab installs partial attempt uniqueness and current-result uniqueness with all guards (380 ms)
+  √ canonical insert and status update OPEN are accepted (336 ms)
+  √ canonical insert and status update RECORDED are accepted (341 ms)
+  √ canonical insert and status update SUBMITTED are accepted (334 ms)
+  √ canonical insert and status update ACCEPTED are accepted (328 ms)
+  √ canonical insert and status update QUESTIONED are accepted (343 ms)
+  √ canonical insert and status update INVALIDATED are accepted (335 ms)
+  √ canonical insert and status update SUPERSEDED are accepted (360 ms)
+  √ historical RETURNED stays stored but cannot be newly inserted or updated (457 ms)
+  √ historical REJECTED stays stored but cannot be newly inserted or updated (353 ms)
+  √ the migration can flag every historical duplicate before guards, without renumbering (371 ms)
+  √ all conflict flag updates unflagged -> flag are refused (360 ms)
+  √ all conflict flag updates flagged -> null are refused (350 ms)
+  √ all conflict flag updates flagged -> same are refused (347 ms)
+  √ all conflict flag updates unflagged -> null are refused (474 ms)
+  √ evidence field evidenceData is immutable even within its creating transaction (343 ms)
+  √ evidence field evidenceHash is immutable even within its creating transaction (339 ms)
+  √ evidence field instrumentId is immutable even within its creating transaction (345 ms)
+  √ the fixed evidence case refuses caller SQL, unknown fields and invalid parents without writes (16205 ms)
+  √ the new native FK identity cannot authorize arbitrary WorkAttempt SQL or an invalid parent (11144 ms)
+  √ recorded identity field attemptNo cannot change (396 ms)
+  √ recorded identity field workItemId cannot change (345 ms)
+  √ recorded identity field author cannot change (339 ms)
+  √ recorded identity field createdAt cannot change (343 ms)
+  √ recorded identity field updatedAt cannot change (346 ms)
+  √ recorded identity field qcBatchId cannot change (343 ms)
+  √ recorded identity field rawData cannot change (348 ms)
+  √ batch FK is additive, reference checked and write-once when recorded (393 ms)
+  √ canonical reason QC_BATCH_FAIL is accepted by both the shared contract and SQL (386 ms)
+  √ canonical reason REVIEW_OUTLIER is accepted by both the shared contract and SQL (338 ms)
+  √ canonical reason DUPLICATE_DISAGREEMENT is accepted by both the shared contract and SQL (344 ms)
+  √ canonical reason ABOVE_RANGE_DILUTION is accepted by both the shared contract and SQL (375 ms)
+  √ canonical reason INSTRUMENT_FAULT is accepted by both the shared contract and SQL (345 ms)
+  √ canonical reason PREP_ERROR is accepted by both the shared contract and SQL (340 ms)
+  √ canonical reason TRANSCRIPTION_ERROR is accepted by both the shared contract and SQL (338 ms)
+  √ canonical reason CLIENT_RETEST is accepted by both the shared contract and SQL (343 ms)
+  √ canonical reason CONFIRMATION is accepted by both the shared contract and SQL (350 ms)
+  √ canonical reason OTHER is accepted by both the shared contract and SQL (471 ms)
+  √ reason remains nullable for a second execution, while noncanonical values are refused (397 ms)
+  √ SQL and runtime canonical lookup agree: only orphan historical imports can omit an attempt (451 ms)
+  √ raw review inserts require a current attempt of the same work item and sample (425 ms)
+  √ the raw review guard permits only an unexecuted analytical OMIT with no attempt (366 ms)
+  √ SQL keeps non-measurement ARCH review on its separate evidence workflow (334 ms)
+  √ SQL keeps non-measurement ARCHIVING review on its separate evidence workflow (338 ms)
+  √ SQL keeps non-measurement Archive review on its separate evidence workflow (345 ms)
+  √ SQL keeps non-measurement DISP review on its separate evidence workflow (337 ms)
+  √ SQL keeps non-measurement DISPOSAL review on its separate evidence workflow (329 ms)
+  √ SQL keeps non-measurement DRYING review on its separate evidence workflow (361 ms)
+  √ SQL keeps non-measurement Dispose review on its separate evidence workflow (346 ms)
+  √ SQL keeps non-measurement HOMOGENIZATION review on its separate evidence workflow (345 ms)
+  √ SQL keeps non-measurement MILLING review on its separate evidence workflow (329 ms)
+  √ SQL keeps non-measurement PREP review on its separate evidence workflow (326 ms)
+  √ SQL keeps non-measurement PREPARATION review on its separate evidence workflow (342 ms)
+  √ SQL keeps non-measurement SAMPLE_PREP review on its separate evidence workflow (331 ms)
+  √ SQL keeps non-measurement SIEVING review on its separate evidence workflow (328 ms)
+  √ SQL keeps non-measurement SPEC_FTIR review on its separate evidence workflow (349 ms)
+  √ SQL keeps non-measurement SPEC_MIR review on its separate evidence workflow (345 ms)
+  √ SQL keeps non-measurement SPEC_NIR review on its separate evidence workflow (328 ms)
+  √ SQL keeps non-measurement SPEC_VIS_NIR review on its separate evidence workflow (324 ms)
+  √ the authenticated workspace returns linked and unlinked attempt metadata without evidence or cross-lab access (1107 ms)
+  #191 membership trigger SQL defence in depth (not installer or receipt evidence)
+    √ old-repeat-required refuses a direct repeat pointer clear with exact zero writes (26 ms)
+    √ parent-null-hash refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ parent-wrong-batch refuses a direct repeat pointer clear with exact zero writes (23 ms)
+    √ parent-wrong-qc-batch refuses a direct repeat pointer clear with exact zero writes (23 ms)
+    √ wrong-analyte refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ mixed-failed-membership refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ mixed-accepted-wrong-membership refuses a direct repeat pointer clear with exact zero writes (23 ms)
+    √ qc-fail refuses a direct repeat pointer clear with exact zero writes (21 ms)
+    √ qc-pending refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ open-unstarted refuses a direct repeat pointer clear with exact zero writes (21 ms)
+    √ accepted-pass permits the proven SQL handoff and retains all old execution/QC evidence (22 ms)
+    √ accepted-warn permits the proven SQL handoff and retains all old execution/QC evidence (22 ms)
+    √ accepted-deviation permits the proven SQL handoff and retains all old execution/QC evidence (23 ms)
+    √ accepted-texture-alias permits the proven SQL handoff and retains all old execution/QC evidence (25 ms)
+    √ unknown name refuses before opening a scratch or caller database (22 ms)
+    √ unknown option refuses before opening a scratch or caller database (1 ms)
+    √ unknown caller refuses before opening a scratch or caller database (1 ms)
+  all #190 refusals remain effective after the receipt-verified #191 successor installation
+    √ creating-transaction evidence evidenceData still refuses and rolls back (588 ms)
+    √ creating-transaction evidence evidenceHash still refuses and rolls back (544 ms)
+    √ creating-transaction evidence instrumentId still refuses and rolls back (538 ms)
+    √ recorded identity id remains frozen (538 ms)
+    √ recorded identity workItemId remains frozen (531 ms)
+    √ recorded identity orderLineId remains frozen (677 ms)
+    √ recorded identity attemptNo remains frozen (584 ms)
+    √ recorded identity executedMethodRevision remains frozen (550 ms)
+    √ recorded identity author remains frozen (536 ms)
+    √ recorded identity authorName remains frozen (631 ms)
+    √ recorded identity materialAliquot remains frozen (538 ms)
+    √ recorded identity qcBatchId remains frozen (684 ms)
+    √ recorded identity version remains frozen (562 ms)
+    √ recorded identity createdAt remains frozen (561 ms)
+    √ recorded identity updatedAt remains frozen (544 ms)
+    √ recorded identity reason remains frozen (557 ms)
+    √ recorded identity requestedBy remains frozen (540 ms)
+    √ recorded identity requestedAt remains frozen (691 ms)
+    √ recorded identity rawData remains frozen (524 ms)
+    √ recorded identity calcVersion remains frozen (550 ms)
+    √ recorded identity dilutionFactor remains frozen (535 ms)
+    √ recorded identity aliquotId remains frozen (541 ms)
+    √ invalid status RETURNED still refuses insertion and update (552 ms)
+    √ invalid status REJECTED still refuses insertion and update (778 ms)
+    √ invalid status unknown still refuses insertion and update (618 ms)
+    √ canonical reasons, positive numbers, conflict flags and both unique indexes retain their original refusals (852 ms)
+    √ batch FK, write-once batch and deletion refusals survive the successor chain (619 ms)
+    √ Result required and immutable-link guards keep all #190 import and provenance refusal cases (721 ms)
+    √ ReviewDecision required, ownership, current-evidence and immutable-attempt guards keep every #190 refusal (694 ms)
+
+  console.error
+    [Report] Sample PDF error: TransitionError: Choose a reported value before reporting this test.
+        at readReportedSelection (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:95:28)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueReadService.js:11:31
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at assembleReport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportAssembly.js:43:70)
+        at Object.getSampleReportPdf (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\reportController.js:913:31)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_reported_readers.test.js:24:9
+        at Runtime.isolateModulesAsync (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\jest-runtime\build\index.js:1002:7)
+        at invoke (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_reported_readers.test.js:20:11)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_reported_readers.test.js:58:20) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_SELECTION_REQUIRED',
+      details: { workItemId: 'b3babc43-d152-4a54-a671-7bf50fd3f809' }
+    }
+
+      925 |         return res.send(pdfBuffer);
+      926 |     } catch (err) {
+    > 927 |         console.error('[Report] Sample PDF error:', err);
+          |                 ^
+      928 |         if(err.statusCode) return res.status(err.statusCode).json({error:err.message,code:err.code,...err.details});
+      929 |         return res.status(500).json({ error: err.message || 'Failed to generate PDF' });
+      930 |     }
+
+      at Object.error [as getSampleReportPdf] (controllers/reportController.js:927:17)
+      at tests/contracts/audit_3_3_reported_readers.test.js:24:9
+      at invoke (tests/contracts/audit_3_3_reported_readers.test.js:20:11)
+      at Object.<anonymous> (tests/contracts/audit_3_3_reported_readers.test.js:58:20)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 78b740f2-d898-48b6-94bb-1ab0c3a39d60
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 78b740f2-d898-48b6-94bb-1ab0c3a39d60
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.error
+    [Report] Sample PDF error: TransitionError: The selected source is blocked by QC_ACKNOWLEDGEMENT_REQUIRED.
+        at validateReportedSources (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSourceService.js:42:35)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueReadService.js:13:31
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at assembleReport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportAssembly.js:43:70)
+        at Object.getSampleReportPdf (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\reportController.js:913:31)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_reported_readers.test.js:24:9
+        at Runtime.isolateModulesAsync (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\jest-runtime\build\index.js:1002:7)
+        at invoke (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_reported_readers.test.js:20:11)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_reported_readers.test.js:130:15 {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_SOURCE_QC_BLOCKED',
+      details: {
+        workItemId: 'ea127613-31f9-4fef-b76e-0c08b3f8b9fc',
+        resultId: '07689abf-0257-4af9-9cb4-26d8f63e74aa',
+        qcCode: 'QC_ACKNOWLEDGEMENT_REQUIRED',
+        gate: {
+          mode: 'REQUIRED_WARN',
+          modeSource: 'FROZEN',
+          required: true,
+          batchIds: [Array],
+          evaluationId: '19659c0f-369a-4ce8-928d-73c6457af14c',
+          dispositionId: null,
+          batchId: 'BATCH-78340df2-3a18-44f4-b273-039c4330831a',
+          analysisCode: 'QC-GATE-9e8b8d0f-7e76-4402-be13-c3f43edc9f84',
+          dispositionReason: null,
+          value: 'FAIL',
+          notRequired: false,
+          acceptedWithDeviation: false,
+          contributions: [Array],
+          acknowledgementRequired: true
+        }
+      }
+    }
+
+      925 |         return res.send(pdfBuffer);
+      926 |     } catch (err) {
+    > 927 |         console.error('[Report] Sample PDF error:', err);
+          |                 ^
+      928 |         if(err.statusCode) return res.status(err.statusCode).json({error:err.message,code:err.code,...err.details});
+      929 |         return res.status(500).json({ error: err.message || 'Failed to generate PDF' });
+      930 |     }
+
+      at Object.error [as getSampleReportPdf] (controllers/reportController.js:927:17)
+      at tests/contracts/audit_3_3_reported_readers.test.js:24:9
+      at invoke (tests/contracts/audit_3_3_reported_readers.test.js:20:11)
+      at tests/contracts/audit_3_3_reported_readers.test.js:130:15
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b3449a86-d71e-4934-8196-29bc7715ba42
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b3449a86-d71e-4934-8196-29bc7715ba42
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.error
+    [Report] Sample PDF error: TransitionError: Selected source evidence is invalid.
+        at validateReportedSources (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSourceService.js:38:73)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueReadService.js:13:31
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at assembleReport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportAssembly.js:43:70)
+        at Object.getSampleReportPdf (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\reportController.js:913:31)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_reported_readers.test.js:24:9
+        at Runtime.isolateModulesAsync (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\jest-runtime\build\index.js:1002:7)
+        at invoke (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_reported_readers.test.js:20:11)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_reported_readers.test.js:130:15 {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_SOURCE_INVALID',
+      details: {
+        workItemId: '21c4540c-ffc9-4c3f-9407-c10143a99572',
+        resultId: '1329fbfe-9d43-4920-a02b-b7e51d7dce6c'
+      }
+    }
+
+      925 |         return res.send(pdfBuffer);
+      926 |     } catch (err) {
+    > 927 |         console.error('[Report] Sample PDF error:', err);
+          |                 ^
+      928 |         if(err.statusCode) return res.status(err.statusCode).json({error:err.message,code:err.code,...err.details});
+      929 |         return res.status(500).json({ error: err.message || 'Failed to generate PDF' });
+      930 |     }
+
+      at Object.error [as getSampleReportPdf] (controllers/reportController.js:927:17)
+      at tests/contracts/audit_3_3_reported_readers.test.js:24:9
+      at invoke (tests/contracts/audit_3_3_reported_readers.test.js:20:11)
+      at tests/contracts/audit_3_3_reported_readers.test.js:130:15
+
+PASS tests/contracts/audit_3_3_reported_readers.test.js (28.227 s, 245 MB heap size)
+  √ assembly reads the saved selection once, keeps full precision, source ids and methodology precision (1224 ms)
+  √ not-reportable assembly displays its localized recorded reason (en) and supplies publication proof (1118 ms)
+  √ not-reportable assembly displays its localized recorded reason (es) and supplies publication proof (1121 ms)
+  √ not-reportable assembly displays its localized recorded reason (es-419) and supplies publication proof (1122 ms)
+  √ not-reportable assembly displays its localized recorded reason (fr) and supplies publication proof (1134 ms)
+  √ not-reportable assembly displays its localized recorded reason (pt) and supplies publication proof (1127 ms)
+  √ accepted measured work with no selection refuses assembly instead of reading a raw result (1098 ms)
+  √ draft PDF reports a missing selection as 409 with its refused work item and zero writes (1271 ms)
+  √ bulk views disclose only a missing test and retain good selections (shared sample: false) (1260 ms)
+  √ bulk views disclose only a missing test and retain good selections (shared sample: true) (1248 ms)
+  √ later persisted QC failure isolates the blocked accepted test in every bulk surface (REQUIRED_WARN) and preserves history (1894 ms)
+  √ later persisted QC failure isolates the blocked accepted test in every bulk surface (REQUIRED_BLOCKING) and preserves history (1847 ms)
+  √ partial reader still throws an unexpected storage error (P2021) with zero writes (1121 ms)
+  √ partial reader still throws an unexpected storage error (REPORTED_VALUE_STORAGE_FAILURE) with zero writes (1094 ms)
+  √ SIS v1 receives the requesting user locale for a not-reportable value (en) (1103 ms)
+  √ SIS v1 receives the requesting user locale for a not-reportable value (es) (1102 ms)
+  √ SIS v1 receives the requesting user locale for a not-reportable value (es-419) (1171 ms)
+  √ SIS v1 receives the requesting user locale for a not-reportable value (fr) (1114 ms)
+  √ SIS v1 receives the requesting user locale for a not-reportable value (pt) (1131 ms)
+  √ an unselected unresolved historical TEXTURE test is disclosed without resolving its layout or hiding the selected scalar (1171 ms)
+  √ WET_CHEM, reported grid and every SIS v1 surface match the persisted ATTEMPT outcome (1280 ms)
+  √ WET_CHEM, reported grid and every SIS v1 surface match the persisted NOT_REPORTABLE outcome (1220 ms)
+  √ raw v2 rows, counts and ordering retain their contract; only selection membership is added (1144 ms)
+  √ report rendering applies frozen methodology precision to 12.3456789
+  √ report rendering applies frozen methodology precision to 12.3456789
+  √ report rendering applies frozen methodology precision to 12.3456789 (1 ms)
+  √ report rendering applies frozen methodology precision to <0.005123
+  √ report rendering applies frozen methodology precision to Not reportable: No evidence
+  √ report rendering applies frozen methodology precision to loam
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 5f1a80a6-eae6-4511-b894-b0aae172210f
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: Choose the reported value for this test before accepting it.
+        at choiceFor (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:18:34)
+        at Object.choiceFor [as preflightReportedSelection] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:39:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:68:34
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_SELECTION_REQUIRED',
+      details: {
+        workItemId: 'f34ad2e2-0ee3-474e-8baf-a4442443589a',
+        reasons: [ 'REVIEWER_PICKS' ],
+        eligibleAttempts: [ [Object] ]
+      }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 414f3ce6-ec46-4047-bd7e-74f85e249f46
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [WS] Blocked broadcast for event WORKITEM_UPDATE: missing labId
+
+      288 | function broadcastToLab(labId, eventType, payload) {
+      289 |     if (!labId) {
+    > 290 |         if (DEBUG) console.warn(`[WS] Blocked broadcast for event ${eventType}: missing labId`);
+          |                            ^
+      291 |         return 0;
+      292 |     }
+      293 |     const data = JSON.stringify({ type: eventType, ...payload });
+
+      at Object.warn [as broadcastToLab] (wsServer.js:290:28)
+      at broadcastToLab (controllers/workItemController.js:1334:26)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [WS] Blocked broadcast for event WORKITEM_UPDATE: missing labId
+
+      288 | function broadcastToLab(labId, eventType, payload) {
+      289 |     if (!labId) {
+    > 290 |         if (DEBUG) console.warn(`[WS] Blocked broadcast for event ${eventType}: missing labId`);
+          |                            ^
+      291 |         return 0;
+      292 |     }
+      293 |     const data = JSON.stringify({ type: eventType, ...payload });
+
+      at Object.warn [as broadcastToLab] (wsServer.js:290:28)
+      at broadcastToLab (controllers/workItemController.js:1334:26)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 77efce68-98fb-4e7f-b4f3-55baa53822a4
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0facba62-7bd1-4b0d-9fb1-873976fcc600 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User foreign-selection-reviewer (Lab: null) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/reportedValueSelectionService.js:115:11)
+      at services/reportedValueSelectionService.js:136:26
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.inspect (controllers/reportedValueController.js:9:20)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab db219b82-e037-4d30-bfac-7d7f454c8d9e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: Explain why the retained questioned evidence is being reported.
+        at choiceFor (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:13:19)
+        at Object.choiceFor [as preflightReportedSelection] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:39:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:68:34
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_REASON_REQUIRED',
+      details: {}
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab db219b82-e037-4d30-bfac-7d7f454c8d9e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 70501af8-4ff0-47f1-8205-abfd3984d96e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 70501af8-4ff0-47f1-8205-abfd3984d96e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab fe47f401-52b4-43d2-9455-08bb415072a9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: The selected measurements exceed their recorded repeatability limit.
+        at refused (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueMeanContract.js:3:42)
+        at refused (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueMeanContract.js:42:15)
+        at calculateReportedMean (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueChoiceContract.js:33:22)
+        at Array.map (<anonymous>)
+        at map (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueChoiceContract.js:24:94)
+        at selectedOutputValues (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueChoiceContract.js:72:20)
+        at explicitReportedChoice (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:11:24)
+        at Object.choiceFor [as preflightReportedSelection] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:39:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:68:34
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_OUTSIDE_LIMIT',
+      details: {}
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+PASS tests/contracts/audit_3_3_selection_acceptance.test.js (18.34 s, 242 MB heap size)
+  √ actual scalar acceptance with no r atomically saves AUTO_SINGLE after ACCEPTED and is immediately fresh (1348 ms)
+  √ REVIEWER_PICKS without a choice refuses actual acceptance with zero writes, then explicit choice succeeds (1434 ms)
+  √ bulk acceptance refuses only the row without a required choice and preserves that row completely (1275 ms)
+  √ a SQL refusal after review writes rolls back just that bulk row, including its decision, attempt event and status (1282 ms)
+  √ actual review preview exposes complete attempt evidence and disabled mean reason with zero writes (1243 ms)
+  √ actual accepted selection endpoint appends a whole replacement and rejects the stale displayed group with zero writes (1367 ms)
+  √ selection inspection checks lab scope before exposing attempts, values or policy (1160 ms)
+  √ actual RETURN, repeat recording and accept retain a questioned original, requiring its explicit selection reason (1470 ms)
+  √ submission review preserves the explicit selection and its reason through request normalization (2507 ms)
+  √ actual questioned12.0/repeat12.6 uses recorded r1 and complete retained evidence (2623 ms)
+  √ actual questioned12.0/repeat12.6 uses recorded r0.5 and complete retained evidence (2534 ms)
+
+PASS tests/contracts/audit_3_3_selection_backfill.test.js (5.822 s, 214 MB heap size)
+  √ default dry-run writes zero bytes, reports exact outcomes, and apply preserves both published and superseded report content (3030 ms)
+  √ a missing or stale dry-run fingerprint refuses with zero writes (1451 ms)
+  √ a missing named active global approver refuses dry and apply without writes (1234 ms)
+  √ CLI refuses incomplete, duplicate or contradictory arguments [] (11 ms)
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned"] (1 ms)
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned", "--by", "reviewer", "--apply", "--dry-run"]
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned", "--by", "reviewer", "--wat"] (1 ms)
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned", "--by", "reviewer", "--db", "other"]
+  √ CLI defaults to dry-run and requires an explicit database and actor
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User audit-reviewer (Lab: LAB-190-REVIEW) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/reviewAttemptService.js:36:11)
+      at createReviewDecision (services/reviewAttemptService.js:63:16)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.<anonymous> (tests/contracts/audit_3_1_attempt_review.test.js:106:5)
+
+PASS tests/contracts/audit_3_1_attempt_review.test.js (226 MB heap size)
+  √ a single current attempt is derived and stored on the actual ReviewDecision (42 ms)
+  √ two current attempts require selection; a valid explicit attempt is used without choosing latest (28 ms)
+  √ an attempt from another WorkItem or without current Results is refused without writes (52 ms)
+  √ only an unexecuted analytical WAIVE may keep its attempt null (37 ms)
+  √ several current Results on one attempt are one review candidate (15 ms)
+  √ bulk ambiguity lists all affected ids before writes, and any later failure rolls back every decision (56 ms)
+  √ review creation enforces lab scope and review permission before writing (27 ms)
+  √ non-measurement review keeps its existing separate evidence workflow (10 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab e074bc48-7a0d-4d35-b9b9-537e7845ed80
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/audit_3_3_frozen_selection.test.js (264 MB heap size)
+  √ actual acceptance uses a started run frozen r after a later method-specific QcRule revision (1460 ms)
+
+PASS tests/contracts/audit_3_2_repeat_plan.test.js (262 MB heap size)
+  √ actual mandatory-reason repeats are excluded from the interim list with zero planner writes (1211 ms)
+  √ an unavailable predecessor schema refuses before planning with a stable code and zero writes (6 ms)
+
+PASS tests/contracts/audit_3_3_pdf_layout.test.js (247 MB heap size)
+  #192 saved not-reportable PDF explanations
+    √ en / short retains the entire reason before the following result (19 ms)
+    √ en / multiple pages retains the entire reason before the following result (16 ms)
+    √ es / short retains the entire reason before the following result (8 ms)
+    √ es / multiple pages retains the entire reason before the following result (14 ms)
+    √ es-419 / short retains the entire reason before the following result (7 ms)
+    √ es-419 / multiple pages retains the entire reason before the following result (12 ms)
+    √ fr / short retains the entire reason before the following result (8 ms)
+    √ fr / multiple pages retains the entire reason before the following result (11 ms)
+    √ pt / short retains the entire reason before the following result (11 ms)
+    √ pt / multiple pages retains the entire reason before the following result (11 ms)
+
+PASS tests/contracts/audit_3_2_repeat_components.test.js (244 MB heap size)
+  √ the RETURN form starts with no inferred reason and sends the selected canonical code and independent note (53 ms)
+  √ new repeat labels and errors are translated in both en catalogues (5 ms)
+  √ new repeat labels and errors are translated in both es catalogues (3 ms)
+  √ new repeat labels and errors are translated in both es-419 catalogues (3 ms)
+  √ new repeat labels and errors are translated in both fr catalogues (3 ms)
+  √ new repeat labels and errors are translated in both pt catalogues (3 ms)
+
+PASS tests/contracts/audit_3_3_selection_choices.test.js (248 MB heap size)
+  √ AUTO_SINGLE needs no r under MEAN_IF_WITHIN_R and preserves the original string (1 ms)
+  √ AUTO_SINGLE needs no r under LATEST_VALID and preserves the original string
+  √ a censored single value stays censored without needing r
+  √ REVIEWER_PICKS never auto-selects even a single execution (1 ms)
+  √ a duplicate execution without r requires a choice, while NOT_REPORTABLE can retain its reason (13 ms)
+  √ an INVALIDATED6.1 is excluded and the accepted6.4 is labelled AUTO_LATEST_AFTER_INVALIDATION (1 ms)
+  √ LATEST_VALID follows recording time even when request time or attempt number orders differently
+  √ equal recording times need a reviewer choice
+  √ missing recording times need a reviewer choice
+  √ a QUESTIONED parent can be chosen unchanged, and prevents an automatic latest-value shortcut
+  √ a single composite execution gives four outputs with one linked AUTO_SINGLE choice and no r
+  √ a reviewer chooses all four QUESTIONED outputs from the same attempt without mixing the child (1 ms)
+  √ a texture mean averages each fraction and derives its class using the actual server authority (1 ms)
+  √ one texture fraction outside r refuses the whole choice (1 ms)
+  √ an incomplete composite replicate set cannot drop a fraction or select one replicate
+  √ categorical outputs without a server derivation cannot be averaged (1 ms)
+  √ a missing or independently changed group member is stale while a full group preserves the selection (2 ms)
+
+PASS tests/contracts/audit_3_3_recording_time.test.js (246 MB heap size)
+  √ FIRST_FILL time supplies the repeat recording time rather than the earlier request time
+  √ a new first execution uses its CREATED to RECORDED event
+  √ an event-free historical first execution may use createdAt
+  √ a repeat with no recording event has no historical fallback
+  √ a first execution with retained events but no recording event has no fallback
+  √ two recording events refuse a time instead of picking one
+  √ invalid details means no r
+  √ invalid timestamp means no r
+  √ unrelated work item events do not supply a recording time
+  √ invalid historical date null cannot become an invented time
+  √ invalid historical date invalid cannot become an invented time
+
+Test Suites: 12 passed, 12 total
+Tests:       262 passed, 262 total
+Snapshots:   0 total
+Time:        192.449 s, estimated 270 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_1_attempt_review.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_1_attempt_sql_guards.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_2_repeat_commands.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_2_repeat_components.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_2_repeat_plan.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_frozen_selection.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_pdf_layout.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_recording_time.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_reported_readers.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_selection_acceptance.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_selection_backfill.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_selection_choices.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-10.json

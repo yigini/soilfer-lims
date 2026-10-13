@@ -1,0 +1,650 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-laboratory) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/nonScientificAmendmentService.js:16:8)
+      at services/nonScientificAmendmentService.js:50:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:90:3)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-laboratory) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/nonScientificAmendmentService.js:16:8)
+      at services/nonScientificAmendmentService.js:75:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:91:3)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User requester (Lab: foreign-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/scientificAmendmentService.js:43:9)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:220:2
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/scientificAmendmentService.js:79:9)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:301:2
+
+  console.log
+    [AUTH] Verifying token for ID: authoriser (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_6_1_non_scientific_authorisation.test.js (101.612 s, 150 MB heap size)
+  √ a profile request is PENDING and cannot change sample identity, approval or existing work (2836 ms)
+  √ a distinct approver applies a clerical correction once and retains prior approval and immutable request evidence (1451 ms)
+  √ Strict refuses self-authorisation and stale versions without any persisted changes (1446 ms)
+  √ authorisation re-reads actual lab policy; ADVISORY self-authorisation is explicit in the audit (1425 ms)
+  √ a different pending correction changing the profile makes this authorisation a zero-write conflict (1376 ms)
+  √ both request and authorisation enforce approval permission and current sample scope (1519 ms)
+  √ CLERICAL correction on ARCHIVED leaves physical status and prior approval unchanged (1377 ms)
+  √ CLERICAL correction on DISPOSED leaves physical status and prior approval unchanged (1415 ms)
+  √ ORDER authorisation records affected evidence and reason without changing orders, work, reports or sample (1417 ms)
+  √ REPORT authorisation records affected evidence and reason without changing orders, work, reports or sample (1333 ms)
+  √ foreign evidence, injected authorisation fields and invalid versions refuse without writes (1460 ms)
+  √ legacy NULL-version rows cannot enter the new authorisation workflow (1404 ms)
+  √ a late audit failure rolls back both authorisation and clerical profile changes (1510 ms)
+  √ the link guard accepts its exact authorised scientific context without changing any retained evidence (1384 ms)
+  √ the link guard refuses pending with zero writes (1366 ms)
+  √ the link guard refuses legacy with zero writes (1339 ms)
+  √ the link guard refuses clerical with zero writes (1360 ms)
+  √ the link guard refuses unselected with zero writes (1384 ms)
+  √ the link guard refuses recorded-parent with zero writes (1358 ms)
+  √ the link guard refuses recorded-child with zero writes (1367 ms)
+  √ the link guard refuses reason-mismatch with zero writes (2685 ms)
+  √ an unrelated parentAttemptId cannot produce a link (1355 ms)
+  √ an unrelated childAttemptId cannot produce a link (1373 ms)
+  √ an unrelated workItemId cannot produce a link (2656 ms)
+  √ an unrelated amendmentId cannot produce a link (1397 ms)
+  √ an unrelated reason cannot produce a link (2621 ms)
+  √ all seven link columns are immutable and links and referenced attempts cannot be deleted (1458 ms)
+  √ a scientific CLIENT_RETEST request remains pending and preserves every existing row (1371 ms)
+  √ a scientific CONFIRMATION request remains pending and preserves every existing row (1357 ms)
+  √ scientific requests on ARCHIVED refuse without writes (1353 ms)
+  √ scientific requests on DISPOSED refuse without writes (1336 ms)
+  √ scientific requests on PROCESSING refuse without writes (1381 ms)
+  √ scientific requests reject permission before any writes (1348 ms)
+  √ scientific requests reject tenant before any writes (1355 ms)
+  √ scientific requests reject empty-lines before any writes (1330 ms)
+  √ scientific requests reject duplicate-lines before any writes (1455 ms)
+  √ scientific requests reject foreign-line before any writes (1380 ms)
+  √ scientific requests reject reason before any writes (1378 ms)
+  √ scientific requests reject forged-capability before any writes (1373 ms)
+  √ scientific requests refuse nonaccepted work without writes (1338 ms)
+  √ scientific requests refuse nonmeasurement work without writes (1311 ms)
+  √ scientific requests refuse duplicate-marker work without writes (1345 ms)
+  √ scientific requests retain scope for affectedResults (1350 ms)
+  √ scientific requests retain scope for affectedReports (1318 ms)
+  √ a late scientific request audit failure rolls back the request without changing retained evidence (1395 ms)
+  √ scientific CLIENT_RETEST authorisation reopens only selected work, seals the accepted parent and withdraws the exact report (1431 ms)
+  √ scientific CONFIRMATION authorisation reopens only selected work, seals the accepted parent and withdraws the exact report (1428 ms)
+  √ scientific authorisation re-reads second-person policy and explicitly records ADVISORY self-authorisation (1396 ms)
+  √ scientific authorisation rejects permission with zero writes (1399 ms)
+  √ scientific authorisation rejects tenant with zero writes (1344 ms)
+  √ scientific authorisation rejects stale-version with zero writes (1419 ms)
+  √ scientific authorisation rejects forged-capability with zero writes (1371 ms)
+  √ an action string or forged capability cannot reopen a released Sample (1358 ms)
+  √ an action string or forged capability cannot reopen a released WorkItem (1342 ms)
+  √ a late scientific authorisation audit failure rolls back every reopen, child, binding and report change (1420 ms)
+  √ withdrawal binding and every report content field stay sealed after authorisation (1396 ms)
+  √ scientific repeats preserve the existing configured attempt limit and NCR refusal (1377 ms)
+  √ authorisation revalidates parent-no-longer-accepted after a valid request and refuses the whole transaction (1397 ms)
+  √ authorisation revalidates new-open-child after a valid request and refuses the whole transaction (1368 ms)
+  √ an explicit selected-line CLIENT_RETEST limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent (1402 ms)
+  √ an explicit selected-line CONFIRMATION limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent (1491 ms)
+  √ a line override without the existing NCR assessment refuses the request atomically (1407 ms)
+  √ a pending scientific amendment cannot reopen a subsequently ARCHIVED sample (1340 ms)
+  √ a pending scientific amendment cannot reopen a subsequently DISPOSED sample (1365 ms)
+  √ the actual report HTTP routes retain internal access and refuse both public formats before expiry or revocation (1651 ms)
+  √ withdrawn report numbering remains reserved and the next issuance preserves its row and takes the next revision (1411 ms)
+  √ scientific request refuses unregistered laboratory authority without policy fallback or writes (1361 ms)
+  √ scientific authorise refuses unregistered laboratory authority without policy fallback or writes (1387 ms)
+  √ a pending request cannot grant withdrawal authority and a report cannot become withdrawn without its binding (1357 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6206bb0a-2a2e-4f3a-a413-601b3866be23 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6206bb0a-2a2e-4f3a-a413-601b3866be23 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6206bb0a-2a2e-4f3a-a413-601b3866be23 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 7f1d5643-08c8-4c65-80c4-b2e5662026f8
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9903b02d-26f3-49d8-a512-d8c24afc1de1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 7f1d5643-08c8-4c65-80c4-b2e5662026f8
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 9903b02d-26f3-49d8-a512-d8c24afc1de1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9903b02d-26f3-49d8-a512-d8c24afc1de1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_6_1_first_fill.test.js (19.194 s, 191 MB heap size)
+  √ linked CLIENT_RETEST child first-fills, completes its replica set and submits with the accepted parent sealed (1532 ms)
+  √ linked CONFIRMATION child first-fills, completes its replica set and submits with the accepted parent sealed (1282 ms)
+  √ ordinary accepted-parent repeat requests retain their exact refusal and zero writes (1260 ms)
+  √ an absent original replicate refuses and rolls back first fill, result and audit together (1287 ms)
+  √ a persisted version field fault refuses the actual result write and rolls back every row (1169 ms)
+  √ a persisted lab field fault refuses the actual result write and rolls back every row (1167 ms)
+  √ the SQL guard prevents a persisted sample link fault with zero writes (1162 ms)
+  √ the SQL guard prevents a persisted line link fault with zero writes (1151 ms)
+  √ the SQL guard prevents a persisted parent link fault with zero writes (1182 ms)
+  √ the SQL guard prevents a persisted reason link fault with zero writes (1164 ms)
+  √ recordedExecution refuses a real unlinked OPEN child of an accepted parent without writes (1140 ms)
+  √ the texture writer reaches appendResult and rolls back first fill for a real unlinked accepted-parent child (1184 ms)
+  √ submitRecordedAttempt refuses a real unlinked accepted-parent child without writes (1134 ms)
+  √ mounted request/authorise routes keep requests pending, enforce a second person and preserve command replay (1389 ms)
+  √ normal scientific retest review, reapproval and report generation preserve the withdrawn original and issue the next revision (1765 ms)
+
+PASS tests/contracts/audit_6_1_amendment_install.test.js (11.14 s, 204 MB heap size)
+  √ retained earlier 84-model predecessor upgrades additively while retaining every historical field, schema object, foreign key and receipt (196 ms)
+  √ current main after #201 with 90 models upgrades additively while retaining every historical field, schema object, foreign key and receipt (197 ms)
+  √ the function createPre210AmendmentFixture() {
+  if (arguments.length) throw Error('The pre-210 factory accepts no arguments.');
+  if (path.relative(path.resolve(__dirname, '../..'), globalThis.expect?.getState?.().testPath || '').replace(/\\/g, '/') !== CALLER) throw Error('The pre-210 factory refuses an unlisted caller.');
+  const bytes = fs.readFileSync(path.join(__dirname, 'fixtures/pre210_full_application_schema.sql'));
+  if (bytes.length !== 68418 || createHash('sha256').update(bytes).digest('hex') !== DDL_SHA256) throw Error('The literal pre-210 DDL differs.');
+  const directory = path.resolve(__dirname, '../.tmp');
+  fs.mkdirSync(directory, {
+    recursive: true
+  });
+  const file = assertOwnedTestDatabase(path.join(directory, 'audit_legacy_pre210_' + randomUUID() + '.db'), 'system:fixture');
+  fs.closeSync(fs.openSync(file, 'wx'));
+  const db = new Database(file, {
+    fileMustExist: true
+  });
+  try {
+    db.pragma('foreign_keys=ON');
+    db.transaction(() => {
+      db.exec(bytes.toString('utf8'));
+      db.prepare('INSERT INTO Sample(id,originalId,status,metadata,history,approvedBy,approvedAt,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?,?,?)').run('pre210-sample', 'PRE210-ORIGINAL', 'APPROVED', '{"preserve":"é精确"}', '[{"old":"history"}]', 'prior-approver', 100, '2026-09-01T10:00:00.123Z', '2026-09-02T11:00:00.456Z');
+      const amendment = db.prepare('INSERT INTO SampleAmendment(id,sampleId,type,status,reason,affectedOrderLines,affectedResults,affectedReports,impactAssessment,authorizedBy,authorizedAt,resolution,createdBy,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
+      amendment.run('pre210-approved', 'pre210-sample', 'CLERICAL', 'APPROVED', 'Retained reason', '["old-line"]', '["pre210-result"]', '["old-report"]', '{"old":"assessment"}', 'prior-requester', 123, 'Retained resolution', 'prior-requester', 100, 150);
+      amendment.run('pre210-pending', 'pre210-sample', 'SCIENTIFIC', 'PENDING', 'Historical request', '["old-line"]', '["pre210-result"]', '["old-report"]', '{"old":"pending assessment"}', null, null, null, 'second-requester', 151, 152);
+      db.prepare('INSERT INTO Result(id,sampleId,param,value,numericValue,rawInput,unit,flags,isValid,censoring,basis,provenance,methodologyId,replicateNo,isCurrent,supersededBy,enteredBy,analysedAt,equipmentId,equipmentReadiness,batchId,attemptId,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run('pre210-result', 'pre210-sample', 'SOC', ' 6,7500 ', 6.75, ' 6,7500 ', 'g/kg', '["HISTORICAL_QC_FLAG"]', 0, 'BELOW_LOQ', 'OVEN_DRY', 'IMPORTED', 'old-method', 2, 0, 'old-successor', 'old-analyst', 111, 'old-instrument', '{"old":"equipment evidence"}', 'old-batch', 'old-attempt', 112, 113);
+      db.prepare('INSERT INTO AuditLog(id,entity,entityId,action,details,performedBy,timestamp) VALUES(?,?,?,?,?,?,?)').run('pre210-audit', 'SampleAmendment', 'pre210-approved', 'AMENDMENT_CREATED', '{"old":"audit evidence"}', 'prior-requester', 123);
+    })();
+  } finally {
+    db.close();
+  }
+  // Existing installer creates its genuine receipt; this factory fabricates none.
+  require('../../scripts/install_workflow_state_guards').installWorkflowStateGuards({
+    dbPath: file,
+    apply: true
+  });
+  return {
+    file
+  };
+} factory has one no-argument caller and exact source and DDL boundaries (42 ms)
+  √ the function createPre210After201Fixture() {
+  if (arguments.length) throw Error('The pre-210 factory accepts no arguments.');
+  if (path.relative(path.resolve(__dirname, '../..'), globalThis.expect?.getState?.().testPath || '').replace(/\\/g, '/') !== CALLER) throw Error('The pre-210 factory refuses an unlisted caller.');
+  const bytes = fs.readFileSync(path.join(__dirname, 'fixtures/pre210_after201_full_application_schema.sql'));
+  if (bytes.length !== 77186 || createHash('sha256').update(bytes).digest('hex') !== DDL_SHA256) throw Error('The literal pre-210 DDL differs.');
+  const directory = path.resolve(__dirname, '../.tmp');
+  fs.mkdirSync(directory, {
+    recursive: true
+  });
+  const file = assertOwnedTestDatabase(path.join(directory, 'audit_legacy_pre210_after201_' + randomUUID() + '.db'), 'system:fixture');
+  fs.closeSync(fs.openSync(file, 'wx'));
+  const db = new Database(file, {
+    fileMustExist: true
+  });
+  try {
+    db.pragma('foreign_keys=ON');
+    db.transaction(() => {
+      db.exec(bytes.toString('utf8'));
+      db.prepare('INSERT INTO Sample(id,originalId,status,metadata,history,approvedBy,approvedAt,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?,?,?)').run('pre210-sample', 'PRE210-ORIGINAL', 'APPROVED', '{"preserve":"é精确"}', '[{"old":"history"}]', 'prior-approver', 100, '2026-09-01T10:00:00.123Z', '2026-09-02T11:00:00.456Z');
+      const amendment = db.prepare('INSERT INTO SampleAmendment(id,sampleId,type,status,reason,affectedOrderLines,affectedResults,affectedReports,impactAssessment,authorizedBy,authorizedAt,resolution,createdBy,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
+      amendment.run('pre210-approved', 'pre210-sample', 'CLERICAL', 'APPROVED', 'Retained reason', '["old-line"]', '["pre210-result"]', '["old-report"]', '{"old":"assessment"}', 'prior-requester', 123, 'Retained resolution', 'prior-requester', 100, 150);
+      amendment.run('pre210-pending', 'pre210-sample', 'SCIENTIFIC', 'PENDING', 'Historical request', '["old-line"]', '["pre210-result"]', '["old-report"]', '{"old":"pending assessment"}', null, null, null, 'second-requester', 151, 152);
+      db.prepare('INSERT INTO Result(id,sampleId,param,value,numericValue,rawInput,unit,flags,isValid,censoring,basis,provenance,methodologyId,replicateNo,isCurrent,supersededBy,enteredBy,analysedAt,equipmentId,equipmentReadiness,batchId,attemptId,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run('pre210-result', 'pre210-sample', 'SOC', ' 6,7500 ', 6.75, ' 6,7500 ', 'g/kg', '["HISTORICAL_QC_FLAG"]', 0, 'BELOW_LOQ', 'OVEN_DRY', 'IMPORTED', 'old-method', 2, 0, 'old-successor', 'old-analyst', 111, 'old-instrument', '{"old":"equipment evidence"}', 'old-batch', 'old-attempt', 112, 113);
+      db.prepare('INSERT INTO AuditLog(id,entity,entityId,action,details,performedBy,timestamp) VALUES(?,?,?,?,?,?,?)').run('pre210-audit', 'SampleAmendment', 'pre210-approved', 'AMENDMENT_CREATED', '{"old":"audit evidence"}', 'prior-requester', 123);
+    })();
+  } finally {
+    db.close();
+  }
+  // Existing installer creates its genuine receipt; this factory fabricates none.
+  require('../../scripts/install_workflow_state_guards').installWorkflowStateGuards({
+    dbPath: file,
+    apply: true
+  });
+  return {
+    file
+  };
+} factory has one no-argument caller and exact source and DDL boundaries (15 ms)
+  √ only the exact amendment loader and DDL resolve; aliases and changed bytes grant no SQL authority (5 ms)
+  √ fresh generated Prisma receives guards with every historical field and prior receipt retained; repeat is byte-preserving NO_OP (2616 ms)
+  √ a partial installation refuses with zero persisted writes (1285 ms)
+  √ a foreign installation refuses with zero persisted writes (1281 ms)
+  √ a late-receipt-fault installation refuses with zero persisted writes (1362 ms)
+  √ the actual guards preserve immutable request evidence, require one CAS increment and seal prior approval after authorisation (1330 ms)
+  √ the read-only startup gate refuses uninstalled evidence and accepts only the complete receipt with zero writes (2580 ms)
+  √ installer arguments require an explicit unambiguous mode: [] (1 ms)
+  √ installer arguments require an explicit unambiguous mode: ["--db","owned.db","--apply","--dry-run"]
+  √ installer arguments require an explicit unambiguous mode: ["--db","owned.db","--apply","--apply"]
+  √ installer arguments require an explicit unambiguous mode: ["--db","owned.db","--unknown"] (1 ms)
+  √ managed amendment attempt table matches the actual independently emitted fresh Prisma oracle (1 ms)
+
+PASS tests/contracts/audit_4_9_bench_credential_install.test.js (173 MB heap size)
+  √ PRE databases dry-run without writes, then apply additively with a verified receipt (295 ms)
+  √ FRESH databases dry-run without writes, then apply additively with a verified receipt (276 ms)
+  √ unmarked credentials, a marker without its table and an altered table refuse with zero writes (295 ms)
+  √ the command line requires an explicit database and one mode (2 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_technician_benchlab33e3fa796367401486a783d8e7d22c8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T11:26:56.749Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (app.js:99:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/localeMiddleware.js:36:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:62:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:51:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:62:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cors (node_modules/cors/lib/index.js:188:7)
+      at node_modules/cors/lib/index.js:224:17
+      at originCallback (node_modules/cors/lib/index.js:214:15)
+      at node_modules/cors/lib/index.js:219:13
+      at optionsCallback (node_modules/cors/lib/index.js:199:9)
+      at corsMiddleware (node_modules/cors/lib/index.js:204:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at internalNext (node_modules/helmet/index.cjs:531:6)
+      at xXssProtectionMiddleware (node_modules/helmet/index.cjs:311:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xPoweredByMiddleware (node_modules/helmet/index.cjs:304:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xPermittedCrossDomainPoliciesMiddleware (node_modules/helmet/index.cjs:297:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xFrameOptionsMiddleware (node_modules/helmet/index.cjs:281:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xDownloadOptionsMiddleware (node_modules/helmet/index.cjs:261:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xDnsPrefetchControlMiddleware (node_modules/helmet/index.cjs:254:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at xContentTypeOptionsMiddleware (node_modules/helmet/index.cjs:246:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at strictTransportSecurityMiddleware (node_modules/helmet/index.cjs:239:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at referrerPolicyMiddleware (node_modules/helmet/index.cjs:207:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at originAgentClusterMiddleware (node_modules/helmet/index.cjs:182:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at crossOriginResourcePolicyMiddleware (node_modules/helmet/index.cjs:175:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at crossOriginOpenerPolicyMiddleware (node_modules/helmet/index.cjs:159:3)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at contentSecurityPolicyMiddleware (node_modules/helmet/index.cjs:124:4)
+      at internalNext (node_modules/helmet/index.cjs:529:6)
+      at helmetMiddleware (node_modules/helmet/index.cjs:533:6)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+PASS tests/contracts/audit_4_9_bench_terminals.test.js (230 MB heap size)
+  √ bench settings come from the lab policy registry and report whether a PIN exists (19 ms)
+  √ a bench PIN needs the password, is stored only as a hash, and locks after repeated wrong entries (457 ms)
+  √ an active session refreshes in place to a token for the same analyst (17 ms)
+  √ a handed-over work item keeps one draft that the new assignee sees and then owns (18 ms)
+
+PASS tests/contracts/audit_4_9_bench_client.test.js (240 MB heap size)
+  idle lock (#202 B12)
+    √ after the idle timeout, input is blocked until the PIN is entered (80 ms)
+    √ Record asks for the same analyst PIN when lab policy requires it (9 ms)
+  local drafts on a shared terminal (#202 B13/B15)
+    √ after a switch, the new analyst cannot see the previous analyst local drafts or queued work (6 ms)
+    √ changing the instrument keeps the typed value and every other draft field (3 ms)
+  token expiry mid-entry (#202 B14)
+    √ the typed values are re-sent with the fresh token after re-login, once, and concurrent expiries share one prompt (3 ms)
+    √ without a mounted re-login prompt the existing sign-in handling applies; a cancelled prompt rejects the original error (2 ms)
+    √ the re-login prompt accepts only the same analyst and keeps the session in place (8 ms)
+
+PASS tests/contracts/audit_6_1_withdrawal_rendering.test.js (251 MB heap size)
+  √ en retained content re-renders the full withdrawal UUID in both HTML and every PDF page (27 ms)
+  √ es retained content re-renders the full withdrawal UUID in both HTML and every PDF page (12 ms)
+  √ es-419 retained content re-renders the full withdrawal UUID in both HTML and every PDF page (11 ms)
+  √ fr retained content re-renders the full withdrawal UUID in both HTML and every PDF page (11 ms)
+  √ pt retained content re-renders the full withdrawal UUID in both HTML and every PDF page (10 ms)
+
+PASS tests/contracts/audit_6_1_amendment_ui.test.js (246 MB heap size)
+  √ actual dialog requests only selected accepted lines and keeps the reason and request separate from authorisation (53 ms)
+  √ a requester waits for a second person while the lab self-authorisation policy enables the same button (12 ms)
+  √ the actual dialog requires both assessments and sends an explicit override only for the selected line (13 ms)
+  √ an authoriser sends the persisted request version and retains the full UUID (6 ms)
+  √ permission loss prevents reading amendment requests and sends no mutation (3 ms)
+  √ an authorisation refusal preserves the request and permits an idempotent retry (9 ms)
+  √ amendment workflow notices and labels are present in en without changing old keys (4 ms)
+  √ amendment workflow notices and labels are present in es without changing old keys (3 ms)
+  √ amendment workflow notices and labels are present in es-419 without changing old keys (3 ms)
+  √ amendment workflow notices and labels are present in fr without changing old keys (3 ms)
+  √ amendment workflow notices and labels are present in pt without changing old keys (3 ms)
+
+PASS tests/contracts/audit_6_1_public_withdrawal_ui.test.js (253 MB heap size)
+  √ the actual public component shows the localized amendment notice for REPORT_WITHDRAWN and renders no report content (52 ms)
+  √ five client and server locales disclose withdrawal without a replacement pointer (26 ms)
+
+PASS tests/contracts/audit_4_8_cross_check_policy.test.js (257 MB heap size)
+  Audit 4.8: laboratory cross-check policy contract
+    √ all presets supply the pinned per-lab defaults and finite values (6 ms)
+    √ five server and client locales label every cross-check policy (18 ms)
+    √ profile validation rejects equal and inverted C:N bounds using the stable policy code (15 ms)
+
+PASS tests/contracts/audit_4_8_cross_parameter_evaluator.test.js (257 MB heap size)
+  Audit 4.8: cross-parameter science from stored evidence
+    √ the 1.3 × CEC sample flags both base rules and retains every used input (2 ms)
+    √ missing Na is a recorded lower bound, flags only when BASES_CEC is already exceeded (1 ms)
+    √ missing Na is a recorded lower bound, flags only when BASE_SATURATION is already exceeded
+    √ base limits are strict and come from the provided policy, including partial Na cases
+    √ finite stored values cannot create a false base outcome through sum or product overflow (1 ms)
+    √ nonpositive CEC 0 is never divided or flagged
+    √ nonpositive CEC -1 is never divided or flagged
+    √ nonpositive nitrogen 0 cannot produce a C:N flag
+    √ nonpositive nitrogen -1 cannot produce a C:N flag (1 ms)
+    √ C:N accepts equal allowed % units
+    √ C:N accepts equal allowed g/kg units
+    √ C:N accepts equal allowed mg/g units
+    √ C:N accepts equal allowed mg/kg units
+    √ C:N 7.99 has outcome FLAGGED at the pinned boundaries (1 ms)
+    √ C:N 8 has outcome PASS at the pinned boundaries
+    √ C:N 25 has outcome PASS at the pinned boundaries
+    √ C:N 25.01 has outcome FLAGGED at the pinned boundaries
+    √ C:N never converts different units even when their factors coincide (1 ms)
+    √ only published unit synonyms normalize; no scale factors or unknown units are inferred
+    √ required absent/different C:N basis null is disclosed (1 ms)
+    √ required absent/different C:N basis  is disclosed
+    √ required absent/different C:N basis OVEN_DRY is disclosed
+    √ both-null unit and both-null basis still fail their respective authority checks
+    √ texture uses stored numeric fractions and policy tolerance, preserving source text (1 ms)
+    √ g/kg texture is not compared with100, while the legacy gate still ignores its units
+    √ positive carbonate in % compares its sign with water pH, without conversion or basis matching
+    √ positive carbonate in g/kg compares its sign with water pH, without conversion or basis matching (1 ms)
+    √ positive carbonate in mg/kg compares its sign with water pH, without conversion or basis matching
+    √ carbonate 0 does not impose a pH threshold
+    √ carbonate -1 does not impose a pH threshold
+    √ each pH salt checks strict inequality independently and ignores basis differences (1 ms)
+    √ legacy analysis aliases and ECEC do not stand in for the pinned catalogue codes
+    √ selected values disclose saved result identities; raw candidates are never chosen or averaged
+    √ reason precedence selects only INPUT_MISSING (1 ms)
+    √ reason precedence selects only INPUT_NOT_REPORTABLE
+    √ reason precedence selects only INPUT_NON_NUMERIC
+    √ reason precedence selects only INPUT_CENSORED
+    √ reason precedence selects only MULTIPLE_CANDIDATES
+    √ reason precedence selects only UNIT_MISMATCH (1 ms)
+    √ reason precedence selects only BASIS_MISMATCH
+    √ reason precedence selects only DENOMINATOR_NOT_POSITIVE
+    √ non-numeric stored carbon NaN is never parsed
+    √ non-numeric stored carbon Infinity is never parsed
+    √ non-numeric stored carbon -Infinity is never parsed
+    √ non-numeric stored carbon null is never parsed (1 ms)
+    √ non-numeric stored carbon 12 is never parsed
+    √ policy snapshot is mandatory and invalid bounds are refused without a default (13 ms)
+    √ the EC rule is absent and no evaluation mutates input or policy data (1 ms)
+
+PASS tests/contracts/audit_6_2_amendment_comparison.test.js (258 MB heap size)
+  √ exact pairs compare the frozen displayed value, unit and censoring mark (4 ms)
+  √ a single remaining pair records the exact old and new bases as CHANGED
+  √ ADDED and REMOVED remain listed alongside an exact pair of the same analysis under another basis (1 ms)
+  √ ambiguous candidates refuse with identities and candidate bases only (10 ms)
+  √ ambiguous candidates refuse with identities and candidate bases only (1 ms)
+  √ ambiguous candidates refuse with identities and candidate bases only (1 ms)
+  √ ambiguous candidates refuse with identities and candidate bases only
+  √ re-measurement with the same displayed value is unmarked and retains both source identities
+  √ historical param is the exact stable key even if that legacy code is absent from the catalogue
+  √ case and whitespace remain distinct keys; null basis is distinct from a named basis
+  √ missing identity refuses and exposes report/item position without values (1 ms)
+  √ missing identity refuses and exposes report/item position without values
+  √ missing identity refuses and exposes report/item position without values (1 ms)
+  √ shuffled groups, rows and source identities give the same deterministic frozen comparison (1 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       198 passed, 198 total
+Snapshots:   0 total
+Time:        135.916 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_8_cross_check_policy.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_8_cross_parameter_evaluator.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_9_bench_client.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_9_bench_credential_install.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_9_bench_terminals.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_1_amendment_install.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_1_amendment_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_1_first_fill.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_1_non_scientific_authorisation.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_1_public_withdrawal_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_1_withdrawal_rendering.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_2_amendment_comparison.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-16.json

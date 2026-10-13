@@ -1,0 +1,917 @@
+PASS tests/contracts/deployment_readiness_bootstrap.test.js (13.154 s, 57 MB heap size)
+  Deployment Readiness Bootstrap & Packaging Verification
+    √ setup.sh rejects invalid mode with exit 1 (226 ms)
+    √ setup.sh rejects Node 18 runtime with clear guidance (596 ms)
+    √ setup.sh fails fast and aborts if schema push fails (no error swallowing) (743 ms)
+    √ setup.sh auto-populates JWT_SECRET into existing .env with blank secret (1167 ms)
+    √ entrypoint persists auto-generated JWT_SECRET across container restarts (894 ms)
+    √ entrypoint recovers from interrupted initial setup on restart without reseeding populated installations (1444 ms)
+    √ docker-entrypoint.sh database inspection fails closed on corrupt or unreadable database (185 ms)
+    √ docker-entrypoint.sh database inspection passes cleanly on valid populated database (5687 ms)
+    √ seed.js recovers from real partial state ({ labs: 1, users: 0 }) and does not duplicate LAB01 (770 ms)
+    √ docker compose configuration validates cleanly across local, global, and nginx overlays (1130 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-global_admin_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-local_mgr_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-global_admin_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-global_admin_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [RESTORE] Initiating restore from: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\.tmp_journey_runner_HtbwHF\disposable_journey.db
+
+      at log (scripts/restore_db.js:32:13)
+
+  console.log
+    [RESTORE] Target database path: C:\Users\yigin\AppData\Local\Temp\lims_restore_test_1791890859307_HXtUVY\target.db
+
+      at log (scripts/restore_db.js:33:13)
+
+  console.log
+    [RESTORE] Verifying source backup integrity...
+
+      at log (scripts/restore_db.js:36:13)
+
+  console.log
+    [RESTORE] Source backup is valid. Users: 1, Samples: 1
+
+      at log (scripts/restore_db.js:41:13)
+
+  console.log
+    [RESTORE] Successfully rotated data exchange epoch to invalidate prior cursors: epoch-1791890860462-eb98bd61f64c
+
+      at log (scripts/restore_db.js:133:25)
+
+  console.log
+    [RESTORE] SUCCESS: Database successfully restored to C:\Users\yigin\AppData\Local\Temp\lims_restore_test_1791890859307_HXtUVY\target.db
+
+      at log (scripts/restore_db.js:141:17)
+
+  console.log
+    [RESTORE] Initiating restore from: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\.tmp_journey_runner_MH6USD\disposable_journey.db
+
+      at log (scripts/restore_db.js:32:13)
+
+  console.log
+    [RESTORE] Target database path: C:\Users\yigin\AppData\Local\Temp\lims_restore_test_1791890859307_HXtUVY\fail_target.db
+
+      at log (scripts/restore_db.js:33:13)
+
+  console.log
+    [RESTORE] Verifying source backup integrity...
+
+      at log (scripts/restore_db.js:36:13)
+
+  console.log
+    [RESTORE] Source backup is valid. Users: 1, Samples: 1
+
+      at log (scripts/restore_db.js:41:13)
+
+  console.log
+    [RESTORE] Creating safety snapshot of current database: C:\Users\yigin\AppData\Local\Temp\lims_restore_test_1791890859307_HXtUVY\fail_target.db.pre_restore_2026-10-13T11-27-40-597Z.bak
+
+      at log (scripts/restore_db.js:54:17)
+
+  console.error
+    [RESTORE] ERROR: Restoration failed: Data exchange epoch rotation failed: controlled epoch persistence failure
+
+      150 |             try { fs.unlinkSync(stagingPath); } catch (_) {}
+      151 |         }
+    > 152 |         console.error(`[RESTORE] ERROR: Restoration failed: ${err.message}`);
+          |                 ^
+      153 |         throw err;
+      154 |     }
+      155 | }
+
+      at error (scripts/restore_db.js:152:17)
+      at Object.<anonymous> (tests/contracts/deployment_readiness_acceptance.test.js:475:13)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_a_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-mgr_b_1791890859307 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/deployment_readiness_acceptance.test.js (156 MB heap size)
+  Deployment Readiness Acceptance Contract
+    1. Initial Login & Mandatory Password Change Enforcement
+      √ Initial login succeeds and reports mustChangePassword: true (102 ms)
+      √ Operational endpoints are blocked with 403 until password is changed (15 ms)
+      √ POST /api/auth/change-password updates credential and clears flag (210 ms)
+      √ Global admin initial password change workflow (230 ms)
+    2. Single-Lab (Local Mode) Security & Authority Boundaries
+      √ LAB_MANAGER can view and edit own laboratory (8 ms)
+      √ LAB_MANAGER can onboard technician to own laboratory (66 ms)
+      √ LAB_MANAGER can create a laboratory project (9 ms)
+      √ LAB_MANAGER cannot create extra laboratories (403) (6 ms)
+      √ LAB_MANAGER cannot create SUPER_ADMIN accounts (403) (4 ms)
+      √ LAB_MANAGER cannot access external data exchange API connections (403) (13 ms)
+    3. Multi-Lab (Global Mode) Scoping & Cross-Lab Isolation
+      √ Manager A only sees Lab A in laboratory catalogue (8 ms)
+      √ Manager B only sees Lab B in laboratory catalogue (7 ms)
+      √ Manager A is denied mutating Lab B (403) (4 ms)
+      √ Manager A is denied creating staff for Lab B (403) (3 ms)
+      √ SUPER_ADMIN can see and coordinate all laboratories (7 ms)
+    4. Stopped-Writer Database Restore & Automatic Epoch Invalidation
+      √ Restores database, verifies integrity & foreign keys, and rotates exchange epoch (109 ms)
+      √ Fails closed, exits non-zero, and preserves safety artifacts when SQL epoch rotation triggers fail (341 ms)
+    5. Bounded Concurrent Multi-Lab Load Processing & Workload Isolation
+      √ Handles concurrent sample intake, queries, and project reads across laboratories without deadlocks (180 ms)
+    6. Provision Super Admin CLI Identity Collision & State Preservation Invariants
+      √ provision_super_admin CLI rejects conflicting email and does not mutate unrelated inactive user (419 ms)
+      √ provision_super_admin CLI creates non-conflicting new admin cleanly without touching existing accounts (444 ms)
+      √ provision_super_admin CLI preserves inactive status unless --activate is explicitly specified (408 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewb1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewb1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labviewa1791890862524 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labcap1791890863197 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_labcap1791890863197 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/dashboard_manager_views.test.js (205 MB heap size)
+  Dashboard, Manager Task List & Field Registry Separation (#120)
+    √ 1. GET /api/samples?view=daily defaults to physically received and active lab work (18 ms)
+    √ 2. GET /api/samples?view=expected returns field arrivals awaiting intake (including COLLECTED) (9 ms)
+    √ 3. GET /api/samples?view=registry returns the full field registry without omitting records (9 ms)
+    √ 4. Response provides reconciled view counts in views and facets.views (8 ms)
+    √ 5. Manager exceptions queue includes unresolved QC batches and excludes resolved dispositions (22 ms)
+    √ 6. Cross-lab isolation: Manager B cannot view Lab A samples or exceptions (14 ms)
+    √ 7. Explicit status query parameter overrides view (24 ms)
+    √ 8. UI Completed quick filter (status=SUBMITTED_FULL,APPROVED) returns both finished and approved samples (6 ms)
+    √ 9. Pending manager review and final approval remain visible in Manager Task List (19 ms)
+    √ 10. Final approval candidates reconcile across dashboard home and queue without 200 cap (>200 candidate regression) (580 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+PASS tests/contracts/controlled_units_interpretation.test.js (227 MB heap size)
+  BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine
+    √ 1. Normalizes synonym units and applies scientific conversion factors (1 ms)
+    √ 2. Evaluates individual parameter agronomic classifications (FAO 5-tier)
+    √ 3. Computes multi-parameter soil diagnostics (USDA texture, C:N stoichiometry, Base Saturation, Ca:Mg) (1 ms)
+    √ 4. End-to-end report assembly embeds controlled units and rich diagnostic interpretations (98 ms)
+    √ 5. WP-04: Fail closed on unrecognised unit
+    √ 6. WP-05: Cation mg/kg to cmol(+)/kg conversions
+    √ 7. WP-18: Total N of 30 g/kg rates High in SOIL and Adequate in PLANT
+    √ 8. WP-23: Extended interpretation coverage with calibration methods (1 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b7c65de0-9541-440b-81ad-0d7d8ad9b0df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b7c65de0-9541-440b-81ad-0d7d8ad9b0df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-C-SMP1-1791890864949 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample TEST-C-SMP1-1791890864949 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-C-SMP2-1791890864949 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 92c3e0a0-3f7f-48da-8c76-1b8717264570 linked to Project: PROJ-CSG-1791890864949
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 92c3e0a0-3f7f-48da-8c76-1b8717264570 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-C-SMP3-1791890864949 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 40b6821f-5079-4c66-92ba-f66aad8ae1b7 linked to Project: PROJ-CSG-1791890864949
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 40b6821f-5079-4c66-92ba-f66aad8ae1b7 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-C-REJ4-1791890864949 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: ee6139d3-6118-49a8-9572-a3aae6624dc7 linked to Project: PROJ-CSG-1791890864949
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: b7c65de0-9541-440b-81ad-0d7d8ad9b0df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b7c65de0-9541-440b-81ad-0d7d8ad9b0df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b7c65de0-9541-440b-81ad-0d7d8ad9b0df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b7c65de0-9541-440b-81ad-0d7d8ad9b0df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b7c65de0-9541-440b-81ad-0d7d8ad9b0df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b7c65de0-9541-440b-81ad-0d7d8ad9b0df (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/consignment_stage_c.test.js (252 MB heap size)
+  Stage C: Consignment & High-Throughput Batch Intake Contract (RC-12 - RC-15)
+    √ RC-12 & RC-13 & RC-14: POST /api/reception/consignments processes atomic batch with mixed statuses (202 ms)
+    √ RC-12: GET /api/reception/consignments lists consignments and GET /:id returns details (20 ms)
+    √ RC-15: POST /api/reception/parse-manifest validates and converts coordinates from client spreadsheet rows (20 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 21083cba-8568-4856-a867-3ada9ab466d9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b7c31a67-2090-4509-a97a-e26b194395fb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_lab_technician_labgtm (LAB_TECHNICIAN) attempted EDIT_ANALYSES. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","SAMPLE_RECEPTION"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+PASS tests/contracts/edit_analyses_permission.test.js (271 MB heap size)
+  SD-06: EDIT_ANALYSES Permission Gate Contract
+    √ 1. EDIT_ANALYSES is registered in roles.js and includes SAMPLE_RECEPTION and LAB_MANAGER (2 ms)
+    √ 2. User with EDIT_ANALYSES (SAMPLE_RECEPTION) can update sample analyses (HTTP 200) (104 ms)
+    √ 3. User without EDIT_ANALYSES (LAB_TECHNICIAN) is refused with HTTP 403 Forbidden (8 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrB-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrB-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User mgrb_EQ108-1791890866236 (Lab: lab-eq-B-EQ108-1791890866236) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (controllers/equipmentEventController.js:72:24)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-EQ108-1791890866236 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/equipment_qualification_wp_108.test.js (292 MB heap size)
+  Issue #108: Calibration Qualification, Policy, and Consistency Contracts
+    √ 1. Configured instrument schedule policy computes OK, DUE_SOON, and OVERDUE based on rule (28 ms)
+    √ 2. Absent schedule policy does not falsely mark unconfigured instrument OK (16 ms)
+    √ 3. Chronological recomputation: rejecting an older event does not invalidate newer accepted calibration (25 ms)
+    √ 4. Chronological recomputation: rejecting the latest event blocks qualification and places asset OUT_OF_SERVICE (15 ms)
+    √ 5. Decommissioned asset is never downgraded to merely OUT_OF_SERVICE on failure (13 ms)
+    √ 6. Passing calibration on unrelated OUT_OF_SERVICE asset does not auto-promote to IN_SERVICE (13 ms)
+    √ 7. Date validation: future performed date is rejected (400 FUTURE_PERFORMED_DATE) (4 ms)
+    √ 8. Idempotency: rapid repeat submit returns existing event without duplicate record (9 ms)
+    √ 9. Cross-lab security denial (403) on events and dispositions (8 ms)
+    √ 10. Method eligibility excludes BLOCKED instruments (7 ms)
+    √ 11. Read-only diagnostic mismatch report generates accurately (3 ms)
+
+PASS tests/contracts/escalation.test.js (294 MB heap size)
+  SD-14: Work Escalation Service Contract
+    √ 1. An unassigned work item sitting for >2 days escalates to the manager without opening a page (9 ms)
+    √ 2. Running escalation checks again deduplicates and does not re-notify (3 ms)
+    √ 3. Stalled work (in progress >72 hours) escalates to the manager
+
+  console.log
+    [PROFILE SEED] Seeding profile: soilfer from C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\profiles\soilfer
+
+      at log (seeds/profile.js:29:13)
+
+  console.log
+      ✓ Seeded 7 laboratories
+
+      at log (seeds/profile.js:55:17)
+
+  console.log
+      ✓ Seeded 9 projects
+
+      at log (seeds/profile.js:122:17)
+
+  console.log
+      ✓ Applied branding configuration
+
+      at log (seeds/profile.js:139:17)
+
+  console.log
+    [PROFILE SEED] Seeding profile: default from C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\profiles\default
+
+      at log (seeds/profile.js:29:13)
+
+  console.log
+      ✓ Seeded 1 laboratories
+
+      at log (seeds/profile.js:55:17)
+
+  console.log
+      ✓ Seeded 1 projects
+
+      at log (seeds/profile.js:122:17)
+
+  console.log
+      ✓ Applied branding configuration
+
+      at log (seeds/profile.js:139:17)
+
+  console.log
+    [PROFILE SEED] Seeding profile: soilfer from C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\profiles\soilfer
+
+      at log (seeds/profile.js:29:13)
+
+  console.log
+      ✓ Seeded 7 laboratories
+
+      at log (seeds/profile.js:55:17)
+
+  console.log
+      ✓ Seeded 9 projects
+
+      at log (seeds/profile.js:122:17)
+
+  console.log
+      ✓ Applied branding configuration
+
+      at log (seeds/profile.js:139:17)
+
+PASS tests/contracts/deployment_profiles.test.js (309 MB heap size)
+  WP-36: Declarative Deployment Profiles Contract
+    √ 1. Profiles contain strictly JSON files (zero executable code) (1 ms)
+    √ 2. SoilFER profile defines exactly 7 laboratories and 2 multi-lab projects (2 ms)
+    √ 3. Default profile defines single generic lab without hardcoded countries
+    √ 4. Programmatic profile execution seeds target system cleanly (52 ms)
+
+PASS tests/contracts/exchange_diagnostics_privacy.test.js (303 MB heap size)
+  Exchange diagnostics preserve confidentiality
+    √ typed and code-only eligibility errors never expose internal messages or details (2 ms)
+    √ hold lookup keeps its cause internal and reports a stable retryable public error (1 ms)
+    √ unrelated errors keep generic handling without reflecting caller correlation or query data (1 ms)
+    √ phase timing logs route templates rather than bag IDs or query values (1 ms)
+
+PASS tests/contracts/db_pragmas.test.js (304 MB heap size)
+  Database PRAGMAs Contract Tests
+    √ should have WAL journal mode enabled (1 ms)
+    √ should have busy_timeout configured to at least 5000ms (1 ms)
+    √ should have foreign keys enabled
+    √ should have synchronous mode set to NORMAL (1)
+
+PASS tests/contracts/coord_parser.test.js (305 MB heap size)
+  Universal Coordinate Parser (RC-05, RC-06)
+    √ parses standard Decimal Degrees with comma (1 ms)
+    √ parses Decimal Degrees with cardinal directions and symbols
+    √ parses Southern Hemisphere & East African coordinates (1 ms)
+    √ parses Degrees-Minutes-Seconds (DMS)
+    √ parses DMS with space delimiter and decimals
+    √ parses UTM Zone 15N (Guatemala)
+    √ parses UTM with Zone keyword and units
+    √ parses UTM Zone 35S (Zambia) (1 ms)
+    √ returns null for invalid strings
+
+Test Suites: 12 passed, 12 total
+Tests:       90 passed, 90 total
+Snapshots:   0 total
+Time:        22.018 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\consignment_stage_c.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\controlled_units_interpretation.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\coord_parser.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\dashboard_manager_views.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\db_pragmas.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\deployment_profiles.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\deployment_readiness_acceptance.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\deployment_readiness_bootstrap.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\edit_analyses_permission.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\equipment_qualification_wp_108.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\escalation.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\exchange_diagnostics_privacy.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-context-serial\batch-18.json
