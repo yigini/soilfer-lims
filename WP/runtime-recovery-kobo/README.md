@@ -1,3 +1,11 @@
+# #206 PR295 open; real CI pending — 2026-10-13
+
+[PR295](https://github.com/yigini/soilfer-lims/pull/295) is OPEN at `9ae02f6ab7651d2ca887a98722f6a20ace3cc471`, base `959d17e11c357266f7c2a41b0c84ab76914c591e`. Complete local frozen-source coverage is PASS (362 unique suites / 5,508 tests) and all closed raw evidence is pushed at `c56414a5148cb2b17547680a55550d66c9a1b013`. Actual GitHub `closingIssuesReferences=[]`; #206 remains open for Claudio's post-deploy check. ONE real CI run [38393187129](https://github.com/yigini/soilfer-lims/actions/runs/38393187129) is in_progress; its current snapshot is not a complete CI verdict. Observe the same run. Standard CI must pass before ready-for-audit and the final exact-head native handoff. No final Claudio verdict or new production operation exists. PR/source/initial CI records and hashes: `WP/backlog-resume-20261013/pr-295-open-boundary.json`.
+
+Fresh actual native read: LIMS Audit / Lab workflow audit and plan still shows the phone instructions and unanswered #103 See first / Approve now clarification. Both composers are empty; no message or human-card response was sent. Same writer/worktree/branch. Completed release helpers, data, evidence and notices remain immutable. Historical pending/failed statements below keep their original meaning; current status is this PR with local coverage complete and real CI pending.
+
+---
+
 # #206 complete frozen-source regression coverage PASS — 2026-10-13
 
 Source-only head `9ae02f6ab7651d2ca887a98722f6a20ace3cc471` / `codex/issue-206-containers`, audit source `877a1d210da1124e5750695eb2da41c1645b9218`: all 362 unique discovered suites / 5,508 tests PASS, zero failed or pending in the accepted results. Coverage combines 324 independently valid passing suites from closed source-pinned runs and 38 remaining suites in fresh serial processes. Both ordinary owned database setup files and stock assertions were preserved; all 51 frozen source hashes stayed unchanged. The final completion exited 0 at 2026-10-13T11:43:03.835789+00:00. No test writer remains. Raw files are indexed in `WP/backlog-resume-20261013/full-context-pass-retention-206.json`; accepted-report hashes and exact inventory are in `full-206-visible-completion/progress.json` and `manifest.json`.

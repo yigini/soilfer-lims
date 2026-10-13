@@ -1,0 +1,31 @@
+{
+  "observedUtc": "2026-10-13T11:55:04.401751+00:00",
+  "pr": 295,
+  "url": "https://github.com/yigini/soilfer-lims/pull/295",
+  "reviewHead": "9ae02f6ab7651d2ca887a98722f6a20ace3cc471",
+  "base": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "rawCoverageCommit": "c56414a5148cb2b17547680a55550d66c9a1b013",
+  "localCoverage": "PASS: 362 unique suites / 5508 tests",
+  "ciRun": 38393187129,
+  "ciStatus": "in_progress",
+  "ciConclusion": "",
+  "automaticClosingReferences": [],
+  "actualClaudioFinalVerdict": "NOT YET",
+  "finalNativeHandoff": "NOT YET",
+  "productionMutations": 0,
+  "nativeRead": "Actual LIMS Audit / Lab workflow audit and plan unchanged: phone instructions visible; See first / Approve now clarification unanswered; both composers empty; no input sent.",
+  "files": {
+    "pr-295-open-raw.json": {
+      "bytes": 4814,
+      "sha256": "3bf438a7fcd49ff785020c26e8ef8c2574ab16a2210e4ef5a609720cbc3f50b8"
+    },
+    "ci-38393187129-initial-raw.json": {
+      "bytes": 3345,
+      "sha256": "4c4cd6192150fc56de627e929ab4b61c7c1cd3ea9fa9f0eefc0e148b2a2ce1af"
+    },
+    "issue-206-pr-body.md": {
+      "bytes": 4230,
+      "sha256": "e19c491b50365c6cf1f617dcd839e5942829c3f107ad54da00f975c84530dd89"
+    }
+  }
+}
