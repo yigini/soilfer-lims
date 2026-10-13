@@ -1,0 +1,12 @@
+{
+  "observedUtc": "2026-10-13T21:53:44.225110+00:00",
+  "helper": "diagnose-issue214-ci-policy-prerequisite-owned-once.cjs",
+  "exitCode": 1,
+  "code": "WORKFLOW_FIXTURE_REFUSED",
+  "message": "Workflow fixtures require an explicitly isolated database.",
+  "boundary": "Before any fixture connection",
+  "cause": "DATABASE_PATH was not supplied",
+  "originalHelperPreserved": true,
+  "rawStderrWasReturnedByTerminalNotCapturedToFile": true,
+  "productionOperations": 0
+}

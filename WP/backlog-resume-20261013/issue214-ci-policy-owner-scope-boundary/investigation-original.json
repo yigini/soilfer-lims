@@ -1,0 +1,26 @@
+{
+  "observedUtc": "2026-10-13T21:56:03.590972+00:00",
+  "head": "e47b842c2a7f6b4f06fa4c532f7460c01797821b",
+  "run": 38467368095,
+  "overallCi": "FAILED",
+  "serverSummary": [
+    "Test Suites: 365 passed, 365 total",
+    "Tests:       5547 passed, 5547 total"
+  ],
+  "all365UniqueServerPathsMatch": true,
+  "clientAndBothActualDockerBuildsCompleted": true,
+  "actualDockerBoundary": "PASS",
+  "actualDockerReadiness": "FAILED",
+  "failedScenario": "Scenario6 historical PRE_199 copy, actual shipped default entrypoint",
+  "refusalCode": "QC_CHART_PREREQUISITE_REQUIRED",
+  "onlyMissingPrerequisiteInOwnedReproduction": "LabPolicyOverride.value",
+  "actualCiVolumeIndependentlyInspected": false,
+  "supportedBaselinePolicyModelsAbsent": true,
+  "canonicalPolicyMigrationSha256": "fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70",
+  "originalJobStepMetadataWasStaleRelativeToClosedLogs": true,
+  "sourceUnchanged": true,
+  "scopeQuestionOnly": true,
+  "newApplicationChanges": 0,
+  "newCiDispatches": 0,
+  "productionOperations": 0
+}

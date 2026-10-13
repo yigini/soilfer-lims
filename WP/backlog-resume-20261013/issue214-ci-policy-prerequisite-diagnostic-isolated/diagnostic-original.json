@@ -1,0 +1,92 @@
+{
+  "completedUtc": "2026-10-13T21:53:46.284Z",
+  "status": "ORIGINAL_REFUSAL_REPRODUCED",
+  "sourceFixture": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_16f6be4b-c7b7-438e-b1a0-22efe20e7d7f.db",
+  "ownedClone": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\issue214_policy_absent_96cd4e63-9b69-4508-bf2b-cc696ec43ddc.db",
+  "fixturePolicyTablesWereEmpty": true,
+  "sourceFixtureTripleUnchanged": true,
+  "allOtherRowsPreserved": true,
+  "missingPrerequisites": [
+    "LabPolicyOverride.value"
+  ],
+  "columns": {
+    "QcEvaluation": [
+      "id",
+      "batchId",
+      "analysisCode",
+      "version",
+      "ruleId",
+      "ruleVersion",
+      "policyVersion",
+      "verdict",
+      "details",
+      "evaluatedBy",
+      "evaluatedAt",
+      "supersedesId",
+      "legacySource"
+    ],
+    "Batch": [
+      "id",
+      "labId",
+      "analysis",
+      "instrument",
+      "status",
+      "createdBy",
+      "createdAt",
+      "notes",
+      "qcResults",
+      "workItemIds",
+      "maxCapacity",
+      "profile",
+      "disposition",
+      "history",
+      "instrumentId",
+      "analystUsername",
+      "startedAt",
+      "completedAt"
+    ],
+    "QcMeasurement": [
+      "id",
+      "batchId",
+      "positionId",
+      "analysisCode",
+      "replicateNo",
+      "value",
+      "rawInput",
+      "censoring",
+      "censoringLimit",
+      "enteredBy",
+      "enteredAt",
+      "supersededById",
+      "correctionReason",
+      "legacySource"
+    ],
+    "LabPolicyOverride": [],
+    "_schema_migrations": [
+      "id",
+      "appliedAt",
+      "details"
+    ]
+  },
+  "refusal": {
+    "code": "QC_CHART_PREREQUISITE_REQUIRED",
+    "message": "Install the previous application schema first.",
+    "totalChanges": 0
+  },
+  "diagnosticDryRunTripleUnchanged": true,
+  "sourceTriple": {
+    "": "310180aca58caee408e411d2aea27400310fc96065ad310453ebf57163b2ebd8",
+    "-wal": null,
+    "-shm": null
+  },
+  "cloneTriple": {
+    "": "3488d444044dc915c01bf1384a41c7d99ed63c67a1ad29595b78bf11a528836b",
+    "-wal": null,
+    "-shm": null
+  },
+  "simulatedTablelessPolicyPredecessor": true,
+  "actualCiVolumeIndependentlyInspected": false,
+  "filesRetained": true,
+  "productionConnections": 0,
+  "productionOperations": 0
+}

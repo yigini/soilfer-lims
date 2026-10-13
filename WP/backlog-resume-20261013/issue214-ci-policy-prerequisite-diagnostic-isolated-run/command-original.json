@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "node",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\diagnose-issue214-ci-policy-prerequisite-owned-isolated-once.cjs"
+  ],
+  "cwd": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims",
+  "environment": {
+    "NODE_ENV": "test",
+    "DATABASE_PATH": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\test_issue214_diagnostic_context_f040db71-56f0-4190-9d3e-2e3a12ee81e9.db",
+    "DATABASE_URL": "file:C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\test_issue214_diagnostic_context_f040db71-56f0-4190-9d3e-2e3a12ee81e9.db"
+  },
+  "sourceFrozenCount": 415,
+  "productionOperations": 0
+}

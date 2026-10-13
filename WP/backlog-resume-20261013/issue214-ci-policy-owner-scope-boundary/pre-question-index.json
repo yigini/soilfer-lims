@@ -1,0 +1,78 @@
+{
+  "WP/backlog-resume-20261013/issue214-ci-policy-owner-scope-boundary/canonical-policy-migration-original.sql": {
+    "bytes": 1289,
+    "sha256": "fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-owner-scope-boundary/comments-before-original.json": {
+    "bytes": 37428,
+    "sha256": "cff0662d607b48a55f5b28ec27460a720b907ae665b20e81daac9361f6cf0aed"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-owner-scope-boundary/investigation-original.json": {
+    "bytes": 1051,
+    "sha256": "10c391a8f332489b4183b308ed0013e36ab3694ec4cb5d3625d66dd5c148057c"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-owner-scope-boundary/main-before-original.json": {
+    "bytes": 336,
+    "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-owner-scope-boundary/policy-service-original.js": {
+    "bytes": 18752,
+    "sha256": "316979b36d2cae69ea480d27f07f0c5030d30c83992df94cde9921970c56fd3e"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-owner-scope-boundary/pr-before-original.json": {
+    "bytes": 50236,
+    "sha256": "7f2515d16e4f1f4f40f8214443029043aa990fbcddc0504839b42d62f71a613b"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-owner-scope-boundary/run-before-original.json": {
+    "bytes": 12659,
+    "sha256": "c6529276b15c702c19ce78891544403bbc8ee5a25f0228fa261dd4ed54e07567"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-owner-scope-boundary/supported-baseline-schema-original.prisma": {
+    "bytes": 49332,
+    "sha256": "d54ccc3d7e622f73c54826ae96315ce386143ada7a9e38e490703fa91994ccbe"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-prerequisite-diagnostic-isolated/diagnostic-original.json": {
+    "bytes": 2331,
+    "sha256": "a0b68af5be3e711cadcc9e9ee5a305a00e21aceda490c66d3b7f5e4d0d891182"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-prerequisite-diagnostic-isolated-run/command-original.json": {
+    "bytes": 793,
+    "sha256": "5cff9ee161b919d0f4f985c90c5dfa0e958b79e2f4aa0ed8ec9ee36338a86567"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-prerequisite-diagnostic-isolated-run/exit-original.txt": {
+    "bytes": 3,
+    "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-prerequisite-diagnostic-isolated-run/first-pre-fixture-refusal-record.json": {
+    "bytes": 484,
+    "sha256": "769b4f689d79687f6e2c6d5e13011f26da949b77fc62c9f6c9c17e5c2a25a6d4"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-prerequisite-diagnostic-isolated-run/stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-prerequisite-diagnostic-isolated-run/stdout-original.log": {
+    "bytes": 1798,
+    "sha256": "ecb22ae7c691ddc235e25085c230518335eeb15699981d4fa5b09ba3a65c1adf"
+  },
+  "WP/backlog-resume-20261013/issue214-ci-policy-prerequisite-diagnostic-isolated-run/summary-original.json": {
+    "bytes": 157,
+    "sha256": "6a10e7ee7eadb4e48fff1005a735351c75cbded18d24cc69eb669955553c1029"
+  },
+  "WP/backlog-resume-20261013/diagnose-issue214-ci-policy-prerequisite-owned-once.cjs": {
+    "bytes": 4401,
+    "sha256": "e7ecc0ed262f5651dc90bff1238df61107c2c3eef7edb56b468d6dd7cd3164b8"
+  },
+  "WP/backlog-resume-20261013/diagnose-issue214-ci-policy-prerequisite-owned-isolated-once.cjs": {
+    "bytes": 4464,
+    "sha256": "74f477ca35b23fbe512e6dac290b225c4332a6081aa1f7968340b431641e9e0b"
+  },
+  "WP/backlog-resume-20261013/prepare-run-issue214-owned-policy-diagnostic-successor-once.py": {
+    "bytes": 2820,
+    "sha256": "66243f5b243a846115d32af71b6347bfe4d917d8aa5f36b3f2334dcfe85214eb"
+  },
+  "WP/backlog-resume-20261013/retain-raise-issue214-ci-policy-owner-boundary-once.py": {
+    "bytes": 13501,
+    "sha256": "cac6fba00ff06ab02cb0794253020af4b30620ff7d655d55b47401e60c84801d"
+  }
+}
