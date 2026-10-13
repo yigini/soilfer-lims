@@ -1,0 +1,28 @@
+{
+  "observedUtc": "2026-10-13T12:38:29.849037+00:00",
+  "issue": 206,
+  "pr": 295,
+  "reviewHead": "9ae02f6ab7651d2ca887a98722f6a20ace3cc471",
+  "failedRun": 38393187129,
+  "commentId": 6145723989,
+  "url": "https://github.com/yigini/soilfer-lims/issues/206#issuecomment-6145723989",
+  "createdUtc": "2026-10-13T12:38:28Z",
+  "readyForAudit": false,
+  "finalNativeHandoff": false,
+  "productionMutations": 0,
+  "scopeQuestion": "One serial recyclable Jest worker; no application changes yet",
+  "files": {
+    "issue-206-ci-failure-scope-question.md": {
+      "bytes": 1829,
+      "sha256": "5e6a37a248bf2ba471f5600a818196ed7c3a90d3d29027840fb90768f0570c5c"
+    },
+    "issue-206-ci-failure-scope-question-request.json": {
+      "bytes": 1851,
+      "sha256": "8e7e4557ba6e23c85c1132608cb0869af86cdf2648862ed0c76be23b9fbfbfe1"
+    },
+    "issue-206-ci-failure-scope-question-raw.json": {
+      "bytes": 3426,
+      "sha256": "0421232a3d1d4549158566973ef59d4e1defd4517739657a6ebae852726df861"
+    }
+  }
+}
