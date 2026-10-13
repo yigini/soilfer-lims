@@ -1,0 +1,97 @@
+{
+  "observedUtc": "2026-10-13T13:57:09.348015+00:00",
+  "status": "MERGED_ACTUAL_AUDITED_HEAD",
+  "pr": 295,
+  "issue": 206,
+  "sourceHead": "1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a",
+  "sourceTree": "85350d14bdff5a607a3d2edc9615785842c9c94b",
+  "priorMain": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "actualMerge": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "mergedAt": "2026-10-13T13:57:04Z",
+  "parents": [
+    "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a"
+  ],
+  "mergedTreeEqualsAuditedSource": true,
+  "actualAuditCommentId": 6146939836,
+  "actualAuditEvidenceCommit": "431f4ba8bdf86aa9cf0a2efdb4777991ca78a2ac",
+  "prCi": 38400174689,
+  "mainCi": [],
+  "mainCiLogsCollected": false,
+  "issue206State": "open",
+  "closingIssuesReferences": [],
+  "deploymentPerformed": false,
+  "productionOperations": 0,
+  "nativeAcknowledgementSent": false,
+  "nativeBoundary": "Human draft observed in another Claude chat; zero input, draft preserved.",
+  "files": {
+    "actual-merge-commit-raw.json": {
+      "bytes": 2702,
+      "sha256": "15b477c34ea504a6b67559cd179978944c77a6136e910dde45659248b30d0d4e"
+    },
+    "checks-immediate-raw.json": {
+      "bytes": 3560,
+      "sha256": "699854c3faf9deb90f3467850fe739c4c4def5d7276d714f8554b4bf210fa2fd"
+    },
+    "ci-immediate-raw.json": {
+      "bytes": 12701,
+      "sha256": "a3b68e07faa5e8ee3109ff4ce3f3edbd80f9b9b892d063d0ca6c20a39be03475"
+    },
+    "closing-references-after-raw.json": {
+      "bytes": 104,
+      "sha256": "5c61148747a18f41c4d46c9180793af73d84c7f1a5d0d15535b3bdeca4952ac1"
+    },
+    "closing-references-immediate-raw.json": {
+      "bytes": 158,
+      "sha256": "0aaf00199d1bb8f958e52658974d9d73f826286930bb124e55c1834f60db40cd"
+    },
+    "comments-immediate-raw.json": {
+      "bytes": 10377,
+      "sha256": "759066ce322b54c686253ce00bc9b32fcdef05d19ccddafa257097fb6fac39bd"
+    },
+    "issue-206-after-raw.json": {
+      "bytes": 8443,
+      "sha256": "3dc98dd02cf3627d100397ef67351456fd6a49c1a3b62eda9355d1ba33ef1bea"
+    },
+    "main-actual-merged-raw.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    },
+    "main-ci-open-boundary-raw.json": {
+      "bytes": 36,
+      "sha256": "a2790a384d7d281e7395679000c35d27768d89dbd7052f725b8f4688beb59915"
+    },
+    "main-immediate-raw.json": {
+      "bytes": 336,
+      "sha256": "b80a139ba9da230bf25b4fe2a137e4420c70a9b093cfc445dbb9607f878fb920"
+    },
+    "merge-request.json": {
+      "bytes": 77,
+      "sha256": "6c7be62e0878df32ae4aaf4d3b3102eed8299a58960cd938011a2329412f6bed"
+    },
+    "merge-response-raw.json": {
+      "bytes": 109,
+      "sha256": "62cea8407313e64a19345f86d0caac84c2496e5931fc39002a27e0a947bcef14"
+    },
+    "merge-response-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "mutation-started.json": {
+      "bytes": 137,
+      "sha256": "cb362fa7a13c43515123b39cd55b62cdfcb1139bfc28d5e40b4e89fd4342bdd6"
+    },
+    "pr-actual-merged-raw.json": {
+      "bytes": 23237,
+      "sha256": "76296167be7b0e012d8e36ef7d404c9c103b5552998f6f0d0dcea9e1fe440ea4"
+    },
+    "pr-immediate-raw.json": {
+      "bytes": 22293,
+      "sha256": "e61d7f5d435d078b365dbd4b1671cd77d19742075cc3d75582e689216c7eb62b"
+    },
+    "verdict-immediate-raw.json": {
+      "bytes": 6787,
+      "sha256": "3d504670dbe3035c87ff67d73c50782e005a1893c4665de338de9fb57ce0a25a"
+    }
+  }
+}
