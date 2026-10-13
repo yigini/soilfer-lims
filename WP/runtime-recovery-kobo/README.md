@@ -1,3 +1,13 @@
+# #206 UI compatibility repaired; successor full regression running — 2026-10-13
+
+Current source-only head `61d1798524315032da62ca4f51cd08c7611a555a` / `codex/issue-206-containers`; audit source `01e05ccfa8d469122203218e939e07c0ad688c77`. Claudio's LF and SPA-scope findings stay resolved: two LF attribute additions, zero CR bytes, and `server/app.js` exactly main. Subsequent regression stopped at batch 12 with 15 UI failures (classic JSX React binding and an unnecessary null field on unselected repeat requests). Those failures are repaired. Three affected suites / 41 tests PASS, rebuilt client PASS, canonical lint zero errors and the identical 14 baseline warnings.
+
+The failed run is retained under `WP/backlog-resume-20261013/full-206-serial/` and must not be resumed, overwritten or called PASS. ONE new frozen 362-suite regression is RUNNING in session 16276 / `full-206-ui-serial/`, through `run-issue-206-full-ui-serial.py`; 12-suite sequential processes, ordinary owned fixtures, default heap and blank NODE_OPTIONS. Observe that SAME run; no concurrent Jest or duplicate dispatch. No full PASS or final Claudio acceptance yet. Closed raw logs and exact hashes: `ui-review-corrections-206.json`.
+
+No PR until complete full-suite PASS, then actual PR CI and exact-head Claudio audit. No new release/kit/gate or production operation. PR294/#200 and every completed historical helper/receipt/notice remain immutable. Same worktree, branch and writer; human files, drafts and YY cards untouched.
+
+---
+
 # #206 source corrections; full regression in progress — 2026-10-13
 
 Claudio inspected source `7b893c5` and withheld his final verdict pending the full regression and CI. His two pre-PR findings are resolved at source-only review head `cea610f1dcd58b3aed209b4a65b045ba9576bbb6` (`codex/issue-206-containers`); audit source `fc62c1bb7b6eefca5ce4f4dc8b66d4cd6500d0ba`. `.gitattributes` now has only two added LF entries and zero CR bytes. `server/app.js` equals main exactly. The owned keyboard fixture uses byte-identical built assets outside the hidden checkout; actual Chromium keyboard recording of 40 determinations passed. Physical parentage intentionally has no fixed kind ordering, documented with the #207/#208 lifecycle and location deferrals.

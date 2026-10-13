@@ -1,0 +1,14 @@
+Frozen inventory: 362 suites; one process at a time, 12 suites per batch.
+{"batch": 1, "exitCode": 0, "elapsedSeconds": 13.405999999959022, "passedTests": 105, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 2, "exitCode": 0, "elapsedSeconds": 26.92200000002049, "passedTests": 347, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 3, "exitCode": 0, "elapsedSeconds": 44.375, "passedTests": 173, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 4, "exitCode": 0, "elapsedSeconds": 55.063000000081956, "passedTests": 216, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 5, "exitCode": 0, "elapsedSeconds": 82.10900000005495, "passedTests": 483, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 6, "exitCode": 0, "elapsedSeconds": 68.04599999997299, "passedTests": 250, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 7, "exitCode": 0, "elapsedSeconds": 96.70299999997951, "passedTests": 228, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 8, "exitCode": 0, "elapsedSeconds": 75.0, "passedTests": 114, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 9, "exitCode": 0, "elapsedSeconds": 71.07799999997951, "passedTests": 240, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 10, "exitCode": 0, "elapsedSeconds": 187.84400000004098, "passedTests": 262, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 11, "exitCode": 0, "elapsedSeconds": 131.53100000007544, "passedTests": 175, "failedTests": 0, "pendingTests": 0, "inventoryEquality": true}
+{"batch": 12, "exitCode": 1, "elapsedSeconds": 100.64099999994505, "passedTests": 150, "failedTests": 15, "pendingTests": 0, "inventoryEquality": true}
+Stopped at a failed/incomplete batch; preserve evidence and investigate.

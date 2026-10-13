@@ -1,0 +1,1812 @@
+PASS tests/contracts/audit_1_2_guard_installer.test.js (30.401 s, 58 MB heap size)
+  √ fresh Prisma schema installs the exact guards and marker; repeat starts write nothing (1722 ms)
+  √ actual pre-179 child installer preserves seeded historical science and the old schema (614 ms)
+  √ unreviewed UNMAPPED_SAMPLE refuses the actual child with unchanged bytes and no returned handle (464 ms)
+  √ unreviewed COLLECTED refuses the actual child with unchanged bytes and no returned handle (472 ms)
+  √ the real reviewed legacy upgrade preserves science, refuses interrupted startup, then maps and starts without writes (1711 ms)
+  √ a real timestamp race invalidates the review and the actual installer refuses without writes or a returned file (1136 ms)
+  √ a reviewed fingerprint cannot approve an unmapped status (975 ms)
+  √ a blocked legacy marker refuses startup even with a reviewed fingerprint and preserves all bytes (1113 ms)
+  √ malformed or unsupported reviewed fixture options refuse before creating any file (524 ms)
+  √ direct startup refuses a pre-179 file before app import, scheduler or listen, with unchanged bytes (609 ms)
+  √ direct startup refuses a fresh db push, without writes, serving or scheduler initialization (1412 ms)
+  √ direct startup refuses an interrupted reviewed upgrade with unchanged SHA and no listener (1093 ms)
+  √ direct startup reports a mismatched trigger before serving and preserves the file (1428 ms)
+  √ direct startup refuses a missing file without implicitly creating it (76 ms)
+  √ direct startup refuses missing normalized QC installation before app import and preserves the file (769 ms)
+  √ a complete guarded database passes the read-only gate, listens and answers a real health request (4996 ms)
+  √ partial schema refuses a writable owned database before any write (343 ms)
+  √ tampered trigger refuses a writable owned database before any write (1422 ms)
+  √ marker without guards refuses a writable owned database before any write (1380 ms)
+  √ complete objects without marker refuses a writable owned database before any write (1431 ms)
+  √ different marker hashes refuses a writable owned database before any write (1859 ms)
+  √ extra marker key refuses a writable owned database before any write (1442 ms)
+  √ unparseable marker refuses a writable owned database before any write (1437 ms)
+  √ image-copy hashes are checked and the overlaid volume sources are never read (1574 ms)
+  √ startup calls the installer after the existing migrations and fails before serving; no override argument exists (15 ms)
+
+PASS tests/contracts/audit_1_2_constraint_probes.test.js (5.237 s, 120 MB heap size)
+  Audit 1.2: exact SQLite constraint refusals preserve workflow evidence
+    √ the named active-item index rejects a new duplicate without changing any scientific or audit evidence (747 ms)
+    √ a missing parent fails the exact foreign key constraint with foreign keys ON and no writes (442 ms)
+    √ a different refusal code fails the helper instead of passing as an arbitrary database error (497 ms)
+    √ a successful write fails the helper and rolls back rather than becoming a reusable raw writer (428 ms)
+    √ an unpinned constraint name is refused before any raw write (440 ms)
+    √ the exact duplicateOf RESTRICT deletion preserves the kept row, measurement and all audits (432 ms)
+    √ a workflow-trigger refusal cannot pass under the native RESTRICT identity (433 ms)
+    √ a trigger raising the native message is rejected before it can impersonate a foreign-key refusal (438 ms)
+    √ an unknown identity cannot authorize SQLITE_CONSTRAINT_TRIGGER (411 ms)
+    √ an unreferenced deletion that would succeed is refused before running (416 ms)
+    √ a different successful write cannot use the pinned deletion identity (425 ms)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\audit_legacy_8615df59-656f-46ed-ab87-4a7ca80d45d4.db
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Applying migration: missingColumns=templateId, templateVersion, policyConfig, programmeCode, parentProjectId, missingIndex=true
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:109:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateId" (TEXT DEFAULT 'GENERIC_OPEN_INTAKE') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateVersion" (TEXT DEFAULT '1.0.0') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "policyConfig" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "programmeCode" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "parentProjectId" (TEXT REFERENCES "Project"("id") ON DELETE SET NULL ON UPDATE CASCADE) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Creating index "Project_parentProjectId_idx"...
+
+      at log (scripts/migrate_project_templates_and_policy.js:122:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] All missing columns and indexes successfully added and verified atomically.
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:155:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Migration verified successfully. 0 Project records preserved.
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:158:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Target DB: C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\audit_legacy_6c7edfae-63a3-4693-8a91-150ea2a937b7.db
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:27:13)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Applying migration: missingColumns=templateId, templateVersion, policyConfig, programmeCode, parentProjectId, missingIndex=true
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:109:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateId" (TEXT DEFAULT 'GENERIC_OPEN_INTAKE') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "templateVersion" (TEXT DEFAULT '1.0.0') to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "policyConfig" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "programmeCode" (TEXT) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Adding column "parentProjectId" (TEXT REFERENCES "Project"("id") ON DELETE SET NULL ON UPDATE CASCADE) to Project table...
+
+      at log (scripts/migrate_project_templates_and_policy.js:116:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Creating index "Project_parentProjectId_idx"...
+
+      at log (scripts/migrate_project_templates_and_policy.js:122:25)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] All missing columns and indexes successfully added and verified atomically.
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:155:17)
+
+  console.log
+    [MIGRATE-PROJECT-POLICY] Migration verified successfully. 0 Project records preserved.
+
+      at Object.log [as migrateProjectTemplatesAndPolicy] (scripts/migrate_project_templates_and_policy.js:158:17)
+
+PASS tests/contracts/audit_1_2_historical_schemas.test.js (113 MB heap size)
+  Audit 1.2: pinned historical rehearsals retain production migration order semantics
+    √ PRE_1_1_DUPLICATES has identical tables, columns, indexes and guards in both migration orders (583 ms)
+    √ CONSIGNMENT_PRE_1_1_A has identical tables, columns, indexes and guards in both migration orders (572 ms)
+    √ CONSIGNMENT_PRE_1_1_B has identical tables, columns, indexes and guards in both migration orders (575 ms)
+    √ PROJECT_PRE_TEMPLATE_POLICY has identical tables, columns, indexes and guards in both migration orders (701 ms)
+    √ PRE_1_3_SAMPLE_CODES has identical tables, columns, indexes and guards in both migration orders (594 ms)
+    √ the literal full baseline is the exact deployed pre-1.1 schema pinned by the author (1 ms)
+    √ the pre-1.3 baseline is the unchanged deployed v1.6.1 schema (1 ms)
+    √ an unknown variant is rejected before creating a database (19 ms)
+    √ teardown fails and discards an unaccounted CONSIGNMENT_PRE_1_1_A migration (262 ms)
+    √ teardown fails and discards an unaccounted PROJECT_PRE_TEMPLATE_POLICY migration (299 ms)
+    √ teardown fails and discards an unaccounted PRE_1_3_SAMPLE_CODES migration (271 ms)
+    √ pending migration cannot run against another rehearsal or accept an arbitrary expected error (540 ms)
+
+PASS tests/contracts/audit_1_2_cli_rehearsal_boundary.test.js (112 MB heap size)
+  √ run_manager_dashboard_tasklist_side_by_side.cjs refuses external databases and path arguments before launching a child (418 ms)
+  √ verify_issue149_3643053_remediations.cjs refuses external databases and path arguments before launching a child (400 ms)
+  √ verify_issue149_932cb6a_remediations.cjs refuses external databases and path arguments before launching a child (389 ms)
+  √ verify_issue149_9ac1202_remediations.cjs refuses external databases and path arguments before launching a child (394 ms)
+  √ verify_issue149_complete_remediations.cjs refuses external databases and path arguments before launching a child (383 ms)
+  √ verify_issue149_9850d78_remediations.cjs refuses external databases and path arguments before launching a child (367 ms)
+  √ verify_issue149_ccc08c2_remediations.cjs refuses external databases and path arguments before launching a child (366 ms)
+  √ verify_issue149_6df8fe6_remediations.cjs refuses external databases and path arguments before launching a child (372 ms)
+  √ verify_issue149_b5ddd14_remediations.cjs refuses external databases and path arguments before launching a child (371 ms)
+  √ verify_issue149_working_review.cjs refuses external databases and path arguments before launching a child (375 ms)
+  √ verify_issue149_remediations.cjs refuses external databases and path arguments before launching a child (375 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_technician_lablegacyresults179 (Lab: LAB-LEGACY-RESULTS-179) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (controllers/resultsController.js:16:16)
+      at assertResultSaveReadiness (controllers/resultsController.js:147:38)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.saveResults (controllers/resultsController.js:143:25)
+
+  console.error
+    [saveResults] Error: TransitionError: Access Denied: You do not have permission to access this resource.
+        at Object.assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:64:49)
+        at assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:16:16)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:147:38)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 403,
+      status: 403,
+      code: 'ACCESS_DENIED_LAB',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Sample preparation has not been completed
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:29:92)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:147:32
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 412
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Injected result audit failure
+        at Object.create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_legacy_results.test.js:69:112)
+        at Object.create [as appendAttemptEvent] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptEventService.js:26:35)
+        at appendAttemptEvent (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:57:52)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Sample preparation has not been completed
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:29:92)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 412
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Sample drying has not been completed
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:29:92)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 412
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Operational WorkItem and sample gate flag disagree.
+        at Object.assertEvidence (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\gateEvidenceService.js:32:11)
+        at assertEvidence (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:27:66)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'GATE_STATE_MISMATCH',
+      details: { gates: [ [Object] ] }
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:21:20)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:21:20)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:21:20)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Scientific matrix validation failed: Texture closure failed: Sand(40%) + Silt(30%) + Clay(17%) = 87.0% (must sum to 100% exactly)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:231:53
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 422,
+      status: 422,
+      code: 'BLOCKING_MATRIX_DIAGNOSTICS',
+      details: {
+        blockingErrors: [ [Object] ],
+        matrixDiagnostics: {
+          texture: [Object],
+          textureClosure: [Array],
+          retiredAdvisories: [Array],
+          advisorySuccessor: 'crossChecks',
+          warnings: [Array],
+          blockingErrors: [Array],
+          isBlocking: true
+        }
+      }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: Error: Injected late Sample audit failure
+        at Object.create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_legacy_results.test.js:149:72)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleStateService.js:83:35)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:55:25
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:258:31
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25)
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: Error: Sample preparation has not been completed
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:29:92)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:237:13
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 412
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: Error: Sample drying has not been completed
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:29:92)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:237:13
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 412
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:235:28)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:235:28)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:235:28)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Some canonical analytical work cannot be submitted for approval.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:256:40
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: Error: No results entered
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:229:54
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 400
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73cf8641-7fa4-4ae1-b18e-84e766f55577 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Preparation was reverted for current results. Re-enter them or obtain a manager clearance.
+        at Object.assertNoPreparationRevert (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:40:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:236:13
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'PREP_REVERTED_RESULTS',
+      details: { resultIds: [ 'eca5cbfb-7afc-4ac9-9351-6172d2828158' ] }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+PASS tests/contracts/audit_1_2_legacy_results.test.js (206 MB heap size)
+  √ saving results keeps PROCESSING lifecycle and WorkItem state while refreshing only its result cache (165 ms)
+  √ saving results keeps SUBMITTED_PARTIAL lifecycle and WorkItem state while refreshing only its result cache (58 ms)
+  √ a scope refusal inside the result-save transaction writes nothing (174 ms)
+  √ a gate refusal inside the result-save transaction writes nothing (25 ms)
+  √ a audit refusal inside the result-save transaction writes nothing (86 ms)
+  √ missing preparation evidence retains HTTP 412 and its existing message (23 ms)
+  √ missing preparation evidence retains HTTP 412 and its existing message (22 ms)
+  √ a present gate WorkItem overrides a saved DONE flag and refuses inconsistent evidence (25 ms)
+  √ final APPROVED result edits require an amendment and write nothing (20 ms)
+  √ final ARCHIVED result edits require an amendment and write nothing (15 ms)
+  √ final DISPOSED result edits require an amendment and write nothing (28 ms)
+  √ legacy submit completes evidenced COMPLETED work and creates a real FULL Submission (66 ms)
+  √ legacy submit completes evidenced IN_PROGRESS work and creates a real FULL Submission (62 ms)
+  √ legacy submit completes evidenced ASSIGNED work and creates a real FULL Submission (68 ms)
+  √ a NOT_ASSIGNED blocker prevents FULL submission with zero writes, including an earlier evidenced item (30 ms)
+  √ a ON_HOLD blocker prevents FULL submission with zero writes, including an earlier evidenced item (33 ms)
+  √ a REPEAT_REQUIRED blocker prevents FULL submission with zero writes, including an earlier evidenced item (30 ms)
+  √ a AWAITING_VERIFICATION blocker prevents FULL submission with zero writes, including an earlier evidenced item (29 ms)
+  √ a COMPLETED blocker prevents FULL submission with zero writes, including an earlier evidenced item (33 ms)
+  √ blocking matrix diagnostics retain 422 before any lifecycle or submission write (35 ms)
+  √ a late Sample audit failure rolls back automatic completion and the entire real submission (68 ms)
+  √ legacy submit retains existing prerequisite 412 refusals with zero writes (17 ms)
+  √ legacy submit retains existing prerequisite 412 refusals with zero writes (21 ms)
+  √ legacy submit never reopens a final APPROVED Sample (16 ms)
+  √ legacy submit never reopens a final ARCHIVED Sample (15 ms)
+  √ legacy submit never reopens a final DISPOSED Sample (17 ms)
+  √ legacy submission refuses incomplete stored value  without changing evidence (40 ms)
+  √ legacy submission refuses incomplete stored value not-a-number without changing evidence (18 ms)
+  √ legacy submission refuses incomplete stored value 19 without changing evidence (18 ms)
+  √ legacy submission refuses incomplete stored value 6.2 without changing evidence (20 ms)
+  √ legacy submission refuses malformed mapping with zero lifecycle or evidence writes (34 ms)
+  √ legacy submission refuses missing instrument with zero lifecycle or evidence writes (34 ms)
+  √ legacy submission refuses ineligible instrument with zero lifecycle or evidence writes (34 ms)
+  √ legacy submission refuses out of service with zero lifecycle or evidence writes (20 ms)
+  √ legacy submission refuses different laboratory with zero lifecycle or evidence writes (20 ms)
+  √ legacy submission refuses overdue calibration with zero lifecycle or evidence writes (36 ms)
+  √ legacy submit preserves the no-results refusal before lifecycle checks (15 ms)
+  √ uncleared preparation reversion prevents submission and preserves its append-only evidence (17 ms)
+
+PASS tests/contracts/audit_1_2_guard_helpers.test.js (193 MB heap size)
+  √ the pinned corrupt Project fixture returns only a closed owned path with no workflow objects (93 ms)
+  √ the named legacy inserter installs every actual release guard and refuses reusing a file (377 ms)
+  √ the negative probe requires the exact refusal and fails if a write succeeds (400 ms)
+  √ the negative probe refuses non-probe SQL before opening: UPDATE Sample SET status = ?; DROP TRIGGER anything (7 ms)
+  √ the negative probe refuses non-probe SQL before opening: PRAGMA foreign_keys = OFF (2 ms)
+  √ the negative probe refuses non-probe SQL before opening: UPDATE Sample SET status = ? -- comment (1 ms)
+  √ the negative probe refuses non-probe SQL before opening: SELECT 1 (2 ms)
+  √ both helpers require the literal fixture actor: system:other (2 ms)
+  √ both helpers require the literal fixture actor: undefined (1 ms)
+  √ both helpers refuse outside test mode even if explicit fixture flags are enabled
+  √ both helpers refuse configured, working, production and out-of-directory database paths before opening (8 ms)
+  √ an opted-in snapshot has its creation hash, no sidecars and no returned writable handle (372 ms)
+
+PASS tests/contracts/audit_1_2_gate_evidence.test.js (219 MB heap size)
+  √ DRYING WorkItem in NOT_ASSIGNED with DONE flag decides execution and refuses conflicts without writes (20 ms)
+  √ DRYING WorkItem in NOT_ASSIGNED with PENDING flag decides execution and refuses conflicts without writes (11 ms)
+  √ DRYING WorkItem in ASSIGNED with DONE flag decides execution and refuses conflicts without writes (8 ms)
+  √ DRYING WorkItem in ASSIGNED with PENDING flag decides execution and refuses conflicts without writes (10 ms)
+  √ DRYING WorkItem in IN_PROGRESS with DONE flag decides execution and refuses conflicts without writes (17 ms)
+  √ DRYING WorkItem in IN_PROGRESS with PENDING flag decides execution and refuses conflicts without writes (7 ms)
+  √ DRYING WorkItem in COMPLETED with DONE flag decides execution and refuses conflicts without writes (23 ms)
+  √ DRYING WorkItem in COMPLETED with PENDING flag decides execution and refuses conflicts without writes (8 ms)
+  √ DRYING WorkItem in SUBMITTED with DONE flag decides execution and refuses conflicts without writes (9 ms)
+  √ DRYING WorkItem in SUBMITTED with PENDING flag decides execution and refuses conflicts without writes (7 ms)
+  √ DRYING WorkItem in ACCEPTED with DONE flag decides execution and refuses conflicts without writes (17 ms)
+  √ DRYING WorkItem in ACCEPTED with PENDING flag decides execution and refuses conflicts without writes (9 ms)
+  √ DRYING WorkItem in REPEAT_REQUIRED with DONE flag decides execution and refuses conflicts without writes (7 ms)
+  √ DRYING WorkItem in REPEAT_REQUIRED with PENDING flag decides execution and refuses conflicts without writes (15 ms)
+  √ DRYING WorkItem in REANALYSIS_REQUIRED with DONE flag decides execution and refuses conflicts without writes (7 ms)
+  √ DRYING WorkItem in REANALYSIS_REQUIRED with PENDING flag decides execution and refuses conflicts without writes (9 ms)
+  √ DRYING WorkItem in WAIVED with DONE flag decides execution and refuses conflicts without writes (17 ms)
+  √ DRYING WorkItem in WAIVED with PENDING flag decides execution and refuses conflicts without writes (9 ms)
+  √ DRYING WorkItem in ON_HOLD with DONE flag decides execution and refuses conflicts without writes (8 ms)
+  √ DRYING WorkItem in ON_HOLD with PENDING flag decides execution and refuses conflicts without writes (8 ms)
+  √ DRYING WorkItem in AWAITING_VERIFICATION with DONE flag decides execution and refuses conflicts without writes (9 ms)
+  √ DRYING WorkItem in AWAITING_VERIFICATION with PENDING flag decides execution and refuses conflicts without writes (8 ms)
+  √ DRYING WorkItem in CANCELLED with DONE flag decides execution and refuses conflicts without writes (9 ms)
+  √ DRYING WorkItem in CANCELLED with PENDING flag decides execution and refuses conflicts without writes (8 ms)
+  √ PREPARATION WorkItem in NOT_ASSIGNED with DONE flag decides execution and refuses conflicts without writes (8 ms)
+  √ PREPARATION WorkItem in NOT_ASSIGNED with PENDING flag decides execution and refuses conflicts without writes (8 ms)
+  √ PREPARATION WorkItem in ASSIGNED with DONE flag decides execution and refuses conflicts without writes (8 ms)
+  √ PREPARATION WorkItem in ASSIGNED with PENDING flag decides execution and refuses conflicts without writes (13 ms)
+  √ PREPARATION WorkItem in IN_PROGRESS with DONE flag decides execution and refuses conflicts without writes (9 ms)
+  √ PREPARATION WorkItem in IN_PROGRESS with PENDING flag decides execution and refuses conflicts without writes (9 ms)
+  √ PREPARATION WorkItem in COMPLETED with DONE flag decides execution and refuses conflicts without writes (15 ms)
+  √ PREPARATION WorkItem in COMPLETED with PENDING flag decides execution and refuses conflicts without writes (7 ms)
+  √ PREPARATION WorkItem in SUBMITTED with DONE flag decides execution and refuses conflicts without writes (8 ms)
+  √ PREPARATION WorkItem in SUBMITTED with PENDING flag decides execution and refuses conflicts without writes (7 ms)
+  √ PREPARATION WorkItem in ACCEPTED with DONE flag decides execution and refuses conflicts without writes (15 ms)
+  √ PREPARATION WorkItem in ACCEPTED with PENDING flag decides execution and refuses conflicts without writes (8 ms)
+  √ PREPARATION WorkItem in REPEAT_REQUIRED with DONE flag decides execution and refuses conflicts without writes (7 ms)
+  √ PREPARATION WorkItem in REPEAT_REQUIRED with PENDING flag decides execution and refuses conflicts without writes (7 ms)
+  √ PREPARATION WorkItem in REANALYSIS_REQUIRED with DONE flag decides execution and refuses conflicts without writes (8 ms)
+  √ PREPARATION WorkItem in REANALYSIS_REQUIRED with PENDING flag decides execution and refuses conflicts without writes (7 ms)
+  √ PREPARATION WorkItem in WAIVED with DONE flag decides execution and refuses conflicts without writes (18 ms)
+  √ PREPARATION WorkItem in WAIVED with PENDING flag decides execution and refuses conflicts without writes (12 ms)
+  √ PREPARATION WorkItem in ON_HOLD with DONE flag decides execution and refuses conflicts without writes (8 ms)
+  √ PREPARATION WorkItem in ON_HOLD with PENDING flag decides execution and refuses conflicts without writes (7 ms)
+  √ PREPARATION WorkItem in AWAITING_VERIFICATION with DONE flag decides execution and refuses conflicts without writes (8 ms)
+  √ PREPARATION WorkItem in AWAITING_VERIFICATION with PENDING flag decides execution and refuses conflicts without writes (8 ms)
+  √ PREPARATION WorkItem in CANCELLED with DONE flag decides execution and refuses conflicts without writes (7 ms)
+  √ PREPARATION WorkItem in CANCELLED with PENDING flag decides execution and refuses conflicts without writes (7 ms)
+  √ DRYING flag-only DONE is read as legacy evidence and recorded on the authorized write (17 ms)
+  √ PREPARATION flag-only DONE is read as legacy evidence and recorded on the authorized write (18 ms)
+  √ missing DRYING WorkItem with null flag blocks with zero writes (9 ms)
+  √ missing DRYING WorkItem with PENDING flag blocks with zero writes (7 ms)
+  √ missing DRYING WorkItem with FAILED flag blocks with zero writes (6 ms)
+  √ missing DRYING WorkItem with IN_PROGRESS flag blocks with zero writes (6 ms)
+  √ missing PREPARATION WorkItem with null flag blocks with zero writes (6 ms)
+  √ missing PREPARATION WorkItem with PENDING flag blocks with zero writes (6 ms)
+  √ missing PREPARATION WorkItem with FAILED flag blocks with zero writes (16 ms)
+  √ missing PREPARATION WorkItem with IN_PROGRESS flag blocks with zero writes (8 ms)
+  √ sample-detail GET displays a missing lab fallback without persisting any repair, lifecycle or approval (18 ms)
+  √ a cold catalogue blocks a missing non-gate prerequisite before any workflow write (20 ms)
+  √ a present COMPLETED catalogue prerequisite permits execution on cold load (18 ms)
+  √ a present SUBMITTED catalogue prerequisite permits execution on cold load (16 ms)
+  √ a present ACCEPTED catalogue prerequisite permits execution on cold load (16 ms)
+  √ a present WAIVED catalogue prerequisite permits execution on cold load (16 ms)
+  √ a transaction uses its catalogue edit immediately without leaking an uncommitted definition (29 ms)
+  √ map and workbench queue load catalogue blockers without persisting a derived state (230 ms)
+
+PASS tests/contracts/audit_1_2_retired_scripts.test.js (212 MB heap size)
+  √ cleanup-data.js cannot open, create or alter data under any former override (417 ms)
+  √ migrate_stage_e.js cannot open, create or alter data under any former override (426 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2c66be9b-e720-4fea-a99a-f9e3b3ba5493 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2c66be9b-e720-4fea-a99a-f9e3b3ba5493 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2c66be9b-e720-4fea-a99a-f9e3b3ba5493 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2c66be9b-e720-4fea-a99a-f9e3b3ba5493 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_1_2_repeat_queues.test.js (268 MB heap size)
+  √ my-work queue and counts include both repeat names, enforce assignment/lab scope and never change stored lifecycle (83 ms)
+  √ dashboard repeat metric and queue count canonical and historical work once each and preserve all stored rows (47 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_technician_labofflinestate179 (Lab: LAB-OFFLINE-STATE-179) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/syncService.js:21:16)
+      at services/syncService.js:269:32
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at SyncService.processSyncBatch (services/syncService.js:268:21)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:38:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:105:21
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process SAVE_WORK_DRAFT (995a3fdc-2a49-4e28-b99a-94432a0654ef): TransitionError: Access Denied: You do not have permission to access this resource.
+        at Object.assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:64:49)
+        at assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:21:16)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:269:32
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:268:21)
+        at perform (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:38:22)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:105:21 {
+      statusCode: 403,
+      status: 403,
+      code: 'ACCESS_DENIED_LAB',
+      details: {}
+    }
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:38:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:105:21
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_technician_labofflinestate179 (Lab: LAB-OFFLINE-STATE-179) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/syncService.js:21:16)
+      at services/syncService.js:708:32
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at SyncService.processSyncBatch (services/syncService.js:707:21)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:38:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:105:21
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process COMPLETE_WORK (b1fcb3ce-7b09-4c2a-9c87-a5eb0a6feb6a): TransitionError: Access Denied: You do not have permission to access this resource.
+        at Object.assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:64:49)
+        at assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:21:16)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:708:32
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:707:21)
+        at perform (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:38:22)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:105:21 {
+      statusCode: 403,
+      status: 403,
+      code: 'ACCESS_DENIED_LAB',
+      details: {}
+    }
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:38:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:105:21
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process SAVE_WORK_DRAFT (b34bdf04-e622-489b-b36c-66953f988b1c): Error: Injected offline state audit failure
+        at Object.create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:113:65)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workItemStateService.js:225:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:509:29
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:268:21)
+        at perform (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:38:22)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:114:13
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:38:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:114:13
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process COMPLETE_WORK (4434dca0-cf82-4a9e-a4cb-17597b0f32fb): TransitionError: Use the transcription correction route or request a repeat to change a recorded cell.
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:411:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:723:44
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:707:21)
+        at perform (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:38:22)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:114:13 {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:38:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:114:13
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process COMPLETE_WORK (76e289ee-3236-4682-b28b-977d545d0f99): TransitionError: Work item changed before offline work was committed.
+        at freshExecutableItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:19:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:708:32
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:707:21)
+        at perform (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:38:22)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:124:21) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_STATE_CHANGED',
+      details: {}
+    }
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:38:22)
+      at Object.<anonymous> (tests/contracts/audit_1_2_offline_state.test.js:124:21)
+
+PASS tests/contracts/audit_1_2_offline_state.test.js (287 MB heap size)
+  √ offline draft start preserves analytical base version and commits its central audit with the draft and receipt (66 ms)
+  √ offline completion centrally records provenance and preserves superseded analytical values (83 ms)
+  √ fresh scope refusal rolls back all SAVE_WORK_DRAFT changes inside its transaction (133 ms)
+  √ fresh scope refusal rolls back all COMPLETE_WORK changes inside its transaction (29 ms)
+  √ a failed central audit rolls back SAVE_WORK_DRAFT, evidence and receipt together (43 ms)
+  √ a failed central audit rolls back COMPLETE_WORK, evidence and receipt together (43 ms)
+  √ a stale item refuses completion and rolls back the transaction without partial evidence (23 ms)
+  √ offline completion leaves final APPROVED work and all evidence unchanged (12 ms)
+  √ offline completion leaves final ARCHIVED work and all evidence unchanged (11 ms)
+  √ offline completion leaves final DISPOSED work and all evidence unchanged (12 ms)
+  √ offline intake creates EXPECTED then records RECEIVED centrally with custody and receipt in one transaction (9 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for ab21c89c-c9ae-4eaf-b417-bd6213662816 by test_lab_manager_0e2fdbb63c504c2cba859f0b17f0e414
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for ab21c89c-c9ae-4eaf-b417-bd6213662816 by test_lab_manager_0e2fdbb63c504c2cba859f0b17f0e414
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for 3cab6035-084a-4ceb-9972-d48933435892 by test_lab_manager_0e2fdbb63c504c2cba859f0b17f0e414
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for 2f389afe-2374-4a47-b6b6-c0f451471db7 by test_lab_manager_0e2fdbb63c504c2cba859f0b17f0e414
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for 4e8dff3a-79af-4488-8fab-3c2c79eafa06 by test_lab_manager_0e2fdbb63c504c2cba859f0b17f0e414
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a6714662-e1b6-4180-93d5-0d9f6d938b20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DISCARD] Reverted project sample 827c1b1d-d499-429b-9a25-9da0b0bf5076 to EXPECTED
+
+      at log (controllers/receptionController.js:162:21)
+
+  console.log
+    [INTAKE] Processing intake for 51bd925e-ecc7-416f-a02e-ffeb9564fc5d by test_lab_manager_0e2fdbb63c504c2cba859f0b17f0e414
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+PASS tests/contracts/audit_1_2_intake_state.test.js (315 MB heap size)
+  Audit 1.2: the action-bound intake draft edge
+    √ draft save preserves specimen identity, field provenance and its open hold, with one transition audit (69 ms)
+    √ the generic status API cannot take the expected-to-draft edge (19 ms)
+    √ received draft saves and draft resaves retain their current state and custody (27 ms)
+    √ discard returns a registered draft to expected through the central edge (24 ms)
+    √ a failed conditional state update rolls back the draft and audit together (9 ms)
+    √ the draft action refuses a return from RECEIVED with zero writes (5 ms)
+    √ the draft action refuses a return from ACCEPTED with zero writes (4 ms)
+    √ the draft action refuses a return from PROCESSING with zero writes (5 ms)
+    √ the draft action refuses a return from SUBMITTED_PARTIAL with zero writes (4 ms)
+    √ the draft action refuses a return from SUBMITTED_FULL with zero writes (4 ms)
+    √ the draft action refuses a return from APPROVED with zero writes (4 ms)
+    √ the draft action refuses a return from ARCHIVED with zero writes (5 ms)
+    √ the draft action refuses a return from DISPOSED with zero writes (4 ms)
+    √ the draft action refuses a return from RECEIVED_REJECTED with zero writes (4 ms)
+    √ the draft action refuses a return from ON_HOLD with zero writes (4 ms)
+    √ the draft action refuses a return from CANCELLED with zero writes (5 ms)
+
+PASS tests/contracts/audit_1_2_spectral_reason_components.test.js (301 MB heap size)
+  √ required prompt blocks whitespace by button and Enter and submits the actual reason (6 ms)
+  √ single library trash sends the required reason in the DELETE body (11 ms)
+  √ batch trash preserves the selected ids and supplies one reason (8 ms)
+  √ a reopen refusal prompts once and retries the same request with the supplied reason (1 ms)
+  √ canceling a reopen prompt does not retry; unrelated failures do not prompt
+  √ spectral reason prompts have messages in all five locales (21 ms)
+  √ upload flow prompts once and resends the exact original files or decisions (7 ms)
+  √ review flow prompts once and resends the exact original files or decisions (7 ms)
+  √ staged flow prompts once and resends the exact original files or decisions (7 ms)
+  √ partial staged receipts show the failures and retain the manifest for an operator-controlled retry (5 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       216 passed, 216 total
+Snapshots:   0 total
+Time:        53.166 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_cli_rehearsal_boundary.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_constraint_probes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_gate_evidence.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_guard_helpers.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_guard_installer.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_historical_schemas.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_intake_state.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_legacy_results.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_repeat_queues.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_retired_scripts.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_spectral_reason_components.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-serial\batch-04.json

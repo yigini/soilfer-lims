@@ -1,0 +1,783 @@
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d9daeb80-5789-449f-b5fa-b96c7f5c4c21
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 400d1005-dc8c-44d6-b18c-6164a2607a47
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 3061b31a-b67b-48c0-bccf-3fa4327a4d52
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 3061b31a-b67b-48c0-bccf-3fa4327a4d52
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_2_4_bracket_disposition.test.js (40.488 s, 458 MB heap size)
+  √ failed CCV in frozen REQUIRED_WARN mode can be reviewed, finally approved and published through authenticated routes (2627 ms)
+  √ failed CCV in frozen ADVISORY mode can be reviewed, finally approved and published through authenticated routes (1934 ms)
+  √ opening CCB failure refuses an empty bracket repeat (WARN ICV: false) with zero writes (1801 ms)
+  √ opening CCB failure refuses an empty bracket repeat (WARN ICV: true) with zero writes (1773 ms)
+  √ a real Native run frozen before calibrationFailAction uses its old LRM action and refuses bracket disposition (1740 ms)
+  √ actual CCV 25 repeat preserves sealed evidence, repeats only its bracket and permits outside publication (2643 ms)
+  √ actual calibration failures [25,37] persist the server-computed union/CCB scope (1773 ms)
+  √ actual calibration failures [26] persist the server-computed union/CCB scope (1733 ms)
+  √ affected bracket work can join another run while retained positions and evaluations stay unchanged (1849 ms)
+  √ both JS and SQL refuse bracket movement: outside (1788 ms)
+  √ both JS and SQL refuse bracket movement: not-repeat-required (1802 ms)
+  √ both JS and SQL refuse bracket movement: sealed-in-scope (1786 ms)
+  √ both JS and SQL refuse bracket movement: no-scope (1778 ms)
+  √ both JS and SQL refuse bracket movement: not-current (1808 ms)
+  √ both JS and SQL refuse bracket movement: same-time-later-id (1793 ms)
+  √ both JS and SQL refuse bracket movement: rack-only (1779 ms)
+  √ a bracket repeat cannot join a started target (1792 ms)
+  √ a bracket repeat cannot join a frozen target (1838 ms)
+  √ a bracket repeat cannot join a observations target (1825 ms)
+  √ LEGACY_MIGRATED scope cannot authorize the Native bracket movement exception (1154 ms)
+  √ PROFILE_ONLY scope cannot authorize the Native bracket movement exception (1131 ms)
+  √ JS and SQL both allow the pinned bracket branch when the sealed list is absent (1780 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: QC_ACKNOWLEDGEMENT_REQUIRED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:848:17) {
+      statusCode: 409,
+      code: 'QC_ACKNOWLEDGEMENT_REQUIRED',
+      details: { items: [ [Object] ] }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: QC_ACKNOWLEDGEMENT_REQUIRED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:848:17) {
+      statusCode: 409,
+      code: 'QC_ACKNOWLEDGEMENT_REQUIRED',
+      details: { items: [ [Object] ] }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c0d5b598-58c0-45e1-a93d-11c724f1c37a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItemsBulk] Error: Error: QC_ACKNOWLEDGEMENT_REQUIRED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItemsBulk (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1162:13) {
+      statusCode: 409,
+      code: 'QC_ACKNOWLEDGEMENT_REQUIRED',
+      details: { items: [ [Object], [Object] ] }
+    }
+
+      1346 |         res.json({ success: true, count: results.length, results, errors });
+      1347 |     } catch (error) {
+    > 1348 |         console.error('[reviewWorkItemsBulk] Error:', error);
+           |                 ^
+      1349 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1350 |     }
+      1351 | };
+
+      at error (controllers/workItemController.js:1348:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItemsBulk] Error: Error: QC_ACKNOWLEDGEMENT_REQUIRED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItemsBulk (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1162:13) {
+      statusCode: 409,
+      code: 'QC_ACKNOWLEDGEMENT_REQUIRED',
+      details: { items: [ [Object], [Object] ] }
+    }
+
+      1346 |         res.json({ success: true, count: results.length, results, errors });
+      1347 |     } catch (error) {
+    > 1348 |         console.error('[reviewWorkItemsBulk] Error:', error);
+           |                 ^
+      1349 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1350 |     }
+      1351 | };
+
+      at error (controllers/workItemController.js:1348:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [WS] Blocked broadcast for event WORKITEM_UPDATE: missing labId
+
+      288 | function broadcastToLab(labId, eventType, payload) {
+      289 |     if (!labId) {
+    > 290 |         if (DEBUG) console.warn(`[WS] Blocked broadcast for event ${eventType}: missing labId`);
+          |                            ^
+      291 |         return 0;
+      292 |     }
+      293 |     const data = JSON.stringify({ type: eventType, ...payload });
+
+      at Object.warn [as broadcastToLab] (wsServer.js:290:28)
+      at broadcastToLab (controllers/workItemController.js:1334:26)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewSubmission] Error: Error: QC_ACKNOWLEDGEMENT_REQUIRED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:259:9) {
+      statusCode: 409,
+      code: 'QC_ACKNOWLEDGEMENT_REQUIRED',
+      details: { items: [ [Object], [Object] ] }
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewSubmission] Error: Error: QC_ACKNOWLEDGEMENT_REQUIRED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:259:9) {
+      statusCode: 409,
+      code: 'QC_ACKNOWLEDGEMENT_REQUIRED',
+      details: { items: [ [Object], [Object] ] }
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: QC_GATE_NO_BATCH
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:848:17) {
+      statusCode: 409,
+      code: 'QC_GATE_NO_BATCH',
+      details: { items: [ [Object] ] }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 9de98841-244d-4402-8ec1-649c0b63f7d3
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d9e6cb63-2d80-4129-80c2-648112eb8847
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b76beaa8-a103-405c-821b-d92a3db2acea
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_2_4_review_publication.test.js (12.611 s, 600 MB heap size)
+  √ individual acceptance requires an acknowledgement before any write and records each result atomically (1410 ms)
+  √ bulk acceptance requires an acknowledgement before any write and records each result atomically (1374 ms)
+  √ submission acceptance requires an acknowledgement before any write and records each result atomically (1410 ms)
+  √ AUTO uses resolved fallback QC with zero stored QcRule rows; method overrides and non-measurement classification remain live (1120 ms)
+  √ actual review follows the live requirement table in REQUIRED_BLOCKING (1158 ms)
+  √ actual review follows the live requirement table in REQUIRED_WARN (1192 ms)
+  √ actual review follows the live requirement table in ADVISORY (1192 ms)
+  √ actual review follows the live requirement table in OFF (1196 ms)
+  √ publication cannot use a request acknowledgement without a matching durable AuditLog record (1183 ms)
+  √ final approval and workspace refuse an accepted historical result without a durable QC acknowledgement (1204 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User system:fixture (VIEWER) attempted CHANGE_STATUS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","SAMPLE_RECEPTION","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 6647148a-162f-4b82-8d2d-0eb4dd539373) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at services/qcRunPreviewService.js:43:23
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.previewBatch (controllers/qcController.js:87:27)
+
+PASS tests/contracts/audit_2_5_qc_preview.test.js (7.563 s, 748 MB heap size)
+  √ native PASS preview writes nothing and equals the persisted verdict and check details (630 ms)
+  √ native FAIL preview writes nothing and equals the persisted verdict and check details (590 ms)
+  √ native INCOMPLETE preview writes nothing and equals the persisted verdict and check details (568 ms)
+  √ native WARN preview writes nothing and equals the persisted verdict and check details (587 ms)
+  √ a set of preview calls never writes rows/schema and keeps the started rule and mode after live changes (608 ms)
+  √ initial run view supplies the frozen actual blank bound without a candidate or stored verdict (575 ms)
+  √ censored parent/duplicate <LOQ shares real parsing, LOQ and verdict without writes (573 ms)
+  √ censored parent/duplicate <0.05 shares real parsing, LOQ and verdict without writes (581 ms)
+  √ an existing observation can be substituted only in preview; ordinary persistence still requires a reasoned correction (622 ms)
+  √ preview rejects client rule/expected/limit overrides, duplicate positions and unknown analytes with zero writes (649 ms)
+  √ unstarted and compatibility runs return stable 409 instead of reevaluating historical evidence (582 ms)
+  √ preview HTTP route retains evaluate permission and canonical lab scope (857 ms)
+
+PASS tests/contracts/audit_2_4_scope_install.test.js (5.023 s, 748 MB heap size)
+  √ scope installation preserves existing evidence without rebuilding (fresh Prisma=false) (468 ms)
+  √ scope installation preserves existing evidence without rebuilding (fresh Prisma=true) (1474 ms)
+  √ unexpected scope installation refuses without writes: foreign-object (361 ms)
+  √ unexpected scope installation refuses without writes: partial-guards (341 ms)
+  √ unexpected scope installation refuses without writes: bad-receipt (368 ms)
+  √ scope installer requires an explicit target and rejects unknown arguments (1 ms)
+  √ a failure inside the scope transaction rolls back all DDL and the retained verifier still passes (366 ms)
+  √ failure between the membership DROP and CREATE restores the exact old guard and schema (359 ms)
+  √ membership verifier refuses old-with-receipt without writes (378 ms)
+  √ membership verifier refuses new-without-receipt without writes (353 ms)
+  √ membership verifier refuses other-text without writes (379 ms)
+  √ the replacement leaves every original membership predicate byte-identical (1 ms)
+  √ the scope loader is closed to the reviewed source and cannot authorize shadowed or changed SQL (15 ms)
+
+PASS tests/contracts/audit_2_6_bracket_integration.test.js (806 MB heap size)
+  √ REPEAT_BRACKET freezes scope and changed states in one matching QC audit/event pair (1839 ms)
+  √ late snapshot event failure rolls back scope, bracket states, audit and operation event together (1708 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 30e4d962-9b16-4448-aa95-3714c593498b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 30e4d962-9b16-4448-aa95-3714c593498b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c12dd946-9a9f-446a-bdf6-ca1d69fad32a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c12dd946-9a9f-446a-bdf6-ca1d69fad32a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab 32dda57c-cf1d-4561-8f63-c9c568cc1217
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 4ae76a59-8084-4bf7-bfa2-3dec1f592d4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4ae76a59-8084-4bf7-bfa2-3dec1f592d4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4ae76a59-8084-4bf7-bfa2-3dec1f592d4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4ae76a59-8084-4bf7-bfa2-3dec1f592d4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aa2f1655-ccfb-4e91-b014-cef73d9a19ea (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: aa2f1655-ccfb-4e91-b014-cef73d9a19ea (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9c541e56-49e8-4e9f-a13c-3d696b455164 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9c541e56-49e8-4e9f-a13c-3d696b455164 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9c541e56-49e8-4e9f-a13c-3d696b455164 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9c541e56-49e8-4e9f-a13c-3d696b455164 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9c541e56-49e8-4e9f-a13c-3d696b455164 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9c541e56-49e8-4e9f-a13c-3d696b455164 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab 131c7792-43d8-4f9b-a017-becfdf1285f9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: a428c08e-e867-4431-a570-f1cfa0d5a33c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a428c08e-e867-4431-a570-f1cfa0d5a33c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab ac85eed8-bd87-4c88-a6dd-301d90e0fa62
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: dc513948-37c9-45cd-b122-b8bd2ac0ce73 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dc513948-37c9-45cd-b122-b8bd2ac0ce73 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab d00fa32d-900b-4739-84bf-9d6990c7c4bc
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 0f7c2529-70f1-43bc-b91b-8e125e0fd280 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0f7c2529-70f1-43bc-b91b-8e125e0fd280 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab 2842f4ba-8bde-455e-b419-50ae217cbef3
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/audit_2_6_equipment_commit.test.js (844 MB heap size)
+  √ an instrument made overdue at the transaction boundary rejects only its row, with zero row writes; the other row commits (164 ms)
+  √ default NON_CRITICAL ALLOW retains NOT_CONFIGURED in the immutable Result evidence (61 ms)
+  √ queue projects overdue dates and unconfigured policy at read time and keeps each method-specific picker list (49 ms)
+  √ sample hold stays the first refusal when equipment is also overdue, with zero row writes (15 ms)
+  √ a required missing instrument and an unconfigured critical instrument refuse EQUIPMENT_NOT_READY; lab ALLOW permits only unconfigured evidence (64 ms)
+  √ AUTO chooses method-specific eligibility over the fallback and explicit NOT_REQUIRED overrides the mapping (67 ms)
+  √ texture results and the new existing-path attempt store exactly the same snapshot (53 ms)
+  √ raw database updates cannot change equipment evidence while ordinary result metadata updates remain valid (146 ms)
+  √ a superseding Result gets a fresh snapshot and leaves the original equipment evidence unchanged (77 ms)
+
+PASS tests/contracts/audit_2_5_worksheet_ui.test.js (821 MB heap size)
+  √ the real worksheet table combines linked Result editors and all QC positions while keeping their writes separate (113 ms)
+  √ selecting another analyte preserves the run and selects its ordinary Result method through the existing group callback (42 ms)
+  √ a finished operation from the previous run cannot refetch it over the newly selected worksheet (27 ms)
+  √ PROFILE_ONLY renders stored evidence verbatim without inputs or preview/evaluation requests (9 ms)
+  √ LEGACY_MIGRATED renders stored evidence verbatim without inputs or preview/evaluation requests (8 ms)
+  √ NATIVE_CLOSED renders stored evidence verbatim without inputs or preview/evaluation requests (9 ms)
+  √ an open LEGACY_MIGRATED run retains the permission-gated existing rebuild action using actual work-item ids (8 ms)
+  √ BatchModal exposes the worksheet action and retains the actual server profile and positions without typed QC inputs (15 ms)
+  √ worksheet messages are complete in en and client QC limits contain no fixed recovery or RPD strings (8 ms)
+  √ worksheet messages are complete in es and client QC limits contain no fixed recovery or RPD strings (6 ms)
+  √ worksheet messages are complete in es-419 and client QC limits contain no fixed recovery or RPD strings (5 ms)
+  √ worksheet messages are complete in fr and client QC limits contain no fixed recovery or RPD strings (5 ms)
+  √ worksheet messages are complete in pt and client QC limits contain no fixed recovery or RPD strings (6 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eq26-user-a337baab-1f9d-4436-ad08-5fce64b061de (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eq26-user-a337baab-1f9d-4436-ad08-5fce64b061de (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eq26-user-a337baab-1f9d-4436-ad08-5fce64b061de (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eq26-user-a337baab-1f9d-4436-ad08-5fce64b061de (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eq26-user-a337baab-1f9d-4436-ad08-5fce64b061de (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eq26-user-a337baab-1f9d-4436-ad08-5fce64b061de (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_2_6_equipment_read_time.test.js (862 MB heap size)
+  Audit 2.6 equipment read-time qualification
+    √ a stale stored OK becomes OVERDUE without changing the source record (1 ms)
+    √ verification due dates also block while future calibration stays OK
+    √ an unconfigured qualification has no implicit READY fallback (1 ms)
+    √ unconfigured readiness obeys resolved BLOCK policy
+    √ unconfigured readiness obeys resolved WARN policy
+    √ unconfigured readiness obeys resolved ALLOW policy
+    √ ALLOW never makes overdue qualification ready
+    √ equipment views read the lab policy and return the projected dates/status (1 ms)
+  Audit 2.6 authenticated equipment reads
+    √ GET derives overdue status without any calibration event or database write (14 ms)
+    √ GET uses the lab override for unconfigured critical equipment (23 ms)
+
+PASS tests/contracts/audit_2_5_worksheet_navigation.test.js (842 MB heap size)
+  √ run rows retain every server position in sequence and attach Result drafts by work-item link only (1 ms)
+  √ Enter advances through Result, separate QC parent, blank and duplicate cells (1 ms)
+  √ Tab advances through Result, separate QC parent, blank and duplicate cells (1 ms)
+  √ reverse grid navigation and modified keys never jump into run setup
+
+PASS tests/contracts/audit_2_4_gate.test.js (861 MB heap size)
+  √ QC gate decisions in REQUIRED_BLOCKING follow the pinned acceptance/publication table (2 ms)
+  √ QC gate decisions in REQUIRED_WARN follow the pinned acceptance/publication table (1 ms)
+  √ QC gate decisions in ADVISORY follow the pinned acceptance/publication table (1 ms)
+  √ QC gate decisions in OFF follow the pinned acceptance/publication table
+  √ OPEN/RUNNING and reopened evaluations are NOT_EVALUATED despite retained pass evidence (2 ms)
+  √ analyte verdicts are independent and missing batch membership never produces PASS
+  √ required NO_BATCH fails while a method waiver allows it
+  √ a gate reader error fails closed with stable evidence and no writes (1 ms)
+  √ repeat scope takes priority across linked runs and NOT_REQUIRED never erases another evaluated warning
+
+PASS tests/contracts/audit_2_4_calibration_brackets.test.js (846 MB heap size)
+  √ a failed CCV at 25 with passing CCVs at 13 and 37 selects exactly samples 14–24 (1 ms)
+  √ several failed brackets union samples and duplicates of affected parents, without another analyte (1 ms)
+  √ a failed CCB uses the bracket ending at its passing verification boundary
+  √ legacy snapshots or non-native PROFILE_ONLY evidence never offers REPEAT_BRACKET (9 ms)
+  √ legacy snapshots or non-native LEGACY_MIGRATED evidence never offers REPEAT_BRACKET
+  √ legacy snapshots or non-native NATIVE evidence never offers REPEAT_BRACKET (1 ms)
+  √ a failing non-calibration check retains the full-analyte disposition requirement
+  √ a valid later bracket cannot conceal an empty opening CCB bracket (1 ms)
+
+PASS tests/contracts/audit_2_4_policy.test.js (848 MB heap size)
+  √ batch QC requirement and calibration actions are scoped policies in every preset (1 ms)
+  √ calibration policy rejects illegal or extra actions without changing the retained four-key QC policy (1 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       114 passed, 114 total
+Snapshots:   0 total
+Time:        73.033 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_4_bracket_disposition.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_4_calibration_brackets.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_4_gate.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_4_policy.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_4_review_publication.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_4_scope_install.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_5_qc_preview.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_5_worksheet_navigation.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_5_worksheet_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_bracket_integration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_equipment_commit.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_equipment_read_time.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\full-206-serial\batch-08.json
