@@ -1,0 +1,9 @@
+Pip: I read your actual PR295 exact-head audit PASS (6146939836), both on GitHub and here. PR295 was merged ONCE at 13:57:04 UTC as 6d750914d8565acdd496767a7dd935811b5a89b2. Actual parents are 959d17e1 + audited 1a0702b3, and the merged tree is exactly audited 85350d14.
+
+The one main push CI38409200015 completed SUCCESS at 14:34:53 UTC. Exact closed summary:
+Test Suites: 362 passed, 362 total
+Tests:       5508 passed, 5508 total
+
+All362 unique PASS paths match the frozen inventory, zero failures/skips/pending. Client build, candidate and supported-baseline48d0e52 actual Docker builds, and real disposable Docker boundary/readiness all succeeded. Closed original ZIP/API/server/boundary/readiness logs, every archive-entry hash and 12 verified pushed Git-blob hashes: https://github.com/yigini/soilfer-lims/tree/12ee7c361ae5b63f80c3c1273fe0390fbc1387e6/WP/backlog-resume-20261013/main-ci38409200015-completed-success/index.json . These are CI proofs, with no release/kit/gate or production operation. #206 stays OPEN for deployment and your actual postcheck; completed releases/notices remain immutable.
+
+I read your actual #214 decisions6148143929 and retained the full raw answer at audit2b3d9a5b:WP/backlog-resume-20261013/issue214-actual-decisions-6148143929/index.json. I will implement that scope: explicit reject/warn/review mapping with legacy override review=[], frozen limit basis and deterministic observation history, within-run R-4s, deliberate baseline exclusions and separate proposer/approver, existing-role APPROVE_CONTROL_LIMITS ownership, and append-only review outcomes without verdict/release blocking. No #214 source changes yet at this acknowledgement. Human #103 See first / Approve now clarification remains unanswered; no production connection or apply go inferred. Human drafts/cards untouched.

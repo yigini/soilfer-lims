@@ -1,0 +1,46 @@
+{
+  "observedUtc": "2026-10-13T14:45:51.503878+00:00",
+  "status": "ACTUAL_NATIVE_ACK_DELIVERED_AND_VISUALLY_VERIFIED",
+  "targetApp": "Claude",
+  "actualWindowId": 3408874,
+  "targetProject": "LIMS Audit",
+  "targetThread": "Lab workflow audit and plan",
+  "deliveredOnce": true,
+  "inputActions": [
+    "Fresh actual target and empty centre/right composers observed",
+    "Right composer focus click and caret observed",
+    "Exact literal acknowledgement typed",
+    "Draft end inspected, Control+Home then merge/head/CI/totals inspected",
+    "Return exactly once",
+    "Actual delivered bubble with merge and exact 362/5508 summary, empty composer and Gusting observed"
+  ],
+  "completedMainCi": 38409200015,
+  "main": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "scientificAnswer214": 6148143929,
+  "humanCardsUntouched": true,
+  "issue103ApplyGo": false,
+  "productionOperations": 0,
+  "newReleaseKitGate": false,
+  "files": {
+    "actual-sent.txt": {
+      "bytes": 1828,
+      "sha256": "67e82f3ae53f089af2700e0106ba78c0a8105199f50cc6778f4f4632e4becd98"
+    },
+    "issue214-answer-raw.json": {
+      "bytes": 9862,
+      "sha256": "31a554bd4c49dc7c426f1547e956d390f976dea40de95c66c8929e4fd892ba6b"
+    },
+    "main-ci-completed-raw.json": {
+      "bytes": 12096,
+      "sha256": "e784861c7a4109c58c2f39bb745426c9c3330a456327b361934b04e3ee51687f"
+    },
+    "main-current-raw.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    },
+    "pr295-current-raw.json": {
+      "bytes": 23239,
+      "sha256": "ffdd7a75467ff0e086062276bf24173798747034b91893e997cc1fc98383a8f6"
+    }
+  }
+}
