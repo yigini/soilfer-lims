@@ -66,6 +66,23 @@ test('offline label QR encodes the issued container code and the printed card id
     expect(print.props.disabled).toBe(false);
     expect(elements(tree, row => row.type === 'img').every(row => row.props.alt === 'C-ISSUED-7')).toBe(true);
 });
+
+test('a dilution repeat sends the explicitly selected physical aliquot identity', async () => {
+    const { mountUi } = require('../helpers/qcWorksheetUi');
+    const axios = { get: jest.fn(async () => ({ data: [] })), post: jest.fn(async () => ({ data: {} })) };
+    const item = { workItemId: 'owned', sampleId: 'sample', status: 'IN_PROGRESS', currentResult: '25',
+        readiness: { isReady: true }, numberFormat: { decimal: '.', thousands: null },
+        valueRules: { min: 2, max: 100, calibrationMax: 20, unit: 'mg/kg' },
+        draft: { value: '25', replicateNo: 1, basis: 'AIR_DRY' }, dilutionOpportunity: { eligible: true, attemptId: 'retained' } };
+    const host = mountUi('components/workbench/ResultValueActions.jsx', { item }, { axios });
+    await host.render();
+    const chooser = host.all().find(node => node.type === host.children['../sample/AliquotSelect']);
+    expect(chooser).toBeDefined(); chooser.props.onChange('physical-aliquot');
+    host.find('override-reason').props.onChange({ target: { value: 'Dilute this physical aliquot' } });
+    await host.render(); await host.find('dilute-repeat').props.onClick();
+    expect(axios.post).toHaveBeenCalledWith('/api/work-items/owned/repeats', {
+        reason: 'ABOVE_RANGE_DILUTION', note: 'Dilute this physical aliquot', aliquotId: 'physical-aliquot' });
+});
 test.each(['en', 'es', 'es-419', 'fr', 'pt'])('container labels, kinds and policy keys are present in both %s catalogues', locale => {
     for (const directory of [root + '/translations', path.resolve(__dirname, '../../locales')]) {
         const catalogue = JSON.parse(fs.readFileSync(path.join(directory, locale + '.json'), 'utf8'));
