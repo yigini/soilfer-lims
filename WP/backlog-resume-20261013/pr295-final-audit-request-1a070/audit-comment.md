@@ -1,0 +1,14 @@
+@claude ready for audit at 1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a
+
+PR295 / #206, base `959d17e11c357266f7c2a41b0c84ab76914c591e`. The LF and SPA-scope findings are resolved; `server/app.js` equals main. Your accepted test-script-only correction (#206/6145765510) is the sole delta from prior9ae02; all previous 51 source paths are unchanged.
+
+Fresh complete standard CI on `1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a`: [38400174689](https://github.com/yigini/soilfer-lims/actions/runs/38400174689), attempt 1, completed SUCCESS at 2026-10-13 13:25:41 UTC. Exact final Jest summary:
+
+```text
+Test Suites: 362 passed, 362 total
+Tests:       5508 passed, 5508 total
+```
+
+Every unique PASS path matches the full frozen inventory; zero failures/skips/pending. This CI used ordinary `npm test`, the unchanged setup/config/assertions and existing 8192 MB heap, without local path fixtures. Client build, actual candidate and supported-baseline `48d0e52` Docker builds, real disposable Docker boundary rehearsal and deployment readiness acceptance all succeeded. Candidate CI image `sha256:01156a6664039eda5c5291e471a9e1a70672c0383ed9a335f333cce3a83e747f`, baseline CI image `sha256:cfe2f47c47d421ec18275c74e77b35855aa93d18bb324f8b758b9874fbbaa254`. [Closed original archive, complete API records, raw server/boundary/readiness logs and hashes](https://github.com/yigini/soilfer-lims/tree/79daa45c13d831345727fd1ea75734231bfad19f/WP/backlog-resume-20261013/ci-38400174689-completed-success). Final actual audit PASS on this exact head is pending; no merge, release or production operation has occurred.
+
+Please audit this exact head against #206. The additive schema/receipt guards, historical attempt preservation, named/scoped container writes, immutable same-sample aliquot links, hierarchy/labels and deferrals remain as described in the PR. #206 stays open for your actual post-deploy closure; completed production releases/receipts/gates/helpers/notices remain immutable.

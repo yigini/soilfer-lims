@@ -1,0 +1,60 @@
+{
+  "observedUtc": "2026-10-13T13:38:59.792477+00:00",
+  "pr": 295,
+  "issue": 206,
+  "head": "1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a",
+  "base": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "ci": 38400174689,
+  "ciConclusion": "success",
+  "evidenceAudit": "79daa45c13d831345727fd1ea75734231bfad19f",
+  "rawGitBlobHashesVerified": 7,
+  "readyForAudit": true,
+  "commentId": 6146853088,
+  "commentUrl": "https://github.com/yigini/soilfer-lims/pull/295#issuecomment-6146853088",
+  "finalNativeHandoff": false,
+  "actualFinalAuditPass": false,
+  "closingIssuesReferences": [],
+  "productionMutations": 0,
+  "files": {
+    "audit-comment-request.json": {
+      "bytes": 1996,
+      "sha256": "30e6e543218a3c690e40756aac62922459cb6b04fce69f8435da6b261b01da3a"
+    },
+    "audit-comment.md": {
+      "bytes": 1970,
+      "sha256": "e25e0c5744687005e3968784e9f4a11236f0ea962aa05eb47043c1818512ea57"
+    },
+    "audit-label-request.json": {
+      "bytes": 31,
+      "sha256": "126663d0c989297b6a2441d3e2872da3b9de78aa2326b023381cbdfa6bc5477d"
+    },
+    "body-edit-response.txt": {
+      "bytes": 48,
+      "sha256": "b70f579b39eeef0aa150fc91a6f687ad4c0052c955516f576c9363d8526dcea3"
+    },
+    "comment-response-raw.json": {
+      "bytes": 3572,
+      "sha256": "8b300132772c3af26be4212463a974a4bb3a780cb0ab0f74e6483ebd0087d211"
+    },
+    "label-response-raw.json": {
+      "bytes": 283,
+      "sha256": "52d58c2648b5b6c44b500d9ee7eaedf383ad854f33fda4c974560e7febead153"
+    },
+    "native-handoff.txt": {
+      "bytes": 1809,
+      "sha256": "13d7245b55acb6f7abf22b5f32bac2b1fece3b67e12d8b06efcb45a6d5612d1a"
+    },
+    "pr-after-raw.json": {
+      "bytes": 9379,
+      "sha256": "eee617f1878575ef9884f718d465515732b7724efcf52b847c553101f538350d"
+    },
+    "pr-before-raw.json": {
+      "bytes": 5683,
+      "sha256": "34c642c8ab55f98efe3d3e4579c374d5c49741715cd04b7caa5c2c886fb7ba5c"
+    },
+    "pr-body-full-ci.md": {
+      "bytes": 6723,
+      "sha256": "7cea0cab436977e49bdad239c3960b73c7b28a031d37bda67ca9451f96f8af49"
+    }
+  }
+}

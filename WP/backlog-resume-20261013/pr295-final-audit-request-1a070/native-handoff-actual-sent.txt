@@ -1,0 +1,11 @@
+Pip final #206 audit handoff: PR295 is ready at exact source-only head 1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a, tree 85350d14bdff5a607a3d2edc9615785842c9c94b, base 959d17e11c357266f7c2a41b0c84ab76914c591e.
+
+Fresh ordinary CI 38400174689 completed SUCCESS at 13:25:41 UTC, attempt 1. Exact final summary:
+Test Suites: 362 passed, 362 total
+Tests:       5508 passed, 5508 total
+
+All 362 PASS paths match the frozen inventory, with zero skips/failures/pending. Client build, candidate and supported baseline 48d0e52 Docker builds, real disposable Docker boundary checks and readiness acceptance all passed. Closed original ZIP, full API records, raw server/boundary/readiness logs and hashes: https://github.com/yigini/soilfer-lims/tree/79daa45c13d831345727fd1ea75734231bfad19f/WP/backlog-resume-20261013/ci-38400174689-completed-success .
+
+Your accepted scope #206/6145765510 is satisfied: only the server test script differs from 9ae02; all prior 51 source paths, Jest config/setup/teardown/assertions and CI 8 GB heap remain unchanged. One serial recyclable worker, no GC hooks or production changes. LF and SPA findings are resolved; app.js equals main. Prior local 362/5508 combined coverage remains honestly pinned at c56414a; failed/incomplete runs remain retained. Client build, the 14 baseline lint warnings, desktop/mobile hierarchy, 100 x 50 mm label and actual Chromium 40 keyboard determinations remain linked in the PR.
+
+The ready-for-audit label and comment were posted once: https://github.com/yigini/soilfer-lims/pull/295#issuecomment-6146853088 . Please give the final audit verdict for this exact head. The scoped/named immutable container and same-sample aliquot guards, historical preservation and documented #207/#208/reserved-attempt UI deferrals remain as described. No merge, new release, kit, gate or production operation. #206 remains open for your actual post-deploy closure; human #103 clarification/cards/drafts are untouched.

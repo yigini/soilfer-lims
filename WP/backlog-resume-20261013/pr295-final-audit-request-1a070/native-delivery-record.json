@@ -1,0 +1,23 @@
+{
+  "observedUtc": "2026-10-13T13:41:53.775472+00:00",
+  "target": "Claude / LIMS Audit / Lab workflow audit and plan",
+  "windowId": 3408874,
+  "sourceHead": "1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a",
+  "readyForAuditComment": 6146853088,
+  "nativeFinalHandoff": "DELIVERED_ONCE_VISUALLY_VERIFIED",
+  "beforeSend": "Fresh actual returned window/right thread, both empty composers, explicit right-composer click and fresh caret; draft end then exact head/tree/base/Jest totals inspected before Return",
+  "afterSend": "Actual sent bubble shows correct head/tree/base/CI and Jest totals; right composer empty; Claudio Forming response visible",
+  "humanDraftsAnd103Card": "UNTOUCHED; See first / Approve now remains unanswered",
+  "actualFinalAuditPass": false,
+  "productionMutations": 0,
+  "sentFile": {
+    "name": "native-handoff-actual-sent.txt",
+    "bytes": 1954,
+    "sha256": "43bf5a8983c2dbe59b02062c76457c83c7187d52fd651ac73488fbe7d7763814"
+  },
+  "prApi": {
+    "name": "pr-after-native-raw.json",
+    "bytes": 2663,
+    "sha256": "a5badd87e9088de40e5af265d2c2d03e13c58ceea549a4bef9dc536863ac73f4"
+  }
+}
