@@ -25,7 +25,7 @@ const owned = [];
 const input = (blank = 0.0123456789) => ({ blanks: [{ value: blank }], controls: [{ expected: 7.123456789, measured: 7.123456780 }],
     duplicates: [{ value1: 2.123456789, value2: 2.123456780 }, { value1: 2.123456789, value2: 2.123456780 }] });
 
-async function fixture({ migrated = false, sampleMember = false, finalClear = false, legacyRepeat = false, multiAnalyte = false } = {}) {
+async function fixture({ migrated = false, sampleMember = false, finalClear = false, legacyRepeat = false, multiAnalyte = false, nativeCurrentSchema = false } = {}) {
     const labId = randomUUID(), analysisCode = randomUUID(), username = 'system:fixture', batchId = randomUUID();
     const sampleId = randomUUID(), workItemId = randomUUID(), secondCode = randomUUID(), secondItemId = randomUUID();
     const members = sampleMember ? [{ id: workItemId, sampleId, labId, analysis: analysisCode, batchId, rackPosition: 3,
@@ -57,11 +57,15 @@ async function fixture({ migrated = false, sampleMember = false, finalClear = fa
     require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: record.file, apply: true });
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: record.file, apply: true });
     require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: record.file, apply: true });
-    // New chart-mode runs use the current normal installation, retaining all legacy assertions.
-    require('../helpers/calculationReleasePrerequisites').installCalculationReleasePrerequisites(record.file);
-    require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: record.file, apply: true });
-    require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: record.file, apply: true });
-    require('../../scripts/install_control_charts').installControlCharts({ dbPath: record.file, apply: true });
+    if (nativeCurrentSchema) {
+        // Only the new Native case needs the current normal installation; all assertions are retained.
+        require('../../scripts/install_work_attempt_contract').installWorkAttemptContract({ dbPath: record.file, apply: true });
+        require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({ dbPath: record.file, apply: true });
+        require('../helpers/calculationReleasePrerequisites').installCalculationReleasePrerequisites(record.file);
+        require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: record.file, apply: true });
+        require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: record.file, apply: true });
+        require('../../scripts/install_control_charts').installControlCharts({ dbPath: record.file, apply: true });
+    }
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${record.file}` }) }); record.db = db;
     const actor = { id: username, username, role: 'LAB_MANAGER', labId }, f = { db, file: record.file, actor, labId, analysisCode };
     await db.analysis.create({ data: { code: analysisCode, name: 'Compatibility fixture analysis' } });
@@ -144,7 +148,7 @@ test.each([null, 'REPEAT_BATCH', 'REJECT'])('a migrated sibling status change pr
 });
 
 test.each(['PROFILE', 'NATIVE'])('a migrated REJECT_REANALYSIS item joins a new %s run while preserving its old evidence and membership', async targetKind => {
-    const f = await fixture({ migrated: true, sampleMember: true, legacyRepeat: true });
+    const f = await fixture({ migrated: true, sampleMember: true, legacyRepeat: true, nativeCurrentSchema: targetKind === 'NATIVE' });
     const old = await f.db.batch.findUnique({ where: { id: f.batch.id }, include: QC_RUN_INCLUDE });
     const workItemId = f.batch.workItems[0].id;
     expect(old.analytes[0].status).toBe('REPEAT_ORDERED');

@@ -1,0 +1,74 @@
+{
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/command.json": {
+    "bytes": 2551,
+    "sha256": "946c15ce370579acdf624648aa556e730347203d76c0a732d1fe758b841afff5"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/config-original.json": {
+    "bytes": 11237,
+    "sha256": "4317cebceb905ad1d961b33e0140f39db700219ec5d3c8007fae37d836aa7b43"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/config-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/inventory-original.json": {
+    "bytes": 48871,
+    "sha256": "6dbff7e61cc21f99ea52bf30576782e8edb2b213b7ca2d28aa19da9ecd3fccf0"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/inventory-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/report-original.json": {
+    "bytes": 80324,
+    "sha256": "6abe2d375e59cbf3e75b620790d92c52da398c12861a9b950bdb37ff8c1e4324"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/source-after.json": {
+    "bytes": 52475,
+    "sha256": "7c60755d10b5f95670853f3f42e139d183cacd32d34d678ac2dca9fc94124cc8"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/source-before.json": {
+    "bytes": 52475,
+    "sha256": "7c60755d10b5f95670853f3f42e139d183cacd32d34d678ac2dca9fc94124cc8"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/stderr-original.log": {
+    "bytes": 59232,
+    "sha256": "e5406c186f511ba274c3ca5de15bc00ace82403714b8f04c3f178a558321273a"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/stdout-original.log": {
+    "bytes": 2124,
+    "sha256": "18a304925a73a2af8aa5ed8d1c40d43f24570e7924041642c2bb3b8bc12beeb6"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/summary.json": {
+    "bytes": 464,
+    "sha256": "fc9ea7f89cad97aac1f283e81e52ad71132e57cbccbfab2a893d7f5245df19c2"
+  },
+  "WP/backlog-resume-20261013/issue214-compatibility-prerequisite-corrected/visible-local-storage.json": {
+    "bytes": 10276,
+    "sha256": "bb1b2fe368eac9943019d37c847e9ec08ec0745e64d925a23be6c7ee8723d86e"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-prerequisite-pass/terminal-boundary.json": {
+    "bytes": 936,
+    "sha256": "c4c9d9318d64b0817b98219b5ce8ba92fdaeef2c41a25666151176d1aa5eccc1"
+  },
+  "WP/backlog-resume-20261013/prepare-issue214-compatibility-prerequisite-successor-once.py": {
+    "bytes": 882,
+    "sha256": "3ca68e85ba3c676b7b238cb05bd3b64a306ad121aadc1b10582e857f92561b13"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-compatibility-prerequisite-corrected-once.py": {
+    "bytes": 6968,
+    "sha256": "a8627365f38cde063d9c8be57a915fc08d9bfc8352dd3bbdd36d7f7ed8c7ce8f"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-full-fixture-corrected-once.py": {
+    "bytes": 6400,
+    "sha256": "6e5d08cf08cbdbadb2090d479b11153747958731e12c7197d0f04a8864cc8bfb"
+  },
+  "WP/backlog-resume-20261013/retain-issue214-fixture-prerequisite-pass-once.py": {
+    "bytes": 5750,
+    "sha256": "98ddd2d0181691fc7406277f2c5d750fb413fd8a1185409711e9674869aa8157"
+  }
+}
