@@ -62,7 +62,7 @@ export default function ResultValueActions({ item, onChooseApproval, onChanged }
             data-testid="dilute-repeat" onClick={async () => {
                 setBusy(true);setError(null);
                 try { await axios.post(`/api/work-items/${encodeURIComponent(item.workItemId)}/repeats`, {
-                    reason: 'ABOVE_RANGE_DILUTION', note: reason, aliquotId: repeatAliquot });await onChanged?.(); }
+                    reason: 'ABOVE_RANGE_DILUTION', note: reason, ...(repeatAliquot ? { aliquotId: repeatAliquot } : {}) });await onChanged?.(); }
                 catch (failure) { setError(failure.response?.data?.error || failure.message); }
                 finally { setBusy(false); }
             }}>{t('overrideRequests.diluteRepeat')}</button>}
