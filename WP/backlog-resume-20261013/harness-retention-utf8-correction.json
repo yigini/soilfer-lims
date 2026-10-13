@@ -1,0 +1,10 @@
+{
+  "observedUtc": "2026-10-13T12:49:20.069359+00:00",
+  "failedHelper": "record-issue-206-harness-verification.py",
+  "status": "REFUSED_BEFORE_EXTERNAL_MUTATION",
+  "cause": "Default Windows cp1252 read of original UTF-8 body failed equality; explicit UTF-8 equality is true with zero current PR edits",
+  "prEdits": 0,
+  "sourcePushes": 0,
+  "successor": "record-issue-206-harness-verification-utf8.py",
+  "failedHelperPreserved": true
+}

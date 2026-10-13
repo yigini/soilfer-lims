@@ -1,0 +1,2157 @@
+  console.log
+    [AUTH] Verifying token for ID: 7e28e096-eba5-498b-be74-9b8084dc5ce3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9e05e4a6-6058-48d7-ab82-b82036206e7f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e0329ae4-a671-44d5-96b0-84f37d4479a1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 36df6775-649d-4ec4-8358-5cd5b79db11d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6f9e0d50-2318-4018-80ac-07783a66ec46 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2198da4c-ee99-4640-9d37-64e35e24d95b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2198da4c-ee99-4640-9d37-64e35e24d95b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1dd6deff-6212-416c-bcb5-187a4dbc4822 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b90fb133-3e92-446c-a67f-1e1c2a48b20b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e20d7033-16e2-4536-8a91-fead1197ca13 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ec94c8dd-c79a-4489-9bcb-54c7e2764d8d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1d08aaf5-e111-4c95-92c0-73e1cf82b00e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 76e4d58a-e51a-4d47-bbf3-bc9ce4a3015b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 540ba988-77fa-4398-a712-fd3bdd2cc435 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c8d6e38-d0ca-4b55-a9eb-9e24fafad29f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 14c2540c-8648-49ac-95fa-70ff480b2ca5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 99275593-34ff-4ff0-b6b7-015fd39b3d76 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ab9b7a8d-1845-42ab-9157-89f6e4b37ab9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4321e57-80ca-4016-a8ef-f9a191c8399d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4321e57-80ca-4016-a8ef-f9a191c8399d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4321e57-80ca-4016-a8ef-f9a191c8399d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e4321e57-80ca-4016-a8ef-f9a191c8399d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0522f792-9da4-43fa-8d2d-0421ed3da778 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f3f13fa3-08dd-44fb-9249-9ba6d971f02c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f3f13fa3-08dd-44fb-9249-9ba6d971f02c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f3f13fa3-08dd-44fb-9249-9ba6d971f02c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f3f13fa3-08dd-44fb-9249-9ba6d971f02c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f3f13fa3-08dd-44fb-9249-9ba6d971f02c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0e1dcb13-2238-4acb-bb6c-10416104910f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a6a0d5b0-c08f-4455-a42d-29bd4e01e0aa (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94d4bb48-9685-4f56-bfb2-afb5f6b3bf17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-a99b35e7-3df4-4cb6-b41a-e0f0fb611458 (AUDIT_USER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 94d4bb48-9685-4f56-bfb2-afb5f6b3bf17 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-a99b35e7-3df4-4cb6-b41a-e0f0fb611458 (AUDIT_USER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: ac21355c-e447-49bd-bc20-fea4e4bbb4e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-6129d0ed-452d-4ba1-9e37-f3bbc0861974 (VIEWER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: ac21355c-e447-49bd-bc20-fea4e4bbb4e4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-6129d0ed-452d-4ba1-9e37-f3bbc0861974 (VIEWER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: bdfdbac1-4559-4fa3-b34c-ed17922c2769 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-c2d39ecc-e664-447a-ae50-ab44276858ec (SAMPLE_RECEPTION) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: bdfdbac1-4559-4fa3-b34c-ed17922c2769 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-c2d39ecc-e664-447a-ae50-ab44276858ec (SAMPLE_RECEPTION) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 8b7fc73b-fe93-4586-b43d-836fbd0903f5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8b7fc73b-fe93-4586-b43d-836fbd0903f5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 25cd02fd-0430-46d1-8877-7a4f9cf26b22 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 90274837-f950-496d-b2cc-e5ecc84ac15a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 90274837-f950-496d-b2cc-e5ecc84ac15a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a3e217d3-2f8f-4dcb-9bfa-d72a17b5172b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a3e217d3-2f8f-4dcb-9bfa-d72a17b5172b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c7267012-5c07-4d55-9b21-01322bb3b4d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c7267012-5c07-4d55-9b21-01322bb3b4d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Record a failing required pair before adding a third reading.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:77:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_NOT_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c7267012-5c07-4d55-9b21-01322bb3b4d4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 12499503-5d4d-493f-bddd-7f819fa90516 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 12499503-5d4d-493f-bddd-7f819fa90516 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:106:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 12499503-5d4d-493f-bddd-7f819fa90516 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at recordedExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:71:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:103:28)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:23:45)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b059f1a1-9cac-4f69-89c0-764a49404b1c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 64e20c62-cc4c-4680-b023-69c4f6621c8b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 360233c3-2d9b-4810-9cd9-e6876bbee660 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f744aea5-c690-4034-9481-99266e03ea4c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Owned replicate-event storage failure
+        at Array.Error (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_2_repeat_commands.test.js:370:92)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:9304
+        at r (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:1022)
+        at PrismaPromise.o [as then] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:1118)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d133f62-3788-4a03-87e9-5acd448bcbac (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4d133f62-3788-4a03-87e9-5acd448bcbac (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 83b82325-e372-4f90-91a7-daad78f53478 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 83b82325-e372-4f90-91a7-daad78f53478 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c6c9b508-6f73-4d13-b128-a414dc20da55
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: b7e82fa6-df6a-4528-a3c2-305b69fcb5d6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 0d1e6629-704c-4720-b287-cb94770a8c03
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94ddabf-a496-4a1f-87ea-8f81cb5e3dde (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab ffc39b93-65ff-4502-9f7b-e34a9e44377c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: ad282e20-62d8-4552-a227-9cc948bb960d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d6898339-4928-42ae-82d0-e3cf9fc59480
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: b3cfddff-e0cc-42c5-ba04-8270fc4d8724 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d5863b05-b5ce-44b5-970d-5495f769a79d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e195d884-b2db-4563-80d1-ed6426160d79 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab cafc0916-c82e-4462-a9ff-3359645d6d62
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f0764766-872d-4126-814a-ad7de9f80e0b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f49dff6d-7a58-46a9-9f9d-11a5034a0802
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: bfea64f2-10cd-422f-a799-3e6988511934 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2c98b50b-3e40-4be6-b31f-301f228a7efc
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 7cfbdcc1-2462-48b9-969d-95ea2591a67f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab e1ad8884-627e-443f-b83a-47b8a597e5f8
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 9fa0d72f-23fa-46af-a0f3-b16b0c37486d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: A repeat reason code is required.
+        at Object.repeatRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workRepeatContract.js:22:30)
+        at repeatRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:61:63)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORK_ATTEMPT_REASON_REQUIRED',
+      details: {}
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 263aff64-5e72-42b2-8e46-a8f00c83f817 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User repeat-reviewer-d6e067fc-0931-411e-9dff-11253523aa35 (Lab: f49630f7-ed23-4a68-978a-cb70588dee77) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/workRepeatService.js:20:11)
+      at preflightRepeat (services/workRepeatService.js:82:28)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.requestRepeat (controllers/workRepeatController.js:8:32)
+
+  console.log
+    [AUTH] Verifying token for ID: 263aff64-5e72-42b2-8e46-a8f00c83f817 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User repeat-reviewer-d6e067fc-0931-411e-9dff-11253523aa35 (Lab: f49630f7-ed23-4a68-978a-cb70588dee77) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/workAttemptCorrectionService.js:31:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.correctAttempt (controllers/workRepeatController.js:16:32)
+
+  console.log
+    [AUTH] Verifying token for ID: a7227f59-a057-402e-a97f-51e3131fff5b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: a7227f59-a057-402e-a97f-51e3131fff5b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e6a045de-11ec-435c-9656-2e51c1e31079 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 93c9e468-fd88-4e89-84f8-99d2c96bc15a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ee679d1-938f-47c5-90ac-34810e51f120 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d5160ca9-1fb9-496d-84a3-14819ee92ea1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 3e0f32e2-e4cf-45ea-9785-bf9588c6a1c8
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 6b97183d-23b1-4336-a276-f65074d4666e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab fcdb3bbe-031c-4de2-89f9-762a2e91185b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: a52bb3ce-afa0-4a8d-bce5-a9aabe2821f8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab eab03184-eadb-4a93-8b62-0cdfab97ea31
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/audit_3_2_repeat_commands.test.js (68.491 s)
+  √ the narrow owned fixture records explicit replicas together, retains literal evidence and refuses reuse (1803 ms)
+  √ the owned result-set fixture refuses duplicate current replicas before any execution or Result writes (1177 ms)
+  √ an unknown correction key status refuses with zero writes (1448 ms)
+  √ an unknown correction key equipmentId refuses with zero writes (1212 ms)
+  √ an unknown correction key timestamp refuses with zero writes (1204 ms)
+  √ an unknown correction key sourceEventIds refuses with zero writes (1161 ms)
+  √ the four named compatibility keys cannot affect a correction Result, event or response (1186 ms)
+  √ a scoped technician requests INSTRUMENT_FAULT before submission, reserving exactly one immutable OPEN attempt (1255 ms)
+  √ the actual repeat API refuses {} with zero evidence/state writes (1263 ms)
+  √ the actual repeat API refuses {"reason":"guess"} with zero evidence/state writes (1350 ms)
+  √ the actual repeat API refuses {"reason":"TRANSCRIPTION_ERROR"} with zero evidence/state writes (1248 ms)
+  √ the actual repeat API refuses {"reason":"CLIENT_RETEST"} with zero evidence/state writes (1156 ms)
+  √ the actual repeat API refuses {"reason":"OTHER"} with zero evidence/state writes (1204 ms)
+  √ the actual repeat API refuses {"reason":"INSTRUMENT_FAULT","sameBatchAllowed":true} with zero evidence/state writes (1159 ms)
+  √ the actual repeat API refuses {"reason":"INSTRUMENT_FAULT","author":"caller"} with zero evidence/state writes (1157 ms)
+  √ the actual repeat API refuses {"reason":"INSTRUMENT_FAULT","ncrId":"unverified"} with zero evidence/state writes (1163 ms)
+  √ the actual repeat API refuses {"reason":"INSTRUMENT_FAULT","override":false} with zero evidence/state writes (1157 ms)
+  √ the configured self-repeat disablement refuses a technician with zero writes (1205 ms)
+  √ an OPEN repeat fills once in the real Result transaction and keeps every request/version/time field frozen (1220 ms)
+  √ the fourth attempt refuses at the lab limit, while zero policy means unlimited (1372 ms)
+  √ a single-result transcription correction appends within the same attempt and preserves its evidence exactly (1179 ms)
+  √ a multi-replicate correction requires an explicit valid current selector and leaves every other replicate byte for byte (2478 ms)
+  √ a reviewer may request REVIEW_OUTLIER and a technician cannot request it (1221 ms)
+  √ the route permission admits a scoped MASTER_USER reviewer and refuses read-only roles before any writes (1493 ms)
+  √ a failed attempt event rolls back the parent transition, OPEN request and WorkItem together (1136 ms)
+  √ a failed first Result rolls back its first fill and immutable event, allowing the same OPEN request to be retried (1378 ms)
+  √ a failed correction event rolls back the new Result, old supersession and review metadata without deleting audit rows (1139 ms)
+  √ a repeat with 2 parent replicas and 1 filled refuses missing [2] even with extra replica null (1334 ms)
+  √ a repeat with 3 parent replicas and 2 filled refuses missing [3] even with extra replica null (1322 ms)
+  √ a repeat with 2 parent replicas and 1 filled refuses missing [2] even with extra replica 3 (1383 ms)
+  √ the ordinary save appends an absent replicate to the same frozen RECORDED attempt, then refuses cell changes and post-submit additions (1338 ms)
+  √ an unbatched recorded execution cannot append a replica after the completed WorkItem joins an open run (1209 ms)
+  √ an incremental replicate refuses a changed frozen instrument with zero writes (1156 ms)
+  √ an incremental replicate refuses a changed frozen method with zero writes (1596 ms)
+  √ failure to append the replicate event rolls back its Result, cache and every audit row (1211 ms)
+  √ actual submission changes only the attempt status; a technician cannot repeat or correct afterwards (1394 ms)
+  √ a submitted reviewer correction preserves submitted execution evidence and needs a new explicit acceptance (1341 ms)
+  √ actual reviewer RETURN with REVIEW_OUTLIER records QUESTIONED and a new OPEN request atomically (1211 ms)
+  √ actual reviewer RETURN with DUPLICATE_DISAGREEMENT records QUESTIONED and a new OPEN request atomically (1318 ms)
+  √ actual reviewer RETURN with CONFIRMATION records QUESTIONED and a new OPEN request atomically (1228 ms)
+  √ actual reviewer RETURN with QC_BATCH_FAIL records INVALIDATED and a new OPEN request atomically (1210 ms)
+  √ actual reviewer RETURN with ABOVE_RANGE_DILUTION records INVALIDATED and a new OPEN request atomically (1208 ms)
+  √ actual reviewer RETURN with INSTRUMENT_FAULT records INVALIDATED and a new OPEN request atomically (1235 ms)
+  √ actual reviewer RETURN with PREP_ERROR records INVALIDATED and a new OPEN request atomically (1255 ms)
+  √ actual reviewer RETURN with OTHER records QUESTIONED and a new OPEN request atomically (1273 ms)
+  √ missing RETURN reason and a cross-lab repeat/correction preserve the complete owned evidence (1331 ms)
+  √ a failed undispositioned native run refuses atomically; after REPEAT_BATCH a request records only in a new run (1482 ms)
+  √ an open or pending native run refuses {"started":false,"blankValue":null} without any request or evidence writes (1244 ms)
+  √ an open or pending native run refuses {"started":true,"blankValue":null} without any request or evidence writes (1238 ms)
+  √ RETURN from an accepted native run ({ status: 'QC_PASS', blankValue: 0 }) hands off one WorkItem and preserves all original membership and QC evidence byte for byte (1425 ms)
+  √ RETURN from an accepted native run ({ status: 'QC_WARN', blankValue: 9.123456789, criteria: [Object] }) hands off one WorkItem and preserves all original membership and QC evidence byte for byte (1282 ms)
+  √ RETURN from an accepted native run ({
+  status: 'ACCEPTED_WITH_DEVIATION',
+  blankValue: 9.123456789,
+  disposition: true
+}) hands off one WorkItem and preserves all original membership and QC evidence byte for byte (1303 ms)
+
+PASS tests/contracts/audit_1_2_guard_installer.test.js (31.754 s)
+  √ fresh Prisma schema installs the exact guards and marker; repeat starts write nothing (2459 ms)
+  √ actual pre-179 child installer preserves seeded historical science and the old schema (618 ms)
+  √ unreviewed UNMAPPED_SAMPLE refuses the actual child with unchanged bytes and no returned handle (486 ms)
+  √ unreviewed COLLECTED refuses the actual child with unchanged bytes and no returned handle (469 ms)
+  √ the real reviewed legacy upgrade preserves science, refuses interrupted startup, then maps and starts without writes (1719 ms)
+  √ a real timestamp race invalidates the review and the actual installer refuses without writes or a returned file (1127 ms)
+  √ a reviewed fingerprint cannot approve an unmapped status (951 ms)
+  √ a blocked legacy marker refuses startup even with a reviewed fingerprint and preserves all bytes (963 ms)
+  √ malformed or unsupported reviewed fixture options refuse before creating any file (516 ms)
+  √ direct startup refuses a pre-179 file before app import, scheduler or listen, with unchanged bytes (597 ms)
+  √ direct startup refuses a fresh db push, without writes, serving or scheduler initialization (1403 ms)
+  √ direct startup refuses an interrupted reviewed upgrade with unchanged SHA and no listener (1096 ms)
+  √ direct startup reports a mismatched trigger before serving and preserves the file (1383 ms)
+  √ direct startup refuses a missing file without implicitly creating it (79 ms)
+  √ direct startup refuses missing normalized QC installation before app import and preserves the file (712 ms)
+  √ a complete guarded database passes the read-only gate, listens and answers a real health request (5003 ms)
+  √ partial schema refuses a writable owned database before any write (348 ms)
+  √ tampered trigger refuses a writable owned database before any write (1397 ms)
+  √ marker without guards refuses a writable owned database before any write (1453 ms)
+  √ complete objects without marker refuses a writable owned database before any write (1403 ms)
+  √ different marker hashes refuses a writable owned database before any write (1414 ms)
+  √ extra marker key refuses a writable owned database before any write (1432 ms)
+  √ unparseable marker refuses a writable owned database before any write (1443 ms)
+  √ image-copy hashes are checked and the overlaid volume sources are never read (2765 ms)
+  √ startup calls the installer after the existing migrations and fails before serving; no override argument exists (14 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [WS] Blocked broadcast for event WORKITEM_CHANGED: missing labId
+
+      288 | function broadcastToLab(labId, eventType, payload) {
+      289 |     if (!labId) {
+    > 290 |         if (DEBUG) console.warn(`[WS] Blocked broadcast for event ${eventType}: missing labId`);
+          |                            ^
+      291 |         return 0;
+      292 |     }
+      293 |     const data = JSON.stringify({ type: eventType, ...payload });
+
+      at warn (wsServer.js:290:28)
+      at Object.broadcastToLab [as batchSave] (controllers/workbenchController.js:1283:21)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_3_keyboard_playwright.test.js (29 s)
+  √ real Chromium types and records 40 values through the production app with keyboard input only (28543 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: ff5afc00-1c56-40f2-998c-0aabdbda413a) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleContainerService.js:21:11)
+      at Object.list (services/sampleContainerService.js:26:5)
+      at Object.<anonymous> (tests/contracts/issue_206_sample_containers.test.js:61:5)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: ff5afc00-1c56-40f2-998c-0aabdbda413a) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleContainerService.js:21:11)
+      at services/sampleContainerService.js:33:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/issue_206_sample_containers.test.js:62:5)
+
+  console.warn
+    [AUTH] RBAC Denied: User system:fixture (AUDIT_USER) attempted MANAGE_CONTAINERS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","SAMPLE_RECEPTION","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (tests/contracts/issue_206_sample_containers.test.js:67:103)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+PASS tests/contracts/issue_206_sample_containers.test.js (17.906 s)
+  √ bulk → fine earth → aliquot is queryable, labelled by policy and leaves sample numbers unchanged (1274 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"ALIQUOT"} (1130 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":0} (1102 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":"1"} (1116 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":null} (1141 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","code":"invented"} (1093 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"UNKNOWN"} (1100 ms)
+  √ scope, role and parent validation refuse both API reads and writes across samples/labs (1239 ms)
+  √ SQL rejects foreign parents, alias collisions, invalid kind/mass and changing or deleting identities (1177 ms)
+  √ transaction rollback returns the counter and container policy collision checks run both ways (1318 ms)
+  √ initial execution and reserved repeat link the exact aliquot without changing recorded attempts (1298 ms)
+  √ the additive attempt insert guard refuses foreign/non-aliquot links; future disposal retains recorded linkage (1131 ms)
+  √ installer dry/apply/no-op preserve all old rows and schema guards; tampered provenance fails closed (1257 ms)
+  √ an empty fresh Prisma table gains only its counter and guards; an unmarked populated table is refused (2295 ms)
+
+PASS tests/contracts/deployment_readiness_bootstrap.test.js (12.61 s)
+  Deployment Readiness Bootstrap & Packaging Verification
+    √ setup.sh rejects invalid mode with exit 1 (187 ms)
+    √ setup.sh rejects Node 18 runtime with clear guidance (512 ms)
+    √ setup.sh fails fast and aborts if schema push fails (no error swallowing) (740 ms)
+    √ setup.sh auto-populates JWT_SECRET into existing .env with blank secret (1029 ms)
+    √ entrypoint persists auto-generated JWT_SECRET across container restarts (803 ms)
+    √ entrypoint recovers from interrupted initial setup on restart without reseeding populated installations (1511 ms)
+    √ docker-entrypoint.sh database inspection fails closed on corrupt or unreadable database (176 ms)
+    √ docker-entrypoint.sh database inspection passes cleanly on valid populated database (5606 ms)
+    √ seed.js recovers from real partial state ({ labs: 1, users: 0 }) and does not duplicate LAB01 (765 ms)
+    √ docker compose configuration validates cleanly across local, global, and nginx overlays (1142 ms)
+
+PASS tests/security/audit_1_2_state_writes.test.js (11.422 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (6 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)"))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)"))
+  √ the original rehearsal cannot reintroduce a direct Sample deletion (1 ms)
+  √ nested connect association has one actual authority finding
+  √ nested set association has one actual authority finding (1 ms)
+  √ nested disconnect association has one actual authority finding
+  √ the closed FK runner refuses unknown case (86 ms)
+  √ the closed FK runner refuses configured candidate (81 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (5 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (2 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (3 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (2 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (1 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js (1 ms)
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql
+  √ legacy CLI launchers cannot import any fixture or test module (2 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (6 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (2 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (8 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (5 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js (1 ms)
+  √ a direct sample write in a #190 test remains a finding outside the factory
+  √ a direct workItem write in a #190 test remains a finding outside the factory (1 ms)
+  √ a direct result write in a #190 test remains a finding outside the factory
+  √ a changed #190 historical factory digest is a scanner finding (18 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (11 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js (1 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (2 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql (1 ms)
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (10890 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"])
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')")
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)')
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')")
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (3 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (44 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}})
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}})
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) }
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED')
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}` (1 ms)
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) }
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`)
+  √ a real temporary non-allowlisted test file fails the source guard (3 ms)
+  √ a shadowed file reader cannot impersonate a known schema load
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (1 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js (1 ms)
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (1 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF')
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting) (1 ms)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0')
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF') (1 ms)
+  √ native pragma reads and enabled constraints remain permitted
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (1 ms)
+
+PASS tests/security/wiring.test.js
+  WP-03: Dead-Code & System Wiring Regression Tests
+    √ Audit 2.5: QC preview has the evaluate permission and uses the scoped read authority (3 ms)
+    √ 1. validateSampleMatrix is actively called in result save/submit flow
+    √ 2. workflowContract functions are exported and callable (1 ms)
+    √ 3. utils/scopeGuard.js exported functions have active call sites and no dead code (WP-28) (103 ms)
+    √ 4. config/roles.js permission keys are registered and referenced (75 ms)
+    √ 5. client/src/components are tracked for active imports (177 ms)
+    √ 6. SD-16: No client file issues a status write the user did not request (catches SD-07) (1 ms)
+    √ 7. SD-16: Route-level permission guards are consistent with controller authorization (catches SD-06) (1 ms)
+    √ 8. SD-16: Every gate the client renders has an active server counterpart (catches SD-05) (1 ms)
+
+PASS tests/contracts/issue_206_container_components.test.js
+  √ sample detail renders the physical hierarchy and the linked attempt without implying a legacy backfill (83 ms)
+  √ aliquot selector never lists bulk or disposed material and emits the explicit chosen identity (6 ms)
+  √ offline label QR encodes the issued container code and the printed card identifies its parent sample (4 ms)
+  √ a dilution repeat sends the explicitly selected physical aliquot identity (29 ms)
+  √ container labels, kinds and policy keys are present in both en catalogues (21 ms)
+  √ container labels, kinds and policy keys are present in both es catalogues (4 ms)
+  √ container labels, kinds and policy keys are present in both es-419 catalogues (4 ms)
+  √ container labels, kinds and policy keys are present in both fr catalogues (4 ms)
+  √ container labels, kinds and policy keys are present in both pt catalogues (4 ms)
+
+Test Suites: 8 passed, 8 total
+Tests:       232 passed, 232 total
+Snapshots:   0 total
+Time:        173.16 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_guard_installer.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_2_repeat_commands.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_3_keyboard_playwright.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\deployment_readiness_bootstrap.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_206_container_components.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_206_sample_containers.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\wiring.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\harness-206-serial-verification\focused.json
