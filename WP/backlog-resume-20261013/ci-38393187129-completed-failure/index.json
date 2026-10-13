@@ -1,0 +1,121 @@
+{
+  "observedUtc": "2026-10-13T12:34:52.447751+00:00",
+  "status": "FAILED_INCOMPLETE_HEAP_EXHAUSTION",
+  "run": 38393187129,
+  "runAttempt": 1,
+  "job": 115281767821,
+  "reviewHead": "9ae02f6ab7651d2ca887a98722f6a20ace3cc471",
+  "base": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "completedUtc": "2026-10-13T12:31:44Z",
+  "exitCode": 134,
+  "passedSuites": 350,
+  "failedSuiteHeaders": [],
+  "fullSuitePass": false,
+  "localCoverageCommit": "c56414a5148cb2b17547680a55550d66c9a1b013",
+  "requiredDockerSteps": {
+    "Set up Docker Buildx": "skipped",
+    "Build Docker image": "skipped",
+    "Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)": "skipped",
+    "Run Real Disposable Docker Boundary Rehearsal": "skipped",
+    "Run Real Docker Deployment Readiness Acceptance": "skipped"
+  },
+  "productionMutations": 0,
+  "retryDispatches": 0,
+  "readyForAudit": false,
+  "nativeFinalHandoff": false,
+  "actualClaudioFinalVerdict": "NOT YET",
+  "archiveEntries": [
+    {
+      "name": "0_Test & Build.txt",
+      "bytes": 3839390,
+      "sha256": "7b8ff3f35c0bfde5d33392d7f5ef3237498554fb46f9b38e471e78454bdeb5e7"
+    },
+    {
+      "name": "Test & Build/system.txt",
+      "bytes": 581,
+      "sha256": "2b719d6ff90867ce1edc6f9c240e0fa40f25af2974a0d1a7f1e78c0765e4e564"
+    },
+    {
+      "name": "Test & Build/1_Set up job.txt",
+      "bytes": 2337,
+      "sha256": "28f7bda4d874803171965b5e974af3fe94c5e5f843045b7d97f73a5755dfb4b4"
+    },
+    {
+      "name": "Test & Build/2_Checkout repository.txt",
+      "bytes": 20681,
+      "sha256": "bfe46aa22371402da41a318afbaefb5d0d64acbbd9c85e2c62b5334c5bcd50c6"
+    },
+    {
+      "name": "Test & Build/3_Setup Node.js.txt",
+      "bytes": 903,
+      "sha256": "f8348ac8ef79ae335679342178cdf69232890f08eacab024ed6adac116256129"
+    },
+    {
+      "name": "Test & Build/4_Install server dependencies.txt",
+      "bytes": 3166,
+      "sha256": "8a41017421976f79626169472e3f7b2552c8fbc52ea2ce435aa65c9ccfcc308f"
+    },
+    {
+      "name": "Test & Build/5_Install client dependencies.txt",
+      "bytes": 2621,
+      "sha256": "8891dc5697cbc4293a62e73ed549fc2249504a0d069808941738ccdaa5a5c820"
+    },
+    {
+      "name": "Test & Build/6_Verify theme catalog and tokens drift.txt",
+      "bytes": 617,
+      "sha256": "0e47f755bcb7c74747a1417a8b0ba888a0983e24a7adcfd725e6a98b317c3e03"
+    },
+    {
+      "name": "Test & Build/7_Build client production bundle.txt",
+      "bytes": 12792,
+      "sha256": "6785331a15c24da66e415668e962d37bde4aa041d5fdfe5c2b058cf51a6bf70e"
+    },
+    {
+      "name": "Test & Build/8_Setup test database and generate Prisma client.txt",
+      "bytes": 5754,
+      "sha256": "6ff4187493e6c346a0269470b58ec29355cdefef552a600137202e8c360f4d14"
+    },
+    {
+      "name": "Test & Build/9_Install Chromium for keyboard-only recording contract.txt",
+      "bytes": 25111,
+      "sha256": "e3b490ee9f6fd98ddc001752cf08a4baf029c33b2695d1ae3492213ee17214f9"
+    },
+    {
+      "name": "Test & Build/10_Run server test suite.txt",
+      "bytes": 3763351,
+      "sha256": "d25cdee1a163b5c66803740f537ecf2eae3fec489d97483703ecfa8c29db0203"
+    },
+    {
+      "name": "Test & Build/30_Post Checkout repository.txt",
+      "bytes": 1719,
+      "sha256": "8f989013b2eb39021fb1eca41990e30feb726eb847353fdc345be0e3a1ac60ec"
+    },
+    {
+      "name": "Test & Build/31_Complete job.txt",
+      "bytes": 371,
+      "sha256": "3e2c8c69d2e9028264bc43c8f394a72c30f0a016eed69899c471bb22c0329667"
+    }
+  ],
+  "files": {
+    "run-raw.json": {
+      "bytes": 12685,
+      "sha256": "354497066c6aa7977294ecb33277334ddce14354c7fc4d63f1ffb4191b0f1aad"
+    },
+    "jobs-raw.json": {
+      "bytes": 3999,
+      "sha256": "160256cf03ef3d35dfa48f9ee1f3e8319129a15c347ec539837a92a9d8f81da6"
+    },
+    "pr-raw.json": {
+      "bytes": 253,
+      "sha256": "7cdca1fdb55adef42804ce0e2e8ca17e64b80d433c5bbc24b1c2e73d02132f1e"
+    },
+    "logs-original.zip": {
+      "bytes": 1271245,
+      "sha256": "29c78f1dc962164899b9b0f68f3dd00cf6387e530b9c0c303bd42d82b68f9903"
+    },
+    "server-tests-original.log": {
+      "bytes": 3763351,
+      "sha256": "d25cdee1a163b5c66803740f537ecf2eae3fec489d97483703ecfa8c29db0203"
+    }
+  }
+}
