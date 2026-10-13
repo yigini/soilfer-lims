@@ -193,6 +193,7 @@ node scripts/install_preparation_records.js --db "${DATABASE_PATH:-$DB_FILE}" --
 echo "📦 Installing retained instrument import templates and receipts..."
 node scripts/install_instrument_imports.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 node scripts/install_sample_containers.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+node scripts/install_control_charts.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."

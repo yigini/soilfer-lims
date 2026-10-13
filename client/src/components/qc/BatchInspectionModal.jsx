@@ -170,6 +170,14 @@ export function StoredQcEvidence({ batch, t = (key, fallback) => fallback || key
                     </tr>)}</tbody>
                 </table></div>
                 {!rows.length && <p>{t('qcWorksheet.notStored', 'not stored in this evaluation')}</p>}
+                {(evaluation.controlCharts || []).map(chart => <div key={chart.series.referenceMaterialId} className="border rounded p-3 space-y-1" data-testid="stored-control-chart">
+                    <h4 className="font-semibold">{t('controlCharts.frozenEvidence')} · {chart.series.referenceMaterialId}</h4>
+                    <p>{t(chart.basis.mode === 'PROVISIONAL' ? 'controlCharts.provisional' : chart.basis.mode === 'CONTROL_CHART' ? 'controlCharts.approved' : 'controlCharts.fixedWindow')}
+                        {' · '}{chart.basis.controlLimitSetId || JSON.stringify(chart.basis.fixedWindow)}</p>
+                    <p>{t('controlCharts.minimum')}: {chart.minimumPoints}</p>
+                    {chart.rules.map(rule => <p key={rule.rule}>{rule.rule} · {t(`controlCharts.ruleStatus.${rule.status}`)} · {rule.action && t(`policies.${rule.action}`)}</p>)}
+                    <details><summary>{t('controlCharts.observations')}</summary><pre className="whitespace-pre-wrap break-all text-xs">{JSON.stringify(chart.observations, null, 2)}</pre></details>
+                </div>)}
                 {details && <details><summary>{t('qcWorksheet.fullRecord', 'Full stored evaluation')}</summary>
                     <pre className="whitespace-pre-wrap break-all text-xs">{JSON.stringify(details, null, 2)}</pre></details>}
             </div>;

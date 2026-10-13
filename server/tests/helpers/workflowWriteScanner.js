@@ -31,6 +31,12 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // #214: inspect only the exact additive chart evidence/guard source.
+    // This adds no workflow writer exemption.
+    Object.freeze({ functionName: 'loadControlChartMigrationSource', loader: 'services/controlChartMigrationSource.js',
+        loaderSha256: '2e79cdf57bb09eed9f5e2e8721aa5c0ab540c16a7312d4ff02d138a20e604df6',
+        directory: '20261013000200_control_charts', sqlSha256: '49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6',
+        boundary: '-- Contract guards' }),
     // #206: resolve only digest-bound additive container/counter DDL. No writer exception.
     Object.freeze({ functionName: 'loadSampleContainerMigrationSource', loader: 'services/sampleContainerMigrationSource.js',
         loaderSha256: 'ab223052522a5d74e899c4c372204a4a68574819a3f6b3c7bd8837f8ad7bb8d4',
@@ -216,6 +222,8 @@ const CALCULATION_PREREQUISITES = Object.freeze({
     file: 'tests/helpers/calculationReleasePrerequisites.js', exportName: 'installCalculationReleasePrerequisites',
     sha256: '5b091435c1e3ce5468a5dedcddf1f278fe3d6f6238c129804959f1826287ac57',
     callers: ['tests/helpers/qcGateFixture.js', 'tests/helpers/normalizedQcFixture.js', 'tests/helpers/repeatQcPredecessors.js',
+        // Claudio6152507558: current-schema Native case in this owned compatibility fixture only.
+        'tests/contracts/audit_2_3_compatibility_runs.test.js',
         'tests/contracts/audit_2_3_native_runs.test.js', 'tests/contracts/audit_1_2_guard_installer.test.js',
         'tests/contracts/deployment_readiness_bootstrap.test.js', 'tests/contracts/audit_3_1_attempt_sql_guards.test.js']
 });

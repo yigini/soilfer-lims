@@ -88,3 +88,6 @@ server/tests/helpers/fixtures/pre200_after293_full_application_schema.sql -text
 server/tests/helpers/instrumentImportReleaseHistoricalFixture.js text eol=lf
 server/prisma/migrations/20261013000100_sample_containers/migration.sql text eol=lf
 server/services/sampleContainerMigrationSource.js text eol=lf
+server/prisma/migrations/20261013000200_control_charts/migration.sql text eol=lf
+server/services/controlChartMigrationSource.js text eol=lf
+server/tests/fixtures/pre214-native-run-source.cjs -text

@@ -6,6 +6,20 @@ const group = count => ({ analysis: 'A', analysisName: 'Owned analysis', items: 
 })) });
 const options = { labId: 'owned-lab', defaultMethodologyId: 'method', methodologyId: 'method', maxBatchSize: 40, equipmentRequired: true,
     methods: [{ id: 'method', analysisCode: 'A', name: 'Owned method' }], eligibleEquipment: [{ id: 'instrument', name: 'Qualified instrument' }] };
+
+test('#214 chart-mode start visibly requires an offered LRM lot and sends its identity with the run', async () => {
+    const { view, axios } = await form(1, { ...options, chartLotRequired: true,
+        eligibleLrmLots: [{ id: 'lot-a', code: 'LRM-A', lotNumber: 'LOT-A' }] });
+    view.find('start-run-instrument').props.onChange({ target: { value: 'instrument' } }); await view.render();
+    expect(view.find('start-run-select-all').props.disabled).toBeTruthy();
+    expect(view.find('start-run-lrm-lot').props.required).toBe(true);
+    view.find('start-run-lrm-lot').props.onChange({ target: { value: 'lot-a' } }); await view.render();
+    view.find('start-run-select-all').props.onClick(); await view.render();
+    expect(view.find('start-run-confirm').props.disabled).toBeFalsy();
+    await view.find('start-run-form').props.onSubmit({ preventDefault() {} });
+    expect(axios.post).toHaveBeenCalledWith('/api/qc/runs/start', { analysisCode: 'A', labId: 'owned-lab', methodologyId: 'method',
+        instrumentId: 'instrument', workItemIds: ['item-0'], referenceMaterialLotId: 'lot-a' });
+});
 function api(data = options) { return { get: jest.fn(async () => ({ data })), post: jest.fn(async () => ({ data: { batch: { id: 'started-run' } } })) }; }
 async function form(count = 40, data = options) {
     const axios = api(data), onStarted = jest.fn(), groups = [group(count)];

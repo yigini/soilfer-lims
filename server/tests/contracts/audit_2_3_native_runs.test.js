@@ -35,6 +35,28 @@ const request = require('supertest');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const owned = [];
 
+test('#214 new Provisional chart-mode start refuses an unbound served LRM lot atomically', async () => {
+    const f = await require('../helpers/qcGateFixture').qcGateFixture({ fixedWindowPolicy: false, criteria: {
+        blankPerBatch: 0, duplicateEvery: 0, lrmPerBatch: 1
+    } });
+    try {
+        const built = await buildNativeRun(f.db, f.actor, f.input), before = await f.snapshot();
+        const position = built.positions.find(row => row.kind === 'LRM');
+        await expect(startNativeRun(f.db, built.id, f.actor)).rejects.toMatchObject({
+            statusCode: 422, code: 'QC_CHART_LOT_REQUIRED', message: expect.stringContaining(position.id)
+        });
+        expect(await f.snapshot()).toEqual(before);
+        expect(await f.db.controlLimitSet.count()).toBe(0);
+        expect((await f.db.batch.findUnique({ where: { id: built.id } })).startedAt).toBeNull();
+        expect(await policies.get(f.labId, 'qc.lrmLimitMode', {db:f.db,analysisCode:f.analysisCode,methodologyId:f.method.id})).toBe('CONTROL_CHART');
+        expect(await f.db.labPolicyOverride.count()).toBe(0);
+        const lot = await referenceLot(f);
+        const started = await startNativeRun(f.db, built.id, f.actor, { references: [{ positionId: position.id, referenceMaterialId: lot.id }] });
+        expect(started.startedAt).not.toBeNull();
+        expect(JSON.parse((await f.db.batchAnalyte.findFirst()).criteriaSnapshot).controlCharts[0].basis.mode).toBe('PROVISIONAL');
+    } finally { await f.close(); }
+});
+
 async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }, recordedAnalysisCode = null) {
     const labId = randomUUID(), analysisCode = recordedAnalysisCode || `NATIVE-${randomUUID()}`, username = 'system:fixture';
     const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES', relatedRows: {
@@ -63,6 +85,10 @@ async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }, recordedAn
     const method = await db.methodology.create({ data: { analysisCode, name: 'Recorded native method', loq: 0.123456789 } });
     const instrument = await db.equipmentAsset.create({ data: { id: randomUUID(), labId, name: 'Fixture instrument', assetType: 'OTHER', status: 'IN_SERVICE', criticality: 'NON_CRITICAL' } });
     const actor = { username, role: 'SUPER_ADMIN', labId }, f = { db, file, actor, labId, analysisCode, method, instrument };
+    // Claudio6152507558: retain these pre-chart assertions in their explicit
+    // fixed-window policy context; production Strict remains CONTROL_CHART.
+    await policies.change(actor, labId, { changes: [{ key: 'qc.lrmLimitMode', value: 'FIXED_WINDOW' }],
+        reason: 'Retained pre-chart Native fixture context' }, { db });
     await rules.change(actor, { labId, analysisCode, methodologyId: method.id, criteria, expectedVersion: 0, reason: 'Reviewed fixture criteria' }, { db });
     f.workItemIds = await members(f, count);
     f.input = { instrumentId: instrument.id, workItemIds: f.workItemIds, seed: 'native-integration-fixture' };

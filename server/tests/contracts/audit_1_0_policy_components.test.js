@@ -82,7 +82,7 @@ describe('Audit 1.0: real policy page controls', () => {
         const h = await fixture(), change = jest.fn();
         const tree = h.editor({ definition: registry['qc.westgardRules'], value: { reject: [], warn: ['1-2s'] }, t, onChange: change });
         elements(tree).find(node => node.type === 'input').props.onChange({ target: { checked: true } });
-        expect(change).toHaveBeenCalledWith({ reject: ['1-2s'], warn: [] });
+        expect(change).toHaveBeenCalledWith({ reject: ['1-2s'], warn: [], review: [] });
     });
     test('calibration action editor offers bracket repeats only for continuing checks and preserves other kinds', async () => {
         const h = await fixture(), change = jest.fn();

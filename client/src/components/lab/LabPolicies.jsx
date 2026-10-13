@@ -32,10 +32,10 @@ export function PolicyValueEditor({ definition, value, onChange, t }) {
             onChange={e => onChange({ ...value, [boundary]: e.target.value === '' ? '' : Number(e.target.value) })} />
     </label>)}</div>;
     if (definition.type === 'westgard') return <div>{definition.allowedValues.map(code => <div key={code} className="flex gap-4 items-center py-2">
-        <span>{code}</span>{['reject', 'warn'].map(kind => <label key={kind}>
-            <input type="checkbox" checked={value[kind].includes(code)} onChange={e => onChange({
-                reject: value.reject.filter(v => v !== code), warn: value.warn.filter(v => v !== code),
-                [kind]: e.target.checked ? [...value[kind].filter(v => v !== code), code] : value[kind].filter(v => v !== code)
+        <span>{code}</span>{['reject', 'warn', 'review'].map(kind => <label key={kind}>
+            <input type="checkbox" checked={(value[kind] || []).includes(code)} onChange={e => onChange({
+                reject: value.reject.filter(v => v !== code), warn: value.warn.filter(v => v !== code), review: (value.review || []).filter(v => v !== code),
+                [kind]: e.target.checked ? [...(value[kind] || []).filter(v => v !== code), code] : (value[kind] || []).filter(v => v !== code)
             })} /> {t(`policies.${kind}`)}</label>)}</div>)}</div>;
     if (definition.type === 'qcFailAction') return <div className="space-y-2">{['BLANK', 'DUPLICATE', 'LRM', 'CRM'].map(type => <label key={type}>
         {t(`qcRules.types.${type}`)}<select value={value[type]} onChange={e => onChange({ ...value, [type]: e.target.value })}>
@@ -93,7 +93,7 @@ export default function LabPolicies({ labId }) {
     const display = (definition, value) => {
         if (value === null) return t(definition.type === 'integer' ? 'policies.noLimit' : 'policies.none');
         if (typeof value === 'boolean') return t(value ? 'policies.yes' : 'policies.no');
-        if (definition.type === 'westgard') return `${t('policies.reject')}: ${value.reject.join(', ') || '—'}; ${t('policies.warn')}: ${value.warn.join(', ') || '—'}`;
+        if (definition.type === 'westgard') return ['reject','warn','review'].map(kind => `${t(`policies.${kind}`)}: ${(value[kind] || []).join(', ') || '—'}`).join('; ');
         if (definition.type === 'runProfiles') return Object.values(value).map(p => `${p.name} (${p.capacity})`).join('; ');
         if (['qcFailAction', 'calibrationFailAction'].includes(definition.type)) return Object.entries(value).map(([type, action]) => `${t(definition.type === 'calibrationFailAction' ? `qcRuns.kinds.${type}` : `qcRules.types.${type}`, type)}: ${t(`qcRules.actions.${action}`)}`).join('; ');
         if (definition.type === 'equipmentReadinessMap') return Object.entries(value).map(([criticality, action]) =>

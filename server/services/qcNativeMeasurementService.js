@@ -135,6 +135,7 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
                 details: JSON.stringify({ ...evaluated, entryMode: correction ? 'CORRECTION' : 'NATIVE_ENTRY', correctionReason: correction ? reason : null,
                     ...(reviewed && { correctionMode: MODE, sourceReference: reviewed.sourceReference, criteriaSource }) }) } });
             await require('./nonconformityQcService').raiseCrmFailures(tx, actor, storedEvaluation);
+            await require('./controlChartService').createReviews(tx, storedEvaluation, targetLab.id);
             await tx.batchAnalyte.update({ where: { id: analyte.id }, data: { status: evaluated.status } });
             analyte.status = evaluated.status;
             if (['QC_FAIL', 'QC_PASS', 'QC_WARN'].includes(evaluated.status)) {
