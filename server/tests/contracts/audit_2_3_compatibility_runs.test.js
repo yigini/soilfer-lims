@@ -61,7 +61,9 @@ async function fixture({ migrated = false, sampleMember = false, finalClear = fa
         // Only the new Native case needs the current normal installation; all assertions are retained.
         require('../../scripts/install_work_attempt_contract').installWorkAttemptContract({ dbPath: record.file, apply: true });
         require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({ dbPath: record.file, apply: true });
-        require('../helpers/calculationReleasePrerequisites').installCalculationReleasePrerequisites(record.file);
+        const { installCalculationReleasePrerequisites } = require('../helpers/calculationReleasePrerequisites');
+        const ownedDatabaseFile = record.file;
+        installCalculationReleasePrerequisites(ownedDatabaseFile);
         require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: record.file, apply: true });
         require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: record.file, apply: true });
         require('../../scripts/install_control_charts').installControlCharts({ dbPath: record.file, apply: true });

@@ -1,0 +1,1523 @@
+PASS tests/security/audit_1_2_state_writes.test.js (11.01 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (7 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)"))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)"))
+  √ the original rehearsal cannot reintroduce a direct Sample deletion (1 ms)
+  √ nested connect association has one actual authority finding
+  √ nested set association has one actual authority finding (1 ms)
+  √ nested disconnect association has one actual authority finding
+  √ the closed FK runner refuses unknown case (82 ms)
+  √ the closed FK runner refuses configured candidate (83 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (5 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (2 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (2 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (2 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (2 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js (1 ms)
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql
+  √ legacy CLI launchers cannot import any fixture or test module (2 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (5 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (2 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (6 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (4 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js
+  √ a direct sample write in a #190 test remains a finding outside the factory
+  √ a direct workItem write in a #190 test remains a finding outside the factory (1 ms)
+  √ a direct result write in a #190 test remains a finding outside the factory
+  √ a changed #190 historical factory digest is a scanner finding (9 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (11 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql (2 ms)
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql (1 ms)
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (10436 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"]) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')")
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`")
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)')
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')")
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (2 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (40 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}})
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED')
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}`
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`)
+  √ a real temporary non-allowlisted test file fails the source guard (2 ms)
+  √ a shadowed file reader cannot impersonate a known schema load (1 ms)
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (1 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js (1 ms)
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (1 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF')
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0')
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF')
+  √ native pragma reads and enabled constraints remain permitted
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (1 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (1 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 8ddfa2a4-511b-4b6a-9ee9-f8fa94ac9b68) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcNativeRunService.js:18:16)
+      at services/qcNativeRunService.js:74:9
+      at transaction (services/qcNativeRunService.js:42:91)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_2_3_native_runs.test.js:1124:5)
+
+PASS tests/contracts/audit_2_3_native_runs.test.js (102.229 s)
+  √ #214 new Provisional chart-mode start refuses an unbound served LRM lot atomically (2818 ms)
+  √ a failed analyte leaves its sibling measurable, reopenable and closable (deviation=false) (2101 ms)
+  √ a failed analyte leaves its sibling measurable, reopenable and closable (deviation=true) (2098 ms)
+  √ an explicit method cannot replace recorded strict work-item methods with a lax QC rule (1608 ms)
+  √ a real failed Native blocking run remains excluded from reports and publication after live QC becomes OFF (2340 ms)
+  √ mixed actual Native ADVISORY and compatibility live BLOCKING batches use the strictest effective report mode (1757 ms)
+  √ a compatibility-only failed run retains live policy changes for report validity and publication (2029 ms)
+  √ Native texture QC flags its governed fractions independently and preserves their values on deviation acceptance (1826 ms)
+  √ test-owned cleanup retains QC-referenced workflow evidence and still removes unrelated explicit fixture ids (1643 ms)
+  √ Native builds refuse two active attempts for a sample/analyte and never attach ACCEPTED history, with zero writes (1593 ms)
+  √ sealed SUBMITTED work items cannot join Native or ordinary runs (1628 ms)
+  √ sealed ACCEPTED work items cannot join Native or ordinary runs (1631 ms)
+  √ sealed WAIVED work items cannot join Native or ordinary runs (1608 ms)
+  √ sealed CANCELLED work items cannot join Native or ordinary runs (1642 ms)
+  √ concurrent A/B first starts allocate distinct ordinals; abandoned OPEN builds do not consume C’s ordinal (1851 ms)
+  √ actual OPEN reorder retains physical ids, lot evidence and duplicate parents; invalid and frozen orders write nothing (1802 ms)
+  √ a late reorder event fault rolls back temporary numbering and all work-item rack changes (1881 ms)
+  √ native entry, explicit evaluation and corrections before first start refuse without any write (1633 ms)
+  √ partial native entry is retained; missing explicit values, malformed values and auto-evaluation while unbound refuse atomically (1747 ms)
+  √ retained Native collection input uses physical ids, real duplicate parents and immutable full-precision expected values (1747 ms)
+  √ the shared Native mutation rolls back evaluated observations when requested acceptance, close or metadata is refused (1778 ms)
+  √ actual authenticated Native routes build, start, evaluate, reopen and correct using frozen API criteria and exact retained values (2812 ms)
+  √ reasoned corrections append two evaluation versions and exact measurements using the frozen start limit (2000 ms)
+  √ explicit evaluation after reopen appends fresh acceptance without rewriting retained readings (1826 ms)
+  √ native censoring retains null numeric observations, canonical qualifiers and the frozen method limit (1756 ms)
+  √ OFF start writes no evaluation; explicit evaluation records NOT_REQUIRED and never passing observation evidence (1705 ms)
+  √ explicit evaluation records each OFF analyte without fake readings or passed QC counts (1751 ms)
+  √ stored profile conversion refuses; separate direct non-calibration runs preserve free text and may start without a registered asset (1704 ms)
+  √ part 13 calibration start requires a valid active scoped asset, refuses without writes and freezes its exact identity and text (1768 ms)
+  √ failed Native disposition REPEAT_BATCH retains failed evidence and uses the central work transition (1948 ms)
+  √ failed Native disposition REJECT retains failed evidence and uses the central work transition (1938 ms)
+  √ failed membership cannot move without repeat/reject disposition (warning=false) (1750 ms)
+  √ failed membership cannot move without repeat/reject disposition (warning=true) (1879 ms)
+  √ actual manager disposition accepts a failed Native analyte with deviation, preserves warning flags and closes without changing failed readings (1930 ms)
+  √ actual stored profile membership refuses conversion; a separate new Native run works and remains frozen after manager reopen (1953 ms)
+  √ actual Native builder refuses 23 samples at the default limit and builds the specified 23-sample sequence through a method rule (2161 ms)
+  √ ADVISORY explicit evaluation records INCOMPLETE; later complete values supersede it using frozen criteria (1844 ms)
+  √ mixed-analyte evaluations and flags are independent; a shared lot correction appends both verdicts atomically (2110 ms)
+  √ a late evaluation insert failure rolls back measurements, every shared binding and both analyte verdicts (1898 ms)
+  √ calibration CHECK_STANDARD uses the frozen CCV criterion and unbound calibration blanks never block (1722 ms)
+  √ pre-start rebuild retains a bound extra and both certificate revisions when its lot changes (1893 ms)
+  √ a measured extra CRM is optional at a not-due ordinal and its failure contributes to the analyte verdict (1840 ms)
+  √ removing a bound analyte last member is refused without writes; an unbound analyte removal is recorded (3449 ms)
+  √ optional CRM lot correction records NOT_SERVED with intact prior evidence; a due CRM refuses the same missing value (2320 ms)
+  √ real 23-sample builder writes 28 physical members, recorded parent picks and no invented QC values or ordinal (2077 ms)
+  √ positive-minimum shared LRM extras use frozen required ids; only the extra may drop optional analyte service (2036 ms)
+  √ mixed calibration frequencies freeze each analyte opening, closing and first boundary pair ids independently (2059 ms)
+  √ real default-capacity, missing method and cross-lab builds refuse with zero normalized, membership or audit writes (2208 ms)
+  √ first start freezes the newly effective limit, number policy and method LOQ with one ordinal, instrument and real analyst (1709 ms)
+  √ a first-start count revision refuses stale positions and leaves every row, actor and ordinal unchanged (1652 ms)
+  √ resuming a reopened native run reuses first-start metadata and criteria without resolving later policy (1797 ms)
+  √ another start consumes the forecast ordinal; a now-due missing CRM refuses atomically instead of guessing or skipping it (1792 ms)
+  √ shared physical lot gets separate precise analyte snapshots; a missing second value and conflicting lot refuse the whole build (1735 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User foreign (Lab: 4b0ad930-4223-4613-b7ca-72fc36d2ef1e) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/crossCheckEvaluationService.js:13:11)
+      at services/crossCheckEvaluationService.js:109:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_8_cross_check_evidence.test.js:223:5)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User foreign (Lab: 4b0ad930-4223-4613-b7ca-72fc36d2ef1e) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/crossCheckEvaluationService.js:13:11)
+      at recordSubmissionCrossChecks (services/crossCheckEvaluationService.js:77:20)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_8_cross_check_evidence.test.js:224:5)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 91d67d06-05ac-424c-9369-55b66e7fa1b7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 91d67d06-05ac-424c-9369-55b66e7fa1b7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 91d67d06-05ac-424c-9369-55b66e7fa1b7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 91d67d06-05ac-424c-9369-55b66e7fa1b7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 91d67d06-05ac-424c-9369-55b66e7fa1b7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 91d67d06-05ac-424c-9369-55b66e7fa1b7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 57ee5918-707f-4c52-b60b-f705d6773054
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 57ee5918-707f-4c52-b60b-f705d6773054
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 57ee5918-707f-4c52-b60b-f705d6773054
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 57ee5918-707f-4c52-b60b-f705d6773054
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 57ee5918-707f-4c52-b60b-f705d6773054
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 57ee5918-707f-4c52-b60b-f705d6773054
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 59861422-230b-4faf-b898-744ffc99443a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 59861422-230b-4faf-b898-744ffc99443a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 59861422-230b-4faf-b898-744ffc99443a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 59861422-230b-4faf-b898-744ffc99443a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 59861422-230b-4faf-b898-744ffc99443a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 59861422-230b-4faf-b898-744ffc99443a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 4d3b04ef-2d6a-4f9d-a8da-707b2a2610ee
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/audit_4_8_cross_check_evidence.test.js (29.721 s)
+  √ current stored-numeric preview keeps legacy diagnostics separate for basis null and writes no evidence (1719 ms)
+  √ current stored-numeric preview keeps legacy diagnostics separate for basis AIR_DRY and writes no evidence (1383 ms)
+  √ the actual submission response retains legacy diagnostics and separate immutable crossChecks for basis null (1668 ms)
+  √ the actual submission response retains legacy diagnostics and separate immutable crossChecks for basis AIR_DRY (1587 ms)
+  √ an unregistered historical lab saves and submits through the real HTTP workflow with disclosed unavailable checks and zero evidence (1279 ms)
+  √ missing sample lab metadata discloses unavailable preview/review without a policy substitute or database writes (1312 ms)
+  √ a registered inactive lab still records immutable checks using its own configured policy (1346 ms)
+  √ the separate submission endpoint exposes cross-check evidence or its unavailable reason, registered=true (1444 ms)
+  √ the separate submission endpoint exposes cross-check evidence or its unavailable reason, registered=false (1389 ms)
+  √ real submission retains all seven numeric-evidence checks and review reads the frozen 1.3 × CEC flag without parsing text (1500 ms)
+  √ a late evidence insert refusal rolls back the complete submission, attempts, events, Sample and audits (1450 ms)
+  √ cross-check writes require a caller transaction and permission; foreign review reads and writes refuse without changes (1377 ms)
+  √ after selection the live panel uses the real saved selections, supersedes without mixing observations, and preserves submission evidence (1766 ms)
+  √ a later laboratory policy affects only live selected checks; stored submission thresholds and another lab remain fixed (3364 ms)
+  √ a partial selection never fills missing selected inputs from the still-current observations (1428 ms)
+  √ invalid retained JSON {invalid is refused with a stable4xx without adopting or changing evidence (1341 ms)
+  √ invalid retained JSON null is refused with a stable4xx without adopting or changing evidence (1340 ms)
+  √ invalid retained JSON {"values":null} is refused with a stable4xx without adopting or changing evidence (1349 ms)
+  √ invalid retained JSON {"values":[],"missing":[],"lowerBound":false} is refused with a stable4xx without adopting or changing evidence (1323 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_7_xlsx_commit.test.js (18.074 s)
+  √ real XLSX commit keeps long, exponent and rounded-display raw drafts plus immutable cell and policy evidence (1309 ms)
+  √ every mapped cell refusal lists its cell and leaves actual drafts, results, QC, attempts, audits and receipts unchanged (1336 ms)
+  √ actual lab number policy {"decimal":",","thousands":"."} controls the verified numeric1.234 lab text (1305 ms)
+  √ actual lab number policy {"decimal":",","thousands":null} controls the verified numeric1.234 lab text (1186 ms)
+  √ actual lab number policy {"decimal":".","thousands":null} controls the verified numeric1.234 lab text (1197 ms)
+  √ actual lab number policy {"decimal":".","thousands":","} controls the verified numeric1.234 lab text (1199 ms)
+  √ numeric/text imports under{"decimal":",","thousands":"."} keep source lexemes, verified draft text and the used policy version (1398 ms)
+  √ numeric/text imports under{"decimal":",","thousands":" "} keep source lexemes, verified draft text and the used policy version (1373 ms)
+  √ numeric/text imports under{"decimal":".","thousands":","} keep source lexemes, verified draft text and the used policy version (1378 ms)
+  √ shared-string1.234 remains ambiguous under comma/space policy and refuses the whole commit without transliteration (1217 ms)
+  √ policy changes after preview invalidate the actual commit before any receipt or draft (1190 ms)
+  √ mounted multipart sheets require an exact selection; changing it cannot authorize another sheet (1309 ms)
+  √ the actual multipart compressed-size cap returns the pinned XLSX code on both routes with zero writes (1334 ms)
+  √ malformed XML, macros, external parts and XML resource overflow refuse the real preview with zero writes (1200 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: OUTSIDE-FIXTURE-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at Object.<anonymous> (tests/contracts/audit_2_3_compatibility_runs.test.js:320:5)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: OUTSIDE-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcCompatibilityRunService.js:26:16)
+      at services/qcCompatibilityCorrectionService.js:24:23
+      at inTransaction (services/workflowStateRules.js:188:97)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_2_3_compatibility_runs.test.js:375:5)
+
+PASS tests/contracts/audit_2_3_compatibility_runs.test.js (17.923 s)
+  √ empty compatibility creation leaves all deprecated JSON null and resolves the laboratory profile (505 ms)
+  √ a migrated sibling status change preserves failed/dispositioned evidence and result flags (null) (922 ms)
+  √ a migrated sibling status change preserves failed/dispositioned evidence and result flags (REPEAT_BATCH) (900 ms)
+  √ a migrated sibling status change preserves failed/dispositioned evidence and result flags (REJECT) (876 ms)
+  √ a migrated REJECT_REANALYSIS item joins a new PROFILE run while preserving its old evidence and membership (533 ms)
+  √ a migrated REJECT_REANALYSIS item joins a new NATIVE run while preserving its old evidence and membership (852 ms)
+  √ a migrated never-run OPEN batch with main default empty QC arrays still accepts and removes real items (550 ms)
+  √ a migrated final-clear round retains historical evidence and refuses a real item add with zero writes (522 ms)
+  √ first RUNNING transition freezes compatibility membership permanently (migrated=false) (606 ms)
+  √ first RUNNING transition freezes compatibility membership permanently (migrated=true) (574 ms)
+  √ manual QC_FAIL contradicting a passing evaluation is refused rather than acknowledged as a no-op (545 ms)
+  √ actual compatibility PUT and evaluate routes retain pass/reopen/resubmit cycles, missing-value refusals and manager authority (812 ms)
+  √ actual unresolved profile membership retains reserved-slot, explicit rack and removal behavior using real SAMPLE joins (624 ms)
+  √ normalized reads resolve the actor laboratory code while refusing another laboratory scope (485 ms)
+  √ actual reasoned compatibility corrections retain both evaluations, supersede once and keep the full round (migrated=false) (680 ms)
+  √ actual reasoned compatibility corrections retain both evaluations, supersede once and keep the full round (migrated=true) (675 ms)
+  √ compatibility correction resolves the round after a reopen, refuses earlier round ids, and rolls back a late insert fault (801 ms)
+  √ profile/migrated ordinary resubmission retains every preceding row and isolates the current round (migrated=false) (561 ms)
+  √ profile/migrated ordinary resubmission retains every preceding row and isolates the current round (migrated=true) (552 ms)
+  √ a migrated INCOMPLETE clear can receive an ordinary full submission without inventing a correction or reopen (495 ms)
+  √ ordinary resubmission supersedes a changed real SAMPLE reading once and reuses an unchanged parent in the next round (655 ms)
+  √ a submitted invalid value null is refused before any snapshot, position, reading or evaluation write (525 ms)
+  √ a submitted invalid value  is refused before any snapshot, position, reading or evaluation write (528 ms)
+  √ a submitted invalid value true is refused before any snapshot, position, reading or evaluation write (482 ms)
+  √ manager authority and reason are required for reopening, and failed evidence remains locked for every role (622 ms)
+  √ a late evaluation insertion failure rolls back the entire submission and both durable snapshot representations (557 ms)
+  √ compatibility duplicate censoring retains raw input and null numeric observations in the new round (559 ms)
+  √ the next compatibility submission resolves the current lab policy instead of freezing an empty profile method (626 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User manager-3a9270ca-a5da-4145-aef0-3a831a33d81f (Lab: another-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/controlChartService.js:23:16)
+      at services/controlChartService.js:156:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/issue_214_control_chart_integration.test.js:207:5)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T20:31:44.613Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/issue_214_control_chart_integration.test.js (17.693 s)
+  √ the explicit SQLite read-only impact report resolves actual policy scopes and counts unbound new runs without changing database bytes (1575 ms)
+  √ an effective corrected observation replaces its original in future baselines while prior proposals and evaluations stay immutable (1351 ms)
+  √ a different reference-material lot is a new Provisional series and cannot inherit approved limits or history (1280 ms)
+  √ run-first options expose eligible chart lots and the actual start binds them in its guarded transaction (1258 ms)
+  √ chart lots freeze at start; fixed-window late binding and a pre-release started run retain their original path (3647 ms)
+  √ provisional limits, approval by a second user and supersession preserve all past and already-started criteria (1402 ms)
+  √ QC_FAIL controls remain in sequence history but cannot enter a passing baseline (1325 ms)
+  √ review rules create idempotent scoped obligations and append-only resolutions without changing verdicts (1491 ms)
+  √ every baseline exclusion is explicit and retained; ambiguous chronology and wrong scope refuse atomically (1389 ms)
+  √ HTTP scope and approval permissions use actual token validation and stable refusal codes (1349 ms)
+  √ additive installation preserves stored legacy policy bytes and old rows with DRY 0 / APPLY 1 / NO_OP 0 (1234 ms)
+
+PASS tests/contracts/audit_4_7_calculation_import.test.js (5.619 s)
+  √ actual EXCH_CA/Olsen activated input imports do not calculate; later typed recording freezes the selected local definitions and verified raw input text (1470 ms)
+  √ missing/duplicate/unknown activated variables, output-unit input guesses and active direct-value mappings refuse the whole commit (1482 ms)
+  √ a calculation deactivation after preview refuses before any receipt, raw draft or scientific evidence is created (1276 ms)
+  √ QC under an input-only mapping refuses the whole file before any draft, receipt or scientific writes (1282 ms)
+
+PASS tests/contracts/audit_3_3_selection_backfill.test.js
+  √ default dry-run writes zero bytes, reports exact outcomes, and apply preserves both published and superseded report content (1817 ms)
+  √ a missing or stale dry-run fingerprint refuses with zero writes (1451 ms)
+  √ a missing named active global approver refuses dry and apply without writes (1248 ms)
+  √ CLI refuses incomplete, duplicate or contradictory arguments [] (11 ms)
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned"]
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned", "--by", "reviewer", "--apply", "--dry-run"] (1 ms)
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned", "--by", "reviewer", "--wat"]
+  √ CLI refuses incomplete, duplicate or contradictory arguments ["--db", "owned", "--by", "reviewer", "--db", "other"]
+  √ CLI defaults to dry-run and requires an explicit database and actor
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+PASS tests/contracts/reception_route_smoke.test.js
+  Reception Route Smoke & Static Asset Verification (#113, #114, #117)
+    √ 1. Release Prerequisite: client production build (client/dist) must exist
+    √ 2. GET /reception returns HTTP 200 and text/html SPA shell (6 ms)
+    √ 3. GET /reception?mode=WALK_IN returns HTTP 200 and text/html SPA shell (4 ms)
+    √ 4. Client dist bundle contains compiled Reception page asset (97 ms)
+    √ 5. Referenced entry assets in index.html are served with HTTP 200 (11 ms)
+    √ 6. Isolated Reception parent render with WALK_IN mode completes without runtime crash (15 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3a666a87-f568-47d9-8c53-f6efeb0ae68e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 3a666a87-f568-47d9-8c53-f6efeb0ae68e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3a666a87-f568-47d9-8c53-f6efeb0ae68e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3a666a87-f568-47d9-8c53-f6efeb0ae68e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate_attempt.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=3e1113e1cda1bb9ae206481e8990423cf9df02546065fd4d92f32e366b28ed88. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate_attempt.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=3e1113e1cda1bb9ae206481e8990423cf9df02546065fd4d92f32e366b28ed88. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 3a666a87-f568-47d9-8c53-f6efeb0ae68e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1_rescan.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=alpha_mir_sample01_rep1_rescan.csv, LabID=TEST-STAGEB-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 3a666a87-f568-47d9-8c53-f6efeb0ae68e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [getLibrary] Query: {
+      "AND": [
+        {
+          "status": {
+            "not": "DELETED"
+          }
+        },
+        {
+          "isCurrent": true
+        },
+        {
+          "OR": [
+            {
+              "sampleId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "labId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "filename": {
+                "contains": "TEST-STAGEB-SMP-01"
+              }
+            },
+            {
+              "sampleId": {
+                "in": [
+                  "TEST-STAGEB-SMP-01"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "OR": [
+            {
+              "labId": "LAB-GTM"
+            }
+          ]
+        }
+      ]
+    }
+
+      at log (controllers/spectralController.js:124:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3a666a87-f568-47d9-8c53-f6efeb0ae68e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [getLibrary] Query: {
+      "AND": [
+        {
+          "status": {
+            "not": "DELETED"
+          }
+        },
+        {
+          "OR": [
+            {
+              "sampleId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "labId": "TEST-STAGEB-SMP-01"
+            },
+            {
+              "filename": {
+                "contains": "TEST-STAGEB-SMP-01"
+              }
+            },
+            {
+              "sampleId": {
+                "in": [
+                  "TEST-STAGEB-SMP-01"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "OR": [
+            {
+              "labId": "LAB-GTM"
+            }
+          ]
+        }
+      ]
+    }
+
+      at log (controllers/spectralController.js:124:17)
+
+PASS tests/contracts/spectral_stage_b.test.js
+  Spectral Library Stage B (SL-06 to SL-12)
+    √ SL-06 & SL-08 & SL-09 & SL-10: Ingest stores raw file, links equipment, and saves typed metadata (56 ms)
+    √ SL-07: Cannot approve spectrum if physical quantity is UNVERIFIED (9 ms)
+    √ SL-11: Checksum Deduplication rejects identical file in same lab (7 ms)
+    √ SL-12: Supersession marks prior scan isCurrent: false and supersedes (33 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8b7da770-67a7-4311-97e7-d8dd7950d07f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=TEST-MULTIPART-SMP-01_scan.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=TEST-MULTIPART-SMP-01_scan.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8b7da770-67a7-4311-97e7-d8dd7950d07f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8b7da770-67a7-4311-97e7-d8dd7950d07f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate.dx, LabID=TEST-MULTIPART-SMP-01, Modality=undefined
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=d7f07004808860cf614ea03d45c1bf973842cdab5798fde83a7cffd2acc67166. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+  console.log
+    [DEBUG] Processing Scan: Name=duplicate.dx, LabID=TEST-MULTIPART-SMP-01, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [SPECTRAL] Duplicate detected with sha256=d7f07004808860cf614ea03d45c1bf973842cdab5798fde83a7cffd2acc67166. Skipping.
+
+      at log (controllers/spectralController.js:1341:25)
+
+PASS tests/contracts/spectral_multipart_upload.test.js
+  Spectral Multipart Raw Ingest & Byte-Identical Preservation Contract (SL-06 & SL-13)
+    √ 1. Multipart raw JCAMP-DX upload preserves exact binary bytes and downloads back byte-identical (42 ms)
+    √ 2. Multipart duplicate upload is rejected by checksum (11 ms)
+
+PASS tests/contracts/issue_214_control_chart_ui.test.js
+  √ chart requests use the chosen lab and exact series; reading permission hides all requests and actions (59 ms)
+  √ baseline exclusions require a reason and submit selected identities without changing values (14 ms)
+  √ a trial outlier stays selected until the proposer explicitly excludes it (10 ms)
+  √ proposal approval is hidden from its own proposer and visible to a different named approver (12 ms)
+  √ review resolution requires a note and posts the explicit outcome without touching a run verdict (6 ms)
+  √ plot draws mean, ±2s and ±3s from the selected stored set and labels every observation (4 ms)
+  √ chart actions, statuses and policy keys exist in both en catalogues (6 ms)
+  √ chart actions, statuses and policy keys exist in both es catalogues (8 ms)
+  √ chart actions, statuses and policy keys exist in both es-419 catalogues (6 ms)
+  √ chart actions, statuses and policy keys exist in both fr catalogues (7 ms)
+  √ chart actions, statuses and policy keys exist in both pt catalogues (5 ms)
+
+PASS tests/contracts/audit_2_6_sql_scanner.test.js
+  √ closed loadProficiencyMigrationSource SQL is inspected while appended workflow writes remain rejected (14 ms)
+  √ closed loadResultEquipmentMigrationSource SQL is inspected while appended workflow writes remain rejected (5 ms)
+  √ shadowed, escaped and mutated loadProficiencyMigrationSource sources are still unknown SQL (4 ms)
+  √ shadowed, escaped and mutated loadResultEquipmentMigrationSource sources are still unknown SQL (3 ms)
+  √ changed loadProficiencyMigrationSource loader or DDL bytes restore the failing unknown-SQL finding (2 ms)
+  √ changed loadResultEquipmentMigrationSource loader or DDL bytes restore the failing unknown-SQL finding (1 ms)
+
+PASS tests/contracts/issue_214_control_chart_rules.test.js
+  √ 1-2s fires only beyond its strict boundary (1 ms)
+  √ 1-3s fires only beyond its strict boundary
+  √ 2-2s fires only beyond its strict boundary (5 ms)
+  √ 4-1s fires only beyond its strict boundary
+  √ 10x fires only beyond its strict boundary
+  √ R-4s cannot compare two different runs and records one-point runs as not applicable (1 ms)
+  √ sequence rules span runs, include failed controls, and count multiple positions in one run
+  √ history cannot cross a limit-basis reset (10 ms)
+  √ provisional and fixed windows never report multirules as passed (1 ms)
+  √ explicit review mapping is independent of reject/warn verdicts
+  √ mapping rejects duplicates and preserves old overrides without a review key
+  √ order is execution time then QC index then deterministic id; unknown metadata refuses (2 ms)
+  √ baseline uses arithmetic mean and sample SD, refuses constant or nonfinite baselines
+  √ a stored evaluation is independent of later changes to input values and limits (1 ms)
+
+Test Suites: 14 passed, 14 total
+Tests:       293 passed, 293 total
+Snapshots:   0 total
+Time:        210.116 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_compatibility_runs.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_8_cross_check_evidence.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_xlsx_commit.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_selection_backfill.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_calculation_import.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectral_multipart_upload.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reception_route_smoke.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\spectral_stage_b.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_rules.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_integration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_native_runs.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_sql_scanner.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue214-scanner-call-form-focused\report-original.json

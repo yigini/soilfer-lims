@@ -1,0 +1,102 @@
+{
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/command.json": {
+    "bytes": 2812,
+    "sha256": "323c08597e16ff52bee2da2d05176beb7ad6d072c151dde4529ae29567024f13"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/config-original.json": {
+    "bytes": 12028,
+    "sha256": "531b4c2f584b18b8e3953ede63af289260256bd345fff8af6483cdf56043305c"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/config-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/inventory-original.json": {
+    "bytes": 48871,
+    "sha256": "e4cf87a833b8ad623423cddef6999e70102d61e0b2109175157fc0fd7778f5ab"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/inventory-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/report-original.json": {
+    "bytes": 133928,
+    "sha256": "91ce27fcce64190e01b9711a048314dd3ab34ac33a49220a04f61292881af730"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/source-after.json": {
+    "bytes": 52475,
+    "sha256": "0e93684aefe3ed752f19e4b486c704811dc20cabdc95f46672b029abd18b4048"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/source-before.json": {
+    "bytes": 52475,
+    "sha256": "0e93684aefe3ed752f19e4b486c704811dc20cabdc95f46672b029abd18b4048"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/stderr-original.log": {
+    "bytes": 73760,
+    "sha256": "a9b1480301f1181f944647202bc61c6288363c96ae3a4349936be47a946f6cbb"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/stdout-original.log": {
+    "bytes": 2351,
+    "sha256": "7f7693cfc71793076add41b9c4265926114f195bec2485238d9ef16b5d5c8398"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/summary.json": {
+    "bytes": 464,
+    "sha256": "2d835eeead8b8702566f7a4e08e2b95fd862f1c8f09f64e5340a6d6aa195bc48"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused/visible-local-storage.json": {
+    "bytes": 10276,
+    "sha256": "2074175831658d26499745eb6d3b1cc250f33263b0c66c18d473854e60875226"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-focused-pass/terminal-boundary.json": {
+    "bytes": 1170,
+    "sha256": "b7a0c60904b82177a569df805e52f8ccddc0d601d95be4c347a08dcf76018c53"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-correction/fixture-after-original.js": {
+    "bytes": 45064,
+    "sha256": "b9c502bf592675d854daaf6581e76ef60a20cc4ba12ea34eede5bbbb701a3efd"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-correction/fixture-before-original.js": {
+    "bytes": 44951,
+    "sha256": "5401a5188066575cd9f260c9d02bc93aab331abb84cc19aae2d220368529ac89"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-correction/preparation-record.json": {
+    "bytes": 749,
+    "sha256": "ce249a99ad73005fe88c8d0594c8be82672ea485f284a20d9d69e9200f543095"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-correction/static-scanner-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-scanner-call-form-correction/static-scanner-stdout-original.json": {
+    "bytes": 2,
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "server/tests/contracts/audit_2_3_compatibility_runs.test.js": {
+    "bytes": 45064,
+    "sha256": "b9c502bf592675d854daaf6581e76ef60a20cc4ba12ea34eede5bbbb701a3efd"
+  },
+  "server/tests/helpers/workflowWriteScanner.js": {
+    "bytes": 85312,
+    "sha256": "1894b51320bacf9993b7b392cf5fe7621f8fa76bfbad6a7064ab722615247298"
+  },
+  "WP/backlog-resume-20261013/retain-issue214-scanner-call-form-focused-pass-once.py": {
+    "bytes": 5632,
+    "sha256": "43bd4cf3952b345c1240f78073953a97016af1753bb026bff4fea677c73581e4"
+  },
+  "WP/backlog-resume-20261013/prepare-issue214-scanner-call-form-successors-once.py": {
+    "bytes": 4537,
+    "sha256": "4e0d446b6cfd1a8dc4f200682b0ce547219d16eeca59d0bce56afd0183cb3389"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-scanner-call-form-focused-once.py": {
+    "bytes": 7151,
+    "sha256": "7d497ae183cdbd1868b6509b0b7ebcb64ce04636ff400ee3b7b41173b5ea1def"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-scanner-call-form-full-once.py": {
+    "bytes": 6406,
+    "sha256": "040ef95a4624ea31adf2825c9fd4b0831b10f4bf4cdf0b9ff9feba201e320863"
+  }
+}

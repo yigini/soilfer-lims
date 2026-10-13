@@ -1,0 +1,18 @@
+{
+  "preparedUtc": "2026-10-13T20:28:19.142652+00:00",
+  "auditSourceBefore": "1015c0ac2e9ff8acdc7041f0700c94313ba7f5a3",
+  "changedSource": [
+    "server/tests/contracts/audit_2_3_compatibility_runs.test.js"
+  ],
+  "existingScannerPredicatesUnchanged": true,
+  "staticScannerFindings": [],
+  "releasedCompatibilityStatementsAndAssertionsByteIdentical": true,
+  "preparedHelpers": [
+    "verify-issue214-scanner-call-form-focused-once.py",
+    "verify-issue214-scanner-call-form-full-once.py"
+  ],
+  "preparedHelpersNotExecuted": true,
+  "productionOperations": 0,
+  "sourceBeforeSha256": "5401a5188066575cd9f260c9d02bc93aab331abb84cc19aae2d220368529ac89",
+  "sourceAfterSha256": "b9c502bf592675d854daaf6581e76ef60a20cc4ba12ea34eede5bbbb701a3efd"
+}
