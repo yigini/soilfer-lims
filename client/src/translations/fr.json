@@ -2614,7 +2614,9 @@
       "crossCheck_cnMin": "Rapport C:N minimal",
       "crossCheck_cnMax": "Rapport C:N maximal",
       "crossCheck_carbonatePhMin": "pH minimal dans l’eau pour les carbonates",
-      "report_amendedStatement": "Texte du rapport modifié"
+      "report_amendedStatement": "Texte du rapport modifié",
+      "container_codeFormat": "Format du code de contenant",
+      "container_sequenceReset": "Réinitialisation de la séquence des contenants"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -3706,5 +3708,45 @@
     "matchedRow": "Correspondance",
     "draftNotice": "Le collage met à jour les brouillons locaux. Les mesures sont sauvegardées avec Enregistrer.",
     "apply": "Appliquer {count} valeurs aux brouillons"
+  },
+  "containers": {
+    "title": "Contenants et aliquotes",
+    "help": "Créez les contenants à partir du matériau physique et de leur contenant parent enregistré.",
+    "empty": "Aucun contenant enregistré.",
+    "kind": "Type",
+    "parent": "Contenant parent",
+    "noParent": "Contenant initial en vrac",
+    "mass": "Masse (g, facultative)",
+    "create": "Créer un contenant",
+    "print": "Imprimer l’étiquette du contenant",
+    "sample": "Échantillon",
+    "linkedAttempt": "Tentative liée",
+    "aliquot": "Aliquote physique (facultative)",
+    "unlinked": "Aucun lien d’aliquote",
+    "loadFailed": "Impossible de charger les contenants.",
+    "createFailed": "Impossible de créer le contenant.",
+    "labelFailed": "Impossible de générer l’étiquette.",
+    "kinds": {
+      "BULK": "Vrac",
+      "FINE_EARTH": "Terre fine",
+      "GROUND": "Broyé",
+      "ALIQUOT": "Aliquote",
+      "ARCHIVE": "Archive"
+    },
+    "status": {
+      "ACTIVE": "Actif",
+      "CONSUMED": "Consommé",
+      "DISPOSED": "Éliminé"
+    },
+    "errors": {
+      "SAMPLE_CONTAINER_FIELDS_INVALID": "Impossible de créer le contenant.",
+      "SAMPLE_CONTAINER_FORBIDDEN": "Impossible de créer le contenant.",
+      "SAMPLE_CONTAINER_PARENT_INVALID": "Impossible de créer le contenant.",
+      "SAMPLE_CONTAINER_STATE_REFUSED": "Impossible de créer le contenant.",
+      "SAMPLE_CONTAINER_ALIQUOT_INVALID": "Impossible de créer le contenant.",
+      "SAMPLE_CONTAINER_ALIQUOT_IMMUTABLE": "Impossible de créer le contenant.",
+      "SAMPLE_CONTAINER_INVALID": "Impossible de créer le contenant.",
+      "SAMPLE_CONTAINER_IMMUTABLE": "Impossible de créer le contenant."
+    }
   }
 }

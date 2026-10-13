@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import AliquotSelect from '../sample/AliquotSelect';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { classifyResultValue } from '@lims/result-value-validation';
@@ -9,6 +10,7 @@ export default function ResultValueActions({ item, onChooseApproval, onChanged }
     const { hasPermission } = useAuth(), { t } = useLanguage();
     const [rows, setRows] = useState([]), [reason, setReason] = useState('');
     const [error, setError] = useState(null), [busy, setBusy] = useState(false);
+    const [repeatAliquot, setRepeatAliquot] = useState(null);
     const number = Number(item.draft?.replicateNo ?? 1);
     const validation = classifyResultValue(item.draft?.value ?? '', item.valueRules, item.numberFormat);
     useEffect(() => {
@@ -55,11 +57,12 @@ export default function ResultValueActions({ item, onChooseApproval, onChanged }
         </div>}
         {validation.flags.includes('ABOVE_RANGE') && !item.dilutionOpportunity?.eligible && !item.currentResult &&
             <p data-testid="record-before-dilution">{t('overrideRequests.recordFirst')}</p>}
+        {item.dilutionOpportunity?.eligible && <AliquotSelect sampleId={item.sampleId} value={repeatAliquot} onChange={setRepeatAliquot} disabled={busy} />}
         {item.dilutionOpportunity?.eligible && <button type="button" disabled={busy || !reason.trim()}
             data-testid="dilute-repeat" onClick={async () => {
                 setBusy(true);setError(null);
                 try { await axios.post(`/api/work-items/${encodeURIComponent(item.workItemId)}/repeats`, {
-                    reason: 'ABOVE_RANGE_DILUTION', note: reason });await onChanged?.(); }
+                    reason: 'ABOVE_RANGE_DILUTION', note: reason, aliquotId: repeatAliquot });await onChanged?.(); }
                 catch (failure) { setError(failure.response?.data?.error || failure.message); }
                 finally { setBusy(false); }
             }}>{t('overrideRequests.diluteRepeat')}</button>}

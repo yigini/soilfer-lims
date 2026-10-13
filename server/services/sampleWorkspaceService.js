@@ -57,7 +57,7 @@ class SampleWorkspaceService {
                     draft: true,
                     workAttempts: {
                         select: { id: true, attemptNo: true, status: true, author: true, authorName: true,
-                            materialAliquot: true, executedMethodRevision: true, createdAt: true },
+                            materialAliquot: true, aliquotId: true, executedMethodRevision: true, createdAt: true },
                         orderBy: { attemptNo: 'asc' }
                     }
                 }
@@ -309,6 +309,7 @@ class SampleWorkspaceService {
                     author: att.author,
                     authorName: att.authorName,
                     materialAliquot: att.materialAliquot,
+                    aliquotId: att.aliquotId,
                     executedMethodRevision: att.executedMethodRevision,
                     createdAt: att.createdAt
                 }))

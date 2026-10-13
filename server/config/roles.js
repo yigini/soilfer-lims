@@ -106,6 +106,9 @@ const PERMISSIONS = {
     ],
     // Repeat/correction entry admits technicians and reviewers; the command
     // services enforce assignment, submission state and laboratory scope.
+    'MANAGE_CONTAINERS': [
+        'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'SAMPLE_RECEPTION', 'LAB_TECHNICIAN'
+    ],
     'MANAGE_WORK_ATTEMPTS': [
         'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER', 'LAB_TECHNICIAN'
     ],

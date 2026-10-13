@@ -2614,7 +2614,9 @@
       "crossCheck_cnMin": "Relação C:N mínima",
       "crossCheck_cnMax": "Relação C:N máxima",
       "crossCheck_carbonatePhMin": "pH mínimo em água para carbonatos",
-      "report_amendedStatement": "Texto do relatório alterado"
+      "report_amendedStatement": "Texto do relatório alterado",
+      "container_codeFormat": "Formato do código do recipiente",
+      "container_sequenceReset": "Reinício da sequência de recipientes"
     },
     "title": "Políticas",
     "yes": "Sim",
@@ -3706,5 +3708,45 @@
     "matchedRow": "Correspondência",
     "draftNotice": "A colagem atualiza os rascunhos locais. As medições são guardadas com Registar.",
     "apply": "Aplicar {count} valores aos rascunhos"
+  },
+  "containers": {
+    "title": "Recipientes e alíquotas",
+    "help": "Crie recipientes a partir do material físico e do recipiente pai registrado.",
+    "empty": "Nenhum recipiente registrado.",
+    "kind": "Tipo",
+    "parent": "Recipiente pai",
+    "noParent": "Recipiente inicial a granel",
+    "mass": "Massa (g, opcional)",
+    "create": "Criar recipiente",
+    "print": "Imprimir etiqueta do recipiente",
+    "sample": "Amostra",
+    "linkedAttempt": "Tentativa vinculada",
+    "aliquot": "Alíquota física (opcional)",
+    "unlinked": "Sem vínculo de alíquota",
+    "loadFailed": "Não foi possível carregar os recipientes.",
+    "createFailed": "Não foi possível criar o recipiente.",
+    "labelFailed": "Não foi possível gerar a etiqueta.",
+    "kinds": {
+      "BULK": "A granel",
+      "FINE_EARTH": "Terra fina",
+      "GROUND": "Moído",
+      "ALIQUOT": "Alíquota",
+      "ARCHIVE": "Arquivo"
+    },
+    "status": {
+      "ACTIVE": "Ativo",
+      "CONSUMED": "Consumido",
+      "DISPOSED": "Descartado"
+    },
+    "errors": {
+      "SAMPLE_CONTAINER_FIELDS_INVALID": "Não foi possível criar o recipiente.",
+      "SAMPLE_CONTAINER_FORBIDDEN": "Não foi possível criar o recipiente.",
+      "SAMPLE_CONTAINER_PARENT_INVALID": "Não foi possível criar o recipiente.",
+      "SAMPLE_CONTAINER_STATE_REFUSED": "Não foi possível criar o recipiente.",
+      "SAMPLE_CONTAINER_ALIQUOT_INVALID": "Não foi possível criar o recipiente.",
+      "SAMPLE_CONTAINER_ALIQUOT_IMMUTABLE": "Não foi possível criar o recipiente.",
+      "SAMPLE_CONTAINER_INVALID": "Não foi possível criar o recipiente.",
+      "SAMPLE_CONTAINER_IMMUTABLE": "Não foi possível criar o recipiente."
+    }
   }
 }

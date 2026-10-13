@@ -18,6 +18,7 @@ import SingleSampleEditor from './SingleSampleEditor';
 import { useHelp } from '../../context/HelpContext';
 import { isEntryReady } from './entryReadiness';
 import PreviousResultHint from './PreviousResultHint';
+import AliquotSelect from '../sample/AliquotSelect';
 import ResultValueActions from './ResultValueActions';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
@@ -503,6 +504,9 @@ export default function WorksheetArea({
                                                     onBarcodeRejected={scanner.rejectValueBurst}
                                                     inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)}>{numericEntry}</CalculationEntry>) : numericEntry)}
                                                 {!isOperationalGate && <PreviousResultHint result={item.previousResult} />}
+                                                {!isOperationalGate && !isSpectral && <AliquotSelect sampleId={item.sampleId}
+                                                    value={item.draft?.values?.aliquotId} disabled={Boolean(item.currentResult)}
+                                                    onChange={aliquotId => onDraftChange(item.workItemId, null, { values: { ...(item.draft?.values || {}), aliquotId } })} />}
                                                 {!isOperationalGate && !isTexture && !isSpectral && item.valueRules && <ResultValueActions item={item}
                                                     onChooseApproval={onChooseApproval} onChanged={onBatchUpdated} />}
                                                 {position && nativeControls.renderObservation(position)}
