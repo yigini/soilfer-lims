@@ -1,0 +1,26 @@
+{
+  "status": "READ_ONLY_POLICY_RECONCILIATION",
+  "issue": 214,
+  "sourceContext": "main 959d17e1 plus frozen issue-206 source 9ae02f6a; no application changes",
+  "scopeAuthority": "https://github.com/yigini/soilfer-lims/issues/214#issuecomment-5975243795",
+  "trackingAuthority": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6141144901",
+  "applicationChanges": 0,
+  "productionMutations": 0,
+  "correctionToEarlierPlanning": "Twenty is the shipped default, not a universal threshold. Eligibility and provisional fallback must read qc.controlChartMinPoints for the canonical laboratory and method, and freeze that value with the evaluation criteria.",
+  "observedPolicyBoundaries": [
+    "qc.lrmLimitMode already exists: Strict CONTROL_CHART; Basic and Advisory FIXED_WINDOW.",
+    "qc.westgardRules already defines reject/warn sets and permits 1-2s, 1-3s, 2-2s, R-4s, 4-1s and 10x. Strict currently enables reject 1-3s/2-2s/R-4s and warn 1-2s.",
+    "qc.controlChartMinPoints is absent from the current registry and application consumers. Its new shipped default belongs in policyRegistry, with all consumers reading policyService; no inline twenty.",
+    "startNativeRun freezes method, policy, reference and rule criteria. A newly approved baseline must be frozen for a new run; existing started runs cannot fetch a newer baseline.",
+    "evaluateNativeEvidence currently sees only the current analyte evidence in its run. Cross-run sequence rules need an explicitly frozen history input and deterministic ordering, not an implicit live history query during later evaluation.",
+    "NonconformityReport is the existing CRM-failure path. closureTaskService handles sample archive/disposal. Neither is silently repurposed into a generic QC review task."
+  ],
+  "preparedScientificDesignQuestionsNotYetSent": [
+    "For R-4s, confirm the within-run measurement grouping and whether cross-run pairs are forbidden. For 2-2s/4-1s/10x, confirm the canonical chronology, eligible physical observations and reset at baseline changes.",
+    "For baseline proposals, confirm the eligibility of corrected/superseded observations and how outlier flags are recorded. Proposed design retains explicit selected/excluded measurement identities and reasons, refusing ambiguity instead of silently excluding rows.",
+    "For enabled 4-1s and 10x rules, confirm scoped QA review-task storage, owner and idempotent evaluation link. Proposed design uses a separate append-only review obligation rather than inventing a CRM nonconformity or sample closure task.",
+    "Confirm whether 4-1s and 10x retain the current policy defaults as opt-in permitted rules, or whether a separately reviewed default-policy change is intended. The current reject/warn schema is not silently extended with a new review set."
+  ],
+  "nextBoundary": "#206 remains under real CI and requires actual Claudio exact-head PASS. #214 implementation follows the authorized queue and its scientific/data-model choices are raised with Claudio before source changes.",
+  "humanBoundaries": "#102 physical phones remain YY owned. #103 See first / Approve now clarification remains unanswered at the actual native read; no apply go is inferred. Human cards and drafts untouched."
+}
