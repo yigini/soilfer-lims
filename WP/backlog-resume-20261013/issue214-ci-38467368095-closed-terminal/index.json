@@ -1,0 +1,258 @@
+{
+  "retainedUtc": "2026-10-13T21:44:32.146498+00:00",
+  "status": "CLOSED_NON_SUCCESS",
+  "run": 38467368095,
+  "runUrl": "https://github.com/yigini/soilfer-lims/actions/runs/38467368095",
+  "attempt": 1,
+  "conclusion": "failure",
+  "job": 115537503433,
+  "jobConclusion": "failure",
+  "completedUtc": "2026-10-13T21:38:10Z",
+  "number": 296,
+  "head": "e47b842c2a7f6b4f06fa4c532f7460c01797821b",
+  "tree": "7269379790ada4e9766cae14e33abd3c91eb59fd",
+  "base": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "sourcePaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/admin/ReferenceMaterials.jsx",
+    "client/src/components/lab/LabPolicies.jsx",
+    "client/src/components/qc/BatchInspectionModal.jsx",
+    "client/src/components/qc/ControlCharts.jsx",
+    "client/src/components/workbench/NativeRunPanel.jsx",
+    "client/src/components/workbench/StartRunForm.jsx",
+    "client/src/context/AuthContext.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/214-control-charts.md",
+    "server/config/policyRegistry.js",
+    "server/config/roles.js",
+    "server/controllers/controlChartController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261013000200_control_charts/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/routes/qcRoutes.js",
+    "server/scripts/control_chart_prebinding_impact.js",
+    "server/scripts/install_control_charts.js",
+    "server/services/controlChartMigrationSource.js",
+    "server/services/controlChartRules.js",
+    "server/services/controlChartService.js",
+    "server/services/policyService.js",
+    "server/services/qcNativeEvaluationService.js",
+    "server/services/qcNativeMeasurementService.js",
+    "server/services/qcNativeRunService.js",
+    "server/services/qcRunReferenceService.js",
+    "server/services/workbenchRunService.js",
+    "server/tests/contracts/audit_1_0_policy_components.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_2_1_reference_ui.test.js",
+    "server/tests/contracts/audit_2_3_compatibility_runs.test.js",
+    "server/tests/contracts/audit_2_3_native_runs.test.js",
+    "server/tests/contracts/audit_2_3_native_ui.test.js",
+    "server/tests/contracts/audit_4_1_run_first_ui.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/issue_214_control_chart_integration.test.js",
+    "server/tests/contracts/issue_214_control_chart_rules.test.js",
+    "server/tests/contracts/issue_214_control_chart_ui.test.js",
+    "server/tests/fixtures/pre214-native-run-source.cjs",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workflowWriteScanner.js"
+  ],
+  "exactJestSummary": [
+    "Test Suites: 365 passed, 365 total",
+    "Tests:       5547 passed, 5547 total"
+  ],
+  "uniquePassPathsObserved": 365,
+  "exactFullInventoryMatch": false,
+  "passedSuites": null,
+  "passedTests": null,
+  "failedOrSkippedOrPending": "Inspect retained originals",
+  "requiredSteps": {
+    "Set up job": "success",
+    "Checkout repository": "success",
+    "Setup Node.js": "success",
+    "Install server dependencies": "success",
+    "Install client dependencies": "success",
+    "Verify theme catalog and tokens drift": "success",
+    "Build client production bundle": "success",
+    "Setup test database and generate Prisma client": "success",
+    "Install Chromium for keyboard-only recording contract": "success",
+    "Run server test suite": null,
+    "Set up Docker Buildx": null,
+    "Build Docker image": null,
+    "Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)": null,
+    "Run Real Disposable Docker Boundary Rehearsal": null,
+    "Run Real Docker Deployment Readiness Acceptance": null,
+    "Post Setup Node.js": null,
+    "Post Checkout repository": null
+  },
+  "standardWorkflowUnchanged": true,
+  "localStorageFixtureUsedInCI": null,
+  "archiveEntries": [
+    {
+      "name": "0_Test & Build.txt",
+      "bytes": 4124910,
+      "sha256": "5896f86e65bac56c9f89a01f319438a1ea93e114dcac765588f1d5180a092b2b"
+    },
+    {
+      "name": "Test & Build/system.txt",
+      "bytes": 581,
+      "sha256": "3bf99ec45645865906969adfa995a20193b81be8ce40f89879ca3587a55c441e"
+    },
+    {
+      "name": "Test & Build/1_Set up job.txt",
+      "bytes": 2337,
+      "sha256": "ffd5e48cba27a464a9f8ee59b1d9894f0bbdd52d6ac29829aefe2b44e2bda9ed"
+    },
+    {
+      "name": "Test & Build/2_Checkout repository.txt",
+      "bytes": 20815,
+      "sha256": "01ad11497d5d7b793996cdd393b6a6fc2966618a8f909f1ecc60c4ec2894778e"
+    },
+    {
+      "name": "Test & Build/3_Setup Node.js.txt",
+      "bytes": 903,
+      "sha256": "82aca8b3d94479ac5fe555d37d0d71f7760922fcf668c6b91c3ad569b79ac65c"
+    },
+    {
+      "name": "Test & Build/4_Install server dependencies.txt",
+      "bytes": 3166,
+      "sha256": "be7504fe04a42147473800c4689f1b3d4509c370bb8cf1fa6bf3654d154fc553"
+    },
+    {
+      "name": "Test & Build/5_Install client dependencies.txt",
+      "bytes": 2621,
+      "sha256": "b8c0f0cacd2cd0bc7d0c12ab37bc0d85f992e3ca3bab8740ecddef20b8f905be"
+    },
+    {
+      "name": "Test & Build/6_Verify theme catalog and tokens drift.txt",
+      "bytes": 617,
+      "sha256": "e8cc13c0ac9f0f9ceb1bd0d70a7b9dfe1247f2e9ad7d38ed7785da49877d65e3"
+    },
+    {
+      "name": "Test & Build/7_Build client production bundle.txt",
+      "bytes": 12792,
+      "sha256": "24557adfa7fdd9c6fa8c2aa8e4308f31ad36d2b1d4e97e8bb79a1938ffdba8b2"
+    },
+    {
+      "name": "Test & Build/8_Setup test database and generate Prisma client.txt",
+      "bytes": 5754,
+      "sha256": "e1f2a60382c8deff88624662483a1d7071d3e1136cfc005b1fd66f466e120f94"
+    },
+    {
+      "name": "Test & Build/9_Install Chromium for keyboard-only recording contract.txt",
+      "bytes": 25111,
+      "sha256": "a63fc7c1f9bb933443618eaa489213be5877f0d263ca7a23342d34a9cb07c6c4"
+    },
+    {
+      "name": "Test & Build/10_Run server test suite.txt",
+      "bytes": 3777139,
+      "sha256": "4e515ae5c96fb08da0b01c25bba808d82fd2c0aced5d832a1a561dbc46311206"
+    },
+    {
+      "name": "Test & Build/11_Set up Docker Buildx.txt",
+      "bytes": 14642,
+      "sha256": "1c08f4e546180ae1ae69dac052b750582f2b8dadaa2c540312251ee7aa948a7e"
+    },
+    {
+      "name": "Test & Build/12_Build Docker image.txt",
+      "bytes": 148182,
+      "sha256": "306b7ca81f96c94ae534bb0fd547aadd3b9ed3d22860028fb32886f94cb71666"
+    },
+    {
+      "name": "Test & Build/13_Build Supported Baseline Docker Image (v3.5.30 _ 48d0e52).txt",
+      "bytes": 28796,
+      "sha256": "92ff0fc0de827bdb65d9a6c9827c507b906ae2f24e954a47b732ebad7ba5856e"
+    },
+    {
+      "name": "Test & Build/14_Run Real Disposable Docker Boundary Rehearsal.txt",
+      "bytes": 3784,
+      "sha256": "de3419dc63969218f0282fe6c982916c8fa4022127d60cef4d3b1b72b3a1bd28"
+    },
+    {
+      "name": "Test & Build/15_Run Real Docker Deployment Readiness Acceptance.txt",
+      "bytes": 74727,
+      "sha256": "8bece3feb88296f01f799262c3a47f0fee5f7545cca8431a6f1de5e52149c995"
+    },
+    {
+      "name": "Test & Build/30_Post Checkout repository.txt",
+      "bytes": 1719,
+      "sha256": "41ea7c1137db8c594a343d3f9fa4f6ff7efa75b5d38bf3a98e42540bfeb78d5f"
+    }
+  ],
+  "files": {
+    "run-original.json": {
+      "bytes": 12659,
+      "sha256": "c6529276b15c702c19ce78891544403bbc8ee5a25f0228fa261dd4ed54e07567"
+    },
+    "jobs-original.json": {
+      "bytes": 3527,
+      "sha256": "6a0c990573fd3ff3cf2fa8310fb9d83ef2c7a0901d89cdcc2ae0dc18fb3e0370"
+    },
+    "pr-original.json": {
+      "bytes": 50236,
+      "sha256": "bd6fbece19dbda05251b49b3f320aa49038c946494941af31bedc9f8c54e3b7b"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    },
+    "issue214-original.json": {
+      "bytes": 8805,
+      "sha256": "94637fd70cf8b508875a534b05359fa83a2b8844bbc65585bf0c1c7ecb49cd3a"
+    },
+    "closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    },
+    "workflow-original.yml": {
+      "bytes": 2785,
+      "sha256": "602236753ac1d7096c257927f6192b93800f8a8da96af1cc0a1580251950fcf5"
+    },
+    "logs-original.zip": {
+      "bytes": 1401660,
+      "sha256": "289fd3fed88433862617811a7b72f8a5a5c8780532cd7bf401c8038a8c870044"
+    },
+    "server-tests-original.log": {
+      "bytes": 3777139,
+      "sha256": "4e515ae5c96fb08da0b01c25bba808d82fd2c0aced5d832a1a561dbc46311206"
+    },
+    "client-build-original.log": {
+      "bytes": 12792,
+      "sha256": "24557adfa7fdd9c6fa8c2aa8e4308f31ad36d2b1d4e97e8bb79a1938ffdba8b2"
+    },
+    "candidate-docker-build-original.log": {
+      "bytes": 148182,
+      "sha256": "306b7ca81f96c94ae534bb0fd547aadd3b9ed3d22860028fb32886f94cb71666"
+    },
+    "baseline-docker-build-original.log": {
+      "bytes": 28796,
+      "sha256": "92ff0fc0de827bdb65d9a6c9827c507b906ae2f24e954a47b732ebad7ba5856e"
+    },
+    "docker-boundary-original.log": {
+      "bytes": 3784,
+      "sha256": "de3419dc63969218f0282fe6c982916c8fa4022127d60cef4d3b1b72b3a1bd28"
+    },
+    "docker-readiness-original.log": {
+      "bytes": 74727,
+      "sha256": "8bece3feb88296f01f799262c3a47f0fee5f7545cca8431a6f1de5e52149c995"
+    }
+  },
+  "disposableCiImagesAreNotProductionImages": true,
+  "ciDispatches": 0,
+  "readyNoticeSent": false,
+  "finalNativeAuditRequestSent": false,
+  "actualFinalAuditPass": false,
+  "productionOperations": 0
+}

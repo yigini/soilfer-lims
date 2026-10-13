@@ -1,0 +1,1050 @@
+﻿2026-10-13T21:35:37.2907682Z ##[group]Run node server/scripts/rehearsal_deployment_readiness.cjs
+2026-10-13T21:35:37.2908214Z [36;1mnode server/scripts/rehearsal_deployment_readiness.cjs[0m
+2026-10-13T21:35:37.2972322Z shell: /usr/bin/bash -e {0}
+2026-10-13T21:35:37.2972604Z env:
+2026-10-13T21:35:37.2972809Z   IMAGE_TAG: soilfer-lims:ci
+2026-10-13T21:35:37.2973077Z   CI: true
+2026-10-13T21:35:37.2973426Z ##[endgroup]
+2026-10-13T21:35:37.3324586Z ================================================================
+2026-10-13T21:35:37.3326316Z   REAL DISPOSABLE DOCKER DEPLOYMENT READINESS ACCEPTANCE        
+2026-10-13T21:35:37.3327280Z   Testing Default-Entrypoint Containers on Empty Volumes        
+2026-10-13T21:35:37.3328133Z ================================================================
+2026-10-13T21:35:37.3328540Z 
+2026-10-13T21:35:37.3999770Z Image Tag:    soilfer-lims:ci
+2026-10-13T21:35:37.4000490Z Immutable ID: sha256:b37091f8b536b66914a48b7199720cec022e5c55365300f743367e70faefca73
+2026-10-13T21:35:37.4001033Z 
+2026-10-13T21:35:37.4034970Z ▶ [Scenario 1] Default Entrypoint Empty-Volume Local Mode First-Start...
+2026-10-13T21:35:45.9675573Z   ✓ Container healthy on port 37281
+2026-10-13T21:35:46.3239064Z   ✓ Fresh shipped entrypoint healthy: schema COMPLETE, 11 references deferred, catalogue inserts 0, reference receipts 0, repeat NO_OP/byte-preserved
+2026-10-13T21:35:46.6380137Z   ✓ Initial admin login succeeded (mustChangePassword=true)
+2026-10-13T21:35:46.9139264Z   ✓ Password change succeeded
+2026-10-13T21:35:47.0261896Z   ✓ Pre-restart token issued and verified active on operational API
+2026-10-13T21:35:47.2270124Z   ✓ Persisted secret verified on volume (13f9874f...)
+2026-10-13T21:35:57.3963130Z   ✓ Quiesced container 1
+2026-10-13T21:35:57.3963516Z 
+2026-10-13T21:35:57.3964616Z ▶ [Scenario 2] Container Restart on Same Volume (Secret Persistence & No Reseed)...
+2026-10-13T21:36:02.6951835Z   ✓ Restarted container healthy on port 40381
+2026-10-13T21:36:03.2660232Z   ✓ Pre-restart JWT token remains valid across container restart without re-login
+2026-10-13T21:36:03.4980408Z   ✓ Persisted secret byte-for-byte identical across restart
+2026-10-13T21:36:03.6111265Z   ✓ Login with updated password confirmed on restarted container
+2026-10-13T21:36:03.6360486Z   ✓ Verified seed.js was safely skipped on restart
+2026-10-13T21:36:03.6361147Z   Preparing 199 conflict proof: quiescing its disposable source containers
+2026-10-13T21:36:13.7927447Z   Source containers stopped; starting bounded WAL-aware owned snapshot/conflict proof
+2026-10-13T21:36:14.1180176Z   ✓ Actual shipped installer refuses conflicting pct_mass in both modes, writes 0, owned/source bytes unchanged
+2026-10-13T21:36:14.3589847Z   Loading owned catalogue prerequisite through existing units authority
+2026-10-13T21:36:15.1165434Z   Loading owned catalogue prerequisite through existing references authority
+2026-10-13T21:36:15.8546181Z   Loading owned catalogue prerequisite through existing catalogue authority
+2026-10-13T21:36:33.0516013Z   ✓ Explicit existing catalogue authorities → next shipped entrypoint adds exactly 11 inactive references/11 receipts; all old rows/schema/receipts retained; repeat NO_OP/byte-preserved
+2026-10-13T21:36:33.0517211Z 
+2026-10-13T21:36:33.0517756Z ▶ [Scenario 3] Interrupted-Init (Partial Seed Recovery) in Docker...
+2026-10-13T21:36:35.7748333Z Loaded Prisma config from prisma.config.ts.
+2026-10-13T21:36:35.7749237Z 
+2026-10-13T21:36:35.7749691Z Prisma schema loaded from prisma/schema.prisma.
+2026-10-13T21:36:42.0863300Z   ✓ Container booted on partial volume and became healthy on port 40425
+2026-10-13T21:36:42.3950348Z   ✓ Partial initialization was cleanly resumed and admin user created without LAB01 conflict
+2026-10-13T21:36:52.5613389Z 
+2026-10-13T21:36:52.5615108Z ▶ [Scenario 4] Default Entrypoint Empty-Volume Global Mode First-Start...
+2026-10-13T21:37:00.9157351Z   ✓ Global mode container healthy on port 43989
+2026-10-13T21:37:01.2045151Z   ✓ Global SUPER_ADMIN login verified
+2026-10-13T21:37:01.6104726Z   ✓ Created Lab Alpha (ALPHA_1791927337399) and Lab Beta (BETA_1791927337399)
+2026-10-13T21:37:01.6229145Z   ✓ Activated both laboratories
+2026-10-13T21:37:01.6229418Z 
+2026-10-13T21:37:01.6229918Z ▶ [Scenario 5] Multi-Lab Workload, Real Export, Schedulers & Quiesced Backup Serialization...
+2026-10-13T21:37:03.1359080Z   ✓ Ingested 10 representative samples concurrently across Lab Alpha & Lab Beta
+2026-10-13T21:37:03.1477636Z   ✓ Manager A real data export returned exactly 5 scoped samples with 1:1 multiplicity and verified accession Lab IDs
+2026-10-13T21:37:03.1565397Z   ✓ Manager B real data export returned exactly 5 scoped samples with 1:1 multiplicity and verified accession Lab IDs
+2026-10-13T21:37:03.1635732Z   ✓ Super Admin real data export returned all 10 cross-facility samples with complete IDs, multiplicity, and accession Lab IDs
+2026-10-13T21:37:03.2138913Z Loaded Prisma config from prisma.config.ts.
+2026-10-13T21:37:03.2139405Z 
+2026-10-13T21:37:03.2139743Z Prisma schema loaded from prisma/schema.prisma.
+2026-10-13T21:37:03.2141043Z   ✓ Verified background escalation scheduler initialized during container boot
+2026-10-13T21:37:13.3696894Z   ✓ Quiesced active writer container before generating database backup
+2026-10-13T21:37:13.6681041Z   ✓ Pre-restore backup executed cleanly
+2026-10-13T21:37:13.6682341Z   ✓ Bound exact backup artifact matching runbook regex: soilfer_lims_backup_2026-10-13T21-37-13-533Z.db.gz
+2026-10-13T21:37:13.9473420Z   ✓ Backup artifact verification PASSED: Users=3, Samples=10
+2026-10-13T21:37:14.2910552Z   ✓ Restore into fresh target volume PASSED with epoch invalidation
+2026-10-13T21:37:19.5946633Z   ✓ Restored container healthy on port 42031
+2026-10-13T21:37:19.8848057Z   ✓ Post-restore admin login confirmed
+2026-10-13T21:37:20.0405932Z   ✓ Post-restore sample count confirmed (exactly 5 samples preserved for Manager Alpha)
+2026-10-13T21:37:30.1828432Z 
+2026-10-13T21:37:30.1830082Z ▶ [Scenario 6] Populated Supported-Baseline Upgrade, Assets, Staged Route B & Epoch Invalidation...
+2026-10-13T21:37:30.2007198Z   ✓ Bound supported baseline: soilfer-lims:baseline-v3.5.30 (Tree: 48d0e526ded03232ac8516dd867f4b14923bdb58, ID: sha256:baadca9577f9bf65363c1c9569bea6a5766d7c6260e9ff6835acebc8a44ecce6)
+2026-10-13T21:37:30.2008770Z   ✓ Bound candidate target:   soilfer-lims:ci (ID: sha256:b37091f8b536b66914a48b7199720cec022e5c55365300f743367e70faefca73)
+2026-10-13T21:37:33.2307327Z Loaded Prisma config from prisma.config.ts.
+2026-10-13T21:37:33.2307709Z 
+2026-10-13T21:37:33.2307933Z Prisma schema loaded from prisma/schema.prisma.
+2026-10-13T21:37:33.2308710Z   ✓ Initialized real baseline database with 2 labs and 3 users
+2026-10-13T21:37:33.4272250Z   ✓ Uploaded reference asset (spectral_cal_curve.json) to assets volume
+2026-10-13T21:37:34.6277723Z   ✓ Baseline container healthy on port 34395
+2026-10-13T21:37:34.9903000Z   ✓ Baseline operational login and API access verified
+2026-10-13T21:37:35.3914923Z   ✓ Created ten EXPECTED samples through baseline project manifests; API and read-only preservation record agree
+2026-10-13T21:37:47.6201769Z Unable to find image 'alpine:latest' locally
+2026-10-13T21:37:47.6202308Z latest: Pulling from library/alpine
+2026-10-13T21:37:47.6202643Z e2de96513ba9: Already exists
+2026-10-13T21:37:47.6203185Z Digest: sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
+2026-10-13T21:37:47.6204225Z Status: Downloaded newer image for alpine:latest
+2026-10-13T21:37:47.8106019Z   ✓ Generated Route B tarballs: db_snapshot_1791927337399.tar.gz & assets_snapshot_1791927337399.tar.gz
+2026-10-13T21:37:48.0056189Z   ✓ Staged recovery safely aborted on corrupt tarball without touching target volume
+2026-10-13T21:37:48.2457969Z   ✓ Live volume verified intact after corrupt staging abort
+2026-10-13T21:37:49.5108361Z   ✓ Owned baseline → #190 COMPLETE → #191 PRE_191 dry-run → COMPLETE; NULL reasons 0, backfill 0, blocked RECORDED owners 0; all retained rows and both receipts verified; NO_OP writes 0
+2026-10-13T21:37:50.0790835Z   ✓ Owned #191 COMPLETE → #192 PRE_192 dry-run → COMPLETE; retained history unchanged, new selections 0, NO_OP writes 0
+2026-10-13T21:37:50.7809073Z   ✓ cross-check-installer-pre201: direct installer PRE_201 dry-run → COMPLETE_201; retained rows/objects/receipts preserved, evidence/backfill0, repeat NO_OP writes0/bytes preserved
+2026-10-13T21:37:50.7829396Z {"crossCheckInstallerProof":{"scenario":"cross-check-installer-pre201","invocation":"DIRECT_INSTALLER_MODULE","dry":{"classification":"PRE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"mode":"DRY_RUN","totalChanges":0,"newEvaluationCount":0,"backfilledCount":0},"applied":{"classification":"COMPLETE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"receipt":{"sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"originalRowsSha256":"a5b7aaa9d47764599d72adbbcf86f72741729d3de4ac7048523bd635485f4a01","originalRowsPreserved":true,"newEvaluationCount":0,"backfilledCount":0,"receiptSha256":"76e32302ffce6fa970466d0db44cd768fe55a34af53c347d772090258cc7feb7"},"previousClassification":"PRE_201","mode":"APPLIED","newEvaluationCount":0,"backfilledCount":0,"totalChanges":1},"ready":{"classification":"COMPLETE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"receipt":{"sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"originalRowsSha256":"a5b7aaa9d47764599d72adbbcf86f72741729d3de4ac7048523bd635485f4a01","originalRowsPreserved":true,"newEvaluationCount":0,"backfilledCount":0,"receiptSha256":"76e32302ffce6fa970466d0db44cd768fe55a34af53c347d772090258cc7feb7"},"mode":"DRY_RUN","totalChanges":0,"newEvaluationCount":0,"backfilledCount":0},"again":{"classification":"COMPLETE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"receipt":{"sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"originalRowsSha256":"a5b7aaa9d47764599d72adbbcf86f72741729d3de4ac7048523bd635485f4a01","originalRowsPreserved":true,"newEvaluationCount":0,"backfilledCount":0,"receiptSha256":"76e32302ffce6fa970466d0db44cd768fe55a34af53c347d772090258cc7feb7"},"mode":"NO_OP","totalChanges":0,"newEvaluationCount":0,"backfilledCount":0},"retainedRowsAndObjectsPreserved":true,"dryRunBytesPreserved":true,"noOpBytesPreserved":true}}
+2026-10-13T21:37:51.1263392Z   ✓ Owned #272 ABSENT → shipped additive rawInput owner → ALREADY_PRESENT; all old fields/receipts preserved, backfill0, repeat NO_OP bytes unchanged
+2026-10-13T21:37:51.3757970Z   Loading owned catalogue prerequisite through existing units authority
+2026-10-13T21:37:52.1278970Z   Loading owned catalogue prerequisite through existing references authority
+2026-10-13T21:37:52.8900705Z   Loading owned catalogue prerequisite through existing catalogue authority
+2026-10-13T21:37:58.8038050Z {"error":"QC_CHART_PREREQUISITE_REQUIRED","message":"Install the previous application schema first.","differences":[],"totalChanges":0}
+2026-10-13T21:37:58.8044133Z 
+2026-10-13T21:37:58.8045738Z ❌ REHEARSAL FAILED: Error: Container 'lims_199_entrypoint_1791927337399' exited unexpectedly with status 'exited'. Logs:
+2026-10-13T21:37:58.8046851Z ╔═══════════════════════════════════════╗
+2026-10-13T21:37:58.8047241Z ║    SoilFER-LIMS Docker Entrypoint     ║
+2026-10-13T21:37:58.8047623Z ╚═══════════════════════════════════════╝
+2026-10-13T21:37:58.8048232Z ⚠ JWT_SECRET was not set — generated and securely saved persistent secret to prisma/.jwt_secret.
+2026-10-13T21:37:58.8048775Z   This secret will persist across container restarts.
+2026-10-13T21:37:58.8049228Z ⚠ schema.prisma not found — copying from backup...
+2026-10-13T21:37:58.8049682Z 📦 Applying versioned lab operations v3 migration...
+2026-10-13T21:37:58.8050206Z ╔══════════════════════════════════════════════════════════════╗
+2026-10-13T21:37:58.8050698Z ║  SoilFER-LIMS Lab Operations v3 Fail-Closed DB Migration    ║
+2026-10-13T21:37:58.8051239Z ╚══════════════════════════════════════════════════════════════╝
+2026-10-13T21:37:58.8051637Z Target Database: /app/server/prisma/dev.db
+2026-10-13T21:37:58.8052006Z Mode:            APPLY (Transactional Execution)
+2026-10-13T21:37:58.8052221Z 
+2026-10-13T21:37:58.8052470Z A94 manual-review candidates: []
+2026-10-13T21:37:58.8053130Z ℹ️ [SCHEMA MIGRATIONS] Migration 'v3_lab_operations_20260906' was already applied at 2026-10-13 21:37:33.
+2026-10-13T21:37:58.8053855Z Skipping default re-assertions and data migrations to preserve administrative changes.
+2026-10-13T21:37:58.8054566Z 
+2026-10-13T21:37:58.8055005Z 📦 Applying appearance preference migration...
+2026-10-13T21:37:58.8055775Z [MIGRATE-APPEARANCE] Target DB: /app/server/prisma/dev.db
+2026-10-13T21:37:58.8056858Z [MIGRATE-APPEARANCE] Column themePreference already exists on User table. Skipping ALTER.
+2026-10-13T21:37:58.8057977Z [MIGRATE-APPEARANCE] Verification: 3 users have valid themePreference.
+2026-10-13T21:37:58.8058777Z [MIGRATE-APPEARANCE] Migration completed successfully.
+2026-10-13T21:37:58.8059392Z 📦 Applying project templates and policy migration...
+2026-10-13T21:37:58.8059945Z [MIGRATE-PROJECT-POLICY] Target DB: /app/server/prisma/dev.db
+2026-10-13T21:37:58.8060687Z [MIGRATE-PROJECT-POLICY] All project template & policy columns and indexes already exist. Verification successful (no-op).
+2026-10-13T21:37:58.8061326Z [MIGRATE-PROJECT-POLICY] Process exited normally.
+2026-10-13T21:37:58.8061763Z 📦 Applying sitewide theme library migration...
+2026-10-13T21:37:58.8062153Z [MIGRATE-THEMES] Target DB: /app/server/prisma/dev.db
+2026-10-13T21:37:58.8062546Z [MIGRATE-THEMES] Adding uiThemeId to User table...
+2026-10-13T21:37:58.8062956Z [MIGRATE-THEMES] Adding uiModePreference to User table...
+2026-10-13T21:37:58.8063415Z [MIGRATE-THEMES] Adding uiAppearanceRevision to User table...
+2026-10-13T21:37:58.8064297Z [MIGRATE-THEMES] Performing initial backfill of uiModePreference from legacy themePreference...
+2026-10-13T21:37:58.8065011Z [MIGRATE-THEMES] Creating LabAppearanceSetting table with foreign key to Lab...
+2026-10-13T21:37:58.8065722Z [MIGRATE-THEMES] Integrity check: [{"integrity_check":"ok"}]
+2026-10-13T21:37:58.8066118Z [MIGRATE-THEMES] Foreign key errors: 0
+2026-10-13T21:37:58.8066571Z [MIGRATE-THEMES] Global setting: theme=soilfer-classic, mode=light, rev=1
+2026-10-13T21:37:58.8067000Z [MIGRATE-THEMES] Verified 3 users.
+2026-10-13T21:37:58.8068220Z [MIGRATE-THEMES] Migration completed successfully: {"success":true,"integrity":"ok","fkErrors":0,"globalSetting":{"id":"global","themeId":"soilfer-classic","defaultMode":"light","revision":1,"updatedAt":"2026-10-13 21:37:55","updatedBy":null},"userCount":3}
+2026-10-13T21:37:58.8069338Z 📦 Installing workflow-state schema and guards...
+2026-10-13T21:37:58.8069820Z {
+2026-10-13T21:37:58.8070007Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8070247Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8070496Z   "inventory": {
+2026-10-13T21:37:58.8070690Z     "totals": {
+2026-10-13T21:37:58.8070886Z       "Sample": 10,
+2026-10-13T21:37:58.8071090Z       "WorkItem": 0
+2026-10-13T21:37:58.8071358Z     },
+2026-10-13T21:37:58.8071553Z     "candidateCount": 0,
+2026-10-13T21:37:58.8071784Z     "unmappedCount": 0,
+2026-10-13T21:37:58.8072012Z     "blockedCount": 0,
+2026-10-13T21:37:58.8072414Z     "fingerprint": "f92b4677e3ce0424471df4cffefe4c4e3138a1557846094059b8af0886129386"
+2026-10-13T21:37:58.8072818Z   },
+2026-10-13T21:37:58.8072996Z   "statements": [],
+2026-10-13T21:37:58.8073193Z   "sources": {
+2026-10-13T21:37:58.8073599Z     "evidenceSha256": "ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552",
+2026-10-13T21:37:58.8074548Z     "guardsSha256": "84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed"
+2026-10-13T21:37:58.8074968Z   },
+2026-10-13T21:37:58.8075153Z   "totalChanges": 0,
+2026-10-13T21:37:58.8075371Z   "postflight": {
+2026-10-13T21:37:58.8075571Z     "counts": {
+2026-10-13T21:37:58.8075768Z       "Sample": 10,
+2026-10-13T21:37:58.8075974Z       "WorkItem": 0,
+2026-10-13T21:37:58.8076183Z       "Result": 0,
+2026-10-13T21:37:58.8076399Z       "ReviewDecision": 0,
+2026-10-13T21:37:58.8076662Z       "ResultEvidenceEvent": 0
+2026-10-13T21:37:58.8076892Z     },
+2026-10-13T21:37:58.8077077Z     "integrity": "ok",
+2026-10-13T21:37:58.8077326Z     "foreignKeyViolations": [],
+2026-10-13T21:37:58.8077563Z     "guards": [
+2026-10-13T21:37:58.8077792Z       "Sample_status_insert_guard",
+2026-10-13T21:37:58.8078071Z       "Sample_status_update_guard",
+2026-10-13T21:37:58.8078352Z       "WorkItem_status_insert_guard",
+2026-10-13T21:37:58.8078642Z       "WorkItem_status_update_guard",
+2026-10-13T21:37:58.8078931Z       "Batch_status_insert_guard",
+2026-10-13T21:37:58.8079202Z       "Batch_status_update_guard",
+2026-10-13T21:37:58.8079500Z       "ReviewDecision_decision_insert_guard",
+2026-10-13T21:37:58.8079821Z       "ReviewDecision_decision_immutable",
+2026-10-13T21:37:58.8080130Z       "ResultEvidenceEvent_insert_guard",
+2026-10-13T21:37:58.8080452Z       "ResultEvidenceEvent_update_immutable",
+2026-10-13T21:37:58.8080772Z       "ResultEvidenceEvent_delete_immutable"
+2026-10-13T21:37:58.8081038Z     ],
+2026-10-13T21:37:58.8081219Z     "marker": {
+2026-10-13T21:37:58.8081449Z       "id": "179_workflow_state_guards",
+2026-10-13T21:37:58.8081737Z       "appliedAt": "2026-10-13 21:37:48",
+2026-10-13T21:37:58.8082599Z       "details": "{\"evidenceSha256\":\"ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552\",\"guardsSha256\":\"84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed\"}"
+2026-10-13T21:37:58.8083356Z     }
+2026-10-13T21:37:58.8083524Z   }
+2026-10-13T21:37:58.8083691Z }
+2026-10-13T21:37:58.8084236Z 📦 Installing result attempt links...
+2026-10-13T21:37:58.8084730Z {
+2026-10-13T21:37:58.8084967Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8085224Z   "sources": {
+2026-10-13T21:37:58.8085628Z     "migrationSha256": "aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d"
+2026-10-13T21:37:58.8086040Z   },
+2026-10-13T21:37:58.8086214Z   "guards": [
+2026-10-13T21:37:58.8086436Z     "Result_attempt_insert_guard",
+2026-10-13T21:37:58.8086846Z     "Result_attempt_update_guard",
+2026-10-13T21:37:58.8087132Z     "WorkAttempt_result_reference_guard"
+2026-10-13T21:37:58.8087386Z   ],
+2026-10-13T21:37:58.8087556Z   "counts": {
+2026-10-13T21:37:58.8087746Z     "results": 0,
+2026-10-13T21:37:58.8087942Z     "linked": 0
+2026-10-13T21:37:58.8088129Z   },
+2026-10-13T21:37:58.8088306Z   "backfillCount": 0,
+2026-10-13T21:37:58.8088516Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8088718Z   "totalChanges": 0
+2026-10-13T21:37:58.8088910Z }
+2026-10-13T21:37:58.8089075Z {
+2026-10-13T21:37:58.8089277Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8089514Z   "sources": {
+2026-10-13T21:37:58.8089918Z     "migrationSha256": "5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8"
+2026-10-13T21:37:58.8090471Z   },
+2026-10-13T21:37:58.8090643Z   "guards": [
+2026-10-13T21:37:58.8090857Z     "SampleHold_insert_guard",
+2026-10-13T21:37:58.8091117Z     "SampleHold_update_guard",
+2026-10-13T21:37:58.8091382Z     "SampleHold_raise_immutable",
+2026-10-13T21:37:58.8091730Z     "SampleHold_resolution_final",
+2026-10-13T21:37:58.8092004Z     "SampleHold_delete_refusal",
+2026-10-13T21:37:58.8092282Z     "WorkItem_cancellation_insert_guard",
+2026-10-13T21:37:58.8092585Z     "WorkItem_cancellation_update_guard"
+2026-10-13T21:37:58.8092834Z   ],
+2026-10-13T21:37:58.8093007Z   "counts": {
+2026-10-13T21:37:58.8093212Z     "workItems": 0,
+2026-10-13T21:37:58.8093414Z     "holds": 0
+2026-10-13T21:37:58.8093594Z   },
+2026-10-13T21:37:58.8093770Z   "backfillCount": 0,
+2026-10-13T21:37:58.8094265Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8094475Z   "totalChanges": 0
+2026-10-13T21:37:58.8094668Z }
+2026-10-13T21:37:58.8094993Z 📦 Installing reference material catalogue...
+2026-10-13T21:37:58.8095281Z {
+2026-10-13T21:37:58.8095484Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8095784Z   "sources": {
+2026-10-13T21:37:58.8096479Z     "migrationSha256": "5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3",
+2026-10-13T21:37:58.8097605Z     "oracleSha256": "7a626b66bd31a7e7305d8c1b091207f3fb26348345a431fb77b63f875d3b99b5"
+2026-10-13T21:37:58.8098492Z   },
+2026-10-13T21:37:58.8098693Z   "guards": [
+2026-10-13T21:37:58.8098933Z     "ReferenceMaterial_insert_guard",
+2026-10-13T21:37:58.8099228Z     "ReferenceMaterial_update_guard",
+2026-10-13T21:37:58.8099509Z     "ReferenceValue_insert_guard",
+2026-10-13T21:37:58.8099789Z     "ReferenceValue_immutable_guard",
+2026-10-13T21:37:58.8100071Z     "ReferenceValue_delete_guard",
+2026-10-13T21:37:58.8100360Z     "BatchQcResult_reference_insert_guard",
+2026-10-13T21:37:58.8100674Z     "BatchQcResult_reference_update_guard"
+2026-10-13T21:37:58.8100931Z   ],
+2026-10-13T21:37:58.8101102Z   "indexes": [
+2026-10-13T21:37:58.8101341Z     "ReferenceMaterial_labId_code_idx",
+2026-10-13T21:37:58.8101702Z     "ReferenceValue_referenceMaterialId_analysisCode_idx",
+2026-10-13T21:37:58.8102052Z     "ReferenceValue_current_generic",
+2026-10-13T21:37:58.8102337Z     "ReferenceValue_current_method"
+2026-10-13T21:37:58.8102742Z   ],
+2026-10-13T21:37:58.8102944Z   "counts": {
+2026-10-13T21:37:58.8103140Z     "materials": 0,
+2026-10-13T21:37:58.8103345Z     "values": 0,
+2026-10-13T21:37:58.8103537Z     "qcRows": 0,
+2026-10-13T21:37:58.8103852Z     "linked": 0
+2026-10-13T21:37:58.8104702Z   },
+2026-10-13T21:37:58.8105081Z   "backfillCount": 0,
+2026-10-13T21:37:58.8105512Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8105921Z   "totalChanges": 0
+2026-10-13T21:37:58.8106139Z }
+2026-10-13T21:37:58.8106643Z 📦 Installing versioned QC rules...
+2026-10-13T21:37:58.8106919Z {
+2026-10-13T21:37:58.8107141Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8107393Z   "sources": {
+2026-10-13T21:37:58.8107984Z     "migrationSha256": "4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06",
+2026-10-13T21:37:58.8108746Z     "oracleSha256": "fe0dbc7dbb0a35bc62353de715a48b4263d492917225c7be5b6f969ec3f52819"
+2026-10-13T21:37:58.8109407Z   },
+2026-10-13T21:37:58.8109592Z   "guards": [
+2026-10-13T21:37:58.8109820Z     "QcRule_immutable_update",
+2026-10-13T21:37:58.8110405Z     "QcRule_immutable_delete",
+2026-10-13T21:37:58.8110661Z     "QcRule_version_guard",
+2026-10-13T21:37:58.8110901Z     "QcRule_scope_guard",
+2026-10-13T21:37:58.8111124Z     "QcRule_value_guard"
+2026-10-13T21:37:58.8111479Z   ],
+2026-10-13T21:37:58.8111664Z   "indexes": [
+2026-10-13T21:37:58.8111974Z     "QcRule_labId_analysisCode_methodologyId_effectiveFrom_idx",
+2026-10-13T21:37:58.8112342Z     "QcRule_scope_version_unique"
+2026-10-13T21:37:58.8112736Z   ],
+2026-10-13T21:37:58.8112914Z   "counts": {
+2026-10-13T21:37:58.8113107Z     "rules": 0
+2026-10-13T21:37:58.8113290Z   },
+2026-10-13T21:37:58.8113477Z   "backfillCount": 0,
+2026-10-13T21:37:58.8113819Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8114356Z   "totalChanges": 0
+2026-10-13T21:37:58.8114557Z }
+2026-10-13T21:37:58.8115060Z 📦 Installing normalized QC runs...
+2026-10-13T21:37:58.8115331Z {
+2026-10-13T21:37:58.8115545Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8115784Z   "sources": {
+2026-10-13T21:37:58.8116360Z     "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+2026-10-13T21:37:58.8117101Z     "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369"
+2026-10-13T21:37:58.8117668Z   },
+2026-10-13T21:37:58.8117849Z   "counts": {
+2026-10-13T21:37:58.8118045Z     "BatchAnalyte": 0,
+2026-10-13T21:37:58.8118267Z     "BatchPosition": 0,
+2026-10-13T21:37:58.8118672Z     "BatchPositionWorkItem": 0,
+2026-10-13T21:37:58.8118960Z     "BatchPositionReference": 0,
+2026-10-13T21:37:58.8119209Z     "QcMeasurement": 0,
+2026-10-13T21:37:58.8119425Z     "QcEvaluation": 0,
+2026-10-13T21:37:58.8119785Z     "BatchDisposition": 0,
+2026-10-13T21:37:58.8120050Z     "BatchEvent": 0
+2026-10-13T21:37:58.8120243Z   },
+2026-10-13T21:37:58.8120427Z   "receipt": {
+2026-10-13T21:37:58.8120944Z     "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+2026-10-13T21:37:58.8121602Z     "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369",
+2026-10-13T21:37:58.8122418Z     "backfillFingerprint": "b45932a5a1f2be5cba68f756ef680d68aec060efcf3c4aaba1da4b31a8227d47",
+2026-10-13T21:37:58.8122889Z     "backfillCounts": {
+2026-10-13T21:37:58.8123159Z       "batches": 0,
+2026-10-13T21:37:58.8123448Z       "analytes": 0,
+2026-10-13T21:37:58.8123668Z       "samplePositions": 0,
+2026-10-13T21:37:58.8124029Z       "qcPositions": 0,
+2026-10-13T21:37:58.8124386Z       "historicalSnapshots": 0,
+2026-10-13T21:37:58.8124782Z       "currentEvaluations": 0,
+2026-10-13T21:37:58.8125030Z       "evaluations": 0,
+2026-10-13T21:37:58.8125245Z       "measurements": 0,
+2026-10-13T21:37:58.8125522Z       "typedRows": 0,
+2026-10-13T21:37:58.8125894Z       "historicalTypedRows": 0,
+2026-10-13T21:37:58.8126136Z       "jsonEntries": 0,
+2026-10-13T21:37:58.8126378Z       "typedFallbackEntries": 0,
+2026-10-13T21:37:58.8126664Z       "typedJsonConflicts": 0,
+2026-10-13T21:37:58.8127096Z       "historyAuditConflicts": 0,
+2026-10-13T21:37:58.8127364Z       "unresolvedMethods": 0,
+2026-10-13T21:37:58.8127632Z       "unresolvedAnalysts": 0,
+2026-10-13T21:37:58.8127980Z       "unresolvedInstruments": 0,
+2026-10-13T21:37:58.8128326Z       "unlinkedReferences": 0,
+2026-10-13T21:37:58.8128575Z       "unresolvedNumbers": 0,
+2026-10-13T21:37:58.8128854Z       "unresolvedDuplicateParents": 0,
+2026-10-13T21:37:58.8129301Z       "unresolvedRackPositions": 0,
+2026-10-13T21:37:58.8129576Z       "missingWorkItems": 0,
+2026-10-13T21:37:58.8129816Z       "malformedHistory": 0,
+2026-10-13T21:37:58.8130068Z       "malformedQcResults": 0,
+2026-10-13T21:37:58.8130451Z       "orphanSnapshots": 0,
+2026-10-13T21:37:58.8130771Z       "multiAttemptMembershipGroups": 0,
+2026-10-13T21:37:58.8131166Z       "refusals": 0,
+2026-10-13T21:37:58.8131469Z       "legacyDispositionMapped": {
+2026-10-13T21:37:58.8132004Z         "REJECT_REANALYSIS": 0,
+2026-10-13T21:37:58.8132258Z         "ACCEPT_OPAQUE": 0
+2026-10-13T21:37:58.8132483Z       },
+2026-10-13T21:37:58.8132800Z       "dispositionAttribution": {
+2026-10-13T21:37:58.8133255Z         "AUDIT_LOG": 0,
+2026-10-13T21:37:58.8133518Z         "BATCH_DISPOSITION_FIELD": 0,
+2026-10-13T21:37:58.8133812Z         "SNAPSHOT_DISPOSITION_FIELD": 0
+2026-10-13T21:37:58.8134404Z       },
+2026-10-13T21:37:58.8134661Z       "dispositionAttributionConflicts": 0,
+2026-10-13T21:37:58.8134972Z       "TEXTURE_ALIAS_MERGED": 0
+2026-10-13T21:37:58.8135249Z     },
+2026-10-13T21:37:58.8135630Z     "bootstrapRebuild": []
+2026-10-13T21:37:58.8136065Z   },
+2026-10-13T21:37:58.8136413Z   "bootstrapRebuild": [],
+2026-10-13T21:37:58.8136833Z   "guards": [
+2026-10-13T21:37:58.8137238Z     "Batch_legacy_qc_immutable",
+2026-10-13T21:37:58.8137736Z     "Batch_first_start_immutable",
+2026-10-13T21:37:58.8138441Z     "BatchQcResult_frozen_insert",
+2026-10-13T21:37:58.8138739Z     "BatchQcResult_frozen_update",
+2026-10-13T21:37:58.8150286Z     "BatchQcResult_frozen_delete",
+2026-10-13T21:37:58.8150850Z     "BatchAnalyte_insert_guard",
+2026-10-13T21:37:58.8151355Z     "BatchAnalyte_update_guard",
+2026-10-13T21:37:58.8152063Z     "BatchAnalyte_identity_immutable",
+2026-10-13T21:37:58.8152630Z     "BatchAnalyte_membership_insert_guard",
+2026-10-13T21:37:58.8153202Z     "BatchAnalyte_membership_delete_guard",
+2026-10-13T21:37:58.8153777Z     "BatchAnalyte_membership_update_guard",
+2026-10-13T21:37:58.8154562Z     "BatchPosition_insert_guard",
+2026-10-13T21:37:58.8155067Z     "BatchPosition_update_guard",
+2026-10-13T21:37:58.8155588Z     "BatchPosition_membership_insert_guard",
+2026-10-13T21:37:58.8156171Z     "BatchPosition_membership_update_guard",
+2026-10-13T21:37:58.8156739Z     "BatchPosition_membership_delete_guard",
+2026-10-13T21:37:58.8157273Z     "BatchPosition_identity_guard",
+2026-10-13T21:37:58.8157822Z     "BatchPositionWorkItem_insert_guard",
+2026-10-13T21:37:58.8158428Z     "BatchPositionWorkItem_immutable",
+2026-10-13T21:37:58.8159003Z     "BatchPositionWorkItem_run_unique_guard",
+2026-10-13T21:37:58.8160300Z     "BatchPositionWorkItem_membership_insert_guard",
+2026-10-13T21:37:58.8163166Z     "BatchPositionWorkItem_membership_delete_guard",
+2026-10-13T21:37:58.8163854Z     "WorkItem_batch_membership_guard",
+2026-10-13T21:37:58.8164641Z     "WorkItem_batch_membership_insert_guard",
+2026-10-13T21:37:58.8165245Z     "BatchPositionReference_insert_guard",
+2026-10-13T21:37:58.8165893Z     "BatchPositionReference_correction_reason_guard",
+2026-10-13T21:37:58.8166525Z     "BatchPositionReference_lot_guard",
+2026-10-13T21:37:58.8167103Z     "BatchPositionReference_supersede_guard",
+2026-10-13T21:37:58.8167735Z     "BatchPositionReference_delete_guard",
+2026-10-13T21:37:58.8168280Z     "QcMeasurement_insert_guard",
+2026-10-13T21:37:58.8168809Z     "QcMeasurement_historical_write_guard",
+2026-10-13T21:37:58.8169389Z     "QcMeasurement_replacement_guard",
+2026-10-13T21:37:58.8169966Z     "BatchPositionReference_replacement_guard",
+2026-10-13T21:37:58.8170540Z     "QcMeasurement_start_guard",
+2026-10-13T21:37:58.8171072Z     "QcMeasurement_supersede_guard",
+2026-10-13T21:37:58.8171524Z     "QcMeasurement_delete_guard",
+2026-10-13T21:37:58.8171856Z     "QcEvaluation_insert_guard",
+2026-10-13T21:37:58.8172166Z     "QcEvaluation_start_guard",
+2026-10-13T21:37:58.8172494Z     "QcEvaluation_frozen_criteria_guard",
+2026-10-13T21:37:58.8173248Z     "QcEvaluation_immutable_update",
+2026-10-13T21:37:58.8174057Z     "QcEvaluation_immutable_delete",
+2026-10-13T21:37:58.8174754Z     "BatchDisposition_immutable_update",
+2026-10-13T21:37:58.8175469Z     "BatchDisposition_immutable_delete",
+2026-10-13T21:37:58.8176133Z     "BatchEvent_immutable_update",
+2026-10-13T21:37:58.8176693Z     "BatchEvent_immutable_delete",
+2026-10-13T21:37:58.8177321Z     "BatchDisposition_insert_guard",
+2026-10-13T21:37:58.8177867Z     "BatchEvent_insert_guard"
+2026-10-13T21:37:58.8178278Z   ],
+2026-10-13T21:37:58.8178620Z   "indexes": [
+2026-10-13T21:37:58.8179117Z     "BatchAnalyte_labId_analysisCode_methodologyId_idx",
+2026-10-13T21:37:58.8179764Z     "BatchAnalyte_batchId_analysisCode_key",
+2026-10-13T21:37:58.8180525Z     "BatchPosition_batchId_position_key",
+2026-10-13T21:37:58.8181105Z     "BatchPositionWorkItem_workItemId_idx",
+2026-10-13T21:37:58.8181735Z     "BatchPositionWorkItem_positionId_analysisCode_key",
+2026-10-13T21:37:58.8182442Z     "BatchPositionReference_positionId_analysisCode_idx",
+2026-10-13T21:37:58.8183074Z     "QcMeasurement_batchId_analysisCode_idx",
+2026-10-13T21:37:58.8183736Z     "QcMeasurement_positionId_analysisCode_replicateNo_idx",
+2026-10-13T21:37:58.8184983Z     "QcEvaluation_batchId_analysisCode_version_key",
+2026-10-13T21:37:58.8185946Z     "BatchDisposition_batchId_analysisCode_idx",
+2026-10-13T21:37:58.8186744Z     "BatchEvent_batchId_at_idx",
+2026-10-13T21:37:58.8187258Z     "BatchAnalyte_crm_ordinal_unique",
+2026-10-13T21:37:58.8188394Z     "BatchPositionReference_current_unique",
+2026-10-13T21:37:58.8188955Z     "QcMeasurement_current_unique"
+2026-10-13T21:37:58.8189387Z   ],
+2026-10-13T21:37:58.8189996Z   "backfillCount": 0,
+2026-10-13T21:37:58.8190383Z   "backfillCounts": {
+2026-10-13T21:37:58.8190613Z     "batches": 0,
+2026-10-13T21:37:58.8191169Z     "analytes": 0,
+2026-10-13T21:37:58.8191613Z     "samplePositions": 0,
+2026-10-13T21:37:58.8192125Z     "qcPositions": 0,
+2026-10-13T21:37:58.8192367Z     "historicalSnapshots": 0,
+2026-10-13T21:37:58.8192623Z     "currentEvaluations": 0,
+2026-10-13T21:37:58.8192859Z     "evaluations": 0,
+2026-10-13T21:37:58.8193211Z     "measurements": 0,
+2026-10-13T21:37:58.8193437Z     "typedRows": 0,
+2026-10-13T21:37:58.8193663Z     "historicalTypedRows": 0,
+2026-10-13T21:37:58.8193902Z     "jsonEntries": 0,
+2026-10-13T21:37:58.8194529Z     "typedFallbackEntries": 0,
+2026-10-13T21:37:58.8194836Z     "typedJsonConflicts": 0,
+2026-10-13T21:37:58.8195116Z     "historyAuditConflicts": 0,
+2026-10-13T21:37:58.8195575Z     "unresolvedMethods": 0,
+2026-10-13T21:37:58.8195838Z     "unresolvedAnalysts": 0,
+2026-10-13T21:37:58.8196100Z     "unresolvedInstruments": 0,
+2026-10-13T21:37:58.8196345Z     "unlinkedReferences": 0,
+2026-10-13T21:37:58.8196746Z     "unresolvedNumbers": 0,
+2026-10-13T21:37:58.8197036Z     "unresolvedDuplicateParents": 0,
+2026-10-13T21:37:58.8197338Z     "unresolvedRackPositions": 0,
+2026-10-13T21:37:58.8197606Z     "missingWorkItems": 0,
+2026-10-13T21:37:58.8198021Z     "malformedHistory": 0,
+2026-10-13T21:37:58.8198300Z     "malformedQcResults": 0,
+2026-10-13T21:37:58.8198542Z     "orphanSnapshots": 0,
+2026-10-13T21:37:58.8198977Z     "multiAttemptMembershipGroups": 0,
+2026-10-13T21:37:58.8199262Z     "refusals": 0,
+2026-10-13T21:37:58.8199522Z     "legacyDispositionMapped": {
+2026-10-13T21:37:58.8199782Z       "REJECT_REANALYSIS": 0,
+2026-10-13T21:37:58.8200187Z       "ACCEPT_OPAQUE": 0
+2026-10-13T21:37:58.8200411Z     },
+2026-10-13T21:37:58.8200647Z     "dispositionAttribution": {
+2026-10-13T21:37:58.8200904Z       "AUDIT_LOG": 0,
+2026-10-13T21:37:58.8201324Z       "BATCH_DISPOSITION_FIELD": 0,
+2026-10-13T21:37:58.8201617Z       "SNAPSHOT_DISPOSITION_FIELD": 0
+2026-10-13T21:37:58.8201866Z     },
+2026-10-13T21:37:58.8202104Z     "dispositionAttributionConflicts": 0,
+2026-10-13T21:37:58.8202565Z     "TEXTURE_ALIAS_MERGED": 0
+2026-10-13T21:37:58.8202798Z   },
+2026-10-13T21:37:58.8203232Z   "backfillFingerprint": "b45932a5a1f2be5cba68f756ef680d68aec060efcf3c4aaba1da4b31a8227d47",
+2026-10-13T21:37:58.8203843Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8204053Z   "totalChanges": 0
+2026-10-13T21:37:58.8204255Z }
+2026-10-13T21:37:58.8205016Z 📦 Installing QC disposition scope guards...
+2026-10-13T21:37:58.8205322Z {
+2026-10-13T21:37:58.8205545Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8206228Z   "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+2026-10-13T21:37:58.8207192Z   "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+2026-10-13T21:37:58.8207968Z   "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+2026-10-13T21:37:58.8208905Z   "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+2026-10-13T21:37:58.8209790Z   "existingDispositionRows": 0,
+2026-10-13T21:37:58.8210347Z   "originalDispositionFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+2026-10-13T21:37:58.8211033Z   "backfillCount": 0,
+2026-10-13T21:37:58.8211278Z   "bootstrapRebuild": [],
+2026-10-13T21:37:58.8211515Z   "totalChanges": 0,
+2026-10-13T21:37:58.8211740Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8212071Z   "receipt": {
+2026-10-13T21:37:58.8212555Z     "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+2026-10-13T21:37:58.8213038Z     "existingDispositionRows": 0,
+2026-10-13T21:37:58.8213762Z     "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+2026-10-13T21:37:58.8215116Z     "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+2026-10-13T21:37:58.8216093Z     "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+2026-10-13T21:37:58.8217008Z     "originalDispositionFingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+2026-10-13T21:37:58.8217729Z     "backfillCount": 0,
+2026-10-13T21:37:58.8217976Z     "bootstrapRebuild": []
+2026-10-13T21:37:58.8218352Z   }
+2026-10-13T21:37:58.8218595Z }
+2026-10-13T21:37:58.8218943Z 📦 Installing retained raw input column...
+2026-10-13T21:37:58.8219223Z {
+2026-10-13T21:37:58.8219591Z   "classification": "ALREADY_PRESENT",
+2026-10-13T21:37:58.8219918Z   "counts": {
+2026-10-13T21:37:58.8220123Z     "results": 0,
+2026-10-13T21:37:58.8220348Z     "recordedRawInputs": 0
+2026-10-13T21:37:58.8220579Z   },
+2026-10-13T21:37:58.8220936Z   "backfillCount": 0,
+2026-10-13T21:37:58.8221175Z   "sources": {
+2026-10-13T21:37:58.8221585Z     "migrationSha256": "850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc"
+2026-10-13T21:37:58.8222197Z   },
+2026-10-13T21:37:58.8222393Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8222601Z   "totalChanges": 0
+2026-10-13T21:37:58.8222806Z }
+2026-10-13T21:37:58.8223213Z 📦 Installing proficiency evidence...
+2026-10-13T21:37:58.8223567Z {
+2026-10-13T21:37:58.8223794Z   "classification": "COMPLETE_193",
+2026-10-13T21:37:58.8224180Z   "sources": {
+2026-10-13T21:37:58.8224787Z     "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+2026-10-13T21:37:58.8225500Z     "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+2026-10-13T21:37:58.8226144Z   },
+2026-10-13T21:37:58.8226332Z   "receipt": {
+2026-10-13T21:37:58.8226529Z     "sources": {
+2026-10-13T21:37:58.8227117Z       "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+2026-10-13T21:37:58.8227836Z       "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+2026-10-13T21:37:58.8228491Z     },
+2026-10-13T21:37:58.8228915Z     "originalRowsSha256": "fac0f361c632dd7951a0a6a9b7f35c232ba6374452fa00b9bee0c9ae78bdd572",
+2026-10-13T21:37:58.8229595Z     "originalRowsAndFieldsPreserved": true,
+2026-10-13T21:37:58.8229907Z     "newNcrCount": 0,
+2026-10-13T21:37:58.8230136Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8230721Z     "receiptSha256": "d75692da2894c17d50d74a199a0676cdf49fc9538710c114534e601734ce1dd8"
+2026-10-13T21:37:58.8231148Z   },
+2026-10-13T21:37:58.8231335Z   "roundCount": 0,
+2026-10-13T21:37:58.8231663Z   "pendingRoundIds": [],
+2026-10-13T21:37:58.8231953Z   "ncrCount": 0,
+2026-10-13T21:37:58.8232206Z   "previousClassification": "PRE_193",
+2026-10-13T21:37:58.8232478Z   "mode": "APPLIED",
+2026-10-13T21:37:58.8232767Z   "newNcrCount": 0,
+2026-10-13T21:37:58.8233072Z   "backfilledCount": 0,
+2026-10-13T21:37:58.8233296Z   "totalChanges": 1
+2026-10-13T21:37:58.8233498Z }
+2026-10-13T21:37:58.8233671Z {
+2026-10-13T21:37:58.8234085Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8234579Z   "sources": {
+2026-10-13T21:37:58.8235364Z     "migrationSha256": "bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4"
+2026-10-13T21:37:58.8236421Z   },
+2026-10-13T21:37:58.8236768Z   "bootstrapRebuild": [],
+2026-10-13T21:37:58.8237168Z   "backfillCount": 0,
+2026-10-13T21:37:58.8237587Z   "resultCount": 0,
+2026-10-13T21:37:58.8238440Z   "originalResultSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+2026-10-13T21:37:58.8239373Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8239763Z   "totalChanges": 0
+2026-10-13T21:37:58.8240059Z }
+2026-10-13T21:37:58.8240606Z 📦 Installing duplicate-marker prerequisite...
+2026-10-13T21:37:58.8240909Z {
+2026-10-13T21:37:58.8241128Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8241519Z   "sources": [
+2026-10-13T21:37:58.8241739Z     {
+2026-10-13T21:37:58.8242015Z       "id": "20261004190000_add_workitem_duplicate_marker",
+2026-10-13T21:37:58.8242878Z       "sqlSha256": "80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e"
+2026-10-13T21:37:58.8243289Z     },
+2026-10-13T21:37:58.8243472Z     {
+2026-10-13T21:37:58.8243792Z       "id": "20261004190100_unique_active_workitem",
+2026-10-13T21:37:58.8244683Z       "sqlSha256": "a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e"
+2026-10-13T21:37:58.8245296Z     }
+2026-10-13T21:37:58.8245484Z   ],
+2026-10-13T21:37:58.8245674Z   "workItemCount": 0,
+2026-10-13T21:37:58.8245913Z   "duplicateGroupCount": 0,
+2026-10-13T21:37:58.8246312Z   "duplicateGroups": [],
+2026-10-13T21:37:58.8246556Z   "differences": [],
+2026-10-13T21:37:58.8246775Z   "ledgerReady": true,
+2026-10-13T21:37:58.8247034Z   "executionTablesEmpty": true,
+2026-10-13T21:37:58.8247366Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8247653Z   "totalChanges": 0
+2026-10-13T21:37:58.8247854Z }
+2026-10-13T21:37:58.8248205Z 📦 Installing WorkAttempt execution evidence...
+2026-10-13T21:37:58.8248627Z {
+2026-10-13T21:37:58.8248899Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8249145Z   "sources": {
+2026-10-13T21:37:58.8249573Z     "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+2026-10-13T21:37:58.8250228Z     "contractVersion": "190-v1"
+2026-10-13T21:37:58.8250476Z   },
+2026-10-13T21:37:58.8250659Z   "plan": {
+2026-10-13T21:37:58.8250978Z     "status": "READY",
+2026-10-13T21:37:58.8251287Z     "existingAttemptCount": 0,
+2026-10-13T21:37:58.8251536Z     "resultCount": 0,
+2026-10-13T21:37:58.8251788Z     "alreadyLinkedResultCount": 0,
+2026-10-13T21:37:58.8252057Z     "exemptImportCount": 0,
+2026-10-13T21:37:58.8252357Z     "exemptImports": [],
+2026-10-13T21:37:58.8252720Z     "missingOrderedWorkGroups": [],
+2026-10-13T21:37:58.8253021Z     "missingOrderedWorkCount": 0,
+2026-10-13T21:37:58.8253336Z     "samplesWithMissingOrderedWorkCount": 0,
+2026-10-13T21:37:58.8253658Z     "invalidOrderMetadata": [],
+2026-10-13T21:37:58.8254183Z     "unmappedStatusGroups": [],
+2026-10-13T21:37:58.8254570Z     "newAttempts": [],
+2026-10-13T21:37:58.8254791Z     "links": [],
+2026-10-13T21:37:58.8254990Z     "blockers": [],
+2026-10-13T21:37:58.8255417Z     "duplicateAttemptNumberGroups": [],
+2026-10-13T21:37:58.8255778Z     "currentResultConflicts": [],
+2026-10-13T21:37:58.8256086Z     "historicalEquipmentEvidence": [],
+2026-10-13T21:37:58.8256388Z     "historicalBatchEvidence": [],
+2026-10-13T21:37:58.8256898Z     "originalAttemptSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+2026-10-13T21:37:58.8257600Z     "originalResultSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+2026-10-13T21:37:58.8258323Z     "matchedWorkItemSourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+2026-10-13T21:37:58.8259124Z     "batchReferenceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+2026-10-13T21:37:58.8259648Z     "totalChanges": 0,
+2026-10-13T21:37:58.8260059Z     "planSha256": "8025595147abdd35fe7688414d03d06321617889bfb9f467fc619bf1573be136"
+2026-10-13T21:37:58.8260445Z   },
+2026-10-13T21:37:58.8260669Z   "duplicateMarkerPrerequisite": {
+2026-10-13T21:37:58.8260964Z     "classification": "COMPLETE",
+2026-10-13T21:37:58.8261206Z     "sources": [
+2026-10-13T21:37:58.8261520Z       {
+2026-10-13T21:37:58.8261797Z         "id": "20261004190000_add_workitem_duplicate_marker",
+2026-10-13T21:37:58.8262286Z         "sqlSha256": "80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e"
+2026-10-13T21:37:58.8262680Z       },
+2026-10-13T21:37:58.8262855Z       {
+2026-10-13T21:37:58.8263094Z         "id": "20261004190100_unique_active_workitem",
+2026-10-13T21:37:58.8263556Z         "sqlSha256": "a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e"
+2026-10-13T21:37:58.8264160Z       }
+2026-10-13T21:37:58.8264351Z     ]
+2026-10-13T21:37:58.8264525Z   },
+2026-10-13T21:37:58.8264707Z   "receipt": {
+2026-10-13T21:37:58.8264903Z     "sources": {
+2026-10-13T21:37:58.8265465Z       "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+2026-10-13T21:37:58.8265938Z       "contractVersion": "190-v1"
+2026-10-13T21:37:58.8266284Z     },
+2026-10-13T21:37:58.8266751Z     "originalPlanSha256": "8025595147abdd35fe7688414d03d06321617889bfb9f467fc619bf1573be136",
+2026-10-13T21:37:58.8267313Z     "duplicateMarkerPrerequisite": {
+2026-10-13T21:37:58.8267613Z       "classification": "COMPLETE",
+2026-10-13T21:37:58.8267868Z       "sources": [
+2026-10-13T21:37:58.8268062Z         {
+2026-10-13T21:37:58.8268332Z           "id": "20261004190000_add_workitem_duplicate_marker",
+2026-10-13T21:37:58.8268825Z           "sqlSha256": "80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e"
+2026-10-13T21:37:58.8269222Z         },
+2026-10-13T21:37:58.8269409Z         {
+2026-10-13T21:37:58.8269650Z           "id": "20261004190100_unique_active_workitem",
+2026-10-13T21:37:58.8270110Z           "sqlSha256": "a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e"
+2026-10-13T21:37:58.8270669Z         }
+2026-10-13T21:37:58.8270850Z       ]
+2026-10-13T21:37:58.8271024Z     },
+2026-10-13T21:37:58.8271457Z     "originalAttemptSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+2026-10-13T21:37:58.8272151Z     "originalResultSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+2026-10-13T21:37:58.8272877Z     "matchedWorkItemSourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+2026-10-13T21:37:58.8273372Z     "createdAttempts": [],
+2026-10-13T21:37:58.8273599Z     "links": [],
+2026-10-13T21:37:58.8273811Z     "flaggedGroups": [],
+2026-10-13T21:37:58.8274325Z     "exemptImportCount": 0,
+2026-10-13T21:37:58.8274575Z     "exemptImports": [],
+2026-10-13T21:37:58.8274837Z     "missingOrderedWorkGroups": [],
+2026-10-13T21:37:58.8275133Z     "missingOrderedWorkCount": 0,
+2026-10-13T21:37:58.8275445Z     "samplesWithMissingOrderedWorkCount": 0,
+2026-10-13T21:37:58.8275776Z     "invalidOrderMetadata": [],
+2026-10-13T21:37:58.8276059Z     "historicalBatchEvidence": [],
+2026-10-13T21:37:58.8276360Z     "historicalEquipmentEvidence": [],
+2026-10-13T21:37:58.8276686Z     "originalRowsAndFieldsPreserved": true,
+2026-10-13T21:37:58.8277173Z     "receiptSha256": "da36234031eec3cf498e6e004b80ffdde23910e4a697d9e126ef3e52dfc37d5b"
+2026-10-13T21:37:58.8277593Z   },
+2026-10-13T21:37:58.8277792Z   "bootstrapRebuild": [],
+2026-10-13T21:37:58.8278020Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8278224Z   "totalChanges": 0
+2026-10-13T21:37:58.8278420Z }
+2026-10-13T21:37:58.8278770Z 📦 Installing repeat and correction evidence...
+2026-10-13T21:37:58.8279057Z {
+2026-10-13T21:37:58.8279271Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8279512Z   "sources": {
+2026-10-13T21:37:58.8280092Z     "migrationSha256": "600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd",
+2026-10-13T21:37:58.8280565Z     "contractVersion": "191-v1",
+2026-10-13T21:37:58.8280814Z     "predecessor": {
+2026-10-13T21:37:58.8281087Z       "marker": "190_work_attempt_contract",
+2026-10-13T21:37:58.8281579Z       "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+2026-10-13T21:37:58.8282204Z       "contractVersion": "190-v1",
+2026-10-13T21:37:58.8282654Z       "receiptSha256": "da36234031eec3cf498e6e004b80ffdde23910e4a697d9e126ef3e52dfc37d5b"
+2026-10-13T21:37:58.8283175Z     },
+2026-10-13T21:37:58.8283363Z     "qcPredecessors": {
+2026-10-13T21:37:58.8283615Z       "186_normalized_qc_runs": {
+2026-10-13T21:37:58.8284283Z         "receiptSha256": "cf4baaf46b2279f2e1820ef4011fe7802ccb700a6f68db8478845ea9178eb6ca"
+2026-10-13T21:37:58.8284715Z       },
+2026-10-13T21:37:58.8284913Z       "187_qc_gate_scope": {
+2026-10-13T21:37:58.8285350Z         "receiptSha256": "4876290cfbd0ec9cbdd0965d890b529bca21e2b92be53f6b91a2593656d8bc2e"
+2026-10-13T21:37:58.8285759Z       }
+2026-10-13T21:37:58.8285940Z     }
+2026-10-13T21:37:58.8286111Z   },
+2026-10-13T21:37:58.8286286Z   "receipt": {
+2026-10-13T21:37:58.8286615Z     "sources": {
+2026-10-13T21:37:58.8287018Z       "migrationSha256": "600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd",
+2026-10-13T21:37:58.8287472Z       "contractVersion": "191-v1",
+2026-10-13T21:37:58.8287726Z       "predecessor": {
+2026-10-13T21:37:58.8287992Z         "marker": "190_work_attempt_contract",
+2026-10-13T21:37:58.8288562Z         "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+2026-10-13T21:37:58.8289039Z         "contractVersion": "190-v1",
+2026-10-13T21:37:58.8289496Z         "receiptSha256": "da36234031eec3cf498e6e004b80ffdde23910e4a697d9e126ef3e52dfc37d5b"
+2026-10-13T21:37:58.8289910Z       },
+2026-10-13T21:37:58.8290115Z       "qcPredecessors": {
+2026-10-13T21:37:58.8290373Z         "186_normalized_qc_runs": {
+2026-10-13T21:37:58.8290829Z           "receiptSha256": "cf4baaf46b2279f2e1820ef4011fe7802ccb700a6f68db8478845ea9178eb6ca"
+2026-10-13T21:37:58.8291243Z         },
+2026-10-13T21:37:58.8291454Z         "187_qc_gate_scope": {
+2026-10-13T21:37:58.8291900Z           "receiptSha256": "4876290cfbd0ec9cbdd0965d890b529bca21e2b92be53f6b91a2593656d8bc2e"
+2026-10-13T21:37:58.8292311Z         }
+2026-10-13T21:37:58.8292487Z       }
+2026-10-13T21:37:58.8292661Z     },
+2026-10-13T21:37:58.8293316Z     "originalRowsSha256": "1957b39aa86d562091a74f49496436384680066495a8faf6a33ca22f0d600eeb",
+2026-10-13T21:37:58.8294343Z     "reasonNotRecordedCount": 0,
+2026-10-13T21:37:58.8294800Z     "reasonNotRecorded": [],
+2026-10-13T21:37:58.8295264Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8295770Z     "originalReasonFieldsPreserved": true,
+2026-10-13T21:37:58.8296121Z     "originalRowsAndFieldsPreserved": true,
+2026-10-13T21:37:58.8296411Z     "newAttemptCount": 0,
+2026-10-13T21:37:58.8296649Z     "linkedResultCount": 0,
+2026-10-13T21:37:58.8297071Z     "receiptSha256": "0ede7cd3507005672950110286e54841110d5007a0faa234d1fdbf611d06f88a"
+2026-10-13T21:37:58.8297479Z   },
+2026-10-13T21:37:58.8297670Z   "predecessor": {
+2026-10-13T21:37:58.8297932Z     "classification": "COMPLETE",
+2026-10-13T21:37:58.8298220Z     "sources": {
+2026-10-13T21:37:58.8298647Z       "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+2026-10-13T21:37:58.8299116Z       "contractVersion": "190-v1"
+2026-10-13T21:37:58.8299354Z     },
+2026-10-13T21:37:58.8299735Z     "receiptSha256": "da36234031eec3cf498e6e004b80ffdde23910e4a697d9e126ef3e52dfc37d5b"
+2026-10-13T21:37:58.8300142Z   },
+2026-10-13T21:37:58.8300319Z   "plan": {
+2026-10-13T21:37:58.8300551Z     "reasonNotRecordedCount": 0,
+2026-10-13T21:37:58.8300811Z     "reasonNotRecorded": [],
+2026-10-13T21:37:58.8301060Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8301337Z     "originalReasonFieldsPreserved": true
+2026-10-13T21:37:58.8301606Z   },
+2026-10-13T21:37:58.8301790Z   "releaseInventory": {
+2026-10-13T21:37:58.8302045Z     "blockedWorkItemCount": 0,
+2026-10-13T21:37:58.8302293Z     "blockedWorkItems": [],
+2026-10-13T21:37:58.8302524Z     "totalChanges": 0
+2026-10-13T21:37:58.8302732Z   },
+2026-10-13T21:37:58.8302914Z   "bootstrapRebuild": [],
+2026-10-13T21:37:58.8303137Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8303343Z   "totalChanges": 0
+2026-10-13T21:37:58.8303543Z }
+2026-10-13T21:37:58.8304184Z 📦 Installing reported-value selection evidence...
+2026-10-13T21:37:58.8304649Z {
+2026-10-13T21:37:58.8304868Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8305332Z   "migrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7",
+2026-10-13T21:37:58.8305815Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8306124Z   "totalChanges": 0,
+2026-10-13T21:37:58.8306464Z   "newSelectionCount": 0
+2026-10-13T21:37:58.8306686Z }
+2026-10-13T21:37:58.8307029Z 📦 Installing retained run reagent links...
+2026-10-13T21:37:58.8307301Z {
+2026-10-13T21:37:58.8307518Z   "classification": "COMPLETE_194",
+2026-10-13T21:37:58.8307776Z   "sources": {
+2026-10-13T21:37:58.8308522Z     "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+2026-10-13T21:37:58.8309206Z   },
+2026-10-13T21:37:58.8309393Z   "linkCount": 0,
+2026-10-13T21:37:58.8309771Z   "receipt": {
+2026-10-13T21:37:58.8309973Z     "sources": {
+2026-10-13T21:37:58.8310382Z       "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+2026-10-13T21:37:58.8310804Z     },
+2026-10-13T21:37:58.8311219Z     "originalRowsSha256": "ec9388dae07ff2840425ed91b755afd500e5a74f9304d0221c07d23a48f20a48",
+2026-10-13T21:37:58.8311799Z     "originalRowsPreserved": true,
+2026-10-13T21:37:58.8312059Z     "newLinkCount": 0,
+2026-10-13T21:37:58.8312286Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8312703Z     "receiptSha256": "0606fa9baf2db724c0857382c95d8188f18850a593fd8a097163ba3dec578b20"
+2026-10-13T21:37:58.8313103Z   },
+2026-10-13T21:37:58.8313333Z   "previousClassification": "PRE_194",
+2026-10-13T21:37:58.8313600Z   "mode": "APPLIED",
+2026-10-13T21:37:58.8313814Z   "newLinkCount": 0,
+2026-10-13T21:37:58.8314422Z   "backfilledCount": 0,
+2026-10-13T21:37:58.8314661Z   "totalChanges": 1
+2026-10-13T21:37:58.8314866Z }
+2026-10-13T21:37:58.8315312Z 📦 Installing inactive calculation references and evidence guards...
+2026-10-13T21:37:58.8315667Z {
+2026-10-13T21:37:58.8315877Z   "classification": "COMPLETE",
+2026-10-13T21:37:58.8316119Z   "sources": {
+2026-10-13T21:37:58.8316530Z     "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+2026-10-13T21:37:58.8317147Z     "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+2026-10-13T21:37:58.8317751Z     "referenceSha256": "57dc4b667dab93606e24673b39a12032e48f3df686b9bd3c593ac04d2fac8491"
+2026-10-13T21:37:58.8318161Z   },
+2026-10-13T21:37:58.8318341Z   "receipt": {
+2026-10-13T21:37:58.8318741Z     "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+2026-10-13T21:37:58.8319342Z     "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+2026-10-13T21:37:58.8319744Z     "guards": [
+2026-10-13T21:37:58.8319984Z       "CalcTemplate_insert_contract",
+2026-10-13T21:37:58.8320311Z       "CalcTemplateActivation_insert_contract",
+2026-10-13T21:37:58.8320646Z       "CalibrationCurve_insert_contract",
+2026-10-13T21:37:58.8320952Z       "CalibrationPoint_insert_contract",
+2026-10-13T21:37:58.8321259Z       "ResultCalculation_insert_contract",
+2026-10-13T21:37:58.8321572Z       "CalcTemplate_update_immutable",
+2026-10-13T21:37:58.8321864Z       "CalcTemplate_delete_immutable",
+2026-10-13T21:37:58.8322178Z       "CalcTemplateActivation_update_immutable",
+2026-10-13T21:37:58.8322575Z       "CalcTemplateActivation_delete_immutable",
+2026-10-13T21:37:58.8322962Z       "CalibrationCurve_update_immutable",
+2026-10-13T21:37:58.8323358Z       "CalibrationCurve_delete_immutable",
+2026-10-13T21:37:58.8323679Z       "CalibrationPoint_update_immutable",
+2026-10-13T21:37:58.8324276Z       "CalibrationPoint_delete_immutable",
+2026-10-13T21:37:58.8324620Z       "ResultCalculation_update_immutable",
+2026-10-13T21:37:58.8324937Z       "ResultCalculation_delete_immutable",
+2026-10-13T21:37:58.8325272Z       "CalibrationCurve_pass_coefficients_guard"
+2026-10-13T21:37:58.8325550Z     ],
+2026-10-13T21:37:58.8325738Z     "backfillCount": 0
+2026-10-13T21:37:58.8325944Z   },
+2026-10-13T21:37:58.8326126Z   "guards": [
+2026-10-13T21:37:58.8326353Z     "CalcTemplate_insert_contract",
+2026-10-13T21:37:58.8326772Z     "CalcTemplateActivation_insert_contract",
+2026-10-13T21:37:58.8327094Z     "CalibrationCurve_insert_contract",
+2026-10-13T21:37:58.8327393Z     "CalibrationPoint_insert_contract",
+2026-10-13T21:37:58.8327694Z     "ResultCalculation_insert_contract",
+2026-10-13T21:37:58.8327997Z     "CalcTemplate_update_immutable",
+2026-10-13T21:37:58.8328287Z     "CalcTemplate_delete_immutable",
+2026-10-13T21:37:58.8328595Z     "CalcTemplateActivation_update_immutable",
+2026-10-13T21:37:58.8328938Z     "CalcTemplateActivation_delete_immutable",
+2026-10-13T21:37:58.8329258Z     "CalibrationCurve_update_immutable",
+2026-10-13T21:37:58.8329565Z     "CalibrationCurve_delete_immutable",
+2026-10-13T21:37:58.8329993Z     "CalibrationPoint_update_immutable",
+2026-10-13T21:37:58.8330292Z     "CalibrationPoint_delete_immutable",
+2026-10-13T21:37:58.8330595Z     "ResultCalculation_update_immutable",
+2026-10-13T21:37:58.8330908Z     "ResultCalculation_delete_immutable",
+2026-10-13T21:37:58.8331230Z     "CalibrationCurve_pass_coefficients_guard"
+2026-10-13T21:37:58.8331569Z   ],
+2026-10-13T21:37:58.8331741Z   "counts": {
+2026-10-13T21:37:58.8331939Z     "CalcTemplate": 11,
+2026-10-13T21:37:58.8332194Z     "CalcTemplateActivation": 0,
+2026-10-13T21:37:58.8332451Z     "CalibrationCurve": 0,
+2026-10-13T21:37:58.8332688Z     "CalibrationPoint": 0,
+2026-10-13T21:37:58.8332921Z     "ResultCalculation": 0
+2026-10-13T21:37:58.8333139Z   },
+2026-10-13T21:37:58.8333321Z   "backfillCount": 0,
+2026-10-13T21:37:58.8333527Z   "unit": {
+2026-10-13T21:37:58.8333760Z     "classification": "ALREADY_PRESENT",
+2026-10-13T21:37:58.8334455Z     "unitCode": "pct_mass",
+2026-10-13T21:37:58.8334708Z     "unitInsertCount": 0,
+2026-10-13T21:37:58.8334957Z     "backfillCount": 0
+2026-10-13T21:37:58.8335163Z   },
+2026-10-13T21:37:58.8335344Z   "references": {
+2026-10-13T21:37:58.8335582Z     "classification": "COMPLETE",
+2026-10-13T21:37:58.8335840Z     "referenceCount": 11,
+2026-10-13T21:37:58.8336101Z     "installedReferenceCount": 11,
+2026-10-13T21:37:58.8336397Z     "missingReferenceIds": [],
+2026-10-13T21:37:58.8336654Z     "deferredReferences": [],
+2026-10-13T21:37:58.8336923Z     "deferredReferenceCount": 0,
+2026-10-13T21:37:58.8337195Z     "referenceInsertCount": 0,
+2026-10-13T21:37:58.8337475Z     "referenceReceiptInsertCount": 0,
+2026-10-13T21:37:58.8337769Z     "activationInsertCount": 0,
+2026-10-13T21:37:58.8338020Z     "backfillCount": 0
+2026-10-13T21:37:58.8338225Z   },
+2026-10-13T21:37:58.8338403Z   "ready": true,
+2026-10-13T21:37:58.8338639Z   "plannedUnitInsertCount": 0,
+2026-10-13T21:37:58.8338920Z   "plannedReferenceInsertCount": 0,
+2026-10-13T21:37:58.8339195Z   "activationInsertCount": 0,
+2026-10-13T21:37:58.8339490Z   "previousClassification": "PRE_199",
+2026-10-13T21:37:58.8339754Z   "mode": "APPLIED",
+2026-10-13T21:37:58.8339969Z   "unitInsertCount": 0,
+2026-10-13T21:37:58.8340204Z   "referenceInsertCount": 11,
+2026-10-13T21:37:58.8340483Z   "referenceReceiptInsertCount": 11,
+2026-10-13T21:37:58.8340782Z   "schemaReceiptInsertCount": 1,
+2026-10-13T21:37:58.8341041Z   "totalChanges": 23
+2026-10-13T21:37:58.8341240Z }
+2026-10-13T21:37:58.8341607Z 📦 Installing immutable result override requests...
+2026-10-13T21:37:58.8341913Z {
+2026-10-13T21:37:58.8342126Z   "classification": "COMPLETE_197",
+2026-10-13T21:37:58.8342377Z   "sources": {
+2026-10-13T21:37:58.8342786Z     "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+2026-10-13T21:37:58.8343198Z   },
+2026-10-13T21:37:58.8343383Z   "requestCount": 0,
+2026-10-13T21:37:58.8343592Z   "receipt": {
+2026-10-13T21:37:58.8343783Z     "sources": {
+2026-10-13T21:37:58.8344585Z       "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+2026-10-13T21:37:58.8345033Z     },
+2026-10-13T21:37:58.8345443Z     "originalRowsSha256": "27d2cb6e7176582447c225ff34afbe00179809fd4ee5e84283453a11d8898bf4",
+2026-10-13T21:37:58.8345921Z     "originalRowsPreserved": true,
+2026-10-13T21:37:58.8346186Z     "newRequestCount": 0,
+2026-10-13T21:37:58.8346538Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8346953Z     "receiptSha256": "a9d40f527646e76111e4fc87fbc0ca62678cb7b262048718968403b33bf57cce"
+2026-10-13T21:37:58.8347366Z   },
+2026-10-13T21:37:58.8347591Z   "previousClassification": "PRE_197",
+2026-10-13T21:37:58.8347862Z   "mode": "APPLIED",
+2026-10-13T21:37:58.8348079Z   "newRequestCount": 0,
+2026-10-13T21:37:58.8348301Z   "backfilledCount": 0,
+2026-10-13T21:37:58.8348519Z   "totalChanges": 1
+2026-10-13T21:37:58.8348720Z }
+2026-10-13T21:37:58.8349050Z 📦 Installing immutable cross-check evidence...
+2026-10-13T21:37:58.8349338Z {
+2026-10-13T21:37:58.8349552Z   "classification": "COMPLETE_201",
+2026-10-13T21:37:58.8349935Z   "sources": {
+2026-10-13T21:37:58.8350342Z     "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+2026-10-13T21:37:58.8350965Z     "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+2026-10-13T21:37:58.8351640Z     "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+2026-10-13T21:37:58.8352176Z   },
+2026-10-13T21:37:58.8352364Z   "evaluationCount": 0,
+2026-10-13T21:37:58.8352582Z   "receipt": {
+2026-10-13T21:37:58.8352781Z     "sources": {
+2026-10-13T21:37:58.8353190Z       "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+2026-10-13T21:37:58.8353805Z       "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+2026-10-13T21:37:58.8355132Z       "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+2026-10-13T21:37:58.8355623Z     },
+2026-10-13T21:37:58.8356043Z     "originalRowsSha256": "a5b7aaa9d47764599d72adbbcf86f72741729d3de4ac7048523bd635485f4a01",
+2026-10-13T21:37:58.8356535Z     "originalRowsPreserved": true,
+2026-10-13T21:37:58.8356806Z     "newEvaluationCount": 0,
+2026-10-13T21:37:58.8357054Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8357475Z     "receiptSha256": "76e32302ffce6fa970466d0db44cd768fe55a34af53c347d772090258cc7feb7"
+2026-10-13T21:37:58.8357894Z   },
+2026-10-13T21:37:58.8358080Z   "mode": "NO_OP",
+2026-10-13T21:37:58.8358288Z   "totalChanges": 0,
+2026-10-13T21:37:58.8358512Z   "newEvaluationCount": 0,
+2026-10-13T21:37:58.8358747Z   "backfilledCount": 0
+2026-10-13T21:37:58.8358958Z }
+2026-10-13T21:37:58.8359466Z 📦 Installing immutable amendment requests, attempt links and report withdrawals...
+2026-10-13T21:37:58.8360007Z {
+2026-10-13T21:37:58.8360369Z   "classification": "COMPLETE_210",
+2026-10-13T21:37:58.8360711Z   "sources": {
+2026-10-13T21:37:58.8361126Z     "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+2026-10-13T21:37:58.8361779Z     "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+2026-10-13T21:37:58.8362230Z     "contractVersion": "210-v1"
+2026-10-13T21:37:58.8362473Z   },
+2026-10-13T21:37:58.8362659Z   "amendmentCount": 0,
+2026-10-13T21:37:58.8362912Z   "amendmentAttemptLinkCount": 0,
+2026-10-13T21:37:58.8363177Z   "withdrawalCount": 0,
+2026-10-13T21:37:58.8363397Z   "receipt": {
+2026-10-13T21:37:58.8363590Z     "sources": {
+2026-10-13T21:37:58.8364288Z       "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+2026-10-13T21:37:58.8364939Z       "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+2026-10-13T21:37:58.8365392Z       "contractVersion": "210-v1"
+2026-10-13T21:37:58.8365629Z     },
+2026-10-13T21:37:58.8366032Z     "originalRowsSha256": "f988419f5a8a360153d828b8dce8580e8a1cfaf214cba3080888498c74d168af",
+2026-10-13T21:37:58.8366509Z     "originalRowsPreserved": true,
+2026-10-13T21:37:58.8366775Z     "newAmendmentCount": 0,
+2026-10-13T21:37:58.8367025Z     "newAttemptLinkCount": 0,
+2026-10-13T21:37:58.8367276Z     "newWithdrawalCount": 0,
+2026-10-13T21:37:58.8367519Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8368106Z     "receiptSha256": "f9f3ab90425bff7ce5c14fd81dff3ee3ee479ae1f7ddfa9167a5a94f4587e1f8"
+2026-10-13T21:37:58.8368766Z   },
+2026-10-13T21:37:58.8369224Z   "previousClassification": "PRE_210",
+2026-10-13T21:37:58.8369767Z   "mode": "APPLIED",
+2026-10-13T21:37:58.8370026Z   "newAmendmentCount": 0,
+2026-10-13T21:37:58.8370270Z   "newAttemptLinkCount": 0,
+2026-10-13T21:37:58.8370713Z   "newWithdrawalCount": 0,
+2026-10-13T21:37:58.8370964Z   "backfilledCount": 0,
+2026-10-13T21:37:58.8371185Z   "totalChanges": 1
+2026-10-13T21:37:58.8371384Z }
+2026-10-13T21:37:58.8371934Z 📦 Installing immutable report revision evidence...
+2026-10-13T21:37:58.8372246Z {
+2026-10-13T21:37:58.8372466Z   "classification": "COMPLETE_211",
+2026-10-13T21:37:58.8372729Z   "sources": {
+2026-10-13T21:37:58.8373432Z     "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+2026-10-13T21:37:58.8374449Z     "contractVersion": "211-v1"
+2026-10-13T21:37:58.8374698Z   },
+2026-10-13T21:37:58.8374888Z   "reportCount": 0,
+2026-10-13T21:37:58.8375094Z   "receipt": {
+2026-10-13T21:37:58.8375429Z     "sources": {
+2026-10-13T21:37:58.8375901Z       "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+2026-10-13T21:37:58.8376577Z       "contractVersion": "211-v1"
+2026-10-13T21:37:58.8377283Z     },
+2026-10-13T21:37:58.8377826Z     "originalRowsSha256": "dfb2494ff31b99968103abba11508795edf3ac5478f66eb2688ff690b383457a",
+2026-10-13T21:37:58.8378387Z     "originalRowsPreserved": true,
+2026-10-13T21:37:58.8378653Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8379244Z     "receiptSha256": "6af02c4f6c37f10e78f480b7ad50b22bb642bb368d86934f1c346162e1da37fd"
+2026-10-13T21:37:58.8379669Z   },
+2026-10-13T21:37:58.8379897Z   "previousClassification": "PRE_211",
+2026-10-13T21:37:58.8380337Z   "mode": "APPLIED",
+2026-10-13T21:37:58.8380576Z   "backfilledCount": 0,
+2026-10-13T21:37:58.8380800Z   "totalChanges": 1
+2026-10-13T21:37:58.8380994Z }
+2026-10-13T21:37:58.8381469Z 📦 Installing bench credential storage...
+2026-10-13T21:37:58.8381755Z {
+2026-10-13T21:37:58.8381971Z   "classification": "COMPLETE_202",
+2026-10-13T21:37:58.8382234Z   "sources": {
+2026-10-13T21:37:58.8382836Z     "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+2026-10-13T21:37:58.8383303Z     "contractVersion": "202-v1"
+2026-10-13T21:37:58.8383538Z   },
+2026-10-13T21:37:58.8383848Z   "receipt": {
+2026-10-13T21:37:58.8384315Z     "sources": {
+2026-10-13T21:37:58.8384978Z       "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+2026-10-13T21:37:58.8385602Z       "contractVersion": "202-v1"
+2026-10-13T21:37:58.8385859Z     },
+2026-10-13T21:37:58.8386526Z     "originalRowsSha256": "760acdaaece934e5eecc2dab96a530eeb67fee853de3d8614678378174328d60",
+2026-10-13T21:37:58.8387051Z     "originalRowsPreserved": true,
+2026-10-13T21:37:58.8387325Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8387912Z     "receiptSha256": "bd0cac92aa8ad10a91f5dfeb648ca863b4832e3a06dc65e93a6f2480fdccfe00"
+2026-10-13T21:37:58.8388334Z   },
+2026-10-13T21:37:58.8388642Z   "previousClassification": "PRE_202",
+2026-10-13T21:37:58.8389002Z   "mode": "APPLIED",
+2026-10-13T21:37:58.8389225Z   "backfilledCount": 0,
+2026-10-13T21:37:58.8389450Z   "totalChanges": 1
+2026-10-13T21:37:58.8389655Z }
+2026-10-13T21:37:58.8390139Z 📦 Installing preparation record evidence...
+2026-10-13T21:37:58.8390422Z {
+2026-10-13T21:37:58.8390641Z   "classification": "COMPLETE_205",
+2026-10-13T21:37:58.8390938Z   "sources": {
+2026-10-13T21:37:58.8391444Z     "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+2026-10-13T21:37:58.8391907Z     "contractVersion": "205-v1"
+2026-10-13T21:37:58.8392246Z   },
+2026-10-13T21:37:58.8392471Z   "receipt": {
+2026-10-13T21:37:58.8392668Z     "sources": {
+2026-10-13T21:37:58.8393083Z       "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+2026-10-13T21:37:58.8393673Z       "contractVersion": "205-v1"
+2026-10-13T21:37:58.8394071Z     },
+2026-10-13T21:37:58.8394814Z     "originalRowsSha256": "49c5cf8a4e8ccdf1fbb911ce355d6eb9d9918b73495ef5ac2bf1a2e659498dbe",
+2026-10-13T21:37:58.8395719Z     "originalRowsPreserved": true,
+2026-10-13T21:37:58.8396147Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8396578Z     "receiptSha256": "7ede7886f3645823a02c7bd2ce810b45354d781d0bbfadb849a838112dd44de9"
+2026-10-13T21:37:58.8397124Z   },
+2026-10-13T21:37:58.8397406Z   "previousClassification": "PRE_205",
+2026-10-13T21:37:58.8397679Z   "mode": "APPLIED",
+2026-10-13T21:37:58.8397896Z   "backfilledCount": 0,
+2026-10-13T21:37:58.8398206Z   "totalChanges": 1
+2026-10-13T21:37:58.8398529Z }
+2026-10-13T21:37:58.8398969Z 📦 Installing retained instrument import templates and receipts...
+2026-10-13T21:37:58.8399329Z {
+2026-10-13T21:37:58.8399736Z   "classification": "COMPLETE_200",
+2026-10-13T21:37:58.8400349Z   "sources": {
+2026-10-13T21:37:58.8400962Z     "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+2026-10-13T21:37:58.8401611Z     "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+2026-10-13T21:37:58.8402508Z     "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+2026-10-13T21:37:58.8403561Z     "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+2026-10-13T21:37:58.8404707Z     "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+2026-10-13T21:37:58.8405162Z   },
+2026-10-13T21:37:58.8405342Z   "counts": {
+2026-10-13T21:37:58.8405543Z     "templates": 0,
+2026-10-13T21:37:58.8405951Z     "receipts": 0,
+2026-10-13T21:37:58.8414962Z     "draftLinks": 0
+2026-10-13T21:37:58.8415575Z   },
+2026-10-13T21:37:58.8415912Z   "receipt": {
+2026-10-13T21:37:58.8416139Z     "sources": {
+2026-10-13T21:37:58.8416596Z       "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+2026-10-13T21:37:58.8417262Z       "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+2026-10-13T21:37:58.8417900Z       "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+2026-10-13T21:37:58.8418580Z       "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+2026-10-13T21:37:58.8419261Z       "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+2026-10-13T21:37:58.8419705Z     },
+2026-10-13T21:37:58.8420282Z     "originalRowsSha256": "ebe1d344d6634728a3e1fcce70032ce249068ea5785597cc90dbadac5c25db59",
+2026-10-13T21:37:58.8420842Z     "originalRowsPreserved": true,
+2026-10-13T21:37:58.8421118Z     "newTemplateCount": 0,
+2026-10-13T21:37:58.8421533Z     "newReceiptCount": 0,
+2026-10-13T21:37:58.8421784Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8422358Z     "receiptSha256": "d1a5426c08d055f0b4e2a02ddc7a8d8d5e01f81c44e9126166dae55eaaf66b58"
+2026-10-13T21:37:58.8423116Z   },
+2026-10-13T21:37:58.8423513Z   "previousClassification": "PRE_200",
+2026-10-13T21:37:58.8424142Z   "mode": "APPLIED",
+2026-10-13T21:37:58.8424538Z   "newTemplateCount": 0,
+2026-10-13T21:37:58.8424942Z   "newReceiptCount": 0,
+2026-10-13T21:37:58.8425372Z   "backfilledCount": 0,
+2026-10-13T21:37:58.8425764Z   "totalChanges": 1
+2026-10-13T21:37:58.8426100Z }
+2026-10-13T21:37:58.8426394Z {
+2026-10-13T21:37:58.8426800Z   "classification": "COMPLETE_206",
+2026-10-13T21:37:58.8427276Z   "sources": {
+2026-10-13T21:37:58.8428030Z     "migrationSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4",
+2026-10-13T21:37:58.8428864Z     "contractVersion": "206-v1"
+2026-10-13T21:37:58.8429278Z   },
+2026-10-13T21:37:58.8429591Z   "receipt": {
+2026-10-13T21:37:58.8429927Z     "sources": {
+2026-10-13T21:37:58.8430668Z       "migrationSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4",
+2026-10-13T21:37:58.8431528Z       "contractVersion": "206-v1"
+2026-10-13T21:37:58.8431937Z     },
+2026-10-13T21:37:58.8432670Z     "originalRowsSha256": "ad774505fc1f6efe63bc9de48c2f11c66e72f76c23b92075ddc9563a5e0656cd",
+2026-10-13T21:37:58.8433566Z     "originalRowsPreserved": true,
+2026-10-13T21:37:58.8434456Z     "backfilledCount": 0,
+2026-10-13T21:37:58.8435246Z     "receiptSha256": "7f327b4061e12807de75c5fc6c666f1ba88319aafc80d8efa3d9fd2a817f47e7"
+2026-10-13T21:37:58.8435994Z   },
+2026-10-13T21:37:58.8436389Z   "previousClassification": "PRE_206",
+2026-10-13T21:37:58.8436885Z   "mode": "APPLIED",
+2026-10-13T21:37:58.8437270Z   "backfilledCount": 0,
+2026-10-13T21:37:58.8437660Z   "totalChanges": 1
+2026-10-13T21:37:58.8438009Z }
+2026-10-13T21:37:58.8438185Z 
+2026-10-13T21:37:58.8438974Z     at waitForHealth (/home/runner/work/soilfer-lims/soilfer-lims/server/scripts/rehearsal_deployment_readiness.cjs:155:27)
+2026-10-13T21:37:58.8440586Z     at async runSuite (/home/runner/work/soilfer-lims/soilfer-lims/server/scripts/rehearsal_deployment_readiness.cjs:1345:5)
+2026-10-13T21:37:58.8441825Z 
+2026-10-13T21:37:58.8442284Z 🧹 Cleaning up disposable test resources...
+2026-10-13T21:37:59.1394784Z ✓ Cleanup complete.
+2026-10-13T21:37:59.1395207Z 
+2026-10-13T21:37:59.1497480Z ##[error]Process completed with exit code 1.

@@ -1,0 +1,93 @@
+﻿2026-10-13T21:01:52.4878730Z ##[group]Run npm run build
+2026-10-13T21:01:52.4879043Z [36;1mnpm run build[0m
+2026-10-13T21:01:52.4943577Z shell: /usr/bin/bash -e {0}
+2026-10-13T21:01:52.4944076Z ##[endgroup]
+2026-10-13T21:01:52.6019709Z 
+2026-10-13T21:01:52.6020441Z > client@1.9.0 prebuild
+2026-10-13T21:01:52.6021339Z > node scripts/generate-workflow-contract.cjs
+2026-10-13T21:01:52.6021729Z 
+2026-10-13T21:01:52.6332138Z 
+2026-10-13T21:01:52.6332759Z > client@1.9.0 build
+2026-10-13T21:01:52.6333093Z > vite build
+2026-10-13T21:01:52.6333238Z 
+2026-10-13T21:01:52.8195740Z [36mvite v5.4.21 [32mbuilding for production...[36m[39m
+2026-10-13T21:01:52.8824776Z transforming...
+2026-10-13T21:01:53.1737508Z Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+2026-10-13T21:01:53.1738445Z   npx update-browserslist-db@latest
+2026-10-13T21:01:53.1739367Z   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2026-10-13T21:02:02.4460793Z [32m✓[39m 2715 modules transformed.
+2026-10-13T21:02:03.9795323Z rendering chunks...
+2026-10-13T21:02:04.6615056Z computing gzip size...
+2026-10-13T21:02:04.8865467Z [33m
+2026-10-13T21:02:04.8866796Z [2mdist/[22m[32mindex.html                               [39m[1m[2m    1.69 kB[22m[1m[22m[2m │ gzip:   0.64 kB[22m
+2026-10-13T21:02:04.8925596Z (!) Some chunks are larger than 1000 kB after minification. Consider:
+2026-10-13T21:02:04.8927470Z [2mdist/[22m[2massets/[22m[35mSampleWorkflowMap-DxFfliMr.css    [39m[1m[2m   14.34 kB[22m[1m[22m[2m │ gzip:   3.55 kB[22m
+2026-10-13T21:02:04.8943102Z - Using dynamic import() to code-split the application
+2026-10-13T21:02:04.8944816Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2026-10-13T21:02:04.8946517Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+2026-10-13T21:02:04.8948140Z [2mdist/[22m[2massets/[22m[35mindex-CGes9DlH.css                [39m[1m[2m  215.67 kB[22m[1m[22m[2m │ gzip:  35.43 kB[22m
+2026-10-13T21:02:04.8950301Z [2mdist/[22m[2massets/[22m[36mplay-RmiB3JHi.js                  [39m[1m[2m    0.30 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+2026-10-13T21:02:04.8995924Z [2mdist/[22m[2massets/[22m[36mpen-line-C3HS10ZH.js              [39m[1m[2m    0.36 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+2026-10-13T21:02:04.8998629Z [2mdist/[22m[2massets/[22m[36mplus-circle-C6rfrdYV.js           [39m[1m[2m    0.37 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+2026-10-13T21:02:04.9026326Z [2mdist/[22m[2massets/[22m[36mcheck-square-C-L53n3h.js          [39m[1m[2m    0.38 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+2026-10-13T21:02:04.9055533Z [2mdist/[22m[2massets/[22m[36mkey-round-Cu-Zdktf.js             [39m[1m[2m    0.41 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+2026-10-13T21:02:04.9057646Z [2mdist/[22m[2massets/[22m[36mwrench-BYcc-KlH.js                [39m[1m[2m    0.43 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+2026-10-13T21:02:04.9062579Z [2mdist/[22m[2massets/[22m[36mtag-C_tOZXhg.js                   [39m[1m[2m    0.50 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+2026-10-13T21:02:04.9064864Z [2mdist/[22m[2massets/[22m[36mshare-2-BqcfaIrc.js               [39m[1m[2m    0.52 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+2026-10-13T21:02:04.9066688Z [2mdist/[22m[2massets/[22m[36mlayout-list-D4i9ewLR.js           [39m[1m[2m    0.53 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+2026-10-13T21:02:04.9068351Z [2mdist/[22m[2massets/[22m[36mscale-CtZbZupT.js                 [39m[1m[2m    0.53 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+2026-10-13T21:02:04.9069341Z [2mdist/[22m[2massets/[22m[36msparkles-DQaj9lRx.js              [39m[1m[2m    0.59 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+2026-10-13T21:02:04.9070271Z [2mdist/[22m[2massets/[22m[36mcpu-BcqdBy7T.js                   [39m[1m[2m    0.66 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+2026-10-13T21:02:04.9071214Z [2mdist/[22m[2massets/[22m[36mpanels-top-left-D1ei8_dq.js       [39m[1m[2m    0.72 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+2026-10-13T21:02:04.9074285Z [2mdist/[22m[2massets/[22m[36mloader-CQQC_Phl.js                [39m[1m[2m    0.73 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+2026-10-13T21:02:04.9075866Z [2mdist/[22m[2massets/[22m[36mthumbs-up-C-CKjs3Z.js             [39m[1m[2m    0.90 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m
+2026-10-13T21:02:04.9076871Z [2mdist/[22m[2massets/[22m[36mvendor-flow-BTkdDkRO.js           [39m[1m[2m    0.96 kB[22m[1m[22m[2m │ gzip:   0.60 kB[22m
+2026-10-13T21:02:04.9077832Z [2mdist/[22m[2massets/[22m[36mvendor-pdf-D7HrI6pR.js            [39m[1m[2m    1.02 kB[22m[1m[22m[2m │ gzip:   0.62 kB[22m
+2026-10-13T21:02:04.9078787Z [2mdist/[22m[2massets/[22m[36mLabPolicies-BSQUL7sB.js           [39m[1m[2m    1.11 kB[22m[1m[22m[2m │ gzip:   0.63 kB[22m
+2026-10-13T21:02:04.9079723Z [2mdist/[22m[2massets/[22m[36msettings-2-CE-JDw8U.js            [39m[1m[2m    1.30 kB[22m[1m[22m[2m │ gzip:   0.52 kB[22m
+2026-10-13T21:02:04.9080689Z [2mdist/[22m[2massets/[22m[36mspreadsheetImport-B7K8n_-a.js     [39m[1m[2m    1.48 kB[22m[1m[22m[2m │ gzip:   0.67 kB[22m
+2026-10-13T21:02:04.9081659Z [2mdist/[22m[2massets/[22m[36museRealtimeData-CWaiSQ8c.js       [39m[1m[2m    2.61 kB[22m[1m[22m[2m │ gzip:   1.17 kB[22m
+2026-10-13T21:02:04.9082617Z [2mdist/[22m[2massets/[22m[36mNotFound-YOpeOjhB.js              [39m[1m[2m    2.81 kB[22m[1m[22m[2m │ gzip:   1.17 kB[22m
+2026-10-13T21:02:04.9083911Z [2mdist/[22m[2massets/[22m[36mCountryData-B0gknisa.js           [39m[1m[2m    4.20 kB[22m[1m[22m[2m │ gzip:   1.34 kB[22m
+2026-10-13T21:02:04.9085598Z [2mdist/[22m[2massets/[22m[36mTopicExplorer-DYWXkRav.js         [39m[1m[2m    4.36 kB[22m[1m[22m[2m │ gzip:   1.77 kB[22m
+2026-10-13T21:02:04.9086596Z [2mdist/[22m[2massets/[22m[36mDataSheet-BGSUMTdP.js             [39m[1m[2m    5.12 kB[22m[1m[22m[2m │ gzip:   1.83 kB[22m
+2026-10-13T21:02:04.9087564Z [2mdist/[22m[2massets/[22m[36mPublicReport-xN3lkLCo.js          [39m[1m[2m    5.21 kB[22m[1m[22m[2m │ gzip:   1.86 kB[22m
+2026-10-13T21:02:04.9088517Z [2mdist/[22m[2massets/[22m[36mFAQPage-By3WldvZ.js               [39m[1m[2m    6.14 kB[22m[1m[22m[2m │ gzip:   2.29 kB[22m
+2026-10-13T21:02:04.9090154Z [2mdist/[22m[2massets/[22m[36mResetPassword-B2QnUzlD.js         [39m[1m[2m    6.36 kB[22m[1m[22m[2m │ gzip:   1.87 kB[22m
+2026-10-13T21:02:04.9091158Z [2mdist/[22m[2massets/[22m[36mActivateAccount-DXkrE2An.js       [39m[1m[2m    7.42 kB[22m[1m[22m[2m │ gzip:   2.03 kB[22m
+2026-10-13T21:02:04.9092116Z [2mdist/[22m[2massets/[22m[36mScanPage-B83ilrAN.js              [39m[1m[2m    7.64 kB[22m[1m[22m[2m │ gzip:   2.99 kB[22m
+2026-10-13T21:02:04.9093059Z [2mdist/[22m[2massets/[22m[36mAuditLogs-Dc3Yn6kB.js             [39m[1m[2m    8.30 kB[22m[1m[22m[2m │ gzip:   2.87 kB[22m
+2026-10-13T21:02:04.9094180Z [2mdist/[22m[2massets/[22m[36mLegacyImport-DtejijqF.js          [39m[1m[2m   10.41 kB[22m[1m[22m[2m │ gzip:   3.32 kB[22m
+2026-10-13T21:02:04.9095158Z [2mdist/[22m[2massets/[22m[36mLabMethods-DjCWBPGM.js            [39m[1m[2m   11.50 kB[22m[1m[22m[2m │ gzip:   3.59 kB[22m
+2026-10-13T21:02:04.9096579Z [2mdist/[22m[2massets/[22m[36mMyWork-nj6jcFH4.js                [39m[1m[2m   14.57 kB[22m[1m[22m[2m │ gzip:   3.88 kB[22m
+2026-10-13T21:02:04.9097544Z [2mdist/[22m[2massets/[22m[36mUsers-BDtQBmaX.js                 [39m[1m[2m   15.34 kB[22m[1m[22m[2m │ gzip:   4.64 kB[22m
+2026-10-13T21:02:04.9098497Z [2mdist/[22m[2massets/[22m[36mResultReports-DgUxYJmH.js         [39m[1m[2m   16.20 kB[22m[1m[22m[2m │ gzip:   5.02 kB[22m
+2026-10-13T21:02:04.9099480Z [2mdist/[22m[2massets/[22m[36mDataResults-qiXF1Ecr.js           [39m[1m[2m   16.78 kB[22m[1m[22m[2m │ gzip:   5.25 kB[22m
+2026-10-13T21:02:04.9100448Z [2mdist/[22m[2massets/[22m[36mQADashboard-CSSzWRBF.js           [39m[1m[2m   17.31 kB[22m[1m[22m[2m │ gzip:   4.26 kB[22m
+2026-10-13T21:02:04.9101594Z [2mdist/[22m[2massets/[22m[36mManagerQueue-FYmcaH-h.js          [39m[1m[2m   17.98 kB[22m[1m[22m[2m │ gzip:   6.08 kB[22m
+2026-10-13T21:02:04.9102598Z [2mdist/[22m[2massets/[22m[36mLabPolicies-laNUQOOt.js           [39m[1m[2m   18.17 kB[22m[1m[22m[2m │ gzip:   5.13 kB[22m
+2026-10-13T21:02:04.9103555Z [2mdist/[22m[2massets/[22m[36mAbout-DjoIu13p.js                 [39m[1m[2m   20.84 kB[22m[1m[22m[2m │ gzip:   4.89 kB[22m
+2026-10-13T21:02:04.9104709Z [2mdist/[22m[2massets/[22m[36mProjects-B25ROUpZ.js              [39m[1m[2m   21.67 kB[22m[1m[22m[2m │ gzip:   6.29 kB[22m
+2026-10-13T21:02:04.9105676Z [2mdist/[22m[2massets/[22m[36mTechStack-BZcYFp_E.js             [39m[1m[2m   22.88 kB[22m[1m[22m[2m │ gzip:   8.64 kB[22m
+2026-10-13T21:02:04.9106665Z [2mdist/[22m[2massets/[22m[36mSampleWorkflowMap-e1euXVOR.js     [39m[1m[2m   23.60 kB[22m[1m[22m[2m │ gzip:   7.13 kB[22m
+2026-10-13T21:02:04.9107649Z [2mdist/[22m[2massets/[22m[36mArticleReader-64EPBcou.js         [39m[1m[2m   23.91 kB[22m[1m[22m[2m │ gzip:   5.76 kB[22m
+2026-10-13T21:02:04.9108597Z [2mdist/[22m[2massets/[22m[36mThemeGallery-C7lAcO8o.js          [39m[1m[2m   25.93 kB[22m[1m[22m[2m │ gzip:   6.48 kB[22m
+2026-10-13T21:02:04.9109575Z [2mdist/[22m[2massets/[22m[36mAdminHelpEditor-BMHBeyLr.js       [39m[1m[2m   28.56 kB[22m[1m[22m[2m │ gzip:   6.83 kB[22m
+2026-10-13T21:02:04.9110564Z [2mdist/[22m[2massets/[22m[36mSuspendUserModal-f6Wap6JX.js      [39m[1m[2m   30.92 kB[22m[1m[22m[2m │ gzip:   7.11 kB[22m
+2026-10-13T21:02:04.9111512Z [2mdist/[22m[2massets/[22m[36mProfile-B7zm0QWF.js               [39m[1m[2m   32.30 kB[22m[1m[22m[2m │ gzip:   8.34 kB[22m
+2026-10-13T21:02:04.9112476Z [2mdist/[22m[2massets/[22m[36mBatchInspectionModal-DAT3-3g4.js  [39m[1m[2m   32.72 kB[22m[1m[22m[2m │ gzip:   8.34 kB[22m
+2026-10-13T21:02:04.9113541Z [2mdist/[22m[2massets/[22m[36mSpectralLibrary-CTjj8Hwu.js       [39m[1m[2m   37.05 kB[22m[1m[22m[2m │ gzip:   8.73 kB[22m
+2026-10-13T21:02:04.9114684Z [2mdist/[22m[2massets/[22m[36mHelpCentre-B1DjnkDt.js            [39m[1m[2m   37.95 kB[22m[1m[22m[2m │ gzip:  10.45 kB[22m
+2026-10-13T21:02:04.9115800Z [2mdist/[22m[2massets/[22m[36mInventory-hsaao3b-.js             [39m[1m[2m   41.43 kB[22m[1m[22m[2m │ gzip:   9.61 kB[22m
+2026-10-13T21:02:04.9116725Z [2mdist/[22m[2massets/[22m[36mEquipment-B7Xz82kt.js             [39m[1m[2m   41.60 kB[22m[1m[22m[2m │ gzip:   8.95 kB[22m
+2026-10-13T21:02:04.9117662Z [2mdist/[22m[2massets/[22m[36mLabManagement-B8G94P6W.js         [39m[1m[2m   82.65 kB[22m[1m[22m[2m │ gzip:  17.54 kB[22m
+2026-10-13T21:02:04.9118633Z [2mdist/[22m[2massets/[22m[36mProjectWorkspace-Dc3ihtzx.js      [39m[1m[2m  128.70 kB[22m[1m[22m[2m │ gzip:  27.92 kB[22m
+2026-10-13T21:02:04.9119594Z [2mdist/[22m[2massets/[22m[36mvendor-maps-DwGOs-Il.js           [39m[1m[2m  156.28 kB[22m[1m[22m[2m │ gzip:  45.73 kB[22m
+2026-10-13T21:02:04.9120536Z [2mdist/[22m[2massets/[22m[36mvendor-react-DoAq6ymf.js          [39m[1m[2m  163.50 kB[22m[1m[22m[2m │ gzip:  53.43 kB[22m
+2026-10-13T21:02:04.9121486Z [2mdist/[22m[2massets/[22m[36mAdminPanel-CQ28M6YF.js            [39m[1m[2m  193.89 kB[22m[1m[22m[2m │ gzip:  46.06 kB[22m
+2026-10-13T21:02:04.9122436Z [2mdist/[22m[2massets/[22m[36mTechWorkbench-BPc4Zkjr.js         [39m[1m[2m  247.74 kB[22m[1m[22m[2m │ gzip:  66.86 kB[22m
+2026-10-13T21:02:04.9123401Z [2mdist/[22m[2massets/[22m[36mvendor-charts-CqgcOpg6.js         [39m[1m[2m  383.30 kB[22m[1m[22m[2m │ gzip: 105.42 kB[22m
+2026-10-13T21:02:04.9124505Z [2mdist/[22m[2massets/[22m[36mvendor-excel-CKN5doRT.js          [39m[1m[2m  424.23 kB[22m[1m[22m[2m │ gzip: 141.75 kB[22m
+2026-10-13T21:02:04.9125447Z [2mdist/[22m[2massets/[22m[36mReception-DsoRgVhC.js             [39m[1m[2m  565.67 kB[22m[1m[22m[2m │ gzip: 162.60 kB[22m
+2026-10-13T21:02:04.9126519Z [2mdist/[22m[2massets/[22m[36mindex-BbdY9b_v.js                 [39m[1m[33m1,650.86 kB[39m[22m[2m │ gzip: 487.77 kB[22m
+2026-10-13T21:02:04.9127122Z [32m✓ built in 12.04s[39m
