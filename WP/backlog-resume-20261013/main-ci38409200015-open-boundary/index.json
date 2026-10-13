@@ -1,0 +1,48 @@
+{
+  "observedUtc": "2026-10-13T14:00:50.485182+00:00",
+  "status": "OPEN_MAIN_CI_BOUNDARY_NOT_COMPLETION",
+  "main": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "ci": 38409200015,
+  "ciUrl": "https://github.com/yigini/soilfer-lims/actions/runs/38409200015",
+  "ciStatus": "in_progress",
+  "ciConclusion": null,
+  "activeLogsCollected": false,
+  "completedVerdict": false,
+  "issue206State": "open",
+  "issue214QuestionsComment": 6147255466,
+  "issue214AwaitingClaudio": true,
+  "sourceImplementationStarted": false,
+  "noProductionOperation": true,
+  "nativeAcknowledgementSent": false,
+  "humanDraftsAndCardsUntouched": true,
+  "files": {
+    "issue206-current-raw.json": {
+      "bytes": 8443,
+      "sha256": "3dc98dd02cf3627d100397ef67351456fd6a49c1a3b62eda9355d1ba33ef1bea"
+    },
+    "issue214-comments-current-raw.json": {
+      "bytes": 9596,
+      "sha256": "060f69e2c762a7ec857a1aaebe66bad2db6b26eeca339368e3912ccb0fddc831"
+    },
+    "issue214-questions-current-raw.json": {
+      "bytes": 5073,
+      "sha256": "65174de8626294c1a7b52b0380369cea3b37f4be4a8c04baec3b5e21ef7c4f48"
+    },
+    "jobs-current-raw.json": {
+      "bytes": 3480,
+      "sha256": "4772ad4b56d6c052e39db79ed357c70c4af0831519974de6ec9f1cc2afb105d2"
+    },
+    "main-current-raw.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    },
+    "pr295-current-raw.json": {
+      "bytes": 23237,
+      "sha256": "06febd008b4a97826ade5dd15abc469312947a309c8980a849effb24c18d8890"
+    },
+    "run-current-raw.json": {
+      "bytes": 12093,
+      "sha256": "82d3e25dc10221c8abec3efd3364f984770b1b0ff73ca061747ac40349b809c7"
+    }
+  }
+}
