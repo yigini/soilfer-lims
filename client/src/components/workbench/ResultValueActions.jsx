@@ -11,6 +11,7 @@ export default function ResultValueActions({ item, onChooseApproval, onChanged }
     const [rows, setRows] = useState([]), [reason, setReason] = useState('');
     const [error, setError] = useState(null), [busy, setBusy] = useState(false);
     const [repeatAliquot, setRepeatAliquot] = useState(null);
+    useEffect(() => { setRepeatAliquot(null); }, [item.workItemId]);
     const number = Number(item.draft?.replicateNo ?? 1);
     const validation = classifyResultValue(item.draft?.value ?? '', item.valueRules, item.numberFormat);
     useEffect(() => {

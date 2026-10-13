@@ -82,6 +82,13 @@ test('a dilution repeat sends the explicitly selected physical aliquot identity'
     await host.render(); await host.find('dilute-repeat').props.onClick();
     expect(axios.post).toHaveBeenCalledWith('/api/work-items/owned/repeats', {
         reason: 'ABOVE_RANGE_DILUTION', note: 'Dilute this physical aliquot', aliquotId: 'physical-aliquot' });
+    axios.post.mockClear();
+    await host.render({ item: { ...item, workItemId: 'other-work', sampleId: 'other-sample' } });
+    const otherChooser = host.all().find(node => node.type === host.children['../sample/AliquotSelect']);
+    expect(otherChooser.props.value).toBeNull();
+    await host.find('dilute-repeat').props.onClick();
+    expect(axios.post).toHaveBeenCalledWith('/api/work-items/other-work/repeats', {
+        reason: 'ABOVE_RANGE_DILUTION', note: 'Dilute this physical aliquot' });
 });
 test.each(['en', 'es', 'es-419', 'fr', 'pt'])('container labels, kinds and policy keys are present in both %s catalogues', locale => {
     for (const directory of [root + '/translations', path.resolve(__dirname, '../../locales')]) {
