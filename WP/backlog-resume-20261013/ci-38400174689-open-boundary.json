@@ -1,0 +1,42 @@
+{
+  "observedUtc": "2026-10-13T12:51:42.130334+00:00",
+  "reviewHead": "1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a",
+  "base": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+  "pr": 295,
+  "ciRun": 38400174689,
+  "ciStatus": "in_progress",
+  "ciConclusion": null,
+  "runAttempt": 1,
+  "activeMetadataOnly": true,
+  "completeCIVerdict": false,
+  "readyForAudit": false,
+  "finalNativeHandoff": false,
+  "exactHeadAuditPass": false,
+  "failedPriorCI": 38393187129,
+  "scopeComment": 6145765510,
+  "localFocused": "8 suites / 232 tests PASS",
+  "fullDiscoveredInventory": 362,
+  "requiredNewFullTests": 5508,
+  "sourceOnlyDelta": [
+    "server/package.json"
+  ],
+  "prior51SourcePathsUnchanged": true,
+  "configSetupAssertionsCIHeapUnchanged": true,
+  "automaticClosingReferences": [],
+  "productionMutations": 0,
+  "newWorktrees": 0,
+  "files": {
+    "ci-38400174689-initial-run-raw.json": {
+      "bytes": 12698,
+      "sha256": "d6a8890660e790e6e731ea60044b27bb6ac367f62a768bdbe2e5a1b9723cc6cb"
+    },
+    "ci-38400174689-initial-jobs-raw.json": {
+      "bytes": 3502,
+      "sha256": "668104d77a49afb0a304e7f57ad205205ad37e71e925fd1ed8aead59f1effead"
+    },
+    "pr-295-harness-head-initial-raw.json": {
+      "bytes": 5683,
+      "sha256": "34c642c8ab55f98efe3d3e4579c374d5c49741715cd04b7caa5c2c886fb7ba5c"
+    }
+  }
+}
