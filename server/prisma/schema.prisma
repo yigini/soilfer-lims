@@ -609,6 +609,7 @@ model QcEvaluation {
   supersedes              QcEvaluation? @relation("EvaluationRevision", fields: [supersedesId], references: [id], onDelete: Restrict)
   revisions               QcEvaluation[] @relation("EvaluationRevision")
   legacySource            String?
+  controlReviews          QcReviewObligation[]
 
   @@unique([batchId, analysisCode, version])
 }
@@ -749,6 +750,9 @@ model Lab {
   crossCheckEvaluations CrossCheckEvaluation[]
   importTemplates   ImportTemplate[]
   instrumentImports InstrumentImportReceipt[]
+  controlLimitProposals ControlLimitProposal[]
+  controlLimitSets ControlLimitSet[]
+  qcReviewObligations QcReviewObligation[]
 }
 
 model LabPolicy {
@@ -1435,6 +1439,8 @@ model Methodology {
   qcRules          QcRule[]
   referenceValues  ReferenceValue[]
   batchAnalytes    BatchAnalyte[]
+  controlLimitProposals ControlLimitProposal[]
+  controlLimitSets ControlLimitSet[]
   resultOverrideRequests ResultOverrideRequest[]
   calcTemplates    CalcTemplate[]
   calcActivations  CalcTemplateActivation[]
@@ -1604,8 +1610,77 @@ model ReferenceMaterial {
   values         ReferenceValue[]
   qcItems        BatchQcResult[]
   batchReferences BatchPositionReference[]
+  controlLimitProposals ControlLimitProposal[]
+  controlLimitSets ControlLimitSet[]
 
   @@index([labId, code])
+}
+
+// #214: proposal selections and evaluation inputs are retained, never backfilled.
+model ControlLimitProposal {
+  id String @id
+  labId String
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  analysisCode String
+  methodologyId String
+  methodology Methodology @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  referenceMaterialId String
+  referenceMaterial ReferenceMaterial @relation(fields: [referenceMaterialId], references: [id], onDelete: Restrict)
+  mean Float
+  sd Float
+  n Int
+  selectionSnapshot String
+  policySnapshot String
+  reason String
+  proposedBy String
+  proposedAt DateTime @default(now())
+  approvedSet ControlLimitSet?
+  @@index([labId, analysisCode, methodologyId, referenceMaterialId])
+}
+
+model ControlLimitSet {
+  id String @id
+  labId String
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  analysisCode String
+  methodologyId String
+  methodology Methodology @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  referenceMaterialId String
+  referenceMaterial ReferenceMaterial @relation(fields: [referenceMaterialId], references: [id], onDelete: Restrict)
+  proposalId String @unique
+  proposal ControlLimitProposal @relation(fields: [proposalId], references: [id], onDelete: Restrict)
+  mean Float
+  sd Float
+  n Int
+  fromDate DateTime
+  toDate DateTime?
+  approvedBy String
+  status String
+  @@index([labId, analysisCode, methodologyId, referenceMaterialId])
+}
+
+model QcReviewObligation {
+  id String @id
+  labId String
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  evaluationId String
+  evaluation QcEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Restrict)
+  rule String
+  evidenceSnapshot String
+  createdAt DateTime @default(now())
+  resolutions QcReviewResolution[]
+  @@unique([evaluationId, rule])
+  @@index([labId, createdAt])
+}
+
+model QcReviewResolution {
+  id String @id
+  obligationId String @unique
+  obligation QcReviewObligation @relation(fields: [obligationId], references: [id], onDelete: Restrict)
+  outcome String
+  note String
+  resolvedBy String
+  resolvedAt DateTime @default(now())
 }
 
 model ReferenceValue {

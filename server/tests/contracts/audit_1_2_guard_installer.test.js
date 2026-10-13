@@ -440,6 +440,12 @@ test('a complete guarded database passes the read-only gate, listens and answers
     expect(fingerprint(fixture.file)).toBe(beforeContainers);
     expect(require('../../scripts/install_sample_containers').installSampleContainers({dbPath:fixture.file,apply:true}))
         .toMatchObject({classification:'COMPLETE_206',previousClassification:'FRESH_PRISMA_206',backfilledCount:0,totalChanges:1});
+    const beforeCharts=fingerprint(fixture.file), missingCharts=await realStartup(fixture.file,false);
+    expect(missingCharts.code).toBe(1); expect(JSON.parse(missingCharts.stderr).error).toBe('QC_CHART_STARTUP_REQUIRED');
+    expect(missingCharts.stdout).not.toMatch(/Enterprise Server running on|\[PRISMA\]|SCHEDULER/);
+    expect(fingerprint(fixture.file)).toBe(beforeCharts);
+    expect(require('../../scripts/install_control_charts').installControlCharts({dbPath:fixture.file,apply:true}))
+        .toMatchObject({classification:'COMPLETE_214',previousClassification:'FRESH_PRISMA_214',backfilledCount:0,totalChanges:1});
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const benchReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"BENCH_CREDENTIAL_STARTUP_READY"')));
@@ -466,6 +472,9 @@ test('a complete guarded database passes the read-only gate, listens and answers
     const containersReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"SAMPLE_CONTAINER_STARTUP_READY"')));
     expect(containersReady).toMatchObject({classification:'COMPLETE_206',totalChanges:0});
     expect(child.stdout.indexOf('SAMPLE_CONTAINER_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
+    const chartsReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"CONTROL_CHART_STARTUP_READY"')));
+    expect(chartsReady).toMatchObject({classification:'COMPLETE_214',totalChanges:0});
+    expect(child.stdout.indexOf('CONTROL_CHART_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
     const holdsReady = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"SAMPLE_HOLD_STARTUP_READY"')));
     expect(holdsReady).toMatchObject({ classification: 'COMPLETE', totalChanges: 0 });
     expect(child.stdout.indexOf('SAMPLE_HOLD_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));

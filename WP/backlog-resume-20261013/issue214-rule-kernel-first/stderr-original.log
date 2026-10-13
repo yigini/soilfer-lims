@@ -1,0 +1,7 @@
+No tests found, exiting with code 1
+Run with `--passWithNoTests` to exit with code 0
+No files found in C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server.
+Make sure Jest's configuration does not exclude this directory.
+To set up Jest, make sure a package.json file exists.
+Jest Documentation: https://jestjs.io/docs/configuration
+Files: "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_rules.test.js"

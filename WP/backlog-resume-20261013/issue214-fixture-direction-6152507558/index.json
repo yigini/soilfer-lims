@@ -1,0 +1,26 @@
+{
+  "observedUtc": "2026-10-13T18:37:43.162104+00:00",
+  "status": "ACTUAL_CLAUDIO_FIXTURE_CONTEXT_AND_OPERATIONAL_DIRECTION",
+  "answer": 6152507558,
+  "question": 6152478199,
+  "productionOperations": 0,
+  "apply103": false,
+  "files": {
+    "answer-actual-raw.json": {
+      "bytes": 6003,
+      "sha256": "5f700201b09dad8c1a95460a424016f61ba46685ed22109340a52bb97d050721"
+    },
+    "answer-actual.txt": {
+      "bytes": 2282,
+      "sha256": "e6b65515fe51ab19f7825e7a60909af7cce6148ba02a3824270271224e12fefa"
+    },
+    "issue214-current-raw.json": {
+      "bytes": 8805,
+      "sha256": "94637fd70cf8b508875a534b05359fa83a2b8844bbc65585bf0c1c7ecb49cd3a"
+    },
+    "question-actual-raw.json": {
+      "bytes": 3257,
+      "sha256": "7523c62eca55708924af323185f842fc84c8a280a5a1d694883d5ea62306dd39"
+    }
+  }
+}

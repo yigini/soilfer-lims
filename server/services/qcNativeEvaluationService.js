@@ -77,11 +77,35 @@ function evaluateNativeEvidence(batch, analyte, { recordedObservations = false }
             if (calibration && calibrationActions) { evaluated.observedStatus = evaluated.status; evaluated.status = 'WARN'; }
         }
     }
+    const controlCharts = criteria.qcMode === 'OFF' ? [] : require('./controlChartService').evaluateRunCharts(batch, analyte, evidence);
+    for (const chart of controlCharts) {
+        const current = chart.observations.filter(row => row.runId === batch.id);
+        for (const control of controls.filter(row => row.kind === 'LRM' && row.referenceMaterialId === chart.series.referenceMaterialId)) {
+            for (let index = warnings.length - 1; index >= 0; index--) if (warnings[index].positionId === control.positionId) warnings.splice(index,1);
+            const own = current.filter(row => evidence.measurements.some(measurement => measurement.id === row.measurementId && measurement.positionId === control.positionId));
+            const fired = chart.rules.filter(rule => rule.status === 'FIRED' && rule.observationIds.some(id => own.some(row => row.measurementId === id)));
+            Object.assign(control, { controlChart: { basis: chart.basis, rules: chart.rules, minimumPoints: chart.minimumPoints },
+                provisional: chart.basis.mode === 'PROVISIONAL' });
+            if (chart.basis.mode === 'CONTROL_CHART') {
+                control.criterion = 'CONTROL_CHART'; control.notes = [];
+                control.status = fired.some(rule => rule.action === 'reject') ? 'FAIL' : fired.some(rule => rule.action === 'warn') ? 'WARN' : 'PASS';
+                control.details = JSON.stringify({ controlLimitSetId: chart.basis.controlLimitSetId, firedRules: fired.map(rule => rule.rule) });
+                if (control.status === 'FAIL') control.failAction = 'FAIL_BATCH';
+            } else if (own.length) {
+                // The start-frozen window remains authoritative even if a later
+                // reference catalogue revision/binding has another expectation.
+                control.status = own.every(row => row.value >= chart.basis.fixedWindow.lower && row.value <= chart.basis.fixedWindow.upper) ? 'PASS' : 'FAIL';
+                control.expected = chart.basis.fixedWindow.expected;
+            }
+            if (control.status === 'WARN') warnings.push({ positionId: control.positionId, kind:'LRM', criterion:'CONTROL_CHART', rules:fired.filter(rule=>rule.action==='warn').map(rule=>rule.rule) });
+            else if (control.status === 'FAIL' && control.failAction === 'WARN') warnings.push({positionId:control.positionId,kind:'LRM',status:'FAIL',criterion:control.criterion});
+        }
+    }
     const checks = [...blanks, ...duplicates, ...controls], failed = checks.filter(row => ['FAIL', 'INVALID'].includes(row.status) && row.failAction !== 'WARN').length;
     const incomplete = criteria.qcMode !== 'OFF' && (missingPositions.length > 0 || unboundPositions.length > 0);
     const verdict = criteria.qcMode === 'OFF' ? 'NOT_REQUIRED' : incomplete ? 'INCOMPLETE' : failed ? 'FAIL' : warnings.length ? 'WARN' : 'PASS';
     const status = { NOT_REQUIRED: 'QC_PASS', INCOMPLETE: 'QC_PENDING', FAIL: 'QC_FAIL', WARN: 'QC_WARN', PASS: 'QC_PASS' }[verdict];
-    const evaluation = { blanks, duplicates, controls, qcRule: criteria.qcRule, policyVersion: criteria.policyVersion,
+    const evaluation = { blanks, duplicates, controls, ...(Object.hasOwn(criteria,'controlCharts') && {controlCharts}), qcRule: criteria.qcRule, policyVersion: criteria.policyVersion,
         result: verdict, overallStatus: verdict === 'FAIL' ? 'QC_FAIL' : verdict === 'INCOMPLETE' ? 'OPEN' : 'QC_PASS',
         summary: { totalQcSamples: checks.length, passed: checks.filter(row => row.status === 'PASS').length, failed, warnings,
             missingPositions, unboundPositions, mode: criteria.qcMode, notRequired: verdict === 'NOT_REQUIRED' } };

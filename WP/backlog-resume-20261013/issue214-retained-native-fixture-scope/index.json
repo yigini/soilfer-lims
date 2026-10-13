@@ -1,0 +1,21 @@
+{
+  "observedUtc": "2026-10-13T18:33:36.586243+00:00",
+  "status": "ACTUAL_RETAINED_FIXTURE_SCOPE_QUESTION_POSTED_ONCE",
+  "id": 6152478199,
+  "url": "https://github.com/yigini/soilfer-lims/issues/214#issuecomment-6152478199",
+  "productionOperations": 0,
+  "files": {
+    "actual-posted-raw.json": {
+      "bytes": 3257,
+      "sha256": "7523c62eca55708924af323185f842fc84c8a280a5a1d694883d5ea62306dd39"
+    },
+    "request-original.json": {
+      "bytes": 1685,
+      "sha256": "90ea599a41adffd83b6e294a873ba9adae8973a3412447b6e530360e8c939f20"
+    },
+    "response-original.json": {
+      "bytes": 3257,
+      "sha256": "7523c62eca55708924af323185f842fc84c8a280a5a1d694883d5ea62306dd39"
+    }
+  }
+}

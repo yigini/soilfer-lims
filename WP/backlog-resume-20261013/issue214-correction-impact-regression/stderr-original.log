@@ -1,0 +1,1127 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User manager-ee1f7429-7d9e-43ef-b00a-06f05bccbaef (Lab: another-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/controlChartService.js:23:16)
+      at services/controlChartService.js:156:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/issue_214_control_chart_integration.test.js:206:5)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T18:54:58.997Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User manager-eb3a4f1b-31a2-45c3-ab60-7983bfffba2d (Lab: another-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/controlChartService.js:23:16)
+      at services/controlChartService.js:156:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/issue_214_control_chart_integration.test.js:206:5)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T18:55:16.208Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+FAIL tests/contracts/issue_214_control_chart_integration.test.js (18.089 s)
+  × the explicit SQLite read-only impact report resolves actual policy scopes and counts unbound new runs without changing database bytes (1686 ms)
+  √ an effective corrected observation replaces its original in future baselines while prior proposals and evaluations stay immutable (1341 ms)
+  √ a different reference-material lot is a new Provisional series and cannot inherit approved limits or history (1310 ms)
+  √ run-first options expose eligible chart lots and the actual start binds them in its guarded transaction (1415 ms)
+  √ chart lots freeze at start; fixed-window late binding and a pre-release started run retain their original path (3662 ms)
+  √ provisional limits, approval by a second user and supersession preserve all past and already-started criteria (1441 ms)
+  √ QC_FAIL controls remain in sequence history but cannot enter a passing baseline (1475 ms)
+  √ review rules create idempotent scoped obligations and append-only resolutions without changing verdicts (1447 ms)
+  √ every baseline exclusion is explicit and retained; ambiguous chronology and wrong scope refuse atomically (1349 ms)
+  √ HTTP scope and approval permissions use actual token validation and stable refusal codes (1314 ms)
+  √ additive installation preserves stored legacy policy bytes and old rows with DRY 0 / APPLY 1 / NO_OP 0 (1249 ms)
+
+  ● the explicit SQLite read-only impact report resolves actual policy scopes and counts unbound new runs without changing database bytes
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      51 |     const fixedBefore = hash(), fixed = await collectReadonly(f.file);
+      52 |     expect(hash()).toEqual(fixedBefore);
+    > 53 |     expect(fixed.controlChartContexts.some(row => row.labId === f.labId && row.analysisCode === f.analysisCode && row.methodologyId === f.method.id)).toBe(false);
+         |                                                                                                                                                       ^
+      54 |     expect(fixed.affectedRuns.some(row => row.batchId === built.id)).toBe(false);
+      55 | });
+      56 |
+
+      at Object.toBe (tests/contracts/issue_214_control_chart_integration.test.js:53:151)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 58b7d23a-56d7-4562-98d9-69bff51c56c9) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcNativeRunService.js:18:16)
+      at services/qcNativeRunService.js:74:9
+      at transaction (services/qcNativeRunService.js:42:91)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_2_3_native_runs.test.js:1124:5)
+
+PASS tests/contracts/audit_2_3_native_runs.test.js (40.253 s)
+  √ #214 new Provisional chart-mode start refuses an unbound served LRM lot atomically (1305 ms)
+  √ a failed analyte leaves its sibling measurable, reopenable and closable (deviation=false) (984 ms)
+  √ a failed analyte leaves its sibling measurable, reopenable and closable (deviation=true) (965 ms)
+  √ an explicit method cannot replace recorded strict work-item methods with a lax QC rule (551 ms)
+  √ a real failed Native blocking run remains excluded from reports and publication after live QC becomes OFF (1094 ms)
+  √ mixed actual Native ADVISORY and compatibility live BLOCKING batches use the strictest effective report mode (616 ms)
+  √ a compatibility-only failed run retains live policy changes for report validity and publication (885 ms)
+  √ Native texture QC flags its governed fractions independently and preserves their values on deviation acceptance (672 ms)
+  √ test-owned cleanup retains QC-referenced workflow evidence and still removes unrelated explicit fixture ids (561 ms)
+  √ Native builds refuse two active attempts for a sample/analyte and never attach ACCEPTED history, with zero writes (535 ms)
+  √ sealed SUBMITTED work items cannot join Native or ordinary runs (551 ms)
+  √ sealed ACCEPTED work items cannot join Native or ordinary runs (559 ms)
+  √ sealed WAIVED work items cannot join Native or ordinary runs (553 ms)
+  √ sealed CANCELLED work items cannot join Native or ordinary runs (589 ms)
+  √ concurrent A/B first starts allocate distinct ordinals; abandoned OPEN builds do not consume C’s ordinal (700 ms)
+  √ actual OPEN reorder retains physical ids, lot evidence and duplicate parents; invalid and frozen orders write nothing (701 ms)
+  √ a late reorder event fault rolls back temporary numbering and all work-item rack changes (725 ms)
+  √ native entry, explicit evaluation and corrections before first start refuse without any write (696 ms)
+  √ partial native entry is retained; missing explicit values, malformed values and auto-evaluation while unbound refuse atomically (685 ms)
+  √ retained Native collection input uses physical ids, real duplicate parents and immutable full-precision expected values (655 ms)
+  √ the shared Native mutation rolls back evaluated observations when requested acceptance, close or metadata is refused (693 ms)
+  √ actual authenticated Native routes build, start, evaluate, reopen and correct using frozen API criteria and exact retained values (840 ms)
+  √ reasoned corrections append two evaluation versions and exact measurements using the frozen start limit (893 ms)
+  √ explicit evaluation after reopen appends fresh acceptance without rewriting retained readings (683 ms)
+  √ native censoring retains null numeric observations, canonical qualifiers and the frozen method limit (627 ms)
+  √ OFF start writes no evaluation; explicit evaluation records NOT_REQUIRED and never passing observation evidence (640 ms)
+  √ explicit evaluation records each OFF analyte without fake readings or passed QC counts (670 ms)
+  √ stored profile conversion refuses; separate direct non-calibration runs preserve free text and may start without a registered asset (632 ms)
+  √ part 13 calibration start requires a valid active scoped asset, refuses without writes and freezes its exact identity and text (697 ms)
+  √ failed Native disposition REPEAT_BATCH retains failed evidence and uses the central work transition (774 ms)
+  √ failed Native disposition REJECT retains failed evidence and uses the central work transition (763 ms)
+  √ failed membership cannot move without repeat/reject disposition (warning=false) (663 ms)
+  √ failed membership cannot move without repeat/reject disposition (warning=true) (684 ms)
+  √ actual manager disposition accepts a failed Native analyte with deviation, preserves warning flags and closes without changing failed readings (754 ms)
+  √ actual stored profile membership refuses conversion; a separate new Native run works and remains frozen after manager reopen (863 ms)
+  √ actual Native builder refuses 23 samples at the default limit and builds the specified 23-sample sequence through a method rule (812 ms)
+  √ ADVISORY explicit evaluation records INCOMPLETE; later complete values supersede it using frozen criteria (678 ms)
+  √ mixed-analyte evaluations and flags are independent; a shared lot correction appends both verdicts atomically (915 ms)
+  √ a late evaluation insert failure rolls back measurements, every shared binding and both analyte verdicts (881 ms)
+  √ calibration CHECK_STANDARD uses the frozen CCV criterion and unbound calibration blanks never block (777 ms)
+  √ pre-start rebuild retains a bound extra and both certificate revisions when its lot changes (723 ms)
+  √ a measured extra CRM is optional at a not-due ordinal and its failure contributes to the analyte verdict (749 ms)
+  √ removing a bound analyte last member is refused without writes; an unbound analyte removal is recorded (1295 ms)
+  √ optional CRM lot correction records NOT_SERVED with intact prior evidence; a due CRM refuses the same missing value (1152 ms)
+  √ real 23-sample builder writes 28 physical members, recorded parent picks and no invented QC values or ordinal (804 ms)
+  √ positive-minimum shared LRM extras use frozen required ids; only the extra may drop optional analyte service (891 ms)
+  √ mixed calibration frequencies freeze each analyte opening, closing and first boundary pair ids independently (797 ms)
+  √ real default-capacity, missing method and cross-lab builds refuse with zero normalized, membership or audit writes (763 ms)
+  √ first start freezes the newly effective limit, number policy and method LOQ with one ordinal, instrument and real analyst (650 ms)
+  √ a first-start count revision refuses stale positions and leaves every row, actor and ordinal unchanged (592 ms)
+  √ resuming a reopened native run reuses first-start metadata and criteria without resolving later policy (728 ms)
+  √ another start consumes the forecast ordinal; a now-due missing CRM refuses atomically instead of guessing or skipping it (692 ms)
+  √ shared physical lot gets separate precise analyte snapshots; a missing second value and conflicting lot refuse the whole build (662 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the instrument frozen on this run.
+        at resolveResultRunContext (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:90:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:165:24)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_INSTRUMENT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Instrument Fixture instrument calibration is overdue
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: The method revision changed after run start; use a new run.
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:192:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_METHOD_REVISION_CHANGED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [WS] Blocked broadcast for event WORKITEM_CHANGED: missing labId
+
+      288 | function broadcastToLab(labId, eventType, payload) {
+      289 |     if (!labId) {
+    > 290 |         if (DEBUG) console.warn(`[WS] Blocked broadcast for event ${eventType}: missing labId`);
+          |                            ^
+      291 |         return 0;
+      292 |     }
+      293 |     const data = JSON.stringify({ type: eventType, ...payload });
+
+      at warn (wsServer.js:290:28)
+      at Object.broadcastToLab [as batchSave] (controllers/workbenchController.js:1283:21)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 8df0b3f5-9f05-478e-9669-27bff99410be) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at controllers/qcController.js:70:75
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.getBatchById (controllers/qcController.js:70:22)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_1_run_start_header.test.js (35.496 s)
+  √ 40 policy-permitted samples start atomically with the LabMethodDefault and every committed Result retains its run instrument (3913 ms)
+  √ real HTTP Result recording uses frozen run context: null (1447 ms)
+  √ real HTTP Result recording uses frozen run context: same (1347 ms)
+  √ real HTTP Result recording uses frozen run context: different (1497 ms)
+  √ real HTTP Result recording uses frozen run context: unready (1290 ms)
+  √ real HTTP Result recording uses frozen run context: method-changed (1277 ms)
+  √ real HTTP keeps the existing WorkItem/live-revision rule for no-batch (1188 ms)
+  √ real HTTP keeps the existing WorkItem/live-revision rule for unstarted (1362 ms)
+  √ real HTTP keeps the existing WorkItem/live-revision rule for legacy-null (1263 ms)
+  √ the queue exposes RUN context, and real completion retains a different WorkItem instrument (1380 ms)
+  √ AUTO rejects a omitted required run instrument through the real API with zero writes (1172 ms)
+  √ AUTO rejects a null required run instrument through the real API with zero writes (1186 ms)
+  √ AUTO rejects a empty required run instrument through the real API with zero writes (1174 ms)
+  √ REQUIRED rejects a omitted required run instrument through the real API with zero writes (1202 ms)
+  √ REQUIRED rejects a null required run instrument through the real API with zero writes (1187 ms)
+  √ REQUIRED rejects a empty required run instrument through the real API with zero writes (1205 ms)
+  √ AUTO retains instrument-optional run starts when the resolved requirement is false (1192 ms)
+  √ NOT_REQUIRED retains instrument-optional run starts when the resolved requirement is false (1171 ms)
+  √ ineligible start refuses with a stable 4xx and rolls back every run/membership/audit row (1133 ms)
+  √ overdue start refuses with a stable 4xx and rolls back every run/membership/audit row (1175 ms)
+  √ method-mismatch start refuses with a stable 4xx and rolls back every run/membership/audit row (1170 ms)
+  √ held start refuses with a stable 4xx and rolls back every run/membership/audit row (1170 ms)
+  √ capacity start refuses with a stable 4xx and rolls back every run/membership/audit row (1167 ms)
+  √ curve start refuses with a stable 4xx and rolls back every run/membership/audit row (1126 ms)
+  √ first-start revision remains frozen after Methodology changes/reopen; old missing snapshots remain unknown and QC ignores the new key (1234 ms)
+  √ My runs ownership is applied on the server; All runs retains existing lab visibility and both exclude foreign labs (1412 ms)
+
+PASS tests/contracts/audit_1_2_guard_installer.test.js (31.919 s)
+  √ fresh Prisma schema installs the exact guards and marker; repeat starts write nothing (1883 ms)
+  √ actual pre-179 child installer preserves seeded historical science and the old schema (705 ms)
+  √ unreviewed UNMAPPED_SAMPLE refuses the actual child with unchanged bytes and no returned handle (518 ms)
+  √ unreviewed COLLECTED refuses the actual child with unchanged bytes and no returned handle (499 ms)
+  √ the real reviewed legacy upgrade preserves science, refuses interrupted startup, then maps and starts without writes (1763 ms)
+  √ a real timestamp race invalidates the review and the actual installer refuses without writes or a returned file (1139 ms)
+  √ a reviewed fingerprint cannot approve an unmapped status (955 ms)
+  √ a blocked legacy marker refuses startup even with a reviewed fingerprint and preserves all bytes (1008 ms)
+  √ malformed or unsupported reviewed fixture options refuse before creating any file (568 ms)
+  √ direct startup refuses a pre-179 file before app import, scheduler or listen, with unchanged bytes (626 ms)
+  √ direct startup refuses a fresh db push, without writes, serving or scheduler initialization (1410 ms)
+  √ direct startup refuses an interrupted reviewed upgrade with unchanged SHA and no listener (1126 ms)
+  √ direct startup reports a mismatched trigger before serving and preserves the file (1382 ms)
+  √ direct startup refuses a missing file without implicitly creating it (76 ms)
+  √ direct startup refuses missing normalized QC installation before app import and preserves the file (777 ms)
+  √ a complete guarded database passes the read-only gate, listens and answers a real health request (5515 ms)
+  √ partial schema refuses a writable owned database before any write (347 ms)
+  √ tampered trigger refuses a writable owned database before any write (1380 ms)
+  √ marker without guards refuses a writable owned database before any write (1381 ms)
+  √ complete objects without marker refuses a writable owned database before any write (1433 ms)
+  √ different marker hashes refuses a writable owned database before any write (1402 ms)
+  √ extra marker key refuses a writable owned database before any write (1421 ms)
+  √ unparseable marker refuses a writable owned database before any write (2673 ms)
+  √ image-copy hashes are checked and the overlaid volume sources are never read (1601 ms)
+  √ startup calls the installer after the existing migrations and fails before serving; no override argument exists (24 ms)
+
+PASS tests/contracts/deployment_readiness_bootstrap.test.js (12.843 s)
+  Deployment Readiness Bootstrap & Packaging Verification
+    √ setup.sh rejects invalid mode with exit 1 (198 ms)
+    √ setup.sh rejects Node 18 runtime with clear guidance (560 ms)
+    √ setup.sh fails fast and aborts if schema push fails (no error swallowing) (685 ms)
+    √ setup.sh auto-populates JWT_SECRET into existing .env with blank secret (1107 ms)
+    √ entrypoint persists auto-generated JWT_SECRET across container restarts (912 ms)
+    √ entrypoint recovers from interrupted initial setup on restart without reseeding populated installations (1468 ms)
+    √ docker-entrypoint.sh database inspection fails closed on corrupt or unreadable database (161 ms)
+    √ docker-entrypoint.sh database inspection passes cleanly on valid populated database (5694 ms)
+    √ seed.js recovers from real partial state ({ labs: 1, users: 0 }) and does not duplicate LAB01 (776 ms)
+    √ docker compose configuration validates cleanly across local, global, and nginx overlays (1149 ms)
+
+PASS tests/contracts/audit_2_3_native_ui.test.js
+  √ #214 lot selections are bound by the actual start request; frozen chart lots cannot be changed in the UI (123 ms)
+  √ Native form starts with empty observations, requires start, and drags actual complete position ids (24 ms)
+  √ partial entry sends only the actual position and exact raw observation; malformed numbers cannot be saved (21 ms)
+  √ recorded observations stay read-only until a reasoned correction is selected (22 ms)
+  √ accepted QC requires reasoned reopen and OFF evaluation sends zero invented readings (35 ms)
+  √ a failed sibling does not lock the selected analyte’s entry, reopen or close handlers (26 ms)
+  √ QC preview runs on cell commit only and sends exact raw observations without client limits (23 ms)
+  √ typing another value discards the old preview and a late response cannot recolour the cell (23 ms)
+  √ real submission discards preview and renders only the refetched stored verdict and limits (23 ms)
+  √ switching runs invalidates the previous in-flight preview (25 ms)
+  √ preview errors retain the entered observation and cannot submit or colour it as a pass (21 ms)
+  √ a stored evaluation without a limit never invents a policy or recomputes its status (17 ms)
+  √ the native grid opens with one row per real position, empty QC parent observation and no automatic requests (23 ms)
+  √ every required cell is needed for evaluate and the zero/comma payload contains only raw measurements (24 ms)
+  √ reference correction stays in setup and the grid refetches the new server-bound certificate without editable reference fields (24 ms)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:48:18)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:48:90)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:50:11)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:50:83)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:53:64)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:55:136)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:68:11)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:68:83)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:70:63)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:74:18)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:76:18)
+
+PASS tests/contracts/audit_1_0_policy_components.test.js
+  Audit 1.0: real policy page controls
+    √ technician sees effective policies and scope selectors but has no save, edit or clear controls (251 ms)
+    √ manager changes preset with mandatory reason and current version (23 ms)
+    √ manager edits selected method scope, includes reason and version, and cannot edit lab-only keys there (76 ms)
+    √ profile defaults cannot be cleared as laboratory overrides (14 ms)
+    √ manager edits PT limits at analysis scope and submits the exact structured thresholds (42 ms)
+    √ Westgard editor keeps reject and warning lists exclusive (6 ms)
+    √ calibration action editor offers bracket repeats only for continuing checks and preserves other kinds (5 ms)
+    √ sample-code editor warns when the check character is omitted, and allows the lab to keep that format (6 ms)
+    √ all registry descriptions, UI labels and error keys exist in all five locales (70 ms)
+
+PASS tests/contracts/audit_4_1_run_first_ui.test.js
+  √ #214 chart-mode start visibly requires an offered LRM lot and sends its identity with the run (66 ms)
+  √ My runs is the default server filter; All runs is available to every existing reader (5 ms)
+  √ a 40-sample run reaches one atomic confirmation in six interactions, with the real form callbacks and policy/default/eligible data (30 ms)
+  √ capacity comes from the response; scanning selects a sample and never submits the form (15 ms)
+  √ method changes discard prior sample/instrument selections, and only the new method gets offered (12 ms)
+  √ unknown historical method revision is explicit, context has no row override, and post-start withdrawal is absent (34 ms)
+  √ all run-first labels and stable rule messages exist in all five client and server locales (53 ms)
+
+PASS tests/contracts/audit_2_1_reference_ui.test.js
+  √ reference catalogue lists lot expiry and warnings without exposing writes to a read-only user (84 ms)
+  √ certificate correction requires a reason and posts a new revision while preserving the method and analyte (20 ms)
+  √ manual status change requires a reason and uses the audited status endpoint (13 ms)
+  √ native control use, expected and limits come from the server; setup disables ineligible lots (29 ms)
+  √ re-entry preserves the original bound certificate when the placed lot is ineligible and posts no binding fields (27 ms)
+  √ reference strings and server rule codes are translated in en (9 ms)
+  √ reference strings and server rule codes are translated in es (6 ms)
+  √ reference strings and server rule codes are translated in es-419 (5 ms)
+  √ reference strings and server rule codes are translated in fr (6 ms)
+  √ reference strings and server rule codes are translated in pt (6 ms)
+
+PASS tests/contracts/issue_214_control_chart_ui.test.js
+  √ chart requests use the chosen lab and exact series; reading permission hides all requests and actions (63 ms)
+  √ baseline exclusions require a reason and submit selected identities without changing values (15 ms)
+  √ a trial outlier stays selected until the proposer explicitly excludes it (10 ms)
+  √ proposal approval is hidden from its own proposer and visible to a different named approver (14 ms)
+  √ review resolution requires a note and posts the explicit outcome without touching a run verdict (7 ms)
+  √ plot draws mean, ±2s and ±3s from the selected stored set and labels every observation (5 ms)
+  √ chart actions, statuses and policy keys exist in both en catalogues (7 ms)
+  √ chart actions, statuses and policy keys exist in both es catalogues (7 ms)
+  √ chart actions, statuses and policy keys exist in both es-419 catalogues (7 ms)
+  √ chart actions, statuses and policy keys exist in both fr catalogues (7 ms)
+  √ chart actions, statuses and policy keys exist in both pt catalogues (7 ms)
+
+PASS tests/contracts/audit_2_6_sql_scanner.test.js
+  √ closed loadProficiencyMigrationSource SQL is inspected while appended workflow writes remain rejected (27 ms)
+  √ closed loadResultEquipmentMigrationSource SQL is inspected while appended workflow writes remain rejected (5 ms)
+  √ shadowed, escaped and mutated loadProficiencyMigrationSource sources are still unknown SQL (4 ms)
+  √ shadowed, escaped and mutated loadResultEquipmentMigrationSource sources are still unknown SQL (4 ms)
+  √ changed loadProficiencyMigrationSource loader or DDL bytes restore the failing unknown-SQL finding (2 ms)
+  √ changed loadResultEquipmentMigrationSource loader or DDL bytes restore the failing unknown-SQL finding (1 ms)
+
+PASS tests/contracts/issue_214_control_chart_rules.test.js
+  √ 1-2s fires only beyond its strict boundary (1 ms)
+  √ 1-3s fires only beyond its strict boundary
+  √ 2-2s fires only beyond its strict boundary (1 ms)
+  √ 4-1s fires only beyond its strict boundary
+  √ 10x fires only beyond its strict boundary (1 ms)
+  √ R-4s cannot compare two different runs and records one-point runs as not applicable
+  √ sequence rules span runs, include failed controls, and count multiple positions in one run (1 ms)
+  √ history cannot cross a limit-basis reset (11 ms)
+  √ provisional and fixed windows never report multirules as passed (1 ms)
+  √ explicit review mapping is independent of reject/warn verdicts
+  √ mapping rejects duplicates and preserves old overrides without a review key (1 ms)
+  √ order is execution time then QC index then deterministic id; unknown metadata refuses (1 ms)
+  √ baseline uses arithmetic mean and sample SD, refuses constant or nonfinite baselines (1 ms)
+  √ a stored evaluation is independent of later changes to input values and limits
+
+Test Suites: 1 failed, 11 passed, 12 total
+Tests:       1 failed, 196 passed, 197 total
+Snapshots:   0 total
+Time:        158.642 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_rules.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_integration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_native_runs.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_0_policy_components.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_1_reference_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_guard_installer.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\deployment_readiness_bootstrap.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_sql_scanner.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_3_native_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_1_run_first_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_1_run_start_header.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue214-correction-impact-regression\report-original.json

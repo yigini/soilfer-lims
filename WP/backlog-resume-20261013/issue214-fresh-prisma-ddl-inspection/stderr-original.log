@@ -1,0 +1,17 @@
+C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\helpers\testOwnedDatabase.js:13
+        throw new Error('Workflow guard probes require system:fixture and NODE_ENV=test.');
+        ^
+
+Error: Workflow guard probes require system:fixture and NODE_ENV=test.
+    at Object.assertOwnedTestDatabase (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\helpers\testOwnedDatabase.js:13:15)
+    at [eval]:3:57
+    at [eval]:11:4
+    at runScriptInThisContext (node:internal/vm:219:10)
+    at node:internal/process/execution:451:12
+    at [eval]-wrapper:6:24
+    at runScriptInContext (node:internal/process/execution:449:60)
+    at evalFunction (node:internal/process/execution:283:30)
+    at evalTypeScript (node:internal/process/execution:295:3)
+    at node:internal/main/eval_string:71:3
+
+Node.js v24.13.0

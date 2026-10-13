@@ -1,0 +1,20 @@
+{
+  "status": "DELIVERED_ONCE_VISUALLY_VERIFIED",
+  "boundaryUtc": "2026-10-13T18:13Z",
+  "precision": "boundary minute",
+  "windowId": 3408874,
+  "app": "Claude",
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "observations": [
+    "fresh inventory and returned actual window",
+    "centre and right composers empty",
+    "right composer focused",
+    "draft beginning and end inspected",
+    "one Return",
+    "actual sent bubble inspected",
+    "empty right composer and Ionizing observed"
+  ],
+  "humanCardsAnswered": false,
+  "productionOperations": 0
+}

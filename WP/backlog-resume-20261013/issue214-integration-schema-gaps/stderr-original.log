@@ -1,0 +1,98 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User manager-14d975c3-e66d-4728-8f72-5e7f642de166 (Lab: another-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/controlChartService.js:23:16)
+      at services/controlChartService.js:143:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/issue_214_control_chart_integration.test.js:103:5)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T18:11:32.382Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/issue_214_control_chart_integration.test.js (22.587 s)
+  √ provisional limits, approval by a second user and supersession preserve all past and already-started criteria (4500 ms)
+  √ QC_FAIL controls remain in sequence history but cannot enter a passing baseline (3267 ms)
+  √ review rules create idempotent scoped obligations and append-only resolutions without changing verdicts (3610 ms)
+  √ every baseline exclusion is explicit and retained; ambiguous chronology and wrong scope refuse atomically (3484 ms)
+  √ HTTP scope and approval permissions use actual token validation and stable refusal codes (3658 ms)
+  √ additive installation preserves stored legacy policy bytes and old rows with DRY 0 / APPLY 1 / NO_OP 0 (2970 ms)
+
+PASS tests/contracts/issue_214_control_chart_rules.test.js
+  √ 1-2s fires only beyond its strict boundary (2 ms)
+  √ 1-3s fires only beyond its strict boundary
+  √ 2-2s fires only beyond its strict boundary
+  √ 4-1s fires only beyond its strict boundary (1 ms)
+  √ 10x fires only beyond its strict boundary (1 ms)
+  √ R-4s cannot compare two different runs and records one-point runs as not applicable (1 ms)
+  √ sequence rules span runs, include failed controls, and count multiple positions in one run (1 ms)
+  √ history cannot cross a limit-basis reset (21 ms)
+  √ provisional and fixed windows never report multirules as passed (1 ms)
+  √ explicit review mapping is independent of reject/warn verdicts (1 ms)
+  √ mapping rejects duplicates and preserves old overrides without a review key (1 ms)
+  √ order is execution time then QC index then deterministic id; unknown metadata refuses (3 ms)
+  √ baseline uses arithmetic mean and sample SD, refuses constant or nonfinite baselines (2 ms)
+  √ a stored evaluation is independent of later changes to input values and limits (1 ms)
+
+Test Suites: 2 passed, 2 total
+Tests:       20 passed, 20 total
+Snapshots:   0 total
+Time:        23.356 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_integration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_rules.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue214-integration-schema-gaps\report-original.json

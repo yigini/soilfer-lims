@@ -1,0 +1,54 @@
+{
+  "issue-214/charts.html": {
+    "bytes": 1550926,
+    "sha256": "e9438c6692a6465d1ce1984ca59ba8b2630d06e72a72140b4794c06ae202299e"
+  },
+  "issue-214/desktop-original.png": {
+    "bytes": 153572,
+    "sha256": "f4a5102c2241a26ca78741f45bcfaf3fbde1765d6cc0aa942a586c9ff07efd21"
+  },
+  "issue-214/fixture-inputs.json": {
+    "bytes": 9189,
+    "sha256": "df5dbfa57f0ef2a99ea2ed82e32b5a2ca63d53cd5b4775cb4c178fda0e3476b8"
+  },
+  "issue-214/mobile-original.png": {
+    "bytes": 139778,
+    "sha256": "e22a1eb9d5d931b7481098dbf71aca774858da4caf8258b28fc59d574ef42eff"
+  },
+  "issue-214-responsive/charts.html": {
+    "bytes": 1550994,
+    "sha256": "c479fd2f4d9489427d10285be45ab6364a1a895acdcbb897efe5a10641ed7121"
+  },
+  "issue-214-responsive/desktop-corrected.png": {
+    "bytes": 57188,
+    "sha256": "3138a4d14a4f1579686e4552e86e3fabc7d963d7dad22613945edfa1c8820389"
+  },
+  "issue-214-responsive/fixture-inputs.json": {
+    "bytes": 9189,
+    "sha256": "908698e568ed535f6f0cf5a05af20b2133ba9805c53923895725406105183c18"
+  },
+  "issue-214-responsive/mobile-chart.png": {
+    "bytes": 36386,
+    "sha256": "1f2460716375ca39bbff689fd935b54171d9e82a265ac8e2c4c9657f77e48e3a"
+  },
+  "issue-214-responsive/mobile-corrected.png": {
+    "bytes": 40207,
+    "sha256": "797dd77d5a660150d8b5fa0dbf59fe67e49f6183eee087da875a34e1b138ff86"
+  },
+  "issue-214-responsive/mobile-review.png": {
+    "bytes": 37172,
+    "sha256": "ba6aa0eb9794f7b1289418b9f758d861cc2c8cd8122edb432194f043b93c6796"
+  },
+  "observations.json": {
+    "bytes": 1222,
+    "sha256": "fd062387062fec19494146446d6a83f29ccf9144d4fef96d9728fec308b763f5"
+  },
+  "requests-cli-original.txt": {
+    "bytes": 3778,
+    "sha256": "6817cfe74836a0e653f47ba4b84392f9850596c90509311f63de38d485fb4b20"
+  },
+  "requests-parsed.json": {
+    "bytes": 3683,
+    "sha256": "4ab17076cd175ef5e21a1ceb5e029abaec34d33e15aae751ed834c20529e4981"
+  }
+}

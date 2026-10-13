@@ -1,0 +1,37 @@
+{
+  "closedUtc": "2026-10-13T19:14:58.813680+00:00",
+  "scope": "actual Chromium rendering of production components with injected synthetic UI API, no database or production connection",
+  "status": "PASS_AFTER_RESPONSIVE_CORRECTION",
+  "viewports": {
+    "mobile": [
+      390,
+      844
+    ],
+    "desktop": [
+      1440,
+      1050
+    ]
+  },
+  "firstMobileOverflow": {
+    "viewport": 390,
+    "documentWidth": 464,
+    "status": "FAILED_RENDERING_FIXED_IN_SUCCESSOR"
+  },
+  "correctedMobile": {
+    "viewport": 390,
+    "documentWidth": 375
+  },
+  "checks": [
+    "recorded limit-basis chart and history rendered",
+    "trial outlier remains selected until explicit deselection",
+    "explicit exclusion reason and proposal reason required",
+    "same proposer cannot approve own proposal",
+    "separate named manager approval POST",
+    "unbound chart-run sample selection and start disabled",
+    "bound lot carried by keyboard-submitted start POST",
+    "blank review note refused before POST",
+    "Tab/Enter review submits outcome and mandatory note without verdict mutation"
+  ],
+  "console": "React development-tools INFO and localhost favicon404 only; no component exception",
+  "productionOperations": 0
+}

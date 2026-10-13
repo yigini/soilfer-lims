@@ -1,0 +1,20 @@
+{
+  "observedUtc": "2026-10-13T18:35:26.976Z",
+  "status": "DELIVERED_ONCE_VISUALLY_VERIFIED",
+  "windowId": 3408874,
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "questionId": 6152478199,
+  "observations": [
+    "fresh returned unique target",
+    "centre and right composers empty",
+    "right focus before typing",
+    "draft end and beginning inspected",
+    "single Return",
+    "expanded actual sent bubble with113pass32fail0pending verified",
+    "empty composer",
+    "Claudio acknowledged question and is checking default-setting impact"
+  ],
+  "humanCardsAnswered": false,
+  "productionOperations": 0
+}

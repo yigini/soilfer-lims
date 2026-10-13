@@ -1,0 +1,8 @@
+{
+  "sourceCommit": "1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a",
+  "sourcePath": "server/services/qcNativeRunService.js",
+  "fixturePath": "server/tests/fixtures/pre214-native-run-source.cjs",
+  "bytes": 20577,
+  "sha256": "6feb54119690380ebdcf372f8b053e592a81d9506e134b018bf39c6eb92eddaa",
+  "purpose": "Genuine pre-release start on a disposable test-owned database; no editing historical criteria or production operation."
+}

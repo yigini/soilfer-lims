@@ -1,0 +1,22 @@
+PASS tests/contracts/issue_214_control_chart_rules.test.js
+  √ 1-2s fires only beyond its strict boundary (4 ms)
+  √ 1-3s fires only beyond its strict boundary
+  √ 2-2s fires only beyond its strict boundary (5 ms)
+  √ 4-1s fires only beyond its strict boundary (1 ms)
+  √ 10x fires only beyond its strict boundary
+  √ R-4s cannot compare two different runs and records one-point runs as not applicable (1 ms)
+  √ sequence rules span runs, include failed controls, and count multiple positions in one run
+  √ history cannot cross a limit-basis reset (10 ms)
+  √ provisional and fixed windows never report multirules as passed
+  √ explicit review mapping is independent of reject/warn verdicts (1 ms)
+  √ mapping rejects duplicates and preserves old overrides without a review key
+  √ order is execution time then QC index then deterministic id; unknown metadata refuses (2 ms)
+  √ baseline uses arithmetic mean and sample SD, refuses constant or nonfinite baselines
+  √ a stored evaluation is independent of later changes to input values and limits (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       14 passed, 14 total
+Snapshots:   0 total
+Time:        0.811 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_rules.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue214-rule-kernel-visible-discovery\report-original.json

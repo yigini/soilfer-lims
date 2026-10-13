@@ -1,0 +1,57 @@
+{
+  "file": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_214_comparison_98f8b962-f0ae-4330-b1e0-63f731a87351.db",
+  "inspectionUtc": "2026-10-13T18:37:44.644Z",
+  "prismaPush": "Datasource \"db\": SQLite database \"installer_214_comparison_98f8b962-f0ae-4330-b1e0-63f731a87351.db\" at \"file:C:/Users/yigin/.codex/worktrees/audit-qc-integration/soilfer-lims/server/tests/.tmp/installer_214_comparison_98f8b962-f0ae-4330-b1e0-63f731a87351.db\"\n\nYour database is now in sync with your Prisma schema. Done in 420ms\n\n",
+  "objects": [
+    {
+      "name": "ControlLimitProposal",
+      "expected": "CREATE TABLE \"ControlLimitProposal\" (\n    \"id\" TEXT NOT NULL PRIMARY KEY,\n    \"labId\" TEXT NOT NULL,\n    \"analysisCode\" TEXT NOT NULL,\n    \"methodologyId\" TEXT NOT NULL,\n    \"referenceMaterialId\" TEXT NOT NULL,\n    \"mean\" REAL NOT NULL,\n    \"sd\" REAL NOT NULL,\n    \"n\" INTEGER NOT NULL,\n    \"selectionSnapshot\" TEXT NOT NULL,\n    \"policySnapshot\" TEXT NOT NULL,\n    \"reason\" TEXT NOT NULL,\n    \"proposedBy\" TEXT NOT NULL,\n    \"proposedAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    CONSTRAINT \"ControlLimitProposal_labId_fkey\" FOREIGN KEY (\"labId\") REFERENCES \"Lab\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"ControlLimitProposal_methodologyId_fkey\" FOREIGN KEY (\"methodologyId\") REFERENCES \"Methodology\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"ControlLimitProposal_referenceMaterialId_fkey\" FOREIGN KEY (\"referenceMaterialId\") REFERENCES \"ReferenceMaterial\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n);",
+      "actual": "CREATE TABLE \"ControlLimitProposal\" (\n    \"id\" TEXT NOT NULL PRIMARY KEY,\n    \"labId\" TEXT NOT NULL,\n    \"analysisCode\" TEXT NOT NULL,\n    \"methodologyId\" TEXT NOT NULL,\n    \"referenceMaterialId\" TEXT NOT NULL,\n    \"mean\" REAL NOT NULL,\n    \"sd\" REAL NOT NULL,\n    \"n\" INTEGER NOT NULL,\n    \"selectionSnapshot\" TEXT NOT NULL,\n    \"policySnapshot\" TEXT NOT NULL,\n    \"reason\" TEXT NOT NULL,\n    \"proposedBy\" TEXT NOT NULL,\n    \"proposedAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    CONSTRAINT \"ControlLimitProposal_labId_fkey\" FOREIGN KEY (\"labId\") REFERENCES \"Lab\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"ControlLimitProposal_methodologyId_fkey\" FOREIGN KEY (\"methodologyId\") REFERENCES \"Methodology\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"ControlLimitProposal_referenceMaterialId_fkey\" FOREIGN KEY (\"referenceMaterialId\") REFERENCES \"ReferenceMaterial\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n)"
+    },
+    {
+      "name": "ControlLimitSet",
+      "expected": "CREATE TABLE \"ControlLimitSet\" (\n    \"id\" TEXT NOT NULL PRIMARY KEY,\n    \"labId\" TEXT NOT NULL,\n    \"analysisCode\" TEXT NOT NULL,\n    \"methodologyId\" TEXT NOT NULL,\n    \"referenceMaterialId\" TEXT NOT NULL,\n    \"proposalId\" TEXT NOT NULL,\n    \"mean\" REAL NOT NULL,\n    \"sd\" REAL NOT NULL,\n    \"n\" INTEGER NOT NULL,\n    \"fromDate\" DATETIME NOT NULL,\n    \"toDate\" DATETIME,\n    \"approvedBy\" TEXT NOT NULL,\n    \"status\" TEXT NOT NULL,\n    CONSTRAINT \"ControlLimitSet_labId_fkey\" FOREIGN KEY (\"labId\") REFERENCES \"Lab\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"ControlLimitSet_methodologyId_fkey\" FOREIGN KEY (\"methodologyId\") REFERENCES \"Methodology\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"ControlLimitSet_referenceMaterialId_fkey\" FOREIGN KEY (\"referenceMaterialId\") REFERENCES \"ReferenceMaterial\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"ControlLimitSet_proposalId_fkey\" FOREIGN KEY (\"proposalId\") REFERENCES \"ControlLimitProposal\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n);",
+      "actual": "CREATE TABLE \"ControlLimitSet\" (\n    \"id\" TEXT NOT NULL PRIMARY KEY,\n    \"labId\" TEXT NOT NULL,\n    \"analysisCode\" TEXT NOT NULL,\n    \"methodologyId\" TEXT NOT NULL,\n    \"referenceMaterialId\" TEXT NOT NULL,\n    \"proposalId\" TEXT NOT NULL,\n    \"mean\" REAL NOT NULL,\n    \"sd\" REAL NOT NULL,\n    \"n\" INTEGER NOT NULL,\n    \"fromDate\" DATETIME NOT NULL,\n    \"toDate\" DATETIME,\n    \"approvedBy\" TEXT NOT NULL,\n    \"status\" TEXT NOT NULL,\n    CONSTRAINT \"ControlLimitSet_labId_fkey\" FOREIGN KEY (\"labId\") REFERENCES \"Lab\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"ControlLimitSet_methodologyId_fkey\" FOREIGN KEY (\"methodologyId\") REFERENCES \"Methodology\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"ControlLimitSet_referenceMaterialId_fkey\" FOREIGN KEY (\"referenceMaterialId\") REFERENCES \"ReferenceMaterial\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"ControlLimitSet_proposalId_fkey\" FOREIGN KEY (\"proposalId\") REFERENCES \"ControlLimitProposal\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n)"
+    },
+    {
+      "name": "QcReviewObligation",
+      "expected": "CREATE TABLE \"QcReviewObligation\" (\n    \"id\" TEXT NOT NULL PRIMARY KEY,\n    \"labId\" TEXT NOT NULL,\n    \"evaluationId\" TEXT NOT NULL,\n    \"rule\" TEXT NOT NULL,\n    \"evidenceSnapshot\" TEXT NOT NULL,\n    \"createdAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    CONSTRAINT \"QcReviewObligation_labId_fkey\" FOREIGN KEY (\"labId\") REFERENCES \"Lab\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"QcReviewObligation_evaluationId_fkey\" FOREIGN KEY (\"evaluationId\") REFERENCES \"QcEvaluation\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n);",
+      "actual": "CREATE TABLE \"QcReviewObligation\" (\n    \"id\" TEXT NOT NULL PRIMARY KEY,\n    \"labId\" TEXT NOT NULL,\n    \"evaluationId\" TEXT NOT NULL,\n    \"rule\" TEXT NOT NULL,\n    \"evidenceSnapshot\" TEXT NOT NULL,\n    \"createdAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    CONSTRAINT \"QcReviewObligation_labId_fkey\" FOREIGN KEY (\"labId\") REFERENCES \"Lab\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE,\n    CONSTRAINT \"QcReviewObligation_evaluationId_fkey\" FOREIGN KEY (\"evaluationId\") REFERENCES \"QcEvaluation\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n)"
+    },
+    {
+      "name": "QcReviewResolution",
+      "expected": "CREATE TABLE \"QcReviewResolution\" (\n    \"id\" TEXT NOT NULL PRIMARY KEY,\n    \"obligationId\" TEXT NOT NULL,\n    \"outcome\" TEXT NOT NULL,\n    \"note\" TEXT NOT NULL,\n    \"resolvedBy\" TEXT NOT NULL,\n    \"resolvedAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    CONSTRAINT \"QcReviewResolution_obligationId_fkey\" FOREIGN KEY (\"obligationId\") REFERENCES \"QcReviewObligation\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n);",
+      "actual": "CREATE TABLE \"QcReviewResolution\" (\n    \"id\" TEXT NOT NULL PRIMARY KEY,\n    \"obligationId\" TEXT NOT NULL,\n    \"outcome\" TEXT NOT NULL,\n    \"note\" TEXT NOT NULL,\n    \"resolvedBy\" TEXT NOT NULL,\n    \"resolvedAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    CONSTRAINT \"QcReviewResolution_obligationId_fkey\" FOREIGN KEY (\"obligationId\") REFERENCES \"QcReviewObligation\" (\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n)"
+    },
+    {
+      "name": "ControlLimitProposal_labId_analysisCode_methodologyId_referenceMaterialId_idx",
+      "expected": "CREATE INDEX \"ControlLimitProposal_labId_analysisCode_methodologyId_referenceMaterialId_idx\" ON \"ControlLimitProposal\"(\"labId\", \"analysisCode\", \"methodologyId\", \"referenceMaterialId\");",
+      "actual": "CREATE INDEX \"ControlLimitProposal_labId_analysisCode_methodologyId_referenceMaterialId_idx\" ON \"ControlLimitProposal\"(\"labId\", \"analysisCode\", \"methodologyId\", \"referenceMaterialId\")"
+    },
+    {
+      "name": "ControlLimitSet_proposalId_key",
+      "expected": "CREATE UNIQUE INDEX \"ControlLimitSet_proposalId_key\" ON \"ControlLimitSet\"(\"proposalId\");",
+      "actual": "CREATE UNIQUE INDEX \"ControlLimitSet_proposalId_key\" ON \"ControlLimitSet\"(\"proposalId\")"
+    },
+    {
+      "name": "ControlLimitSet_labId_analysisCode_methodologyId_referenceMaterialId_idx",
+      "expected": "CREATE INDEX \"ControlLimitSet_labId_analysisCode_methodologyId_referenceMaterialId_idx\" ON \"ControlLimitSet\"(\"labId\", \"analysisCode\", \"methodologyId\", \"referenceMaterialId\");",
+      "actual": "CREATE INDEX \"ControlLimitSet_labId_analysisCode_methodologyId_referenceMaterialId_idx\" ON \"ControlLimitSet\"(\"labId\", \"analysisCode\", \"methodologyId\", \"referenceMaterialId\")"
+    },
+    {
+      "name": "QcReviewObligation_labId_createdAt_idx",
+      "expected": "CREATE INDEX \"QcReviewObligation_labId_createdAt_idx\" ON \"QcReviewObligation\"(\"labId\", \"createdAt\");",
+      "actual": "CREATE INDEX \"QcReviewObligation_labId_createdAt_idx\" ON \"QcReviewObligation\"(\"labId\", \"createdAt\")"
+    },
+    {
+      "name": "QcReviewObligation_evaluationId_rule_key",
+      "expected": "CREATE UNIQUE INDEX \"QcReviewObligation_evaluationId_rule_key\" ON \"QcReviewObligation\"(\"evaluationId\", \"rule\");",
+      "actual": "CREATE UNIQUE INDEX \"QcReviewObligation_evaluationId_rule_key\" ON \"QcReviewObligation\"(\"evaluationId\", \"rule\")"
+    },
+    {
+      "name": "QcReviewResolution_obligationId_key",
+      "expected": "CREATE UNIQUE INDEX \"QcReviewResolution_obligationId_key\" ON \"QcReviewResolution\"(\"obligationId\");",
+      "actual": "CREATE UNIQUE INDEX \"QcReviewResolution_obligationId_key\" ON \"QcReviewResolution\"(\"obligationId\")"
+    }
+  ]
+}

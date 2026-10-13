@@ -180,8 +180,11 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
         {analyte.qcMode === 'OFF' && <p data-testid="native-qc-not-required">{t('qcRuns.notRequired')}</p>}
         {!batch.startedAt && <>
             <p className="text-xs text-sf-muted">{t('qcRuns.startHelp')}</p>
+            <p className="text-xs text-sf-muted">{t('controlCharts.startBindingHelp')}</p>
             <button type="button" data-testid="native-run-start" disabled={loading || locked} className="px-3 py-2 rounded border border-sf-divider"
-                onClick={() => perform(() => axios.post(`/api/qc/batches/${batch.id}/start`, {}))}>{t('qcRuns.start')}</button>
+                onClick={() => perform(() => axios.post(`/api/qc/batches/${batch.id}/start`, changedLots.length ? {
+                    references: changedLots.map(row => ({ positionId: row.id, referenceMaterialId: lots[row.id] }))
+                } : {}))}>{t('qcRuns.start')}</button>
             <p className="text-xs text-sf-muted">{t('qcRuns.reorderHelp')}</p>
         </>}
         {locked && <p role="alert">{t('qcRuns.locked')}</p>}
@@ -192,15 +195,18 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
             {positions.map(row => {
                 const reference = binding(row), old = measured(row.id);
                 const needsLot = served.has(row.id) && ['LRM', 'CRM', 'ICV', 'CCV', 'CCB'].includes(row.kind);
+                const chartLotFrozen = row.kind === 'LRM' && frozen?.qcRule?.resolved?.lrmMode?.value === 'CONTROL_CHART' &&
+                    frozen?.controlCharts?.some(context => context.positions?.some(position => position.positionId === row.id));
                 const lotKind = { ICV: 'CHECK_STANDARD', CCV: 'CHECK_STANDARD', CCB: 'BLANK_MATRIX' }[row.kind] || row.kind;
                 return <div key={row.id} className="text-xs space-y-1">
                     {needsLot && <label className="grid gap-1">{row.position} · {row.kind} · {t('referenceMaterials.controlMaterial')}
-                        <select value={lots[row.id] || reference?.referenceMaterialId || ''} disabled={locked || loading || accepted}
+                        <select value={lots[row.id] || reference?.referenceMaterialId || ''} disabled={locked || loading || accepted || chartLotFrozen}
                             onChange={event => setLots(previous => ({ ...previous, [row.id]: event.target.value }))} data-testid={`native-lot-${row.id}`}>
                             <option value="">{t('referenceMaterials.choose')}</option>
-                            {referenceMaterials.filter(material => material.kind === lotKind).map(material => <option key={material.id} value={material.id} disabled={!material.eligible}>
+                            {referenceMaterials.filter(material => row.kind === 'LRM' ? ['LRM','CRM','CHECK_STANDARD'].includes(material.kind) : material.kind === lotKind).map(material => <option key={material.id} value={material.id} disabled={!material.eligible}>
                                 {material.code} · {material.lotNumber}</option>)}
                         </select>
+                        {chartLotFrozen && <span className="text-sf-muted">{t('controlCharts.frozenLot')}</span>}
                     </label>}
                     {canMeasure(row) && old && !locked && !accepted && <label className="flex gap-2">
                         <input type="checkbox" checked={!!correcting[row.id]} disabled={loading}

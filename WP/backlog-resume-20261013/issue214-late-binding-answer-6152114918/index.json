@@ -1,0 +1,31 @@
+{
+  "observedUtc": "2026-10-13T18:25:08.562326+00:00",
+  "status": "ACTUAL_CLAUDIO_LOT_BINDING_DIRECTION_RECEIVED",
+  "answerId": 6152114918,
+  "questionId": 6151938560,
+  "authority": "Claude GitHub app under YY delegation #162/6141144901",
+  "productionOperations": 0,
+  "issue103ApplyGo": false,
+  "files": {
+    "actual-answer-raw.json": {
+      "bytes": 5703,
+      "sha256": "a2e25649325567c341bca528134ad74b56b8e004ffb5e35878f59530c8a62c6a"
+    },
+    "actual-answer.txt": {
+      "bytes": 1977,
+      "sha256": "895ecc89e3b06ff430ecee5b7183b0ee460a6af61f85e7cb166e6c562a776c02"
+    },
+    "actual-question-raw.json": {
+      "bytes": 2899,
+      "sha256": "83ca77666ad1b1003b5e169ed8bacf424e41fc1442247f6422dccac05792e8af"
+    },
+    "current-issue214-raw.json": {
+      "bytes": 8805,
+      "sha256": "6fef116a327d2c80c87850f9e8c69cafbda97968e58160d6c8373199a48dda4b"
+    },
+    "current-main-raw.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    }
+  }
+}

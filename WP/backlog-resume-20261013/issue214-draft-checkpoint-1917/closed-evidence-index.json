@@ -1,0 +1,750 @@
+{
+  "WP/backlog-resume-20261013/add-issue214-locales-once.py": {
+    "bytes": 7745,
+    "sha256": "54d9b42f3b5265249f63da05e74509eb2a71bc06b0547025c9efd9884935b6bc"
+  },
+  "WP/backlog-resume-20261013/add-issue214-start-binding-locales-once.py": {
+    "bytes": 2128,
+    "sha256": "2ca72a486088bf16e0409a3f3620e21fcb47246061ad3a81bbfd025c6a419cb3"
+  },
+  "WP/backlog-resume-20261013/assemble-issue214-additive-migration-literal.py": {
+    "bytes": 5982,
+    "sha256": "81d69cd122fea7f71942422d803fef8eb2f7c042a010353a61b75dbf64d2a412"
+  },
+  "WP/backlog-resume-20261013/assemble-issue214-additive-migration.py": {
+    "bytes": 5912,
+    "sha256": "88146108036f8a517f7ab16559a0e1f7d997167eab0deeb79a2dcf935748fbbe"
+  },
+  "WP/backlog-resume-20261013/checkpoint-issue214-draft-closed-evidence-1917-once.py": {
+    "bytes": 6797,
+    "sha256": "a0bab5b6400041779b750f04fd69c67f4a736e5ab88737d466fb1ed7fca0f229"
+  },
+  "WP/backlog-resume-20261013/inspect-issue214-fresh-prisma-ddl-isolated-environment.py": {
+    "bytes": 2280,
+    "sha256": "a66c2e4a2b1f9187d83008d2ebe85fffd239cea7317f89fa09105864bda74003"
+  },
+  "WP/backlog-resume-20261013/inspect-issue214-fresh-prisma-ddl-once.py": {
+    "bytes": 2149,
+    "sha256": "a48532fa9da6b5ca0283f3019c1cc93504e377a598fc538a7490a30495929fb8"
+  },
+  "WP/backlog-resume-20261013/inspect-issue214-fresh-prisma-ddl-test-environment.py": {
+    "bytes": 2196,
+    "sha256": "eab9faceddb7733fd13176efe4bc748d4c64a6e0336c2aae1f214cf841834a21"
+  },
+  "WP/backlog-resume-20261013/issue214-client-build-lint-first/build-exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-client-build-lint-first/build-stderr-original.log": {
+    "bytes": 525,
+    "sha256": "78926189c9199ed1cd86683028febfac433d0b854f8e721067cf999a87504e77"
+  },
+  "WP/backlog-resume-20261013/issue214-client-build-lint-first/build-stdout-original.log": {
+    "bytes": 5483,
+    "sha256": "8e272898d2377d5f7f91f9fceded0ad4a798373094e56b4ea108e76a34e71bb9"
+  },
+  "WP/backlog-resume-20261013/issue214-client-build-lint-first/lint-exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-client-build-lint-first/lint-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-client-build-lint-first/lint-stdout-original.log": {
+    "bytes": 2844,
+    "sha256": "17818db05c088664a1524421131d88f0911d0600c11bd587504dd0533d472d70"
+  },
+  "WP/backlog-resume-20261013/issue214-client-build-lint-first/source-after.json": {
+    "bytes": 27351,
+    "sha256": "9022475942043b20ac7ff2481a74fa95c557b9fd0d8cbb47aa7f5007516baee6"
+  },
+  "WP/backlog-resume-20261013/issue214-client-build-lint-first/source-before.json": {
+    "bytes": 27351,
+    "sha256": "9022475942043b20ac7ff2481a74fa95c557b9fd0d8cbb47aa7f5007516baee6"
+  },
+  "WP/backlog-resume-20261013/issue214-client-build-lint-first/summary.json": {
+    "bytes": 486,
+    "sha256": "c60d962827cae853a008b31d3e2ec6ed802f0a3dba00c1e9e238e3e39c26c82f"
+  },
+  "WP/backlog-resume-20261013/issue214-correction-impact-regression/command.json": {
+    "bytes": 2146,
+    "sha256": "655a4c27cba7b7fb81d5e926ef63a25ce9eef3cbedadfe3f7939601bc80843b2"
+  },
+  "WP/backlog-resume-20261013/issue214-correction-impact-regression/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "WP/backlog-resume-20261013/issue214-correction-impact-regression/report-original.json": {
+    "bytes": 88041,
+    "sha256": "6f550176994363910e56b47c7425266bcc9fbb0be23a9197963dd738ca0e09b7"
+  },
+  "WP/backlog-resume-20261013/issue214-correction-impact-regression/source-after.json": {
+    "bytes": 6251,
+    "sha256": "158675adc361f62321ba9bafdec76ace4d6804caff4f35d16156fe2ebaa823b2"
+  },
+  "WP/backlog-resume-20261013/issue214-correction-impact-regression/source-before.json": {
+    "bytes": 6251,
+    "sha256": "158675adc361f62321ba9bafdec76ace4d6804caff4f35d16156fe2ebaa823b2"
+  },
+  "WP/backlog-resume-20261013/issue214-correction-impact-regression/stderr-original.log": {
+    "bytes": 59486,
+    "sha256": "a3bacc135588c362b0efe26f35bedadc0a56ecfdbe6d3746c9f60c7a95ebc7f8"
+  },
+  "WP/backlog-resume-20261013/issue214-correction-impact-regression/stdout-original.log": {
+    "bytes": 1776,
+    "sha256": "4ec93b197eb784379c7600f1f2386d2afd36e6859b6fba12ae641df8fe5ebe01"
+  },
+  "WP/backlog-resume-20261013/issue214-correction-impact-regression/summary.json": {
+    "bytes": 228,
+    "sha256": "58a62b2870c7ca7c830d48240105a51ad822c10c3311d22221cf996428ecd5dd"
+  },
+  "WP/backlog-resume-20261013/issue214-draft-checkpoint-1917/full-successor-open-metadata.json": {
+    "bytes": 6727,
+    "sha256": "c81905a8b5e5016881988dd58a2c5c090061cadff2022549ba7d736d1e06eef5"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-direction-6152507558/answer-actual-raw.json": {
+    "bytes": 6003,
+    "sha256": "5f700201b09dad8c1a95460a424016f61ba46685ed22109340a52bb97d050721"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-direction-6152507558/answer-actual.txt": {
+    "bytes": 2282,
+    "sha256": "e6b65515fe51ab19f7825e7a60909af7cce6148ba02a3824270271224e12fefa"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-direction-6152507558/index.json": {
+    "bytes": 817,
+    "sha256": "e10559f7b42308fddad90c6461549c07ad27be6bb4891ea6c2e44c36ffdb4934"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-direction-6152507558/issue214-current-raw.json": {
+    "bytes": 8805,
+    "sha256": "94637fd70cf8b508875a534b05359fa83a2b8844bbc65585bf0c1c7ecb49cd3a"
+  },
+  "WP/backlog-resume-20261013/issue214-fixture-direction-6152507558/question-actual-raw.json": {
+    "bytes": 3257,
+    "sha256": "7523c62eca55708924af323185f842fc84c8a280a5a1d694883d5ea62306dd39"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-inspection/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-inspection/script-original.cjs": {
+    "bytes": 1174,
+    "sha256": "9ea6dee365e20f5cddccff6b759cb8bc462408f0ad30c7060709fbf1a569f814"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-inspection/stderr-original.log": {
+    "bytes": 874,
+    "sha256": "5742d23537e2d520b64c566dfa4e077de75c99eb15ce8d86548f441428b7fb05"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-inspection/stdout-original.json": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-isolated-environment/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-isolated-environment/script-original.cjs": {
+    "bytes": 1174,
+    "sha256": "9ea6dee365e20f5cddccff6b759cb8bc462408f0ad30c7060709fbf1a569f814"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-isolated-environment/stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-isolated-environment/stdout-original.json": {
+    "bytes": 9613,
+    "sha256": "8165af12277141b4708ebb2ad1304036e39ccfea6d9b4a3b533d3ea2bc687233"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-test-environment/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-test-environment/script-original.cjs": {
+    "bytes": 1174,
+    "sha256": "9ea6dee365e20f5cddccff6b759cb8bc462408f0ad30c7060709fbf1a569f814"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-test-environment/stderr-original.log": {
+    "bytes": 1102,
+    "sha256": "b2b611848ec41835bc10eb19121eebc7c564208eb13e7056e57d375a9eed9628"
+  },
+  "WP/backlog-resume-20261013/issue214-fresh-prisma-ddl-test-environment/stdout-original.json": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-first/command.json": {
+    "bytes": 428,
+    "sha256": "6c7805a5c8aa703c64f7ef7fb0976f48642a55bd5b379161c526fb63ee3c1b19"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-first/exit-original.txt": {
+    "bytes": 11,
+    "sha256": "e65633bae2c4b3af83a315c42cf4acd12e7510275a1b6370fcbf9f51de1b2045"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-first/inventory-original.json": {
+    "bytes": 48871,
+    "sha256": "c6f4309eb6673d0ef7679ccbb77ced97f5fc1b0b98c347a1f7c98212e4d5d3b3"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-first/inventory-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-first/owned-stop-boundary.json": {
+    "bytes": 2558,
+    "sha256": "b4c276db76ce56750c5f585bd85fc4869abe702e86d1b0da1ff4869682d3f89c"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-first/source-after.json": {
+    "bytes": 6366,
+    "sha256": "ea8458799cfb8e2eaedb8dad2d4fb8acb644b0fbe826ed90abf9dc38395da8cf"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-first/source-before.json": {
+    "bytes": 6366,
+    "sha256": "ea8458799cfb8e2eaedb8dad2d4fb8acb644b0fbe826ed90abf9dc38395da8cf"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-first/stderr-original.log": {
+    "bytes": 55046,
+    "sha256": "859c12f80d2ae9df1255245ef302bdbbe6a7b956df366782fc8db0ca61389780"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-first/stdout-original.log": {
+    "bytes": 269,
+    "sha256": "1ae5042d18127262e32bec9714e4e87015ce111ea083aa0f7dadff906dd4141c"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-first/summary.json": {
+    "bytes": 246,
+    "sha256": "0a5dd71889e2fff15c7d8c82bd8962273ae3a54317e575121f910f7d606d9d8e"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-responsive/command.json": {
+    "bytes": 433,
+    "sha256": "12a7b131b2483938f9f47b258e039196a98696a1174a6962d42f0d0149025aa5"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-responsive/inventory-original.json": {
+    "bytes": 48871,
+    "sha256": "c6f4309eb6673d0ef7679ccbb77ced97f5fc1b0b98c347a1f7c98212e4d5d3b3"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-responsive/inventory-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-full-server-responsive/source-before.json": {
+    "bytes": 6366,
+    "sha256": "d2257cecb45516e7af43fe1b8723e9b00992cfb67def18c931f843c080cee942"
+  },
+  "WP/backlog-resume-20261013/issue214-generated-client-preparation/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-generated-client-preparation/stderr-original.log": {
+    "bytes": 93,
+    "sha256": "75066079154e16278b8bbb61e3a8fed567403e1667eda92ad7c8eeab0cda5879"
+  },
+  "WP/backlog-resume-20261013/issue214-generated-client-preparation/stdout-original.log": {
+    "bytes": 150,
+    "sha256": "9dd7dc87c44c55c932466cedbeec77a307ed278ebdc4c1a432515ae95ca06fd6"
+  },
+  "WP/backlog-resume-20261013/issue214-integration-first/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "WP/backlog-resume-20261013/issue214-integration-first/report-original.json": {
+    "bytes": 408809,
+    "sha256": "9253d985d126ba14c71205ebd648a02edd8d2deb5f51ff19705e5d2f86e13863"
+  },
+  "WP/backlog-resume-20261013/issue214-integration-first/stderr-original.log": {
+    "bytes": 111606,
+    "sha256": "a64e12e5afbc89cb4dcab7e66f10bd345c4b7e4320cbff9a40400c8e42c994f3"
+  },
+  "WP/backlog-resume-20261013/issue214-integration-first/stdout-original.log": {
+    "bytes": 546,
+    "sha256": "f66dffc65bb586a02fe5807172c2e0d93d081fcdd78422e736b2ddd9c5b35a79"
+  },
+  "WP/backlog-resume-20261013/issue214-integration-first/summary.json": {
+    "bytes": 2192,
+    "sha256": "0aebe37df23211a1f303da4ea740963e2e9028b403710aa7bd9f95591edeb214"
+  },
+  "WP/backlog-resume-20261013/issue214-integration-schema-gaps/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-integration-schema-gaps/report-original.json": {
+    "bytes": 8638,
+    "sha256": "309f9600cca9b23da7254c10aadc36ea858ed169e2c12eb51a7bcf5c10f24972"
+  },
+  "WP/backlog-resume-20261013/issue214-integration-schema-gaps/stderr-original.log": {
+    "bytes": 5597,
+    "sha256": "8e14531bea0bc469c7a62e36adcbbe4a50b819351689ad4e1311148bdf98e96e"
+  },
+  "WP/backlog-resume-20261013/issue214-integration-schema-gaps/stdout-original.log": {
+    "bytes": 552,
+    "sha256": "38896ed93bd920a4fb79020ec69f229c56e827205c0b49550f6f7306d2e306e8"
+  },
+  "WP/backlog-resume-20261013/issue214-integration-schema-gaps/summary.json": {
+    "bytes": 2298,
+    "sha256": "8fe18457cd060fcc513b9243e98ff5188ddb074e5a5b9c4b0f1f115774ace3e9"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-answer-6152114918/actual-answer-raw.json": {
+    "bytes": 5703,
+    "sha256": "a2e25649325567c341bca528134ad74b56b8e004ffb5e35878f59530c8a62c6a"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-answer-6152114918/actual-answer.txt": {
+    "bytes": 1977,
+    "sha256": "895ecc89e3b06ff430ecee5b7183b0ee460a6af61f85e7cb166e6c562a776c02"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-answer-6152114918/actual-question-raw.json": {
+    "bytes": 2899,
+    "sha256": "83ca77666ad1b1003b5e169ed8bacf424e41fc1442247f6422dccac05792e8af"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-answer-6152114918/current-issue214-raw.json": {
+    "bytes": 8805,
+    "sha256": "6fef116a327d2c80c87850f9e8c69cafbda97968e58160d6c8373199a48dda4b"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-answer-6152114918/current-main-raw.json": {
+    "bytes": 336,
+    "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-answer-6152114918/index.json": {
+    "bytes": 1030,
+    "sha256": "80aadded1ba6154a12a307d8eb305a4a73061229c93463e9a099fd6d3edf7a18"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-boundary/actual-posted.json": {
+    "bytes": 2899,
+    "sha256": "83ca77666ad1b1003b5e169ed8bacf424e41fc1442247f6422dccac05792e8af"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-boundary/actual-posted.json.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-boundary/authority-6148143929.json": {
+    "bytes": 9862,
+    "sha256": "31a554bd4c49dc7c426f1547e956d390f976dea40de95c66c8929e4fd892ba6b"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-boundary/authority-6148143929.json.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-boundary/index.json": {
+    "bytes": 1364,
+    "sha256": "bee6009b269fd664d6b9625bca7c3c849256b56c556c408ce6efb960b197006a"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-boundary/mutation-started.json": {
+    "bytes": 120,
+    "sha256": "5a49b26508a377e6c2b2366539fb9180dd76fe831cb6a1a5792b7a165db4023d"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-boundary/request.json": {
+    "bytes": 1322,
+    "sha256": "cc5e0046865ccd37a4f9de2a634772bc9b668421867e5cb9ff1af3c75bf4af9f"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-boundary/response.json": {
+    "bytes": 2899,
+    "sha256": "83ca77666ad1b1003b5e169ed8bacf424e41fc1442247f6422dccac05792e8af"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-boundary/response.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-native-actual/actual-sent.txt": {
+    "bytes": 1001,
+    "sha256": "76c3f1203f25b2c6007b2198deb63169b5d79001d732026319c42b693be4bc63"
+  },
+  "WP/backlog-resume-20261013/issue214-late-binding-native-actual/delivery-observation.json": {
+    "bytes": 584,
+    "sha256": "fd2cc0e861a85f712d40ea0fc8080f538a8a41c51b8f53f9e068a97f50764af0"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-boundary-correction/command.json": {
+    "bytes": 2155,
+    "sha256": "1090d6a062d65c409cb108b01f618071193f6a8d29e198d6fcb5457079fa1bff"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-boundary-correction/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-boundary-correction/report-original.json": {
+    "bytes": 88938,
+    "sha256": "846aab1ed29273df773936f46c2c4fd903492f0280fe1f6bfa639f0b9896418d"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-boundary-correction/source-after.json": {
+    "bytes": 5934,
+    "sha256": "c1f1d9b9b8e3aff199115c932c1d9694ce2dc084441a2ed18998d347383feda5"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-boundary-correction/source-before.json": {
+    "bytes": 5934,
+    "sha256": "c1f1d9b9b8e3aff199115c932c1d9694ce2dc084441a2ed18998d347383feda5"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-boundary-correction/stderr-original.log": {
+    "bytes": 56791,
+    "sha256": "772732575fc067af52652684c6c51909f326480e76ec0bd76a4a587e71465790"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-boundary-correction/stdout-original.log": {
+    "bytes": 1785,
+    "sha256": "af82294e5b6a373ee4fa21a4d4eb0a37d9b0b13f82390493f814a99a2611023d"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-boundary-correction/summary.json": {
+    "bytes": 228,
+    "sha256": "ffdd1db5caeb4128860ff44c616f996c6a8c25c843e7fd953836ad33a2810596"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-first/command.json": {
+    "bytes": 1729,
+    "sha256": "a8be022f7a081298ae9af6c17a0ed2a8e17afaa30d34fa236ec73a91e1d1b319"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-first/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-first/report-original.json": {
+    "bytes": 633679,
+    "sha256": "ab790e7d80c31e79607f35dc791e778ea806ff8fc56f7ea207559555dfd887dd"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-first/source-after.json": {
+    "bytes": 5194,
+    "sha256": "fa7c233b6a4b96a2f23a4b110212e8a90778b646ed498e3b8da0bdf50b86af0e"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-first/source-before.json": {
+    "bytes": 5194,
+    "sha256": "fa7c233b6a4b96a2f23a4b110212e8a90778b646ed498e3b8da0bdf50b86af0e"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-first/stderr-original.log": {
+    "bytes": 535927,
+    "sha256": "986af96dc5f07ff50ecae8ec575bfc4401865212160b164f56df5da88ef0bf2a"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-first/stdout-original.log": {
+    "bytes": 1410,
+    "sha256": "f406ec8973b7b303f5c93003a4b72f83df59dea586fb407b9d7178d1e63d9059"
+  },
+  "WP/backlog-resume-20261013/issue214-lot-ui-regression-first/summary.json": {
+    "bytes": 228,
+    "sha256": "7d7d85269fbe1c4e4e6055efd4792f4f77d4e06a3e5f4bb0e022c12be0b6bc44"
+  },
+  "WP/backlog-resume-20261013/issue214-pre-release-start-fixture.json": {
+    "bytes": 426,
+    "sha256": "26fbbb8cffc72e008e782a7eeaa904b2856b17597eba7ae6686ed42374e90e01"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/index.json": {
+    "bytes": 1887,
+    "sha256": "02a2c1412fc33becaf3eca4501df3e741fa57901d691b73b2f62d2a052434fb7"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/issue-214-responsive/charts.html": {
+    "bytes": 1550994,
+    "sha256": "c479fd2f4d9489427d10285be45ab6364a1a895acdcbb897efe5a10641ed7121"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/issue-214-responsive/desktop-corrected.png": {
+    "bytes": 57188,
+    "sha256": "3138a4d14a4f1579686e4552e86e3fabc7d963d7dad22613945edfa1c8820389"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/issue-214-responsive/fixture-inputs.json": {
+    "bytes": 9189,
+    "sha256": "908698e568ed535f6f0cf5a05af20b2133ba9805c53923895725406105183c18"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/issue-214-responsive/mobile-chart.png": {
+    "bytes": 36386,
+    "sha256": "1f2460716375ca39bbff689fd935b54171d9e82a265ac8e2c4c9657f77e48e3a"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/issue-214-responsive/mobile-corrected.png": {
+    "bytes": 40207,
+    "sha256": "797dd77d5a660150d8b5fa0dbf59fe67e49f6183eee087da875a34e1b138ff86"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/issue-214-responsive/mobile-review.png": {
+    "bytes": 37172,
+    "sha256": "ba6aa0eb9794f7b1289418b9f758d861cc2c8cd8122edb432194f043b93c6796"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/issue-214/charts.html": {
+    "bytes": 1550926,
+    "sha256": "e9438c6692a6465d1ce1984ca59ba8b2630d06e72a72140b4794c06ae202299e"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/issue-214/desktop-original.png": {
+    "bytes": 153572,
+    "sha256": "f4a5102c2241a26ca78741f45bcfaf3fbde1765d6cc0aa942a586c9ff07efd21"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/issue-214/fixture-inputs.json": {
+    "bytes": 9189,
+    "sha256": "df5dbfa57f0ef2a99ea2ed82e32b5a2ca63d53cd5b4775cb4c178fda0e3476b8"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/issue-214/mobile-original.png": {
+    "bytes": 139778,
+    "sha256": "e22a1eb9d5d931b7481098dbf71aca774858da4caf8258b28fc59d574ef42eff"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/observations.json": {
+    "bytes": 1222,
+    "sha256": "fd062387062fec19494146446d6a83f29ccf9144d4fef96d9728fec308b763f5"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/requests-cli-original.txt": {
+    "bytes": 3778,
+    "sha256": "6817cfe74836a0e653f47ba4b84392f9850596c90509311f63de38d485fb4b20"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-browser-closed/requests-parsed.json": {
+    "bytes": 3683,
+    "sha256": "4ab17076cd175ef5e21a1ceb5e029abaec34d33e15aae751ed834c20529e4981"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-client-build-lint/build-exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-client-build-lint/build-stderr-original.log": {
+    "bytes": 525,
+    "sha256": "78926189c9199ed1cd86683028febfac433d0b854f8e721067cf999a87504e77"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-client-build-lint/build-stdout-original.log": {
+    "bytes": 5482,
+    "sha256": "bd11f5c16e60c8c9dbe17084fa6ad43e21bbcc115ca9ed6585a49e9f82b54c6e"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-client-build-lint/lint-exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-client-build-lint/lint-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-client-build-lint/lint-stdout-original.log": {
+    "bytes": 2844,
+    "sha256": "17818db05c088664a1524421131d88f0911d0600c11bd587504dd0533d472d70"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-client-build-lint/source-after.json": {
+    "bytes": 27351,
+    "sha256": "16686cd107aaa34263b756d35b2fd4e1b6125055ceb7a96dfc6189d8d5f91a5a"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-client-build-lint/source-before.json": {
+    "bytes": 27351,
+    "sha256": "16686cd107aaa34263b756d35b2fd4e1b6125055ceb7a96dfc6189d8d5f91a5a"
+  },
+  "WP/backlog-resume-20261013/issue214-responsive-client-build-lint/summary.json": {
+    "bytes": 486,
+    "sha256": "ed99764564d90360fecb838aa9d9772994a413a168ade8f3d359ce219b631d8c"
+  },
+  "WP/backlog-resume-20261013/issue214-retained-native-fixture-scope/actual-posted-raw.json": {
+    "bytes": 3257,
+    "sha256": "7523c62eca55708924af323185f842fc84c8a280a5a1d694883d5ea62306dd39"
+  },
+  "WP/backlog-resume-20261013/issue214-retained-native-fixture-scope/index.json": {
+    "bytes": 702,
+    "sha256": "087ffb7babdeede9896fe2a8ae39387855eb0421d9b892f7557a721f3851b244"
+  },
+  "WP/backlog-resume-20261013/issue214-retained-native-fixture-scope/native-actual-sent.txt": {
+    "bytes": 1255,
+    "sha256": "37768818f977a62be470a4a967d1135e6083ba759d2b1ace53e641e7c3abc69f"
+  },
+  "WP/backlog-resume-20261013/issue214-retained-native-fixture-scope/native-delivery-record.json": {
+    "bytes": 640,
+    "sha256": "f3de1312ba17bc6254060c8fae2b5eeb9767ff869f097944b12e46e4228fce9e"
+  },
+  "WP/backlog-resume-20261013/issue214-retained-native-fixture-scope/request-original.json": {
+    "bytes": 1685,
+    "sha256": "90ea599a41adffd83b6e294a873ba9adae8973a3412447b6e530360e8c939f20"
+  },
+  "WP/backlog-resume-20261013/issue214-retained-native-fixture-scope/response-original.json": {
+    "bytes": 3257,
+    "sha256": "7523c62eca55708924af323185f842fc84c8a280a5a1d694883d5ea62306dd39"
+  },
+  "WP/backlog-resume-20261013/issue214-rule-kernel-first/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "WP/backlog-resume-20261013/issue214-rule-kernel-first/stderr-original.log": {
+    "bytes": 488,
+    "sha256": "7dc8bb8496c6e9770205d289a6f2a540f56dfff3a1ca4a23a626770161c4ad1c"
+  },
+  "WP/backlog-resume-20261013/issue214-rule-kernel-first/stdout-original.log": {
+    "bytes": 379,
+    "sha256": "649af1ac91535b98660e4c838b799f13ea6079bd01b592788c3f4584d361613d"
+  },
+  "WP/backlog-resume-20261013/issue214-rule-kernel-first/summary.json": {
+    "bytes": 914,
+    "sha256": "c0fd3b5f194359f424b6b2d7667ad6bc0b4f4b99a322023a7188b71709c1c0fd"
+  },
+  "WP/backlog-resume-20261013/issue214-rule-kernel-visible-discovery/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-rule-kernel-visible-discovery/report-original.json": {
+    "bytes": 5790,
+    "sha256": "b48cfca8aec61b5c2d65a6db0e981a12997d91b7f2dd6d2e802cc4dbfe4a59a5"
+  },
+  "WP/backlog-resume-20261013/issue214-rule-kernel-visible-discovery/stderr-original.log": {
+    "bytes": 1468,
+    "sha256": "03e329cee13674adc055cbdc7007d28c524d6013aa01a6ad66eea22324b32edb"
+  },
+  "WP/backlog-resume-20261013/issue214-rule-kernel-visible-discovery/stdout-original.log": {
+    "bytes": 425,
+    "sha256": "a07f20b07c79f453243325639765cfc1bfbe5149c6ae01b44576d2466f083529"
+  },
+  "WP/backlog-resume-20261013/issue214-rule-kernel-visible-discovery/summary.json": {
+    "bytes": 922,
+    "sha256": "9158af52cc7c6983c42fae00cd348ca7636494df63618a8273d9d3e6d4b355b6"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-direct-cli/diff.exit": {
+    "bytes": 3,
+    "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-direct-cli/diff.stderr": {
+    "bytes": 45,
+    "sha256": "04243fac449156c0326b2fbb17ec68f3575b23d47faf13efc78b8e7631f446e5"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-direct-cli/diff.stdout": {
+    "bytes": 87870,
+    "sha256": "3e979aea92e74cc7bf43ed541faa492f231520246082d93b40974ba92d49b218"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-direct-cli/schema-only.sql": {
+    "bytes": 3721,
+    "sha256": "aac59d5e84d39ff3acbd2d0dfcf5661f143e119ba7004128f1742a0eac9b08b7"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-direct-cli/validate.exit": {
+    "bytes": 3,
+    "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-direct-cli/validate.stderr": {
+    "bytes": 93,
+    "sha256": "75066079154e16278b8bbb61e3a8fed567403e1667eda92ad7c8eeab0cda5879"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-direct-cli/validate.stdout": {
+    "bytes": 49,
+    "sha256": "6381c2dba0dcd378ea2cc5d0f63d1a2c895dc6ae0f2193d0b39f2a1735a50228"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-preparation/diff.exit": {
+    "bytes": 3,
+    "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-preparation/diff.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-preparation/diff.stdout": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-preparation/validate.exit": {
+    "bytes": 3,
+    "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-preparation/validate.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-schema-ddl-preparation/validate.stdout": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-scoped-impact-ordinary-regression/command.json": {
+    "bytes": 2151,
+    "sha256": "46a4f0f243a2296e364b73b8d4dbe9ca394fbd2a73c4bf572f4bc3a993059ca4"
+  },
+  "WP/backlog-resume-20261013/issue214-scoped-impact-ordinary-regression/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-scoped-impact-ordinary-regression/report-original.json": {
+    "bytes": 86585,
+    "sha256": "78a53c3ed7ad72b7148c701504befdfd4ec96e73f933ba934460ba8415e810e7"
+  },
+  "WP/backlog-resume-20261013/issue214-scoped-impact-ordinary-regression/source-after.json": {
+    "bytes": 6251,
+    "sha256": "5c98901c3bb9a5bef70c593fba5faf99b13390c1b7fe01419e553065c706dcd0"
+  },
+  "WP/backlog-resume-20261013/issue214-scoped-impact-ordinary-regression/source-before.json": {
+    "bytes": 6251,
+    "sha256": "5c98901c3bb9a5bef70c593fba5faf99b13390c1b7fe01419e553065c706dcd0"
+  },
+  "WP/backlog-resume-20261013/issue214-scoped-impact-ordinary-regression/stderr-original.log": {
+    "bytes": 55467,
+    "sha256": "80601e47b40688c841042247d0c001e15391249d171a48b96637cca133b7ccc4"
+  },
+  "WP/backlog-resume-20261013/issue214-scoped-impact-ordinary-regression/stdout-original.log": {
+    "bytes": 1781,
+    "sha256": "e5d7eb83827a269f5d06c6f0084e5062d93a6c47dcf5b76c7e42f0690e8fdae1"
+  },
+  "WP/backlog-resume-20261013/issue214-scoped-impact-ordinary-regression/summary.json": {
+    "bytes": 212,
+    "sha256": "80cc9d09a6f401d34bcd065327064c2048e394bcb84f78a2a54da1d3ecf5eeca"
+  },
+  "WP/backlog-resume-20261013/prepare-issue214-detached-browser-fixture-once.cjs": {
+    "bytes": 5566,
+    "sha256": "704433d23d1150a3fb7295dbcd1c7c852c7772bc1beb80dea445fca5dd5cf1e1"
+  },
+  "WP/backlog-resume-20261013/prepare-issue214-responsive-browser-fixture-once.cjs": {
+    "bytes": 5577,
+    "sha256": "fe7ac4f1dec6669dfe84c72fc7066ebc3548b99f8a0bb71233145e92e7172a3b"
+  },
+  "WP/backlog-resume-20261013/prepare-issue214-schema-ddl-direct-cli.py": {
+    "bytes": 1427,
+    "sha256": "18bc835cb39508ba618f47f9be551d489d6a0ee8130e859fdf605c01dd4398c2"
+  },
+  "WP/backlog-resume-20261013/prepare-issue214-schema-ddl-once.py": {
+    "bytes": 1541,
+    "sha256": "b39af06204472ef61b4dd24360517c77daf6d0f8cd096a51a424ee51c753e8a3"
+  },
+  "WP/backlog-resume-20261013/raise-issue214-late-binding-boundary-once.py": {
+    "bytes": 3120,
+    "sha256": "ee44e2508b2ee90b4981591c32ab37d752c250eded560c68ab1eba8d07946c90"
+  },
+  "WP/backlog-resume-20261013/raise-issue214-retained-native-fixture-scope-once.py": {
+    "bytes": 3249,
+    "sha256": "ae166ff0cbb30cdd6635646023a18ee76ea41b0819c696d82f288ac04a9f38d8"
+  },
+  "WP/backlog-resume-20261013/retain-issue214-fixture-direction-6152507558.py": {
+    "bytes": 1550,
+    "sha256": "3b8fbbad6a8326def4dc8f18ab64dccd1a53bf1b65da233b003ea2a92fb15a15"
+  },
+  "WP/backlog-resume-20261013/retain-issue214-late-binding-answer-6152114918.py": {
+    "bytes": 2108,
+    "sha256": "b686302f8748986cfcec6352f5276fc57b8cc8e2425affcb0feb3572a746426d"
+  },
+  "WP/backlog-resume-20261013/retain-issue214-pre-release-start-fixture-once.py": {
+    "bytes": 927,
+    "sha256": "fa31a7977e9e5b832c4dfcc8432d89fe09b56fe591963d935a2500368e19aa11"
+  },
+  "WP/backlog-resume-20261013/retain-issue214-responsive-browser-closed-once.py": {
+    "bytes": 7156,
+    "sha256": "dce9f98b156985f35defd94ff0780356ea430e15d6cf0af0477de952d031baa5"
+  },
+  "WP/backlog-resume-20261013/serve-issue214-detached-ui-once.cjs": {
+    "bytes": 516,
+    "sha256": "d2208266020943e93686fcfeed1ea3a519c6258992ee102374736882ace59454"
+  },
+  "WP/backlog-resume-20261013/serve-issue214-responsive-ui-once.cjs": {
+    "bytes": 527,
+    "sha256": "00f655988e0cb240e59177e09dccbd674235f935a69c807c369635660416ee2f"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-client-build-lint-first.py": {
+    "bytes": 1613,
+    "sha256": "8162ef61bc2ea7d63d4b05f7e868b2be5afbb07334b43041b44c565356686bab"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-correction-impact-regression.py": {
+    "bytes": 4252,
+    "sha256": "fc2856efe917eb579df45b5b8ff60683fd5c1451b024a1ce35587480457c423c"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-full-server-first.py": {
+    "bytes": 4774,
+    "sha256": "4f8089f165745215f37b8978749e13ed33f3729f7017ed43ef8845c99f3b2bd2"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-full-server-responsive.py": {
+    "bytes": 5208,
+    "sha256": "4d76d26ecaca1cfd911190ac6ba7a16697d34dece3dc3a77ed7e84d6fb4240a7"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-integration-first.py": {
+    "bytes": 2660,
+    "sha256": "e872d5125a6c6ea8bf5c44c4c6c3a921a893d62724c1e33d7d3feffaa168d5fe"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-integration-schema-gaps.py": {
+    "bytes": 2760,
+    "sha256": "35fd7d0867b7ccef89e2298ca0494417c4cdd9bfb9ccf37068d3b5460209cb9f"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-lot-ui-regression-boundary-correction.py": {
+    "bytes": 4157,
+    "sha256": "1e0fe883d76ac230ae50d79f5d0e4f97449d9eb1947467ed66e383fd9cd3de46"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-lot-ui-regression-first.py": {
+    "bytes": 3941,
+    "sha256": "48feeb38ea5546887fcee6820ed6ad019d3b5ae896c4708aa8c1425438e37412"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-responsive-client-build-lint.py": {
+    "bytes": 1618,
+    "sha256": "9089b2bc1a74a5d5f55206ec134b0f1a2da00aa7547a0ed408af04d697998c66"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-rule-kernel-first.py": {
+    "bytes": 2011,
+    "sha256": "9d9a8cd2820cd4f1f06b71ba7190e47462ca688f0ce1997a40e0b412307c8764"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-rule-kernel-visible-discovery.py": {
+    "bytes": 2101,
+    "sha256": "a26a1631e636866ed5d0c8be50cd5be894af8dc34dd30c1b5628e267e242df46"
+  },
+  "WP/backlog-resume-20261013/verify-issue214-scoped-impact-ordinary-regression.py": {
+    "bytes": 4257,
+    "sha256": "a1f16bf754abbd38fdb45541e34c47ce4b4bd7ee13111aaef5aae5e2091dccef"
+  }
+}

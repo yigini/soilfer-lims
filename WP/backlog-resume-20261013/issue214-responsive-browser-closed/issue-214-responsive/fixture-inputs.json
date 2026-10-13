@@ -1,0 +1,366 @@
+{
+  "series": {
+    "labId": "UI-LAB",
+    "analysisCode": "UI-ANALYTE",
+    "methodologyId": "UI-METHOD",
+    "referenceMaterialId": "UI-LOT",
+    "referenceName": "Synthetic control",
+    "lotNumber": "LOT-UI-1"
+  },
+  "chart": {
+    "series": {
+      "labId": "UI-LAB",
+      "analysisCode": "UI-ANALYTE",
+      "methodologyId": "UI-METHOD",
+      "referenceMaterialId": "UI-LOT",
+      "referenceName": "Synthetic control",
+      "lotNumber": "LOT-UI-1"
+    },
+    "minimumPoints": 2,
+    "mode": "CONTROL_CHART",
+    "provisional": false,
+    "current": {
+      "id": "UI-SET",
+      "mode": "CONTROL_CHART",
+      "key": "set:UI-SET",
+      "controlLimitSetId": "UI-SET",
+      "mean": 100,
+      "sd": 1,
+      "n": 20
+    },
+    "points": [
+      {
+        "measurementId": "UI-M0",
+        "runId": "UI-R0",
+        "value": 99,
+        "executionTime": "2026-10-13T12:00:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-M1",
+        "runId": "UI-R1",
+        "value": 101,
+        "executionTime": "2026-10-13T12:01:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-M2",
+        "runId": "UI-R2",
+        "value": 99,
+        "executionTime": "2026-10-13T12:02:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-M3",
+        "runId": "UI-R3",
+        "value": 101,
+        "executionTime": "2026-10-13T12:03:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-M4",
+        "runId": "UI-R4",
+        "value": 99,
+        "executionTime": "2026-10-13T12:04:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-M5",
+        "runId": "UI-R5",
+        "value": 101,
+        "executionTime": "2026-10-13T12:05:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-M6",
+        "runId": "UI-R6",
+        "value": 99,
+        "executionTime": "2026-10-13T12:06:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-M7",
+        "runId": "UI-R7",
+        "value": 101,
+        "executionTime": "2026-10-13T12:07:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-M8",
+        "runId": "UI-R8",
+        "value": 99,
+        "executionTime": "2026-10-13T12:08:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-M9",
+        "runId": "UI-R9",
+        "value": 101,
+        "executionTime": "2026-10-13T12:09:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-M10",
+        "runId": "UI-R10",
+        "value": 99,
+        "executionTime": "2026-10-13T12:10:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-M11",
+        "runId": "UI-R11",
+        "value": 135,
+        "executionTime": "2026-10-13T12:11:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "PROVISIONAL",
+          "key": "ui-provisional",
+          "fixedWindow": {
+            "expected": 100,
+            "lower": 50,
+            "upper": 150
+          }
+        },
+        "basisKey": "ui-provisional",
+        "inControl": true,
+        "verdict": "PASS",
+        "analysisUnit": "mg/kg"
+      },
+      {
+        "measurementId": "UI-CHARTED",
+        "runId": "UI-CHART-RUN",
+        "value": 102.5,
+        "executionTime": "2026-10-13T13:00:00Z",
+        "sequenceIndex": 1,
+        "basis": {
+          "mode": "CONTROL_CHART",
+          "key": "set:UI-SET",
+          "controlLimitSetId": "UI-SET",
+          "mean": 100,
+          "sd": 1,
+          "n": 20
+        },
+        "basisKey": "set:UI-SET",
+        "inControl": false,
+        "verdict": "WARN",
+        "analysisUnit": "mg/kg"
+      }
+    ],
+    "canPropose": true,
+    "canApprove": true,
+    "sets": [
+      {
+        "id": "UI-SET",
+        "mean": 100,
+        "sd": 1,
+        "n": 20,
+        "status": "APPROVED",
+        "approvedBy": "UI-manager",
+        "fromDate": "2026-10-13T13:00:00Z",
+        "toDate": null
+      }
+    ],
+    "proposals": [
+      {
+        "id": "UI-PROPOSAL",
+        "mean": 100,
+        "sd": 1.4142135623730951,
+        "n": 2,
+        "proposedBy": "UI-proposer",
+        "proposedAt": "2026-10-13T12:30:00Z",
+        "reason": "Explicit synthetic example",
+        "selectionSnapshot": [
+          {
+            "measurementId": "UI-M0",
+            "value": 99,
+            "selected": true
+          },
+          {
+            "measurementId": "UI-M1",
+            "value": 101,
+            "selected": true
+          }
+        ],
+        "approvedSet": null
+      }
+    ]
+  },
+  "reviews": {
+    "canResolve": true,
+    "obligations": [
+      {
+        "id": "UI-REVIEW",
+        "rule": "4-1s",
+        "evaluationId": "UI-EVALUATION",
+        "evaluation": {
+          "analysisCode": "UI-ANALYTE"
+        },
+        "status": "OPEN",
+        "resolutions": [],
+        "evidenceSnapshot": {
+          "basis": {
+            "mode": "CONTROL_CHART",
+            "key": "set:UI-SET",
+            "controlLimitSetId": "UI-SET",
+            "mean": 100,
+            "sd": 1,
+            "n": 20
+          },
+          "firedRules": [
+            "4-1s"
+          ],
+          "observations": [
+            {
+              "measurementId": "synthetic-review-point",
+              "value": 101.5
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "sourceSha256": "d6c0648f85371de5ec2335dfeb2101daf0c8641e2ad78807d01e632e8d217c2a"
+}

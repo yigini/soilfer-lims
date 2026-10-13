@@ -40,6 +40,7 @@ function host(file, { canEdit = true, savedControl = null, materials = [material
             if (name === '@lims/number-parse') return require('../../../shared/numberParse');
             if (name === './NumberPreview') return () => null;
             if (name === './NativeRunPanel') return () => null; // These retained contracts exercise the profile form.
+            if (name === '../qc/ControlCharts') return () => null; // Chart interactions have their own contracts.
             throw new Error(`Unexpected reference component dependency: ${name}`);
         } });
     return { axios,

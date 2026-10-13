@@ -1,0 +1,181 @@
+### Result
+[
+  {
+    "method": "GET",
+    "url": "/api/qc/control-charts/series",
+    "input": {
+      "params": {
+        "labId": "UI-LAB"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/control-reviews",
+    "input": {
+      "params": {
+        "labId": "UI-LAB"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/control-charts",
+    "input": {
+      "params": {
+        "labId": "UI-LAB",
+        "analysisCode": "UI-ANALYTE",
+        "methodologyId": "UI-METHOD",
+        "referenceMaterialId": "UI-LOT",
+        "referenceName": "Synthetic control",
+        "lotNumber": "LOT-UI-1"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/run-options",
+    "input": {
+      "params": {
+        "analysisCode": "UI-ANALYTE",
+        "labId": "UI-LAB",
+        "workItemIds": "[\"UI-WORK\"]"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/run-options",
+    "input": {
+      "params": {
+        "analysisCode": "UI-ANALYTE",
+        "labId": "UI-LAB",
+        "workItemIds": "[\"UI-WORK\"]",
+        "methodologyId": "UI-METHOD"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "url": "/api/qc/runs/start",
+    "input": {
+      "analysisCode": "UI-ANALYTE",
+      "labId": "UI-LAB",
+      "methodologyId": "UI-METHOD",
+      "instrumentId": null,
+      "workItemIds": [
+        "UI-WORK"
+      ],
+      "referenceMaterialLotId": "UI-LOT"
+    }
+  },
+  {
+    "method": "POST",
+    "url": "/api/qc/control-limit-proposals/UI-PROPOSAL/approve",
+    "input": {}
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/control-charts",
+    "input": {
+      "params": {
+        "labId": "UI-LAB",
+        "analysisCode": "UI-ANALYTE",
+        "methodologyId": "UI-METHOD",
+        "referenceMaterialId": "UI-LOT",
+        "referenceName": "Synthetic control",
+        "lotNumber": "LOT-UI-1"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/control-charts/series",
+    "input": {
+      "params": {
+        "labId": "UI-LAB"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/control-reviews",
+    "input": {
+      "params": {
+        "labId": "UI-LAB"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/control-charts",
+    "input": {
+      "params": {
+        "labId": "UI-LAB",
+        "analysisCode": "UI-ANALYTE",
+        "methodologyId": "UI-METHOD",
+        "referenceMaterialId": "UI-LOT",
+        "referenceName": "Synthetic control",
+        "lotNumber": "LOT-UI-1"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "url": "/api/qc/control-reviews/UI-REVIEW/resolve",
+    "input": {
+      "outcome": "INVESTIGATE_NEW_LIMITS",
+      "note": "Investigate this frozen series; propose limits through the separate reviewed workflow."
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/control-charts",
+    "input": {
+      "params": {
+        "labId": "UI-LAB",
+        "analysisCode": "UI-ANALYTE",
+        "methodologyId": "UI-METHOD",
+        "referenceMaterialId": "UI-LOT",
+        "referenceName": "Synthetic control",
+        "lotNumber": "LOT-UI-1"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/control-charts/series",
+    "input": {
+      "params": {
+        "labId": "UI-LAB"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/control-reviews",
+    "input": {
+      "params": {
+        "labId": "UI-LAB"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/qc/control-charts",
+    "input": {
+      "params": {
+        "labId": "UI-LAB",
+        "analysisCode": "UI-ANALYTE",
+        "methodologyId": "UI-METHOD",
+        "referenceMaterialId": "UI-LOT",
+        "referenceName": "Synthetic control",
+        "lotNumber": "LOT-UI-1"
+      }
+    }
+  }
+]
+### Ran Playwright code
+```js
+await page.evaluate('() => window.__uiRequests');
+```

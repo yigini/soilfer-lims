@@ -1,0 +1,44 @@
+{
+  "observedUtc": "2026-10-13T19:06:31.7386270Z",
+  "status": "INCOMPLETE_STOPPED_BEFORE_SOURCE_CHANGE",
+  "reason": "Detached mobile browser found selector page overflow: viewport390/documentWidth464. Stop frozen first full server attempt before fixing source.",
+  "processes": [
+    {
+      "ProcessId": 43604,
+      "Depth": 0,
+      "Name": "python.exe",
+      "CommandLine": "\"C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe\" WP/backlog-resume-20261013/verify-issue214-full-server-first.py"
+    },
+    {
+      "ProcessId": 11456,
+      "Depth": 1,
+      "Name": "cmd.exe",
+      "CommandLine": "cmd.exe /d /c npm.cmd test -- --testMatch **/tests/**/*.test.js --json --outputFile C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\issue214-full-server-first\\report-original.json"
+    },
+    {
+      "ProcessId": 16980,
+      "Depth": 2,
+      "Name": "node.exe",
+      "CommandLine": "\"C:\\Program Files\\nodejs\\\\node.exe\"  \"C:\\Program Files\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" test -- --testMatch **/tests/**/*.test.js --json --outputFile C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\issue214-full-server-first\\report-original.json"
+    },
+    {
+      "ProcessId": 42000,
+      "Depth": 3,
+      "Name": "cmd.exe",
+      "CommandLine": "C:\\Windows\\system32\\cmd.exe /d /s /c jest --maxWorkers=1 --workerIdleMemoryLimit=512MB --testMatch **/tests/**/*.test.js --json --outputFile C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\issue214-full-server-first\\report-original.json"
+    },
+    {
+      "ProcessId": 22704,
+      "Depth": 4,
+      "Name": "node.exe",
+      "CommandLine": "\"node\"   \"C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\.bin\\\\..\\jest\\bin\\jest.js\" --maxWorkers=1 --workerIdleMemoryLimit=512MB --testMatch **/tests/**/*.test.js --json --outputFile C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\issue214-full-server-first\\report-original.json"
+    },
+    {
+      "ProcessId": 44676,
+      "Depth": 5,
+      "Name": "node.exe",
+      "CommandLine": "\"C:\\Program Files\\nodejs\\node.exe\" C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-worker\\build\\processChild.js"
+    }
+  ],
+  "productionOperations": 0
+}

@@ -47,14 +47,18 @@ async function runOptions(db, actor, input = {}) {
         eligibleEquipmentForItem(db, { analysis: input.analysisCode, methodologyId: selected.id }, lab.id),
         resolveSequenceCriteria(lab.id, input.analysisCode, selected.id, db)
     ]);
+    const chartLotRequired = criteria.qcMode !== 'OFF' && criteria.qcRule.resolved.lrmMode.value === 'CONTROL_CHART' && criteria.qcRule.resolved.lrmPerBatch.value > 0;
+    const eligibleLrmLots = chartLotRequired ? (await require('./referenceMaterialService').listMaterials(db, actor, { labId: lab.id }))
+        .filter(row => row.eligible && ['LRM','CRM','CHECK_STANDARD'].includes(row.kind) && row.values.some(value => value.analysisCode === input.analysisCode && !value.supersededById && (!value.methodologyId || value.methodologyId === selected.id)))
+        .map(row => ({ id: row.id, code: row.code, lotNumber: row.lotNumber, name: row.name })) : [];
     return { labId: lab.id, methods, defaultMethodologyId: defaultSelection?.method?.id || null, defaultError: defaultSelection?.error || null,
         methodologyId: selected.id, equipmentRequired: equipment.requirement.isRequired,
         eligibleEquipment: equipment.eligibleEquipment.filter(asset => !['BLOCKED', 'NOT_CONFIGURED'].includes(asset.readiness) && !['OVERDUE', 'FAILED'].includes(asset.calibrationStatus)),
-        maxBatchSize: criteria.qcRule.resolved.maxBatchSize.value, eligibleWorkItemIds };
+        maxBatchSize: criteria.qcRule.resolved.maxBatchSize.value, eligibleWorkItemIds, chartLotRequired, eligibleLrmLots };
 }
 async function startWorkbenchRun(db, actor, input = {}) {
     if (!hasPermission(actor, 'CHANGE_STATUS')) throw failure(403, 'QC_RUN_PERMISSION_REQUIRED', 'QC run permission is required.');
-    if (Object.keys(input).some(key => !['analysisCode', 'methodologyId', 'instrumentId', 'workItemIds', 'labId'].includes(key))) {
+    if (Object.keys(input).some(key => !['analysisCode', 'methodologyId', 'instrumentId', 'workItemIds', 'labId', 'referenceMaterialLotId'].includes(key))) {
         throw failure(400, 'QC_RUN_INPUT_INVALID', 'Select the analysis, method, instrument and samples.');
     }
     return withQcAudit(db, { actor, input, operation: 'WORKBENCH_START' }, async tx => {
@@ -68,7 +72,8 @@ async function startWorkbenchRun(db, actor, input = {}) {
             throw failure(422, 'INSTRUMENT_NOT_ELIGIBLE', 'Select an eligible, ready instrument for this method.');
         }
         const built = await buildNativeRun(tx, actor, { labId: options.labId, workItemIds: input.workItemIds,
-            instrumentId, analysisCode: input.analysisCode, analyses: [{ analysisCode: input.analysisCode, methodologyId: options.methodologyId }] });
+            instrumentId, analysisCode: input.analysisCode, analyses: [{ analysisCode: input.analysisCode, methodologyId: options.methodologyId,
+                ...(input.referenceMaterialLotId && { references: [{ positionKind: 'LRM', referenceMaterialLotId: input.referenceMaterialLotId }] }) }] });
         const items = await tx.workItem.findMany({ where: { id: { in: input.workItemIds } }, include: { sample: true } });
         for (const item of items) {
             await require('./sampleHoldService').assertNotHeld(tx, item.sample);

@@ -1,0 +1,1053 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-laboratory) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/nonScientificAmendmentService.js:16:8)
+      at services/nonScientificAmendmentService.js:50:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:90:3)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-laboratory) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/nonScientificAmendmentService.js:16:8)
+      at services/nonScientificAmendmentService.js:75:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:91:3)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User requester (Lab: foreign-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/scientificAmendmentService.js:43:9)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:220:2
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/scientificAmendmentService.js:79:9)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:301:2
+
+  console.log
+    [AUTH] Verifying token for ID: authoriser (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_6_1_non_scientific_authorisation.test.js (97.613 s)
+  √ a profile request is PENDING and cannot change sample identity, approval or existing work (1578 ms)
+  √ a distinct approver applies a clerical correction once and retains prior approval and immutable request evidence (1414 ms)
+  √ Strict refuses self-authorisation and stale versions without any persisted changes (1452 ms)
+  √ authorisation re-reads actual lab policy; ADVISORY self-authorisation is explicit in the audit (1381 ms)
+  √ a different pending correction changing the profile makes this authorisation a zero-write conflict (1345 ms)
+  √ both request and authorisation enforce approval permission and current sample scope (1592 ms)
+  √ CLERICAL correction on ARCHIVED leaves physical status and prior approval unchanged (1341 ms)
+  √ CLERICAL correction on DISPOSED leaves physical status and prior approval unchanged (1333 ms)
+  √ ORDER authorisation records affected evidence and reason without changing orders, work, reports or sample (1340 ms)
+  √ REPORT authorisation records affected evidence and reason without changing orders, work, reports or sample (1335 ms)
+  √ foreign evidence, injected authorisation fields and invalid versions refuse without writes (1445 ms)
+  √ legacy NULL-version rows cannot enter the new authorisation workflow (1372 ms)
+  √ a late audit failure rolls back both authorisation and clerical profile changes (1448 ms)
+  √ the link guard accepts its exact authorised scientific context without changing any retained evidence (1382 ms)
+  √ the link guard refuses pending with zero writes (1353 ms)
+  √ the link guard refuses legacy with zero writes (1352 ms)
+  √ the link guard refuses clerical with zero writes (1345 ms)
+  √ the link guard refuses unselected with zero writes (1351 ms)
+  √ the link guard refuses recorded-parent with zero writes (1353 ms)
+  √ the link guard refuses recorded-child with zero writes (1424 ms)
+  √ the link guard refuses reason-mismatch with zero writes (1572 ms)
+  √ an unrelated parentAttemptId cannot produce a link (1481 ms)
+  √ an unrelated childAttemptId cannot produce a link (1380 ms)
+  √ an unrelated workItemId cannot produce a link (1378 ms)
+  √ an unrelated amendmentId cannot produce a link (1357 ms)
+  √ an unrelated reason cannot produce a link (1356 ms)
+  √ all seven link columns are immutable and links and referenced attempts cannot be deleted (1463 ms)
+  √ a scientific CLIENT_RETEST request remains pending and preserves every existing row (1325 ms)
+  √ a scientific CONFIRMATION request remains pending and preserves every existing row (1389 ms)
+  √ scientific requests on ARCHIVED refuse without writes (1447 ms)
+  √ scientific requests on DISPOSED refuse without writes (1341 ms)
+  √ scientific requests on PROCESSING refuse without writes (1325 ms)
+  √ scientific requests reject permission before any writes (1316 ms)
+  √ scientific requests reject tenant before any writes (1345 ms)
+  √ scientific requests reject empty-lines before any writes (1411 ms)
+  √ scientific requests reject duplicate-lines before any writes (1376 ms)
+  √ scientific requests reject foreign-line before any writes (1342 ms)
+  √ scientific requests reject reason before any writes (1340 ms)
+  √ scientific requests reject forged-capability before any writes (1377 ms)
+  √ scientific requests refuse nonaccepted work without writes (1313 ms)
+  √ scientific requests refuse nonmeasurement work without writes (1345 ms)
+  √ scientific requests refuse duplicate-marker work without writes (1326 ms)
+  √ scientific requests retain scope for affectedResults (1350 ms)
+  √ scientific requests retain scope for affectedReports (1363 ms)
+  √ a late scientific request audit failure rolls back the request without changing retained evidence (1379 ms)
+  √ scientific CLIENT_RETEST authorisation reopens only selected work, seals the accepted parent and withdraws the exact report (1501 ms)
+  √ scientific CONFIRMATION authorisation reopens only selected work, seals the accepted parent and withdraws the exact report (1621 ms)
+  √ scientific authorisation re-reads second-person policy and explicitly records ADVISORY self-authorisation (2848 ms)
+  √ scientific authorisation rejects permission with zero writes (1334 ms)
+  √ scientific authorisation rejects tenant with zero writes (1379 ms)
+  √ scientific authorisation rejects stale-version with zero writes (1338 ms)
+  √ scientific authorisation rejects forged-capability with zero writes (1363 ms)
+  √ an action string or forged capability cannot reopen a released Sample (1335 ms)
+  √ an action string or forged capability cannot reopen a released WorkItem (1337 ms)
+  √ a late scientific authorisation audit failure rolls back every reopen, child, binding and report change (1376 ms)
+  √ withdrawal binding and every report content field stay sealed after authorisation (1403 ms)
+  √ scientific repeats preserve the existing configured attempt limit and NCR refusal (1364 ms)
+  √ authorisation revalidates parent-no-longer-accepted after a valid request and refuses the whole transaction (1373 ms)
+  √ authorisation revalidates new-open-child after a valid request and refuses the whole transaction (1354 ms)
+  √ an explicit selected-line CLIENT_RETEST limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent (1367 ms)
+  √ an explicit selected-line CONFIRMATION limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent (1343 ms)
+  √ a line override without the existing NCR assessment refuses the request atomically (1352 ms)
+  √ a pending scientific amendment cannot reopen a subsequently ARCHIVED sample (1329 ms)
+  √ a pending scientific amendment cannot reopen a subsequently DISPOSED sample (1334 ms)
+  √ the actual report HTTP routes retain internal access and refuse both public formats before expiry or revocation (1710 ms)
+  √ withdrawn report numbering remains reserved and the next issuance preserves its row and takes the next revision (1378 ms)
+  √ scientific request refuses unregistered laboratory authority without policy fallback or writes (1386 ms)
+  √ scientific authorise refuses unregistered laboratory authority without policy fallback or writes (1363 ms)
+  √ a pending request cannot grant withdrawal authority and a report cannot become withdrawn without its binding (1436 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User 5dae27a1-7f6b-4903-bdb2-2f4fdea2da09 (Lab: 4cb445ef-7750-4c9f-a219-6ea3226498f8) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at executionContext (services/calibrationCurveService.js:18:19)
+      at services/calibrationCurveService.js:91:25
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_6_calibration.test.js:197:5)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-13T19:04:33.653Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+  console.log
+    [AUTH] Verifying token for ID: ed4c2c83-8117-4da7-a96f-831b1bc0f81c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ed4c2c83-8117-4da7-a96f-831b1bc0f81c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ed4c2c83-8117-4da7-a96f-831b1bc0f81c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5368df3c-288d-401c-8336-46beff3c0e53 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User a705a5e4-6206-47e7-999a-9a327baec558 (Lab: 05549fd0-a21d-4560-a7a5-361a2aa3cd4f) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at executionContext (services/calibrationCurveService.js:18:19)
+      at services/calibrationCurveService.js:134:25
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at controllers/calculationTemplateController.js:19:50
+
+  console.log
+    [AUTH] Verifying token for ID: 2e9236ac-df6b-43f8-a32e-5b33513c5d42 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cfc89edf-6224-475c-b53f-4512887a8648 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 02eb18f5-9653-42eb-90fc-24121099544b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0a19cad4-f7c4-4fda-aa80-805e9e421be8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0a19cad4-f7c4-4fda-aa80-805e9e421be8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_4_6_calibration.test.js (80.717 s)
+  √ only a started native run supplies the real frozen method revision; refusal writes nothing (2211 ms)
+  √ the actual Result writer recomputes every reading, refuses tampering and atomically freezes its curve and raw inputs (2168 ms)
+  √ response 5.002 compares extract mg/L with the highest standard and retains an amber flag=true after mg/kg conversion (2039 ms)
+  √ response 4.998 compares extract mg/L with the highest standard and retains an amber flag=false after mg/kg conversion (1804 ms)
+  √ a future failed curve blocks stored completion without changing an earlier Result or its frozen calculation (1810 ms)
+  √ every replicate participates in the unweighted fit; zero counts and repeated standards add no distinct levels (1778 ms)
+  √ negative correlation fails and a degenerate fit retains four null coefficients (1755 ms)
+  √ a new reasoned revision freezes new resolved limits; an old PASS cannot bypass the latest failed curve (1765 ms)
+  √ assigned analyst, scoped manager reason, and optimistic curve head protect the immutable revision chain (1771 ms)
+  √ missing points, qualifiers, negative concentrations and a stale activation refuse with zero writes (1780 ms)
+  √ a late event failure rolls back curve, all points and calibration audit together (1883 ms)
+  √ incomplete retained point sets cannot bind, and a nondeclared AAS/ICP template needs no curve (1754 ms)
+  √ actual authenticated HTTP entry retains permission, canonical scope, active context and stable refusal codes (1881 ms)
+  √ the pinned prerequisite helper has only the closed owned successors and no runtime writer exemption (1813 ms)
+  √ LAB curveMinPoints boundary 3 retains a curve PASS=true from laboratory policy (1853 ms)
+  √ LAB curveMinPoints boundary 4 retains a curve PASS=false from laboratory policy (1746 ms)
+  √ LAB curveMinR boundary 0.9998998674099174 retains a curve PASS=true from laboratory policy (1899 ms)
+  √ LAB curveMinR boundary 0.9999018674099175 retains a curve PASS=false from laboratory policy (1995 ms)
+  √ METHOD curveMinPoints boundary 3 retains a curve PASS=true from laboratory policy (1998 ms)
+  √ METHOD curveMinPoints boundary 4 retains a curve PASS=false from laboratory policy (1950 ms)
+  √ METHOD curveMinR boundary 0.9998998674099174 retains a curve PASS=true from laboratory policy (1881 ms)
+  √ METHOD curveMinR boundary 0.9999018674099175 retains a curve PASS=false from laboratory policy (1759 ms)
+  √ a passing recalibration binds later readings to revision2 while the original Result/calculation remain on revision1 (3508 ms)
+  √ no-template completion retains the historical path for lab null without writes (1745 ms)
+  √ no-template completion retains the historical path for lab unresolvable-owned-lab without writes (1881 ms)
+  √ UPDATE and DELETE are refused on every calculation table, preserving all original rows (2006 ms)
+  √ an actual calculation SQL context abort becomes a stable409 through the mapped repeat controller (2034 ms)
+  √ the actual curve governs extract 1 despite generic maximum 0.1, with HTTP preview and immutable flags (2021 ms)
+  √ the actual curve governs extract 4 despite generic maximum 1000, with HTTP preview and immutable flags (1959 ms)
+  √ a method with no active calculation keeps the generic #197 calibration maximum (1755 ms)
+  √ a calculated transcription correction keeps the original basis after newer-active, preserving every original scientific field (1805 ms)
+  √ a calculated transcription correction keeps the original basis after deactivated, preserving every original scientific field (1787 ms)
+  √ a correction of a correction keeps the first calculation basis and binds its own original evidence (1819 ms)
+  √ calculated final-only, mismatched output and partial raw-input corrections refuse with exact zero-write snapshots (1781 ms)
+  √ a correction cannot request a different activationId basis (1761 ms)
+  √ a correction cannot request a different templateId basis (1918 ms)
+  √ a correction cannot request a different templateVersion basis (1922 ms)
+  √ a correction cannot request a different curveId basis (1919 ms)
+  √ a revised original curve refuses a transcription correction without writes to either Result or calculation (1973 ms)
+  √ the actual correction HTTP route recomputes the extract-range flag and binds only stored ids (1925 ms)
+  √ a calculation field on a non-calculated Result is refused, while its old final-only correction remains available (1809 ms)
+  √ the authoritative completion preview verifies nested raw calculations, refuses tampering and allocates no Result (1858 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: 7e021b80-7764-443a-9de4-3b36f943333f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 92cbbb04-1fff-4970-b7fc-31e161135d63 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c374fa1e-ca5b-4f0b-aee8-0ae9801e52ab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b593b2be-8af6-4b82-aa4b-50081a68a83d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9071e2eb-1a47-4eb1-a12b-871b54554c34 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d67c5f9c-990d-43d2-8e5e-5ffb49bfc30f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d67c5f9c-990d-43d2-8e5e-5ffb49bfc30f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0a82db72-2f05-46a3-8b1b-c98dd4e6a8b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 85b701a8-097a-4523-80a2-ade891e1e2fb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4c7ae1bb-36b7-4e7f-b675-2f5dc35457ae (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 41f135f0-dddc-436f-9316-e09877f87605 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb67e27f-33a1-4091-bbfb-d1d15a24d188 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb7c1993-af8e-4c5b-8299-025f673463e7 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: eb29bf45-baa8-4a0e-99ce-7f11d10d2653 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f33ffaf0-3acc-43f4-8773-fdcf8ad5e3d8 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 66f3409e-1834-49e7-81f5-f79e79fbf9c0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 21e6cc45-0333-4bb1-9ea0-3640841967fb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 886625a2-fa29-456d-885d-3c62192791f0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 98b5627e-836f-4ef1-b85b-0aebf16b5460 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 98b5627e-836f-4ef1-b85b-0aebf16b5460 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 98b5627e-836f-4ef1-b85b-0aebf16b5460 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 98b5627e-836f-4ef1-b85b-0aebf16b5460 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 18264b21-48c9-4473-ae1f-bb401a26180a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3366cbe6-73a3-4f26-8b04-27b423152419 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3366cbe6-73a3-4f26-8b04-27b423152419 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3366cbe6-73a3-4f26-8b04-27b423152419 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3366cbe6-73a3-4f26-8b04-27b423152419 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3366cbe6-73a3-4f26-8b04-27b423152419 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 00f41683-a158-444c-814a-84bc83cd8c4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8eedcd11-d1ff-4c4d-8e22-b67617e97e7b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4fbac07-faf1-4e74-809b-a664812a200b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-1dbc14d6-1811-4602-8735-5f6f8ca4358f (AUDIT_USER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: f4fbac07-faf1-4e74-809b-a664812a200b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-1dbc14d6-1811-4602-8735-5f6f8ca4358f (AUDIT_USER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: dee67a46-93ac-4de4-bea0-e269654dbc68 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-5fe8acff-51e2-48dd-9ee6-92688af96053 (VIEWER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: dee67a46-93ac-4de4-bea0-e269654dbc68 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-5fe8acff-51e2-48dd-9ee6-92688af96053 (VIEWER) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: c8cfe5b8-b329-489b-8728-9539b5923216 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-cb72ff16-102b-4a16-9c5f-cfd6ace9bebd (SAMPLE_RECEPTION) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: c8cfe5b8-b329-489b-8728-9539b5923216 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User repeat-reviewer-cb72ff16-102b-4a16-9c5f-cfd6ace9bebd (SAMPLE_RECEPTION) attempted MANAGE_WORK_ATTEMPTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: e81ca91a-7b69-489b-8d26-01640d32aa6b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e81ca91a-7b69-489b-8d26-01640d32aa6b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 27177f48-0673-4071-980b-3c82f4acc67e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cdafb872-beb8-42be-a53e-c14f2eeca60b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cdafb872-beb8-42be-a53e-c14f2eeca60b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5fcc2a97-82fd-450a-9f94-b25e93a337e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5fcc2a97-82fd-450a-9f94-b25e93a337e1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7ae44ea8-2f65-4255-85c1-45df0be80ab5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7ae44ea8-2f65-4255-85c1-45df0be80ab5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Record a failing required pair before adding a third reading.
+        at Object.assertSampleReplicateNumbers (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleReplicatePolicyService.js:77:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:420:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPLICATE_NOT_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 7ae44ea8-2f65-4255-85c1-45df0be80ab5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9ced5a4-a9ff-4a3f-9f13-8af2089ec911 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9ced5a4-a9ff-4a3f-9f13-8af2089ec911 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:106:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9ced5a4-a9ff-4a3f-9f13-8af2089ec911 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at recordedExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:71:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:103:28)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:23:45)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 74643aa6-742a-4226-9e26-6c8f2dda7d70 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 685e0443-efed-41eb-80ba-35826755647e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dfc60a97-c5e3-45b0-8512-d46a8d225253 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the frozen method and instrument for an absent replicate.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:114:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CONTEXT_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 31cd28d3-a430-4f17-b1a1-696deb4aea54 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Owned replicate-event storage failure
+        at Array.Error (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_2_repeat_commands.test.js:370:92)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:9304
+        at r (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:1022)
+        at PrismaPromise.o [as then] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:1118)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2ff1c99e-fc0d-47a4-9804-14de21d8d7e2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2ff1c99e-fc0d-47a4-9804-14de21d8d7e2 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: afcff772-7b6b-469f-b7e7-77e132960776 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: afcff772-7b6b-469f-b7e7-77e132960776 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a581746b-a190-40e1-9358-41dd4d286d8d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: c144a3cb-c3a1-407a-8d11-6b24a5bebc57 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab df9e0a8d-9cfe-4598-bac2-dca4a6943866
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 1b8affc9-430d-4ee0-a68e-4ed0e1dcac4d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 13193dbd-5743-43ca-a650-b57281f6d855
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 681f6700-0484-49b9-978d-45e4336b6f9a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 5119bd85-7df8-4ff5-b419-d095bbb79950
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 08752ce2-0de6-4dc6-bfcf-6e6de7e69629 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d226c64b-7f9c-402c-bda5-20bfe614977a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: dd281125-c5b1-49c0-9b59-2e6b6a400bf0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab de917b2f-fa8b-4480-9b48-34eb8174bbba
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: a4cd4680-8139-4098-a393-ae45f3d42b45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab eb0dd95d-b2bb-4b8b-9248-80cb6d04b892
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 44b0e257-b97b-42ef-9fde-6fe84c81850a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 7e57367e-6dde-4f79-b923-5021b87c53ac
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 40f0b57f-6af9-48c3-ba4e-cecc84c321cc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d2fdc1f1-5759-4f58-8261-db6daee15d50
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 943f65a2-c9c4-4619-9d29-509040d69a7b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: A repeat reason code is required.
+        at Object.repeatRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workRepeatContract.js:22:30)
+        at repeatRequest (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:61:63)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORK_ATTEMPT_REASON_REQUIRED',
+      details: {}
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 5bafcdc8-935d-4a59-8d3a-f1cf240ccbb6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User repeat-reviewer-f546d99b-8140-497b-a389-33786c9fdcfc (Lab: 5d8e70f8-bc3d-46a0-8e47-907b22510b3e) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/workRepeatService.js:20:11)
+      at preflightRepeat (services/workRepeatService.js:82:28)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.requestRepeat (controllers/workRepeatController.js:8:32)
+
+  console.log
+    [AUTH] Verifying token for ID: 5bafcdc8-935d-4a59-8d3a-f1cf240ccbb6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User repeat-reviewer-f546d99b-8140-497b-a389-33786c9fdcfc (Lab: 5d8e70f8-bc3d-46a0-8e47-907b22510b3e) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/workAttemptCorrectionService.js:31:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.correctAttempt (controllers/workRepeatController.js:16:32)
+

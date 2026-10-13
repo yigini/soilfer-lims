@@ -1,0 +1,11 @@
+{
+  "observedUtc": "2026-10-13T19:06:31.808141+00:00",
+  "exitCode": 4294967295,
+  "status": "FAILED_OR_INCOMPLETE",
+  "suites": null,
+  "tests": null,
+  "failed": null,
+  "pending": null,
+  "sourceUnchanged": true,
+  "productionOperations": 0
+}

@@ -11,6 +11,7 @@ export default function StartRunForm({ groups = [], onStarted, onCancel }) {
             name: group.analysisName || group.analysis, items: group.items.filter(item => item.laboratoryId === labId)
         }))), [groups]);
     const [choiceKey, setChoiceKey] = useState(''), [methodId, setMethodId] = useState(''), [instrumentId, setInstrumentId] = useState('');
+    const [referenceMaterialLotId, setReferenceMaterialLotId] = useState('');
     const [options, setOptions] = useState(null), [selected, setSelected] = useState(new Set()), [barcode, setBarcode] = useState('');
     const [loading, setLoading] = useState(false), [submitting, setSubmitting] = useState(false), [error, setError] = useState(null);
     const choice = choices.find(row => row.key === choiceKey);
@@ -30,6 +31,7 @@ export default function StartRunForm({ groups = [], onStarted, onCancel }) {
         (!item.methodologyId || item.methodologyId === methodId));
     const capacity = options?.maxBatchSize ?? Infinity;
     const ready = !loading && options?.methodologyId === methodId && methodId &&
+        (!options.chartLotRequired || (options.eligibleLrmLots || []).some(row => row.id === referenceMaterialLotId)) &&
         (!options.equipmentRequired || instrumentId) && (!instrumentId || options.eligibleEquipment.some(asset => asset.id === instrumentId));
     const selectBarcode = () => {
         const matches = candidates.filter(item => [item.sampleDisplayId, item.originalId, item.sampleId, item.labId].includes(barcode.trim()));
@@ -44,7 +46,8 @@ export default function StartRunForm({ groups = [], onStarted, onCancel }) {
         setSubmitting(true); setError(null);
         try {
             const response = await axios.post('/api/qc/runs/start', { analysisCode: choice.analysisCode, labId: choice.labId,
-                methodologyId: methodId, instrumentId: instrumentId || null, workItemIds: [...selected] });
+                methodologyId: methodId, instrumentId: instrumentId || null, workItemIds: [...selected],
+                ...(options.chartLotRequired && { referenceMaterialLotId }) });
             await onStarted(response.data.batch);
         } catch (failure) { setError(t(`runFirst.errors.${failure.response?.data?.code}`, failure.response?.data?.error || failure.message)); }
         finally { setSubmitting(false); }
@@ -53,12 +56,12 @@ export default function StartRunForm({ groups = [], onStarted, onCancel }) {
         <h3 className="font-semibold">{t('runFirst.startRun')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
             <label>{t('runFirst.analysis')}<select data-testid="start-run-analysis" value={choiceKey} disabled={submitting} onChange={event => {
-                setChoiceKey(event.target.value); setMethodId(''); setInstrumentId(''); setSelected(new Set()); setBarcode('');
+                setChoiceKey(event.target.value); setMethodId(''); setInstrumentId(''); setSelected(new Set()); setBarcode(''); setReferenceMaterialLotId('');
             }} className="block w-full border border-sf-divider bg-sf-canvas rounded p-2">
                 <option value="">{t('runFirst.chooseAnalysis')}</option>{choices.map(row => <option key={row.key} value={row.key}>{row.name} · {row.labId}</option>)}
             </select></label>
             <label>{t('runFirst.method')}<select data-testid="start-run-method" value={methodId} disabled={submitting || loading || !choice} onChange={event => {
-                setMethodId(event.target.value); setInstrumentId(''); setSelected(new Set());
+                setMethodId(event.target.value); setInstrumentId(''); setSelected(new Set()); setReferenceMaterialLotId('');
             }} className="block w-full border border-sf-divider bg-sf-canvas rounded p-2">
                 <option value="">{t('runFirst.chooseMethod')}</option>{(options?.methods || []).map(method => <option key={method.id} value={method.id}>{method.name} · {method.standard || ''}</option>)}
             </select></label>
@@ -66,6 +69,12 @@ export default function StartRunForm({ groups = [], onStarted, onCancel }) {
                 <option value="">{options?.equipmentRequired ? t('runFirst.chooseInstrument') : t('runFirst.manual')}</option>{(options?.eligibleEquipment || []).map(asset => <option key={asset.id} value={asset.id}>{asset.name}</option>)}
             </select></label>
         </div>
+        {options?.chartLotRequired && <label className="block">{t('controlCharts.lotAtStart')}
+            <select data-testid="start-run-lrm-lot" required value={referenceMaterialLotId} disabled={submitting || loading}
+                onChange={event => setReferenceMaterialLotId(event.target.value)} className="block w-full border border-sf-divider bg-sf-canvas rounded p-2">
+                <option value="">{t('controlCharts.chooseLot')}</option>{(options.eligibleLrmLots || []).map(row => <option key={row.id} value={row.id}>{row.code} · {row.lotNumber}</option>)}
+            </select><span className="block text-xs text-sf-muted">{t('controlCharts.startBindingHelp')}</span>
+        </label>}
         <p className="text-xs text-sf-muted">{t('runFirst.sharedContext')}</p>
         {choice && <div className="space-y-2 text-xs">
             <p>{t('runFirst.selected')}: {selected.size}{Number.isFinite(capacity) && ` / ${capacity}`}</p>
