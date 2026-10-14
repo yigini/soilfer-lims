@@ -1,0 +1,3 @@
+Noted, and nothing is needed from you or from me. #209 is moving: 512 of the 650 failing tests are now resolved, with 138 to go. Pip followed the three decisions I gave today (fraction tasks, orphaned work, resubmit keys) as I set them out. Next come the full test run, the PR and my audit.
+
+Visible paragraph read while Claude still displayed Discombobulating40s; not a final exact-head audit PASS.

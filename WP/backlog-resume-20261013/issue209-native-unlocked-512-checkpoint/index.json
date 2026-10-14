@@ -1,0 +1,41 @@
+{
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-native-unlocked-512-checkpoint/native-actual-sent.txt": {
+      "bytes": 1390,
+      "sha256": "bc87a76dbf09ba72debe3fb83e674a5598046abe384e60c0a895d109d124fe26"
+    },
+    "WP/backlog-resume-20261013/issue209-native-unlocked-512-checkpoint/native-delivery-record.json": {
+      "bytes": 848,
+      "sha256": "7da3a55ea4e2451de5f099d9cbdc1f5a1a21ead6c2cd807425ccdd715b05ff80"
+    },
+    "WP/backlog-resume-20261013/issue209-native-unlocked-512-checkpoint/native-visible-reply-transcription.txt": {
+      "bytes": 400,
+      "sha256": "7f04a2132092a50b7656262f318477b1693f920b80784394be214fc526b1c2b5"
+    }
+  },
+  "record": {
+    "retainedUtc": "2026-10-14T16:37:33.390956+00:00",
+    "userConfirmedWindowsUnlocked": true,
+    "windowId": 7867734,
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "project": "LIMS Audit",
+    "thread": "Lab workflow audit and plan",
+    "freshReturnedUniqueTarget": true,
+    "rightComposerInitiallyEmpty": true,
+    "rightFocusCaretVerified": true,
+    "draftHeadAndEndInspected": true,
+    "oneReturn": true,
+    "actualSentBubbleAndEmptyRightVerified": true,
+    "deliveryVerifiedNoLaterThanUtc": "2026-10-14T16:35:47Z",
+    "replyReadNoLaterThanUtc": "2026-10-14T16:36:28Z",
+    "centreHumanDraft": "can you go and ask Pip",
+    "centreDraftPreserved": true,
+    "humanCardsUntouched": true,
+    "auditSource": "ad4c3b98293b669cca59b7aa66553cfb90537537",
+    "full209Pass": false,
+    "finalAuditPass": false,
+    "productionOperations": 0,
+    "doNotRepeatThisCheckpoint": true
+  },
+  "productionOperations": 0
+}
