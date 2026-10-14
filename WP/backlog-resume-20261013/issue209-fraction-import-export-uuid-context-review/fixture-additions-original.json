@@ -1,0 +1,46 @@
+{
+  "server/tests/contracts/issue_291_texture_input_authority.test.js": {
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "9a4687c96ec0d9284b881b0146d9c6512df2ac05782fbf1bf0daf8e2e826b379",
+    "afterSha256": "08d5826610fff6c961d928ec4956aa94617af0de52a596afd4c99e76b97a83a9",
+    "additions": [
+      {
+        "afterStart": 63,
+        "bytes": "    await require('../../services/orderService').reviseAnalyses(sample.id, {\n        analyses: ['TEXTURE'], reason: 'Owned complete existing fraction and texture order context'\n    }, f.actor, { tx: f.db, mode: 'order' });\n"
+      }
+    ]
+  },
+  "server/tests/contracts/issue_213_export_equals_report.test.js": {
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "7ec0bab312abe79fbdad6edf9f597fca4592545117af39e7d309f027bcec69a3",
+    "afterSha256": "d5a14f15df8691df72da897881eba06261362cdc547b1620ab7fb7dafe64978a",
+    "additions": [
+      {
+        "afterStart": 169,
+        "bytes": "    await require('../../services/orderService').reviseAnalyses(f.item.sampleId, {\n        analyses: [f.items[0].analysis, 'SOC'], reason: 'Owned additional percent SOC determination'\n    }, f.actor, { tx: f.db });\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_4_7_calculation_import.test.js": {
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "e75f14621cadbaaa8a4f4f91636d6cfd80ef301e7af88eca8516f2c3d52186ac",
+    "afterSha256": "a3552d67135e0c1751868d91a9b4a45f41757bcc068d660c3bb8ec559bd09ec7",
+    "additions": [
+      {
+        "afterStart": 37,
+        "bytes": "    await require('../../services/orderService').reviseAnalyses(sampleId, {\n        analyses: [...f.items.map(item => item.analysis), ...f.calculated.map(row => row.code)],\n        reason: 'Owned additional activated calculation determinations'\n    }, f.actor, { tx: f.db });\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_1_4_uuid_transactions.test.js": {
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "2c07204d0eb5c76799b91a6a7b5c86de3f222fffac4e11ba03aba1b0ab1166cd",
+    "afterSha256": "d285412a5f3e819b4c97f2e13cd17db70d722a859c39a1ed9210066ebc97ec3d",
+    "additions": [
+      {
+        "afterStart": 148,
+        "bytes": "        await require('../../services/orderService').reviseAnalyses(sampleId, {\n            analyses: ['TEXTURE'], reason: 'Owned complete retained fraction and texture order context'\n        }, jwt.decode(token), { tx: prisma, mode: 'order' });\n"
+      }
+    ]
+  }
+}

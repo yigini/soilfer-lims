@@ -1,0 +1,14 @@
+PASS tests/contracts/issue_291_texture_input_authority.test.js (9.496 s)
+  √ the shared authority refuses every non-authoritative input and widens only a valid policy value (4 ms)
+  √ a composite texture mean of g/kg fractions refuses; the same percent means derive within the tolerance (22 ms)
+  √ recording g/kg fractions derives no TEXTURE Result or attempt; the percent control derives Loam within the tolerance (3325 ms)
+  √ the selected-fraction derivation refuses g/kg, missing, mixed and duplicate proofs; the percent control is DERIVED Loam (7 ms)
+  √ a stored NULL censoring is unknown, never uncensored: recording derives nothing and the means refuse (2755 ms)
+  √ a stored out-of-range tolerance (#281) derives with exact closure only, never wider (2796 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        9.833 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_291_texture_input_authority.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-fraction-import-export-uuid-serial-singles\01-issue_291_texture_input_authority.test\report-original.json

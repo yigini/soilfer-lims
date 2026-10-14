@@ -1,0 +1,63 @@
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab dc97b514-995a-4bcb-a093-efc47107cdb2
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f0fba1b8-9b3f-482d-8996-81dcd63430d6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab f0fba1b8-9b3f-482d-8996-81dcd63430d6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 3ad8a9c6-a649-4721-98d2-f4e127ab30d7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 3ad8a9c6-a649-4721-98d2-f4e127ab30d7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/issue_213_export_equals_report.test.js (10.306 s)
+  √ ATTEMPT selection from a batched source: every export carries the report value and its selection, attempt and batch ids (2597 ms)
+  √ MEAN of a retained questioned 12.0 and its repeat 12.6 exports 12.3 everywhere while v2 keeps its raw current row (1839 ms)
+  √ a reviewer-selected retained QUESTIONED source exports its own value, not the current repeat (1825 ms)
+  √ NOT_REPORTABLE exports the localized report text with its selection id and no source ids (1552 ms)
+  √ an analysis configured in a non-standard unit (SOC in %) keeps its unconverted headline; normalized stays in _normalized (1806 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        10.621 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_213_export_equals_report.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-fraction-import-export-uuid-serial-singles\02-issue_213_export_equals_report.test\report-original.json

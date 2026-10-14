@@ -1,0 +1,12 @@
+PASS tests/contracts/audit_4_7_calculation_import.test.js (7.433 s)
+  √ actual EXCH_CA/Olsen activated input imports do not calculate; later typed recording freezes the selected local definitions and verified raw input text (2337 ms)
+  √ missing/duplicate/unknown activated variables, output-unit input guesses and active direct-value mappings refuse the whole commit (1646 ms)
+  √ a calculation deactivation after preview refuses before any receipt, raw draft or scientific evidence is created (1453 ms)
+  √ QC under an input-only mapping refuses the whole file before any draft, receipt or scientific writes (1438 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        7.83 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_7_calculation_import.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-fraction-import-export-uuid-serial-singles\03-audit_4_7_calculation_import.test\report-original.json

@@ -34,6 +34,10 @@ async function fixture({ qc = false } = {}) {
             methodologyId: method.id, status: 'IN_PROGRESS' } });
         f.calculated.push({ code, method, template, activation, item, source }); selections.push({ analysisCode: code, methodologyId: method.id });
     }
+    await require('../../services/orderService').reviseAnalyses(sampleId, {
+        analyses: [...f.items.map(item => item.analysis), ...f.calculated.map(row => row.code)],
+        reason: 'Owned additional activated calculation determinations'
+    }, f.actor, { tx: f.db });
     f.run = await native.startNativeRun(f.db, (await native.buildNativeRun(f.db, f.actor, { instrumentId: f.instrument.id,
         workItemIds: f.calculated.map(row => row.item.id), analyses: selections, seed: 'owned-input-import' })).id, f.actor);
     const phosphorus = f.calculated[1];

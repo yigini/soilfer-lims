@@ -1,0 +1,291 @@
+{
+  "recordedUtc": "2026-10-14T12:56:27.413062+00:00",
+  "reviewedBeforeFixtureChanges": true,
+  "scopeComments": [
+    6163271808,
+    6166518424,
+    6167740581
+  ],
+  "cases": [
+    {
+      "suite": "issue_213_export_equals_report.test.js",
+      "test": "an analysis configured in a non-standard unit (SOC in %) keeps its unconverted headline; normalized stays in _normalized",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Nonstandard SOC percent case adds accepted SOC determination to same sample after valid PH result/selection",
+        "sourceRanges": [
+          [
+            159,
+            174
+          ]
+        ],
+        "change": "Reasoned full PH+SOC target before SOC INSERT. Keep accepted PH/source selection, raw percent headline and normalized export assertions unchanged."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    },
+    {
+      "suite": "issue_291_texture_input_authority.test.js",
+      "test": "recording g/kg fractions derives no TEXTURE Result or attempt; the percent control derives Loam within the tolerance",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Owned four existing fraction+TEXTURE WIs; three future attempts previously had no order, before percent/censoring/closure authority checks",
+        "sourceRanges": [
+          [
+            49,
+            83
+          ]
+        ],
+        "change": "Reasoned full logical TEXTURE target after all four owners exist, preserving allthree companions per6166518424; no units/censoring/scientific closure tolerance/assertion changes."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    },
+    {
+      "suite": "issue_291_texture_input_authority.test.js",
+      "test": "a stored NULL censoring is unknown, never uncensored: recording derives nothing and the means refuse",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Owned four existing fraction+TEXTURE WIs; three future attempts previously had no order, before percent/censoring/closure authority checks",
+        "sourceRanges": [
+          [
+            49,
+            83
+          ]
+        ],
+        "change": "Reasoned full logical TEXTURE target after all four owners exist, preserving allthree companions per6166518424; no units/censoring/scientific closure tolerance/assertion changes."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    },
+    {
+      "suite": "issue_291_texture_input_authority.test.js",
+      "test": "a stored out-of-range tolerance (#281) derives with exact closure only, never wider",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Owned four existing fraction+TEXTURE WIs; three future attempts previously had no order, before percent/censoring/closure authority checks",
+        "sourceRanges": [
+          [
+            49,
+            83
+          ]
+        ],
+        "change": "Reasoned full logical TEXTURE target after all four owners exist, preserving allthree companions per6166518424; no units/censoring/scientific closure tolerance/assertion changes."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    },
+    {
+      "suite": "audit_4_7_calculation_import.test.js",
+      "test": "actual EXCH_CA/Olsen activated input imports do not calculate; later typed recording freezes the selected local definitions and verified raw input text",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Native activated-input import fixture adds EXCH_CA/P_OLSEN WIs manually to base ordered sample before typed future recording",
+        "sourceRanges": [
+          [
+            18,
+            45
+          ],
+          [
+            67,
+            99
+          ]
+        ],
+        "change": "Reasoned full base+two calculated owners target before native run/preview. Do not alter mapping/text/numeric/calibration/import/scientific assertions."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    },
+    {
+      "suite": "audit_1_4_uuid_transactions.test.js",
+      "test": "Audit 1.4: UUID writes and atomic replicate supersession sample result save derives texture within the matching replicate and retains all old values",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Seven failures enter four-owner textureFixture before existing atomic replicate/repeat/supersession tests",
+        "sourceRanges": [
+          [
+            137,
+            160
+          ]
+        ],
+        "change": "Reasoned logical TEXTURE full target after four existing owners, keeping allfractions per6166518424, before first measurement; no UUID guard/replicate/version/storage-failure/scientific assertions changed."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    },
+    {
+      "suite": "audit_1_4_uuid_transactions.test.js",
+      "test": "Audit 1.4: UUID writes and atomic replicate supersession sample result save rolls back fractions, texture supersession and audit when texture storage fails",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Seven failures enter four-owner textureFixture before existing atomic replicate/repeat/supersession tests",
+        "sourceRanges": [
+          [
+            137,
+            160
+          ]
+        ],
+        "change": "Reasoned logical TEXTURE full target after four existing owners, keeping allfractions per6166518424, before first measurement; no UUID guard/replicate/version/storage-failure/scientific assertions changed."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    },
+    {
+      "suite": "audit_1_4_uuid_transactions.test.js",
+      "test": "Audit 1.4: UUID writes and atomic replicate supersession workbench fraction save is atomic with derived texture (storage failure: false)",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Seven failures enter four-owner textureFixture before existing atomic replicate/repeat/supersession tests",
+        "sourceRanges": [
+          [
+            137,
+            160
+          ]
+        ],
+        "change": "Reasoned logical TEXTURE full target after four existing owners, keeping allfractions per6166518424, before first measurement; no UUID guard/replicate/version/storage-failure/scientific assertions changed."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    },
+    {
+      "suite": "audit_1_4_uuid_transactions.test.js",
+      "test": "Audit 1.4: UUID writes and atomic replicate supersession workbench fraction save is atomic with derived texture (storage failure: true)",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Seven failures enter four-owner textureFixture before existing atomic replicate/repeat/supersession tests",
+        "sourceRanges": [
+          [
+            137,
+            160
+          ]
+        ],
+        "change": "Reasoned logical TEXTURE full target after four existing owners, keeping allfractions per6166518424, before first measurement; no UUID guard/replicate/version/storage-failure/scientific assertions changed."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    },
+    {
+      "suite": "audit_1_4_uuid_transactions.test.js",
+      "test": "Audit 1.4: UUID writes and atomic replicate supersession workbench appends the second replica of a repeated fraction, recalculates from REPLICATE_ADDED and requires a new real review",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Seven failures enter four-owner textureFixture before existing atomic replicate/repeat/supersession tests",
+        "sourceRanges": [
+          [
+            137,
+            160
+          ]
+        ],
+        "change": "Reasoned logical TEXTURE full target after four existing owners, keeping allfractions per6166518424, before first measurement; no UUID guard/replicate/version/storage-failure/scientific assertions changed."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    },
+    {
+      "suite": "audit_1_4_uuid_transactions.test.js",
+      "test": "Audit 1.4: UUID writes and atomic replicate supersession derived recalculation refuses a source event from an earlier transaction with zero writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Seven failures enter four-owner textureFixture before existing atomic replicate/repeat/supersession tests",
+        "sourceRanges": [
+          [
+            137,
+            160
+          ]
+        ],
+        "change": "Reasoned logical TEXTURE full target after four existing owners, keeping allfractions per6166518424, before first measurement; no UUID guard/replicate/version/storage-failure/scientific assertions changed."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    },
+    {
+      "suite": "audit_1_4_uuid_transactions.test.js",
+      "test": "Audit 1.4: UUID writes and atomic replicate supersession an accepted fraction cannot be repeated and the accepted TEXTURE stays frozen",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "EXPLICIT_REASONED_FULL_TARGET_FOR_EXISTING_POSITIVE_MEASUREMENT_OWNERS",
+      "caseInspection": {
+        "context": "Seven failures enter four-owner textureFixture before existing atomic replicate/repeat/supersession tests",
+        "sourceRanges": [
+          [
+            137,
+            160
+          ]
+        ],
+        "change": "Reasoned logical TEXTURE full target after four existing owners, keeping allfractions per6166518424, before first measurement; no UUID guard/replicate/version/storage-failure/scientific assertions changed."
+      },
+      "runtimeMissingOrderBoundary": "Reachable old48d orphan variants remain zero-write refused, counted separately; approved/noneditable nonzero list STOP per6167740581. No automatic intake fraction expansion/order backfill/relink."
+    }
+  ],
+  "sourceBefore": {
+    "server/tests/contracts/issue_291_texture_input_authority.test.js": {
+      "bytes": 10331,
+      "sha256": "9a4687c96ec0d9284b881b0146d9c6512df2ac05782fbf1bf0daf8e2e826b379",
+      "context": "Owned four existing fraction+TEXTURE WIs; three future attempts previously had no order, before percent/censoring/closure authority checks",
+      "sourceRanges": [
+        [
+          49,
+          83
+        ]
+      ],
+      "change": "Reasoned full logical TEXTURE target after all four owners exist, preserving allthree companions per6166518424; no units/censoring/scientific closure tolerance/assertion changes."
+    },
+    "server/tests/contracts/issue_213_export_equals_report.test.js": {
+      "bytes": 15141,
+      "sha256": "7ec0bab312abe79fbdad6edf9f597fca4592545117af39e7d309f027bcec69a3",
+      "context": "Nonstandard SOC percent case adds accepted SOC determination to same sample after valid PH result/selection",
+      "sourceRanges": [
+        [
+          159,
+          174
+        ]
+      ],
+      "change": "Reasoned full PH+SOC target before SOC INSERT. Keep accepted PH/source selection, raw percent headline and normalized export assertions unchanged."
+    },
+    "server/tests/contracts/audit_4_7_calculation_import.test.js": {
+      "bytes": 13275,
+      "sha256": "e75f14621cadbaaa8a4f4f91636d6cfd80ef301e7af88eca8516f2c3d52186ac",
+      "context": "Native activated-input import fixture adds EXCH_CA/P_OLSEN WIs manually to base ordered sample before typed future recording",
+      "sourceRanges": [
+        [
+          18,
+          45
+        ],
+        [
+          67,
+          99
+        ]
+      ],
+      "change": "Reasoned full base+two calculated owners target before native run/preview. Do not alter mapping/text/numeric/calibration/import/scientific assertions."
+    },
+    "server/tests/contracts/audit_1_4_uuid_transactions.test.js": {
+      "bytes": 35466,
+      "sha256": "2c07204d0eb5c76799b91a6a7b5c86de3f222fffac4e11ba03aba1b0ab1166cd",
+      "context": "Seven failures enter four-owner textureFixture before existing atomic replicate/repeat/supersession tests",
+      "sourceRanges": [
+        [
+          137,
+          160
+        ]
+      ],
+      "change": "Reasoned logical TEXTURE full target after four existing owners, keeping allfractions per6166518424, before first measurement; no UUID guard/replicate/version/storage-failure/scientific assertions changed."
+    }
+  },
+  "totalClassified": 290,
+  "remainingUnreviewed": 360,
+  "prior193NotYetFullyVerifiedAfterOOM": true,
+  "productionConnections": 0,
+  "productionOperations": 0,
+  "assertionsToChange": 0
+}

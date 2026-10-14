@@ -145,6 +145,9 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
             items[analysis] = await createWorkItemFixture(prisma, { data: { id: id(), sampleId, assignedLab: labId,
                 labId, analysis, status: 'ASSIGNED', assignedTo: username, version: 0 } });
         }
+        await require('../../services/orderService').reviseAnalyses(sampleId, {
+            analyses: ['TEXTURE'], reason: 'Owned complete retained fraction and texture order context'
+        }, jwt.decode(token), { tx: prisma, mode: 'order' });
         const rows=[];
         for(const [param,value] of [['SAND','20'],['SILT','20'],['CLAY','60']])rows.push(...await createExecutionResultsFixture(prisma,{data:[1,2].map(replicateNo=>({
             id:id(),sampleId,param,value,numericValue:Number(value),replicateNo,unit:'%',isCurrent:true,isValid:true}))}));
