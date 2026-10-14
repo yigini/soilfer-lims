@@ -1,0 +1,408 @@
+  console.log
+    [AUTH] Verifying token for ID: 0aadebd4-3544-4a41-b502-913daae22449 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: 'e13d0fe4-ddfa-46a9-9204-ef1f2687ae5a'
+      }
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 56b5a1d9-1e29-4b84-a742-95c28207b6c3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: '51f525b8-141c-484f-9b00-45d568712450'
+      }
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ed984146-4a54-4c7e-870f-487418afe95f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1135:25
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1195:83
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1211:17) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: 'd2e6c217-7915-4689-82d4-b006243b09e1'
+      }
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at error (controllers/workbenchController.js:1332:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 18193a9b-dcb2-49c0-91a1-392ef0895482 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1135:25
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1195:83
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1211:17) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: '73568b02-c0e9-4077-9cdd-a1444286aa0a'
+      }
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at error (controllers/workbenchController.js:1332:17)
+
+FAIL tests/contracts/audit_3_1_attempt_execution.test.js
+  × saveResults retains fraction-only technician saves when canonical TEXTURE is owned by null (459 ms)
+  × saveResults retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst (106 ms)
+  × batchSave retains fraction-only technician saves when canonical TEXTURE is owned by null (119 ms)
+  × batchSave retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst (104 ms)
+  √ a reasoned repeat allocates max+1 and preserves every old field except its legitimate QUESTIONED transition (86 ms)
+  √ all replicates in one submitted execution share one attempt; later execution preserves that evidence (71 ms)
+  √ one texture execution records all four Results and an explicitly reasoned repeat gets number2 (63 ms)
+  √ invalid texture or noncanonical reason refuses without attempt, result, cache or audit writes (27 ms)
+  √ ordered measurement without work refuses before any write (8 ms)
+  √ ordered spectral-prediction without work refuses before any write (7 ms)
+  × separate fraction work produces one TEXTURE attempt with source ids and leaves fraction attempts untouched (25 ms)
+  × direct derivation without TEXTURE work refuses and leaves recorded fractions unchanged (21 ms)
+
+  ● saveResults retains fraction-only technician saves when canonical TEXTURE is owned by null
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "status": 200,
+    +   "status": 409,
+      }
+
+      58 |                     await request(app).post(`/api/results/${f.sample.id}`).set(auth).send({measurements:fractions.map((item,i)=>({param:item.analysis,value:String(values[i]),unit:'%'}))}):
+      59 |                     await request(app).post('/api/workbench/batch-save').set(auth).send({draft:false,entries:fractions.map((item,i)=>({workItemId:item.id,value:String(values[i]),version:item.version}))});
+    > 60 |                 expect(response).toMatchObject({status:200});
+         |                                  ^
+      61 |                 if(route==='batchSave')expect(response.body).toMatchObject({saved:3});
+      62 |                 const rows=await client.result.findMany({where:{sampleId:f.sample.id,isCurrent:true}});
+      63 |                 expect(rows.map(row=>row.param).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
+
+      at toMatchObject (tests/contracts/audit_3_1_attempt_execution.test.js:60:34)
+      at tests/contracts/audit_3_1_attempt_execution.test.js:50:13
+
+  ● saveResults retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "status": 200,
+    +   "status": 409,
+      }
+
+      58 |                     await request(app).post(`/api/results/${f.sample.id}`).set(auth).send({measurements:fractions.map((item,i)=>({param:item.analysis,value:String(values[i]),unit:'%'}))}):
+      59 |                     await request(app).post('/api/workbench/batch-save').set(auth).send({draft:false,entries:fractions.map((item,i)=>({workItemId:item.id,value:String(values[i]),version:item.version}))});
+    > 60 |                 expect(response).toMatchObject({status:200});
+         |                                  ^
+      61 |                 if(route==='batchSave')expect(response.body).toMatchObject({saved:3});
+      62 |                 const rows=await client.result.findMany({where:{sampleId:f.sample.id,isCurrent:true}});
+      63 |                 expect(rows.map(row=>row.param).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
+
+      at toMatchObject (tests/contracts/audit_3_1_attempt_execution.test.js:60:34)
+      at tests/contracts/audit_3_1_attempt_execution.test.js:50:13
+
+  ● batchSave retains fraction-only technician saves when canonical TEXTURE is owned by null
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "status": 200,
+    +   "status": 409,
+      }
+
+      58 |                     await request(app).post(`/api/results/${f.sample.id}`).set(auth).send({measurements:fractions.map((item,i)=>({param:item.analysis,value:String(values[i]),unit:'%'}))}):
+      59 |                     await request(app).post('/api/workbench/batch-save').set(auth).send({draft:false,entries:fractions.map((item,i)=>({workItemId:item.id,value:String(values[i]),version:item.version}))});
+    > 60 |                 expect(response).toMatchObject({status:200});
+         |                                  ^
+      61 |                 if(route==='batchSave')expect(response.body).toMatchObject({saved:3});
+      62 |                 const rows=await client.result.findMany({where:{sampleId:f.sample.id,isCurrent:true}});
+      63 |                 expect(rows.map(row=>row.param).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
+
+      at toMatchObject (tests/contracts/audit_3_1_attempt_execution.test.js:60:34)
+      at tests/contracts/audit_3_1_attempt_execution.test.js:50:13
+
+  ● batchSave retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "status": 200,
+    +   "status": 409,
+      }
+
+      58 |                     await request(app).post(`/api/results/${f.sample.id}`).set(auth).send({measurements:fractions.map((item,i)=>({param:item.analysis,value:String(values[i]),unit:'%'}))}):
+      59 |                     await request(app).post('/api/workbench/batch-save').set(auth).send({draft:false,entries:fractions.map((item,i)=>({workItemId:item.id,value:String(values[i]),version:item.version}))});
+    > 60 |                 expect(response).toMatchObject({status:200});
+         |                                  ^
+      61 |                 if(route==='batchSave')expect(response.body).toMatchObject({saved:3});
+      62 |                 const rows=await client.result.findMany({where:{sampleId:f.sample.id,isCurrent:true}});
+      63 |                 expect(rows.map(row=>row.param).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
+
+      at toMatchObject (tests/contracts/audit_3_1_attempt_execution.test.js:60:34)
+      at tests/contracts/audit_3_1_attempt_execution.test.js:50:13
+
+  ● separate fraction work produces one TEXTURE attempt with source ids and leaves fraction attempts untouched
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertExecution (services/workAttemptWriteService.js:63:25)
+      at writeResultsExecutionChecked (services/resultWriteService.js:445:29)
+      at writeResultsExecution (services/resultWriteService.js:376:16)
+      at Object.writeResult (services/resultWriteService.js:369:13)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.<anonymous> (tests/contracts/audit_3_1_attempt_execution.test.js:156:80)
+
+  ● direct derivation without TEXTURE work refuses and leaves recorded fractions unchanged
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertExecution (services/workAttemptWriteService.js:63:25)
+      at writeResultsExecutionChecked (services/resultWriteService.js:445:29)
+      at writeResultsExecution (services/resultWriteService.js:376:16)
+      at Object.writeResult (services/resultWriteService.js:369:13)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.<anonymous> (tests/contracts/audit_3_1_attempt_execution.test.js:166:65)
+
+PASS tests/security/audit_1_2_state_writes.test.js (11.481 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (5 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (6 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)"))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)")) (1 ms)
+  √ the original rehearsal cannot reintroduce a direct Sample deletion
+  √ nested connect association has one actual authority finding
+  √ nested set association has one actual authority finding (1 ms)
+  √ nested disconnect association has one actual authority finding
+  √ the closed FK runner refuses unknown case (83 ms)
+  √ the closed FK runner refuses configured candidate (106 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (3 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (2 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (1 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (1 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (1 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (2 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (2 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js (1 ms)
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql
+  √ legacy CLI launchers cannot import any fixture or test module (2 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (5 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (2 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (7 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (5 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js
+  √ a direct sample write in a #190 test remains a finding outside the factory (1 ms)
+  √ a direct workItem write in a #190 test remains a finding outside the factory (2 ms)
+  √ a direct result write in a #190 test remains a finding outside the factory
+  √ a changed #190 historical factory digest is a scanner finding (12 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (8 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js (1 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql (1 ms)
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (10995 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"])
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`")
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)')
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')")
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (21 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (41 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}})
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}})
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) }
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED')
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}`
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) }
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`)
+  √ a real temporary non-allowlisted test file fails the source guard (3 ms)
+  √ a shadowed file reader cannot impersonate a known schema load
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (1 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js (1 ms)
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js (1 ms)
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (1 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF')
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0') (1 ms)
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF')
+  √ native pragma reads and enabled constraints remain permitted
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (2 ms)
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       6 failed, 118 passed, 124 total
+Snapshots:   0 total
+Time:        15.129 s, estimated 16 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_1_attempt_execution.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-attempt-single-order-context-focused\report-original.json

@@ -1,0 +1,136 @@
+{
+  "retainedUtc": "2026-10-14T10:48:31.914708+00:00",
+  "status": "CLOSED_ATTEMPT_SINGLE_ORDER_CONTEXT_FOCUSED_FAILURE",
+  "summary": {
+    "closedUtc": "2026-10-14T10:45:29.370839+00:00",
+    "exit": 1,
+    "suites": 2,
+    "tests": 124,
+    "passedTests": 118,
+    "failed": 6,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "cause": "Closed2suites124tests118PASS6FAIL0pending/allfrozeninputsunchanged. Current single-analysis initialorder contexts fix priornonfraction failures; remaining6 allfraction constructs (4HTTPfraction-only,1withTEXTUREderivation,1threefraction/noTEXTUREcase). Next ordinarythree-fraction withoutTEXTURE can getnormalinitializer; fiveTEXTUREcompanion cases awaitactual6166098211 decision. Allruntime/stockassertions/scanners unchanged.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/scripts/order_revision_impact.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/command.json": {
+      "bytes": 1380,
+      "sha256": "46c0fdc9fb585132d774965f31aeabbafaf31d96729d39551eefd0837a4e7add"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/config-original.json": {
+      "bytes": 6580,
+      "sha256": "6d02c1208a858a1b2f46751f3e6b02f893085c8dedf68f5803d44e998746a06c"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "5ccba205c6a248b3bf4d6737a14fd6b5650d2918af795bc395132a602e0bb7c7"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/physical-retained-terminal-index.json": {
+      "bytes": 409,
+      "sha256": "6371b3f854b4f93ed09f998479ff5cb0de44d4c414a62aef6e9477c1b1b4028e"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/physical-retention-original.jsonl": {
+      "bytes": 247,
+      "sha256": "5afdd9521b82a0dfff2b9d3df435f7768613ba6d0872887aaef513debbeb7d98"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/report-original.json": {
+      "bytes": 70613,
+      "sha256": "12bcc6d066a6a795e6a8f73b7eb262ec5d15025031ba7e278748830772b6e290"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/source-after.json": {
+      "bytes": 114832,
+      "sha256": "5eb79af0538c10293316c36b479f72015a54eeb9e91c2223c7d05344b374ac73"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/source-before.json": {
+      "bytes": 114832,
+      "sha256": "5eb79af0538c10293316c36b479f72015a54eeb9e91c2223c7d05344b374ac73"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/stderr-original.log": {
+      "bytes": 32169,
+      "sha256": "b563edc74b70a4381218cc8542cb070ac0d1e5c33a79ebf5ce02be545d7a0475"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/stdout-original.log": {
+      "bytes": 1054,
+      "sha256": "3b64f641ed6dedcba57c6d85cd8acc59ea009256c6e76686b5e548f2b231896d"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-single-order-context-focused/summary.json": {
+      "bytes": 378,
+      "sha256": "7d9e008bec2ade6be0a14ec28d968f64bca856cb7c3fa608c9b97a74210e2ced"
+    }
+  }
+}

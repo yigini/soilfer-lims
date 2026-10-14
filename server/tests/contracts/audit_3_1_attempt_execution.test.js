@@ -85,6 +85,9 @@ async function fixture(analyses=['AT190'],{work=true}={}) {
         dryingStatus:'DONE',preparationStatus:'DONE',requiredAnalyses:JSON.stringify(analyses)}});
     const items=[];
     if(work)for(const analysis of analyses)items.push(await createWorkItemFixture(client,{data:{id:randomUUID(),sampleId,analysis,assignedLab:labId,status:'IN_PROGRESS',history:'[]'}}));
+    // Independent single-analysis current contexts use the ordinary initializer.
+    // Fraction-panel ownership remains unchanged pending Claudio6166098211.
+    if(work&&analyses.length===1)await client.$transaction(tx=>require('../../services/orderService').createInitialOrder(tx,sample,analyses,actor));
     return {sample,items};
 }
 const options=(f,param='AT190',value='6.42')=>({sampleId:f.sample.id,actor,measurement:{param,value,replicateNo:1}});
