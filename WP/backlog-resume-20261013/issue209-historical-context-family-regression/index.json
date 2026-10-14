@@ -1,0 +1,129 @@
+{
+  "retainedUtc": "2026-10-14T09:54:20.164237+00:00",
+  "status": "CLOSED_HISTORICAL_CONTEXT_FAMILY_REGRESSION_FAILURE",
+  "summary": {
+    "closedUtc": "2026-10-14T09:43:26.727408+00:00",
+    "exit": 1,
+    "suites": 10,
+    "tests": 246,
+    "passedTests": 181,
+    "failed": 65,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "cause": "Closed10suites246tests181PASS65FAIL across7suites. Older positive attempt/equipment/amendment/report fixtures lack current order context/schema; a raw container negative INSERT is preempted by ORDER_LINE_REQUIRED; wiring source assertion still reads the retained thin wrapper instead of the new orderService authority. Preserve all assertions/guards and supply explicit fixture/context/source-target corrections. These are observed failures, not full application or CI PASS. Raw report contains every actual failure.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "server/services/orderAttemptWriteService.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/scripts/order_revision_impact.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/command.json": {
+      "bytes": 2498,
+      "sha256": "a712f91cf85e54c6e00ac427505b8d6092168f6f7d5f579440401197ef77575f"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/config-original.json": {
+      "bytes": 6579,
+      "sha256": "cfa404691d1df76fbd13af7cc49943241e9d901881346534f82e55b3e5242480"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "638e8f1336cd20884e36196e8cf1605ffa46f6504e19ce4590fa796eb6e95329"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/physical-retained-terminal-index.json": {
+      "bytes": 51875,
+      "sha256": "959cd0a3c9ea446a004324fca2197978ab611b470c0f98ad724bb02c19d2a277"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/physical-retention-original.jsonl": {
+      "bytes": 42788,
+      "sha256": "e77f469b7bd722dec8b840b5775519c64a0ca27e073c732269a34278c2466ed5"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/report-original.json": {
+      "bytes": 270174,
+      "sha256": "7a4f0eb126c3296ffab44e86c616784f18ebdfb77687952f2dca1f2e1e352a36"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/source-after.json": {
+      "bytes": 114832,
+      "sha256": "0027c5e1b5821759600dd2cc23232109c62864c8b691e0e2f176f31bfffd58c2"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/source-before.json": {
+      "bytes": 114832,
+      "sha256": "0027c5e1b5821759600dd2cc23232109c62864c8b691e0e2f176f31bfffd58c2"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/stderr-original.log": {
+      "bytes": 141861,
+      "sha256": "e54d26700cd9856e14a1a922305b9072265cc3bf9e1d2cdc1437230aedeebcc8"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/stdout-original.log": {
+      "bytes": 2036,
+      "sha256": "3311f850bf59e09d967c1a211ab32ae83c71512267127503f01f1d1bcdb6bfd5"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-context-family-regression/summary.json": {
+      "bytes": 380,
+      "sha256": "be674cd38de839476952f40cba17e9a9180aca20990250e71de1f054c9c5cebf"
+    }
+  }
+}

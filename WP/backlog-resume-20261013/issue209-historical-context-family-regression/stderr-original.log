@@ -1,0 +1,2296 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-laboratory) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/nonScientificAmendmentService.js:16:8)
+      at services/nonScientificAmendmentService.js:50:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:90:3)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-laboratory) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/nonScientificAmendmentService.js:16:8)
+      at services/nonScientificAmendmentService.js:75:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:91:3)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User requester (Lab: foreign-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/scientificAmendmentService.js:43:9)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:220:2
+
+FAIL tests/contracts/audit_6_1_non_scientific_authorisation.test.js (94.923 s)
+  √ a profile request is PENDING and cannot change sample identity, approval or existing work (1586 ms)
+  √ a distinct approver applies a clerical correction once and retains prior approval and immutable request evidence (1394 ms)
+  √ Strict refuses self-authorisation and stale versions without any persisted changes (1392 ms)
+  √ authorisation re-reads actual lab policy; ADVISORY self-authorisation is explicit in the audit (1481 ms)
+  √ a different pending correction changing the profile makes this authorisation a zero-write conflict (1387 ms)
+  √ both request and authorisation enforce approval permission and current sample scope (1425 ms)
+  √ CLERICAL correction on ARCHIVED leaves physical status and prior approval unchanged (1322 ms)
+  √ CLERICAL correction on DISPOSED leaves physical status and prior approval unchanged (1361 ms)
+  √ ORDER authorisation records affected evidence and reason without changing orders, work, reports or sample (1405 ms)
+  √ REPORT authorisation records affected evidence and reason without changing orders, work, reports or sample (1379 ms)
+  √ foreign evidence, injected authorisation fields and invalid versions refuse without writes (1433 ms)
+  √ legacy NULL-version rows cannot enter the new authorisation workflow (1371 ms)
+  √ a late audit failure rolls back both authorisation and clerical profile changes (1475 ms)
+  × the link guard accepts its exact authorised scientific context without changing any retained evidence (1311 ms)
+  × the link guard refuses pending with zero writes (1324 ms)
+  × the link guard refuses legacy with zero writes (1312 ms)
+  × the link guard refuses clerical with zero writes (1314 ms)
+  × the link guard refuses unselected with zero writes (1319 ms)
+  × the link guard refuses recorded-parent with zero writes (1360 ms)
+  × the link guard refuses recorded-child with zero writes (1313 ms)
+  × the link guard refuses reason-mismatch with zero writes (1310 ms)
+  × an unrelated parentAttemptId cannot produce a link (1303 ms)
+  × an unrelated childAttemptId cannot produce a link (1411 ms)
+  × an unrelated workItemId cannot produce a link (1338 ms)
+  × an unrelated amendmentId cannot produce a link (1322 ms)
+  × an unrelated reason cannot produce a link (1316 ms)
+  × all seven link columns are immutable and links and referenced attempts cannot be deleted (1346 ms)
+  √ a scientific CLIENT_RETEST request remains pending and preserves every existing row (1331 ms)
+  √ a scientific CONFIRMATION request remains pending and preserves every existing row (1350 ms)
+  √ scientific requests on ARCHIVED refuse without writes (1337 ms)
+  √ scientific requests on DISPOSED refuse without writes (1345 ms)
+  √ scientific requests on PROCESSING refuse without writes (1380 ms)
+  √ scientific requests reject permission before any writes (1316 ms)
+  √ scientific requests reject tenant before any writes (1321 ms)
+  √ scientific requests reject empty-lines before any writes (1353 ms)
+  √ scientific requests reject duplicate-lines before any writes (1339 ms)
+  √ scientific requests reject foreign-line before any writes (1323 ms)
+  √ scientific requests reject reason before any writes (1335 ms)
+  √ scientific requests reject forged-capability before any writes (1321 ms)
+  √ scientific requests refuse nonaccepted work without writes (1314 ms)
+  √ scientific requests refuse nonmeasurement work without writes (1332 ms)
+  √ scientific requests refuse duplicate-marker work without writes (1359 ms)
+  √ scientific requests retain scope for affectedResults (1357 ms)
+  √ scientific requests retain scope for affectedReports (1590 ms)
+  √ a late scientific request audit failure rolls back the request without changing retained evidence (1441 ms)
+  × scientific CLIENT_RETEST authorisation reopens only selected work, seals the accepted parent and withdraws the exact report (1388 ms)
+  × scientific CONFIRMATION authorisation reopens only selected work, seals the accepted parent and withdraws the exact report (1455 ms)
+  × scientific authorisation re-reads second-person policy and explicitly records ADVISORY self-authorisation (1429 ms)
+  × scientific authorisation rejects permission with zero writes (1407 ms)
+  × scientific authorisation rejects tenant with zero writes (1354 ms)
+  × scientific authorisation rejects stale-version with zero writes (1395 ms)
+  × scientific authorisation rejects forged-capability with zero writes (1381 ms)
+  × an action string or forged capability cannot reopen a released Sample (1402 ms)
+  × an action string or forged capability cannot reopen a released WorkItem (1378 ms)
+  × a late scientific authorisation audit failure rolls back every reopen, child, binding and report change (1375 ms)
+  × withdrawal binding and every report content field stay sealed after authorisation (1421 ms)
+  × scientific repeats preserve the existing configured attempt limit and NCR refusal (1391 ms)
+  × authorisation revalidates parent-no-longer-accepted after a valid request and refuses the whole transaction (1367 ms)
+  × authorisation revalidates new-open-child after a valid request and refuses the whole transaction (1358 ms)
+  × an explicit selected-line CLIENT_RETEST limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent (1307 ms)
+  × an explicit selected-line CONFIRMATION limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent (1313 ms)
+  × a line override without the existing NCR assessment refuses the request atomically (1331 ms)
+  × a pending scientific amendment cannot reopen a subsequently ARCHIVED sample (1400 ms)
+  × a pending scientific amendment cannot reopen a subsequently DISPOSED sample (1396 ms)
+  × the actual report HTTP routes retain internal access and refuse both public formats before expiry or revocation (1333 ms)
+  × withdrawn report numbering remains reserved and the next issuance preserves its row and takes the next revision (1315 ms)
+  × scientific request refuses unregistered laboratory authority without policy fallback or writes (1352 ms)
+  × scientific authorise refuses unregistered laboratory authority without policy fallback or writes (1368 ms)
+  × a pending request cannot grant withdrawal authority and a report cannot become withdrawn without its binding (1294 ms)
+
+  ● the link guard accepts its exact authorised scientific context without changing any retained evidence
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:166:10)
+
+  ● the link guard refuses pending with zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:172:10
+
+  ● the link guard refuses legacy with zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:172:10
+
+  ● the link guard refuses clerical with zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:172:10
+
+  ● the link guard refuses unselected with zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:172:10
+
+  ● the link guard refuses recorded-parent with zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertExecution (services/workAttemptWriteService.js:63:25)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:36:9)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:172:10
+
+  ● the link guard refuses recorded-child with zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:172:10
+
+  ● the link guard refuses reason-mismatch with zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:172:10
+
+  ● an unrelated parentAttemptId cannot produce a link
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:176:10
+
+  ● an unrelated childAttemptId cannot produce a link
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:176:10
+
+  ● an unrelated workItemId cannot produce a link
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:176:10
+
+  ● an unrelated amendmentId cannot produce a link
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:176:10
+
+  ● an unrelated reason cannot produce a link
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:176:10
+
+  ● all seven link columns are immutable and links and referenced attempts cannot be deleted
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at linkFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:143:33)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:181:10)
+
+  ● scientific CLIENT_RETEST authorisation reopens only selected work, seals the accepted parent and withdraws the exact report
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:262:10
+
+  ● scientific CONFIRMATION authorisation reopens only selected work, seals the accepted parent and withdraws the exact report
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:262:10
+
+  ● scientific authorisation re-reads second-person policy and explicitly records ADVISORY self-authorisation
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:286:10)
+
+  ● scientific authorisation rejects permission with zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:296:10
+
+  ● scientific authorisation rejects tenant with zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:296:10
+
+  ● scientific authorisation rejects stale-version with zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:296:10
+
+  ● scientific authorisation rejects forged-capability with zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:296:10
+
+  ● an action string or forged capability cannot reopen a released Sample
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:305:10
+
+  ● an action string or forged capability cannot reopen a released WorkItem
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:305:10
+
+  ● a late scientific authorisation audit failure rolls back every reopen, child, binding and report change
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:317:10)
+
+  ● withdrawal binding and every report content field stay sealed after authorisation
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:323:10)
+
+  ● scientific repeats preserve the existing configured attempt limit and NCR refusal
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:337:10)
+
+  ● authorisation revalidates parent-no-longer-accepted after a valid request and refuses the whole transaction
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:343:10
+
+  ● authorisation revalidates new-open-child after a valid request and refuses the whole transaction
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:343:10
+
+  ● an explicit selected-line CLIENT_RETEST limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:356:10
+
+  ● an explicit selected-line CONFIRMATION limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:356:10
+
+  ● a line override without the existing NCR assessment refuses the request atomically
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:372:10)
+
+  ● a pending scientific amendment cannot reopen a subsequently ARCHIVED sample
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:379:10
+
+  ● a pending scientific amendment cannot reopen a subsequently DISPOSED sample
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:379:10
+
+  ● the actual report HTTP routes retain internal access and refuse both public formats before expiry or revocation
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:385:10)
+
+  ● withdrawn report numbering remains reserved and the next issuance preserves its row and takes the next revision
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:405:10)
+
+  ● scientific request refuses unregistered laboratory authority without policy fallback or writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:420:10
+
+  ● scientific authorise refuses unregistered laboratory authority without policy fallback or writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:420:10
+
+  ● a pending request cannot grant withdrawal authority and a report cannot become withdrawn without its binding
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at scientificFixture (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:249:13)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:428:10)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: test_lab_manager_lab190evidence (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [getSampleWorkspace] Error: PrismaClientKnownRequestError: 
+    Invalid `prisma.sample.findUnique()` invocation:
+    
+    
+    The column `main.OrderLine.workItemId` does not exist in the current database.
+        at zr.handleRequestError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:8172)
+        at zr.handleRequestError [as handleAndLogRequestError] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7467)
+        at zr.handleAndLogRequestError [as request] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7174)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at a (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:5816)
+        at SampleWorkspaceService.getWorkspace (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleWorkspaceService.js:79:22)
+        at exports.getSampleWorkspace (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\sampleController.js:1826:27) {
+      code: 'P2022',
+      meta: {
+        modelName: 'Sample',
+        driverAdapterError: DriverAdapterError: ColumnNotFound
+            at PrismaBetterSqlite3Adapter.onError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:568:11)
+            at PrismaBetterSqlite3Adapter.performIO (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:563:12)
+            at PrismaBetterSqlite3Adapter.queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:504:63)
+            at queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43566)
+            at o (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:25753)
+            at e.xr (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:46795)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43535)
+            at interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:44684)
+            at Array.map (<anonymous>)
+            at e.map [as interpretNode] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:44633)
+            at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+          cause: [Object]
+        }
+      },
+      clientVersion: '7.10.0'
+    }
+
+      1830 |             return res.status(err.statusCode).json({ error: err.message, code: err.code });
+      1831 |         }
+    > 1832 |         console.error('[getSampleWorkspace] Error:', err);
+           |                 ^
+      1833 |         res.status(500).json({ error: 'Failed to fetch sample workspace' });
+      1834 |     }
+      1835 | };
+
+      at error (controllers/sampleController.js:1832:17)
+
+FAIL tests/contracts/audit_3_1_attempt_sql_guards.test.js (63.852 s)
+  √ every lab installs partial attempt uniqueness and current-result uniqueness with all guards (373 ms)
+  √ canonical insert and status update OPEN are accepted (341 ms)
+  √ canonical insert and status update RECORDED are accepted (347 ms)
+  √ canonical insert and status update SUBMITTED are accepted (332 ms)
+  √ canonical insert and status update ACCEPTED are accepted (326 ms)
+  √ canonical insert and status update QUESTIONED are accepted (334 ms)
+  √ canonical insert and status update INVALIDATED are accepted (340 ms)
+  √ canonical insert and status update SUPERSEDED are accepted (345 ms)
+  √ historical RETURNED stays stored but cannot be newly inserted or updated (349 ms)
+  √ historical REJECTED stays stored but cannot be newly inserted or updated (354 ms)
+  √ the migration can flag every historical duplicate before guards, without renumbering (381 ms)
+  √ all conflict flag updates unflagged -> flag are refused (364 ms)
+  √ all conflict flag updates flagged -> null are refused (354 ms)
+  √ all conflict flag updates flagged -> same are refused (348 ms)
+  √ all conflict flag updates unflagged -> null are refused (353 ms)
+  √ evidence field evidenceData is immutable even within its creating transaction (329 ms)
+  √ evidence field evidenceHash is immutable even within its creating transaction (354 ms)
+  √ evidence field instrumentId is immutable even within its creating transaction (361 ms)
+  √ the fixed evidence case refuses caller SQL, unknown fields and invalid parents without writes (16027 ms)
+  √ the new native FK identity cannot authorize arbitrary WorkAttempt SQL or an invalid parent (10623 ms)
+  √ recorded identity field attemptNo cannot change (359 ms)
+  √ recorded identity field workItemId cannot change (339 ms)
+  √ recorded identity field author cannot change (345 ms)
+  √ recorded identity field createdAt cannot change (352 ms)
+  √ recorded identity field updatedAt cannot change (355 ms)
+  √ recorded identity field qcBatchId cannot change (346 ms)
+  √ recorded identity field rawData cannot change (344 ms)
+  √ batch FK is additive, reference checked and write-once when recorded (389 ms)
+  √ canonical reason QC_BATCH_FAIL is accepted by both the shared contract and SQL (373 ms)
+  √ canonical reason REVIEW_OUTLIER is accepted by both the shared contract and SQL (343 ms)
+  √ canonical reason DUPLICATE_DISAGREEMENT is accepted by both the shared contract and SQL (353 ms)
+  √ canonical reason ABOVE_RANGE_DILUTION is accepted by both the shared contract and SQL (338 ms)
+  √ canonical reason INSTRUMENT_FAULT is accepted by both the shared contract and SQL (330 ms)
+  √ canonical reason PREP_ERROR is accepted by both the shared contract and SQL (351 ms)
+  √ canonical reason TRANSCRIPTION_ERROR is accepted by both the shared contract and SQL (337 ms)
+  √ canonical reason CLIENT_RETEST is accepted by both the shared contract and SQL (339 ms)
+  √ canonical reason CONFIRMATION is accepted by both the shared contract and SQL (338 ms)
+  √ canonical reason OTHER is accepted by both the shared contract and SQL (339 ms)
+  √ reason remains nullable for a second execution, while noncanonical values are refused (369 ms)
+  √ SQL and runtime canonical lookup agree: only orphan historical imports can omit an attempt (443 ms)
+  √ raw review inserts require a current attempt of the same work item and sample (427 ms)
+  √ the raw review guard permits only an unexecuted analytical OMIT with no attempt (355 ms)
+  √ SQL keeps non-measurement ARCH review on its separate evidence workflow (330 ms)
+  √ SQL keeps non-measurement ARCHIVING review on its separate evidence workflow (347 ms)
+  √ SQL keeps non-measurement Archive review on its separate evidence workflow (337 ms)
+  √ SQL keeps non-measurement DISP review on its separate evidence workflow (336 ms)
+  √ SQL keeps non-measurement DISPOSAL review on its separate evidence workflow (325 ms)
+  √ SQL keeps non-measurement DRYING review on its separate evidence workflow (331 ms)
+  √ SQL keeps non-measurement Dispose review on its separate evidence workflow (327 ms)
+  √ SQL keeps non-measurement HOMOGENIZATION review on its separate evidence workflow (324 ms)
+  √ SQL keeps non-measurement MILLING review on its separate evidence workflow (331 ms)
+  √ SQL keeps non-measurement PREP review on its separate evidence workflow (337 ms)
+  √ SQL keeps non-measurement PREPARATION review on its separate evidence workflow (349 ms)
+  √ SQL keeps non-measurement SAMPLE_PREP review on its separate evidence workflow (318 ms)
+  √ SQL keeps non-measurement SIEVING review on its separate evidence workflow (334 ms)
+  √ SQL keeps non-measurement SPEC_FTIR review on its separate evidence workflow (329 ms)
+  √ SQL keeps non-measurement SPEC_MIR review on its separate evidence workflow (337 ms)
+  √ SQL keeps non-measurement SPEC_NIR review on its separate evidence workflow (326 ms)
+  √ SQL keeps non-measurement SPEC_VIS_NIR review on its separate evidence workflow (324 ms)
+  × the authenticated workspace returns linked and unlinked attempt metadata without evidence or cross-lab access (1622 ms)
+  #191 membership trigger SQL defence in depth (not installer or receipt evidence)
+    √ old-repeat-required refuses a direct repeat pointer clear with exact zero writes (70 ms)
+    √ parent-null-hash refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ parent-wrong-batch refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ parent-wrong-qc-batch refuses a direct repeat pointer clear with exact zero writes (21 ms)
+    √ wrong-analyte refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ mixed-failed-membership refuses a direct repeat pointer clear with exact zero writes (21 ms)
+    √ mixed-accepted-wrong-membership refuses a direct repeat pointer clear with exact zero writes (21 ms)
+    √ qc-fail refuses a direct repeat pointer clear with exact zero writes (22 ms)
+    √ qc-pending refuses a direct repeat pointer clear with exact zero writes (23 ms)
+    √ open-unstarted refuses a direct repeat pointer clear with exact zero writes (29 ms)
+    √ accepted-pass permits the proven SQL handoff and retains all old execution/QC evidence (24 ms)
+    √ accepted-warn permits the proven SQL handoff and retains all old execution/QC evidence (22 ms)
+    √ accepted-deviation permits the proven SQL handoff and retains all old execution/QC evidence (22 ms)
+    √ accepted-texture-alias permits the proven SQL handoff and retains all old execution/QC evidence (22 ms)
+    √ unknown name refuses before opening a scratch or caller database (1 ms)
+    √ unknown option refuses before opening a scratch or caller database (1 ms)
+    √ unknown caller refuses before opening a scratch or caller database (2 ms)
+  all #190 refusals remain effective after the receipt-verified #191 successor installation
+    √ creating-transaction evidence evidenceData still refuses and rolls back (555 ms)
+    √ creating-transaction evidence evidenceHash still refuses and rolls back (501 ms)
+    √ creating-transaction evidence instrumentId still refuses and rolls back (492 ms)
+    √ recorded identity id remains frozen (485 ms)
+    √ recorded identity workItemId remains frozen (496 ms)
+    √ recorded identity orderLineId remains frozen (493 ms)
+    √ recorded identity attemptNo remains frozen (489 ms)
+    √ recorded identity executedMethodRevision remains frozen (501 ms)
+    √ recorded identity author remains frozen (488 ms)
+    √ recorded identity authorName remains frozen (498 ms)
+    √ recorded identity materialAliquot remains frozen (491 ms)
+    √ recorded identity qcBatchId remains frozen (496 ms)
+    √ recorded identity version remains frozen (497 ms)
+    √ recorded identity createdAt remains frozen (530 ms)
+    √ recorded identity updatedAt remains frozen (505 ms)
+    √ recorded identity reason remains frozen (487 ms)
+    √ recorded identity requestedBy remains frozen (495 ms)
+    √ recorded identity requestedAt remains frozen (501 ms)
+    √ recorded identity rawData remains frozen (486 ms)
+    √ recorded identity calcVersion remains frozen (488 ms)
+    √ recorded identity dilutionFactor remains frozen (496 ms)
+    √ recorded identity aliquotId remains frozen (508 ms)
+    √ invalid status RETURNED still refuses insertion and update (513 ms)
+    √ invalid status REJECTED still refuses insertion and update (515 ms)
+    √ invalid status unknown still refuses insertion and update (523 ms)
+    √ canonical reasons, positive numbers, conflict flags and both unique indexes retain their original refusals (732 ms)
+    √ batch FK, write-once batch and deletion refusals survive the successor chain (591 ms)
+    √ Result required and immutable-link guards keep all #190 import and provenance refusal cases (672 ms)
+    √ ReviewDecision required, ownership, current-evidence and immutable-attempt guards keep every #190 refusal (635 ms)
+
+  ● the authenticated workspace returns linked and unlinked attempt metadata without evidence or cross-lab access
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      283 |         .map(({name})=>({name,rows:db.prepare(`SELECT * FROM "${name}"`).all()}));
+      284 |     const response=await request(app).get('/api/samples/sample/workspace').set('Authorization',`Bearer ${token}`);
+    > 285 |     expect(response.status).toBe(200);
+          |                             ^
+      286 |     const item=response.body.workItems.find(row=>row.id==='item');
+      287 |     expect(item.results.find(row=>row.id==='linked-result').attempt).toEqual({id:'linked',attemptNo:2,status:'RECORDED'});
+      288 |     // A duplicate child supplies the existing evidence block while the exact
+
+      at Object.toBe (tests/contracts/audit_3_1_attempt_sql_guards.test.js:285:29)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 31dec0dc-f70a-4a59-bf1a-21b1256c2d5b) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleContainerService.js:21:11)
+      at Object.list (services/sampleContainerService.js:26:5)
+      at Object.<anonymous> (tests/contracts/issue_206_sample_containers.test.js:61:5)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 31dec0dc-f70a-4a59-bf1a-21b1256c2d5b) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleContainerService.js:21:11)
+      at services/sampleContainerService.js:33:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/issue_206_sample_containers.test.js:62:5)
+
+  console.warn
+    [AUTH] RBAC Denied: User system:fixture (AUDIT_USER) attempted MANAGE_CONTAINERS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER","SAMPLE_RECEPTION","LAB_TECHNICIAN"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (tests/contracts/issue_206_sample_containers.test.js:67:103)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+FAIL tests/contracts/issue_206_sample_containers.test.js (18.709 s)
+  √ bulk → fine earth → aliquot is queryable, labelled by policy and leaves sample numbers unchanged (1403 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"ALIQUOT"} (1226 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":0} (1206 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":"1"} (1333 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","massG":null} (1235 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"BULK","code":"invented"} (1194 ms)
+  √ invalid input writes neither containers nor counters: {"kind":"UNKNOWN"} (1188 ms)
+  √ scope, role and parent validation refuse both API reads and writes across samples/labs (1275 ms)
+  √ SQL rejects foreign parents, alias collisions, invalid kind/mass and changing or deleting identities (1217 ms)
+  √ transaction rollback returns the counter and container policy collision checks run both ways (1338 ms)
+  √ initial execution and reserved repeat link the exact aliquot without changing recorded attempts (1359 ms)
+  × the additive attempt insert guard refuses foreign/non-aliquot links; future disposal retains recorded linkage (1276 ms)
+  √ installer dry/apply/no-op preserve all old rows and schema guards; tampered provenance fails closed (1144 ms)
+  √ an empty fresh Prisma table gains only its counter and guards; an unmarked populated table is refused (2071 ms)
+
+  ● the additive attempt insert guard refuses foreign/non-aliquot links; future disposal retains recorded linkage
+
+    expect(received).toThrow(expected)
+
+    Expected pattern: /SAMPLE_CONTAINER_ALIQUOT_INVALID/
+    Received message: "ORDER_LINE_REQUIRED"
+
+      123 |     raw(f, db => {
+      124 |         const insert = db.prepare("INSERT INTO WorkAttempt(id,workItemId,attemptNo,aliquotId,status,updatedAt) VALUES(?,?,?,?, 'RECORDED',?)");
+    > 125 |         expect(() => insert.run(randomUUID(), f.items[1].id, 1, aliquot.id, Date.now())).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
+          |                                                                                          ^
+      126 |         expect(() => insert.run(randomUUID(), f.items[1].id, 1, bulk.id, Date.now())).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
+      127 |         // Detached test-owned fixture simulates a later audited lifecycle
+      128 |         // successor. #206 itself exposes no disposal mutation or guard bypass.
+
+      at toThrow (tests/contracts/issue_206_sample_containers.test.js:125:90)
+      at exercise (tests/contracts/issue_206_sample_containers.test.js:28:75)
+      at Object.raw (tests/contracts/issue_206_sample_containers.test.js:123:5)
+
+  console.log
+    [AUTH] Verifying token for ID: e548601c-8584-4fa2-9bc2-21a81ae15528 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: '4c73ed30-98b3-4515-9177-645b8abe261a'
+      }
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: bb248b55-d4c5-4a03-a128-3d1b8ab6200b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: '9d827b76-8bca-41cd-9422-0bc44d275a9b'
+      }
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 452341a5-d91b-49e0-a1a0-e906765a31c9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1135:25
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1195:83
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1211:17) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: 'e780a5e6-1ee4-4d1d-b16b-ab5663554c04'
+      }
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at error (controllers/workbenchController.js:1332:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 07109ad2-1808-4f03-85fc-bd96502bf32f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1135:25
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1195:83
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1211:17) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: '5c52058e-0877-400c-bf94-964a30984769'
+      }
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at error (controllers/workbenchController.js:1332:17)
+
+FAIL tests/contracts/audit_3_1_attempt_execution.test.js
+  × saveResults retains fraction-only technician saves when canonical TEXTURE is owned by null (429 ms)
+  × saveResults retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst (107 ms)
+  × batchSave retains fraction-only technician saves when canonical TEXTURE is owned by null (135 ms)
+  × batchSave retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst (90 ms)
+  × a reasoned repeat allocates max+1 and preserves every old field except its legitimate QUESTIONED transition (14 ms)
+  × all replicates in one submitted execution share one attempt; later execution preserves that evidence (30 ms)
+  × one texture execution records all four Results and an explicitly reasoned repeat gets number2 (15 ms)
+  √ invalid texture or noncanonical reason refuses without attempt, result, cache or audit writes (21 ms)
+  √ ordered measurement without work refuses before any write (8 ms)
+  √ ordered spectral-prediction without work refuses before any write (6 ms)
+  × separate fraction work produces one TEXTURE attempt with source ids and leaves fraction attempts untouched (23 ms)
+  × direct derivation without TEXTURE work refuses and leaves recorded fractions unchanged (26 ms)
+
+  ● saveResults retains fraction-only technician saves when canonical TEXTURE is owned by null
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "status": 200,
+    +   "status": 409,
+      }
+
+      58 |                     await request(app).post(`/api/results/${f.sample.id}`).set(auth).send({measurements:fractions.map((item,i)=>({param:item.analysis,value:String(values[i]),unit:'%'}))}):
+      59 |                     await request(app).post('/api/workbench/batch-save').set(auth).send({draft:false,entries:fractions.map((item,i)=>({workItemId:item.id,value:String(values[i]),version:item.version}))});
+    > 60 |                 expect(response).toMatchObject({status:200});
+         |                                  ^
+      61 |                 if(route==='batchSave')expect(response.body).toMatchObject({saved:3});
+      62 |                 const rows=await client.result.findMany({where:{sampleId:f.sample.id,isCurrent:true}});
+      63 |                 expect(rows.map(row=>row.param).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
+
+      at toMatchObject (tests/contracts/audit_3_1_attempt_execution.test.js:60:34)
+      at tests/contracts/audit_3_1_attempt_execution.test.js:50:13
+
+  ● saveResults retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "status": 200,
+    +   "status": 409,
+      }
+
+      58 |                     await request(app).post(`/api/results/${f.sample.id}`).set(auth).send({measurements:fractions.map((item,i)=>({param:item.analysis,value:String(values[i]),unit:'%'}))}):
+      59 |                     await request(app).post('/api/workbench/batch-save').set(auth).send({draft:false,entries:fractions.map((item,i)=>({workItemId:item.id,value:String(values[i]),version:item.version}))});
+    > 60 |                 expect(response).toMatchObject({status:200});
+         |                                  ^
+      61 |                 if(route==='batchSave')expect(response.body).toMatchObject({saved:3});
+      62 |                 const rows=await client.result.findMany({where:{sampleId:f.sample.id,isCurrent:true}});
+      63 |                 expect(rows.map(row=>row.param).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
+
+      at toMatchObject (tests/contracts/audit_3_1_attempt_execution.test.js:60:34)
+      at tests/contracts/audit_3_1_attempt_execution.test.js:50:13
+
+  ● batchSave retains fraction-only technician saves when canonical TEXTURE is owned by null
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "status": 200,
+    +   "status": 409,
+      }
+
+      58 |                     await request(app).post(`/api/results/${f.sample.id}`).set(auth).send({measurements:fractions.map((item,i)=>({param:item.analysis,value:String(values[i]),unit:'%'}))}):
+      59 |                     await request(app).post('/api/workbench/batch-save').set(auth).send({draft:false,entries:fractions.map((item,i)=>({workItemId:item.id,value:String(values[i]),version:item.version}))});
+    > 60 |                 expect(response).toMatchObject({status:200});
+         |                                  ^
+      61 |                 if(route==='batchSave')expect(response.body).toMatchObject({saved:3});
+      62 |                 const rows=await client.result.findMany({where:{sampleId:f.sample.id,isCurrent:true}});
+      63 |                 expect(rows.map(row=>row.param).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
+
+      at toMatchObject (tests/contracts/audit_3_1_attempt_execution.test.js:60:34)
+      at tests/contracts/audit_3_1_attempt_execution.test.js:50:13
+
+  ● batchSave retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "status": 200,
+    +   "status": 409,
+      }
+
+      58 |                     await request(app).post(`/api/results/${f.sample.id}`).set(auth).send({measurements:fractions.map((item,i)=>({param:item.analysis,value:String(values[i]),unit:'%'}))}):
+      59 |                     await request(app).post('/api/workbench/batch-save').set(auth).send({draft:false,entries:fractions.map((item,i)=>({workItemId:item.id,value:String(values[i]),version:item.version}))});
+    > 60 |                 expect(response).toMatchObject({status:200});
+         |                                  ^
+      61 |                 if(route==='batchSave')expect(response.body).toMatchObject({saved:3});
+      62 |                 const rows=await client.result.findMany({where:{sampleId:f.sample.id,isCurrent:true}});
+      63 |                 expect(rows.map(row=>row.param).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
+
+      at toMatchObject (tests/contracts/audit_3_1_attempt_execution.test.js:60:34)
+      at tests/contracts/audit_3_1_attempt_execution.test.js:50:13
+
+  ● a reasoned repeat allocates max+1 and preserves every old field except its legitimate QUESTIONED transition
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertExecution (services/workAttemptWriteService.js:63:25)
+      at writeResultsExecutionChecked (services/resultWriteService.js:445:29)
+      at writeResultsExecution (services/resultWriteService.js:376:16)
+      at Object.writeResult (services/resultWriteService.js:369:13)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.<anonymous> (tests/contracts/audit_3_1_attempt_execution.test.js:96:35)
+
+  ● all replicates in one submitted execution share one attempt; later execution preserves that evidence
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertExecution (services/workAttemptWriteService.js:63:25)
+      at writeResultsExecutionChecked (services/resultWriteService.js:445:29)
+      at Object.writeResultsExecution (services/resultWriteService.js:376:16)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.<anonymous> (tests/contracts/audit_3_1_attempt_execution.test.js:109:16)
+
+  ● one texture execution records all four Results and an explicitly reasoned repeat gets number2
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertExecution (services/workAttemptWriteService.js:63:25)
+      at Object.writeTextureDetermination (services/resultWriteService.js:521:5)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.<anonymous> (tests/contracts/audit_3_1_attempt_execution.test.js:122:17)
+
+  ● separate fraction work produces one TEXTURE attempt with source ids and leaves fraction attempts untouched
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertExecution (services/workAttemptWriteService.js:63:25)
+      at writeResultsExecutionChecked (services/resultWriteService.js:445:29)
+      at writeResultsExecution (services/resultWriteService.js:376:16)
+      at Object.writeResult (services/resultWriteService.js:369:13)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.<anonymous> (tests/contracts/audit_3_1_attempt_execution.test.js:153:80)
+
+  ● direct derivation without TEXTURE work refuses and leaves recorded fractions unchanged
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertExecution (services/workAttemptWriteService.js:63:25)
+      at writeResultsExecutionChecked (services/resultWriteService.js:445:29)
+      at writeResultsExecution (services/resultWriteService.js:376:16)
+      at Object.writeResult (services/resultWriteService.js:369:13)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.<anonymous> (tests/contracts/audit_3_1_attempt_execution.test.js:163:65)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8380f775-ddec-4b9e-80c6-08c5d2caec50 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8380f775-ddec-4b9e-80c6-08c5d2caec50 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9c4854e1-7980-4784-b0f2-1cc730798364 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9c4854e1-7980-4784-b0f2-1cc730798364 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1135:25
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1195:83
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1211:17) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: 'f74b8f92-b534-4b54-ba00-d998e95c277b'
+      }
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at Object.error [as batchSave] (controllers/workbenchController.js:1332:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0f9d34d3-8248-4dde-b41a-97c25e18dc35 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0f9d34d3-8248-4dde-b41a-97c25e18dc35 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0f9d34d3-8248-4dde-b41a-97c25e18dc35 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 0f9d34d3-8248-4dde-b41a-97c25e18dc35 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f0686ada-46c8-4fa2-9b44-b1b0c6ac9ac3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f0686ada-46c8-4fa2-9b44-b1b0c6ac9ac3 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1e762f2a-efda-4190-9fa0-8785892f6e02 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1e762f2a-efda-4190-9fa0-8785892f6e02 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1e762f2a-efda-4190-9fa0-8785892f6e02 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1e762f2a-efda-4190-9fa0-8785892f6e02 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1e762f2a-efda-4190-9fa0-8785892f6e02 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 1e762f2a-efda-4190-9fa0-8785892f6e02 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1135:25
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1195:83
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1211:17) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: 'ebd2b17d-7201-49f4-9705-95874056db61'
+      }
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at Object.error [as batchSave] (controllers/workbenchController.js:1332:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73c16449-12ed-422f-8e5b-a500d49bf6ee (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 73c16449-12ed-422f-8e5b-a500d49bf6ee (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1135:25
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1195:83
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1211:17) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: '31c11809-bbd6-4fc1-b2fd-f39321c6fff0'
+      }
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at Object.error [as batchSave] (controllers/workbenchController.js:1332:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2d380960-cb56-4afe-9473-9d839158b807 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2d380960-cb56-4afe-9473-9d839158b807 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeTextureDetermination (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:521:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1131:25
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1195:83
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1211:17) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: '42f3b075-6009-4624-bffb-16dcdeea34bf'
+      }
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at Object.error [as batchSave] (controllers/workbenchController.js:1332:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4596d55d-822e-4ede-be6f-1673e90924de (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 4596d55d-822e-4ede-be6f-1673e90924de (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: A reasoned order revision with the complete analysis set is required before starting this execution.
+        at Object.resolveOrderLine (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\orderLineResolutionService.js:30:30)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at insertExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:63:25)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:445:29)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1135:25
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1195:83
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1211:17) {
+      statusCode: 409,
+      status: 409,
+      code: 'ORDER_LINE_REQUIRED',
+      details: {
+        cause: 'NO_LINE',
+        workItemId: '563570f6-dde4-4cf9-ac45-d47db180025d'
+      }
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at Object.error [as batchSave] (controllers/workbenchController.js:1332:17)
+
+FAIL tests/contracts/audit_2_6_equipment_commit.test.js
+  × an instrument made overdue at the transaction boundary rejects only its row, with zero row writes; the other row commits (176 ms)
+  × default NON_CRITICAL ALLOW retains NOT_CONFIGURED in the immutable Result evidence (180 ms)
+  √ queue projects overdue dates and unconfigured policy at read time and keeps each method-specific picker list (63 ms)
+  √ sample hold stays the first refusal when equipment is also overdue, with zero row writes (18 ms)
+  × a required missing instrument and an unconfigured critical instrument refuse EQUIPMENT_NOT_READY; lab ALLOW permits only unconfigured evidence (63 ms)
+  × AUTO chooses method-specific eligibility over the fallback and explicit NOT_REQUIRED overrides the mapping (41 ms)
+  × texture results and the new existing-path attempt store exactly the same snapshot (36 ms)
+  × raw database updates cannot change equipment evidence while ordinary result metadata updates remain valid (35 ms)
+  × a superseding Result gets a fresh snapshot and leaves the original equipment evidence unchanged (21 ms)
+
+  ● an instrument made overdue at the transaction boundary rejects only its row, with zero row writes; the other row commits
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      47 |     finally { transaction.mockRestore(); }
+      48 |     expect(injected).toBe(true);
+    > 49 |     expect(response.status).toBe(200); expect(response.body.saved).toBe(1);
+         |                                                                    ^
+      50 |     expect(response.body.errors).toEqual([expect.objectContaining({ workItemId: bad.workItemId, code: 'EQUIPMENT_NOT_READY' })]);
+      51 |     expect(await prisma.workItem.findUnique({ where: { id: bad.workItemId } })).toEqual(before);
+      52 |     expect(await prisma.result.count({ where: { sampleId: bad.sampleId } })).toBe(0);
+
+      at Object.toBe (tests/contracts/audit_2_6_equipment_commit.test.js:49:68)
+
+  ● default NON_CRITICAL ALLOW retains NOT_CONFIGURED in the immutable Result evidence
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: undefined
+
+      64 | test('default NON_CRITICAL ALLOW retains NOT_CONFIGURED in the immutable Result evidence', async () => {
+      65 |     const f = await fixture(), item = await f.item(), asset = await f.asset('NON_CRITICAL', false);
+    > 66 |     expect((await f.save([{ ...item, equipmentId: asset.id }])).body.saved).toBe(1);
+         |                                                                             ^
+      67 |     const result = await prisma.result.findFirst({ where: { sampleId: item.sampleId } });
+      68 |     expect(JSON.parse(result.equipmentReadiness)).toMatchObject({ readiness: 'NOT_CONFIGURED', calibrationDueDate: null,
+      69 |         criticality: 'NON_CRITICAL', equipmentId: asset.id });
+
+      at Object.toBe (tests/contracts/audit_2_6_equipment_commit.test.js:66:77)
+
+  ● a required missing instrument and an unconfigured critical instrument refuse EQUIPMENT_NOT_READY; lab ALLOW permits only unconfigured evidence
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: undefined
+
+      120 |     await policyService.change(f.actor, f.labId, { reason: 'Reviewed criticality configuration', changes: [{ key: 'equipment.unconfiguredReadiness',
+      121 |         value: { CRITICAL: 'ALLOW', IMPORTANT: 'WARN', NON_CRITICAL: 'ALLOW' } }] });
+    > 122 |     expect((await f.save([{ ...item, equipmentId: asset.id }])).body.saved).toBe(1);
+          |                                                                             ^
+      123 |     expect(JSON.parse((await prisma.result.findFirst({ where: { sampleId: item.sampleId } })).equipmentReadiness))
+      124 |         .toMatchObject({ equipmentId: asset.id, calibrationDueDate: null, requirement: 'REQUIRED', readiness: 'NOT_CONFIGURED' });
+      125 | });
+
+      at Object.toBe (tests/contracts/audit_2_6_equipment_commit.test.js:122:77)
+
+  ● AUTO chooses method-specific eligibility over the fallback and explicit NOT_REQUIRED overrides the mapping
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: undefined
+
+      134 |     expect((await resolveEquipmentRequirement(prisma, { analysis: f.analysis, methodologyId: method.id }, f.labId)).isRequired).toBe(false);
+      135 |     const item = await f.item(); await f.require('NOT_REQUIRED');
+    > 136 |     expect((await f.save([item])).body.saved).toBe(1);
+          |                                               ^
+      137 |     const result = await prisma.result.findFirst({ where: { sampleId: item.sampleId } });
+      138 |     expect(result.equipmentId).toBeNull(); expect(result.equipmentReadiness).toBeNull();
+      139 | });
+
+      at Object.toBe (tests/contracts/audit_2_6_equipment_commit.test.js:136:47)
+
+  ● texture results and the new existing-path attempt store exactly the same snapshot
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 409
+
+      142 |     await f.require('REQUIRED', 'TEXTURE');
+      143 |     const response = await f.save([{ ...item, value: undefined, values: { sand: 50, silt: 35, clay: 15 }, equipmentId: asset.id }]);
+    > 144 |     expect(response.status).toBe(200); expect(response.body.saved).toBe(1);
+          |                             ^
+      145 |     const attempt = await prisma.workAttempt.findFirst({ where: { workItemId: item.workItemId } });
+      146 |     const results = await prisma.result.findMany({ where: { sampleId: item.sampleId, attemptId: attempt.id } });
+      147 |     expect(results).toHaveLength(4);
+
+      at Object.toBe (tests/contracts/audit_2_6_equipment_commit.test.js:144:29)
+
+  ● raw database updates cannot change equipment evidence while ordinary result metadata updates remain valid
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: undefined
+
+      153 | test('raw database updates cannot change equipment evidence while ordinary result metadata updates remain valid', async () => {
+      154 |     const f = await fixture(), item = await f.item(), asset = await f.asset();
+    > 155 |     expect((await f.save([{ ...item, equipmentId: asset.id }])).body.saved).toBe(1);
+          |                                                                             ^
+      156 |     const result = await prisma.result.findFirst({ where: { sampleId: item.sampleId } });
+      157 |     await expect(prisma.$executeRawUnsafe('UPDATE "Result" SET equipmentReadiness=? WHERE id=?', '{}', result.id))
+      158 |         .rejects.toThrow('RESULT_EQUIPMENT_READINESS_IMMUTABLE');
+
+      at Object.toBe (tests/contracts/audit_2_6_equipment_commit.test.js:155:77)
+
+  ● a superseding Result gets a fresh snapshot and leaves the original equipment evidence unchanged
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertExecution (services/workAttemptWriteService.js:63:25)
+      at writeResultsExecutionChecked (services/resultWriteService.js:445:29)
+      at writeResultsExecution (services/resultWriteService.js:376:16)
+      at writeResult (services/resultWriteService.js:369:13)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.<anonymous> (tests/contracts/audit_2_6_equipment_commit.test.js:167:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User audit-reviewer (Lab: LAB-190-REVIEW) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/reviewAttemptService.js:36:11)
+      at createReviewDecision (services/reviewAttemptService.js:63:16)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.<anonymous> (tests/contracts/audit_3_1_attempt_review.test.js:106:5)
+
+PASS tests/contracts/audit_3_1_attempt_review.test.js
+  √ a single current attempt is derived and stored on the actual ReviewDecision (42 ms)
+  √ two current attempts require selection; a valid explicit attempt is used without choosing latest (26 ms)
+  √ an attempt from another WorkItem or without current Results is refused without writes (40 ms)
+  √ only an unexecuted analytical WAIVE may keep its attempt null (30 ms)
+  √ several current Results on one attempt are one review candidate (15 ms)
+  √ bulk ambiguity lists all affected ids before writes, and any later failure rolls back every decision (64 ms)
+  √ review creation enforces lab scope and review permission before writing (58 ms)
+  √ non-measurement review keeps its existing separate evidence workflow (13 ms)
+
+PASS tests/contracts/audit_3_2_repeat_plan.test.js
+  √ actual mandatory-reason repeats are excluded from the interim list with zero planner writes (1474 ms)
+  √ an unavailable predecessor schema refuses before planning with a stable code and zero writes (5 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+FAIL tests/contracts/review_reports_amendments_p6.test.js
+  Package P6: Review, Reports & Amendments Verification
+    × 1. Review submission accepts normalized decisions and updates status to ACCEPTED
+    × 2. Disposed material strictly rejects order modifications (1 ms)
+    × 3. Generates report v1 with immutable snapshot and monotonic versioning
+    × disposed material refuses orders/preview with its stable code and zero writes
+    × disposed material refuses amendments with its stable code and zero writes
+    × disposed material refuses custody/move with its stable code and zero writes
+    × 4. Generates superseding report v2 after authorized change
+    × 5. Traceable amendment creation preserves history and records audit
+
+  ● Package P6: Review, Reports & Amendments Verification › 1. Review submission accepts normalized decisions and updates status to ACCEPTED
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/review_reports_amendments_p6.test.js:104:16)
+
+  ● Package P6: Review, Reports & Amendments Verification › 2. Disposed material strictly rejects order modifications
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/review_reports_amendments_p6.test.js:104:16)
+
+  ● Package P6: Review, Reports & Amendments Verification › 3. Generates report v1 with immutable snapshot and monotonic versioning
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/review_reports_amendments_p6.test.js:104:16)
+
+  ● Package P6: Review, Reports & Amendments Verification › disposed material refuses orders/preview with its stable code and zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/review_reports_amendments_p6.test.js:104:16)
+
+  ● Package P6: Review, Reports & Amendments Verification › disposed material refuses amendments with its stable code and zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/review_reports_amendments_p6.test.js:104:16)
+
+  ● Package P6: Review, Reports & Amendments Verification › disposed material refuses custody/move with its stable code and zero writes
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/review_reports_amendments_p6.test.js:104:16)
+
+  ● Package P6: Review, Reports & Amendments Verification › 4. Generates superseding report v2 after authorized change
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/review_reports_amendments_p6.test.js:104:16)
+
+  ● Package P6: Review, Reports & Amendments Verification › 5. Traceable amendment creation preserves history and records audit
+
+    A reasoned order revision with the complete analysis set is required before starting this execution.
+
+      28 |     rules.requireTransaction(tx);
+      29 |     const outcome = await inspectOrderLine(tx, item);
+    > 30 |     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
+         |                              ^
+      31 |         409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+      32 |     return outcome.orderLineId;
+      33 | }
+
+      at Object.resolveOrderLine (services/orderLineResolutionService.js:30:30)
+      at insertFixtureExecution (tests/helpers/workAttemptFixtures.js:28:29)
+      at tests/helpers/workAttemptFixtures.js:83:9
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/review_reports_amendments_p6.test.js:104:16)
+
+FAIL tests/security/wiring.test.js
+  WP-03: Dead-Code & System Wiring Regression Tests
+    √ Audit 2.5: QC preview has the evaluate permission and uses the scoped read authority (2 ms)
+    √ 1. validateSampleMatrix is actively called in result save/submit flow
+    √ 2. workflowContract functions are exported and callable
+    √ 3. utils/scopeGuard.js exported functions have active call sites and no dead code (WP-28) (51 ms)
+    √ 4. config/roles.js permission keys are registered and referenced (436 ms)
+    √ 5. client/src/components are tracked for active imports (129 ms)
+    √ 6. SD-16: No client file issues a status write the user did not request (catches SD-07) (1 ms)
+    × 7. SD-16: Route-level permission guards are consistent with controller authorization (catches SD-06)
+    √ 8. SD-16: Every gate the client renders has an active server counterpart (catches SD-05) (1 ms)
+
+  ● WP-03: Dead-Code & System Wiring Regression Tests › 7. SD-16: Route-level permission guards are consistent with controller authorization (catches SD-06)
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "hasPermission(actor, 'EDIT_ANALYSES')"
+    Received string:    "// Retained entry point; #209 owns both edit routes in one transaction service.
+    module.exports = { reviseAnalyses: require('./orderService').reviseAnalyses };
+    "
+
+      134 |         // the same domain permission check in addition to the route guard.
+      135 |         const analysisAuthority = fs.readFileSync(path.join(serverDir, 'services/sampleAnalysisStateService.js'), 'utf8');
+    > 136 |         expect(analysisAuthority).toContain("hasPermission(actor, 'EDIT_ANALYSES')");
+          |                                   ^
+      137 |         const updateAnalysesFn = sampleControllerCode.match(/exports\.updateSampleAnalyses = async ([\s\S]*?)\n};/);
+      138 |         expect(updateAnalysesFn).not.toBeNull();
+      139 |         expect(updateAnalysesFn[1]).toContain('sampleAnalysisStateService.reviseAnalyses');
+
+      at Object.toContain (tests/security/wiring.test.js:136:35)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-INTAKE-DRAFT by test_sample_reception_profileintakelab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-INTAKE-DRAFT by test_sample_reception_profileintakelab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-INTAKE-DRAFT by test_sample_reception_profileintakelab
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-BATCH-A by test_sample_reception_profileintakelab
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: be61c46f-79fb-4840-8c86-dc3affadd874 linked to Project: PROFILE-INTAKE-PROJECT
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample be61c46f-79fb-4840-8c86-dc3affadd874 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [INTAKE] Processing intake for PROFILE-BATCH-B by test_sample_reception_profileintakelab
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 987c07ba-ecf6-40fa-822b-11df946ee8b9 linked to Project: PROFILE-INTAKE-PROJECT
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 987c07ba-ecf6-40fa-822b-11df946ee8b9 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:746:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c3bb5408-6d1b-482a-9043-86a66c9e24a0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/intake_profile_capture.test.js
+  Intake identity normalization and context preservation
+    √ new captures rewrite client actor/revision/time and preserve independent site (1 ms)
+    √ omission preserves exact legacy; explicit unknown does not resurrect source aliases
+    √ a changed project freezes the exact legacy site key without promoting a pit (1 ms)
+    √ untrusted namespace and server-managed compatibility are rejected (14 ms)
+    √ released records cannot be corrected through intake
+  Mounted intake draft and manifest paths preserve source identity
+    √ draft save, reopen and repeated save retain the reference and explicit unknown (129 ms)
+    √ manifest preview keeps row-specific zero, code and source column rather than inferring from bags (6 ms)
+    √ actual batch capture keeps separate source codes, decimal depths and distinct accessions (112 ms)
+    √ new walk-in receipt requires a registered active laboratory and cannot claim a different lab (11 ms)
+
+Test Suites: 7 failed, 3 passed, 10 total
+Tests:       65 failed, 181 passed, 246 total
+Snapshots:   0 total
+Time:        187.549 s, estimated 370 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_1_non_scientific_authorisation.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\review_reports_amendments_p6.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_2_6_equipment_commit.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_1_attempt_review.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_1_attempt_execution.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_1_attempt_sql_guards.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_206_sample_containers.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\intake_profile_capture.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_2_repeat_plan.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\wiring.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-historical-context-family-regression\report-original.json
