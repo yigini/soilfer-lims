@@ -1,0 +1,421 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User manager-33228175-52fc-4bf6-baaa-48272749afee (Lab: another-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/controlChartService.js:23:16)
+      at services/controlChartService.js:156:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/issue_214_control_chart_integration.test.js:207:5)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-14T06:45:15.247Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/issue_214_control_chart_integration.test.js (19.586 s)
+  √ the explicit SQLite read-only impact report resolves actual policy scopes and counts unbound new runs without changing database bytes (1809 ms)
+  √ an effective corrected observation replaces its original in future baselines while prior proposals and evaluations stay immutable (1544 ms)
+  √ a different reference-material lot is a new Provisional series and cannot inherit approved limits or history (1373 ms)
+  √ run-first options expose eligible chart lots and the actual start binds them in its guarded transaction (1446 ms)
+  √ chart lots freeze at start; fixed-window late binding and a pre-release started run retain their original path (3901 ms)
+  √ provisional limits, approval by a second user and supersession preserve all past and already-started criteria (1511 ms)
+  √ QC_FAIL controls remain in sequence history but cannot enter a passing baseline (1406 ms)
+  √ review rules create idempotent scoped obligations and append-only resolutions without changing verdicts (1686 ms)
+  √ every baseline exclusion is explicit and retained; ambiguous chronology and wrong scope refuse atomically (1453 ms)
+  √ HTTP scope and approval permissions use actual token validation and stable refusal codes (1454 ms)
+  √ additive installation preserves stored legacy policy bytes and old rows with DRY 0 / APPLY 1 / NO_OP 0 (1414 ms)
+
+PASS tests/contracts/deployment_readiness_bootstrap.test.js (14.047 s)
+  Deployment Readiness Bootstrap & Packaging Verification
+    √ setup.sh rejects invalid mode with exit 1 (215 ms)
+    √ setup.sh rejects Node 18 runtime with clear guidance (575 ms)
+    √ setup.sh fails fast and aborts if schema push fails (no error swallowing) (721 ms)
+    √ setup.sh auto-populates JWT_SECRET into existing .env with blank secret (1151 ms)
+    √ entrypoint persists auto-generated JWT_SECRET across container restarts (844 ms)
+    √ entrypoint recovers from interrupted initial setup on restart without reseeding populated installations (1474 ms)
+    √ docker-entrypoint.sh database inspection fails closed on corrupt or unreadable database (177 ms)
+    √ docker-entrypoint.sh database inspection passes cleanly on valid populated database (6840 ms)
+    √ seed.js recovers from real partial state ({ labs: 1, users: 0 }) and does not duplicate LAB01 (793 ms)
+    √ docker compose configuration validates cleanly across local, global, and nginx overlays (1186 ms)
+
+PASS tests/security/audit_1_2_state_writes.test.js (11.044 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (7 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)"))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)")) (1 ms)
+  √ the original rehearsal cannot reintroduce a direct Sample deletion
+  √ nested connect association has one actual authority finding
+  √ nested set association has one actual authority finding (1 ms)
+  √ nested disconnect association has one actual authority finding
+  √ the closed FK runner refuses unknown case (86 ms)
+  √ the closed FK runner refuses configured candidate (109 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (5 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (3 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (3 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (2 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (2 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (2 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (7 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (2 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js (1 ms)
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql (2 ms)
+  √ legacy CLI launchers cannot import any fixture or test module (2 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (4 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js (1 ms)
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (2 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (5 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (3 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js
+  √ a direct sample write in a #190 test remains a finding outside the factory (1 ms)
+  √ a direct workItem write in a #190 test remains a finding outside the factory
+  √ a direct result write in a #190 test remains a finding outside the factory
+  √ a changed #190 historical factory digest is a scanner finding (10 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (8 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js (1 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql (2 ms)
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (2 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql (1 ms)
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (10512 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"]) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')")
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)')
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')")
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (2 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (51 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}})
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) }
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED')
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}`
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`)
+  √ a real temporary non-allowlisted test file fails the source guard (2 ms)
+  √ a shadowed file reader cannot impersonate a known schema load (1 ms)
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (1 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js (1 ms)
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (1 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF')
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0') (1 ms)
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF')
+  √ native pragma reads and enabled constraints remain permitted
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (1 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (2 ms)
+
+PASS tests/contracts/issue_214_lab_policy_schema.test.js
+  √ ABSENT plans the exact canonical DDL, creates empty storage, preserves history and immediately becomes NO_OP () (48 ms)
+  √ ABSENT plans the exact canonical DDL, creates empty storage, preserves history and immediately becomes NO_OP (,"policyVersion" INTEGER) (33 ms)
+  √ PRESENT canonical policy, override and report history remains byte-identical for dry and apply (27 ms)
+  √ refuses one table with zero changes and unchanged DB/WAL/SHM for both modes (24 ms)
+  √ refuses other table absent with zero changes and unchanged DB/WAL/SHM for both modes (92 ms)
+  √ refuses missing column with zero changes and unchanged DB/WAL/SHM for both modes (30 ms)
+  √ refuses missing canonical index with zero changes and unchanged DB/WAL/SHM for both modes (25 ms)
+  √ refuses wrong index with zero changes and unchanged DB/WAL/SHM for both modes (27 ms)
+  √ refuses extra column with zero changes and unchanged DB/WAL/SHM for both modes (26 ms)
+  √ refuses extra trigger with zero changes and unchanged DB/WAL/SHM for both modes (26 ms)
+  √ refuses a mismatched Report column before creating either table (,"policyVersion" TEXT) (17 ms)
+  √ refuses a mismatched Report column before creating either table (,"policyVersion" INTEGER NOT NULL DEFAULT 0) (17 ms)
+  √ a PRESENT schema with a missing Report column is refused without normalization (29 ms)
+  √ tampered canonical source refuses before opening a writer, preserving DB/WAL/SHM (11 ms)
+  √ a partial schema in a real active WAL is refused while all original DB/WAL/SHM bytes stay unchanged (33 ms)
+  √ a real Prisma-created equivalent with stored rows is PRESENT/NO_OP without adding constraints or changing bytes (88 ms)
+  √ empty installed tables resolve shipped Strict/chart/minimum20 through the actual policyService without inserting policy rows (235 ms)
+  √ policy installation and read-only readiness precede214; Docker packages the fixed source outside the database volume (1 ms)
+  √ the actual shipped Docker post-start policy/chart probe preserves an original WAL-mode database without sidecars (1477 ms)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:48:18)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:48:90)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:50:11)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:50:83)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:53:64)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:55:136)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:68:11)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:68:83)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:70:63)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:74:18)
+
+  console.error
+    Warning: React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: object.
+
+      at printWarning (../client/node_modules/react/cjs/react.development.js:209:30)
+      at error (../client/node_modules/react/cjs/react.development.js:183:7)
+      at Object.createElementWithValidation [as createElement] (../client/node_modules/react/cjs/react.development.js:2354:7)
+      at Object.LabPolicies (evalmachine.<anonymous>:183:198)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:19:130)
+      at Object.render (tests/contracts/audit_1_0_policy_components.test.js:76:18)
+
+PASS tests/contracts/audit_1_0_policy_components.test.js
+  Audit 1.0: real policy page controls
+    √ technician sees effective policies and scope selectors but has no save, edit or clear controls (171 ms)
+    √ manager changes preset with mandatory reason and current version (20 ms)
+    √ manager edits selected method scope, includes reason and version, and cannot edit lab-only keys there (61 ms)
+    √ profile defaults cannot be cleared as laboratory overrides (12 ms)
+    √ manager edits PT limits at analysis scope and submits the exact structured thresholds (40 ms)
+    √ Westgard editor keeps reject and warning lists exclusive (5 ms)
+    √ calibration action editor offers bracket repeats only for continuing checks and preserves other kinds (4 ms)
+    √ sample-code editor warns when the check character is omitted, and allows the lab to keep that format (4 ms)
+    √ all registry descriptions, UI labels and error keys exist in all five locales (53 ms)
+
+PASS tests/contracts/issue_214_control_chart_ui.test.js
+  √ chart requests use the chosen lab and exact series; reading permission hides all requests and actions (53 ms)
+  √ baseline exclusions require a reason and submit selected identities without changing values (14 ms)
+  √ a trial outlier stays selected until the proposer explicitly excludes it (8 ms)
+  √ proposal approval is hidden from its own proposer and visible to a different named approver (12 ms)
+  √ review resolution requires a note and posts the explicit outcome without touching a run verdict (6 ms)
+  √ plot draws mean, ±2s and ±3s from the selected stored set and labels every observation (4 ms)
+  √ chart actions, statuses and policy keys exist in both en catalogues (6 ms)
+  √ chart actions, statuses and policy keys exist in both es catalogues (5 ms)
+  √ chart actions, statuses and policy keys exist in both es-419 catalogues (6 ms)
+  √ chart actions, statuses and policy keys exist in both fr catalogues (6 ms)
+  √ chart actions, statuses and policy keys exist in both pt catalogues (6 ms)
+
+PASS tests/security/audit_1_2_migration_sources.test.js
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().evidence.sql); (8 ms)
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().guards.sql); (3 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(sources.evidence.sql); (2 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(evidenceCreates(sources.evidence.sql)); (3 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered services/workflowMigrationSources.js bytes never become a SQL exemption
+  √ a third registry entry changes the loader digest and stays unresolved (1 ms)
+
+PASS tests/contracts/issue_214_control_chart_rules.test.js
+  √ 1-2s fires only beyond its strict boundary (2 ms)
+  √ 1-3s fires only beyond its strict boundary
+  √ 2-2s fires only beyond its strict boundary
+  √ 4-1s fires only beyond its strict boundary (1 ms)
+  √ 10x fires only beyond its strict boundary
+  √ R-4s cannot compare two different runs and records one-point runs as not applicable
+  √ sequence rules span runs, include failed controls, and count multiple positions in one run (1 ms)
+  √ history cannot cross a limit-basis reset (9 ms)
+  √ provisional and fixed windows never report multirules as passed (1 ms)
+  √ explicit review mapping is independent of reject/warn verdicts
+  √ mapping rejects duplicates and preserves old overrides without a review key (1 ms)
+  √ order is execution time then QC index then deterministic id; unknown metadata refuses (1 ms)
+  √ baseline uses arithmetic mean and sample SD, refuses constant or nonfinite baselines (1 ms)
+  √ a stored evaluation is independent of later changes to input values and limits
+
+Test Suites: 8 passed, 8 total
+Tests:       219 passed, 219 total
+Snapshots:   0 total
+Time:        48.304 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_lab_policy_schema.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_integration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_rules.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_214_control_chart_ui.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\deployment_readiness_bootstrap.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_0_policy_components.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_migration_sources.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue214-policy-post-probe-focused\report-original.json

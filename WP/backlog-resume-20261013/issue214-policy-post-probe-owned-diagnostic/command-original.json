@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "node",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\diagnose-issue214-policy-post-probe-owned-once.cjs"
+  ],
+  "databasePath": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\test_issue214_policy_probe_context_de196dfe-3289-4480-b211-e66954431540.db",
+  "sourceTemplate": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.owned-templates\\test_template_33522c62-1788-4298-8db6-06a0d4e5ff38.db",
+  "templateBefore": {
+    "": "e8300c63d817933182ad35393eb5a84bd1974f2ddf5f5830efdce0ec21fd1498",
+    "-wal": "68356b0f2f1dfa8e4a0d026cc57d6cf5144a16ba2f168eece13004bb1df36da5",
+    "-shm": "08145bc174f31b1813985e6a585b2042901a16e68f0c9cb94fd4b3461e38ab66"
+  },
+  "nodeOptions": "",
+  "productionOperations": 0
+}

@@ -1,0 +1,193 @@
+﻿2026-10-14T05:42:44.7447866Z ##[group]Run node server/scripts/rehearsal_deployment_readiness.cjs
+2026-10-14T05:42:44.7448393Z [36;1mnode server/scripts/rehearsal_deployment_readiness.cjs[0m
+2026-10-14T05:42:44.7512302Z shell: /usr/bin/bash -e {0}
+2026-10-14T05:42:44.7512557Z env:
+2026-10-14T05:42:44.7512758Z   IMAGE_TAG: soilfer-lims:ci
+2026-10-14T05:42:44.7512992Z   CI: true
+2026-10-14T05:42:44.7513172Z ##[endgroup]
+2026-10-14T05:42:44.7881708Z ================================================================
+2026-10-14T05:42:44.7884155Z   REAL DISPOSABLE DOCKER DEPLOYMENT READINESS ACCEPTANCE        
+2026-10-14T05:42:44.7885176Z   Testing Default-Entrypoint Containers on Empty Volumes        
+2026-10-14T05:42:44.7886040Z ================================================================
+2026-10-14T05:42:44.7886477Z 
+2026-10-14T05:42:44.8528369Z Image Tag:    soilfer-lims:ci
+2026-10-14T05:42:44.8529197Z Immutable ID: sha256:d36868f744650f8509ae42fbd82290b9c550388f7d288793400147cc4fd0dcaf
+2026-10-14T05:42:44.8529565Z 
+2026-10-14T05:42:44.8566318Z ▶ [Scenario 1] Default Entrypoint Empty-Volume Local Mode First-Start...
+2026-10-14T05:42:53.3053079Z   ✓ Container healthy on port 37183
+2026-10-14T05:42:53.6619459Z   ✓ Fresh shipped entrypoint healthy: schema COMPLETE, 11 references deferred, catalogue inserts 0, reference receipts 0, repeat NO_OP/byte-preserved
+2026-10-14T05:42:53.9665591Z   ✓ Initial admin login succeeded (mustChangePassword=true)
+2026-10-14T05:42:54.2413802Z   ✓ Password change succeeded
+2026-10-14T05:42:54.3546731Z   ✓ Pre-restart token issued and verified active on operational API
+2026-10-14T05:42:54.5555960Z   ✓ Persisted secret verified on volume (1b864fe1...)
+2026-10-14T05:43:04.7028199Z   ✓ Quiesced container 1
+2026-10-14T05:43:04.7028509Z 
+2026-10-14T05:43:04.7028998Z ▶ [Scenario 2] Container Restart on Same Volume (Secret Persistence & No Reseed)...
+2026-10-14T05:43:10.0098398Z   ✓ Restarted container healthy on port 41427
+2026-10-14T05:43:10.5733197Z   ✓ Pre-restart JWT token remains valid across container restart without re-login
+2026-10-14T05:43:10.7906797Z   ✓ Persisted secret byte-for-byte identical across restart
+2026-10-14T05:43:10.8988702Z   ✓ Login with updated password confirmed on restarted container
+2026-10-14T05:43:10.9230411Z   ✓ Verified seed.js was safely skipped on restart
+2026-10-14T05:43:10.9231353Z   Preparing 199 conflict proof: quiescing its disposable source containers
+2026-10-14T05:43:21.0873917Z   Source containers stopped; starting bounded WAL-aware owned snapshot/conflict proof
+2026-10-14T05:43:21.4260891Z   ✓ Actual shipped installer refuses conflicting pct_mass in both modes, writes 0, owned/source bytes unchanged
+2026-10-14T05:43:21.6785026Z   Loading owned catalogue prerequisite through existing units authority
+2026-10-14T05:43:22.4296897Z   Loading owned catalogue prerequisite through existing references authority
+2026-10-14T05:43:23.2129376Z   Loading owned catalogue prerequisite through existing catalogue authority
+2026-10-14T05:43:40.4513496Z   ✓ Explicit existing catalogue authorities → next shipped entrypoint adds exactly 11 inactive references/11 receipts; all old rows/schema/receipts retained; repeat NO_OP/byte-preserved
+2026-10-14T05:43:40.4514585Z 
+2026-10-14T05:43:40.4515104Z ▶ [Scenario 3] Interrupted-Init (Partial Seed Recovery) in Docker...
+2026-10-14T05:43:43.2350141Z Loaded Prisma config from prisma.config.ts.
+2026-10-14T05:43:43.2350569Z 
+2026-10-14T05:43:43.2350809Z Prisma schema loaded from prisma/schema.prisma.
+2026-10-14T05:43:49.5803851Z   ✓ Container booted on partial volume and became healthy on port 35605
+2026-10-14T05:43:49.8737113Z   ✓ Partial initialization was cleanly resumed and admin user created without LAB01 conflict
+2026-10-14T05:44:00.0320037Z 
+2026-10-14T05:44:00.0321200Z ▶ [Scenario 4] Default Entrypoint Empty-Volume Global Mode First-Start...
+2026-10-14T05:44:09.4227815Z   ✓ Global mode container healthy on port 38053
+2026-10-14T05:44:09.7133310Z   ✓ Global SUPER_ADMIN login verified
+2026-10-14T05:44:10.1147610Z   ✓ Created Lab Alpha (ALPHA_1791956564852) and Lab Beta (BETA_1791956564852)
+2026-10-14T05:44:10.1366002Z   ✓ Activated both laboratories
+2026-10-14T05:44:10.1366443Z 
+2026-10-14T05:44:10.1367347Z ▶ [Scenario 5] Multi-Lab Workload, Real Export, Schedulers & Quiesced Backup Serialization...
+2026-10-14T05:44:11.6711236Z   ✓ Ingested 10 representative samples concurrently across Lab Alpha & Lab Beta
+2026-10-14T05:44:11.6843645Z   ✓ Manager A real data export returned exactly 5 scoped samples with 1:1 multiplicity and verified accession Lab IDs
+2026-10-14T05:44:11.6926657Z   ✓ Manager B real data export returned exactly 5 scoped samples with 1:1 multiplicity and verified accession Lab IDs
+2026-10-14T05:44:11.6998140Z   ✓ Super Admin real data export returned all 10 cross-facility samples with complete IDs, multiplicity, and accession Lab IDs
+2026-10-14T05:44:11.7506347Z Loaded Prisma config from prisma.config.ts.
+2026-10-14T05:44:11.7506853Z 
+2026-10-14T05:44:11.7507216Z Prisma schema loaded from prisma/schema.prisma.
+2026-10-14T05:44:11.7512505Z   ✓ Verified background escalation scheduler initialized during container boot
+2026-10-14T05:44:21.9080520Z   ✓ Quiesced active writer container before generating database backup
+2026-10-14T05:44:22.1963783Z   ✓ Pre-restore backup executed cleanly
+2026-10-14T05:44:22.1965341Z   ✓ Bound exact backup artifact matching runbook regex: soilfer_lims_backup_2026-10-14T05-44-22-066Z.db.gz
+2026-10-14T05:44:22.4649956Z   ✓ Backup artifact verification PASSED: Users=3, Samples=10
+2026-10-14T05:44:22.7837745Z   ✓ Restore into fresh target volume PASSED with epoch invalidation
+2026-10-14T05:44:28.0744693Z   ✓ Restored container healthy on port 44957
+2026-10-14T05:44:28.3876284Z   ✓ Post-restore admin login confirmed
+2026-10-14T05:44:28.5343188Z   ✓ Post-restore sample count confirmed (exactly 5 samples preserved for Manager Alpha)
+2026-10-14T05:44:38.6717288Z 
+2026-10-14T05:44:38.6718976Z ▶ [Scenario 6] Populated Supported-Baseline Upgrade, Assets, Staged Route B & Epoch Invalidation...
+2026-10-14T05:44:38.6906713Z   ✓ Bound supported baseline: soilfer-lims:baseline-v3.5.30 (Tree: 48d0e526ded03232ac8516dd867f4b14923bdb58, ID: sha256:3ebe399c38d2597f4deaa0ce7a85c18343382c9a658f641041bb5d2d5ed218dd)
+2026-10-14T05:44:38.6908563Z   ✓ Bound candidate target:   soilfer-lims:ci (ID: sha256:d36868f744650f8509ae42fbd82290b9c550388f7d288793400147cc4fd0dcaf)
+2026-10-14T05:44:41.5323964Z Loaded Prisma config from prisma.config.ts.
+2026-10-14T05:44:41.5324303Z 
+2026-10-14T05:44:41.5324518Z Prisma schema loaded from prisma/schema.prisma.
+2026-10-14T05:44:41.5325261Z   ✓ Initialized real baseline database with 2 labs and 3 users
+2026-10-14T05:44:41.7220384Z   ✓ Uploaded reference asset (spectral_cal_curve.json) to assets volume
+2026-10-14T05:44:42.9109789Z   ✓ Baseline container healthy on port 40851
+2026-10-14T05:44:43.2848579Z   ✓ Baseline operational login and API access verified
+2026-10-14T05:44:43.6658143Z   ✓ Created ten EXPECTED samples through baseline project manifests; API and read-only preservation record agree
+2026-10-14T05:44:54.7432882Z Unable to find image 'alpine:latest' locally
+2026-10-14T05:44:54.7446453Z latest: Pulling from library/alpine
+2026-10-14T05:44:54.7447061Z e2de96513ba9: Already exists
+2026-10-14T05:44:54.7447730Z Digest: sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
+2026-10-14T05:44:54.7448263Z Status: Downloaded newer image for alpine:latest
+2026-10-14T05:44:54.9260686Z   ✓ Generated Route B tarballs: db_snapshot_1791956564852.tar.gz & assets_snapshot_1791956564852.tar.gz
+2026-10-14T05:44:55.1265192Z   ✓ Staged recovery safely aborted on corrupt tarball without touching target volume
+2026-10-14T05:44:55.3782858Z   ✓ Live volume verified intact after corrupt staging abort
+2026-10-14T05:44:56.6832899Z   ✓ Owned baseline → #190 COMPLETE → #191 PRE_191 dry-run → COMPLETE; NULL reasons 0, backfill 0, blocked RECORDED owners 0; all retained rows and both receipts verified; NO_OP writes 0
+2026-10-14T05:44:57.2717007Z   ✓ Owned #191 COMPLETE → #192 PRE_192 dry-run → COMPLETE; retained history unchanged, new selections 0, NO_OP writes 0
+2026-10-14T05:44:57.9955709Z   ✓ cross-check-installer-pre201: direct installer PRE_201 dry-run → COMPLETE_201; retained rows/objects/receipts preserved, evidence/backfill0, repeat NO_OP writes0/bytes preserved
+2026-10-14T05:44:57.9973371Z {"crossCheckInstallerProof":{"scenario":"cross-check-installer-pre201","invocation":"DIRECT_INSTALLER_MODULE","dry":{"classification":"PRE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"mode":"DRY_RUN","totalChanges":0,"newEvaluationCount":0,"backfilledCount":0},"applied":{"classification":"COMPLETE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"receipt":{"sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"originalRowsSha256":"2aa42f4a5ed51bb69565e6623f6291706d326a37859b7e07a0aefb3c530a9a9b","originalRowsPreserved":true,"newEvaluationCount":0,"backfilledCount":0,"receiptSha256":"fd442fa6afee6c09e33869ad579d37228004207af4f80ca7b60a66f98ffe1801"},"previousClassification":"PRE_201","mode":"APPLIED","newEvaluationCount":0,"backfilledCount":0,"totalChanges":1},"ready":{"classification":"COMPLETE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"receipt":{"sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"originalRowsSha256":"2aa42f4a5ed51bb69565e6623f6291706d326a37859b7e07a0aefb3c530a9a9b","originalRowsPreserved":true,"newEvaluationCount":0,"backfilledCount":0,"receiptSha256":"fd442fa6afee6c09e33869ad579d37228004207af4f80ca7b60a66f98ffe1801"},"mode":"DRY_RUN","totalChanges":0,"newEvaluationCount":0,"backfilledCount":0},"again":{"classification":"COMPLETE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"receipt":{"sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"originalRowsSha256":"2aa42f4a5ed51bb69565e6623f6291706d326a37859b7e07a0aefb3c530a9a9b","originalRowsPreserved":true,"newEvaluationCount":0,"backfilledCount":0,"receiptSha256":"fd442fa6afee6c09e33869ad579d37228004207af4f80ca7b60a66f98ffe1801"},"mode":"NO_OP","totalChanges":0,"newEvaluationCount":0,"backfilledCount":0},"retainedRowsAndObjectsPreserved":true,"dryRunBytesPreserved":true,"noOpBytesPreserved":true}}
+2026-10-14T05:44:58.3571880Z   ✓ Owned #272 ABSENT → shipped additive rawInput owner → ALREADY_PRESENT; all old fields/receipts preserved, backfill0, repeat NO_OP bytes unchanged
+2026-10-14T05:44:58.6093464Z   Loading owned catalogue prerequisite through existing units authority
+2026-10-14T05:44:59.3857944Z   Loading owned catalogue prerequisite through existing references authority
+2026-10-14T05:45:00.1706984Z   Loading owned catalogue prerequisite through existing catalogue authority
+2026-10-14T05:45:19.1448104Z [eval]:10
+2026-10-14T05:45:19.1448963Z            Object.values(counts).some(Boolean)||JSON.stringify(hash())!==JSON.stringify(before))throw Error('Policy/214 startup or repeat preservation differs');
+2026-10-14T05:45:19.1449912Z                                                                                                 ^
+2026-10-14T05:45:19.1450337Z 
+2026-10-14T05:45:19.1450729Z Error: Policy/214 startup or repeat preservation differs
+2026-10-14T05:45:19.1451536Z     at [eval]:10:103
+2026-10-14T05:45:19.1451914Z     at [eval]:11:93
+2026-10-14T05:45:19.1452367Z     at runScriptInThisContext (node:internal/vm:219:10)
+2026-10-14T05:45:19.1452771Z     at node:internal/process/execution:451:12
+2026-10-14T05:45:19.1453078Z     at [eval]-wrapper:6:24
+2026-10-14T05:45:19.1453452Z     at runScriptInContext (node:internal/process/execution:449:60)
+2026-10-14T05:45:19.1453927Z     at evalFunction (node:internal/process/execution:283:30)
+2026-10-14T05:45:19.1454356Z     at evalTypeScript (node:internal/process/execution:295:3)
+2026-10-14T05:45:19.1454733Z     at node:internal/main/eval_string:71:3
+2026-10-14T05:45:19.1454932Z 
+2026-10-14T05:45:19.1455022Z Node.js v24.21.0
+2026-10-14T05:45:19.1459397Z 
+2026-10-14T05:45:19.1461378Z ❌ REHEARSAL FAILED: Error: Command failed: docker run --rm -v lims_191_release_copy_1791956564852:/owned-policy soilfer-lims:ci node -e const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+2026-10-14T05:45:19.1462853Z          const dbPath='/owned-policy/dev.db',hash=()=>Object.fromEntries(['','-wal','-shm'].map(suffix=>[suffix,
+2026-10-14T05:45:19.1463932Z            fs.existsSync(dbPath+suffix)?crypto.createHash('sha256').update(fs.readFileSync(dbPath+suffix)).digest('hex'):null]));
+2026-10-14T05:45:19.1464674Z          const before=hash(),installer=require('./scripts/install_lab_policy_schema');
+2026-10-14T05:45:19.1465484Z          const ready=installer.assertLabPolicyStartupReady(dbPath),again=installer.installLabPolicySchema({dbPath,apply:true});
+2026-10-14T05:45:19.1466335Z          const charts=require('./scripts/install_control_charts').assertControlChartStartupReady(dbPath);
+2026-10-14T05:45:19.1466957Z          const db=new Database(dbPath,{readonly:true,fileMustExist:true});
+2026-10-14T05:45:19.1467790Z          const counts=Object.fromEntries(['LabPolicy','LabPolicyOverride'].map(name=>[name,db.prepare('SELECT count(*) n FROM "'+name+'"').get().n]));db.close();
+2026-10-14T05:45:19.1468888Z          if(ready.classification!=='PRESENT'||again.mode!=='NO_OP'||again.totalChanges!==0||charts.classification!=='COMPLETE_214'||charts.totalChanges!==0||
+2026-10-14T05:45:19.1470136Z            Object.values(counts).some(Boolean)||JSON.stringify(hash())!==JSON.stringify(before))throw Error('Policy/214 startup or repeat preservation differs');
+2026-10-14T05:45:19.1471613Z          console.log(JSON.stringify({ready,again,charts,counts,dbWalShmPreserved:true}));
+2026-10-14T05:45:19.1472112Z [eval]:10
+2026-10-14T05:45:19.1472818Z            Object.values(counts).some(Boolean)||JSON.stringify(hash())!==JSON.stringify(before))throw Error('Policy/214 startup or repeat preservation differs');
+2026-10-14T05:45:19.1473588Z                                                                                                 ^
+2026-10-14T05:45:19.1473844Z 
+2026-10-14T05:45:19.1474074Z Error: Policy/214 startup or repeat preservation differs
+2026-10-14T05:45:19.1474409Z     at [eval]:10:103
+2026-10-14T05:45:19.1474624Z     at [eval]:11:93
+2026-10-14T05:45:19.1474924Z     at runScriptInThisContext (node:internal/vm:219:10)
+2026-10-14T05:45:19.1475301Z     at node:internal/process/execution:451:12
+2026-10-14T05:45:19.1475600Z     at [eval]-wrapper:6:24
+2026-10-14T05:45:19.1475960Z     at runScriptInContext (node:internal/process/execution:449:60)
+2026-10-14T05:45:19.1476408Z     at evalFunction (node:internal/process/execution:283:30)
+2026-10-14T05:45:19.1477026Z     at evalTypeScript (node:internal/process/execution:295:3)
+2026-10-14T05:45:19.1477395Z     at node:internal/main/eval_string:71:3
+2026-10-14T05:45:19.1477591Z 
+2026-10-14T05:45:19.1477676Z Node.js v24.21.0
+2026-10-14T05:45:19.1477801Z 
+2026-10-14T05:45:19.1477969Z     at genericNodeError (node:internal/errors:986:15)
+2026-10-14T05:45:19.1478327Z     at wrappedFn (node:internal/errors:540:14)
+2026-10-14T05:45:19.1478694Z     at checkExecSyncError (node:child_process:942:11)
+2026-10-14T05:45:19.1479117Z     at Object.execFileSync (node:child_process:978:15)
+2026-10-14T05:45:19.1479923Z     at runSuite (/home/runner/work/soilfer-lims/soilfer-lims/server/scripts/rehearsal_deployment_readiness.cjs:1368:32)
+2026-10-14T05:45:19.1480682Z     at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+2026-10-14T05:45:19.1481414Z   status: 1,
+2026-10-14T05:45:19.1481622Z   signal: null,
+2026-10-14T05:45:19.1481819Z   output: [
+2026-10-14T05:45:19.1482007Z     null,
+2026-10-14T05:45:19.1482183Z     '',
+2026-10-14T05:45:19.1482372Z     '[eval]:10\n' +
+2026-10-14T05:45:19.1483095Z       "           Object.values(counts).some(Boolean)||JSON.stringify(hash())!==JSON.stringify(before))throw Error('Policy/214 startup or repeat preservation differs');\n" +
+2026-10-14T05:45:19.1483915Z       '                                                                                                ^\n' +
+2026-10-14T05:45:19.1484260Z       '\n' +
+2026-10-14T05:45:19.1484580Z       'Error: Policy/214 startup or repeat preservation differs\n' +
+2026-10-14T05:45:19.1484960Z       '    at [eval]:10:103\n' +
+2026-10-14T05:45:19.1485220Z       '    at [eval]:11:93\n' +
+2026-10-14T05:45:19.1485567Z       '    at runScriptInThisContext (node:internal/vm:219:10)\n' +
+2026-10-14T05:45:19.1486071Z       '    at node:internal/process/execution:451:12\n' +
+2026-10-14T05:45:19.1486407Z       '    at [eval]-wrapper:6:24\n' +
+2026-10-14T05:45:19.1486823Z       '    at runScriptInContext (node:internal/process/execution:449:60)\n' +
+2026-10-14T05:45:19.1487330Z       '    at evalFunction (node:internal/process/execution:283:30)\n' +
+2026-10-14T05:45:19.1487808Z       '    at evalTypeScript (node:internal/process/execution:295:3)\n' +
+2026-10-14T05:45:19.1488228Z       '    at node:internal/main/eval_string:71:3\n' +
+2026-10-14T05:45:19.1488512Z       '\n' +
+2026-10-14T05:45:19.1488715Z       'Node.js v24.21.0\n'
+2026-10-14T05:45:19.1488933Z   ],
+2026-10-14T05:45:19.1489112Z   pid: 30041,
+2026-10-14T05:45:19.1489303Z   stdout: '',
+2026-10-14T05:45:19.1489501Z   stderr: '[eval]:10\n' +
+2026-10-14T05:45:19.1490234Z     "           Object.values(counts).some(Boolean)||JSON.stringify(hash())!==JSON.stringify(before))throw Error('Policy/214 startup or repeat preservation differs');\n" +
+2026-10-14T05:45:19.1491484Z     '                                                                                                ^\n' +
+2026-10-14T05:45:19.1491886Z     '\n' +
+2026-10-14T05:45:19.1492197Z     'Error: Policy/214 startup or repeat preservation differs\n' +
+2026-10-14T05:45:19.1492574Z     '    at [eval]:10:103\n' +
+2026-10-14T05:45:19.1492815Z     '    at [eval]:11:93\n' +
+2026-10-14T05:45:19.1493160Z     '    at runScriptInThisContext (node:internal/vm:219:10)\n' +
+2026-10-14T05:45:19.1493561Z     '    at node:internal/process/execution:451:12\n' +
+2026-10-14T05:45:19.1493890Z     '    at [eval]-wrapper:6:24\n' +
+2026-10-14T05:45:19.1494296Z     '    at runScriptInContext (node:internal/process/execution:449:60)\n' +
+2026-10-14T05:45:19.1494792Z     '    at evalFunction (node:internal/process/execution:283:30)\n' +
+2026-10-14T05:45:19.1495268Z     '    at evalTypeScript (node:internal/process/execution:295:3)\n' +
+2026-10-14T05:45:19.1495682Z     '    at node:internal/main/eval_string:71:3\n' +
+2026-10-14T05:45:19.1495969Z     '\n' +
+2026-10-14T05:45:19.1496163Z     'Node.js v24.21.0\n'
+2026-10-14T05:45:19.1496385Z }
+2026-10-14T05:45:19.1496516Z 
+2026-10-14T05:45:19.1496832Z 🧹 Cleaning up disposable test resources...
+2026-10-14T05:45:19.4988618Z ✓ Cleanup complete.
+2026-10-14T05:45:19.4988993Z 
+2026-10-14T05:45:19.5097195Z ##[error]Process completed with exit code 1.
