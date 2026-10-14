@@ -217,13 +217,13 @@ test('the actual shipped post-start order programme preserves an owned WAL-mode 
 });
 
 test.each([
-    'ALTER TABLE OrderLine ADD COLUMN workItemId INTEGER',
-    'ALTER TABLE OrderLine ADD COLUMN workItemId TEXT REFERENCES WorkItem(id)',
-    'ALTER TABLE OrderLine ADD COLUMN workItemId TEXT; CREATE INDEX OrderLine_workItemId_idx ON OrderLine(analysis)',
-    "CREATE TRIGGER SampleOrderRevision_active_insert BEFORE INSERT ON SampleOrderRevision BEGIN SELECT RAISE(ABORT,'OWNED_PARTIAL_209'); END;"
-])('the read-only owner refuses partial or mismatched schema without touching the original triple: %s', async sql => {
+    ['wrong type', connection => connection.exec('ALTER TABLE OrderLine ADD COLUMN workItemId INTEGER')],
+    ['unreviewed foreign key', connection => connection.exec('ALTER TABLE OrderLine ADD COLUMN workItemId TEXT REFERENCES WorkItem(id)')],
+    ['tampered index', connection => connection.exec('ALTER TABLE OrderLine ADD COLUMN workItemId TEXT; CREATE INDEX OrderLine_workItemId_idx ON OrderLine(analysis)')],
+    ['partial guard', connection => connection.exec("CREATE TRIGGER SampleOrderRevision_active_insert BEFORE INSERT ON SampleOrderRevision BEGIN SELECT RAISE(ABORT,'OWNED_PARTIAL_209'); END;")]
+])('the read-only owner refuses partial or mismatched schema without touching the original triple: %s', async (_name, change) => {
     const f = await fixture(), connection = new Database(f.file,{fileMustExist:true});
-    try { connection.exec(sql); } finally { connection.close(); }
+    try { change(connection); } finally { connection.close(); }
     const before = triples(f.file), retained = await rows(f);
     expect(() => installer.installOrderRevisions({dbPath:f.file,apply:true})).toThrow('Order storage differs');
     expect(triples(f.file)).toEqual(before); expect(await rows(f)).toEqual(retained);

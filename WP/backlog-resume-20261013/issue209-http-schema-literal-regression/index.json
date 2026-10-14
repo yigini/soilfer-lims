@@ -1,0 +1,128 @@
+{
+  "retainedUtc": "2026-10-14T09:11:22.566347+00:00",
+  "status": "CLOSED_HTTP_SCHEMA_LITERAL_REGRESSION_PASS",
+  "summary": {
+    "closedUtc": "2026-10-14T09:10:31.067466+00:00",
+    "exit": 0,
+    "suites": 10,
+    "tests": 270,
+    "passedTests": 270,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "PASS"
+  },
+  "cause": "All10suites270testsPASS; native schema probes use explicit literal case form. All scanner predicates/negative assertions unchanged, migration and loader unchanged. Actual HTTP bothroutes, idempotency, scope, amendment boundaries, intake, historicalID retention, repeat/scientificINSERT, bootstrap, activeWAL/nested retained allocation and actual poststartprogramme pass. Prior264/2 and269/1 failures remain retained honestly.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/scripts/order_revision_impact.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/command.json": {
+      "bytes": 2514,
+      "sha256": "f3ecc164d7558306c4d8a427223eb376db169d3d60ac74635fef3fc2fd1d95af"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/config-original.json": {
+      "bytes": 6580,
+      "sha256": "96af512e6c07e16e3fbf5b6e8387dd5f489ff0fafabfb70ca0e75d095647ccea"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "5f9fbb880ecc54f1ca0111d461c5e7932582540e58e11e9cd36c883a3771ad95"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/physical-retained-terminal-index.json": {
+      "bytes": 15718,
+      "sha256": "48f1e20e202b0eed833292166840f9d5d76e8345626ba7d76cbf4cc05db3a264"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/physical-retention-original.jsonl": {
+      "bytes": 12962,
+      "sha256": "cd82c78393d01d30f79f59afb52fc743b341ca31699fbe63ef7d7fa2ba028874"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/report-original.json": {
+      "bytes": 120376,
+      "sha256": "a6715db4f41a99f9835b2cef4a7b58435d48fb992f5c24dc2192abe4567ede98"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/source-after.json": {
+      "bytes": 114715,
+      "sha256": "c12714f6e6d4fa70970647166253705ae7262dcb946c1157695cd641f66d52ce"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/source-before.json": {
+      "bytes": 114715,
+      "sha256": "c12714f6e6d4fa70970647166253705ae7262dcb946c1157695cd641f66d52ce"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/stderr-original.log": {
+      "bytes": 77127,
+      "sha256": "bf2e0e9ceffa24ce30009548d70f476fd10716ffdd2d5a98f8d6f636f519cc3d"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/stdout-original.log": {
+      "bytes": 2052,
+      "sha256": "65015f25561d43a452f5a8872f30cae43ba657de159b83c3085b7c04d1c027b9"
+    },
+    "WP/backlog-resume-20261013/issue209-http-schema-literal-regression/summary.json": {
+      "bytes": 363,
+      "sha256": "06f8762346089246a2828eedc837036360e92b146f32f2f04198ca05b57cdfe2"
+    }
+  }
+}
