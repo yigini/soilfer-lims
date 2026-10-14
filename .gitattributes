@@ -115,3 +115,5 @@ server/services/controlChartMigrationSource.js text eol=lf
 server/tests/fixtures/pre214-native-run-source.cjs -text
 server/prisma/migrations/20261004085500_add_lab_policy_settings/migration.sql text eol=lf
 server/services/labPolicyMigrationSource.js text eol=lf
+server/prisma/migrations/20261014000100_order_revision_contract/migration.sql text eol=lf
+server/services/orderRevisionMigrationSource.js text eol=lf

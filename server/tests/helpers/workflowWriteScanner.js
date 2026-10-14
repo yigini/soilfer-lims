@@ -31,6 +31,11 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // #209/6163271808: inspect the exact additive source; no writer exemption.
+    Object.freeze({ functionName: 'loadOrderRevisionMigrationSource', loader: 'services/orderRevisionMigrationSource.js',
+        loaderSha256: 'ba6baba68eceb2355cbc68a7a6bba83a1e3c7f168a30bdf8a35df80c8dde1093',
+        directory: '20261014000100_order_revision_contract', sqlSha256: '5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c',
+        boundary: '-- Contract guards' }),
     // Claudio6160619940: inspect the existing canonical policy DDL; no writer exemption.
     Object.freeze({ functionName: 'loadLabPolicyMigrationSource', loader: 'services/labPolicyMigrationSource.js',
         loaderSha256: 'ff0e4a69226b442e97f91b5e569ec4e5c129b6aaef65a0490722e1ba82037bc1',

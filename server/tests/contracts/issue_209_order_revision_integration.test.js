@@ -11,7 +11,7 @@ const triples = file => Object.fromEntries(['', '-wal', '-shm'].map(suffix => [s
     fs.existsSync(file + suffix) ? createHash('sha256').update(fs.readFileSync(file + suffix)).digest('hex') : null]));
 
 async function fixture({ revisions = 1, lines = 1, historicalOpen = false } = {}) {
-    const f = await qcGateFixture({ resolvedRules: false, fixedWindowPolicy: false }); held.push(f);
+    const f = await qcGateFixture({ resolvedRules: false, fixedWindowPolicy: false, installOrderRevisions: false }); held.push(f);
     const item = f.items[0];
     await require('../../services/sampleStateService').transitionSample(item.sampleId, 'PROCESSING', f.actor,
         'Declared complete order context', { requiredAnalyses: JSON.stringify([item.analysis]) }, f.db);
@@ -52,6 +52,9 @@ test('installer dry/apply/repeat retains three ACTIVE histories, every line and 
     expect(dry).toMatchObject({ classification: 'PRE_209', mode: 'DRY_RUN', totalChanges: 0, backfilledCount: 0,
         impact: { multipleActiveSampleCount: 1 } });
     expect(triples(f.file)).toEqual(physical);
+    expect(dry.impact).toMatchObject({ continuingReservedOpenCount: 1,
+        refusalCounts: { NO_LINE: 0, AMBIGUOUS_LINE: 0, MULTIPLE_ACTIVE_REVISIONS: 0 } });
+    expect(dry.impact.continuingReservedOpenWorkItems).toEqual([expect.objectContaining({ attemptId: f.openId, retainedOrderLineId: null })]);
     expect(installer.installOrderRevisions({ dbPath: f.file, apply: true })).toMatchObject({ classification: 'COMPLETE_209', originalRowsPreserved: true, backfilledCount: 0 });
     expect(await rows(f)).toEqual(before);
     const after = triples(f.file);
@@ -148,4 +151,31 @@ test('a reasoned repeat receives its resolved legacy line at the new reservation
     expect(result.attempt).toMatchObject({ status: 'OPEN', orderLineId: originalAttempt.orderLineId, parentAttemptId: originalAttempt.id });
     expect(result.attempt.id).not.toBe(originalAttempt.id);
     expect(await f.db.workAttempt.findUnique({ where: { id: originalAttempt.id } })).toMatchObject({ orderLineId: originalAttempt.orderLineId });
+});
+
+test('scientific amendment authorisation links only its newly reserved attempt to the current order', async () => {
+    const f = await qcGateFixture({ status: 'ACCEPTED', resolvedRules: false, fixedWindowPolicy: false }); held.push(f);
+    const item = f.items[0], original = await f.result(item);
+    await require('../../services/sampleStateService').transitionSample(item.sampleId, 'APPROVED', f.actor,
+        'Owned completed approval before amendment', {}, f.db);
+    const before = await rows(f), service = require('../../services/scientificAmendmentService');
+    const requested = await service.requestScientificAmendment(f.db, item.sampleId, f.actor,
+        { reason: 'Reviewed client retest of retained finding', reasonCode: 'CLIENT_RETEST', selectedWorkItemIds: [item.id] });
+    const approved = await service.authoriseScientificAmendment(f.db, item.sampleId, requested.amendment.id,
+        { ...f.actor, username: 'system:other-authoriser' }, { expectedVersion: requested.amendment.version });
+    expect(approved.attempts).toHaveLength(1);
+    expect(approved.attempts[0]).toMatchObject({ status: 'OPEN', parentAttemptId: original.attemptId, orderLineId: before.lines[0].id });
+    const after = await rows(f);
+    expect(after.lines).toEqual(before.lines);
+    expect(after.attempts.filter(row => row.id === original.attemptId)).toEqual(before.attempts);
+});
+
+test('order revisions enforce permission and laboratory scope before changing retained rows', async () => {
+    const f = await fixture(); installer.installOrderRevisions({ dbPath: f.file, apply: true });
+    const before = await rows(f), input = { analyses: [f.items[0].analysis], reason: 'Reviewed complete order' };
+    await expect(order.reviseAnalyses(f.items[0].sampleId, input, { ...f.actor, role: 'TECHNICIAN' }, { tx: f.db }))
+        .rejects.toMatchObject({ code: 'EDIT_ANALYSES_FORBIDDEN', statusCode: 403 });
+    await expect(order.reviseAnalyses(f.items[0].sampleId, input, { ...f.actor, role: 'LAB_MANAGER', labId: randomUUID() }, { tx: f.db }))
+        .rejects.toMatchObject({ statusCode: 403 });
+    expect(await rows(f)).toEqual(before);
 });

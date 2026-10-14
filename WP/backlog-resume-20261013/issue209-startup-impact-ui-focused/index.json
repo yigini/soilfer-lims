@@ -1,0 +1,113 @@
+{
+  "retainedUtc": "2026-10-14T08:42:26.088639+00:00",
+  "status": "CLOSED_STARTUP_IMPACT_UI_FOCUSED_FAILURE",
+  "summary": {
+    "closedUtc": "2026-10-14T08:39:56.494854+00:00",
+    "exit": 1,
+    "suites": 5,
+    "tests": 184,
+    "passedTests": 179,
+    "failed": 5,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 369,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "cause": "Four UI tests lack browser event APIs in the lightweight harness; strict scanner refuses3 unresolved installer SQL call bindings. Scientific amendment reservation and OPEN-impact checks pass. Retained before correction.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/command.json": {
+      "bytes": 1409,
+      "sha256": "1195aabf2f621be1dc5ecb65b2a8575493bfe3210cef93a36d5c4ac70a01a692"
+    },
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/config-original.json": {
+      "bytes": 6079,
+      "sha256": "df12f2bd498ca4553e9531f06fe3c98c837344ed498e71c1fa58f1e8a8b3e31f"
+    },
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/inventory-original.json": {
+      "bytes": 49433,
+      "sha256": "19807dd0beecbc1d5acf391e583ffed5d2d92f77ec5a79ddadc4037b5828008a"
+    },
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/report-original.json": {
+      "bytes": 93228,
+      "sha256": "5306377687727bb11590a3d331854796b1d9d36fa200fd4f951cb92fcad6c6db"
+    },
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/source-after.json": {
+      "bytes": 114324,
+      "sha256": "25d28ff35eae32fe9ccdddf0621c072f42362b999c6a360be47dde2532e8e395"
+    },
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/source-before.json": {
+      "bytes": 114324,
+      "sha256": "25d28ff35eae32fe9ccdddf0621c072f42362b999c6a360be47dde2532e8e395"
+    },
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/stderr-original.log": {
+      "bytes": 25448,
+      "sha256": "4f2c391066263dbc9be3c2c7114e5da01c4d91d2a2615b57fd47db378e650e91"
+    },
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/stdout-original.log": {
+      "bytes": 1087,
+      "sha256": "a8a6d5e13394fd1526b82c5d40740a2c496d73b2a417bdd24ac40e271b210bd1"
+    },
+    "WP/backlog-resume-20261013/issue209-startup-impact-ui-focused/summary.json": {
+      "bytes": 378,
+      "sha256": "975ddb0a9b73469d17e551c32766697f15900d4cc8ba752c31113d809b4fb458"
+    }
+  }
+}

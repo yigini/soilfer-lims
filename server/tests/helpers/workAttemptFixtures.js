@@ -25,7 +25,8 @@ async function insertFixtureExecution(tx, ctx, allocation, evidence, attemptStat
         // Pins6057445449 /6059085200: explicit final status must match the work.
         if (ctx.item.status !== attemptStatus) throw Error('Final fixture evidence requires matching canonical work.');
         const evidenceData = JSON.stringify({ ...evidence, equipmentReadiness: ctx.equipmentReadiness }), now = new Date();
-        await tx.workAttempt.create({ data: { id: allocation.id, workItemId: ctx.item.id, attemptNo: allocation.attemptNo,
+        const orderLineId = await require('../../services/orderLineResolutionService').resolveOrderLine(tx, ctx.item);
+        await tx.workAttempt.create({ data: { id: allocation.id, workItemId: ctx.item.id, orderLineId, attemptNo: allocation.attemptNo,
             status: attemptStatus, reason: allocation.reason, author: ctx.performedBy, authorName: ctx.performedBy,
             batchId: ctx.batchId, qcBatchId: ctx.batchId, instrumentId: ctx.equipmentReadiness?.equipmentId || null,
             executedMethodRevision: null, version: (ctx.item.version || 0) + 1, evidenceData,

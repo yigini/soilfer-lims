@@ -3,6 +3,7 @@ const fs = require('node:fs'), path = require('node:path'), { createHash } = req
 const { loadOrderRevisionMigrationSource } = require('../services/orderRevisionMigrationSource');
 const { chooseOrderLine } = require('../services/orderLineResolutionService');
 const { isNonMeasurement } = require('../services/workItemKinds');
+const { inspectOpenExecutionReservations } = require('../services/workAttemptReservationService');
 const MARKER = '209_order_revision_contract';
 const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, statusCode: 409, totalChanges: 0, differences });
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -69,25 +70,48 @@ function classify(db, source) {
 }
 
 function impact(db) {
-    const revisions = db.prepare('SELECT * FROM SampleOrderRevision WHERE status=? ORDER BY sampleId,id').all('ACTIVE');
+    const revisions = db.prepare('SELECT id,sampleId FROM SampleOrderRevision WHERE status=? ORDER BY sampleId,id').all('ACTIVE');
     const hasLink = db.prepare('PRAGMA table_xinfo("OrderLine")').all().some(row => row.name === 'workItemId');
-    const lines = db.prepare('SELECT *' + (hasLink ? '' : ',NULL AS workItemId') + ' FROM OrderLine ORDER BY id').all();
-    const groups = new Map();
+    const lines = db.prepare('SELECT id,revisionId,analysis,status,' + (hasLink ? 'workItemId' : 'NULL AS workItemId') +
+        " FROM OrderLine WHERE status='ACTIVE' ORDER BY id").all();
+    const groups = new Map(), linesByRevision = new Map(), openByItem = new Map();
+    for (const line of lines) {
+        if (!linesByRevision.has(line.revisionId)) linesByRevision.set(line.revisionId, []);
+        linesByRevision.get(line.revisionId).push(line);
+    }
+    for (const attempt of db.prepare("SELECT id,workItemId,orderLineId FROM WorkAttempt WHERE status='OPEN' ORDER BY id").iterate()) {
+        if (!openByItem.has(attempt.workItemId)) openByItem.set(attempt.workItemId, []);
+        openByItem.get(attempt.workItemId).push(attempt);
+    }
     for (const revision of revisions) {
-        revision.lines = lines.filter(line => line.revisionId === revision.id);
+        revision.lines = linesByRevision.get(revision.id) || [];
         if (!groups.has(revision.sampleId)) groups.set(revision.sampleId, []);
         groups.get(revision.sampleId).push(revision);
     }
     const multipleActive = [...groups].filter(([, rows]) => rows.length > 1)
         .map(([sampleId, rows]) => ({ sampleId, revisionIds: rows.map(row => row.id), priorActiveCount: rows.length }));
     const refusalCounts = { NO_LINE: 0, AMBIGUOUS_LINE: 0, MULTIPLE_ACTIVE_REVISIONS: 0 }, refused = [];
-    const items = db.prepare("SELECT * FROM WorkItem WHERE status IN ('NOT_ASSIGNED','ASSIGNED','IN_PROGRESS','REPEAT_REQUIRED') ORDER BY id").all();
+    const continuingReservedOpenWorkItems = [], ambiguousOpenReservations = [];
+    const items = db.prepare("SELECT id,sampleId,analysis FROM WorkItem WHERE status IN ('NOT_ASSIGNED','ASSIGNED','IN_PROGRESS','REPEAT_REQUIRED') ORDER BY id").iterate();
     for (const item of items) {
         if (isNonMeasurement(item)) continue;
+        const open = openByItem.get(item.id) || [], reservation = inspectOpenExecutionReservations(open);
+        if (reservation.mode === 'RESERVED_OPEN') {
+            continuingReservedOpenWorkItems.push({ workItemId: item.id, sampleId: item.sampleId, analysis: item.analysis,
+                attemptId: reservation.attemptId, retainedOrderLineId: open[0].orderLineId });
+            continue;
+        }
+        if (reservation.mode === 'AMBIGUOUS_OPEN') {
+            ambiguousOpenReservations.push({ workItemId: item.id, sampleId: item.sampleId, attemptIds: reservation.attemptIds });
+            continue;
+        }
         const result = chooseOrderLine(item, groups.get(item.sampleId) || []);
         if (result.cause) { refusalCounts[result.cause]++; refused.push({ workItemId: item.id, sampleId: item.sampleId, analysis: item.analysis, cause: result.cause }); }
     }
-    return { multipleActiveSampleCount: multipleActive.length, multipleActive, refusalCounts, refusedOpenWorkItems: refused };
+    return { multipleActiveSampleCount: multipleActive.length, multipleActive, refusalCounts, refusedOpenWorkItems: refused,
+        continuingReservedOpenCount: continuingReservedOpenWorkItems.length, continuingReservedOpenWorkItems,
+        ambiguousOpenReservationCount: ambiguousOpenReservations.length, ambiguousOpenReservations,
+        refusalScope: 'Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately' };
 }
 
 function snapshot(db, prior = null) {

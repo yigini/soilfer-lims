@@ -1,4 +1,11 @@
 {
+  "orderRevision": {
+    "reason": "Motif de révision de la commande",
+    "reasonPlaceholder": "Expliquez la sélection complète des analyses…",
+    "reasonRequired": "Un motif est requis pour réviser la commande.",
+    "completeTarget": "La sélection constitue la commande complète et inclut toutes les analyses à conserver. Toute modification nécessite un motif.",
+    "amendmentRequired": "Les échantillons approuvés, archivés ou éliminés nécessitent la procédure de modification avant de changer leur commande."
+  },
   "replicateGrid": {
     "rep1": "Rép 1",
     "rep2": "Rép 2",

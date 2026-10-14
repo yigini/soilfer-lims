@@ -1619,13 +1619,14 @@ exports.updateSampleProject = async (req, res) => {
  * UPDATE SAMPLE ANALYSES
  * PUT /api/samples/:id/analyses
  * Body: { analyses, analysisGroupIds }
- * Allows adding/editing analyses at any time (even after archiving)
+ * Changed orders require a reason; issued work uses the amendment workflow.
  */
 exports.updateSampleAnalyses = async (req, res) => {
     try {
         const { analyses, analysisGroupIds, reason, waiverReason } = req.body;
         const outcome = await sampleAnalysisStateService.reviseAnalyses(req.params.id,
-            { analyses, analysisGroupIds, reason: reason || waiverReason }, req.user);
+            { analyses, analysisGroupIds, reason: reason || waiverReason }, req.user,
+            { idempotencyKey: req.body.idempotencyKey || req.headers['x-idempotency-key'] });
         return res.json(outcome);
     } catch (err) {
         if (!err.statusCode) console.error('[updateSampleAnalyses] Error:', err);

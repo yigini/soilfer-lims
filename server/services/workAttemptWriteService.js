@@ -12,8 +12,9 @@ async function allocateExecution(tx,ctx,{attemptId,repeatReason}={}) {
         return {id:attemptId,existing:true,status:existing.status};
     }
     const open=await tx.workAttempt.findMany({where:{workItemId:ctx.item.id,status:'OPEN'}});
-    if(open.length>1)throw new rules.TransitionError('Resolve the ambiguous OPEN attempts before recording.',409,'WORK_REPEAT_ALREADY_OPEN');
-    if(open.length===1)return {id:open[0].id,existing:true,status:'OPEN'};
+    const reservation=require('./workAttemptReservationService').inspectOpenExecutionReservations(open);
+    if(reservation.mode==='AMBIGUOUS_OPEN')throw new rules.TransitionError('Resolve the ambiguous OPEN attempts before recording.',409,'WORK_REPEAT_ALREADY_OPEN');
+    if(reservation.mode==='RESERVED_OPEN')return {id:reservation.attemptId,existing:true,status:'OPEN'};
     const maximum=await tx.workAttempt.aggregate({where:{workItemId:ctx.item.id},_max:{attemptNo:true}});
     const attemptNo=(maximum._max.attemptNo || 0)+1;
     if(attemptNo>1)throw new rules.TransitionError('Request the repeat with a canonical reason before recording.',409,'WORK_ATTEMPT_REASON_REQUIRED');
