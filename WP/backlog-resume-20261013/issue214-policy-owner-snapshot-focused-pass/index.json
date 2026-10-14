@@ -1,0 +1,58 @@
+{
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/command.json": {
+    "bytes": 2181,
+    "sha256": "78f6bcbc1116955acaab6b75ffe06936181a02de9a184fe3853eb210c1f45933"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/config-original.json": {
+    "bytes": 6560,
+    "sha256": "a041101345d6c57ff63ea84e7119af16ed3d1873810f3e24d859f1945582075a"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/config-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/inventory-original.json": {
+    "bytes": 49008,
+    "sha256": "f47a8ce15f5addf4630cb77bdafe9587c7e2e7f04021e6641197b75c25e6548b"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/inventory-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/report-original.json": {
+    "bytes": 97140,
+    "sha256": "d2c17528449382044e655e637274633ada0a2925f828a4e10e9c54cecdfe5545"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/source-after.json": {
+    "bytes": 53266,
+    "sha256": "8009fe7a9cc1b7a94b2b02453e943c0208917260531899e02fe2bf0fce51b361"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/source-before.json": {
+    "bytes": 53266,
+    "sha256": "8009fe7a9cc1b7a94b2b02453e943c0208917260531899e02fe2bf0fce51b361"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/stderr-original.log": {
+    "bytes": 36899,
+    "sha256": "6c4a95c2a86a694106b70a835c3c2d3d1ef46becb7d7e8908da1455be8cd8d31"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/stdout-original.log": {
+    "bytes": 1799,
+    "sha256": "f5f0fc5fb3c0546e7f8632354348666c5e8ac551c288e7275460f4a6d1cbff7d"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/summary.json": {
+    "bytes": 500,
+    "sha256": "ef54ee8cbfc24c7027df2fc4f05b93bf9aeca6c611be27a7d68378f8ff5826eb"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/terminal-boundary.json": {
+    "bytes": 914,
+    "sha256": "03cea8a1d0897c1084d0d15fdd2372db8253cb0afd335334a8357636496cc1bf"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-snapshot-focused-pass/visible-local-storage.json": {
+    "bytes": 10314,
+    "sha256": "d521eb37f00e4d795cb08f4cb5948e45cf730b5bf6912f9ef73a0b26ab652d99"
+  }
+}

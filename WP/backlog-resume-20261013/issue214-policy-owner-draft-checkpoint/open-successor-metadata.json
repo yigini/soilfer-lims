@@ -1,0 +1,44 @@
+{
+  "observedUtc": "2026-10-14T04:27:10.717939+00:00",
+  "actualScopeComment": 6160619940,
+  "priorAuditHead": "a86931b3a01ad3a1fd59300003d7a11a585af38c",
+  "priorPRHead": "e47b842c2a7f6b4f06fa4c532f7460c01797821b",
+  "base": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "applicationPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    "docs/audit/214-control-charts.md",
+    "server/index.js",
+    "server/scripts/install_control_charts.js",
+    "server/scripts/install_lab_policy_schema.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/labPolicyMigrationSource.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/issue_214_lab_policy_schema.test.js",
+    "server/tests/helpers/workflowWriteScanner.js"
+  ],
+  "changedPreviouslyFrozenPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    "docs/audit/214-control-charts.md",
+    "server/index.js",
+    "server/scripts/install_control_charts.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/helpers/workflowWriteScanner.js"
+  ],
+  "frozenPathCount": 421,
+  "activeRunner": {
+    "sessionId": 34251,
+    "status": "RUNNING",
+    "fullDiscovery": 366,
+    "finalResult": null
+  },
+  "localRetentionTeardownOnly": true,
+  "ordinarySetupAndAssertionsEnabled": true,
+  "stockCiUnchanged": true,
+  "originalCi38467368095": "CLOSED_FAILED_NEVER_REPLAY",
+  "readyNoticeSent": false,
+  "productionOperations": 0
+}

@@ -1,0 +1,33 @@
+{
+  "retainedUtc": "2026-10-14T04:19:42.359763+00:00",
+  "summary": {
+    "observedUtc": "2026-10-14T04:18:23.135532+00:00",
+    "exitCode": 1,
+    "status": "FAILED_OR_INCOMPLETE",
+    "suites": 8,
+    "tests": 184,
+    "passedSuites": 4,
+    "passedTests": 180,
+    "failed": 4,
+    "pending": 0,
+    "failedSuites": 4,
+    "sourceUnchanged": true,
+    "inventoryEqual": true,
+    "testWorkerCount": 1,
+    "workerIdleMemoryLimit": 512000000,
+    "nodeOptions": "",
+    "ordinarySetupsAndAssertions": true,
+    "localVisiblePathFixtureOnly": true,
+    "productionOperations": 0,
+    "localRetentionTeardownOnly": true
+  },
+  "sessionId": 48181,
+  "failures": [
+    "new Lab fixture required country/id",
+    "nonexistent selected scanner filename",
+    "new test dynamic SQL refused by unchanged scanner",
+    "stock bootstrap 20s timeout plus held-file EPERM"
+  ],
+  "classification": "CLOSED_FAILURE",
+  "productionOperations": 0
+}

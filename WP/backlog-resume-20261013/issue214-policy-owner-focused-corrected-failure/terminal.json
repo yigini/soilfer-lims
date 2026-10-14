@@ -1,0 +1,30 @@
+{
+  "retainedUtc": "2026-10-14T04:24:32.800559+00:00",
+  "summary": {
+    "observedUtc": "2026-10-14T04:22:24.022829+00:00",
+    "exitCode": 1,
+    "status": "FAILED_OR_INCOMPLETE",
+    "suites": 8,
+    "tests": 217,
+    "passedSuites": 7,
+    "passedTests": 216,
+    "failed": 1,
+    "pending": 0,
+    "failedSuites": 1,
+    "sourceUnchanged": true,
+    "inventoryEqual": true,
+    "testWorkerCount": 1,
+    "workerIdleMemoryLimit": 512000000,
+    "nodeOptions": "",
+    "ordinarySetupsAndAssertions": true,
+    "localVisiblePathFixtureOnly": true,
+    "productionOperations": 0,
+    "localRetentionTeardownOnly": true
+  },
+  "sessionId": 39506,
+  "failures": [
+    "readonly SQLite opened a WAL-mode Prisma database and created missing WAL/SHM sidecars; original main DB hash unchanged"
+  ],
+  "classification": "CLOSED_FAILURE",
+  "productionOperations": 0
+}

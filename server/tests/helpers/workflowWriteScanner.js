@@ -31,6 +31,11 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // Claudio6160619940: inspect the existing canonical policy DDL; no writer exemption.
+    Object.freeze({ functionName: 'loadLabPolicyMigrationSource', loader: 'services/labPolicyMigrationSource.js',
+        loaderSha256: 'ff0e4a69226b442e97f91b5e569ec4e5c129b6aaef65a0490722e1ba82037bc1',
+        directory: '20261004085500_add_lab_policy_settings', sqlSha256: 'fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70',
+        boundary: 'ALTER TABLE "Report" ADD COLUMN "policyVersion" INTEGER;' }),
     // #214: inspect only the exact additive chart evidence/guard source.
     // This adds no workflow writer exemption.
     Object.freeze({ functionName: 'loadControlChartMigrationSource', loader: 'services/controlChartMigrationSource.js',

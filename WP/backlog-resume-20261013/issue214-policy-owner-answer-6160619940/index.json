@@ -1,0 +1,20 @@
+{
+  "retainedUtc": "2026-10-14T04:07:42.233782+00:00",
+  "commentId": 6160619940,
+  "url": "https://github.com/yigini/soilfer-lims/issues/214#issuecomment-6160619940",
+  "files": {
+    "answer-original.json": {
+      "bytes": 6318,
+      "sha256": "fae6a00c39c2666460a6bdfed9050f6276a40f7abab3363bc7ac69457a2ca17f"
+    },
+    "answer-original.md": {
+      "bytes": 2587,
+      "sha256": "7c3ab0c6f15dd817e401fec9b5b6c6cca88484a02e644c9ad73f24ad05d08621"
+    },
+    "pr-before-original.json": {
+      "bytes": 50238,
+      "sha256": "dfeb290c9ce4f88c95142984a446a2c7625f050e7c49a8168966812ea32ada19"
+    }
+  },
+  "productionOperations": 0
+}

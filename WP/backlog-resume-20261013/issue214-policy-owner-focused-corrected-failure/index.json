@@ -1,0 +1,82 @@
+{
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/command.json": {
+    "bytes": 2182,
+    "sha256": "3557c9f83fc25950364d80ecad6a2122d2f471b3871aea7046c34932f9578801"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/config-original.json": {
+    "bytes": 6561,
+    "sha256": "57241d04fff6c0a4302ec73d1972eeff3ba9a9fb5606008111182a95f4c56bb6"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/config-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/deployment_readiness_bootstrap.test.js.original": {
+    "bytes": 30876,
+    "sha256": "d1009c8b86055b55812af199dc494e7dd5e2539bb90b92f959eb802a1268bab3"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/exit-original.txt": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/install_lab_policy_schema.js.original": {
+    "bytes": 9454,
+    "sha256": "8cfcbde9b9a5957e6109f623340c7109c94c3c54cbac7f7310f1c2611bf63a44"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/inventory-original.json": {
+    "bytes": 49008,
+    "sha256": "63f12fc3785152e58a56cdaaa592ce1a223b9915737d8575cd7b0defb9bb632d"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/inventory-stderr-original.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/issue_214_lab_policy_schema.test.js.original": {
+    "bytes": 9948,
+    "sha256": "c9f9e4521732498b778bc1adf575bf6558eadd24ff47294225e21e96ee751b16"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/labPolicyMigrationSource.js.original": {
+    "bytes": 1326,
+    "sha256": "ff0e4a69226b442e97f91b5e569ec4e5c129b6aaef65a0490722e1ba82037bc1"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/rehearsal_deployment_readiness.cjs.original": {
+    "bytes": 113377,
+    "sha256": "c145dbfbd329a3622ec6482a1e3157f013a4ef8d441e1b76916f746120a9c5d8"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/report-original.json": {
+    "bytes": 99365,
+    "sha256": "1ee43556a0e99d1212c64a447e2b106e68969002a4fdf1989f2f8b0d633736c5"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/source-after.json": {
+    "bytes": 53266,
+    "sha256": "78f98fa7cf6add11766bc67af983f9bafbba9e357f76f956f56d7aa207917422"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/source-before.json": {
+    "bytes": 53266,
+    "sha256": "78f98fa7cf6add11766bc67af983f9bafbba9e357f76f956f56d7aa207917422"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/stderr-original.log": {
+    "bytes": 38063,
+    "sha256": "5569a4cc3b11fdb5fdac9c6beec31accce90bd2b1ab1fc03cc6989bae529696f"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/stdout-original.log": {
+    "bytes": 1800,
+    "sha256": "cb2f59d1ed90b13b36d54bcb213c8a65f72998cbe6850acc8f8146981c6b3ef6"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/summary.json": {
+    "bytes": 516,
+    "sha256": "df1135f550af924d20178e802b2a389331ff4b17ecd55e17eac86ae9ad32df34"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/terminal.json": {
+    "bytes": 892,
+    "sha256": "318dc7ccd2ed360eb8fe9adb46b63cb826aee774bdd027920a9ca6c0e5623ef9"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/visible-local-storage.json": {
+    "bytes": 10314,
+    "sha256": "9351dbc7f092ee32a5214b89af1d6faaf85df86ab27c8a544c058847d1dec089"
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-focused-corrected-failure/workflowWriteScanner.js.original": {
+    "bytes": 85827,
+    "sha256": "169c46cccf4e917660082ebc6dec8545d9946d8830b57185415d2096c33b7734"
+  }
+}

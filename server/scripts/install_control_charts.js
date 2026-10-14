@@ -58,6 +58,7 @@ function installControlCharts({dbPath,apply=false}={}){
  if(typeof dbPath!=='string'||!dbPath.trim())throw fail('QC_CHART_DATABASE_REQUIRED','Provide an explicit database path.');
  const target=path.resolve(dbPath),source=loadControlChartMigrationSource();
  require('./install_sample_containers').assertSampleContainerStartupReady(target);
+ require('./install_lab_policy_schema').assertLabPolicyStartupReady(target);
  const reader=new Database(target,{readonly:true,fileMustExist:true});let reviewed;
  try{reviewed=reader.transaction(()=>classify(reader,source))();}finally{reader.close();}
  if(!apply||reviewed.classification==='COMPLETE_214')return{...reviewed,mode:apply?'NO_OP':'DRY_RUN',totalChanges:0,backfilledCount:0};
