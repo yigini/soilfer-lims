@@ -125,3 +125,27 @@ test('policy installation and read-only readiness precede214; Docker packages th
     expect(startup.indexOf('assertLabPolicyStartupReady')).toBeLessThan(startup.indexOf('assertControlChartStartupReady'));
     expect(fs.readFileSync(path.join(root,'Dockerfile'),'utf8')).toContain('/app/server/.migrations-backup/policy/20261004085500_add_lab_policy_settings/migration.sql');
 });
+test('the actual shipped Docker post-start policy/chart probe preserves an original WAL-mode database without sidecars', async () => {
+    const { qcGateFixture } = require('../helpers/qcGateFixture');
+    const f = await qcGateFixture({ fixedWindowPolicy: false, resolvedRules: false });
+    await f.db.$disconnect();
+    const target = file();
+    for (const suffix of ['', '-wal', '-shm']) if (fs.existsSync(f.file + suffix))
+        fs.copyFileSync(f.file + suffix, target + suffix, fs.constants.COPYFILE_EXCL);
+    const writer = new Database(target, { fileMustExist: true });
+    try { writer.pragma('journal_mode=WAL'); } finally { writer.close(); }
+    const before = bytes(target);
+    expect(before['-wal']).toBeNull(); expect(before['-shm']).toBeNull();
+    const root = path.resolve(__dirname, '../../..');
+    const rehearsal = fs.readFileSync(path.join(root, 'server/scripts/rehearsal_deployment_readiness.cjs'), 'utf8');
+    const section = rehearsal.slice(rehearsal.indexOf('const policyAfterOutput='), rehearsal.indexOf('const policyAfter=JSON.parse'));
+    const program = section.match(/IMAGE_TAG,'node','-e',\s*`([\s\S]*?)`\s*\]/)[1]
+        .replace("'/owned-policy/dev.db'", JSON.stringify(target));
+    const actual = JSON.parse(require('node:child_process').execFileSync(process.execPath, ['-e', program],
+        { cwd: path.join(root, 'server'), encoding: 'utf8' }).trim());
+    expect(actual).toMatchObject({ ready: { classification: 'PRESENT', totalChanges: 0 },
+        again: { mode: 'NO_OP', totalChanges: 0 }, charts: { classification: 'COMPLETE_214', totalChanges: 0 },
+        counts: { LabPolicy: 0, LabPolicyOverride: 0 }, dbWalShmPreserved: true, secondaryInspectionsOnRetainedSnapshot: true });
+    expect(actual.ready.readonlySnapshot.originalDbWalShmSha256).toEqual(before);
+    expect(bytes(target)).toEqual(before);
+});
