@@ -1,0 +1,9 @@
+{
+  "startedUtc": "2026-10-14T15:51:19.599739+00:00",
+  "kind": "SEQUENTIAL_ORDINARY_SINGLE_SUITE_SUCCESSOR",
+  "plannedSuites": 7,
+  "plannedTests": 473,
+  "sourceFrozen": true,
+  "nodeOptions": "",
+  "productionOperations": 0
+}

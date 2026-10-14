@@ -1,0 +1,33 @@
+[
+  {
+    "path": "server/tests/contracts/audit_1_2_workbench_state.test.js",
+    "beforeSha256": "8fc7edb2991c12b0d9c317dbba624332fa0efbd7a21c259aa5bfc42858cdc718",
+    "afterSha256": "9dca94d1e87d7cb4be229da972672b77cedbbc7c85f267e05bc46042e8a16d5a",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "    if (!['PREPARATION', 'DRYING', ...workflow.CLOSURE_TASK_ANALYSES].includes(analysis)) {\n        // #209: declare retained usable order context while assembling this NEW owned fixture.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,\n            version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: manager.username,\n            lines: { create: [{ id: randomUUID(), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n    }\n",
+      "    if (item.id !== row.item.id) {\n        // #209: only this separately seeded canonical witness needs its matching retained order line.\n        await prisma.$transaction(async tx => {\n            const revision = await tx.sampleOrderRevision.findFirstOrThrow({ where: { sampleId: row.sample.id, status: 'ACTIVE' } });\n            if (!await tx.orderLine.count({ where: { revisionId: revision.id, analysis: item.analysis, status: 'ACTIVE' } }))\n                await tx.orderLine.create({ data: { id: randomUUID(), revisionId: revision.id, analysis: item.analysis,\n                    workItemId: null, status: 'ACTIVE', isRequired: true } });\n        });\n    }\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_0_6_review_atomicity.test.js",
+    "beforeSha256": "ab9b5402579b3881c81c1ddc3cf34951b3d5494ac90ba69cd6ae513f6405ce13",
+    "afterSha256": "d1f15f7f310b07ec4f93f6d9dfdf37114d7ce7664ccaccc661e7f78aee0d1a4b",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "            // #209: declare retained usable order context while assembling this NEW owned fixture.\n            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-06-LEGACY'), sampleId: database.sampleId,\n                version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: jwt.decode(manager).username,\n                lines: { create: [{ id: id('LINE-06-LEGACY'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n",
+      "        // #209: declare retained usable order context while assembling this NEW owned fixture.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-06'), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: jwt.decode(manager).username,\n            lines: { create: [{ id: id('LINE-06'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n",
+      "            // #209: only this separately seeded canonical witness needs its matching retained order line.\n            await prisma.$transaction(async tx => {\n                const revision = await tx.sampleOrderRevision.findFirstOrThrow({ where: { sampleId: f.sampleId, status: 'ACTIVE' } });\n                if (!await tx.orderLine.count({ where: { revisionId: revision.id, analysis: item.analysis, status: 'ACTIVE' } }))\n                    await tx.orderLine.create({ data: { id: id('LINE-06-CACHED'), revisionId: revision.id, analysis: item.analysis,\n                        workItemId: null, status: 'ACTIVE', isRequired: true } });\n            });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_1_2_legacy_results.test.js",
+    "beforeSha256": "0bd2b95af1434b1e288bbba048e554f5815957359af0317aedc377e9a349b34b",
+    "afterSha256": "96098e28725924f4a20ae6b35bc5596c28048e186d739300e322b9241e77fb85",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "    // #209: declare retained usable order context while assembling this NEW owned fixture.\n    await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,\n        version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: repeatReviewer.username,\n        lines: { create: [{ id: randomUUID(), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n",
+      "        // #209: only this separately seeded canonical witness needs its matching retained order line.\n        await prisma.$transaction(async tx => {\n            const revision = await tx.sampleOrderRevision.findFirstOrThrow({ where: { sampleId: row.sample.id, status: 'ACTIVE' } });\n            if (!await tx.orderLine.count({ where: { revisionId: revision.id, analysis: param, status: 'ACTIVE' } }))\n                await tx.orderLine.create({ data: { id: randomUUID(), revisionId: revision.id, analysis: param,\n                    workItemId: null, status: 'ACTIVE', isRequired: true } });\n        });\n"
+    ]
+  }
+]

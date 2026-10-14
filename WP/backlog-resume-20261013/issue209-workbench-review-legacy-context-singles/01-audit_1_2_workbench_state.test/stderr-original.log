@@ -1,0 +1,1073 @@
+  console.error
+    [undoIntake] Error: Error: Injected workflow audit failure
+        at Proxy.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:147:31)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\sampleController.js:720:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.undoIntake (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\sampleController.js:701:31)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:65:13)
+
+      729 |     } catch (error) {
+      730 |         const mapped = require('../services/workflowStateRules').mapStateError(error);
+    > 731 |         if (!mapped.statusCode) console.error('[undoIntake] Error:', error);
+          |                                         ^
+      732 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to undo intake',
+      733 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+      734 |     }
+
+      at error (controllers/sampleController.js:731:41)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at Object.<anonymous> (tests/contracts/audit_1_2_workbench_state.test.js:65:13)
+
+  console.error
+    [workbench.clearDrafts] Error: Error: Injected workflow audit failure
+        at Proxy.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:147:31)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1393:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.clearDrafts (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1391:9)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:180:13)
+
+      1406 |         res.json({ success: true, message: `Drafts cleared for ${analysis}`, count: userDrafts.length });
+      1407 |     } catch (error) {
+    > 1408 |         console.error('[workbench.clearDrafts] Error:', error);
+           |                 ^
+      1409 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to clear drafts',
+      1410 |             ...(error.code && { code: error.code }) });
+      1411 |     }
+
+      at error (controllers/workbenchController.js:1408:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at Object.<anonymous> (tests/contracts/audit_1_2_workbench_state.test.js:180:13)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.error
+    [createSubmission] Error: TransitionError: Preparation was reverted for current results. Re-enter them or obtain a manager clearance.
+        at Object.assertNoPreparationRevert (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:40:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:20:9
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:208:12 {
+      statusCode: 409,
+      status: 409,
+      code: 'PREP_REVERTED_RESULTS',
+      details: { resultIds: [ '5cb4c5e7-f4cc-4020-ac16-81685e983b5f' ] }
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:208:12
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ '0675390a-0e4c-4a4b-90ee-f768da73e24b' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.error
+    [workbench.commitSubmissions] Error: TransitionError: Preparation was reverted for current results. Re-enter them or obtain a manager clearance.
+        at Object.assertNoPreparationRevert (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:40:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1856:13
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.commitSubmissions (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1826:9)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:208:12 {
+      statusCode: 409,
+      status: 409,
+      code: 'PREP_REVERTED_RESULTS',
+      details: { resultIds: [ '58bf02b1-386c-480e-90f9-b62daa552590' ] }
+    }
+
+      1941 |         });
+      1942 |     } catch (err) {
+    > 1943 |         console.error('[workbench.commitSubmissions] Error:', err);
+           |                 ^
+      1944 |         const mapped = stateRules.mapStateError(err);
+      1945 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to commit submissions',
+      1946 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/workbenchController.js:1943:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:208:12
+
+  console.error
+    [createSubmission] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:19:18)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:214:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:214:16
+
+  console.error
+    [createSubmission] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:19:18)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:214:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:214:16
+
+  console.error
+    [createSubmission] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:19:18)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:214:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:214:16
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ '5a6b03fc-ac02-429f-be5c-2423bd2a3239' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.error
+    [workbench.commitSubmissions] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1855:28)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.commitSubmissions (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1826:9)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:214:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      1941 |         });
+      1942 |     } catch (err) {
+    > 1943 |         console.error('[workbench.commitSubmissions] Error:', err);
+           |                 ^
+      1944 |         const mapped = stateRules.mapStateError(err);
+      1945 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to commit submissions',
+      1946 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/workbenchController.js:1943:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:214:16
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ 'e45403c9-431f-4a19-91b1-3a80fed61d1a' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.error
+    [workbench.commitSubmissions] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1855:28)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.commitSubmissions (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1826:9)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:214:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      1941 |         });
+      1942 |     } catch (err) {
+    > 1943 |         console.error('[workbench.commitSubmissions] Error:', err);
+           |                 ^
+      1944 |         const mapped = stateRules.mapStateError(err);
+      1945 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to commit submissions',
+      1946 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/workbenchController.js:1943:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:214:16
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ '919ed71a-1ebb-4c66-bb2a-8128db4712a6' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.error
+    [workbench.commitSubmissions] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1855:28)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.commitSubmissions (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1826:9)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:214:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      1941 |         });
+      1942 |     } catch (err) {
+    > 1943 |         console.error('[workbench.commitSubmissions] Error:', err);
+           |                 ^
+      1944 |         const mapped = stateRules.mapStateError(err);
+      1945 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to commit submissions',
+      1946 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/workbenchController.js:1943:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:214:16
+
+  console.error
+    [createSubmission] Error: Error: Injected workflow audit failure
+        at Proxy.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:147:31)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:51:27)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:220:13
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:220:13
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ '0ff40953-09ae-45a1-9ac4-b83a55f1adf7' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.error
+    [workbench.commitSubmissions] Error: Error: Injected workflow audit failure
+        at Proxy.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:147:31)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1891:35)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.commitSubmissions (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1826:9)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:220:13
+
+      1941 |         });
+      1942 |     } catch (err) {
+    > 1943 |         console.error('[workbench.commitSubmissions] Error:', err);
+           |                 ^
+      1944 |         const mapped = stateRules.mapStateError(err);
+      1945 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to commit submissions',
+      1946 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/workbenchController.js:1943:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:220:13
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 2 samples: [
+      'ec041477-c445-4d38-832a-ad745c33d135',
+      '8af1153d-c72a-4d24-9b8d-4c99377643ff'
+    ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.error
+    [workbench.commitSubmissions] Error: TransitionError: Preparation was reverted for current results. Re-enter them or obtain a manager clearance.
+        at Object.assertNoPreparationRevert (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:40:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1856:13
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.commitSubmissions (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1826:9)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:229:12) {
+      statusCode: 409,
+      status: 409,
+      code: 'PREP_REVERTED_RESULTS',
+      details: { resultIds: [ '7a666c1c-57b7-46cf-a89e-880f8a3a039a' ] }
+    }
+
+      1941 |         });
+      1942 |     } catch (err) {
+    > 1943 |         console.error('[workbench.commitSubmissions] Error:', err);
+           |                 ^
+      1944 |         const mapped = stateRules.mapStateError(err);
+      1945 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to commit submissions',
+      1946 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/workbenchController.js:1943:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at Object.<anonymous> (tests/contracts/audit_1_2_workbench_state.test.js:229:12)
+
+  console.error
+    [updateWorkItemStatus] Error: Error: Injected workflow audit failure
+        at Proxy.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:147:31)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workItemStateService.js:225:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:696:27
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.updateWorkItemStatus (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:695:29)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:236:13)
+
+      744 |             return res.status(409).json({ error: 'Version conflict or item not found', code: 'VERSION_CONFLICT' });
+      745 |         }
+    > 746 |         console.error('[updateWorkItemStatus] Error:', error);
+          |                 ^
+      747 |         const mapped = stateRules.mapStateError(error);
+      748 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to update status',
+      749 |             ...(mapped.code && { code: mapped.code }) });
+
+      at error (controllers/workItemController.js:746:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at Object.<anonymous> (tests/contracts/audit_1_2_workbench_state.test.js:236:13)
+
+  console.error
+    [updateWorkItemStatus] Error: TransitionError: A reason is required for this workflow change.
+        at Object.requireReason (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:72:15)
+        at requireReason (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workItemStateService.js:176:80)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:696:27
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.updateWorkItemStatus (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:695:29)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:241:12) {
+      statusCode: 400,
+      status: 400,
+      code: 'TRANSITION_REASON_REQUIRED',
+      details: {}
+    }
+
+      744 |             return res.status(409).json({ error: 'Version conflict or item not found', code: 'VERSION_CONFLICT' });
+      745 |         }
+    > 746 |         console.error('[updateWorkItemStatus] Error:', error);
+          |                 ^
+      747 |         const mapped = stateRules.mapStateError(error);
+      748 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to update status',
+      749 |             ...(mapped.code && { code: mapped.code }) });
+
+      at error (controllers/workItemController.js:746:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at Object.<anonymous> (tests/contracts/audit_1_2_workbench_state.test.js:241:12)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ 'e2f1c059-fd0d-4435-ab10-6121dc7eca84' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ 'c1a1ea1b-487b-4a6a-9603-c86d9a111107' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ '93a7447f-0081-4e52-b257-4c27ce51a289' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ 'ef4136ae-b5f4-4aa5-b1a6-b07287a026a0' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ '192abeba-e55f-4d96-805d-4960950c19c5' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ 'baf90f72-9680-49e0-a46f-61c35a0936f6' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ '87e35f3a-f60f-4782-bcbd-42a269d369a7' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ '4e614ac2-2977-482b-a6f7-fe4698eede2f' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ '060ad933-d3a9-4eee-ac37-7579e7769973' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ 'aeb441d1-da3d-430b-9f29-4f677a6ef902' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ 'aa02b982-3690-42a1-8b2d-8ae8de128258' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at log (wsServer.js:305:24)
+
+  console.error
+    [createSubmission] Error: TransitionError: Some canonical analytical work has not been submitted.
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionLifecycleService.js:28:15)
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:49:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:291:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ], hasSubmission: true }
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:291:16
+
+  console.error
+    [createSubmission] Error: TransitionError: Some canonical analytical work has not been submitted.
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionLifecycleService.js:28:15)
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:49:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:291:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ], hasSubmission: true }
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:291:16
+
+  console.error
+    [createSubmission] Error: TransitionError: Some canonical analytical work has not been submitted.
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionLifecycleService.js:28:15)
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:49:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:291:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ], hasSubmission: true }
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:291:16
+
+  console.error
+    [createSubmission] Error: TransitionError: Some canonical analytical work has not been submitted.
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionLifecycleService.js:28:15)
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:49:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:291:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ], hasSubmission: true }
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:291:16
+
+  console.error
+    [createSubmission] Error: TransitionError: Some canonical analytical work has not been submitted.
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionLifecycleService.js:28:15)
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:49:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:291:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ], hasSubmission: true }
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:291:16
+
+  console.error
+    [createSubmission] Error: TransitionError: Some canonical analytical work has not been submitted.
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionLifecycleService.js:28:15)
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:49:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:291:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ], hasSubmission: true }
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:291:16
+
+  console.error
+    [createSubmission] Error: TransitionError: Some canonical analytical work has not been submitted.
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionLifecycleService.js:28:15)
+        at assertRequestedType (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\submissionStateService.js:49:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.createSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:74:74)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:291:16 {
+      statusCode: 409,
+      status: 409,
+      code: 'SUBMISSION_NOT_FULL',
+      details: { blocking: [ [Object] ], hasSubmission: true }
+    }
+
+      83 |
+      84 |     } catch (error) {
+    > 85 |         console.error('[createSubmission] Error:', error);
+         |                 ^
+      86 |         const mapped = stateRules.mapStateError(error);
+      87 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+      88 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/submissionController.js:85:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:291:16
+
+  console.log
+    [commitSubmissions] Invoked by state-tech-bb8e004a-1696-40a6-a93e-183fde2acad6 with 1 samples: [ 'e135e5f4-691a-44fa-97e6-47b410818483' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.error
+    [workbench.commitSubmissions] Error: TransitionError: Select completed work items before submitting.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1912:52
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.commitSubmissions (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1826:9)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:327:13 {
+      statusCode: 400,
+      status: 400,
+      code: 'EMPTY_SUBMISSION_SELECTION',
+      details: {}
+    }
+
+      1941 |         });
+      1942 |     } catch (err) {
+    > 1943 |         console.error('[workbench.commitSubmissions] Error:', err);
+           |                 ^
+      1944 |         const mapped = stateRules.mapStateError(err);
+      1945 |         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to commit submissions',
+      1946 |             ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+
+      at error (controllers/workbenchController.js:1943:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:327:13
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 1a2c8b0e-7982-4868-a4da-1340013f5ea9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:33:44)
+        at assertReviewable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:818:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:395:12 {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:395:12
+
+  console.error
+    [reviewWorkItemsBulk] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workRepeatService.js:21:40)
+        at preflightRepeat (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewAttemptService.js:49:54)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewAttemptService.js:80:24
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.reviewWorkItemsBulk (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1170:9)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:395:12 {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      1346 |         res.json({ success: true, count: results.length, results, errors });
+      1347 |     } catch (error) {
+    > 1348 |         console.error('[reviewWorkItemsBulk] Error:', error);
+           |                 ^
+      1349 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1350 |     }
+      1351 | };
+
+      at error (controllers/workItemController.js:1348:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:395:12
+
+  console.error
+    [reviewSubmission] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workRepeatService.js:21:40)
+        at preflightRepeat (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewAttemptService.js:49:54)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewAttemptService.js:80:24
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:265:9)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:395:12 {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at tests/contracts/audit_1_2_workbench_state.test.js:395:12
+
+  console.error
+    [reviewWorkItem] Error: Error: Injected workflow audit failure
+        at Proxy.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:147:31)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportResultGovernance.js:148:27)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at commitReview.qcAcknowledgement (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1020:17)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:92:31
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:412:13)
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at Object.<anonymous> (tests/contracts/audit_1_2_workbench_state.test.js:412:13)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User state-manager-1f2e1f73-634c-4b2e-b854-e776096c5b14 (Lab: 1f85d191-a6fb-43a5-a824-dd411e64617b) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/closureTaskService.js:17:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_1_2_workbench_state.test.js:438:5)
+
+  console.error
+    [updateStatus] Error: Error: Injected workflow audit failure
+        at Proxy.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:147:31)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\sampleStateService.js:83:35)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.updateStatus (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\sampleController.js:544:25)
+        at call (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:136:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js:446:13)
+
+      558 |         const mapped = require('../services/workflowStateRules').mapStateError(err);
+      559 |         if (mapped.statusCode) return res.status(mapped.statusCode).json({ code: mapped.code, error: mapped.message, ...(mapped.details && { details: mapped.details }) });
+    > 560 |         console.error('[updateStatus] Error:', err);
+          |                 ^
+      561 |         return error(res, 500, 'SAMPLE_UPDATE_ERROR', null, 'Failed to update status');
+      562 |     }
+      563 | };
+
+      at error (controllers/sampleController.js:560:17)
+      at call (tests/contracts/audit_1_2_workbench_state.test.js:136:5)
+      at Object.<anonymous> (tests/contracts/audit_1_2_workbench_state.test.js:446:13)
+
+PASS tests/contracts/audit_1_2_workbench_state.test.js
+  √ final approval returns the preparation-reversion 409 and preserves every row (94 ms)
+  √ undo intake preserves every task when the transition is refused by a database guard (43 ms)
+  √ undo intake rolls back task deletion and the transition when its final audit fails (193 ms)
+  √ fixture cleanup refuses a database outside the owned test directory before deletion (8 ms)
+  √ removePreAnalyticSample refuses a full client outside a transaction
+  √ removeUnstartedWorkItems refuses a full client outside a transaction (1 ms)
+  √ undo intake preserves COMPLETED work and its recorded evidence on refusal (12 ms)
+  √ undo intake preserves IN_PROGRESS work and its recorded evidence on refusal (12 ms)
+  √ undo intake preserves ASSIGNED work and its recorded evidence on refusal (12 ms)
+  √ a failed draft-start audit rolls back the draft, status and history together (60 ms)
+  √ a failed discard audit restores the original draft and in-progress work item (42 ms)
+  √ bulk draft clear rolls back every discard when its final audit fails (100 ms)
+  √ workbench operational completion respects lab verification policy and reports the actual state (61 ms)
+  √ legacy submission refuses current preparation-revert evidence before writes (42 ms)
+  √ workbench submission refuses current preparation-revert evidence before writes (28 ms)
+  √ legacy submission refuses a final APPROVED sample without an amendment (12 ms)
+  √ legacy submission refuses a final ARCHIVED sample without an amendment (10 ms)
+  √ legacy submission refuses a final DISPOSED sample without an amendment (13 ms)
+  √ workbench submission refuses a final APPROVED sample without an amendment (12 ms)
+  √ workbench submission refuses a final ARCHIVED sample without an amendment (12 ms)
+  √ workbench submission refuses a final DISPOSED sample without an amendment (11 ms)
+  √ legacy submission rolls back sample/work/submit/audit after a later audit failure (41 ms)
+  √ workbench submission rolls back sample/work/submit/audit after a later audit failure (30 ms)
+  √ one preparation-blocked sample rolls back the whole workbench submission batch (48 ms)
+  √ generic work status audit failure rolls back the state, version and history (40 ms)
+  √ completed work requires a real reason before the generic reopen edge (24 ms)
+  √ legacy submission derives SUBMITTED companion work as FULL after selected work is submitted (65 ms)
+  √ legacy submission derives ACCEPTED companion work as FULL after selected work is submitted (41 ms)
+  √ legacy submission derives WAIVED companion work as FULL after selected work is submitted (34 ms)
+  √ legacy submission derives CANCELLED companion work as FULL after selected work is submitted (34 ms)
+  √ legacy submission derives COMPLETED companion work as PARTIAL after selected work is submitted (41 ms)
+  √ legacy submission derives ON_HOLD companion work as PARTIAL after selected work is submitted (39 ms)
+  √ legacy submission derives REPEAT_REQUIRED companion work as PARTIAL after selected work is submitted (34 ms)
+  √ legacy submission derives AWAITING_VERIFICATION companion work as PARTIAL after selected work is submitted (33 ms)
+  √ legacy submission derives NOT_ASSIGNED companion work as PARTIAL after selected work is submitted (35 ms)
+  √ legacy submission derives ASSIGNED companion work as PARTIAL after selected work is submitted (40 ms)
+  √ legacy submission derives IN_PROGRESS companion work as PARTIAL after selected work is submitted (34 ms)
+  √ workbench submission derives SUBMITTED companion work as FULL after selected work is submitted (25 ms)
+  √ workbench submission derives ACCEPTED companion work as FULL after selected work is submitted (28 ms)
+  √ workbench submission derives WAIVED companion work as FULL after selected work is submitted (26 ms)
+  √ workbench submission derives CANCELLED companion work as FULL after selected work is submitted (30 ms)
+  √ workbench submission derives COMPLETED companion work as PARTIAL after selected work is submitted (26 ms)
+  √ workbench submission derives ON_HOLD companion work as PARTIAL after selected work is submitted (24 ms)
+  √ workbench submission derives REPEAT_REQUIRED companion work as PARTIAL after selected work is submitted (27 ms)
+  √ workbench submission derives AWAITING_VERIFICATION companion work as PARTIAL after selected work is submitted (25 ms)
+  √ workbench submission derives NOT_ASSIGNED companion work as PARTIAL after selected work is submitted (25 ms)
+  √ workbench submission derives ASSIGNED companion work as PARTIAL after selected work is submitted (31 ms)
+  √ workbench submission derives IN_PROGRESS companion work as PARTIAL after selected work is submitted (36 ms)
+  √ FULL derivation excludes duplicates, gates and every closure alias (28 ms)
+  √ an explicit FULL request lists its COMPLETED blocker and rolls back every write (36 ms)
+  √ an explicit FULL request lists its ON_HOLD blocker and rolls back every write (34 ms)
+  √ an explicit FULL request lists its REPEAT_REQUIRED blocker and rolls back every write (40 ms)
+  √ an explicit FULL request lists its AWAITING_VERIFICATION blocker and rolls back every write (34 ms)
+  √ an explicit FULL request lists its NOT_ASSIGNED blocker and rolls back every write (36 ms)
+  √ an explicit FULL request lists its ASSIGNED blocker and rolls back every write (35 ms)
+  √ an explicit FULL request lists its IN_PROGRESS blocker and rolls back every write (34 ms)
+  √ requested PARTIAL is preserved in the audit when the derived lifecycle becomes FULL (36 ms)
+  √ a counted set containing only waived/cancelled work does not create a full submission (8 ms)
+  √ submission preview projects only selected items and reads leave every fixture row unchanged (70 ms)
+  √ legacy empty submission selection is refused without writes (8 ms)
+  √ workbench empty submission selection is refused without writes (10 ms)
+  √ single review RETURN reopens FULL atomically and records its decision in Sample history/audit (52 ms)
+  √ bulk review RETURN reopens FULL atomically and records its decision in Sample history/audit (40 ms)
+  √ submission review RETURN reopens FULL atomically and records its decision in Sample history/audit (26 ms)
+  √ single review RETURN retains a partial lifecycle (21 ms)
+  √ bulk review RETURN retains a partial lifecycle (22 ms)
+  √ submission review RETURN retains a partial lifecycle (25 ms)
+  √ single review ACCEPTED leaves FULL lifecycle unchanged (55 ms)
+  √ single review WAIVED leaves FULL lifecycle unchanged (14 ms)
+  √ bulk review ACCEPTED leaves FULL lifecycle unchanged (39 ms)
+  √ bulk review WAIVED leaves FULL lifecycle unchanged (14 ms)
+  √ submission review ACCEPTED leaves FULL lifecycle unchanged (35 ms)
+  √ submission review WAIVED leaves FULL lifecycle unchanged (12 ms)
+  √ single review RETURN refuses an approved Sample with zero writes (14 ms)
+  √ bulk review RETURN refuses an approved Sample with zero writes (20 ms)
+  √ submission review RETURN refuses an approved Sample with zero writes (20 ms)
+  √ a Sample status change during FULL review rolls back its decision and WorkItem (22 ms)
+  √ a failed FULL review lifecycle audit rolls back its decision, history and WorkItem (27 ms)
+  √ ARCHIVING request creates NOT_ASSIGNED through the authority and preserves Sample approval (12 ms)
+  √ DISPOSAL request creates NOT_ASSIGNED through the authority and preserves Sample approval (10 ms)
+  √ ARCHIVING request rolls back creation and metadata if its audit fails (11 ms)
+  √ DISPOSAL request rolls back creation and metadata if its audit fails (9 ms)
+  √ closure state/scope refusals happen before creation or metadata writes (39 ms)
+  √ generic Sample status audit failure rolls back the hold and provenance together (14 ms)
+  √ generic Sample cancellation needs the supplied reason and retains all WorkItems (21 ms)
+  √ generic Sample status cannot reopen an approved sample and writes no audit (10 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       86 passed, 86 total
+Snapshots:   0 total
+Time:        3.918 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_workbench_state.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-workbench-review-legacy-context-singles\01-audit_1_2_workbench_state.test\report-original.json

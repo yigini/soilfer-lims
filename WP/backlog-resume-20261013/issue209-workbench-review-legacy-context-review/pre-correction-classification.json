@@ -1,0 +1,1725 @@
+{
+  "createdUtc": "2026-10-14T15:50:37.049320+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 121,
+  "sourceAuthorities": [
+    6163271808,
+    6166518424,
+    6167740581,
+    6169628053
+  ],
+  "cases": [
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "final approval returns the preparation-reversion 409 and preserves every row",
+      "originalFailureSha256": "5c63ae5c8432da381078fd8b96a35f3d66dc9979cfb962e579cc633430e6639a",
+      "originalFixtureAndTestLineNumbers": [
+        "35"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission refuses current preparation-revert evidence before writes",
+      "originalFailureSha256": "0cfc0d35d6105ffecaf7fe06bc1ccf2b95545601c63c506efc0fc297179bdedd",
+      "originalFixtureAndTestLineNumbers": [
+        "190"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission refuses current preparation-revert evidence before writes",
+      "originalFailureSha256": "0cfc0d35d6105ffecaf7fe06bc1ccf2b95545601c63c506efc0fc297179bdedd",
+      "originalFixtureAndTestLineNumbers": [
+        "190"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission rolls back sample/work/submit/audit after a later audit failure",
+      "originalFailureSha256": "3657294049c90ef16996b0392de042d7eea264ed9e05ff00ed4f7a7d17354c30",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "203"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission rolls back sample/work/submit/audit after a later audit failure",
+      "originalFailureSha256": "3657294049c90ef16996b0392de042d7eea264ed9e05ff00ed4f7a7d17354c30",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "203"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "one preparation-blocked sample rolls back the whole workbench submission batch",
+      "originalFailureSha256": "03e7bd7055fb81ffb022193e23718ef7ccd9e8d1497e10cb6373807f340a0e18",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "210"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission derives SUBMITTED companion work as FULL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission derives ACCEPTED companion work as FULL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission derives WAIVED companion work as FULL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission derives CANCELLED companion work as FULL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission derives COMPLETED companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission derives ON_HOLD companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission derives REPEAT_REQUIRED companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission derives AWAITING_VERIFICATION companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission derives NOT_ASSIGNED companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission derives ASSIGNED companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "legacy submission derives IN_PROGRESS companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission derives SUBMITTED companion work as FULL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission derives ACCEPTED companion work as FULL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission derives WAIVED companion work as FULL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission derives CANCELLED companion work as FULL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission derives COMPLETED companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission derives ON_HOLD companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission derives REPEAT_REQUIRED companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission derives AWAITING_VERIFICATION companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission derives NOT_ASSIGNED companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission derives ASSIGNED companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "workbench submission derives IN_PROGRESS companion work as PARTIAL after selected work is submitted",
+      "originalFailureSha256": "2c9dd7ac328a09a9754da2609db373afbb16abe5e53a5836125a2582405b3bd2",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "247"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "an explicit FULL request lists its COMPLETED blocker and rolls back every write",
+      "originalFailureSha256": "c31f5d29d398ae7f7b21bfbf49ec842f88f50ed44fb633b245fab02c24a61bd0",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "275"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "an explicit FULL request lists its ON_HOLD blocker and rolls back every write",
+      "originalFailureSha256": "c31f5d29d398ae7f7b21bfbf49ec842f88f50ed44fb633b245fab02c24a61bd0",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "275"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "an explicit FULL request lists its REPEAT_REQUIRED blocker and rolls back every write",
+      "originalFailureSha256": "c31f5d29d398ae7f7b21bfbf49ec842f88f50ed44fb633b245fab02c24a61bd0",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "275"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "an explicit FULL request lists its AWAITING_VERIFICATION blocker and rolls back every write",
+      "originalFailureSha256": "c31f5d29d398ae7f7b21bfbf49ec842f88f50ed44fb633b245fab02c24a61bd0",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "275"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "an explicit FULL request lists its NOT_ASSIGNED blocker and rolls back every write",
+      "originalFailureSha256": "c31f5d29d398ae7f7b21bfbf49ec842f88f50ed44fb633b245fab02c24a61bd0",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "275"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "an explicit FULL request lists its ASSIGNED blocker and rolls back every write",
+      "originalFailureSha256": "c31f5d29d398ae7f7b21bfbf49ec842f88f50ed44fb633b245fab02c24a61bd0",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "275"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "an explicit FULL request lists its IN_PROGRESS blocker and rolls back every write",
+      "originalFailureSha256": "c31f5d29d398ae7f7b21bfbf49ec842f88f50ed44fb633b245fab02c24a61bd0",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "275"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "requested PARTIAL is preserved in the audit when the derived lifecycle becomes FULL",
+      "originalFailureSha256": "c89523eef268fb57b858a35495aabd7c1e793f6228cab7203d3a53208e0dd9d9",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "284"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "submission preview projects only selected items and reads leave every fixture row unchanged",
+      "originalFailureSha256": "9b04280599fdb595e945ce7e94fbbc3b6ccaabc782a43f7c75ff808faf7354b6",
+      "originalFixtureAndTestLineNumbers": [
+        "116",
+        "298"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "single review RETURN reopens FULL atomically and records its decision in Sample history/audit",
+      "originalFailureSha256": "3d56477a44a3863fd3b282ab8cd39d1bb8a99cf382921d89875cb30065468ea0",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "349"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "bulk review RETURN reopens FULL atomically and records its decision in Sample history/audit",
+      "originalFailureSha256": "3d56477a44a3863fd3b282ab8cd39d1bb8a99cf382921d89875cb30065468ea0",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "349"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "submission review RETURN reopens FULL atomically and records its decision in Sample history/audit",
+      "originalFailureSha256": "3d56477a44a3863fd3b282ab8cd39d1bb8a99cf382921d89875cb30065468ea0",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "349"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "single review RETURN retains a partial lifecycle",
+      "originalFailureSha256": "244196f2b186d1886593df0ddb9741264ebad92c99c6cee9ec9a3c31812cb903",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "363"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "bulk review RETURN retains a partial lifecycle",
+      "originalFailureSha256": "244196f2b186d1886593df0ddb9741264ebad92c99c6cee9ec9a3c31812cb903",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "363"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "submission review RETURN retains a partial lifecycle",
+      "originalFailureSha256": "244196f2b186d1886593df0ddb9741264ebad92c99c6cee9ec9a3c31812cb903",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "363"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "single review ACCEPTED leaves FULL lifecycle unchanged",
+      "originalFailureSha256": "550b3b94a3f942a8a3f906566582e2b1442e9cfbe1e841e2bac6456bc6a66538",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "373"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "bulk review ACCEPTED leaves FULL lifecycle unchanged",
+      "originalFailureSha256": "550b3b94a3f942a8a3f906566582e2b1442e9cfbe1e841e2bac6456bc6a66538",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "373"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "submission review ACCEPTED leaves FULL lifecycle unchanged",
+      "originalFailureSha256": "550b3b94a3f942a8a3f906566582e2b1442e9cfbe1e841e2bac6456bc6a66538",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "373"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "bulk review RETURN refuses an approved Sample with zero writes",
+      "originalFailureSha256": "eb1f889f845b19dd885ae96a081e62476d2cffc039218c5105fe7a88f8e6841f",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "378"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "submission review RETURN refuses an approved Sample with zero writes",
+      "originalFailureSha256": "eb1f889f845b19dd885ae96a081e62476d2cffc039218c5105fe7a88f8e6841f",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "378"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "a Sample status change during FULL review rolls back its decision and WorkItem",
+      "originalFailureSha256": "05094c3e581c32af906e5fe7e310cc814f4c24ffb00ac98599c4484dc6333439",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "384"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_workbench_state.test.js",
+      "test": "a failed FULL review lifecycle audit rolls back its decision, history and WorkItem",
+      "originalFailureSha256": "ccc4e8d6d06b6f443eb34ff5f1bbfedb56fdae6c424bda03c53e49c48d9acd5e",
+      "originalFixtureAndTestLineNumbers": [
+        "331",
+        "395"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared legacy NULL order for the freshly assembled numerical owner before any execution; operational PREPARATION/DRYING contexts remain unchanged. Only the separately seeded EC owner gets its matching NEW fixture line. Submission matrix/blocked companion set/preview/final sample/preparation revert/RETURN identity/CAS/audit rollback assertions unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set RETURN and WAIVE cannot alter analytical ACCEPTED work or its approved sample",
+      "originalFailureSha256": "bff941b79961dd855774a9dc1b5c8fc03683d024b9c6fc3505693ad662e6bf42",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "81"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set RETURN and WAIVE cannot alter analytical WAIVED work or its approved sample",
+      "originalFailureSha256": "65af6ea1ede7d3c083c2ebaa89d6ae62d36f6de201ba817f3903494c5663d52a",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "81"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set RETURN and WAIVE cannot alter analytical COMPLETED work or its approved sample",
+      "originalFailureSha256": "65af6ea1ede7d3c083c2ebaa89d6ae62d36f6de201ba817f3903494c5663d52a",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "81"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set RETURN and WAIVE cannot alter analytical IN_PROGRESS work or its approved sample",
+      "originalFailureSha256": "65af6ea1ede7d3c083c2ebaa89d6ae62d36f6de201ba817f3903494c5663d52a",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "81"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set two concurrent ACCEPTs create exactly one decision, one audit and one version increment",
+      "originalFailureSha256": "bae1003fcfc0a352477b1b944e0641897d04968805e2bd7157783b197b3a424b",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "90"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set a changed version with the same submitted status loses the CAS with no review writes",
+      "originalFailureSha256": "674df976f42c370bed6883732542c50f5d06fae8e835233889ec898a14a80c8d",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "100"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set bulk ACCEPTED commits eligible rows and refuses already accepted rows",
+      "originalFailureSha256": "0d701b7fb4b745cb5aa39a25efe88dac0300d700694ba42cee31b2d90defc731",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "114"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set bulk REANALYSIS_REQUIRED commits eligible rows and refuses already accepted rows",
+      "originalFailureSha256": "0d701b7fb4b745cb5aa39a25efe88dac0300d700694ba42cee31b2d90defc731",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "114"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set bulk WAIVED commits eligible rows and refuses already accepted rows",
+      "originalFailureSha256": "0d701b7fb4b745cb5aa39a25efe88dac0300d700694ba42cee31b2d90defc731",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "114"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set bulk with no eligible rows returns 409 and leaves every record unchanged",
+      "originalFailureSha256": "e24d1da0b837a8a9cb4271a33bc61a49f369ee1c7a03d1410e38c816922d24ac",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "125"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set array submission review refuses accepted rows and derives status and note from committed rows",
+      "originalFailureSha256": "f60a828918cea857de2bf1e7dd77aa151d01c97f1fc56c01df9b94e1b1310394",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "60",
+        "132"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set shorthand submission review refuses accepted rows and derives status and note from committed rows",
+      "originalFailureSha256": "f60a828918cea857de2bf1e7dd77aa151d01c97f1fc56c01df9b94e1b1310394",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "60",
+        "132"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set no successful submission rows leave the package and every item unchanged",
+      "originalFailureSha256": "f62d474e01d3bfe3a2885bc469106f08572f96d1f54726306f88c5aac9a78c8d",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "60",
+        "149"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set concurrent bulk review has one successful row and exactly one decision",
+      "originalFailureSha256": "184149b6bbcf67baada0f3a3c5332712adc6c61c6593c0b76309a484a1f9eaf0",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "60",
+        "157"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set concurrent submission review has one successful row and exactly one decision",
+      "originalFailureSha256": "184149b6bbcf67baada0f3a3c5332712adc6c61c6593c0b76309a484a1f9eaf0",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "60",
+        "157"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set partial submission summary uses committed state and RETURN keeps the scientific value",
+      "originalFailureSha256": "ea4949997d6a3c9939f34c7594df005e5ad41c00664eef7a5b61cc5271353683",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "60",
+        "176"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set a submitted closure WAIVE follows the shared contract and leaves sample custody unchanged",
+      "originalFailureSha256": "22f1e8db485675ae2d56e3530c477932b89e788f7cd67fe8706cb6604be1ceb7",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "190"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set invalid second decision refuses the whole request before writes ({ decision: 'INVALID' })",
+      "originalFailureSha256": "04cc4fcc239580f5902414e7973d324b33ec90076d232bc0fcb00b580b07c5f1",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "60",
+        "202"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set invalid second decision refuses the whole request before writes ({ decision: 'WAIVE' })",
+      "originalFailureSha256": "04cc4fcc239580f5902414e7973d324b33ec90076d232bc0fcb00b580b07c5f1",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "60",
+        "202"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set invalid second decision refuses the whole request before writes ({ decision: 'REJECT_REANALYSIS', reason: ' ' })",
+      "originalFailureSha256": "04cc4fcc239580f5902414e7973d324b33ec90076d232bc0fcb00b580b07c5f1",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "60",
+        "202"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set invalid second decision refuses the whole request before writes ({ decision: 'WAIVE', reason: 123 })",
+      "originalFailureSha256": "04cc4fcc239580f5902414e7973d324b33ec90076d232bc0fcb00b580b07c5f1",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "60",
+        "202"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set QC refusal remains request-wide and prevents an otherwise eligible bulk row",
+      "originalFailureSha256": "4cdaa2dd6c28f6d39beeca5fa61b9dedb865366cb1741649c7d0d9a3117caf2f",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "210"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set ARCHIVING can be accepted once from COMPLETED and a second decision cannot change custody or audit",
+      "originalFailureSha256": "4e291735d34dc68f601646970f43af4503717a8a5271cbb4c4daa2848070769e",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "217"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set ARCH can be accepted once from COMPLETED and a second decision cannot change custody or audit",
+      "originalFailureSha256": "4e291735d34dc68f601646970f43af4503717a8a5271cbb4c4daa2848070769e",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "217"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set Archive can be accepted once from COMPLETED and a second decision cannot change custody or audit",
+      "originalFailureSha256": "4e291735d34dc68f601646970f43af4503717a8a5271cbb4c4daa2848070769e",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "217"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set DISPOSAL can be accepted once from COMPLETED and a second decision cannot change custody or audit",
+      "originalFailureSha256": "4e291735d34dc68f601646970f43af4503717a8a5271cbb4c4daa2848070769e",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "217"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set DISP can be accepted once from COMPLETED and a second decision cannot change custody or audit",
+      "originalFailureSha256": "4e291735d34dc68f601646970f43af4503717a8a5271cbb4c4daa2848070769e",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "217"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set Dispose can be accepted once from COMPLETED and a second decision cannot change custody or audit",
+      "originalFailureSha256": "4e291735d34dc68f601646970f43af4503717a8a5271cbb4c4daa2848070769e",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "217"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set the shared SUBMITTED -> WAIVED contract keeps the technician status endpoint sealed",
+      "originalFailureSha256": "b8b1937a8dae5fd30a8f4fe4ad6face05b4dd32b2cb789e83e12331fdd9bab07",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "225"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set legacy PENDING closure accepts once and terminal decisions cannot change any records",
+      "originalFailureSha256": "ec31fd815d6f6dbf50ee696b06f5d6e313a7959daa08f4d7f3baf4a1d011bfe6",
+      "originalFixtureAndTestLineNumbers": [
+        "35",
+        "231"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set submission closure commits custody after the CAS and refuses a second package review",
+      "originalFailureSha256": "d475c6df25d5ad4ef22e12fb8478beb6e4edc0dd992b1f7486864ff8ac0e64ce",
+      "originalFixtureAndTestLineNumbers": [
+        "35",
+        "242"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set a moved item is a per-row refusal while current members commit and determine the old package status",
+      "originalFailureSha256": "83d75229d7efcd1648e5480a8d82c9274f55463a2d6c51691b6a982ddf8356bb",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "60",
+        "255"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_6_review_atomicity.test.js",
+      "test": "Audit 0.6: review state and atomic status/version compare-and-set a failed decision insert rolls back the item CAS and audit together",
+      "originalFailureSha256": "9a1e22af6e3e77224bd6f4dd81866725cf01cddeebc5d15d5ba35a5338fbede7",
+      "originalFixtureAndTestLineNumbers": [
+        "46",
+        "270"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable retained legacy NULL line before the positive review witness in ordinary or generated historical closure assembly. Generated closure already has209 nullable model primitive: no DDL/guard change. Its legacy status, custody alias, approval metadata and accepted/waived/refusal predicates stay literal. Only opt-in canonical EC package evidence gets its matching NEW owned line; duplicate child/cached evidence policy unchanged. This is positive history assembly, not a claim that production closure commands create numerical attempts.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "saving results keeps PROCESSING lifecycle and WorkItem state while refreshing only its result cache",
+      "originalFailureSha256": "9a5a840d1098a920053031d54d1ed119be5fc338a2b575a2403cc61f41d21a4a",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "32",
+        "47"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "saving results keeps SUBMITTED_PARTIAL lifecycle and WorkItem state while refreshing only its result cache",
+      "originalFailureSha256": "9a5a840d1098a920053031d54d1ed119be5fc338a2b575a2403cc61f41d21a4a",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "32",
+        "47"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "a scope refusal inside the result-save transaction writes nothing",
+      "originalFailureSha256": "15581397c99b4bf150d45e2ec6544267e78d552a93fb99817ad80132d3a886d4",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "32",
+        "65"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "a gate refusal inside the result-save transaction writes nothing",
+      "originalFailureSha256": "15581397c99b4bf150d45e2ec6544267e78d552a93fb99817ad80132d3a886d4",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "32",
+        "65"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "a audit refusal inside the result-save transaction writes nothing",
+      "originalFailureSha256": "15581397c99b4bf150d45e2ec6544267e78d552a93fb99817ad80132d3a886d4",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "32",
+        "65"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "missing preparation evidence retains HTTP 412 and its existing message",
+      "originalFailureSha256": "6544985079bda5d532d2b3f6e01c8c989c6dc6b81f44461c2313202cd6c0d189",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "32",
+        "81"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "missing preparation evidence retains HTTP 412 and its existing message",
+      "originalFailureSha256": "6544985079bda5d532d2b3f6e01c8c989c6dc6b81f44461c2313202cd6c0d189",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "32",
+        "81"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "a present gate WorkItem overrides a saved DONE flag and refuses inconsistent evidence",
+      "originalFailureSha256": "fe0773d4ad63d1ba43c729ee4f5f9c51af8a0d741424e0c33820faec1ec456e6",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "88"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "final APPROVED result edits require an amendment and write nothing",
+      "originalFailureSha256": "5c11b42e26527ec177c6152e3754b58148360ba523a1be74586a5065a2f78d64",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "97"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "final ARCHIVED result edits require an amendment and write nothing",
+      "originalFailureSha256": "5c11b42e26527ec177c6152e3754b58148360ba523a1be74586a5065a2f78d64",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "97"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "final DISPOSED result edits require an amendment and write nothing",
+      "originalFailureSha256": "5c11b42e26527ec177c6152e3754b58148360ba523a1be74586a5065a2f78d64",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "97"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submit completes evidenced COMPLETED work and creates a real FULL Submission",
+      "originalFailureSha256": "b2d06378fe7e8e43fdf763490a2acebd1eda1480ffef0a16922e7f9ce3334396",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "103"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submit completes evidenced IN_PROGRESS work and creates a real FULL Submission",
+      "originalFailureSha256": "b2d06378fe7e8e43fdf763490a2acebd1eda1480ffef0a16922e7f9ce3334396",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "103"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submit completes evidenced ASSIGNED work and creates a real FULL Submission",
+      "originalFailureSha256": "b2d06378fe7e8e43fdf763490a2acebd1eda1480ffef0a16922e7f9ce3334396",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "103"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "a NOT_ASSIGNED blocker prevents FULL submission with zero writes, including an earlier evidenced item",
+      "originalFailureSha256": "b5cf1fafb88912bdaa9e5ecafc16f3d83e8ad9da1a7409874f87511e7f6caded",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "122"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "a ON_HOLD blocker prevents FULL submission with zero writes, including an earlier evidenced item",
+      "originalFailureSha256": "b5cf1fafb88912bdaa9e5ecafc16f3d83e8ad9da1a7409874f87511e7f6caded",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "122"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "a REPEAT_REQUIRED blocker prevents FULL submission with zero writes, including an earlier evidenced item",
+      "originalFailureSha256": "b5cf1fafb88912bdaa9e5ecafc16f3d83e8ad9da1a7409874f87511e7f6caded",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "122"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "a AWAITING_VERIFICATION blocker prevents FULL submission with zero writes, including an earlier evidenced item",
+      "originalFailureSha256": "b5cf1fafb88912bdaa9e5ecafc16f3d83e8ad9da1a7409874f87511e7f6caded",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "122"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "a COMPLETED blocker prevents FULL submission with zero writes, including an earlier evidenced item",
+      "originalFailureSha256": "b5cf1fafb88912bdaa9e5ecafc16f3d83e8ad9da1a7409874f87511e7f6caded",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "122"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "blocking matrix diagnostics retain 422 before any lifecycle or submission write",
+      "originalFailureSha256": "8e10482bc59df123f104babd21f1e9ef1b499b2b19ca0a498ebd06548e090216",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "131"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "a late Sample audit failure rolls back automatic completion and the entire real submission",
+      "originalFailureSha256": "304bff01120ac76e44460b30d97ef5358021229a93af40267eb79f42d4eb3bb9",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "146"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submit retains existing prerequisite 412 refusals with zero writes",
+      "originalFailureSha256": "9620c9815646da15b8aa8bfde305fdd860bc11e1e82b5d63a375f96906c0bf53",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "160"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submit retains existing prerequisite 412 refusals with zero writes",
+      "originalFailureSha256": "9620c9815646da15b8aa8bfde305fdd860bc11e1e82b5d63a375f96906c0bf53",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "160"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submit never reopens a final APPROVED Sample",
+      "originalFailureSha256": "8c4da9552e547fc44171f085527121e241c874ef8540648af2c77dec013fc35b",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "166"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submit never reopens a final ARCHIVED Sample",
+      "originalFailureSha256": "8c4da9552e547fc44171f085527121e241c874ef8540648af2c77dec013fc35b",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "166"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submit never reopens a final DISPOSED Sample",
+      "originalFailureSha256": "8c4da9552e547fc44171f085527121e241c874ef8540648af2c77dec013fc35b",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "166"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submission refuses incomplete stored value  without changing evidence",
+      "originalFailureSha256": "6b76f222017b062a8b63c873e3717853fd47fbffc618fb4771465ad14bfe7ab0",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "175"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submission refuses incomplete stored value not-a-number without changing evidence",
+      "originalFailureSha256": "6b76f222017b062a8b63c873e3717853fd47fbffc618fb4771465ad14bfe7ab0",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "175"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submission refuses incomplete stored value 19 without changing evidence",
+      "originalFailureSha256": "6b76f222017b062a8b63c873e3717853fd47fbffc618fb4771465ad14bfe7ab0",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "175"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submission refuses incomplete stored value 6.2 without changing evidence",
+      "originalFailureSha256": "6b76f222017b062a8b63c873e3717853fd47fbffc618fb4771465ad14bfe7ab0",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "175"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submission refuses malformed mapping with zero lifecycle or evidence writes",
+      "originalFailureSha256": "34e91a38c7a4232073966e8b8e18900b0a0e8999e53e13a86f35db1d51d963c6",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "187"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submission refuses missing instrument with zero lifecycle or evidence writes",
+      "originalFailureSha256": "34e91a38c7a4232073966e8b8e18900b0a0e8999e53e13a86f35db1d51d963c6",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "187"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submission refuses ineligible instrument with zero lifecycle or evidence writes",
+      "originalFailureSha256": "34e91a38c7a4232073966e8b8e18900b0a0e8999e53e13a86f35db1d51d963c6",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "187"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submission refuses out of service with zero lifecycle or evidence writes",
+      "originalFailureSha256": "34e91a38c7a4232073966e8b8e18900b0a0e8999e53e13a86f35db1d51d963c6",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "187"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submission refuses different laboratory with zero lifecycle or evidence writes",
+      "originalFailureSha256": "34e91a38c7a4232073966e8b8e18900b0a0e8999e53e13a86f35db1d51d963c6",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "187"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submission refuses overdue calibration with zero lifecycle or evidence writes",
+      "originalFailureSha256": "34e91a38c7a4232073966e8b8e18900b0a0e8999e53e13a86f35db1d51d963c6",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "187"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "legacy submit preserves the no-results refusal before lifecycle checks",
+      "originalFailureSha256": "c0687e416d7eb410b254f5b14a3648279a4ea4ab8e7bceffc23c759575b51535",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "206"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_1_2_legacy_results.test.js",
+      "test": "uncleared preparation reversion prevents submission and preserves its append-only evidence",
+      "originalFailureSha256": "c0b416e8cb6396d9e6860718fd0ec1fd50019a175ab5e99931a2ef13d10bf5b3",
+      "originalFixtureAndTestLineNumbers": [
+        "25",
+        "213"
+      ],
+      "classification": "DECLARED_USABLE_ORDER_FOR_NEW_OWNED_POSITIVE_OR_NEGATIVE_WITNESS_ASSEMBLY",
+      "sourceDecision": "Declared usable legacy NULL order before the fresh retained first-reading witness. Final sample/gate/instrument/matrix/refusal and no-results inputs remain unchanged. Only the explicit separate SAND/SILT/CLAY matrix witnesses get their own NEW owned lines before recording; values40/30/17, flags, requiredAnalyses, and old execution identities stay unchanged.",
+      "assertionChanges": 0,
+      "productionInspections": 0,
+      "releasedRuntimeVariant": "Baseline48d could retain WIs after caught initial-order failure; those actual missing-order variants stay zero-write refused and separately readonly listed, approvednonzeroSTOP per6167740581. Currentmainnormalintake creates its initial order; no automatic repair/backfill/relink/widerfallback."
+    }
+  ],
+  "assertionChanges": 0,
+  "runtimeChanges": 0,
+  "productionOperations": 0
+}

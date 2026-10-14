@@ -6,6 +6,16 @@ transaction reconciles actual WorkItems, supersedes every prior ACTIVE revision,
 retains its lines, and creates one ACTIVE revision. Approved, archived and
 disposed samples require the amendment workflow.
 
+A supplied idempotency key creates exactly one receipt in the same transaction
+on either route. Its scope includes the actor, sample, route mode and normalized
+parameters. The same key and payload return the original response without
+writes; a differing payload or reuse through the other route returns
+`409 IDEMPOTENCY_KEY_CONFLICT` without writes. Calls without a key create no
+receipt. Receipt metadata is retained internally and excluded from the replayed
+public response. The audit request identifies the one legacy expectation changed
+under Claudio's decision 6169628053: keyed analyses commands now retain a receipt
+instead of silently ignoring the supplied key.
+
 New lines carry a fixed nullable `workItemId`. This is a historical identifier:
 it is validated against the sample and analysis when inserted, rather than a
 foreign key that would prevent the existing removal of unstarted work. Removing

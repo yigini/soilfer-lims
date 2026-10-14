@@ -1,0 +1,12 @@
+{
+  "closedUtc": "2026-10-14T15:51:32.948784+00:00",
+  "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_0_6_review_atomicity.test.js",
+  "exit": 0,
+  "originalReportPresent": true,
+  "tests": 33,
+  "passed": 33,
+  "failed": 0,
+  "expectedTests": 33,
+  "sourceUnchanged": true,
+  "status": "PASS"
+}

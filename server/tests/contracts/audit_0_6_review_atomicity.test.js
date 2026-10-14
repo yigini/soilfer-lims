@@ -32,6 +32,10 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
             await database.client.user.create({ data: { id: submitter.id, username: submitter.username,
                 email: `${submitter.username}@example.test`, password: 'isolated-fixture', role: 'LAB_TECHNICIAN', labId } });
             const item = await prisma.workItem.findUnique({ where: { id: database.workItemId } });
+            // #209: declare retained usable order context while assembling this NEW owned fixture.
+            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-06-LEGACY'), sampleId: database.sampleId,
+                version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: jwt.decode(manager).username,
+                lines: { create: [{ id: id('LINE-06-LEGACY'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
             const result = await createExecutionResultFixture(prisma, { data: { id: id('R-06-LEGACY'), sampleId: database.sampleId, param: analysis,
                 value: '6.2', numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]' } });
             return { sampleId: database.sampleId, item, result, batch: null };
@@ -43,6 +47,10 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
             qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-06'), sampleId, analysis, assignedLab: labId,
             status, result: '6.2', history: '[]', batchId: batch?.id } });
+        // #209: declare retained usable order context while assembling this NEW owned fixture.
+        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-06'), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: jwt.decode(manager).username,
+            lines: { create: [{ id: id('LINE-06'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
         const result = await createExecutionResultFixture(prisma, { ...(['ACCEPTED','SUBMITTED'].includes(status) && { attemptStatus: status }),
             data: { id: id('R-06'), sampleId, param: analysis, value: '6.2',
             numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
@@ -68,6 +76,13 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
                 SUBMITTED: 'SUBMITTED', ACCEPTED: 'ACCEPTED', COMPLETED: 'RECORDED', AWAITING_VERIFICATION: 'RECORDED'
             }[item.status];
             if (!attemptStatus) throw Error('Cached package evidence requires a pinned final work state.');
+            // #209: only this separately seeded canonical witness needs its matching retained order line.
+            await prisma.$transaction(async tx => {
+                const revision = await tx.sampleOrderRevision.findFirstOrThrow({ where: { sampleId: f.sampleId, status: 'ACTIVE' } });
+                if (!await tx.orderLine.count({ where: { revisionId: revision.id, analysis: item.analysis, status: 'ACTIVE' } }))
+                    await tx.orderLine.create({ data: { id: id('LINE-06-CACHED'), revisionId: revision.id, analysis: item.analysis,
+                        workItemId: null, status: 'ACTIVE', isRequired: true } });
+            });
             await createExecutionResultFixture(prisma, { attemptStatus, data: { id: id('R-06-CACHED'), sampleId: f.sampleId, param: item.analysis,
                 value: item.result, numericValue: Number(item.result), provenance: 'MEASURED', isCurrent: true } });
         }
