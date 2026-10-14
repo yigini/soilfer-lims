@@ -1,0 +1,175 @@
+{
+  "retainedUtc": "2026-10-14T05:48:19.895397+00:00",
+  "run": 38515104824,
+  "attempt": 1,
+  "status": "CLOSED_FAILURE_ORIGINAL_ARCHIVE",
+  "runUrl": "https://github.com/yigini/soilfer-lims/actions/runs/38515104824",
+  "head": "8d564c24f05a3b069bf027bbb7ba4f92cea597b0",
+  "base": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "sourcePathCount": 59,
+  "completedUtc": "2026-10-14T05:45:28Z",
+  "archiveEntries": [
+    {
+      "name": "0_Test & Build.txt",
+      "bytes": 4072717,
+      "sha256": "603b6f0600f79e34a449800dcb7b03be09d0c539388002f4ded7469786d7f74b"
+    },
+    {
+      "name": "Test & Build/system.txt",
+      "bytes": 581,
+      "sha256": "f88847c939f7a1eb614bab8d325cb5504596971a877699889694e1bec931b064"
+    },
+    {
+      "name": "Test & Build/1_Set up job.txt",
+      "bytes": 2337,
+      "sha256": "9f3138cbd9c8939aab32b43cbee986294b0c3afa6bc3f7e860fba2d9b58490b8"
+    },
+    {
+      "name": "Test & Build/2_Checkout repository.txt",
+      "bytes": 20815,
+      "sha256": "ef06aa7156e58d6e7a6c8495fe4ea3e96e1b21216c40db0c5a02422d91d9f89b"
+    },
+    {
+      "name": "Test & Build/3_Setup Node.js.txt",
+      "bytes": 903,
+      "sha256": "27568f2b28ef9254bf0bf00e478652a80dfd48d7f8a319025f6404a411315ba0"
+    },
+    {
+      "name": "Test & Build/4_Install server dependencies.txt",
+      "bytes": 3166,
+      "sha256": "89ca67ace465ce7cdb9d7807815a2922a5cbfb87f7300c1ae2b54c00beda71db"
+    },
+    {
+      "name": "Test & Build/5_Install client dependencies.txt",
+      "bytes": 2621,
+      "sha256": "69f19b17707f4993c52100e1e8ec8bcaf9aad4ce58510567a9868fc0280d0757"
+    },
+    {
+      "name": "Test & Build/6_Verify theme catalog and tokens drift.txt",
+      "bytes": 617,
+      "sha256": "df286bbdc58d45ea7393c0cd087d091b82c27ec9a4d251771e677e6147ceb6c5"
+    },
+    {
+      "name": "Test & Build/7_Build client production bundle.txt",
+      "bytes": 12792,
+      "sha256": "6751ea62924d17a08004494c53f50f1e4db977aa19e7105ba62811e312eb0e46"
+    },
+    {
+      "name": "Test & Build/8_Setup test database and generate Prisma client.txt",
+      "bytes": 5754,
+      "sha256": "4efe9477077366f57045db6bbd5f16ef7db525797ffd4000f1ff6c72effe0b7d"
+    },
+    {
+      "name": "Test & Build/9_Install Chromium for keyboard-only recording contract.txt",
+      "bytes": 25111,
+      "sha256": "c89da1a549028a3d62dc0dcef53d6cf67a655c4543f8121a2cff2d1bab715722"
+    },
+    {
+      "name": "Test & Build/10_Run server test suite.txt",
+      "bytes": 3779768,
+      "sha256": "f0eda85bb2ccc5e9df27624884beea0356fc767862ac2256a5d0b9421a031e01"
+    },
+    {
+      "name": "Test & Build/11_Set up Docker Buildx.txt",
+      "bytes": 14642,
+      "sha256": "311ca58cd1c12f1ae3c75c07c554db49e3b00415ef901436a67924f6941556ce"
+    },
+    {
+      "name": "Test & Build/12_Build Docker image.txt",
+      "bytes": 147842,
+      "sha256": "196def1e2e500b016def62cd1094ea904e4d0d5f43e0f59821e61c182a369cb6"
+    },
+    {
+      "name": "Test & Build/13_Build Supported Baseline Docker Image (v3.5.30 _ 48d0e52).txt",
+      "bytes": 28223,
+      "sha256": "df70b66a2ffbe638dfa89b59f4dbd0af6583e48de908d14a6c3fe99ef667f180"
+    },
+    {
+      "name": "Test & Build/14_Run Real Disposable Docker Boundary Rehearsal.txt",
+      "bytes": 3784,
+      "sha256": "056c655abcee00054d26dd40946ac90bf0b35291f003e8c4a77383daff71fd4a"
+    },
+    {
+      "name": "Test & Build/15_Run Real Docker Deployment Readiness Acceptance.txt",
+      "bytes": 20818,
+      "sha256": "b3412edc1c34084188526bcf511271fbe5993e03a69c21d6ce6e14f2f6155b31"
+    },
+    {
+      "name": "Test & Build/27_Post Build Docker image.txt",
+      "bytes": 595,
+      "sha256": "eac5be5538bd5aa06ea7d4f019fed4616d0300db1924215f6ed660af86947589"
+    },
+    {
+      "name": "Test & Build/28_Post Set up Docker Buildx.txt",
+      "bytes": 833,
+      "sha256": "5a93abbcb97e535a35f295356c4c0bf85de1362ab58deb19c0d607390b8a46f3"
+    },
+    {
+      "name": "Test & Build/30_Post Checkout repository.txt",
+      "bytes": 1719,
+      "sha256": "f42c250931d09c55c420f66f8ff4db410082435a624ebf1eabece655af32d300"
+    },
+    {
+      "name": "Test & Build/31_Complete job.txt",
+      "bytes": 431,
+      "sha256": "26833c4a28a659124f0e7d0da13d091a3f4d4680c4a4c9b66662604ec603523e"
+    }
+  ],
+  "stepFilenameMatches": {
+    "Run server test suite": [
+      "Test & Build/10_Run server test suite.txt"
+    ],
+    "Build client production bundle": [
+      "Test & Build/7_Build client production bundle.txt"
+    ],
+    "Build Docker image": [
+      "Test & Build/12_Build Docker image.txt",
+      "Test & Build/27_Post Build Docker image.txt"
+    ],
+    "Build Supported Baseline Docker Image": [
+      "Test & Build/13_Build Supported Baseline Docker Image (v3.5.30 _ 48d0e52).txt"
+    ],
+    "Run Real Disposable Docker Boundary Rehearsal": [
+      "Test & Build/14_Run Real Disposable Docker Boundary Rehearsal.txt"
+    ],
+    "Run Real Docker Deployment Readiness Acceptance": [
+      "Test & Build/15_Run Real Docker Deployment Readiness Acceptance.txt"
+    ]
+  },
+  "files": {
+    "run-original.json": {
+      "bytes": 12653,
+      "sha256": "39dacdbc79a9d24aa85e7447493f0e42d68e9177dab2502edfc7cd5cee64ecc0"
+    },
+    "jobs-original.json": {
+      "bytes": 4335,
+      "sha256": "e16538e07e94c9fa70a6e1f5395ecc27f71c5ca46704fefdfd185f9af7014644"
+    },
+    "pr-original.json": {
+      "bytes": 56648,
+      "sha256": "42101df8999893e5251e97f515c1600be010985290f47cb10843c0c2decc5e79"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    },
+    "issue214-original.json": {
+      "bytes": 8805,
+      "sha256": "09a09d239ef798edb131eb5aeafa0085258d04c3192d5bad6c9388445438f481"
+    },
+    "closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    },
+    "logs-original.zip": {
+      "bytes": 1381379,
+      "sha256": "facbb11f1e12eb5b083b0ccf43f2424dc5c55f6b2122083d2b6943835cf6afde"
+    }
+  },
+  "prior59PathRetainerRefusedBeforeArtifactCreation": "Substring matched multiple archive entries; original helper consumed, never replay",
+  "terminalStepAnalysisPending": true,
+  "actualOverallCiPass": false,
+  "ciDispatches": 0,
+  "productionOperations": 0,
+  "finalAuditRequestSent": false
+}
