@@ -1,0 +1,19 @@
+{
+  "recordedUtc": "2026-10-14T17:15:50.683256+00:00",
+  "actualResponse": {
+    "status": 500,
+    "body": {
+      "error": "Failed to update analyses"
+    }
+  },
+  "actualRefusal": "MOCK_REQ_HEADERS_ABSENT_BEFORE_ORDER_SERVICE",
+  "failureBeforeReconciliation": true,
+  "runtimeReachabilityClassification": "Mounted Express HTTP request has headers; repository route is the sole non-test caller. Direct fixture mock omitted the HTTP request object primitive. Existing actual mounted analyses keyed/no-key route proofs pass. No current runtime missing-order/reconciliation fault observed.",
+  "plannedCorrection": "Add req.headers={} at only the direct mock input site, remove only the new diagnostic console after retention. Keep original ACTIVE revision1/PH+EC lines, required analyses, POTASSIUM definition/request/reason and all revision2/three-line/supersession/workspace assertions unchanged.",
+  "controllerSha256": "8014827cc72e38d90acfc552694b9c3cd116b1dab86fba4ab712135d5ea0a574",
+  "routeSha256": "c558eeefe226304fd56e7d69dbddca744a76acf3ac38645ec8f7cd4343212242",
+  "productionInspections": 0,
+  "runtimeChanges": 0,
+  "originalCasesResolved": 597,
+  "remaining": 53
+}

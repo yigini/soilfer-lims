@@ -1,0 +1,11 @@
+[
+  {
+    "path": "server/tests/contracts/workbench_single_entry.test.js",
+    "beforeSha256": "bcbc290a0cd9d5c07fe0e8fb965d05d97a37a7986757996aa12edbc22b0aa41f",
+    "afterSha256": "2859c1ca4bc0e02945c0a49b79292552ba1c87384221bba80fb5510340e310b8",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "            console.info('[issue209-single-entry-actual-response]', JSON.stringify({ status: statusVal, body: jsonVal }));\n"
+    ]
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "createdUtc": "2026-10-14T17:11:43.311686+00:00",
+  "reviewedBeforeChanges": true,
+  "cases": [
+    {
+      "suite": "workbench_single_entry.test.js",
+      "test": "Workbench Single-Entry Architecture & Operational Lifecycle Contract Order Revision Snapshotting & Workspace Diagnostics (A14, A15, W09) updateSampleAnalyses creates coherent OrderRevision v2 and OrderLines transactionally",
+      "originalFailureSha256": "4be8a778b92530be821377881a15fbcba9c00618f2277be0d9bbf7b5ecda46fa",
+      "classification": "CAUSE_UNRESOLVED_BEFORE_RUNTIME_RESPONSE_OBSERVATION",
+      "sourceDecision": "Fixture already has one ACTIVE revision with PH and EC usable legacy NULL lines. Original update requested PH/EC/POTASSIUM and supplied reason. Do not add redundant order, alter old definitions/statuses/assertions, invent diagnosis or hide possible runtime reconciliation gap. Append observation only after actual controller returns, before unchanged assertion.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "workbench_single_entry.test.js",
+      "test": "Workbench Single-Entry Architecture & Operational Lifecycle Contract Order Revision Snapshotting & Workspace Diagnostics (A14, A15, W09) SampleWorkspaceService projects active revision and flags any order mismatch",
+      "originalFailureSha256": "80d1fa1470749851980af201405dc8a4ce80313c39d7c18880fd4d1e3b8c0b96",
+      "classification": "CAUSE_UNRESOLVED_BEFORE_RUNTIME_RESPONSE_OBSERVATION",
+      "sourceDecision": "Fixture already has one ACTIVE revision with PH and EC usable legacy NULL lines. Original update requested PH/EC/POTASSIUM and supplied reason. Do not add redundant order, alter old definitions/statuses/assertions, invent diagnosis or hide possible runtime reconciliation gap. Append observation only after actual controller returns, before unchanged assertion.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0
+    }
+  ],
+  "realRefusalCausePending": true,
+  "productionOperations": 0
+}

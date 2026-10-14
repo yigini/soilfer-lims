@@ -1,0 +1,12 @@
+{
+  "recordedUtc": "2026-10-14T17:12:48.053420+00:00",
+  "helper": "WP\\backlog-resume-20261013\\verify-issue209-single-entry-refusal-observation-once.py",
+  "helperSha256": "7e8d3f3f69f6918763e0a234ccdbf7a8d1efe1be19cd01d39f52fe2e044d8ada",
+  "outcome": "PRETEST_PREREQUISITE_FILENAME_REFUSAL",
+  "exit": 1,
+  "assertedMissingPath": "issue209-result-policy-qc-cancellation-context-review/pre-observation-classification.json",
+  "testOutputDirectoryAbsent": true,
+  "testsStarted": false,
+  "oldHelperPreserved": true,
+  "productionOperations": 0
+}

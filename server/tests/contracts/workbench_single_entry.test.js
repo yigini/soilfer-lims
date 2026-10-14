@@ -443,6 +443,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
             };
 
             await sampleController.updateSampleAnalyses(req, res);
+            console.info('[issue209-single-entry-actual-response]', JSON.stringify({ status: statusVal, body: jsonVal }));
             expect(jsonVal.success).toBe(true);
 
             // Verify active revision is v2

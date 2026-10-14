@@ -1,0 +1,11 @@
+{
+  "recordedUtc": "2026-10-14T17:18:20.563492+00:00",
+  "helper": "WP\\backlog-resume-20261013\\retain-issue209-single-entry-observation-terminal-once.py",
+  "helperSha256": "4068c8991f5071924f68527ac31087878b6999070de6ff8a30c137e9d5a1a29f",
+  "outcome": "ABSENT_OPTIONAL_PHYSICAL_CLEANUP_LEDGER_BEFORE_INDEX_STAGE_COMMIT",
+  "exit": 1,
+  "indexAbsent": true,
+  "analysisOriginalPreserved": true,
+  "testSummaryAndOriginalLogsUnchanged": true,
+  "productionOperations": 0
+}
