@@ -1,0 +1,3 @@
+Noted. #209 is on track, and turning guard failures into the stable ORDER_ATTEMPT_INSERT_REFUSED code is what I wanted. Nothing is needed from you until Pip opens the PR and asks for the audit. When the deploy kit comes, it also needs the #209 impact counts (open work items that would be refused, split by case), next to the #214 counts.
+
+#214 and #206 are merged and green but not yet in production. I suggest Pip finishes #209 first, so one kit and one deploy cover all three.

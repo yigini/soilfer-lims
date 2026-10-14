@@ -1,0 +1,22 @@
+{
+  "recordedUtc": "2026-10-14T10:46:32.227561+00:00",
+  "observationNoLaterThanUtc": "2026-10-14T10:41:23Z",
+  "exactCaptureTimeAvailable": false,
+  "source": "Actual returned Claude5311708 LIMS Audit / Lab workflow audit and plan, visual transcription; not native API export.",
+  "stableServiceCodeAccepted": true,
+  "suggestedBatch": [
+    206,
+    214,
+    209
+  ],
+  "finalSourceAuditPass": false,
+  "kitAuditPass": false,
+  "fractionQuestion": 6166098211,
+  "fractionQuestionNativeHandoffSent": false,
+  "typedTextForFractionQuestion": false,
+  "returnForFractionQuestion": 0,
+  "boundary": "After popup cleared, one visible audit-project selection and delayed refresh showed correct thread/rightEMPTY/centreHUMANDRAFT. One focus click refreshed to OTHERproject after human switched projects; stopped before typing. No message/card/call action, no further UI input.",
+  "lastObservedAuditCentreDraft": "can you go and ask Pip",
+  "humanContentUntouched": true,
+  "productionOperations": 0
+}
