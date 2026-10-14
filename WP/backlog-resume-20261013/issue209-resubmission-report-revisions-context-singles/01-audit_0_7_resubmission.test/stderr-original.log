@@ -1,0 +1,563 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-07
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-07
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-07
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-07
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by test_lab_technician_labaudit07 with 1 samples: [ 'SMP-07-a7b7c007-79ad-4119-b512-329d411f49c0' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SUBMISSION] Blocked Trojan Horse attempt by test_lab_manager_labaudit07. Invalid items: NEVER-IN-S1-933b12ad-a017-46a6-b8f6-90af783701f2
+
+      229 |         const invalidDecisions = normalizedDecisions.filter(d => !validItemSet.has(d.workItemId));
+      230 |         if (invalidDecisions.length > 0) {
+    > 231 |             console.warn(`[SUBMISSION] Blocked Trojan Horse attempt by ${user.username}. Invalid items: ${invalidDecisions.map(d => d.workItemId).join(', ')}`);
+          |                     ^
+      232 |             return res.status(403).json({ error: 'Security Violation: Attempted to review items not belonging to this submission.' });
+      233 |         }
+      234 |
+
+      at warn (controllers/submissionController.js:231:21)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-07
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by test_lab_technician_labaudit07 with 1 samples: [ 'SMP-07-3b3071b9-c087-40e8-ba5b-30b191384385' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SUBMISSION] Blocked Trojan Horse attempt by test_lab_manager_labaudit07. Invalid items: NEVER-IN-S1-f6b9fd27-2591-4b31-8da2-2724ffcda76a
+
+      229 |         const invalidDecisions = normalizedDecisions.filter(d => !validItemSet.has(d.workItemId));
+      230 |         if (invalidDecisions.length > 0) {
+    > 231 |             console.warn(`[SUBMISSION] Blocked Trojan Horse attempt by ${user.username}. Invalid items: ${invalidDecisions.map(d => d.workItemId).join(', ')}`);
+          |                     ^
+      232 |             return res.status(403).json({ error: 'Security Violation: Attempted to review items not belonging to this submission.' });
+      233 |         }
+      234 |
+
+      at warn (controllers/submissionController.js:231:21)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: e94272b4-c5b7-48fe-8e70-4fea1ddde593 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [commitSubmissions] Invoked by test_lab_technician_labaudit07 with 1 samples: [ 'SMP-07-2c5bf22c-d631-47ef-b79c-227fc04967ab' ]
+
+      at log (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab LAB-AUDIT-07
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: af1c0a89-6141-456a-bb48-ada06856cbd5 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_0_7_resubmission.test.js
+  Audit 0.7: returned work can be recorded and submitted again
+    √ individual RETURN preserves the old link in history and re-recorded work appears in queue and preview (279 ms)
+    √ bulk RETURN preserves the old link in history and re-recorded work appears in queue and preview (111 ms)
+    √ submission RETURN preserves the old link in history and re-recorded work appears in queue and preview (107 ms)
+    √ QC REANALYZE detaches only mutable work and keeps the old package/reason in history (114 ms)
+    √ RETURN without an old package still records its reason and remains eligible after recording (64 ms)
+    √ individual RETURN and real S2 resubmission cannot be reviewed through S1 (202 ms)
+    √ bulk RETURN and real S2 resubmission cannot be reviewed through S1 (180 ms)
+    √ empty shorthand reconciles a stale QC-return package with one summary and no phantom item reviews (144 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        3.177 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_7_resubmission.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-resubmission-report-revisions-context-singles\01-audit_0_7_resubmission.test\report-original.json

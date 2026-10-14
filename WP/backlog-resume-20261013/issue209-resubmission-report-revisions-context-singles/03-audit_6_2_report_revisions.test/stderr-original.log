@@ -1,0 +1,123 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 20820f31-94f8-4e5c-984b-ae87229a9d64 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_6_2_report_revisions.test.js
+  Audit 6.2: report revisions and amendment marking
+    √ revision 2 without an amendment returns 409 with zero writes (191 ms)
+    √ each amendment refusal code leaves every publication row unchanged (184 ms)
+    √ a CLERICAL revision freezes predecessor, amendment, reason, issuer and approver (77 ms)
+    √ a statement frozen at generation survives a later laboratory policy change (88 ms)
+    √ concurrent generation with one amendment creates exactly one new revision (73 ms)
+    √ a superseded public link shows a text-only tombstone with the replacing number and no link, values or reason (68 ms)
+  Audit 6.2: frozen marking and PDF rendering
+    √ changed and added results are marked, removed ones listed, and a same-display re-measurement is not marked (1 ms)
+    √ the revision PDF prints the replaces/reason statement, change marks and removed results (8 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        2.266 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_2_report_revisions.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-resubmission-report-revisions-context-singles\03-audit_6_2_report_revisions.test\report-original.json

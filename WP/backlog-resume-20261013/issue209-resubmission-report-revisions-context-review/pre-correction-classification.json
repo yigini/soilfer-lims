@@ -1,0 +1,323 @@
+{
+  "createdUtc": "2026-10-14T16:38:48.533015+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 21,
+  "cases": [
+    {
+      "suite": "audit_0_7_resubmission.test.js",
+      "test": "Audit 0.7: returned work can be recorded and submitted again individual RETURN preserves the old link in history and re-recorded work appears in queue and preview",
+      "originalFailureSha256": "b0b5476d9d8695de5b417536926f3f923e2fb40bf36374ef8ac85e4631258e62",
+      "originalCaseLineNumbers": [
+        "33",
+        "45"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled SUBMITTED/ACCEPTED evidence lacks an order. Declare one legacy NULL line for the existing numeric analysis before its first execution witness, and a matching line for the separately assembled remaining S1 owner before its witness. RETURN history, unchanged prior package/result, later S2 submission identity, stale-S1 refusals, QC mutable-only detachment and zero item-review/audit assertions remain byte-identical. Existing duplicate accepted child shares the exact legacy line; no new owners.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_7_resubmission.test.js",
+      "test": "Audit 0.7: returned work can be recorded and submitted again bulk RETURN preserves the old link in history and re-recorded work appears in queue and preview",
+      "originalFailureSha256": "b0b5476d9d8695de5b417536926f3f923e2fb40bf36374ef8ac85e4631258e62",
+      "originalCaseLineNumbers": [
+        "33",
+        "45"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled SUBMITTED/ACCEPTED evidence lacks an order. Declare one legacy NULL line for the existing numeric analysis before its first execution witness, and a matching line for the separately assembled remaining S1 owner before its witness. RETURN history, unchanged prior package/result, later S2 submission identity, stale-S1 refusals, QC mutable-only detachment and zero item-review/audit assertions remain byte-identical. Existing duplicate accepted child shares the exact legacy line; no new owners.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_7_resubmission.test.js",
+      "test": "Audit 0.7: returned work can be recorded and submitted again submission RETURN preserves the old link in history and re-recorded work appears in queue and preview",
+      "originalFailureSha256": "b0b5476d9d8695de5b417536926f3f923e2fb40bf36374ef8ac85e4631258e62",
+      "originalCaseLineNumbers": [
+        "33",
+        "45"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled SUBMITTED/ACCEPTED evidence lacks an order. Declare one legacy NULL line for the existing numeric analysis before its first execution witness, and a matching line for the separately assembled remaining S1 owner before its witness. RETURN history, unchanged prior package/result, later S2 submission identity, stale-S1 refusals, QC mutable-only detachment and zero item-review/audit assertions remain byte-identical. Existing duplicate accepted child shares the exact legacy line; no new owners.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_7_resubmission.test.js",
+      "test": "Audit 0.7: returned work can be recorded and submitted again QC REANALYZE detaches only mutable work and keeps the old package/reason in history",
+      "originalFailureSha256": "d8758caed18cff7eee20764342012686017e4ac0b60ac307c65b289b28be91bb",
+      "originalCaseLineNumbers": [
+        "33",
+        "70"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled SUBMITTED/ACCEPTED evidence lacks an order. Declare one legacy NULL line for the existing numeric analysis before its first execution witness, and a matching line for the separately assembled remaining S1 owner before its witness. RETURN history, unchanged prior package/result, later S2 submission identity, stale-S1 refusals, QC mutable-only detachment and zero item-review/audit assertions remain byte-identical. Existing duplicate accepted child shares the exact legacy line; no new owners.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_7_resubmission.test.js",
+      "test": "Audit 0.7: returned work can be recorded and submitted again RETURN without an old package still records its reason and remains eligible after recording",
+      "originalFailureSha256": "e7f6142f31c0324f4fd2cdb70d65a1291d84d17fe18c57381454696d6840567d",
+      "originalCaseLineNumbers": [
+        "33",
+        "84"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled SUBMITTED/ACCEPTED evidence lacks an order. Declare one legacy NULL line for the existing numeric analysis before its first execution witness, and a matching line for the separately assembled remaining S1 owner before its witness. RETURN history, unchanged prior package/result, later S2 submission identity, stale-S1 refusals, QC mutable-only detachment and zero item-review/audit assertions remain byte-identical. Existing duplicate accepted child shares the exact legacy line; no new owners.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_7_resubmission.test.js",
+      "test": "Audit 0.7: returned work can be recorded and submitted again individual RETURN and real S2 resubmission cannot be reviewed through S1",
+      "originalFailureSha256": "2cde8968c3fdcc28691c985ff1fa4b9f68c91e64b26ab6cf20c839b3dd2eac58",
+      "originalCaseLineNumbers": [
+        "33",
+        "93"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled SUBMITTED/ACCEPTED evidence lacks an order. Declare one legacy NULL line for the existing numeric analysis before its first execution witness, and a matching line for the separately assembled remaining S1 owner before its witness. RETURN history, unchanged prior package/result, later S2 submission identity, stale-S1 refusals, QC mutable-only detachment and zero item-review/audit assertions remain byte-identical. Existing duplicate accepted child shares the exact legacy line; no new owners.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_7_resubmission.test.js",
+      "test": "Audit 0.7: returned work can be recorded and submitted again bulk RETURN and real S2 resubmission cannot be reviewed through S1",
+      "originalFailureSha256": "2cde8968c3fdcc28691c985ff1fa4b9f68c91e64b26ab6cf20c839b3dd2eac58",
+      "originalCaseLineNumbers": [
+        "33",
+        "93"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled SUBMITTED/ACCEPTED evidence lacks an order. Declare one legacy NULL line for the existing numeric analysis before its first execution witness, and a matching line for the separately assembled remaining S1 owner before its witness. RETURN history, unchanged prior package/result, later S2 submission identity, stale-S1 refusals, QC mutable-only detachment and zero item-review/audit assertions remain byte-identical. Existing duplicate accepted child shares the exact legacy line; no new owners.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_7_resubmission.test.js",
+      "test": "Audit 0.7: returned work can be recorded and submitted again empty shorthand reconciles a stale QC-return package with one summary and no phantom item reviews",
+      "originalFailureSha256": "6bdf7905d39c84c69c3c27f6342131ad5ab07ab1e8e5d27221ce60e30a42f0ac",
+      "originalCaseLineNumbers": [
+        "33",
+        "148"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled SUBMITTED/ACCEPTED evidence lacks an order. Declare one legacy NULL line for the existing numeric analysis before its first execution witness, and a matching line for the separately assembled remaining S1 owner before its witness. RETURN history, unchanged prior package/result, later S2 submission identity, stale-S1 refusals, QC mutable-only detachment and zero item-review/audit assertions remain byte-identical. Existing duplicate accepted child shares the exact legacy line; no new owners.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_9_public_report_superseded.test.js",
+      "test": "Audit 0.9: superseded public links publication revokes only replaced-version links and leaves current and other-sample links valid",
+      "originalFailureSha256": "0031446232f3cc7811322c1f06c6ceecf306d9762f37ca9fb499c1b2e6a38f5f",
+      "originalCaseLineNumbers": [
+        "27",
+        "61"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. No runtime amendment order step. Old HTML/PDF link refusal/access-log behavior, other-sample isolation, immutable prior revocation metadata, missing-token zero access rows and injected publication rollback assertions remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_9_public_report_superseded.test.js",
+      "test": "Audit 0.9: superseded public links legacy superseded link refuses content without a back-fill (PDF=false)",
+      "originalFailureSha256": "89b567f523472ce4abdd67b559ed91bd124159f3a5d10ba2d4f363169317f781",
+      "originalCaseLineNumbers": [
+        "27",
+        "88"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. No runtime amendment order step. Old HTML/PDF link refusal/access-log behavior, other-sample isolation, immutable prior revocation metadata, missing-token zero access rows and injected publication rollback assertions remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_9_public_report_superseded.test.js",
+      "test": "Audit 0.9: superseded public links legacy superseded link refuses content without a back-fill (PDF=true)",
+      "originalFailureSha256": "89b567f523472ce4abdd67b559ed91bd124159f3a5d10ba2d4f363169317f781",
+      "originalCaseLineNumbers": [
+        "27",
+        "88"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. No runtime amendment order step. Old HTML/PDF link refusal/access-log behavior, other-sample isolation, immutable prior revocation metadata, missing-token zero access rows and injected publication rollback assertions remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_9_public_report_superseded.test.js",
+      "test": "Audit 0.9: superseded public links pre-existing revocation metadata is preserved when its report is superseded",
+      "originalFailureSha256": "de4bdb2fb83d71dc9be86676de2a08694aa9e6a6313d6fc701e42d6711c0643f",
+      "originalCaseLineNumbers": [
+        "27",
+        "100"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. No runtime amendment order step. Old HTML/PDF link refusal/access-log behavior, other-sample isolation, immutable prior revocation metadata, missing-token zero access rows and injected publication rollback assertions remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_9_public_report_superseded.test.js",
+      "test": "Audit 0.9: superseded public links current manually revoked and expired links stay refused and logged (PDF=false)",
+      "originalFailureSha256": "6010ef10857caa6326ffacbf7563f9b65cdf99ab36fcc90858e4a96ce29f3557",
+      "originalCaseLineNumbers": [
+        "27",
+        "109"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. No runtime amendment order step. Old HTML/PDF link refusal/access-log behavior, other-sample isolation, immutable prior revocation metadata, missing-token zero access rows and injected publication rollback assertions remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_9_public_report_superseded.test.js",
+      "test": "Audit 0.9: superseded public links current manually revoked and expired links stay refused and logged (PDF=true)",
+      "originalFailureSha256": "6010ef10857caa6326ffacbf7563f9b65cdf99ab36fcc90858e4a96ce29f3557",
+      "originalCaseLineNumbers": [
+        "27",
+        "109"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. No runtime amendment order step. Old HTML/PDF link refusal/access-log behavior, other-sample isolation, immutable prior revocation metadata, missing-token zero access rows and injected publication rollback assertions remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_0_9_public_report_superseded.test.js",
+      "test": "Audit 0.9: superseded public links a failed publication rolls back link revocation and report supersession together",
+      "originalFailureSha256": "306a64d5619cffe11c0125af8c83cf7785b3568b5d721b6e663383cdf9f4ce1e",
+      "originalCaseLineNumbers": [
+        "27",
+        "122"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. No runtime amendment order step. Old HTML/PDF link refusal/access-log behavior, other-sample isolation, immutable prior revocation metadata, missing-token zero access rows and injected publication rollback assertions remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_6_2_report_revisions.test.js",
+      "test": "Audit 6.2: report revisions and amendment marking revision 2 without an amendment returns 409 with zero writes",
+      "originalFailureSha256": "dcf6d1fee337f04f97afbfd35fd3da7d298498dc57b7750889753da9e6d0b057",
+      "originalCaseLineNumbers": [
+        "35",
+        "59"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with retained approver/ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. Approval metadata, amendment refusal/zero-table-writes, predecessor/reason/issuer freezing, SQL immutability, stored statement after policy change, concurrent one-revision result and tombstone privacy/PDF marking assertions remain byte-identical; no runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_6_2_report_revisions.test.js",
+      "test": "Audit 6.2: report revisions and amendment marking each amendment refusal code leaves every publication row unchanged",
+      "originalFailureSha256": "e23e3749aabdb6fb7f92c21f6adac3befe62c13d8065060bb3d0154d3f5948ae",
+      "originalCaseLineNumbers": [
+        "35",
+        "65"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with retained approver/ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. Approval metadata, amendment refusal/zero-table-writes, predecessor/reason/issuer freezing, SQL immutability, stored statement after policy change, concurrent one-revision result and tombstone privacy/PDF marking assertions remain byte-identical; no runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_6_2_report_revisions.test.js",
+      "test": "Audit 6.2: report revisions and amendment marking a CLERICAL revision freezes predecessor, amendment, reason, issuer and approver",
+      "originalFailureSha256": "f47eecf58e082993b27c2b7c9effa14f56f8744f9276496b7dadc17ea735046f",
+      "originalCaseLineNumbers": [
+        "35",
+        "83"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with retained approver/ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. Approval metadata, amendment refusal/zero-table-writes, predecessor/reason/issuer freezing, SQL immutability, stored statement after policy change, concurrent one-revision result and tombstone privacy/PDF marking assertions remain byte-identical; no runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_6_2_report_revisions.test.js",
+      "test": "Audit 6.2: report revisions and amendment marking a statement frozen at generation survives a later laboratory policy change",
+      "originalFailureSha256": "9bde59b09508f8ee6296301c37527a60d7d13c8cc6d7d983cf6b97233e68b92f",
+      "originalCaseLineNumbers": [
+        "35",
+        "107"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with retained approver/ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. Approval metadata, amendment refusal/zero-table-writes, predecessor/reason/issuer freezing, SQL immutability, stored statement after policy change, concurrent one-revision result and tombstone privacy/PDF marking assertions remain byte-identical; no runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_6_2_report_revisions.test.js",
+      "test": "Audit 6.2: report revisions and amendment marking concurrent generation with one amendment creates exactly one new revision",
+      "originalFailureSha256": "204fd0aa40952607cbe58660854b5e64303856adb506a8151edfc9d1d8a92bfe",
+      "originalCaseLineNumbers": [
+        "35",
+        "128"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with retained approver/ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. Approval metadata, amendment refusal/zero-table-writes, predecessor/reason/issuer freezing, SQL immutability, stored statement after policy change, concurrent one-revision result and tombstone privacy/PDF marking assertions remain byte-identical; no runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    },
+    {
+      "suite": "audit_6_2_report_revisions.test.js",
+      "test": "Audit 6.2: report revisions and amendment marking a superseded public link shows a text-only tombstone with the replacing number and no link, values or reason",
+      "originalFailureSha256": "935b7c4cab601d55014e3f2f2adf2b27a5de3933c1d24f868ad1932fce672768",
+      "originalCaseLineNumbers": [
+        "35",
+        "139"
+      ],
+      "classification": "NEW_OWNED_HISTORY_POSITIVE_EXECUTION_WITNESS_MISSING_CURRENT_INTAKE_EQUIVALENT_ORDER",
+      "sourceDecision": "Shared manually assembled APPROVED sample with retained approver/ACCEPTED PH_H2O witness declares its usable legacy NULL order in NEW owned retained history. Approval metadata, amendment refusal/zero-table-writes, predecessor/reason/issuer freezing, SQL immutability, stored statement after policy change, concurrent one-revision result and tombstone privacy/PDF marking assertions remain byte-identical; no runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught-order-failure WIs remain reachable zero-write refused with separate readonly noACTIVE/noMatching/fraction/approved amendment impact lists; approved nonzero STOP under6167740581. No automatic backfill/relink/wider fallback."
+    }
+  ],
+  "productionOperations": 0
+}

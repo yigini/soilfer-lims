@@ -1,0 +1,30 @@
+[
+  {
+    "path": "server/tests/contracts/audit_0_7_resubmission.test.js",
+    "beforeSha256": "fe096c8066a537cbdb557a716a5234f49dd5e2556f92bf226272ea3420ad9d35",
+    "afterSha256": "25bf1f545e7c999586c37e7d2c4d89970df82a1d183983c881c18ea4a01bd4a8",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: NEW owned retained execution history declares its existing owner's order.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: id('ORDER-07'), sampleId, version: 1,\n            status: 'ACTIVE', reason: 'Owned resubmission execution order context', requestedBy: 'system:fixture',\n            lines: { create: [{ id: id('LINE-07'), analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n",
+      "        // #209: only the newly assembled remaining S1 owner gets a new matching line.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        const retainedOrder = await prisma.sampleOrderRevision.findFirst({ where: { sampleId: f.sampleId, status: 'ACTIVE' } });\n        await prisma.orderLine.create({ data: { id: id('LINE-07-REMAINING'), revisionId: retainedOrder.id,\n            analysis: remaining.analysis, workItemId: null, status: 'ACTIVE', isRequired: true } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_0_9_public_report_superseded.test.js",
+    "beforeSha256": "a1be589e9793a0e85dc85df62152d432b312b69b30c6718dc25ee980b1a9f4a1",
+    "afterSha256": "fc83be52907c84738e4c4f5d85a33b52c6501cf01e6ea40f8cfb847fbf004802",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declare only this NEW owned retained PH execution's legacy order context.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: id('ORDER-09'), sampleId, version: 1,\n            status: 'ACTIVE', reason: 'Owned retained report execution order context', requestedBy: 'system:fixture',\n            lines: { create: [{ id: id('LINE-09'), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_6_2_report_revisions.test.js",
+    "beforeSha256": "ec401e8ef4ffcf7aa9aa97b9a94e02192dccaec3465be957059e57ff8d1f24c5",
+    "afterSha256": "e4d3a74d7b3caba4ed176bb3ee744a884c97487f274b84af8b2563d47fb1327b",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declare only this NEW owned retained PH execution's legacy order context.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: id('ORDER-62'), sampleId, version: 1,\n            status: 'ACTIVE', reason: 'Owned retained report execution order context', requestedBy: 'system:fixture',\n            lines: { create: [{ id: id('LINE-62'), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n"
+    ]
+  }
+]
