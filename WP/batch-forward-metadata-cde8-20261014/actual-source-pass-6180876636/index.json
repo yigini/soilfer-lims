@@ -1,0 +1,58 @@
+{
+  "status": "ACTUAL_METADATA_ONLY_SOURCE_PASS_RETAINED",
+  "sourceReviewId": 6180876636,
+  "toolingCommit": "0b01804f9d409d74a19472c22469824e2df95005",
+  "imageEligibility": false,
+  "files": [
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-source-pass-6180876636/actual-source-review-original.json",
+      "bytes": 9162,
+      "sha256": "8d1c3cd77dc96d16b256de8bd210a414531b2a30fe3069d566751d06546c473e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-source-pass-6180876636/actual-source-review-readable.txt",
+      "bytes": 5386,
+      "sha256": "8215b3d29f309ff8a7e17a0eaf625b003d691284ed5b98e579001b3247793807"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-source-pass-6180876636/current-main-original.json",
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-source-pass-6180876636/independent-source-validation.json",
+      "bytes": 435,
+      "sha256": "d1b05e05e7b34eb4196b8de0f82485af34426723753a16c6a5e7c5ffe1a3637b"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-source-pass-6180876636/main-ci-original.json",
+      "bytes": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-source-pass-6180876636/reference-direction-original.json",
+      "bytes": 5195,
+      "sha256": "3e5ff7910985af8de6c8294efd76612e68c2956669e8fca7b1d3ea80d353340a"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-source-pass-6180876636/scope-direction-original.json",
+      "bytes": 6613,
+      "sha256": "1a199ef0023c5ba2315d038de4f5797831679f3382933d50e34336b92ffa7ddb"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-source-pass-6180876636/source-index-original.json",
+      "bytes": 1664,
+      "sha256": "38dbb069d4c6fbb7d8aa8500a164a5bf9e7e1a1da675becd24882149f42ae483"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-forward-metadata-source-pass-6180876636-once.py",
+      "bytes": 4274,
+      "sha256": "3875903b4536bbc2f94cd0b0f5f0006e3b308f9adb34c6a170b7e045221dd783"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 418597,
+      "sha256": "287d98d1d88c8d00e329a68556b6c1bd70fc2829c74e24177b66f70fab3432ea"
+    }
+  ]
+}

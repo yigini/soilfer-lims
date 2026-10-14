@@ -1,0 +1,40 @@
+{
+  "head": "0b01804f9d409d74a19472c22469824e2df95005",
+  "files": {
+    "collect_forward_metadata.py": {
+      "path": "WP/batch-forward-metadata-cde8-20261014/collect_forward_metadata.py",
+      "mode": "100644",
+      "blob": "3f30609b013253ab551b107a2342c83e2a694029",
+      "bytes": 10026,
+      "sha256": "8602245e14235f5422cbed7cd42f61ce1c0e72c957f679309a802607fbde1980"
+    },
+    "forward_metadata_contract.py": {
+      "path": "WP/batch-forward-metadata-cde8-20261014/forward_metadata_contract.py",
+      "mode": "100644",
+      "blob": "672bff986e71a93011c99795c50dc130db1fceb0",
+      "bytes": 10821,
+      "sha256": "6077faa59be1305c88f6c041e093a0d437662422740f29f93eca77eb01efaf7e"
+    },
+    "launch_forward_metadata.py": {
+      "path": "WP/batch-forward-metadata-cde8-20261014/launch_forward_metadata.py",
+      "mode": "100644",
+      "blob": "f9ec96d91e056205d78b606e016b170aaf8827ec",
+      "bytes": 6044,
+      "sha256": "52f83d09f2816a80f9f0ed8f2faea580a37156c5a13b33c4dd4d852561a85f0a"
+    },
+    "prepare_forward_metadata.py": {
+      "path": "WP/batch-forward-metadata-cde8-20261014/prepare_forward_metadata.py",
+      "mode": "100644",
+      "blob": "3f5c6947d70a7639c59c56de787d8dbbebbd6574",
+      "bytes": 6104,
+      "sha256": "7ebaa9b53e8cdca1824008cd773b631d1f5c1cf08c6639fe718aa39da2cd2505"
+    },
+    "verify_forward_metadata_guards.py": {
+      "path": "WP/batch-forward-metadata-cde8-20261014/verify_forward_metadata_guards.py",
+      "mode": "100644",
+      "blob": "520766890f6888c9c7362210840edb0ecc2b6026",
+      "bytes": 10789,
+      "sha256": "4eeb2305e67d5a9cd6455392a249ce78019beb781516d3fd6ec29a6cc9961ef1"
+    }
+  }
+}

@@ -1,0 +1,68 @@
+Source review: PASS
+
+This approves only the first bounded read-only metadata capture for the retained image, with the bindings below. It is not image adoption, not proof eligibility, not a growth attribution verdict, and not a proof, kit or deploy approval.
+
+```
+0b01804f9d409d74a19472c22469824e2df95005
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+sha256:1d4882f49f351a08549c79c0409f7848dbb205feef314b33432aae63ed11217b
+metadataScope=READONLY_FORWARD_METADATA_EVIDENCE_ONLY_NO_ADOPTION
+originalFailedBuildRoot=/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z
+originalMetadataRoot=/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z
+scopeDirectionId=6180234041
+referenceDirectionId=6180335648
+reserveFloorBytes=10556150894
+originalResidualBytes=3609116672
+unexplainedAbortBytes=500000000
+metadataCallTimeoutSeconds=10
+metadataCollectionTimeoutSeconds=600
+metadataUnitTimeoutSeconds=900
+metadataMemoryLimitBytes=805306368
+metadataMaxOutputBytes=2097152
+metadataMaxCommands=256
+imageEligibility=false
+imageAdoptionReceipts=0
+filesystemDuCalls=0
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+collect_forward_metadata.py=8602245e14235f5422cbed7cd42f61ce1c0e72c957f679309a802607fbde1980
+forward_metadata_contract.py=6077faa59be1305c88f6c041e093a0d437662422740f29f93eca77eb01efaf7e
+launch_forward_metadata.py=52f83d09f2816a80f9f0ed8f2faea580a37156c5a13b33c4dd4d852561a85f0a
+prepare_forward_metadata.py=7ebaa9b53e8cdca1824008cd773b631d1f5c1cf08c6639fe718aa39da2cd2505
+verify_forward_metadata_guards.py=4eeb2305e67d5a9cd6455392a249ce78019beb781516d3fd6ec29a6cc9961ef1
+```
+
+## What I checked independently
+- **Source identity.** I recomputed the SHA-256 of all five files from the raw blobs at `0b01804f`, and each matches the binding above. Nothing under `server/` or `client/` changed.
+- **Guard tests.** `verify_forward_metadata_guards.py` runs 14 tests, OK on Python 3.11 and on 3.9.23, the host's version. The contract and the collector import cleanly on 3.9, and no 3.10+ API is used.
+- **Directions binding.** `directions()` matches the actual bodies of 6180234041 and 6180335648. Both were posted through the Claude app and never edited, and each contains its required phrase.
+- **Command whitelist (`allowed_command`).** It is exact argv tuples with no shell, covering:
+  - `docker image inspect <IMAGE>`, three `docker info --format` reads and `docker buildx du --format json`;
+  - containerd `namespaces/images/content list`, `snapshots list|info|usage` for keys passing `safe_key`, and `content get` for digests only.
+
+  Nothing can build, pull, push, tag, save, load, run, remove or prune.
+- **Forensic references (condition 2 as corrected in 6180335648).**
+  - It verifies the original `candidate-image.id` (0600) and `docker-build.log` (0400) in place by size, mode and SHA, and that `image-inspect-original.json` is absent before and after the run.
+  - The log's last exported image must equal the ID.
+  - The fresh inspect must equal the distinct forensic response on Id, platform, the full RootFS and the full Config, and carry the revision label.
+  - Nothing is written to the original root.
+- **Metadata bounds.**
+  - Snapshot usage is requested only for committed snapshots, which containerd reports from stored metadata rather than a filesystem walk.
+  - The OCI walk follows only linux/amd64 manifests and size-checked configs, never layers, and stops at 32 objects.
+  - Every call is capped at 10 s and 2 MiB, with 256 calls and 600 s overall.
+  - `docker buildx du` is the BuildKit DiskUsage API. Client config, cache and temp files are confined to the new root.
+  - Any failed, oversized or timed-out call is a required problem and ends as `STOP_METADATA_INCOMPLETE_IMAGE_EXCLUDED`.
+- **Once-only behaviour.**
+  - Before upload and again before launch, it re-checks main `cde8c889`, CI 38636615469, this review, both directions, and any later rejection on #162.
+  - The launch uses an exclusive intent file, a new root created only if absent, and an unused unit with `Restart=no`, `RuntimeMaxSec=900`, `MemoryMax=805306368`, `MemorySwapMax=0` and `UMask=0077`.
+  - The two `append:` unit outputs are the only files allowed besides the 0400 inputs, and they must be empty and not group- or other-writable.
+- **Terminal record.** It always carries `imageEligibility=false`, `imageAdoptionReceipts=0` and `fullGrowthAttributionCompleted=false`, and no code path can set otherwise.
+
+## Notes for the run (none blocks this PASS)
+1. **Call budget versus snapshot count.** Each namespace may use up to 80 `info` calls plus up to 80 `usage` calls, so heavily populated `moby` and `buildkit` namespaces could reach the 256-call bound and end in STOP. That outcome is safe and keeps the image excluded, but it consumes this one root. If it happens, bring the counts back with a new source, not a replay.
+2. **Killing a `docker buildx du` client at 10 s does not stop the daemon's server-side size calculation.** That calculation is read-only, so it needs no action. Record it as such if it occurs.
+3. **This evidence only feeds the later validator.** The 3.6 GB attribution, with residual ≥ 500 MB meaning STOP, the current floor check and any adoption receipt still need their own exact-source review.
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_

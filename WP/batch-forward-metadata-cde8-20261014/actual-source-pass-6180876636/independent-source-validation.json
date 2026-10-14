@@ -1,0 +1,13 @@
+{
+  "status": "ACTUAL_EXACT_METADATA_ONLY_SOURCE_PASS_VALIDATED",
+  "sourceReviewId": 6180876636,
+  "reviewUtc": "2026-10-14T23:37:37Z",
+  "toolingCommit": "0b01804f9d409d74a19472c22469824e2df95005",
+  "fiveRawSourceHashesVerified": true,
+  "imageEligibility": false,
+  "metadataCollectorsRun": 0,
+  "imageAdoptionReceipts": 0,
+  "proofLaunches": 0,
+  "productionDeployments": 0,
+  "validatedUtc": "2026-10-14T23:41:22.461128+00:00"
+}
