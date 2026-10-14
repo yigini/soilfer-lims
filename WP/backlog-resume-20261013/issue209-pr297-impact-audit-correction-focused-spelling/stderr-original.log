@@ -1,0 +1,463 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: d4d7489c-bc29-4c57-ba71-cada3e719dac) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/orderService.js:89:19)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.reviseAnalyses (services/orderService.js:86:16)
+      at Object.<anonymous> (tests/contracts/issue_209_order_revision_integration.test.js:253:5)
+
+PASS tests/contracts/issue_209_order_revision_integration.test.js (105.248 s)
+  √ a TEXTURE target retains all existing fraction owners including completed work and fixes four linked lines in one revision (3660 ms)
+  √ one or two retained fractions refuse a TEXTURE alias with named missing owners and zero row changes (4652 ms)
+  √ TEXTURE without explicit fraction selections still preserves all existing owners; explicit removal waives them with the reason (2388 ms)
+  √ initial generation for a new four-selection sample still creates only the logical TEXTURE measurement owner (2550 ms)
+  √ kit counts separate fraction line refusals and incomplete owner samples without touching the original triple (2559 ms)
+  √ installer dry/apply/repeat retains three ACTIVE histories, every line and a null historical OPEN identity (2642 ms)
+  √ a full reasoned revision supersedes all three ACTIVE ids while every old line and attempt stays byte-equivalent (2297 ms)
+  √ legacy single-match resolution writes only the newly inserted attempt link (2329 ms)
+  √ a legacy 0-revision/0-line context refuses with NO_LINE and no row writes (2482 ms)
+  √ a legacy 1-revision/2-line context refuses with AMBIGUOUS_LINE and no row writes (2511 ms)
+  √ a legacy 2-revision/1-line context refuses with MULTIPLE_ACTIVE_REVISIONS and no row writes (2473 ms)
+  √ a retained OPEN attempt fills with its original null order-line identity (2355 ms)
+  √ two concurrent complete revisions leave exactly one ACTIVE revision (2274 ms)
+  √ raw new-attempt insertion cannot select one ambiguous legacy line (2304 ms)
+  √ a new linked line cannot have its ownership or analysis rewritten (2334 ms)
+  √ a reasoned repeat receives its resolved legacy line at the new reservation INSERT (2313 ms)
+  √ scientific amendment authorisation links only its newly reserved attempt to the current order (2241 ms)
+  √ order revisions enforce permission and laboratory scope before changing retained rows (2333 ms)
+  √ the read-only kit collector preserves an active WAL triple and accounts for every nested retained snapshot (2612 ms)
+  √ the actual shipped post-start order programme preserves an owned WAL-mode original without sidecars (3405 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: wrong type (2265 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: unreviewed foreign key (2225 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: tampered index (2287 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: partial guard (2273 ms)
+  √ an actual Prisma-wrapped native order guard returns the service-owned stable code (2477 ms)
+  √ an actual initial revision INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction (2335 ms)
+  √ an actual initial line INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction (2327 ms)
+  √ runtime-reachable missing revision and missing matching line remain zero-write refusals and have distinct read-only impact lists (5001 ms)
+  √ an approved orphan remains non-editable and its prospective amendment impact requires STOP with sample ids, without writes (2707 ms)
+  √ first execution maps an actual wrapped INSERT refusal and rolls back all result and audit writes (2344 ms)
+  √ approved impact excludes unmatched WAIVED and marked duplicate work while an ACCEPTED current orphan still requires STOP (2889 ms)
+  √ malformed stored fraction analyses { are listed read-only and cannot refuse schema-ready startup (2894 ms)
+  √ malformed stored fraction analyses {"TEXTURE":true} are listed read-only and cannot refuse schema-ready startup (2814 ms)
+  √ malformed stored fraction analyses [42] are listed read-only and cannot refuse schema-ready startup (2915 ms)
+  √ malformed stored fraction analyses [null] are listed read-only and cannot refuse schema-ready startup (2813 ms)
+  √ malformed stored fraction analyses [""] are listed read-only and cannot refuse schema-ready startup (2873 ms)
+  √ malformed stored fraction analyses ["   "] are listed read-only and cannot refuse schema-ready startup (2892 ms)
+  √ repeat reservation maps an actual wrapped INSERT refusal and rolls back its parent transition (2598 ms)
+  √ scientific reservation maps an actual wrapped INSERT refusal and retains its PENDING authorisation (2454 ms)
+
+PASS tests/security/audit_1_2_state_writes.test.js (24.655 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (20 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (4 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})) (3 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (3 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")) (3 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)"))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)")) (1 ms)
+  √ the original rehearsal cannot reintroduce a direct Sample deletion (1 ms)
+  √ nested connect association has one actual authority finding (2 ms)
+  √ nested set association has one actual authority finding
+  √ nested disconnect association has one actual authority finding
+  √ the closed FK runner refuses unknown case (257 ms)
+  √ the closed FK runner refuses configured candidate (175 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (8 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (4 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (4 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (3 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (3 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (4 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (10 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (6 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (5 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (5 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js (2 ms)
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql (2 ms)
+  √ legacy CLI launchers cannot import any fixture or test module (7 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (20 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset (2 ms)
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset (3 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (5 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (17 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (8 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js
+  √ a direct sample write in a #190 test remains a finding outside the factory (1 ms)
+  √ a direct workItem write in a #190 test remains a finding outside the factory
+  √ a direct result write in a #190 test remains a finding outside the factory
+  √ a changed #190 historical factory digest is a scanner finding (25 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (17 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js (3 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (2 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js (2 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql (1 ms)
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (23215 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"]) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')")
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code]) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)') (1 ms)
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')")
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (55 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (86 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}})
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED')
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}`
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) }
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`)
+  √ a real temporary non-allowlisted test file fails the source guard (5 ms)
+  √ a shadowed file reader cannot impersonate a known schema load (1 ms)
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (17 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js (1 ms)
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js (3 ms)
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (2 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF')
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0') (1 ms)
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF')
+  √ native pragma reads and enabled constraints remain permitted (1 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (3 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (2 ms)
+
+PASS tests/contracts/deployment_readiness_bootstrap.test.js (26.293 s)
+  Deployment Readiness Bootstrap & Packaging Verification
+    √ setup.sh rejects invalid mode with exit 1 (386 ms)
+    √ setup.sh rejects Node 18 runtime with clear guidance (1078 ms)
+    √ setup.sh fails fast and aborts if schema push fails (no error swallowing) (1446 ms)
+    √ setup.sh auto-populates JWT_SECRET into existing .env with blank secret (2139 ms)
+    √ entrypoint persists auto-generated JWT_SECRET across container restarts (1751 ms)
+    √ entrypoint recovers from interrupted initial setup on restart without reseeding populated installations (2755 ms)
+    √ docker-entrypoint.sh database inspection fails closed on corrupt or unreadable database (324 ms)
+    √ docker-entrypoint.sh database inspection passes cleanly on valid populated database (12993 ms)
+    √ seed.js recovers from real partial state ({ labs: 1, users: 0 }) and does not duplicate LAB01 (1304 ms)
+    √ docker compose configuration validates cleanly across local, global, and nginx overlays (1658 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User audit-state-manager (Lab: OTHER-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/reviewCommitService.js:54:45)
+      at services/reviewCommitService.js:13:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at commitReview (services/reviewCommitService.js:49:16)
+      at Object.<anonymous> (tests/contracts/audit_1_2_state_authority.test.js:318:5)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User audit-state-manager (Lab: OTHER-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleStateService.js:21:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_1_2_state_authority.test.js:430:5)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+          at async Promise.allSettled (index 0)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/audit_1_2_state_authority.test.js (9.142 s)
+  √ central Sample creation retains an existing caller creation action with exactly one audit (45 ms)
+  √ create nested relation commands are refused by createSample before any writes (60 ms)
+  √ create nested relation commands are refused by createWorkItem before any writes (28 ms)
+  √ create nested relation commands are refused by transitionSample before any writes (31 ms)
+  √ create nested relation commands are refused by transitionWorkItem before any writes (22 ms)
+  √ createMany nested relation commands are refused by createSample before any writes (22 ms)
+  √ createMany nested relation commands are refused by createWorkItem before any writes (21 ms)
+  √ createMany nested relation commands are refused by transitionSample before any writes (25 ms)
+  √ createMany nested relation commands are refused by transitionWorkItem before any writes (22 ms)
+  √ connectOrCreate nested relation commands are refused by createSample before any writes (21 ms)
+  √ connectOrCreate nested relation commands are refused by createWorkItem before any writes (30 ms)
+  √ connectOrCreate nested relation commands are refused by transitionSample before any writes (26 ms)
+  √ connectOrCreate nested relation commands are refused by transitionWorkItem before any writes (22 ms)
+  √ update nested relation commands are refused by createSample before any writes (19 ms)
+  √ update nested relation commands are refused by createWorkItem before any writes (20 ms)
+  √ update nested relation commands are refused by transitionSample before any writes (28 ms)
+  √ update nested relation commands are refused by transitionWorkItem before any writes (24 ms)
+  √ updateMany nested relation commands are refused by createSample before any writes (22 ms)
+  √ updateMany nested relation commands are refused by createWorkItem before any writes (22 ms)
+  √ updateMany nested relation commands are refused by transitionSample before any writes (28 ms)
+  √ updateMany nested relation commands are refused by transitionWorkItem before any writes (21 ms)
+  √ upsert nested relation commands are refused by createSample before any writes (25 ms)
+  √ upsert nested relation commands are refused by createWorkItem before any writes (24 ms)
+  √ upsert nested relation commands are refused by transitionSample before any writes (25 ms)
+  √ upsert nested relation commands are refused by transitionWorkItem before any writes (33 ms)
+  √ delete nested relation commands are refused by createSample before any writes (23 ms)
+  √ delete nested relation commands are refused by createWorkItem before any writes (25 ms)
+  √ delete nested relation commands are refused by transitionSample before any writes (29 ms)
+  √ delete nested relation commands are refused by transitionWorkItem before any writes (24 ms)
+  √ deleteMany nested relation commands are refused by createSample before any writes (21 ms)
+  √ deleteMany nested relation commands are refused by createWorkItem before any writes (19 ms)
+  √ deleteMany nested relation commands are refused by transitionSample before any writes (20 ms)
+  √ deleteMany nested relation commands are refused by transitionWorkItem before any writes (25 ms)
+  √ connect nested relation commands are refused by createSample before any writes (19 ms)
+  √ connect nested relation commands are refused by createWorkItem before any writes (18 ms)
+  √ connect nested relation commands are refused by transitionSample before any writes (18 ms)
+  √ connect nested relation commands are refused by transitionWorkItem before any writes (16 ms)
+  √ set nested relation commands are refused by createSample before any writes (16 ms)
+  √ set nested relation commands are refused by createWorkItem before any writes (16 ms)
+  √ set nested relation commands are refused by transitionSample before any writes (17 ms)
+  √ set nested relation commands are refused by transitionWorkItem before any writes (16 ms)
+  √ disconnect nested relation commands are refused by createSample before any writes (17 ms)
+  √ disconnect nested relation commands are refused by createWorkItem before any writes (18 ms)
+  √ disconnect nested relation commands are refused by transitionSample before any writes (18 ms)
+  √ disconnect nested relation commands are refused by transitionWorkItem before any writes (22 ms)
+  √ reconciliation removal retains analysis and laboratory identity in its one audit row (66 ms)
+  √ connect cannot reassociate another sample work item through caller data (49 ms)
+  √ set cannot reassociate another sample work item through caller data (42 ms)
+  √ disconnect cannot reassociate another sample work item through caller data (43 ms)
+  √ pre-analytical sample removal retains the known laboratory on its audit row (22 ms)
+  √ analyses edits refuse a final APPROVED sample, including no-op saves, with zero writes (54 ms)
+  √ analyses edits refuse a final ARCHIVED sample, including no-op saves, with zero writes (37 ms)
+  √ analyses edits refuse a final DISPOSED sample, including no-op saves, with zero writes (33 ms)
+  √ order edits refuse a final APPROVED sample, including no-op saves, with zero writes (32 ms)
+  √ order edits refuse a final ARCHIVED sample, including no-op saves, with zero writes (30 ms)
+  √ order edits refuse a final DISPOSED sample, including no-op saves, with zero writes (32 ms)
+  √ analyses adding work to SUBMITTED_FULL atomically resumes processing (96 ms)
+  √ order adding work to SUBMITTED_FULL atomically resumes processing (45 ms)
+  √ reconciliation re-reads a stale sample before writing work items (32 ms)
+  √ removal of COMPLETED refuses the full edit before writes and lists its resolution (47 ms)
+  √ removal of ON_HOLD refuses the full edit before writes and lists its resolution (49 ms)
+  √ removal of AWAITING_VERIFICATION refuses the full edit before writes and lists its resolution (42 ms)
+  √ analyses a failed order snapshot rolls back already generated work and audits (308 ms)
+  √ order a failed order snapshot rolls back already generated work and audits (54 ms)
+  √ a failed command receipt rolls back the new order, sample processing transition and work (44 ms)
+  √ a failed analysis audit rolls back a waiver and preserves its original history and review identity (56 ms)
+  √ REANALYZE_BATCH moves active NOT_ASSIGNED work to canonical repeat required and preserves scientific values (376 ms)
+  √ REANALYZE_BATCH moves active ASSIGNED work to canonical repeat required and preserves scientific values (102 ms)
+  √ REANALYZE_BATCH moves active IN_PROGRESS work to canonical repeat required and preserves scientific values (99 ms)
+  √ REANALYZE_BATCH moves active COMPLETED work to canonical repeat required and preserves scientific values (99 ms)
+  √ REANALYZE_BATCH moves active SUBMITTED work to canonical repeat required and preserves scientific values (114 ms)
+  √ REJECT_BATCH moves active NOT_ASSIGNED work to canonical repeat required and preserves scientific values (118 ms)
+  √ REJECT_BATCH moves active ASSIGNED work to canonical repeat required and preserves scientific values (99 ms)
+  √ REJECT_BATCH moves active IN_PROGRESS work to canonical repeat required and preserves scientific values (108 ms)
+  √ REJECT_BATCH moves active COMPLETED work to canonical repeat required and preserves scientific values (103 ms)
+  √ REJECT_BATCH moves active SUBMITTED work to canonical repeat required and preserves scientific values (96 ms)
+  √ QC preserves the REPEAT_REQUIRED alias and review provenance while appending history (117 ms)
+  √ QC preserves the REANALYSIS_REQUIRED alias and review provenance while appending history (103 ms)
+  √ a batch member in ON_HOLD refuses the whole QC decision before writes (119 ms)
+  √ a batch member in AWAITING_VERIFICATION refuses the whole QC decision before writes (120 ms)
+  √ QC preserves final ACCEPTED work on a PROCESSING sample (95 ms)
+  √ QC preserves final WAIVED work on a PROCESSING sample (98 ms)
+  √ QC preserves final CANCELLED work on a PROCESSING sample (102 ms)
+  √ QC preserves final IN_PROGRESS work on a APPROVED sample (105 ms)
+  √ QC preserves final IN_PROGRESS work on a ARCHIVED sample (106 ms)
+  √ QC preserves final IN_PROGRESS work on a DISPOSED sample (103 ms)
+  √ a failed QC audit rolls back disposition, history, repeat status and result flags (124 ms)
+  √ QC also preserves a RELEASED sample that existed before the additive state guards (115 ms)
+  √ central RETURN re-reads final APPROVED parent of SUBMITTED work and refuses amendments before review writes (30 ms)
+  √ central RETURN re-reads final APPROVED parent of ACCEPTED work and refuses amendments before review writes (23 ms)
+  √ central RETURN re-reads final ARCHIVED parent of SUBMITTED work and refuses amendments before review writes (25 ms)
+  √ central RETURN re-reads final ARCHIVED parent of ACCEPTED work and refuses amendments before review writes (22 ms)
+  √ central RETURN re-reads final DISPOSED parent of SUBMITTED work and refuses amendments before review writes (24 ms)
+  √ central RETURN re-reads final DISPOSED parent of ACCEPTED work and refuses amendments before review writes (25 ms)
+  √ central RETURN checks fresh parent scope before its amendment refusal and changes no rows (149 ms)
+  √ manager RETURN of a completed gate records current-result reversion in the review transaction (54 ms)
+  √ a failed gate-review evidence append rolls back the review CAS, review identity and audit (67 ms)
+  √ ordinary creation refuses advanced states before any write, and logs canonical creation (19 ms)
+  √ historical creation keeps provenance and importer identity without inventing a reviewer (8 ms)
+  √ fixture guards refuse missing flags, production paths and the working database (6 ms)
+  √ final APPROVED cannot return to processing, with no changes (22 ms)
+  √ final ARCHIVED cannot return to processing, with no changes (20 ms)
+  √ final DISPOSED cannot return to processing, with no changes (19 ms)
+  √ final CANCELLED cannot return to processing, with no changes (19 ms)
+  √ sample and work-item holds require reasons and can restore only the recorded prior status (64 ms)
+  √ legacy holds recover from history or a scoped manager choice, never a technician guess (22 ms)
+  √ stale work-item version refuses all status, history and audit writes (42 ms)
+  √ scope refusal and status/provenance override refusal write nothing (27 ms)
+  √ operational verification is action-bound; ordinary status writes cannot bypass it (45 ms)
+  √ the reviewed legacy plan preserves original values and reverts once; unmapped rows remain unchanged (158 ms)
+  √ migration fingerprint and row CAS refuse a modified plan or changed row (28 ms)
+  √ preparation reverts preserve scientific values and block review until a valid manager clearance (73 ms)
+  √ superseding a reverted result clears only the current-result block, retaining all old evidence (31 ms)
+  √ state and audit roll back together when a subsequent transaction operation fails (21 ms)
+  √ default policy completes both gates atomically and advances ACCEPTED to PROCESSING (99 ms)
+  √ analysis policy cannot be bypassed by false input; rejected verification stays pending without revert evidence (116 ms)
+  √ a request may demand stricter drying verification; acceptance of the last gate advances the sample (48 ms)
+  √ gate verification policy refuses unrelated analyses and method-specific overrides with no policy writes (7 ms)
+  √ undo approval is an amendment-only zero-write refusal for APPROVED (81 ms)
+  √ undo approval is an amendment-only zero-write refusal for ARCHIVED (22 ms)
+  √ undo approval is an amendment-only zero-write refusal for DISPOSED (22 ms)
+  √ undo approval is an amendment-only zero-write refusal for PROCESSING (21 ms)
+  √ concurrent operational verification commits one decision and refuses the stale decision without side effects (49 ms)
+  √ failed decision insertion rolls back operational state, gate flags and both audits (52 ms)
+  √ Batch and ReviewDecision backstops reject off-contract and mutable decisions with stable conflicts (24 ms)
+  √ reasoned gate revert records each current result once and preserves all analytical values (57 ms)
+  √ gate failure holds both entities and release restores their individual prior states (59 ms)
+  √ gate reversion of APPROVED sample refuses all writes (20 ms)
+  √ gate reversion of ARCHIVED sample refuses all writes (21 ms)
+  √ gate reversion of DISPOSED sample refuses all writes (21 ms)
+  √ an accepted marked gate duplicate prevents revert of the canonical gate with no writes (28 ms)
+  √ analyses same-key replay returns the original response with all-table zero writes (113 ms)
+  √ order same-key replay returns the original response with all-table zero writes (113 ms)
+  √ analyses same key with a differing reason refuses with all-table zero writes (112 ms)
+  √ order same key with a differing reason refuses with all-table zero writes (128 ms)
+  √ analyses key cannot replay identical parameters through the other mode and changes no table (150 ms)
+  √ order key cannot replay identical parameters through the other mode and changes no table (123 ms)
+  √ analyses command without a key writes its order and work without any receipt (48 ms)
+  √ order command without a key writes its order and work without any receipt (39 ms)
+
+PASS tests/security/audit_1_2_migration_sources.test.js
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().evidence.sql); (27 ms)
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().guards.sql); (6 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(sources.evidence.sql); (5 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(evidenceCreates(sources.evidence.sql)); (5 ms)
+  √ unknown imports, members or aliases remain unresolved (2 ms)
+  √ unknown imports, members or aliases remain unresolved (2 ms)
+  √ unknown imports, members or aliases remain unresolved (2 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (2 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (2 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (3 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (3 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered services/workflowMigrationSources.js bytes never become a SQL exemption (1 ms)
+  √ a third registry entry changes the loader digest and stays unresolved (2 ms)
+
+Test Suites: 5 passed, 5 total
+Tests:       333 passed, 333 total
+Snapshots:   0 total
+Time:        166.873 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_209_order_revision_integration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\deployment_readiness_bootstrap.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_state_authority.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_migration_sources.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-pr297-impact-audit-correction-focused-spelling\report-original.json

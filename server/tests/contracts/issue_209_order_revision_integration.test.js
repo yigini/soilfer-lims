@@ -393,8 +393,9 @@ test('approved impact excludes unmatched WAIVED and marked duplicate work while 
         status: 'APPROVED', requiredAnalyses: JSON.stringify([f.analysisCode]) } });
     const waived = await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: f.labId,
         analysis: f.analysisCode, status: 'WAIVED' } });
-    await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: f.labId,
-        analysis: f.analysisCode, status: 'ACCEPTED', duplicateOf: waived.id } });
+    // Retained spellings normalize to the same analysis while respecting this owned fixture's raw unique key.
+    const duplicate = await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: f.labId,
+        analysis: ' ' + f.analysisCode + ' ', status: 'ACCEPTED', duplicateOf: waived.id } });
     let before = await f.snapshot(), physical = triples(f.file);
     const excluded = installer.installOrderRevisions({ dbPath: f.file }).impact;
     expect(triples(f.file)).toEqual(physical);
@@ -402,7 +403,9 @@ test('approved impact excludes unmatched WAIVED and marked duplicate work while 
         prospectiveApprovedAmendmentRefusals: [], approvedAmendmentKitGate: 'NO_APPROVED_AMENDMENT_REFUSALS' });
     expect(await f.snapshot()).toEqual(before);
     const accepted = await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: f.labId,
-        analysis: f.analysisCode, status: 'ACCEPTED' } });
+        analysis: f.analysisCode + ' ', status: 'ACCEPTED' } });
+    expect(require('../../services/analysisCodesService').normalizeAnalysisCodes([waived.analysis, duplicate.analysis, accepted.analysis]))
+        .toEqual([f.analysisCode]);
     before = await f.snapshot(); physical = triples(f.file);
     const required = installer.installOrderRevisions({ dbPath: f.file }).impact;
     expect(triples(f.file)).toEqual(physical);

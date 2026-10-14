@@ -1,0 +1,125 @@
+diff --git a/docs/audit/209-order-revisions.md b/docs/audit/209-order-revisions.md
+index af38acbd..f96a8720 100644
+--- a/docs/audit/209-order-revisions.md
++++ b/docs/audit/209-order-revisions.md
+@@ -57,8 +57,13 @@ The released 48d intake could retain WorkItems after an initial-order failure.
+ Those runtime-reachable missing-order contexts remain zero-write refusals in
+ #209. The kit distinguishes no ACTIVE revision from an ACTIVE revision with no
+ matching line, using the execution resolver's actual decision. It also lists
+-prospective refusals for measurement owners on APPROVED, REPORTED, archived or
+-disposed samples. Operational tasks do not create measurement attempts.
++prospective refusals for ACCEPTED, non-duplicate measurement owners on APPROVED,
++REPORTED, archived or disposed samples, matching scientific amendment selection.
++WAIVED work and marked duplicates are excluded. Operational tasks do not create
++measurement attempts. Malformed stored analysis lists on fraction-owner samples
++are listed separately as `INVALID_STORED_ANALYSES` with sample and owner IDs;
++reporting this legacy data does not throw or refuse schema-ready startup, and
++does not repair or normalize the stored value.
+ The approved-amendment list must be measured as zero before proceeding. A
+ nonzero list requires STOP, YY's sample list and a separate Claudio-reviewed
+ forward remedy. #209 adds no amendment-side order step and keeps the approved
+diff --git a/server/scripts/install_order_revisions.js b/server/scripts/install_order_revisions.js
+index 5b8e0db6..40f214b3 100644
+--- a/server/scripts/install_order_revisions.js
++++ b/server/scripts/install_order_revisions.js
+@@ -121,7 +121,7 @@ function impact(db) {
+     const noActiveRevisionWorkItems=refused.filter(item=>item.contextCause==='NO_ACTIVE_REVISION');
+     const noMatchingLineWorkItems=refused.filter(item=>item.contextCause==='NO_MATCHING_LINE');
+     const prospectiveApprovedAmendmentRefusals=[];
+-    for(const item of db.prepare('SELECT w.id,w.sampleId,w.analysis,s.status AS sampleStatus FROM WorkItem w JOIN Sample s ON s.id=w.sampleId ORDER BY w.id').iterate()) {
++    for(const item of db.prepare("SELECT w.id,w.sampleId,w.analysis,s.status AS sampleStatus FROM WorkItem w JOIN Sample s ON s.id=w.sampleId WHERE w.status='ACCEPTED' AND w.duplicateOf IS NULL ORDER BY w.id").iterate()) {
+         if(isNonMeasurement(item) || !(item.sampleStatus==='REPORTED' ||
+             ['APPROVED','ARCHIVED','DISPOSED'].includes(workflow.normalizeSampleState(item.sampleStatus)))) continue;
+         const result=chooseOrderLine(item,groups.get(item.sampleId)||[]);
+@@ -135,11 +135,17 @@ function impact(db) {
+         if (!ownersBySample.has(item.sampleId)) ownersBySample.set(item.sampleId, []);
+         ownersBySample.get(item.sampleId).push(item);
+     }
+-    const incompleteTextureOwners = [];
++    const incompleteTextureOwners = [], invalidStoredAnalyses = [];
+     const sampleTarget = db.prepare('SELECT requiredAnalyses FROM Sample WHERE id=?');
+     for (const [sampleId, owners] of ownersBySample) {
+         const raw = sampleTarget.get(sampleId).requiredAnalyses;
+-        const target = normalizedSelection(typeof raw === 'string' ? JSON.parse(raw) : raw || [], true);
++        let target;
++        try { target = normalizedSelection(typeof raw === 'string' ? JSON.parse(raw) : raw || [], true); }
++        catch (error) {
++            if (!(error instanceof SyntaxError) && error.code !== 'INVALID_STORED_ANALYSES') throw error;
++            invalidStoredAnalyses.push({ sampleId, cause: 'INVALID_STORED_ANALYSES', workItemIds: owners.map(item => item.id) });
++            continue;
++        }
+         const result = inspectTextureOwners(owners, target);
+         if (result.missingFractions.length) incompleteTextureOwners.push({ sampleId,
+             workItemIds: result.owners.map(item => item.id), missingFractions: result.missingFractions });
+@@ -152,6 +158,7 @@ function impact(db) {
+         approvedAmendmentKitGate:approvedAmendmentSampleIds.length?'STOP_APPROVED_AMENDMENT_REMEDIATION_REQUIRED':'NO_APPROVED_AMENDMENT_REFUSALS',
+         fractionOwnerRefusalCount: refusalCounts.FRACTION_OWNER_LINE_REQUIRED,
+         incompleteTextureOwnerSampleCount: incompleteTextureOwners.length, incompleteTextureOwners,
++        invalidStoredAnalysisSampleCount: invalidStoredAnalyses.length, invalidStoredAnalyses,
+         continuingReservedOpenCount: continuingReservedOpenWorkItems.length, continuingReservedOpenWorkItems,
+         ambiguousOpenReservationCount: ambiguousOpenReservations.length, ambiguousOpenReservations,
+         refusalScope: 'Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately' };
+diff --git a/server/tests/contracts/issue_209_order_revision_integration.test.js b/server/tests/contracts/issue_209_order_revision_integration.test.js
+index a352c611..b8572ee0 100644
+--- a/server/tests/contracts/issue_209_order_revision_integration.test.js
++++ b/server/tests/contracts/issue_209_order_revision_integration.test.js
+@@ -385,6 +385,59 @@ test('first execution maps an actual wrapped INSERT refusal and rolls back all r
+     await expect(f.result(f.items[0])).rejects.toMatchObject({code:'ORDER_ATTEMPT_INSERT_REFUSED',statusCode:409});
+     expect(await f.snapshot()).toEqual(before);
+ });
++
++test('approved impact excludes unmatched WAIVED and marked duplicate work while an ACCEPTED current orphan still requires STOP', async () => {
++    const f = await qcGateFixture({ resolvedRules: false, fixedWindowPolicy: false }); held.push(f);
++    const helpers = require('../helpers/workflowFixtures');
++    const sample = await helpers.createSampleFixture(f.db, { data: { id: randomUUID(), originalId: randomUUID(), assignedLab: f.labId,
++        status: 'APPROVED', requiredAnalyses: JSON.stringify([f.analysisCode]) } });
++    const waived = await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: f.labId,
++        analysis: f.analysisCode, status: 'WAIVED' } });
++    // Retained spellings normalize to the same analysis while respecting this owned fixture's raw unique key.
++    const duplicate = await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: f.labId,
++        analysis: ' ' + f.analysisCode + ' ', status: 'ACCEPTED', duplicateOf: waived.id } });
++    let before = await f.snapshot(), physical = triples(f.file);
++    const excluded = installer.installOrderRevisions({ dbPath: f.file }).impact;
++    expect(triples(f.file)).toEqual(physical);
++    expect(excluded).toMatchObject({ prospectiveApprovedAmendmentRefusalCount: 0, approvedAmendmentSampleIds: [],
++        prospectiveApprovedAmendmentRefusals: [], approvedAmendmentKitGate: 'NO_APPROVED_AMENDMENT_REFUSALS' });
++    expect(await f.snapshot()).toEqual(before);
++    const accepted = await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: f.labId,
++        analysis: f.analysisCode + ' ', status: 'ACCEPTED' } });
++    expect(require('../../services/analysisCodesService').normalizeAnalysisCodes([waived.analysis, duplicate.analysis, accepted.analysis]))
++        .toEqual([f.analysisCode]);
++    before = await f.snapshot(); physical = triples(f.file);
++    const required = installer.installOrderRevisions({ dbPath: f.file }).impact;
++    expect(triples(f.file)).toEqual(physical);
++    expect(required).toMatchObject({ prospectiveApprovedAmendmentRefusalCount: 1, approvedAmendmentSampleIds: [sample.id],
++        approvedAmendmentKitGate: 'STOP_APPROVED_AMENDMENT_REMEDIATION_REQUIRED' });
++    expect(required.prospectiveApprovedAmendmentRefusals).toEqual([expect.objectContaining({ workItemId: accepted.id,
++        sampleId: sample.id, cause: 'NO_LINE', contextCause: 'NO_ACTIVE_REVISION' })]);
++    expect(await f.snapshot()).toEqual(before);
++});
++
++test.each(['{', '{"TEXTURE":true}', '[42]', '[null]', '[""]', '["   "]'])(
++    'malformed stored fraction analyses %s are listed read-only and cannot refuse schema-ready startup', async raw => {
++        const f = await qcGateFixture({ resolvedRules: false, fixedWindowPolicy: false }); held.push(f);
++        const helpers = require('../helpers/workflowFixtures');
++        await f.db.analysis.upsert({ where: { code: 'SAND' }, update: {}, create: { code: 'SAND', name: 'Owned fraction impact', units: '%' } });
++        f.textureSample = await helpers.createSampleFixture(f.db, { data: { id: randomUUID(), originalId: randomUUID(), assignedLab: f.labId,
++            status: 'PROCESSING', requiredAnalyses: raw } });
++        f.textureOwners = [await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: f.textureSample.id,
++            assignedLab: f.labId, analysis: 'SAND', status: 'IN_PROGRESS' } })];
++        const before = await f.snapshot(), physical = triples(f.file);
++        const dry = installer.installOrderRevisions({ dbPath: f.file });
++        const ready = installer.assertOrderRevisionStartupReady(f.file);
++        expect(triples(f.file)).toEqual(physical);
++        for (const result of [dry, ready]) {
++            expect(result).toMatchObject({ classification: 'COMPLETE_209', mode: 'DRY_RUN', totalChanges: 0, backfilledCount: 0,
++                impact: { invalidStoredAnalysisSampleCount: 1 } });
++            expect(result.impact.invalidStoredAnalyses).toEqual([{ sampleId: f.textureSample.id, cause: 'INVALID_STORED_ANALYSES',
++                workItemIds: f.textureOwners.filter(item => item.analysis === 'SAND').map(item => item.id) }]);
++        }
++        expect(await f.snapshot()).toEqual(before);
++        expect((await f.db.sample.findUnique({ where: { id: f.textureSample.id } })).requiredAnalyses).toBe(raw);
++    });
+ test('repeat reservation maps an actual wrapped INSERT refusal and rolls back its parent transition', async () => {
+     const f = await fixture(); installer.installOrderRevisions({dbPath:f.file,apply:true}); await f.result(f.items[0]); addOwnedInsertRefusal(f);
+     const before = await f.snapshot(), attempts = (await rows(f)).attempts;

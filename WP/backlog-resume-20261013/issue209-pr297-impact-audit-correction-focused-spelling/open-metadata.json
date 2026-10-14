@@ -1,0 +1,12 @@
+{
+  "startedUtc": "2026-10-14T19:59:00.870284+00:00",
+  "status": "RUNNING_METADATA_ONLY",
+  "inventory": 370,
+  "frozenInputCount": 1327,
+  "sourceAudit": "0d869350dffb98ae476198363cfd74412fe077c8",
+  "expectedTests": 333,
+  "original650Reconciled": true,
+  "onlyMutableOutput": "server/data/help/RELEASE_MANIFEST_v1.json",
+  "closedLogsExist": false,
+  "productionOperations": 0
+}
