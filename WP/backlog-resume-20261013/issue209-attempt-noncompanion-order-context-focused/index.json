@@ -1,0 +1,135 @@
+{
+  "retainedUtc": "2026-10-14T10:58:15.190806+00:00",
+  "status": "CLOSED_NONCOMPANION_CONTEXT_FAILURE",
+  "summary": {
+    "closedUtc": "2026-10-14T10:50:06.054319+00:00",
+    "exit": 1,
+    "suites": 2,
+    "tests": 124,
+    "passedTests": 119,
+    "failed": 5,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "cause": "Only five existing TEXTURE/fraction contexts remain; no-TEXTURE triplet now passes. Actual fraction direction arrived after closure and is retained separately. No assertion weakening or fraction runtime changes yet.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/scripts/order_revision_impact.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json"
+  ],
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/command.json": {
+      "bytes": 1386,
+      "sha256": "6d0cd17edb544ceb6e29c42a6865ffde0b3e78d1f658ae782ff9e9c8df1c3f2a"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/config-original.json": {
+      "bytes": 6577,
+      "sha256": "af9a63f390667c763b28a976f348a0562b0c63a807a7ba4391554972172ba47b"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "5ccba205c6a248b3bf4d6737a14fd6b5650d2918af795bc395132a602e0bb7c7"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/physical-retained-terminal-index.json": {
+      "bytes": 409,
+      "sha256": "a7ab13df7118b9a01defb71cdb8582ca28921bc8018c250bf2494a84f44a9b7c"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/physical-retention-original.jsonl": {
+      "bytes": 247,
+      "sha256": "4a0baf66f1dc04a5fa4ebac16ea4739721834a7b6662453d311adfc9d8aa85ee"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/report-original.json": {
+      "bytes": 67947,
+      "sha256": "c63617c815435cdf78fd392d080d630e690bfd6893ab1811aebf4115deca51c3"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/source-after.json": {
+      "bytes": 114832,
+      "sha256": "cb1e4a5937c805a9e47cc83b66d0cdff9f9a91de84da220d3669c146effebcf8"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/source-before.json": {
+      "bytes": 114832,
+      "sha256": "cb1e4a5937c805a9e47cc83b66d0cdff9f9a91de84da220d3669c146effebcf8"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/stderr-original.log": {
+      "bytes": 30963,
+      "sha256": "c259ea59b06e0d341d99b651afdf4983c66062f60629f43c828130cf8adb30a5"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/stdout-original.log": {
+      "bytes": 1060,
+      "sha256": "869e82752197787a7ed7c3e3a5ea249ba6d83a7069b7c7f25a341780bfcf9b8b"
+    },
+    "WP/backlog-resume-20261013/issue209-attempt-noncompanion-order-context-focused/summary.json": {
+      "bytes": 378,
+      "sha256": "339a7803389530610bfd20d142182363977cba0e66b9e103d0ce35afef89c6d5"
+    }
+  }
+}

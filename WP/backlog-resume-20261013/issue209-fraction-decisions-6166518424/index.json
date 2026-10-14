@@ -1,0 +1,31 @@
+{
+  "retainedUtc": "2026-10-14T10:58:15.194274+00:00",
+  "status": "ACTUAL_FRACTION_SCOPE_ACCEPTED_BEFORE_IMPLEMENTATION",
+  "comment": 6166518424,
+  "question": 6166098211,
+  "commentUrl": "https://github.com/yigini/soilfer-lims/issues/209#issuecomment-6166518424",
+  "productionOperations": 0,
+  "fractionRuntimeChanged": false,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-fraction-decisions-6166518424/answer-original.json": {
+      "bytes": 7482,
+      "sha256": "0e89cb6c3361f0697d0033c7c4d088481ec3d3e160e19517d91a496ba4418af1"
+    },
+    "WP/backlog-resume-20261013/issue209-fraction-decisions-6166518424/answer-original.md": {
+      "bytes": 3742,
+      "sha256": "9f777815b68a917935ff4f49c231f5876adaf7a0119d23e67f65171a6052b61a"
+    },
+    "WP/backlog-resume-20261013/issue209-fraction-decisions-6166518424/issue209-original.json": {
+      "bytes": 8349,
+      "sha256": "43d1c0afd64885288f90d4e7ce8080d7235a8b97afdd22ed9c92570cc80d8e58"
+    },
+    "WP/backlog-resume-20261013/issue209-fraction-decisions-6166518424/main-original.json": {
+      "bytes": 336,
+      "sha256": "e0c8d4117149b05e499ad0abfd6f0456aed24d869f784317aa0c1072415e39c9"
+    },
+    "WP/backlog-resume-20261013/issue209-fraction-decisions-6166518424/question-original.json": {
+      "bytes": 4677,
+      "sha256": "86565e7b7ee8b4a96ffbb65e0824a36b2ed85a0bdc69ab723d90df1be33253ef"
+    }
+  }
+}
