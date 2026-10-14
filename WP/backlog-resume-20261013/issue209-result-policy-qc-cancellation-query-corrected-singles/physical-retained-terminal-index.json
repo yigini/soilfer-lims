@@ -1,0 +1,21 @@
+{
+  "closedUtc": "2026-10-14T13:32:47.362199+00:00",
+  "allRecordedTeardownTargetsRetained": true,
+  "files": [
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_e921b108-b6b9-4ac3-84ba-11c78e03cc0f.db",
+      "bytes": 1560576,
+      "sha256": "296c900198f28dc5918d6dcea2fd756c978648c972f8aa8fe41b187f6a422932"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_cf35f154-0930-47dd-98de-7dcc1368812c.db",
+      "bytes": 1560576,
+      "sha256": "1ad31ad4573c907e09244ed511df3c77fa2b0070a5ca6255cad944700618a8f3"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_26c3e1fa-3d53-4d43-a8a0-529200283524.db",
+      "bytes": 1560576,
+      "sha256": "783cbe13ca30b17e7426247d5df7fbaf60706014a904f897a3eb45514ef690da"
+    }
+  ]
+}

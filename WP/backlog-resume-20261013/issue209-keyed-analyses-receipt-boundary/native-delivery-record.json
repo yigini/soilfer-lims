@@ -1,0 +1,21 @@
+{
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "title": "Claude"
+  },
+  "nativeSentOnce": true,
+  "lastVerifiedUpperBoundUtc": "2026-10-14T13:35:43Z",
+  "target": "LIMS Audit / Lab workflow audit and plan",
+  "observedRightComposer": "EMPTY",
+  "observedCentreDraft": "can you go and ask Pip",
+  "draftInspections": [
+    "END",
+    "HEAD"
+  ],
+  "sendKey": "Return",
+  "sendCount": 1,
+  "observedReplyStatus": "Kneading",
+  "finalAuditRequested": false,
+  "productionOperations": 0
+}

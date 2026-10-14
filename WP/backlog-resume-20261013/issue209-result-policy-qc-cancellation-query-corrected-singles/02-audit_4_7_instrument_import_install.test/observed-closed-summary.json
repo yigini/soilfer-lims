@@ -1,0 +1,12 @@
+{
+  "closedUtc": "2026-10-14T13:31:23.755732+00:00",
+  "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_4_7_instrument_import_install.test.js",
+  "exit": 0,
+  "originalReportPresent": true,
+  "tests": 100,
+  "passed": 100,
+  "failed": 0,
+  "expectedTests": 100,
+  "sourceUnchanged": true,
+  "status": "PASS"
+}

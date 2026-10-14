@@ -71,7 +71,7 @@ test.each(['result', 'scan', 'attempt', 'draft', 'evidence-event', 'equipment-us
             sampleId: f.sample.id, eventType: 'PREP_REVERTED', gate: 'PREPARATION', reason: 'Reverted preparation evidence', actor: actor.username } });
     }
     if (evidence === 'scan') await prisma.spectralData.create({ data: { id: randomUUID(), sampleId: f.sample.id, workItemId: f.item.id, modality: 'MIR', filename: 'custody-spectrum.csv', sourceFile: '/test/spectrum.csv' } });
-    const orderLine = evidence === 'attempt' ? await prisma.orderLine.findFirstOrThrow({ where: { orderRevision: { sampleId: f.sample.id, status: 'ACTIVE' } } }) : null;
+    const orderLine = evidence === 'attempt' ? await prisma.orderLine.findFirstOrThrow({ where: { revision: { sampleId: f.sample.id, status: 'ACTIVE' } } }) : null;
     if (evidence === 'attempt') await prisma.workAttempt.create({ data: { id: randomUUID(), workItemId: f.item.id, orderLineId: orderLine.id, author: actor.username } });
     if (evidence === 'draft') await prisma.workItemDraft.create({ data: { id: randomUUID(), workItemId: f.item.id,
         sampleId: f.sample.id, analysis: f.item.analysis, userId: actor.username, value: '1.2' } });

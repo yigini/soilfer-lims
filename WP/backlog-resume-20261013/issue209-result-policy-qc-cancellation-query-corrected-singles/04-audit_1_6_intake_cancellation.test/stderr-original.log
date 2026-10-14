@@ -1,0 +1,113 @@
+  console.log
+    [AUTH] Verifying token for ID: c975115c-1c9f-4d0d-814b-e63bb26fbeff (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for 76489830-d3a3-415f-afb7-2dfc91334f3f by test_lab_manager_cancellabd101475328bf411a86ac0b91b5997887
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.warn
+    [INTAKE] Blocked attempt to modify locked sample 76489830-d3a3-415f-afb7-2dfc91334f3f (Status: ACCEPTED, isDraft: false)
+
+      294 |
+      295 |             if (LOCKED_INTAKE_STATUSES.includes(sample.status) && !(sample.status === 'RECEIVED_REJECTED' && isResubmission === true && !isDraft)) {
+    > 296 |                 console.warn(`[INTAKE] Blocked attempt to modify locked sample ${originalId} (Status: ${sample.status}, isDraft: ${!!body.isDraft})`);
+          |                         ^
+      297 |                 throw new IntakeError(403, {
+      298 |                     success: false,
+      299 |                     error: 'SAMPLE_LOCKED',
+
+      at warn (services/intakePreparationService.js:296:25)
+      at Object.rejectSample (services/intakeService.js:89:34)
+      at controllers/sampleController.js:549:25
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.updateStatus (controllers/sampleController.js:544:25)
+
+  console.log
+    [AUTH] Verifying token for ID: c975115c-1c9f-4d0d-814b-e63bb26fbeff (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c975115c-1c9f-4d0d-814b-e63bb26fbeff (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c975115c-1c9f-4d0d-814b-e63bb26fbeff (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c975115c-1c9f-4d0d-814b-e63bb26fbeff (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c975115c-1c9f-4d0d-814b-e63bb26fbeff (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab CANCEL-LAB-d1014753-28bf-411a-86ac-0b91b5997887
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/audit_1_6_intake_cancellation.test.js
+  √ NOT_ASSIGNED work is retained with complete cancellation provenance on intake undo (47 ms)
+  √ NOT_ASSIGNED work is retained with complete cancellation provenance on intake reject (12 ms)
+  √ ASSIGNED work is retained with complete cancellation provenance on intake undo (10 ms)
+  √ ASSIGNED work is retained with complete cancellation provenance on intake reject (10 ms)
+  √ IN_PROGRESS work is retained with complete cancellation provenance on intake undo (11 ms)
+  √ IN_PROGRESS work is retained with complete cancellation provenance on intake reject (10 ms)
+  √ ON_HOLD work is retained with complete cancellation provenance on intake undo (10 ms)
+  √ ON_HOLD work is retained with complete cancellation provenance on intake reject (9 ms)
+  √ COMPLETED work blocks the entire intake undo without any writes (73 ms)
+  √ SUBMITTED work blocks the entire intake undo without any writes (66 ms)
+  √ ACCEPTED work blocks the entire intake undo without any writes (67 ms)
+  √ REPEAT_REQUIRED work blocks the entire intake undo without any writes (70 ms)
+  √ REANALYSIS_REQUIRED work blocks the entire intake undo without any writes (64 ms)
+  √ AWAITING_VERIFICATION work blocks the entire intake undo without any writes (63 ms)
+  √ WAIVED work blocks the entire intake undo without any writes (63 ms)
+  √ result evidence blocks cancellation of every item in a sample (118 ms)
+  √ scan evidence blocks cancellation of every item in a sample (71 ms)
+  √ attempt evidence blocks cancellation of every item in a sample (71 ms)
+  √ draft evidence blocks cancellation of every item in a sample (70 ms)
+  √ evidence-event evidence blocks cancellation of every item in a sample (78 ms)
+  √ equipment-use evidence blocks cancellation of every item in a sample (63 ms)
+  √ inventory-use evidence blocks cancellation of every item in a sample (64 ms)
+  √ batch evidence blocks cancellation of every item in a sample (62 ms)
+  √ generic cancellation and reactivation cannot forge the private intake action (209 ms)
+  √ the generic work route cannot rewrite cancellation or attach equipment (186 ms)
+  √ undo then reject skips previously cancelled rows and preserves their attribution (14 ms)
+  √ legacy cancelled work does not permanently block undo, and dropped analyses keep their original cancellation (57 ms)
+  √ re-acceptance normalizes expanding and alias analysis codes before reactivating retained work (76 ms)
+  √ generic rejection of accepted work with a result is refused without changing any table (208 ms)
+  √ draft discard and clearDrafts remain available on SUBMITTED_PARTIAL samples (46 ms)
+  √ draft discard and clearDrafts remain available on ACCEPTED_HELD samples (18 ms)
+  √ reassignment is refused for HELD without any table writes (163 ms)
+  √ reassignment is refused for EXPECTED without any table writes (68 ms)
+  √ reassignment is refused for CANCELLED without any table writes (75 ms)
+  √ reassignment is refused for SUBMITTED without any table writes (73 ms)
+  √ a resubmitted rejected sample can be rejected again without rewriting cancelled work (16 ms)
+  √ reassignment of eligible work writes its central transition and audit together (23 ms)
+  √ re-acceptance without RECEIVE_SAMPLE refuses with 403 and rolls back every table (70 ms)
+  √ legal sample re-acceptance reuses cancelled work, retains its cancellation history and leaves dropped analyses cancelled (21 ms)
+  √ legacy cancelled keys refuse re-acceptance with a stable item id and zero writes (69 ms)
+  √ EXPECTED samples cannot receive assignments (62 ms)
+  √ RECEIVED samples cannot receive assignments (61 ms)
+  √ RECEIVED_REJECTED samples cannot receive assignments (61 ms)
+  √ ARCHIVED samples cannot receive assignments (75 ms)
+  √ a held sample cannot be accepted or assigned; resolution restores eligibility (139 ms)
+  √ the scanner confines reactivation to the central sample re-acceptance transaction (6 ms)
+  √ undo-intake HTTP route refuses analytical evidence with 409 and no table writes (75 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       47 passed, 47 total
+Snapshots:   0 total
+Time:        4.156 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_6_intake_cancellation.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-result-policy-qc-cancellation-query-corrected-singles\04-audit_1_6_intake_cancellation.test\report-original.json

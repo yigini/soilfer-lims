@@ -1,0 +1,809 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab RW-LAB-0b72161d-1ec6-4f2a-a129-6aa251a32048
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [executeImport] Error: TransitionError: Request the repeat with a canonical reason before recording.
+        at allocateExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workAttemptWriteService.js:20:26)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:419:106)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:242:21
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.executeImport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:207:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORK_ATTEMPT_REASON_REQUIRED',
+      details: {}
+    }
+
+      272 |         });
+      273 |     } catch (error) {
+    > 274 |         console.error('[executeImport] Error:', error);
+          |                 ^
+      275 |         const mapped = rules.mapStateError(error);
+      276 |         res.status(mapped.statusCode || 500).json({ error: 'Failed to execute legacy import: ' + mapped.message,
+      277 |             ...(mapped.code && { code: mapped.code }) });
+
+      at error (controllers/importController.js:274:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [executeImport] Error: TransitionError: Recorded or sealed work requires its correction workflow.
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:201:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:242:21
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.executeImport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:207:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_WORKITEM_SEALED',
+      details: {}
+    }
+
+      272 |         });
+      273 |     } catch (error) {
+    > 274 |         console.error('[executeImport] Error:', error);
+          |                 ^
+      275 |         const mapped = rules.mapStateError(error);
+      276 |         res.status(mapped.statusCode || 500).json({ error: 'Failed to execute legacy import: ' + mapped.message,
+      277 |             ...(mapped.code && { code: mapped.code }) });
+
+      at error (controllers/importController.js:274:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [executeImport] Error: TransitionError: Recorded or sealed work requires its correction workflow.
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:201:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:242:21
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.executeImport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:207:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_WORKITEM_SEALED',
+      details: {}
+    }
+
+      272 |         });
+      273 |     } catch (error) {
+    > 274 |         console.error('[executeImport] Error:', error);
+          |                 ^
+      275 |         const mapped = rules.mapStateError(error);
+      276 |         res.status(mapped.statusCode || 500).json({ error: 'Failed to execute legacy import: ' + mapped.message,
+      277 |             ...(mapped.code && { code: mapped.code }) });
+
+      at error (controllers/importController.js:274:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [executeImport] Error: TransitionError: Recorded or sealed work requires its correction workflow.
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:201:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:242:21
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.executeImport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:207:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_WORKITEM_SEALED',
+      details: {}
+    }
+
+      272 |         });
+      273 |     } catch (error) {
+    > 274 |         console.error('[executeImport] Error:', error);
+          |                 ^
+      275 |         const mapped = rules.mapStateError(error);
+      276 |         res.status(mapped.statusCode || 500).json({ error: 'Failed to execute legacy import: ' + mapped.message,
+      277 |             ...(mapped.code && { code: mapped.code }) });
+
+      at error (controllers/importController.js:274:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [executeImport] Error: TransitionError: Recorded or sealed work requires its correction workflow.
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:201:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:242:21
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.executeImport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:207:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_WORKITEM_SEALED',
+      details: {}
+    }
+
+      272 |         });
+      273 |     } catch (error) {
+    > 274 |         console.error('[executeImport] Error:', error);
+          |                 ^
+      275 |         const mapped = rules.mapStateError(error);
+      276 |         res.status(mapped.statusCode || 500).json({ error: 'Failed to execute legacy import: ' + mapped.message,
+      277 |             ...(mapped.code && { code: mapped.code }) });
+
+      at error (controllers/importController.js:274:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [executeImport] Error: TransitionError: Waiting for Preparation/Grinding to complete; PREPARATION must be completed before continuing; Sample preparation must be completed before analysis (current: PENDING)
+        at validateExecutionReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:214:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:421:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:242:21
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.executeImport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:207:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'PREPARATION_PREREQUISITE_BLOCKED',
+      details: { equipmentBlocked: false }
+    }
+
+      272 |         });
+      273 |     } catch (error) {
+    > 274 |         console.error('[executeImport] Error:', error);
+          |                 ^
+      275 |         const mapped = rules.mapStateError(error);
+      276 |         res.status(mapped.statusCode || 500).json({ error: 'Failed to execute legacy import: ' + mapped.message,
+      277 |             ...(mapped.code && { code: mapped.code }) });
+
+      at error (controllers/importController.js:274:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Supplied result batch differs from the server batch.
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:405:92)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_BATCH_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Supplied result batch differs from the server batch.
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:405:92)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:160:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_BATCH_MISMATCH',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: Supplied result batch differs from the server batch.
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:167:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1135:25
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1195:83
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1211:17) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_BATCH_MISMATCH',
+      details: {}
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at error (controllers/workbenchController.js:1332:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: TransitionError: Supplied result batch differs from the server batch.
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:167:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1135:25
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1195:83
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:1211:17) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_BATCH_MISMATCH',
+      details: {}
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at error (controllers/workbenchController.js:1332:17)
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process COMPLETE_WORK (29864ec1-a55c-4c0f-a6d1-327a0804e9a9): TransitionError: Supplied result batch differs from the server batch.
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:167:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:723:44
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:707:21)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_5_result_writes.test.js:232:30 {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_BATCH_MISMATCH',
+      details: {}
+    }
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at tests/contracts/audit_1_5_result_writes.test.js:232:30
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process COMPLETE_WORK (31febaf1-17e9-458c-ab05-8e98830b311a): TransitionError: Supplied result batch differs from the server batch.
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:167:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:723:44
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:707:21)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_5_result_writes.test.js:232:30 {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_BATCH_MISMATCH',
+      details: {}
+    }
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at tests/contracts/audit_1_5_result_writes.test.js:232:30
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [executeImport] Error: TransitionError: Supplied result batch differs from the server batch.
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:167:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:242:21
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.executeImport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:207:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_BATCH_MISMATCH',
+      details: {}
+    }
+
+      272 |         });
+      273 |     } catch (error) {
+    > 274 |         console.error('[executeImport] Error:', error);
+          |                 ^
+      275 |         const mapped = rules.mapStateError(error);
+      276 |         res.status(mapped.statusCode || 500).json({ error: 'Failed to execute legacy import: ' + mapped.message,
+      277 |             ...(mapped.code && { code: mapped.code }) });
+
+      at error (controllers/importController.js:274:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [executeImport] Error: TransitionError: Supplied result batch differs from the server batch.
+        at context (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:167:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:388:17)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:242:21
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.executeImport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:207:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'RESULT_BATCH_MISMATCH',
+      details: {}
+    }
+
+      272 |         });
+      273 |     } catch (error) {
+    > 274 |         console.error('[executeImport] Error:', error);
+          |                 ^
+      275 |         const mapped = rules.mapStateError(error);
+      276 |         res.status(mapped.statusCode || 500).json({ error: 'Failed to execute legacy import: ' + mapped.message,
+      277 |             ...(mapped.code && { code: mapped.code }) });
+
+      at error (controllers/importController.js:274:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab RW-LAB-0b72161d-1ec6-4f2a-a129-6aa251a32048
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Instrument Expired qualified balance calibration is overdue
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [executeImport] Error: TransitionError: Instrument Expired qualified balance calibration is overdue
+        at validateExecutionReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:214:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:421:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:242:21
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at exports.executeImport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\importController.js:207:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'INSTRUMENT_CALIBRATION_OVERDUE',
+      details: { equipmentBlocked: true }
+    }
+
+      272 |         });
+      273 |     } catch (error) {
+    > 274 |         console.error('[executeImport] Error:', error);
+          |                 ^
+      275 |         const mapped = rules.mapStateError(error);
+      276 |         res.status(mapped.statusCode || 500).json({ error: 'Failed to execute legacy import: ' + mapped.message,
+      277 |             ...(mapped.code && { code: mapped.code }) });
+
+      at error (controllers/importController.js:274:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 57d4ec0a-f099-4597-8738-ee4bf21cdccf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_1_5_result_writes.test.js (5.549 s)
+  √ workbench, offline sync, results API and import have a common shape and server batch (387 ms)
+  √ unbatched measurement gets an attempt; the orphan historical import remains unlinked (57 ms)
+  √ #190 real import route preserves the orphan contract and unrelated rows (120 ms)
+  √ #190 real import route preserves the duplicate-child contract and unrelated rows (106 ms)
+  √ a reasonless canonical historical import refuses and preserves every table exactly (233 ms)
+  √ import refuses sealed COMPLETED work with all-table zero changes (69 ms)
+  √ import refuses sealed SUBMITTED work with all-table zero changes (75 ms)
+  √ import refuses sealed ACCEPTED work with all-table zero changes (65 ms)
+  √ import refuses sealed WAIVED work with all-table zero changes (66 ms)
+  √ import cannot bypass an existing work item prerequisite (87 ms)
+  √ client batch mismatch (null) rolls back every table, including earlier entries (98 ms)
+  √ client batch mismatch (assigned) rolls back every table, including earlier entries (108 ms)
+  √ conflicting attempt and work item batches refuse with all-table zero writes (82 ms)
+  √ workbench refuses a client batch mismatch against null without changing any table (119 ms)
+  √ workbench refuses a client batch mismatch against assigned without changing any table (94 ms)
+  √ sync refuses a client batch mismatch against null without changing any table (118 ms)
+  √ sync refuses a client batch mismatch against assigned without changing any table (86 ms)
+  √ import refuses a client batch mismatch against null without changing any table (81 ms)
+  √ import refuses a client batch mismatch against assigned without changing any table (73 ms)
+  √ texture creates one derived row per existing attempt, with original source provenance, and retry adds none (125 ms)
+  √ offline CommandReceipt replay reuses its attempt and results with zero writes (162 ms)
+  √ fresh calibration due date overrides a stale OK label and leaves all tables untouched (196 ms)
+  √ numeric MIR predictions retain PREDICTED provenance (22 ms)
+  √ the results API ignores smuggled id="colliding-result" and preserves the actual parser evidence (73 ms)
+  √ the results API ignores smuggled rawInput="invented parser evidence" and preserves the actual parser evidence (64 ms)
+  √ the results API ignores smuggled flags=["MANAGER_OVERRIDE","BELOW_LOQ"] and preserves the actual parser evidence (71 ms)
+  √ the results API ignores smuggled flags="not-an-array" and preserves the actual parser evidence (65 ms)
+  √ the results API ignores smuggled provenance="PREDICTED" and preserves the actual parser evidence (65 ms)
+  √ the results API ignores smuggled provenance="IMPORTED" and preserves the actual parser evidence (59 ms)
+  √ the results API ignores smuggled provenance="DERIVED" and preserves the actual parser evidence (69 ms)
+  √ historical import retains invalid text and out-of-range pH while importing the other cells (24 ms)
+  √ offline texture supersedes legacy non-numeric PSA classes, preserves numeric rows, and replays without writes (139 ms)
+  √ a generic result writer cannot use derived to bypass sealed work (62 ms)
+  √ SPEC_MIR summary writes one audit and never enters numerical results, reports or exports (49 ms)
+  √ DRYING summary writes one audit and never enters numerical results, reports or exports (31 ms)
+  √ measurement cache-only summary and operational scalar writes are refused without writes (69 ms)
+  √ attempt insert/update and delete guards preserve every table and map stable 409s (616 ms)
+  √ the write inventory catches an unauthorized result/cache writer: db.result.create({data:{value:"2"}}) (5 ms)
+  √ the write inventory catches an unauthorized result/cache writer: const delegate=tx.result;delegate.createMany({data:[]}) (2 ms)
+  √ the write inventory catches an unauthorized result/cache writer: db.sample.update({data:{results:{create:{value:"2"}}}}) (1 ms)
+  √ the write inventory catches an unauthorized result/cache writer: db.workItem.update({data:{result:"2"}})
+  √ the write inventory catches an unauthorized result/cache writer: const key="result";tx.workItem?.update({data:{[key]:"2"}}) (1 ms)
+  √ the write inventory catches an unauthorized result/cache writer: db.prepare("UPDATE main.WorkItem SET result = ? WHERE id = ?") (2 ms)
+  √ the write inventory catches an unauthorized result/cache writer: db.prepare("INSERT INTO Result (id,value) VALUES (?,?)") (1 ms)
+  √ the write inventory refuses disabling Result_attempt_insert_guard
+  √ the write inventory refuses disabling Result_attempt_update_guard (1 ms)
+  √ the write inventory refuses disabling WorkAttempt_result_reference_guard
+  √ the inventory restricts the historical option to the import entry point: writer.writeResult(tx,{source:'legacy-import'}) (1 ms)
+  √ the inventory restricts the historical option to the import entry point: const mode='legacy-import';writer.writeResult(tx,{source:mode})
+  √ the inventory restricts the historical option to the import entry point: const key='source';writer.writeResult(tx,{[key]:'legacy-import'}) (1 ms)
+  √ the inventory restricts the historical option to the import entry point: options.source='legacy-import'
+  √ the inventory confines the derived option to the two texture functions: writer.writeResult(tx,{source:'derived'}) (2 ms)
+  √ the inventory confines the derived option to the two texture functions: const mode='derived';writer.writeResult(tx,{source:mode}) (2 ms)
+  √ the inventory confines the derived option to the two texture functions: const key='source';writer.writeResult(tx,{[key]:'derived'}) (2 ms)
+  √ the inventory confines the derived option to the two texture functions: options.source='derived' (1 ms)
+  √ the inventory confines sync identity/flags and prediction provenance to internal callers (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       56 passed, 56 total
+Snapshots:   0 total
+Time:        5.859 s, estimated 6 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_5_result_writes.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-result-policy-qc-cancellation-query-corrected-singles\01-audit_1_5_result_writes.test\report-original.json

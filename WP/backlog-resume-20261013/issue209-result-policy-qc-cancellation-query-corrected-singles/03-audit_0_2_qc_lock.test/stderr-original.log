@@ -1,0 +1,1128 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 560838c7-bbf1-464d-b606-db0e4bea3a52 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 560838c7-bbf1-464d-b606-db0e4bea3a52 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 560838c7-bbf1-464d-b606-db0e4bea3a52 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 560838c7-bbf1-464d-b606-db0e4bea3a52 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 560838c7-bbf1-464d-b606-db0e4bea3a52 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 560838c7-bbf1-464d-b606-db0e4bea3a52 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 560838c7-bbf1-464d-b606-db0e4bea3a52 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 560838c7-bbf1-464d-b606-db0e4bea3a52 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [QC run] PrismaClientKnownRequestError: 
+    Invalid `tx.qcMeasurement.create()` invocation in
+    C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcCompatibilityRunService.js:151:65
+    
+      148     const changed = await tx.qcMeasurement.updateMany({ where: { id: old.id, supersededById: null }, data: { supersededById: next.id } });
+      149     if (changed.count !== 1) throw failure(409, 'QC_MEASUREMENT_CHANGED', 'The parent observation changed. Reload before retrying.');
+      150 }
+    → 151 for (const data of measurements) await tx.qcMeasurement.create(
+    Foreign key constraint violated on the foreign key
+        at zr.handleRequestError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:8172)
+        at zr.handleRequestError [as handleAndLogRequestError] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7467)
+        at zr.handleAndLogRequestError [as request] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7174)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at a (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:5816)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcCompatibilityRunService.js:151:42
+        at inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcRunAuditService.js:106:28
+        at inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcRunMutationService.js:71:23
+        at inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcRunAuditService.js:106:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.evaluateBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\qcController.js:82:25) {
+      code: 'P2003',
+      meta: {
+        modelName: 'QcMeasurement',
+        driverAdapterError: DriverAdapterError: ForeignKeyConstraintViolation
+            at BetterSQLite3Transaction.onError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:568:11)
+            at BetterSQLite3Transaction.performIO (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:563:12)
+            at BetterSQLite3Transaction.queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:504:63)
+            at queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43566)
+            at o (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:25753)
+            at e.xr (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:46795)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43535)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43973)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:45162)
+            at e.interpretNode [as run] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:42253)
+            at e.run [as execute] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:61:829)
+            at processTicksAndRejections (node:internal/process/task_queues:103:5)
+            at qt.request (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:62:2327)
+            at Object.singleLoader (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:6569) {
+          cause: [Object]
+        }
+      },
+      clientVersion: '7.10.0'
+    }
+
+      14 | const { normalizeBatchState } = require('../workflowContract');
+      15 | function respondError(res, error, fallback) {
+    > 16 |     if (!error.statusCode) console.error('[QC run]', error);
+         |                                    ^
+      17 |     return res.status(error.statusCode || 500).json(error.body || { code: error.code || 'QC_OPERATION_FAILED',
+      18 |         error: error.statusCode ? error.message : fallback, ...(error.details && { ...error.details, details: error.details }) });
+      19 | }
+
+      at error (controllers/qcController.js:16:36)
+      at respondError (controllers/qcController.js:84:30)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [QC run] PrismaClientKnownRequestError: 
+    Invalid `tx.auditLog.create()` invocation in
+    C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcRunAuditService.js:90:23
+    
+      87     snapshot: { qcResults: view?.qcResults ?? null, qcItems: view?.qcItems || [], status: view?.status ?? null,
+      88         disposition: view?.disposition ?? null, workItemIds: view?.workItemIds || [],
+      89         actor: { id: actor.id || null, username: actor.username }, timestamp: now, reason } };
+    → 90 await tx.auditLog.create(
+    Foreign key constraint violated on the foreign key
+        at zr.handleRequestError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:8172)
+        at zr.handleRequestError [as handleAndLogRequestError] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7467)
+        at zr.handleAndLogRequestError [as request] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7174)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at a (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:5816)
+        at appendPair (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcRunAuditService.js:90:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcRunAuditService.js:115:63
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.evaluateBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\qcController.js:82:25) {
+      code: 'P2003',
+      meta: {
+        modelName: 'AuditLog',
+        driverAdapterError: DriverAdapterError: ForeignKeyConstraintViolation
+            at BetterSQLite3Transaction.onError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:568:11)
+            at BetterSQLite3Transaction.performIO (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:563:12)
+            at BetterSQLite3Transaction.queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:504:63)
+            at queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43566)
+            at o (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:25753)
+            at e.xr (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:46795)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43535)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43973)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:45162)
+            at e.interpretNode [as run] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:42253)
+            at e.run [as execute] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:61:829)
+            at processTicksAndRejections (node:internal/process/task_queues:103:5)
+            at qt.request (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:62:2327)
+            at Object.singleLoader (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:6569) {
+          cause: [Object]
+        }
+      },
+      clientVersion: '7.10.0'
+    }
+
+      14 | const { normalizeBatchState } = require('../workflowContract');
+      15 | function respondError(res, error, fallback) {
+    > 16 |     if (!error.statusCode) console.error('[QC run]', error);
+         |                                    ^
+      17 |     return res.status(error.statusCode || 500).json(error.body || { code: error.code || 'QC_OPERATION_FAILED',
+      18 |         error: error.statusCode ? error.message : fallback, ...(error.details && { ...error.details, details: error.details }) });
+      19 | }
+
+      at error (controllers/qcController.js:16:36)
+      at respondError (controllers/qcController.js:84:30)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: QC_GATE_FAILED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:848:17) {
+      statusCode: 409,
+      code: 'QC_GATE_FAILED',
+      details: { items: [ [Object] ] }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: QC_GATE_NOT_EVALUATED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:848:17) {
+      statusCode: 409,
+      code: 'QC_GATE_NOT_EVALUATED',
+      details: { items: [ [Object] ] }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: QC_GATE_NOT_EVALUATED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:848:17) {
+      statusCode: 409,
+      code: 'QC_GATE_NOT_EVALUATED',
+      details: { items: [ [Object] ] }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: QC_GATE_NOT_EVALUATED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:848:17) {
+      statusCode: 409,
+      code: 'QC_GATE_NOT_EVALUATED',
+      details: { items: [ [Object] ] }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItemsBulk] Error: Error: QC_GATE_FAILED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItemsBulk (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1162:13) {
+      statusCode: 409,
+      code: 'QC_GATE_FAILED',
+      details: { items: [ [Object] ] }
+    }
+
+      1346 |         res.json({ success: true, count: results.length, results, errors });
+      1347 |     } catch (error) {
+    > 1348 |         console.error('[reviewWorkItemsBulk] Error:', error);
+           |                 ^
+      1349 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1350 |     }
+      1351 | };
+
+      at error (controllers/workItemController.js:1348:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItemsBulk] Error: Error: QC_GATE_NOT_EVALUATED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItemsBulk (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1162:13) {
+      statusCode: 409,
+      code: 'QC_GATE_NOT_EVALUATED',
+      details: { items: [ [Object] ] }
+    }
+
+      1346 |         res.json({ success: true, count: results.length, results, errors });
+      1347 |     } catch (error) {
+    > 1348 |         console.error('[reviewWorkItemsBulk] Error:', error);
+           |                 ^
+      1349 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1350 |     }
+      1351 | };
+
+      at error (controllers/workItemController.js:1348:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItemsBulk] Error: Error: QC_GATE_NOT_EVALUATED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItemsBulk (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1162:13) {
+      statusCode: 409,
+      code: 'QC_GATE_NOT_EVALUATED',
+      details: { items: [ [Object] ] }
+    }
+
+      1346 |         res.json({ success: true, count: results.length, results, errors });
+      1347 |     } catch (error) {
+    > 1348 |         console.error('[reviewWorkItemsBulk] Error:', error);
+           |                 ^
+      1349 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1350 |     }
+      1351 | };
+
+      at error (controllers/workItemController.js:1348:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItemsBulk] Error: Error: QC_GATE_NOT_EVALUATED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItemsBulk (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1162:13) {
+      statusCode: 409,
+      code: 'QC_GATE_NOT_EVALUATED',
+      details: { items: [ [Object] ] }
+    }
+
+      1346 |         res.json({ success: true, count: results.length, results, errors });
+      1347 |     } catch (error) {
+    > 1348 |         console.error('[reviewWorkItemsBulk] Error:', error);
+           |                 ^
+      1349 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1350 |     }
+      1351 | };
+
+      at error (controllers/workItemController.js:1348:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewSubmission] Error: Error: QC_GATE_FAILED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:259:9) {
+      statusCode: 409,
+      code: 'QC_GATE_FAILED',
+      details: { items: [ [Object] ] }
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewSubmission] Error: Error: QC_GATE_NOT_EVALUATED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:259:9) {
+      statusCode: 409,
+      code: 'QC_GATE_NOT_EVALUATED',
+      details: { items: [ [Object] ] }
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewSubmission] Error: Error: QC_GATE_NOT_EVALUATED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:259:9) {
+      statusCode: 409,
+      code: 'QC_GATE_NOT_EVALUATED',
+      details: { items: [ [Object] ] }
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewSubmission] Error: Error: QC_GATE_NOT_EVALUATED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:259:9) {
+      statusCode: 409,
+      code: 'QC_GATE_NOT_EVALUATED',
+      details: { items: [ [Object] ] }
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-02
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-02
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ffcd8ff7-2a37-421f-b698-bb9b4d29adba (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8175c6a7-b979-44a8-b05a-8d45992d3b65 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_0_2_qc_lock.test.js (5.262 s)
+  Audit 0.2: batch QC lock and durable evidence
+    √ LAB_TECHNICIAN cannot move QC_FAIL to OPEN (250 ms)
+    √ LAB_TECHNICIAN cannot move QC_FAIL to RUNNING (26 ms)
+    √ LAB_TECHNICIAN cannot move QC_FAIL to QC_PASS (32 ms)
+    √ LAB_TECHNICIAN cannot move QC_FAIL to CLOSED (24 ms)
+    √ LAB_MANAGER cannot move QC_FAIL to OPEN (24 ms)
+    √ LAB_MANAGER cannot move QC_FAIL to RUNNING (20 ms)
+    √ LAB_MANAGER cannot move QC_FAIL to QC_PASS (21 ms)
+    √ LAB_MANAGER cannot move QC_FAIL to CLOSED (19 ms)
+    √ SUPER_ADMIN cannot move QC_FAIL to OPEN (20 ms)
+    √ SUPER_ADMIN cannot move QC_FAIL to RUNNING (24 ms)
+    √ SUPER_ADMIN cannot move QC_FAIL to QC_PASS (18 ms)
+    √ SUPER_ADMIN cannot move QC_FAIL to CLOSED (18 ms)
+    √ evaluate rejects QC_FAIL with disposition null (29 ms)
+    √ evaluate rejects QC_FAIL with disposition {"decision":"PROCEED_WITH_WARNING"} (30 ms)
+    √ evaluate rejects OPEN with disposition {"decision":"REANALYZE_BATCH"} (19 ms)
+    √ evaluate rejects CLOSED with disposition null (23 ms)
+    √ RUNNING membership cannot change via post (21 ms)
+    √ RUNNING membership cannot change via delete (19 ms)
+    √ QC_PASS membership cannot change via post (19 ms)
+    √ QC_PASS membership cannot change via delete (18 ms)
+    √ QC_FAIL membership cannot change via post (18 ms)
+    √ QC_FAIL membership cannot change via delete (19 ms)
+    √ CLOSED membership cannot change via post (23 ms)
+    √ CLOSED membership cannot change via delete (20 ms)
+    √ an operational status cannot hide new failing QC (55 ms)
+    √ manager reopen preserves exactly one full snapshot in history and AuditLog (87 ms)
+    √ LAB_MANAGER cannot reopen without required authority and reason (62 ms)
+    √ LAB_TECHNICIAN cannot reopen without required authority and reason (63 ms)
+    √ two reopen cycles preserve increasing sequence numbers and all prior events (191 ms)
+    √ QcMeasurement write failure rolls back rows, batch and both snapshot copies (197 ms)
+    √ AuditLog write failure rolls back rows, batch and both snapshot copies (98 ms)
+    √ individual review blocks QC_FAIL batch through the shared gate (95 ms)
+    √ individual review blocks OPEN batch through the shared gate (23 ms)
+    √ individual review blocks RUNNING batch through the shared gate (29 ms)
+    √ individual review blocks UNKNOWN batch through the shared gate (471 ms)
+    √ bulk review blocks QC_FAIL batch through the shared gate (80 ms)
+    √ bulk review blocks OPEN batch through the shared gate (28 ms)
+    √ bulk review blocks RUNNING batch through the shared gate (33 ms)
+    √ bulk review blocks UNKNOWN batch through the shared gate (468 ms)
+    √ submission review blocks QC_FAIL batch through the shared gate (66 ms)
+    √ submission review blocks OPEN batch through the shared gate (23 ms)
+    √ submission review blocks RUNNING batch through the shared gate (29 ms)
+    √ submission review blocks UNKNOWN batch through the shared gate (508 ms)
+    √ individual review accepts PROCEED_WITH_WARNING but keeps failed evidence locked (295 ms)
+    √ bulk review accepts PROCEED_WITH_WARNING but keeps failed evidence locked (129 ms)
+    √ submission review accepts PROCEED_WITH_WARNING but keeps failed evidence locked (134 ms)
+    √ publication uses the shared gate for QC_FAIL / null
+    √ publication uses the shared gate for QC_FAIL / {"decision":"PROCEED_WITH_WARNING"}
+    √ publication uses the shared gate for QC_FAIL / {"decision":"REANALYZE_BATCH"}
+    √ publication uses the shared gate for QC_FAIL / "{invalid"
+    √ publication uses the shared gate for OPEN / null
+    √ publication uses the shared gate for RUNNING / null
+    √ publication uses the shared gate for ERROR / null
+    √ publication uses the shared gate for UNKNOWN / null
+    √ publication uses the shared gate for QC_PASS / null
+    √ publication uses the shared gate for CLOSED / null
+    √ batch lookup error fails closed (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       57 passed, 57 total
+Snapshots:   0 total
+Time:        5.581 s, estimated 8 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_2_qc_lock.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-result-policy-qc-cancellation-query-corrected-singles\03-audit_0_2_qc_lock.test\report-original.json

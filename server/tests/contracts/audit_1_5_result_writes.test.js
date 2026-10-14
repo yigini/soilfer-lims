@@ -213,7 +213,7 @@ test.each([null, 'assigned'])('client batch mismatch (%s) rolls back every table
 
 test('conflicting attempt and work item batches refuse with all-table zero writes', async () => {
     const f = await fixture(), attemptId = randomUUID();
-    const orderLine = await prisma.orderLine.findFirstOrThrow({ where: { orderRevision: { sampleId: f.sample.id, status: 'ACTIVE' } } });
+    const orderLine = await prisma.orderLine.findFirstOrThrow({ where: { revision: { sampleId: f.sample.id, status: 'ACTIVE' } } });
     await prisma.workAttempt.create({ data: { id: attemptId, workItemId: f.item.id, orderLineId: orderLine.id, author: actor.username, qcBatchId: 'different-server-batch' } });
     const before = snapshot();
     await expect(prisma.$transaction(tx => writer.writeResult(tx, { sampleId: f.sample.id, workItemId: f.item.id, attemptId, actor, measurement: measurement() })))

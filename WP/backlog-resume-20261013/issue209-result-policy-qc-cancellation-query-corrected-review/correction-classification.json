@@ -1,0 +1,8 @@
+{
+  "createdUtc": "2026-10-14T13:31:04.791020+00:00",
+  "priorClosedFailureAudit": "aa25effa110cb92dde6f1dba4047a79fb3b1f9a5",
+  "correction": "Only the new fixture lookup relation orderRevision becomes the actual generated Prisma relation revision, in result-batch-conflict and not-yet-run cancellation-attempt contexts",
+  "runtimeChanges": 0,
+  "oldSourceAndAssertionsExactlyRecovered": true,
+  "originalFailureImmutable": true
+}
