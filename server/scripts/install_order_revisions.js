@@ -145,17 +145,21 @@ function installOrderRevisions({ dbPath, apply = false } = {}) {
     if (!apply || reviewed.classification === 'COMPLETE_209') return { ...reviewed, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0,
         backfilledCount: 0, impact: counts, readonlySnapshot: policy.readonlySnapshot };
     const release = loadOrderRevisionMigrationSource(), db = new Database(target, { fileMustExist: true, timeout: 5000 });
+    // Keep the immutable DDL binding in the scanner's existing direct-call form.
+    const ddl = loadOrderRevisionMigrationSource();
     try {
         db.pragma('foreign_keys=ON');
         return db.transaction(() => {
             const current = classify(db, release);
             if (current.classification === 'COMPLETE_209') return { ...current, mode: 'NO_OP', totalChanges: 0, backfilledCount: 0, impact: impact(db) };
             const before = snapshot(db);
-            if (current.classification === 'PRE_209') db.exec(release.sql);
+            if (current.classification === 'PRE_209') db.exec(ddl.sql);
             else {
                 const index = releaseObjects(release).find(row => row.type === 'index');
-                if (!db.prepare('SELECT 1 FROM sqlite_master WHERE name=?').get(index.name)) db.exec(index.sql);
-                db.exec(release.guardsSql);
+                const indexSql = 'CREATE INDEX "OrderLine_workItemId_idx" ON "OrderLine"("workItemId");';
+                if (normalize(index.sql) !== normalize(indexSql)) throw fail('ORDER_REVISION_SOURCE_MISMATCH', 'Order index source differs.');
+                if (!db.prepare('SELECT 1 FROM sqlite_master WHERE name=?').get(index.name)) db.exec(indexSql);
+                db.exec(ddl.guardsSql);
             }
             if (hash(snapshot(db, before)) !== hash(before)) throw fail('ORDER_REVISION_PRESERVATION_REFUSED', 'Order installation changed retained rows.');
             const receipt = { sourceSha256: source.sha256, originalRowsSha256: hash(before), originalRowsPreserved: true, backfilledCount: 0 };
