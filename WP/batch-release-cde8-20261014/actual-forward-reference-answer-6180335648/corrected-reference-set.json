@@ -1,0 +1,39 @@
+{
+  "status": "ACTUAL_REFERENCE_SET_CORRECTED_DIRECTION_ONLY",
+  "scopeDirectionId": 6180234041,
+  "referenceAnswerId": 6180335648,
+  "actualAnswerUtc": "2026-10-14T22:57:41Z",
+  "referenceAudit": "a514c0a49a7487f44b33e27a7390972926a56307",
+  "originalImageInspectFilePresent": false,
+  "forensicInspectRole": "DISTINCT_FIRST_POST_CLOSURE_READONLY_API_RESPONSE_NOT_ORIGINAL_INSPECT_FILE",
+  "references": {
+    "candidate-image.id": {
+      "bytes": 71,
+      "sha256": "6bb4227f82debcf97845874330ae261d044b749819d2f2193a0fc0c3935967e3",
+      "originalMode": "0o600"
+    },
+    "docker-build.log": {
+      "bytes": 28713,
+      "sha256": "5a7736d9d36aaccafa9d98d84c3d1a537af4ee29b5255022d2565d78792db0f4",
+      "originalMode": "0o400"
+    },
+    "candidate-image-fresh-inspect-original.json": {
+      "bytes": 7229,
+      "sha256": "c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14",
+      "originalMode": null
+    }
+  },
+  "requiredMatches": [
+    "Original candidate ID equals first forensic response Id",
+    "Successful original build log exported image ID equals the same ID",
+    "New fresh inspect matches first forensic Id/RootFS layers/revision/all Config",
+    "Any reference bytes/image difference STOP",
+    "New receipt records actual reference roles and absent original inspect honestly"
+  ],
+  "originalRootWrites": 0,
+  "otherFiveScopeConditionsUnchanged": true,
+  "newToolingSource": null,
+  "newSourceReview": null,
+  "newReceipt": null,
+  "newExecutionAuthority": null
+}
