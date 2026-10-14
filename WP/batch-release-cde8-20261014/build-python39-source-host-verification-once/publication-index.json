@@ -1,0 +1,81 @@
+{
+  "status": "PYTHON39_CORRECTION_NEW_REVIEW_READY",
+  "sourceSha256": {
+    "batch_build.py": "897ff69d61cf61ef58a0e2266c2c23f5038b6ef5efe884226d7d0ec1a22e4191",
+    "batch_build_contract.py": "43b3e9ca228c07e3ceaa7645b9ae0d87099f3779c327fa336c8fa69184b367a5",
+    "launch_batch_build.py": "7cff0a41ad5cd1d4baefbce9323554f9ea8629fd2391f129f89143a552a2a8c3",
+    "prepare_batch_build.py": "e8b862b8a5136290ee1175497d37f765a8ae1b6e1000af6df9c5cac732896fa9",
+    "verify_build_guards.py": "a0a1b17c8fdb91679ed089e2834e4664c917bd00f7ea305d0058736a83ef3b23"
+  },
+  "oldSourcePass": 6179796996,
+  "newSourcePass": null,
+  "files": [
+    {
+      "path": "WP/batch-release-cde8-20261014/build-python39-source-host-verification-once/actual-host-inmemory-verification-source.py",
+      "bytes": 65002,
+      "sha256": "b8b91ca0fb6e1dfe1c20d1684f82123671df7dd1e3bebe3a819a10072e0ed3c5"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-python39-source-host-verification-once/command-original.json",
+      "bytes": 784,
+      "sha256": "51e3395d3bc2290d6ac8e7e49bf7960730ecd3653b9dd659238ef7b99d5b3492"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-python39-source-host-verification-once/exit-original.json",
+      "bytes": 2365,
+      "sha256": "e50fffb6c627a6fbd909292e32ed0e6fcaa45333b5778e2f95155ce849387f12"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-python39-source-host-verification-once/host-stderr-original.log",
+      "bytes": 1523,
+      "sha256": "8b4ba4ba2136d29c8565731a21f8ff495ab08585b4d2f4af5f17d73b66fa49d8"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-python39-source-host-verification-once/host-stdout-original.json",
+      "bytes": 883,
+      "sha256": "39f9f4d4698f8662d466fbc3ef8ad08da02957c26fd79395ed5b28899c3a852e"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-python39-source-host-verification-once/local-stderr-original.log",
+      "bytes": 2093,
+      "sha256": "aa7491d9dc7e6e8f61d1dd561f7493f6b53a3004825821379dd0e9fc4259c038"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-python39-source-host-verification-once/local-stdout-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-python39-source-host-verification-once/source-delta-original.diff",
+      "bytes": 2013,
+      "sha256": "dd4fcaa8e5068fe07f7de6ea747f3e70edf3d6f75fc2b5243085e695b43a03ad"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-python39-review-ready.md",
+      "bytes": 2148,
+      "sha256": "7e20750ee465ac0e1b17b63d5fa56232ec6254cc9b8a420827e5b340817aab09"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/batch_build.py",
+      "bytes": 8089,
+      "sha256": "897ff69d61cf61ef58a0e2266c2c23f5038b6ef5efe884226d7d0ec1a22e4191"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-batch-build-python39-source-and-host-once.py",
+      "bytes": 4927,
+      "sha256": "1d7feafabfa0cf71845589ea7d684428116693935cb33766b1826a3e8acce924"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/publish-batch-build-python39-source-correction-once.py",
+      "bytes": 5919,
+      "sha256": "7d88de02c7d257b8f4feacb4ced591f5bd5627824483197e017661519ed24193"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 407663,
+      "sha256": "53d767ccad1d8a26a1b8a6ddd0d920e7acd201e3095386d5cec2254695646b9d"
+    }
+  ],
+  "productionOperations": 0,
+  "buildsLaunched": 0
+}

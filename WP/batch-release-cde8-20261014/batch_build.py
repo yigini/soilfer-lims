@@ -53,7 +53,7 @@ def main():
     require(min(after_unpack.values())>=FLOOR+BUILD_ALLOCATION,'Source extraction consumed the build reserve')
     tag='soilfer-lims:audit-'+ROOT.name
     require(not (ROOT/'build-intent.json').exists() and not (ROOT/'docker-build.log').exists(),'Consumed build boundary')
-    write_new('build-intent.json',{'status':'BUILD_ATTEMPTED_ONCE','startedUtc':datetime.datetime.now(datetime.UTC).isoformat(),'head':CANDIDATE,'tag':tag,'scope':SCOPE,'neverRetry':True})
+    write_new('build-intent.json',{'status':'BUILD_ATTEMPTED_ONCE','startedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'head':CANDIDATE,'tag':tag,'scope':SCOPE,'neverRetry':True})
     started=time.monotonic();result=None;error=None
     try:
         with (ROOT/'docker-build.log').open('x',encoding='utf-8') as log:
@@ -68,7 +68,7 @@ def main():
     except RuntimeError as refused:
         disk_growth={'policy':GROWTH_POLICY,'beforeAllocations':allocation_before,'afterAllocations':allocation_after,'refusal':str(refused)}
         error=error or str(refused)
-    closed={'closedUtc':datetime.datetime.now(datetime.UTC).isoformat(),'head':CANDIDATE,'tree':TREE,'scope':SCOPE,
+    closed={'closedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'head':CANDIDATE,'tree':TREE,'scope':SCOPE,
         'exitCode':result.returncode if result else None,'error':error,'elapsedSeconds':elapsed,'freeBytesBefore':before,'freeBytesAfter':after,
         'reserveFloorBytes':FLOOR,'buildAllocationReserveBytes':BUILD_ALLOCATION,'diskGrowth':disk_growth,'productionDatabaseMounts':0,'productionDatabaseConnections':0,'proofLaunches':0,'productionDeployments':0,'neverRetry':True}
     if error or result.returncode!=0 or min(after.values())<FLOOR:

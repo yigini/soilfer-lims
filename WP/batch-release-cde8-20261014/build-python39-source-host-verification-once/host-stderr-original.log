@@ -1,0 +1,19 @@
+test_duplicate_missing_modified_and_wrong_source_inventory_refuse (batch_guard_test_memory.ArchiveGuards) ... ok
+test_foreign_directories_executable_modes_and_hardlinks_refuse (batch_guard_test_memory.ArchiveGuards) ... ok
+test_raw_application_file_and_ignored_dependency_link (batch_guard_test_memory.ArchiveGuards) ... ok
+test_unsafe_paths_and_links_refuse (batch_guard_test_memory.ArchiveGuards) ... ok
+test_changed_source_graph_missing_file_and_extra_file_refuse (batch_guard_test_memory.AuthorityGuards) ... ok
+test_current_bound_build_scope_passes (batch_guard_test_memory.AuthorityGuards) ... ok
+test_duplicate_json_and_unsafe_roots_refuse (batch_guard_test_memory.AuthorityGuards) ... ok
+test_historical_and_expanded_bindings_refuse (batch_guard_test_memory.AuthorityGuards) ... ok
+test_later_source_rejection_refuses_and_unrelated_note_does_not (batch_guard_test_memory.AuthorityGuards) ... ok
+test_old_edited_wrong_actor_and_incomplete_reviews_refuse (batch_guard_test_memory.AuthorityGuards) ... ok
+test_unreviewed_individual_issue_or_main_moves_refuse (batch_guard_test_memory.AuthorityGuards) ... ok
+test_cache_shrink_does_not_hide_unexplained_growth (batch_guard_test_memory.DiskGuards) ... ok
+test_known_growth_does_not_mask_a_different_filesystem (batch_guard_test_memory.DiskGuards) ... ok
+test_shared_filesystem_counts_known_allocations_once_and_bounds_residual (batch_guard_test_memory.DiskGuards) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.026s
+
+OK

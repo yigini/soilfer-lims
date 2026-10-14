@@ -1,3 +1,7 @@
+## 2026-10-14 build-only Python3.9 correction verified; NEW source review required
+
+Only2timestamp references inbatch_build.py use datetime.timezone.utc; four other graph files remain9ef-byteidentical. New14local+14actualhostguardPASS/all5sourcecompileinmemory/hashunchanged, no remote sourcefiles/builder/DB/build operations. Actualhost3.9.23 supports timestampAPI and backportedtarfilter; first221500rootABSENT. Historical9efPASS6179796996/preflightrefusal retainede4e; no root/unit/build attempt. New exact source review required before prepare/upload/build. Full scope/closed evidence at build-source-python39-review-ready.md and build-python39-source-host-verification-once. All futureproof/impact/kit/gate/deploy authority remains empty.
+
 ## 2026-10-14 new build source approved; host Python3.9 compatibility REFUSED before build root
 
 ActualCl Source review PASS6179796996/22:21:23UTC on exact9ef/all5hashes is retained honestly. Independent read-only hostprobe found Python3.9.23/datetimeUTCabsent/tarfiledatafilterpresent/rootABSENT/unitnot-found; no DBpaths/connections/builds. Original approval retainer refused before any package/root/build, and is consumed. Old9efsource MUSTNOTlaunch. New timestamps compatible with actual3.9 need exact source verification/publication/NEWCl PASS before firstbuild; first221500root remains uncreated. Originalreview/probe/stdout/stderr/refusal/helper/index preserved at actual-build-source-pass-6179796996/index.json. Historicalguards/human drafts/cards unchanged; no duplicate oldrequest/ack.

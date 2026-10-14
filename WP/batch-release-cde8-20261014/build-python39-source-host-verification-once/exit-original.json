@@ -1,0 +1,48 @@
+{
+  "status": "PASS",
+  "closedUtc": "2026-10-14T22:25:17.306011+00:00",
+  "localExitCode": 0,
+  "hostExitCode": 0,
+  "localGuardTests": 14,
+  "hostGuardTests": 14,
+  "sourceSha256Before": {
+    "batch_build.py": "897ff69d61cf61ef58a0e2266c2c23f5038b6ef5efe884226d7d0ec1a22e4191",
+    "batch_build_contract.py": "43b3e9ca228c07e3ceaa7645b9ae0d87099f3779c327fa336c8fa69184b367a5",
+    "launch_batch_build.py": "7cff0a41ad5cd1d4baefbce9323554f9ea8629fd2391f129f89143a552a2a8c3",
+    "prepare_batch_build.py": "e8b862b8a5136290ee1175497d37f765a8ae1b6e1000af6df9c5cac732896fa9",
+    "verify_build_guards.py": "a0a1b17c8fdb91679ed089e2834e4664c917bd00f7ea305d0058736a83ef3b23"
+  },
+  "sourceSha256After": {
+    "batch_build.py": "897ff69d61cf61ef58a0e2266c2c23f5038b6ef5efe884226d7d0ec1a22e4191",
+    "batch_build_contract.py": "43b3e9ca228c07e3ceaa7645b9ae0d87099f3779c327fa336c8fa69184b367a5",
+    "launch_batch_build.py": "7cff0a41ad5cd1d4baefbce9323554f9ea8629fd2391f129f89143a552a2a8c3",
+    "prepare_batch_build.py": "e8b862b8a5136290ee1175497d37f765a8ae1b6e1000af6df9c5cac732896fa9",
+    "verify_build_guards.py": "a0a1b17c8fdb91679ed089e2834e4664c917bd00f7ea305d0058736a83ef3b23"
+  },
+  "sourceUnchanged": true,
+  "onlyDelta": "TWO_BUILDER_DATETIME_UTC_TO_TIMEZONE_UTC_REFERENCES",
+  "fourOtherFilesIdenticalTo9ef": true,
+  "host": {
+    "status": "PASS",
+    "pythonVersion": "3.9.23 (main, Aug 19 2025, 00:00:00) \n[GCC 11.5.0 20240719 (Red Hat 11.5.0-11)]",
+    "sourceSha256": {
+      "batch_build.py": "897ff69d61cf61ef58a0e2266c2c23f5038b6ef5efe884226d7d0ec1a22e4191",
+      "batch_build_contract.py": "43b3e9ca228c07e3ceaa7645b9ae0d87099f3779c327fa336c8fa69184b367a5",
+      "launch_batch_build.py": "7cff0a41ad5cd1d4baefbce9323554f9ea8629fd2391f129f89143a552a2a8c3",
+      "prepare_batch_build.py": "e8b862b8a5136290ee1175497d37f765a8ae1b6e1000af6df9c5cac732896fa9",
+      "verify_build_guards.py": "a0a1b17c8fdb91679ed089e2834e4664c917bd00f7ea305d0058736a83ef3b23"
+    },
+    "compiledSourceCount": 5,
+    "guardTestCount": 14,
+    "timestampApi": "datetime.timezone.utc",
+    "tarExtractFilterSupported": true,
+    "rootAbsent": true,
+    "remoteSourceFilesWritten": 0,
+    "productionDatabasePathsOpened": 0,
+    "productionConnections": 0,
+    "dockerOperations": 0,
+    "buildsLaunched": 0
+  },
+  "productionConnections": 0,
+  "buildsLaunched": 0
+}
