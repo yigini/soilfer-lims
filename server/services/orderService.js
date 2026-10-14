@@ -102,7 +102,8 @@ async function reviseAnalyses(sampleId, changes, actor, options = {}) {
                     && normalizeAnalysisCodes([line.analysis]).includes(code)).length !== 1)
                     || texture.owners.some(item => active[0].lines.filter(line => line.status === 'ACTIVE'
                         && line.workItemId === item.id).length !== 1)) });
-            const payloadHash = receipts.computePayloadHash({ analyses: [...request.analyses].sort(), reason: request.reason,
+            const payloadHash = receipts.computePayloadHash({ mode: isOrder ? 'order' : 'analyses',
+                analyses: [...request.analyses].sort(), reason: request.reason,
                 ...(!isOrder && changes.analysisGroupIds && { analysisGroupIds: changes.analysisGroupIds }) });
             if (key) {
                 const checked = await receipts.checkReceipt(key, 'APPLY_ORDER_REVISION', performedBy, resource, payloadHash, tx);
@@ -110,7 +111,10 @@ async function reviseAnalyses(sampleId, changes, actor, options = {}) {
                     if (checked.conflict || checked.receipt.parsedOutcome?.payloadHash !== payloadHash) {
                         throw new rules.TransitionError('Idempotency key collision with differing command parameters.', 409, 'IDEMPOTENCY_KEY_CONFLICT');
                     }
-                    return checked.receipt.parsedOutcome;
+                    // The receipt hash is internal metadata; replay keeps the original public response.
+                    const replay = { ...checked.receipt.parsedOutcome };
+                    delete replay.payloadHash;
+                    return replay;
                 }
             }
             const selection = await cataloguePolicy.validateSelection(request.analyses, { labId: sample.assignedLab || actor.labId, existing: current, db: tx });

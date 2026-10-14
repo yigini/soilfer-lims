@@ -1,0 +1,69 @@
+{
+  "closedUtc": "2026-10-14T13:45:35.001132+00:00",
+  "verificationKind": "SEQUENTIAL_ORDINARY_SINGLE_SUITE_SUCCESSOR",
+  "plannedSuites": 4,
+  "plannedTests": 316,
+  "closedSuites": 4,
+  "closedTests": 316,
+  "passedTests": 316,
+  "sourceUnchanged": true,
+  "selectedInventoryEqual": true,
+  "fullDiscovery": 370,
+  "ordinarySetups": true,
+  "stockAssertions": true,
+  "maxWorkers": 1,
+  "workerIdleMemoryLimit": 512000000,
+  "nodeOptions": "",
+  "productionOperations": 0,
+  "children": [
+    {
+      "closedUtc": "2026-10-14T13:44:21.416026+00:00",
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_state_authority.test.js",
+      "exit": 0,
+      "originalReportPresent": true,
+      "tests": 139,
+      "passed": 139,
+      "failed": 0,
+      "expectedTests": 139,
+      "sourceUnchanged": true,
+      "status": "PASS"
+    },
+    {
+      "closedUtc": "2026-10-14T13:45:16.227765+00:00",
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\issue_209_order_revision_integration.test.js",
+      "exit": 0,
+      "originalReportPresent": true,
+      "tests": 32,
+      "passed": 32,
+      "failed": 0,
+      "expectedTests": 32,
+      "sourceUnchanged": true,
+      "status": "PASS"
+    },
+    {
+      "closedUtc": "2026-10-14T13:45:31.550368+00:00",
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\security\\audit_1_2_state_writes.test.js",
+      "exit": 0,
+      "originalReportPresent": true,
+      "tests": 112,
+      "passed": 112,
+      "failed": 0,
+      "expectedTests": 112,
+      "sourceUnchanged": true,
+      "status": "PASS"
+    },
+    {
+      "closedUtc": "2026-10-14T13:45:34.877660+00:00",
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\security\\audit_1_2_migration_sources.test.js",
+      "exit": 0,
+      "originalReportPresent": true,
+      "tests": 33,
+      "passed": 33,
+      "failed": 0,
+      "expectedTests": 33,
+      "sourceUnchanged": true,
+      "status": "PASS"
+    }
+  ],
+  "status": "PASS"
+}

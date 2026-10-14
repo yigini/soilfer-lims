@@ -1,0 +1,241 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User audit-state-manager (Lab: OTHER-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/reviewCommitService.js:54:45)
+      at services/reviewCommitService.js:13:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at commitReview (services/reviewCommitService.js:49:16)
+      at Object.<anonymous> (tests/contracts/audit_1_2_state_authority.test.js:318:5)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User audit-state-manager (Lab: OTHER-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleStateService.js:21:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_1_2_state_authority.test.js:430:5)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+          at async Promise.allSettled (index 0)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/audit_1_2_state_authority.test.js (6.139 s)
+  √ central Sample creation retains an existing caller creation action with exactly one audit (27 ms)
+  √ create nested relation commands are refused by createSample before any writes (39 ms)
+  √ create nested relation commands are refused by createWorkItem before any writes (20 ms)
+  √ create nested relation commands are refused by transitionSample before any writes (15 ms)
+  √ create nested relation commands are refused by transitionWorkItem before any writes (24 ms)
+  √ createMany nested relation commands are refused by createSample before any writes (15 ms)
+  √ createMany nested relation commands are refused by createWorkItem before any writes (16 ms)
+  √ createMany nested relation commands are refused by transitionSample before any writes (15 ms)
+  √ createMany nested relation commands are refused by transitionWorkItem before any writes (19 ms)
+  √ connectOrCreate nested relation commands are refused by createSample before any writes (14 ms)
+  √ connectOrCreate nested relation commands are refused by createWorkItem before any writes (14 ms)
+  √ connectOrCreate nested relation commands are refused by transitionSample before any writes (12 ms)
+  √ connectOrCreate nested relation commands are refused by transitionWorkItem before any writes (12 ms)
+  √ update nested relation commands are refused by createSample before any writes (16 ms)
+  √ update nested relation commands are refused by createWorkItem before any writes (14 ms)
+  √ update nested relation commands are refused by transitionSample before any writes (15 ms)
+  √ update nested relation commands are refused by transitionWorkItem before any writes (14 ms)
+  √ updateMany nested relation commands are refused by createSample before any writes (15 ms)
+  √ updateMany nested relation commands are refused by createWorkItem before any writes (15 ms)
+  √ updateMany nested relation commands are refused by transitionSample before any writes (12 ms)
+  √ updateMany nested relation commands are refused by transitionWorkItem before any writes (22 ms)
+  √ upsert nested relation commands are refused by createSample before any writes (12 ms)
+  √ upsert nested relation commands are refused by createWorkItem before any writes (13 ms)
+  √ upsert nested relation commands are refused by transitionSample before any writes (12 ms)
+  √ upsert nested relation commands are refused by transitionWorkItem before any writes (13 ms)
+  √ delete nested relation commands are refused by createSample before any writes (15 ms)
+  √ delete nested relation commands are refused by createWorkItem before any writes (10 ms)
+  √ delete nested relation commands are refused by transitionSample before any writes (15 ms)
+  √ delete nested relation commands are refused by transitionWorkItem before any writes (12 ms)
+  √ deleteMany nested relation commands are refused by createSample before any writes (10 ms)
+  √ deleteMany nested relation commands are refused by createWorkItem before any writes (18 ms)
+  √ deleteMany nested relation commands are refused by transitionSample before any writes (11 ms)
+  √ deleteMany nested relation commands are refused by transitionWorkItem before any writes (13 ms)
+  √ connect nested relation commands are refused by createSample before any writes (12 ms)
+  √ connect nested relation commands are refused by createWorkItem before any writes (11 ms)
+  √ connect nested relation commands are refused by transitionSample before any writes (14 ms)
+  √ connect nested relation commands are refused by transitionWorkItem before any writes (12 ms)
+  √ set nested relation commands are refused by createSample before any writes (12 ms)
+  √ set nested relation commands are refused by createWorkItem before any writes (13 ms)
+  √ set nested relation commands are refused by transitionSample before any writes (11 ms)
+  √ set nested relation commands are refused by transitionWorkItem before any writes (14 ms)
+  √ disconnect nested relation commands are refused by createSample before any writes (12 ms)
+  √ disconnect nested relation commands are refused by createWorkItem before any writes (13 ms)
+  √ disconnect nested relation commands are refused by transitionSample before any writes (12 ms)
+  √ disconnect nested relation commands are refused by transitionWorkItem before any writes (12 ms)
+  √ reconciliation removal retains analysis and laboratory identity in its one audit row (34 ms)
+  √ connect cannot reassociate another sample work item through caller data (26 ms)
+  √ set cannot reassociate another sample work item through caller data (25 ms)
+  √ disconnect cannot reassociate another sample work item through caller data (24 ms)
+  √ pre-analytical sample removal retains the known laboratory on its audit row (13 ms)
+  √ analyses edits refuse a final APPROVED sample, including no-op saves, with zero writes (27 ms)
+  √ analyses edits refuse a final ARCHIVED sample, including no-op saves, with zero writes (17 ms)
+  √ analyses edits refuse a final DISPOSED sample, including no-op saves, with zero writes (18 ms)
+  √ order edits refuse a final APPROVED sample, including no-op saves, with zero writes (19 ms)
+  √ order edits refuse a final ARCHIVED sample, including no-op saves, with zero writes (18 ms)
+  √ order edits refuse a final DISPOSED sample, including no-op saves, with zero writes (21 ms)
+  √ analyses adding work to SUBMITTED_FULL atomically resumes processing (50 ms)
+  √ order adding work to SUBMITTED_FULL atomically resumes processing (34 ms)
+  √ reconciliation re-reads a stale sample before writing work items (21 ms)
+  √ removal of COMPLETED refuses the full edit before writes and lists its resolution (28 ms)
+  √ removal of ON_HOLD refuses the full edit before writes and lists its resolution (28 ms)
+  √ removal of AWAITING_VERIFICATION refuses the full edit before writes and lists its resolution (29 ms)
+  √ analyses a failed order snapshot rolls back already generated work and audits (166 ms)
+  √ order a failed order snapshot rolls back already generated work and audits (29 ms)
+  √ a failed command receipt rolls back the new order, sample processing transition and work (28 ms)
+  √ a failed analysis audit rolls back a waiver and preserves its original history and review identity (38 ms)
+  √ REANALYZE_BATCH moves active NOT_ASSIGNED work to canonical repeat required and preserves scientific values (247 ms)
+  √ REANALYZE_BATCH moves active ASSIGNED work to canonical repeat required and preserves scientific values (69 ms)
+  √ REANALYZE_BATCH moves active IN_PROGRESS work to canonical repeat required and preserves scientific values (66 ms)
+  √ REANALYZE_BATCH moves active COMPLETED work to canonical repeat required and preserves scientific values (63 ms)
+  √ REANALYZE_BATCH moves active SUBMITTED work to canonical repeat required and preserves scientific values (62 ms)
+  √ REJECT_BATCH moves active NOT_ASSIGNED work to canonical repeat required and preserves scientific values (72 ms)
+  √ REJECT_BATCH moves active ASSIGNED work to canonical repeat required and preserves scientific values (65 ms)
+  √ REJECT_BATCH moves active IN_PROGRESS work to canonical repeat required and preserves scientific values (67 ms)
+  √ REJECT_BATCH moves active COMPLETED work to canonical repeat required and preserves scientific values (69 ms)
+  √ REJECT_BATCH moves active SUBMITTED work to canonical repeat required and preserves scientific values (69 ms)
+  √ QC preserves the REPEAT_REQUIRED alias and review provenance while appending history (62 ms)
+  √ QC preserves the REANALYSIS_REQUIRED alias and review provenance while appending history (65 ms)
+  √ a batch member in ON_HOLD refuses the whole QC decision before writes (79 ms)
+  √ a batch member in AWAITING_VERIFICATION refuses the whole QC decision before writes (71 ms)
+  √ QC preserves final ACCEPTED work on a PROCESSING sample (60 ms)
+  √ QC preserves final WAIVED work on a PROCESSING sample (62 ms)
+  √ QC preserves final CANCELLED work on a PROCESSING sample (60 ms)
+  √ QC preserves final IN_PROGRESS work on a APPROVED sample (58 ms)
+  √ QC preserves final IN_PROGRESS work on a ARCHIVED sample (58 ms)
+  √ QC preserves final IN_PROGRESS work on a DISPOSED sample (55 ms)
+  √ a failed QC audit rolls back disposition, history, repeat status and result flags (75 ms)
+  √ QC also preserves a RELEASED sample that existed before the additive state guards (66 ms)
+  √ central RETURN re-reads final APPROVED parent of SUBMITTED work and refuses amendments before review writes (18 ms)
+  √ central RETURN re-reads final APPROVED parent of ACCEPTED work and refuses amendments before review writes (14 ms)
+  √ central RETURN re-reads final ARCHIVED parent of SUBMITTED work and refuses amendments before review writes (15 ms)
+  √ central RETURN re-reads final ARCHIVED parent of ACCEPTED work and refuses amendments before review writes (13 ms)
+  √ central RETURN re-reads final DISPOSED parent of SUBMITTED work and refuses amendments before review writes (15 ms)
+  √ central RETURN re-reads final DISPOSED parent of ACCEPTED work and refuses amendments before review writes (14 ms)
+  √ central RETURN checks fresh parent scope before its amendment refusal and changes no rows (79 ms)
+  √ manager RETURN of a completed gate records current-result reversion in the review transaction (45 ms)
+  √ a failed gate-review evidence append rolls back the review CAS, review identity and audit (39 ms)
+  √ ordinary creation refuses advanced states before any write, and logs canonical creation (12 ms)
+  √ historical creation keeps provenance and importer identity without inventing a reviewer (4 ms)
+  √ fixture guards refuse missing flags, production paths and the working database (4 ms)
+  √ final APPROVED cannot return to processing, with no changes (13 ms)
+  √ final ARCHIVED cannot return to processing, with no changes (16 ms)
+  √ final DISPOSED cannot return to processing, with no changes (18 ms)
+  √ final CANCELLED cannot return to processing, with no changes (13 ms)
+  √ sample and work-item holds require reasons and can restore only the recorded prior status (56 ms)
+  √ legacy holds recover from history or a scoped manager choice, never a technician guess (15 ms)
+  √ stale work-item version refuses all status, history and audit writes (25 ms)
+  √ scope refusal and status/provenance override refusal write nothing (24 ms)
+  √ operational verification is action-bound; ordinary status writes cannot bypass it (31 ms)
+  √ the reviewed legacy plan preserves original values and reverts once; unmapped rows remain unchanged (101 ms)
+  √ migration fingerprint and row CAS refuse a modified plan or changed row (16 ms)
+  √ preparation reverts preserve scientific values and block review until a valid manager clearance (49 ms)
+  √ superseding a reverted result clears only the current-result block, retaining all old evidence (22 ms)
+  √ state and audit roll back together when a subsequent transaction operation fails (18 ms)
+  √ default policy completes both gates atomically and advances ACCEPTED to PROCESSING (56 ms)
+  √ analysis policy cannot be bypassed by false input; rejected verification stays pending without revert evidence (85 ms)
+  √ a request may demand stricter drying verification; acceptance of the last gate advances the sample (30 ms)
+  √ gate verification policy refuses unrelated analyses and method-specific overrides with no policy writes (4 ms)
+  √ undo approval is an amendment-only zero-write refusal for APPROVED (50 ms)
+  √ undo approval is an amendment-only zero-write refusal for ARCHIVED (13 ms)
+  √ undo approval is an amendment-only zero-write refusal for DISPOSED (12 ms)
+  √ undo approval is an amendment-only zero-write refusal for PROCESSING (13 ms)
+  √ concurrent operational verification commits one decision and refuses the stale decision without side effects (29 ms)
+  √ failed decision insertion rolls back operational state, gate flags and both audits (34 ms)
+  √ Batch and ReviewDecision backstops reject off-contract and mutable decisions with stable conflicts (16 ms)
+  √ reasoned gate revert records each current result once and preserves all analytical values (35 ms)
+  √ gate failure holds both entities and release restores their individual prior states (37 ms)
+  √ gate reversion of APPROVED sample refuses all writes (18 ms)
+  √ gate reversion of ARCHIVED sample refuses all writes (14 ms)
+  √ gate reversion of DISPOSED sample refuses all writes (14 ms)
+  √ an accepted marked gate duplicate prevents revert of the canonical gate with no writes (18 ms)
+  √ analyses same-key replay returns the original response with all-table zero writes (65 ms)
+  √ order same-key replay returns the original response with all-table zero writes (69 ms)
+  √ analyses same key with a differing reason refuses with all-table zero writes (66 ms)
+  √ order same key with a differing reason refuses with all-table zero writes (67 ms)
+  √ analyses key cannot replay identical parameters through the other mode and changes no table (64 ms)
+  √ order key cannot replay identical parameters through the other mode and changes no table (68 ms)
+  √ analyses command without a key writes its order and work without any receipt (26 ms)
+  √ order command without a key writes its order and work without any receipt (22 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       139 passed, 139 total
+Snapshots:   0 total
+Time:        6.479 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_state_authority.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-keyed-mode-response-contract-singles\01-audit_1_2_state_authority.test\report-original.json

@@ -1,0 +1,47 @@
+{
+  "createdUtc": "2026-10-14T13:43:44.847084+00:00",
+  "reviewedBeforeChanges": true,
+  "actualDirection": 6169628053,
+  "cases": [
+    {
+      "suite": "audit_1_2_state_authority.test.js",
+      "test": "analyses adding work to SUBMITTED_FULL atomically resumes processing",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toHaveLength(expected)",
+      "productionReachabilityClassification": "PENDING_PER_CASE_SOURCE_INSPECTION",
+      "classification": "AUTHORIZED_LEGACY_RECEIPT_EXPECTATION_CHANGE"
+    },
+    {
+      "suite": "audit_1_2_state_authority.test.js",
+      "test": "analyses a failed order snapshot rolls back already generated work and audits",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).rejects.toThrow(expected)",
+      "productionReachabilityClassification": "PENDING_PER_CASE_SOURCE_INSPECTION",
+      "classification": "EXPLICIT_MANDATORY_REASON_INPUT_BEFORE_UNCHANGED_INJECTED_ROLLBACK_ASSERTION"
+    },
+    {
+      "suite": "audit_1_2_state_authority.test.js",
+      "test": "order a failed order snapshot rolls back already generated work and audits",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).rejects.toThrow(expected)",
+      "productionReachabilityClassification": "PENDING_PER_CASE_SOURCE_INSPECTION",
+      "classification": "EXPLICIT_MANDATORY_REASON_INPUT_BEFORE_UNCHANGED_INJECTED_ROLLBACK_ASSERTION"
+    },
+    {
+      "suite": "audit_1_2_state_authority.test.js",
+      "test": "a failed command receipt rolls back the new order, sample processing transition and work",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).rejects.toThrow(expected)",
+      "productionReachabilityClassification": "PENDING_PER_CASE_SOURCE_INSPECTION",
+      "classification": "EXPLICIT_MANDATORY_REASON_INPUT_BEFORE_UNCHANGED_INJECTED_ROLLBACK_ASSERTION"
+    }
+  ],
+  "runtimeChangesRequired": [
+    "Mode included in normalized payload hash, preserving actor/sample scope and all retained receipts",
+    "Replay projects the original response without internal payloadHash metadata; no stored row changes"
+  ],
+  "legacyAssertionChanges": 1,
+  "newMeaningfulTests": 8,
+  "futureFullExpectedTests": 5642,
+  "productionOperations": 0
+}

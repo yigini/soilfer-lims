@@ -1,0 +1,25 @@
+{
+  "actualDirection": 6169628053,
+  "oldTestBodyExactlyRecoveredAfterRemovingNewCasesAndReversingOneAuthorizedExpectationAndTwoReasonInputSites": true,
+  "legacyExpectationChange": {
+    "old": "mode === 'order' ? 1 : 0",
+    "new": "1",
+    "reason": "A supplied key must never be ignored; exactly one scoped sameTX receipt in both modes per6169628053"
+  },
+  "inputSitesChanged": 2,
+  "oldRollbackAssertionsUnchanged": true,
+  "addedMeaningfulTests": 8,
+  "runtimeReceiptRowsRewritten": 0,
+  "schemaOrScannerChanges": 0,
+  "productionOperations": 0,
+  "paths": {
+    "server/services/orderService.js": {
+      "beforeSha256": "8391a86dbc58b47a18faf2b931430cc7dbd8af980480ac7a0b943fe9b0736e49",
+      "afterSha256": "92c9285f7d0ac1604091a0a501f826827004c0e29fef6b12e1a9e8be25b1535a"
+    },
+    "server/tests/contracts/audit_1_2_state_authority.test.js": {
+      "beforeSha256": "a4d355dcfa9e9cfc61cdf21cca59dba59d61eb2c829877db3bcaffcf82f0f459",
+      "afterSha256": "c876ca89437d8b28b106fb0bea2b021c565e955d2251a6ae5632bbb303999c07"
+    }
+  }
+}
