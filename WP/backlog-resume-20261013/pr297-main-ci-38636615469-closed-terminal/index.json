@@ -1,0 +1,349 @@
+{
+  "retainedUtc": "2026-10-14T21:35:21.172009+00:00",
+  "status": "CLOSED_SUCCESS",
+  "run": 38636615469,
+  "runUrl": "https://github.com/yigini/soilfer-lims/actions/runs/38636615469",
+  "attempt": 1,
+  "conclusion": "success",
+  "job": 116101291774,
+  "jobConclusion": "success",
+  "completedUtc": "2026-10-14T21:34:24Z",
+  "number": 297,
+  "head": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "tree": "638580d50f61254609de3abd42d93afc676a5727",
+  "base": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+  "sourcePaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/api_key_scoping_isolation.test.js",
+    "server/tests/contracts/audit_0_10_current_result_views.test.js",
+    "server/tests/contracts/audit_0_11_workbench_queue.test.js",
+    "server/tests/contracts/audit_0_14_number_entry.test.js",
+    "server/tests/contracts/audit_0_15_duplicate_loq.test.js",
+    "server/tests/contracts/audit_0_2_qc_lock.test.js",
+    "server/tests/contracts/audit_0_3_publication.test.js",
+    "server/tests/contracts/audit_0_5_legacy_review.test.js",
+    "server/tests/contracts/audit_0_6_review_atomicity.test.js",
+    "server/tests/contracts/audit_0_7_resubmission.test.js",
+    "server/tests/contracts/audit_0_8_report_truthfulness.test.js",
+    "server/tests/contracts/audit_0_9_public_report_superseded.test.js",
+    "server/tests/contracts/audit_1_0_lab_policies.test.js",
+    "server/tests/contracts/audit_1_1_reconcile_duplicates.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_1_2_legacy_results.test.js",
+    "server/tests/contracts/audit_1_2_offline_state.test.js",
+    "server/tests/contracts/audit_1_2_spectral_state.test.js",
+    "server/tests/contracts/audit_1_2_state_authority.test.js",
+    "server/tests/contracts/audit_1_2_workbench_state.test.js",
+    "server/tests/contracts/audit_1_4_uuid_transactions.test.js",
+    "server/tests/contracts/audit_1_5_result_writes.test.js",
+    "server/tests/contracts/audit_1_6_intake_cancellation.test.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_4_1_run_start_header.test.js",
+    "server/tests/contracts/audit_4_3_keyboard_playwright.test.js",
+    "server/tests/contracts/audit_4_6_calculation_install.test.js",
+    "server/tests/contracts/audit_4_6_calibration.test.js",
+    "server/tests/contracts/audit_4_7_calculation_import.test.js",
+    "server/tests/contracts/audit_4_7_instrument_import_install.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_evidence.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_install.test.js",
+    "server/tests/contracts/audit_6_1_first_fill.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/audit_6_2_report_revisions.test.js",
+    "server/tests/contracts/audit_6_3_report_content.test.js",
+    "server/tests/contracts/catalogue_governance.test.js",
+    "server/tests/contracts/catalogue_result_entry.test.js",
+    "server/tests/contracts/controlled_units_interpretation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/exchange_error_semantics.test.js",
+    "server/tests/contracts/export_normalization.test.js",
+    "server/tests/contracts/interim_gaps_verification.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/issue_213_export_equals_report.test.js",
+    "server/tests/contracts/issue_278_texture_closure_policy.test.js",
+    "server/tests/contracts/issue_281_cross_check_bounds.test.js",
+    "server/tests/contracts/issue_291_texture_input_authority.test.js",
+    "server/tests/contracts/mandatory_reason.test.js",
+    "server/tests/contracts/matrix_blocking_diagnostics.test.js",
+    "server/tests/contracts/matrix_validation.test.js",
+    "server/tests/contracts/mobile_offline_sync.test.js",
+    "server/tests/contracts/nsis_policy_and_scoping.test.js",
+    "server/tests/contracts/nsis_v2_exchange.test.js",
+    "server/tests/contracts/prerequisite_gate.test.js",
+    "server/tests/contracts/profile_identity_routes.test.js",
+    "server/tests/contracts/qc_controls.test.js",
+    "server/tests/contracts/qc_disposition_flagging.test.js",
+    "server/tests/contracts/qc_disposition_release_gate.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/reopened_governance_scenarios.test.js",
+    "server/tests/contracts/report_pdf.test.js",
+    "server/tests/contracts/result_provenance.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/sample_detail.test.js",
+    "server/tests/contracts/spectral_stage_e.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/contracts/workbench_draft_integrity.test.js",
+    "server/tests/contracts/workbench_pipeline_twostep.test.js",
+    "server/tests/contracts/workbench_single_entry.test.js",
+    "server/tests/contracts/workspace_projection_p2.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/scenarios/scientific_validation.test.js",
+    "server/tests/security/wiring.test.js"
+  ],
+  "exactJestSummary": [
+    "Test Suites: 370 passed, 370 total",
+    "Tests:       5649 passed, 5649 total"
+  ],
+  "uniquePassPathsObserved": 370,
+  "exactFullInventoryMatch": true,
+  "passedSuites": 370,
+  "passedTests": 5649,
+  "failedOrSkippedOrPending": 0,
+  "requiredSteps": {
+    "Set up job": "success",
+    "Checkout repository": "success",
+    "Setup Node.js": "success",
+    "Install server dependencies": "success",
+    "Install client dependencies": "success",
+    "Verify theme catalog and tokens drift": "success",
+    "Build client production bundle": "success",
+    "Setup test database and generate Prisma client": "success",
+    "Install Chromium for keyboard-only recording contract": "success",
+    "Run server test suite": "success",
+    "Set up Docker Buildx": "success",
+    "Build Docker image": "success",
+    "Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)": "success",
+    "Run Real Disposable Docker Boundary Rehearsal": "success",
+    "Run Real Docker Deployment Readiness Acceptance": "success",
+    "Post Build Docker image": "success",
+    "Post Set up Docker Buildx": "success",
+    "Post Setup Node.js": "success",
+    "Post Checkout repository": "success",
+    "Complete job": "success"
+  },
+  "standardWorkflowUnchanged": true,
+  "localStorageFixtureUsedInCI": false,
+  "archiveEntries": [
+    {
+      "name": "0_Test & Build.txt",
+      "bytes": 4044652,
+      "sha256": "0e185a26bc2f2ad996210fde890c52544a51003f7b2c238dc37b0d6b628226a6"
+    },
+    {
+      "name": "Test & Build/system.txt",
+      "bytes": 577,
+      "sha256": "7bc33c02cf01ab0301ddafd208f02c30b7dd486a19ed5540883474acf08b3474"
+    },
+    {
+      "name": "Test & Build/1_Set up job.txt",
+      "bytes": 2340,
+      "sha256": "c4079a6866f2298c79f2d0643d5bf5737f93bbf842ddd9c2849a4c37acc3e56e"
+    },
+    {
+      "name": "Test & Build/2_Checkout repository.txt",
+      "bytes": 18849,
+      "sha256": "fc58705bc79991cf11868b4cda1bd36ceb31088d2e35d49fae190cd05ec6e4fb"
+    },
+    {
+      "name": "Test & Build/3_Setup Node.js.txt",
+      "bytes": 903,
+      "sha256": "905e439a4d6e52ad881f90452515e2ea03270f8906a0d1b8c80a3631ea6dbec9"
+    },
+    {
+      "name": "Test & Build/4_Install server dependencies.txt",
+      "bytes": 3166,
+      "sha256": "02cc19bc9c5397cb77bbd1e962559017d68457663f702a5c48b69645bddf55b9"
+    },
+    {
+      "name": "Test & Build/5_Install client dependencies.txt",
+      "bytes": 2620,
+      "sha256": "12b7b3557b39b76608b491615bdd29e4250daf53fde3243634070c68c84a27e8"
+    },
+    {
+      "name": "Test & Build/6_Verify theme catalog and tokens drift.txt",
+      "bytes": 617,
+      "sha256": "3a6f4cf355aee361b4bfb8f97990ea50e9da7829f8d8b931fe9829d4a1cadc59"
+    },
+    {
+      "name": "Test & Build/7_Build client production bundle.txt",
+      "bytes": 12791,
+      "sha256": "8fb387d81b292b219aa0173d560465e52a39d93e38629a145be1db29e2f8372a"
+    },
+    {
+      "name": "Test & Build/8_Setup test database and generate Prisma client.txt",
+      "bytes": 5754,
+      "sha256": "6e528d3d2abe52eca49a570d01791cbc5bd228a46be061c7a7299af55759816b"
+    },
+    {
+      "name": "Test & Build/9_Install Chromium for keyboard-only recording contract.txt",
+      "bytes": 22499,
+      "sha256": "b4b79dc8c75799c2c953ebb0b4fad8496b56a7d0cc92b0d0bd58fd317d7eaedf"
+    },
+    {
+      "name": "Test & Build/10_Run server test suite.txt",
+      "bytes": 3800336,
+      "sha256": "be39ba4d5bfc0ec8f450884194552c0d60b3231940a113ced1a0da88115522e8"
+    },
+    {
+      "name": "Test & Build/11_Set up Docker Buildx.txt",
+      "bytes": 14673,
+      "sha256": "b8de803a481b6f4866d32b5ba511d3f156b15f381f2668c001de9c6f48ff750d"
+    },
+    {
+      "name": "Test & Build/12_Build Docker image.txt",
+      "bytes": 86016,
+      "sha256": "f668de82e80e8581f97c510a9b9a95fd5d8975bac900840e46b4b6a9dc12408c"
+    },
+    {
+      "name": "Test & Build/13_Build Supported Baseline Docker Image (v3.5.30 _ 48d0e52).txt",
+      "bytes": 28938,
+      "sha256": "1205ff4bb889dd8f6b39c8e3bdb6842f898d7d2410c0563819c76aefe8832274"
+    },
+    {
+      "name": "Test & Build/14_Run Real Disposable Docker Boundary Rehearsal.txt",
+      "bytes": 3784,
+      "sha256": "ce36d0e7039da80359fbc2c77e040c228e89fc48be5d4ad03a05ada3ff987025"
+    },
+    {
+      "name": "Test & Build/15_Run Real Docker Deployment Readiness Acceptance.txt",
+      "bytes": 37539,
+      "sha256": "36fe058f1d0e6c66aec5c4aeb1a9c4875e3fc85dfa3d45fa29b302756be668c6"
+    },
+    {
+      "name": "Test & Build/27_Post Build Docker image.txt",
+      "bytes": 595,
+      "sha256": "2d47965d2b727e39d3448a39222457f5d10bec8f9986cc41ac1ca029356b5c35"
+    },
+    {
+      "name": "Test & Build/28_Post Set up Docker Buildx.txt",
+      "bytes": 833,
+      "sha256": "9a2efb10b39d54a2bf3bf6256517be27ff2db5d989c1499bb680d21598c17a72"
+    },
+    {
+      "name": "Test & Build/29_Post Setup Node.js.txt",
+      "bytes": 306,
+      "sha256": "25256820cda2a30bbd5dc2f3d60240b3ff13c32f6a6ddf9dee92f104cacd26fb"
+    },
+    {
+      "name": "Test & Build/30_Post Checkout repository.txt",
+      "bytes": 1719,
+      "sha256": "f3441a739c9ec978b516d810f7e7a879814f95a78cf865254bf109ca78d070ac"
+    },
+    {
+      "name": "Test & Build/31_Complete job.txt",
+      "bytes": 431,
+      "sha256": "2a1d19283fcd4ccc62e19b04112d71a712352b213bd9665f362932de75296cc8"
+    }
+  ],
+  "files": {
+    "run-original.json": {
+      "bytes": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2"
+    },
+    "jobs-original.json": {
+      "bytes": 4309,
+      "sha256": "8f43fc3fbfae5c9030b95b3ad6c4d4a9d935eda3139915ec72a75d233b4f609c"
+    },
+    "pr-original.json": {
+      "bytes": 33502,
+      "sha256": "8c5c14d8ee47a2e8bf444d2146bce75751def009c4ae2aac195389ec94c4ac82"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    "issue209-original.json": {
+      "bytes": 8349,
+      "sha256": "2f1adbd929297ceea9adbd3346dbe7fdaed8fefb0ad62cdf9940993d8286a3a0"
+    },
+    "closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    },
+    "workflow-original.yml": {
+      "bytes": 2785,
+      "sha256": "602236753ac1d7096c257927f6192b93800f8a8da96af1cc0a1580251950fcf5"
+    },
+    "logs-original.zip": {
+      "bytes": 1350824,
+      "sha256": "bfd254200eec9112c7da9dddf827da448196f17c656e2ff1e75172b137186aad"
+    },
+    "server-tests-original.log": {
+      "bytes": 3800336,
+      "sha256": "be39ba4d5bfc0ec8f450884194552c0d60b3231940a113ced1a0da88115522e8"
+    },
+    "client-build-original.log": {
+      "bytes": 12791,
+      "sha256": "8fb387d81b292b219aa0173d560465e52a39d93e38629a145be1db29e2f8372a"
+    },
+    "candidate-docker-build-original.log": {
+      "bytes": 86016,
+      "sha256": "f668de82e80e8581f97c510a9b9a95fd5d8975bac900840e46b4b6a9dc12408c"
+    },
+    "baseline-docker-build-original.log": {
+      "bytes": 28938,
+      "sha256": "1205ff4bb889dd8f6b39c8e3bdb6842f898d7d2410c0563819c76aefe8832274"
+    },
+    "docker-boundary-original.log": {
+      "bytes": 3784,
+      "sha256": "ce36d0e7039da80359fbc2c77e040c228e89fc48be5d4ad03a05ada3ff987025"
+    },
+    "docker-readiness-original.log": {
+      "bytes": 37539,
+      "sha256": "36fe058f1d0e6c66aec5c4aeb1a9c4875e3fc85dfa3d45fa29b302756be668c6"
+    }
+  },
+  "disposableCiImagesAreNotProductionImages": true,
+  "ciDispatches": 0,
+  "readyNoticeSent": false,
+  "finalNativeAuditRequestSent": false,
+  "actualFinalAuditPass": true,
+  "actualFinalAuditCommentId": 6178123314,
+  "productionOperations": 0
+}
