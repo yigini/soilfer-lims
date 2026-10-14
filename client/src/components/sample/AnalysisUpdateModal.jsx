@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { X, Droplet, CheckCircle, AlertTriangle, Plus, Search, Trash2, Info, Layers } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import InfoTooltip from '../common/InfoTooltip';
 
 const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
@@ -17,6 +18,7 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
     }, [isOpen, onClose]);
     const getAnalysisDisplayName = useAnalysisNames();
     const { token } = useAuth();
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [groups, setGroups] = useState([]);
     const [allAnalyses, setAllAnalyses] = useState([]);
@@ -112,6 +114,7 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
     };
 
     const handleSave = async () => {
+        if (!reason.trim()) { setError(t('orderRevision.reasonRequired')); return; }
         setLoading(true);
         setError(null);
         try {
@@ -315,18 +318,21 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                         </div>
                     </div>
 
-                    {/* Reason for Removal if items were dropped */}
-                    {Array.isArray(sample.requiredAnalyses) && sample.requiredAnalyses.some(c => !currentAnalyses.includes(c)) && (
+                    {/* Every submitted revision states the complete target and its reason. */}
+                    {(
                         <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl space-y-1.5">
                             <label className="block text-sm font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1">
-                                Reason for Removal / Waiver
-                                <InfoTooltip text="Required if any removed analysis is already assigned or in progress." />
+                                {t('orderRevision.reason')}
+                                <InfoTooltip text={t('orderRevision.completeTarget')} />
                             </label>
                             <input
                                 type="text"
+                                id="order-revision-reason"
+                                aria-label={t('orderRevision.reason')}
+                                required
                                 value={reason}
                                 onChange={e => setReason(e.target.value)}
-                                placeholder="Specify reason for dropping or waiving analysis..."
+                                placeholder={t('orderRevision.reasonPlaceholder')}
                                 className="w-full p-2.5 bg-sf-surface border border-amber-300 dark:border-amber-700 rounded-lg text-sm text-sf-text outline-none focus:ring-2 focus:ring-amber-500"
                             />
                         </div>
@@ -336,8 +342,7 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                         <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex gap-3">
                             <Info size={20} className="text-amber-600 shrink-0 mt-0.5" />
                             <div className="text-sm text-amber-800 dark:text-amber-200 font-medium">
-                                <p className="font-bold mb-1">Lifecycle Reactivation</p>
-                                Saving these changes will move the sample back to <span className="font-black">PROCESSING</span> to allow technicians to perform the new tests.
+                                <p>{t('orderRevision.amendmentRequired')}</p>
                             </div>
                         </div>
                     )}
@@ -354,7 +359,7 @@ const AnalysisUpdateModal = ({ sample, isOpen, onClose, onUpdateSuccess }) => {
                     </button>
                     <button
                         onClick={handleSave}
-                        disabled={loading || currentAnalyses.length === 0}
+                        disabled={loading || currentAnalyses.length === 0 || !reason.trim() || ['APPROVED', 'ARCHIVED', 'DISPOSED'].includes(sample.status)}
                         className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 dark:disabled:bg-blue-900/20 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2 group"
                     >
                         {loading ? 'Saving...' : (

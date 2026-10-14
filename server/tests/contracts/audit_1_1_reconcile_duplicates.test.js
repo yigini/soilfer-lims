@@ -61,7 +61,7 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
         const sample = await fixture('NOT_ASSIGNED');
         const before = await prisma.workItem.findMany({ where: { sampleId: sample.id, analysis: 'SOC' }, orderBy: { id: 'asc' } });
         const response = await request(app).put(`/api/samples/${sample.id}/analyses`)
-            .set('Authorization', `Bearer ${token}`).send({ analyses: ['PH_H2O', 'SOC'] });
+            .set('Authorization', `Bearer ${token}`).send({ analyses: ['PH_H2O', 'SOC'], reason: 'Reviewed removal of unrelated unstarted CEC' });
         expect(response.status).toBe(200); expect(response.body.removed).toEqual(['CEC']);
         expect(await prisma.workItem.findMany({ where: { sampleId: sample.id, analysis: 'SOC' }, orderBy: { id: 'asc' } })).toEqual(before);
     });

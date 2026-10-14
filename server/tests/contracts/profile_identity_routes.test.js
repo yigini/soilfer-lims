@@ -32,6 +32,11 @@ describe('Mounted profile correction, scope and immutable export contracts',()=>
         for (const [name,id] of Object.entries(ids)) await createSampleFixture(prisma, {data:{id,originalId:`FIELD-${id}`,labId:`ACCESSION-${id}`,assignedLab:lab,projectId:project,projectCode:project,country:'GTM',status:name==='draft'?'RECEIVED':'APPROVED',approvedAt:name==='draft'?null:new Date(),fieldMetadata:JSON.stringify({site_id:{value:'SITE-OLD'},pit_id:{value:'PIT-FIELD'}})}});
         await createWorkItemFixture(prisma, { data: { id: `${ids.released}-PH`, sampleId: ids.released,
             assignedLab: lab, analysis: 'PH_H2O', status: 'ACCEPTED' } });
+        // #209: declared only for this NEW owned released numerical history.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: ids.released,
+            version: 1, status: 'ACTIVE', reason: 'Owned released profile execution order context', requestedBy: 'system:fixture',
+            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
         await createExecutionResultFixture(prisma, {attemptStatus:'ACCEPTED',data:{id:'PROFILE-RESULT-UNCHANGED',sampleId:ids.released,param:'PH_H2O',value:'6.4',numericValue:6.4,unit:'pH',isCurrent:true,isValid:true}});
     });
     // Pin6056586906: retain execution, audit and profile parents until owned database teardown.

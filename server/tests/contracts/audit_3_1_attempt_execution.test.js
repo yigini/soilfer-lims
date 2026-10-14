@@ -85,6 +85,11 @@ async function fixture(analyses=['AT190'],{work=true}={}) {
         dryingStatus:'DONE',preparationStatus:'DONE',requiredAnalyses:JSON.stringify(analyses)}});
     const items=[];
     if(work)for(const analysis of analyses)items.push(await createWorkItemFixture(client,{data:{id:randomUUID(),sampleId,analysis,assignedLab:labId,status:'IN_PROGRESS',history:'[]'}}));
+    // Current order context preserves the retained fraction-panel owners under Claudio6166518424.
+    const companionQuestion=analyses.includes('TEXTURE')&&analyses.some(code=>['SAND','SILT','CLAY'].includes(code));
+    if(work&&!companionQuestion)await client.$transaction(tx=>require('../../services/orderService').createInitialOrder(tx,sample,analyses,actor));
+    if(work&&companionQuestion)await require('../../services/orderService').reviseAnalyses(sample.id,
+        {analyses,reason:'Declared current order for retained independent fraction execution'},actor,{tx:client});
     return {sample,items};
 }
 const options=(f,param='AT190',value='6.42')=>({sampleId:f.sample.id,actor,measurement:{param,value,replicateNo:1}});

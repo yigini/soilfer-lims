@@ -20,6 +20,11 @@ async function fixture(status = 'PROCESSING') {
         status, receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
     const item = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, analysis,
         assignedLab: labId, assignedTo: actor.username, status: 'ASSIGNED', version: 0 } });
+    // #209: NEW owned retained evidence declares its actual existing owner's order.
+    require('../../services/workflowStateRules').assertFixtureContext();
+    await prisma.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,
+        version: 1, status: 'ACTIVE', reason: 'Owned offline execution order context', requestedBy: 'system:fixture',
+        lines: { create: [{ id: randomUUID(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
     const result = await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, param: analysis,
         value: '6.2', numericValue: 6.2, flags: '["ORIGINAL_NOTE"]', isCurrent: true } });
     return { sample, item, result };

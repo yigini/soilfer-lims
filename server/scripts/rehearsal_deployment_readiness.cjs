@@ -1337,6 +1337,7 @@ async function runSuite() {
          }finally{db.close();}`
     ],{encoding:'utf8'}).trim();
     const amendmentBefore=JSON.parse(amendmentBeforeOutput);
+    if (amendmentBefore.columns.OrderLine.includes('workItemId')) throw Error('209 default-entrypoint predecessor already contains its new link');
     const policyBeforeOutput=cp.execFileSync('docker',['run','--rm',
         '-v',`${repeatProofVolume}:/owned-policy`,IMAGE_TAG,'node','-e',
         `const fs=require('node:fs'),crypto=require('node:crypto');
@@ -1383,6 +1384,24 @@ async function runSuite() {
     ],{encoding:'utf8'}).trim();
     const policyAfter=JSON.parse(policyAfterOutput);
     console.log(JSON.stringify({policyChartEntrypointProof:{scenario:'PRE_199-default-entrypoint-COMPLETE_214',before:policyBefore,after:policyAfter}}));
+    if (!calculationStartupLog.includes('ORDER_REVISION_STARTUP_READY') ||
+        calculationStartupLog.indexOf('CONTROL_CHART_STARTUP_READY') >= calculationStartupLog.indexOf('ORDER_REVISION_STARTUP_READY'))
+        throw Error('209 default-entrypoint prerequisite order proof missing');
+    const orderAfterOutput = cp.execFileSync('docker', ['run','--rm',
+        '-v',`${repeatProofVolume}:/owned-order`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto');
+         const dbPath='/owned-order/dev.db',hash=()=>Object.fromEntries(['','-wal','-shm'].map(suffix=>[suffix,
+           fs.existsSync(dbPath+suffix)?crypto.createHash('sha256').update(fs.readFileSync(dbPath+suffix)).digest('hex'):null]));
+         const before=hash(),owner=require('./scripts/install_order_revisions');
+         const ready=owner.assertOrderRevisionStartupReady(dbPath),again=owner.installOrderRevisions({dbPath,apply:true});
+         const impact=require('./scripts/order_revision_impact').collectOrderRevisionImpact({dbPath});
+         if(ready.classification!=='COMPLETE_209'||ready.totalChanges!==0||again.mode!=='NO_OP'||again.totalChanges!==0||
+           ready.receipt.originalRowsPreserved!==true||!impact.originalFilesPreserved||impact.totalChanges!==0||
+           process.platform==='linux'&&!impact.retainedAllocation.allocationMeasured||
+           JSON.stringify(hash())!==JSON.stringify(before))throw Error('209 default-entrypoint repeat or read-only preservation differs');
+         console.log(JSON.stringify({ready,again,impact,dbWalShmPreserved:true,secondaryInspectionsOnRetainedSnapshot:true}));`
+    ], { encoding:'utf8' }).trim();
+    const orderAfter = JSON.parse(orderAfterOutput);
     const calculationAfterOutput = cp.execFileSync('docker', ['run', '--rm',
         '-v', `${repeatProofVolume}:/owned-199`, IMAGE_TAG, 'node', '-e',
         `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
@@ -1440,6 +1459,10 @@ async function runSuite() {
     }
     if(amendmentBefore.receipts.some(before=>!amendmentAfter.receipts.some(after=>JSON.stringify(after)===JSON.stringify(before))))
         throw Error('210 default entrypoint changed a predecessor receipt');
+    console.log(JSON.stringify({orderRevisionEntrypointProof:{scenario:'PRE_199-default-entrypoint-COMPLETE_209',
+        before:{workItemIdAbsent:true,orderRevisions:amendmentBefore.rows.SampleOrderRevision.length,
+            orderLines:amendmentBefore.rows.OrderLine.length,attempts:amendmentBefore.rows.WorkAttempt.length},
+        after:orderAfter,retainedRowsAndReceiptsPreserved:true}}));
     console.log('  ✓ amendment-default-entrypoint-pre210: PRE_210 → shipped default docker-entrypoint.sh → COMPLETE_210; request/link/withdrawal/backfill0; retained rows and receipts preserved; direct installer-module repeat NO_OP writes0');
     console.log(JSON.stringify({amendmentEntrypointProof:{scenario:'amendment-default-entrypoint-pre210',repeatInvocation:'direct installer module (not a second entrypoint run)',
         dry:amendmentBefore.dry,ready:amendmentAfter.ready,again:amendmentAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:amendmentAfter.noOpBytesPreserved}}));

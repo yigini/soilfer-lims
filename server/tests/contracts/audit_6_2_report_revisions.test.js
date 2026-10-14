@@ -32,6 +32,11 @@ describe('Audit 6.2: report revisions and amendment marking', () => {
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId,
             assignedLab: labId, status: 'APPROVED', approvedBy: 'retained-approver', approvedAt: new Date() } });
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-62'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED' } });
+        // #209: declare only this NEW owned retained PH execution's legacy order context.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: id('ORDER-62'), sampleId, version: 1,
+            status: 'ACTIVE', reason: 'Owned retained report execution order context', requestedBy: 'system:fixture',
+            lines: { create: [{ id: id('LINE-62'), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
         await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: id('R-62'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true } });
         await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma, item.id, token);

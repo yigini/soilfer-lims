@@ -1,4 +1,11 @@
 {
+  "orderRevision": {
+    "reason": "Motivo de la revisión de la solicitud",
+    "reasonPlaceholder": "Explique la selección completa de análisis…",
+    "reasonRequired": "Se requiere un motivo para revisar la solicitud.",
+    "completeTarget": "La selección es la solicitud completa e incluye todos los análisis que se conservarán. Un cambio requiere un motivo.",
+    "amendmentRequired": "Las muestras aprobadas, archivadas o eliminadas requieren el flujo de enmienda antes de cambiar su solicitud."
+  },
   "replicateGrid": {
     "rep1": "Rep 1",
     "rep2": "Rep 2",

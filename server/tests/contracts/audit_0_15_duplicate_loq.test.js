@@ -73,6 +73,10 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring 
             await prisma.methodology.create({ data: { id: methodId, analysisCode: analysis, name: methodId, loq } });
             await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING' } });
             await createWorkItemFixture(prisma, { data: { id: id('HTTP-W015'), sampleId, analysis, assignedLab: labId, batchId, methodologyId: methodId, status: 'COMPLETED' } });
+            // #209: declare the usable retained order during NEW owned fixture assembly.
+            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER015'), sampleId: sampleId,
+                version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: 'system:fixture',
+                lines: { create: [{ id: id('LINE015'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
             methods.push(methodId);
         }
         // The two recorded duplicate pairs use two actual SAMPLE parents.
@@ -81,6 +85,10 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring 
             const sampleId = id('HTTP-S015');
             await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING' } });
             await createWorkItemFixture(prisma, { data: { id: id('HTTP-W015'), sampleId, analysis, assignedLab: labId, batchId, methodologyId: methods[0], status: 'COMPLETED' } });
+            // #209: declare the usable retained order during NEW owned fixture assembly.
+            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER015'), sampleId: sampleId,
+                version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: 'system:fixture',
+                lines: { create: [{ id: id('LINE015'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
         }
         if (legacyPrior) {
             await prisma.batchQcResult.create({ data: { id: id('PRIOR-QC015'), batchId: batch.id, type: 'BLANK', label: 'Prior QC', measured: .01, status: 'PASS', details: '{"prior":"retained"}' } });
@@ -240,6 +248,10 @@ describe('Audit 0.15: real batch method and analysis evidence', () => {
             await prisma.methodology.create({ data: { id: methodId, analysisCode: analysis, name: 'Recorded fixture method', loq } });
             await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: batch.labId, status: 'PROCESSING' } });
             await createWorkItemFixture(prisma, { data: { id: id('WI015'), sampleId, analysis, assignedLab: batch.labId, batchId, methodologyId: methodId, status: 'COMPLETED' } });
+            // #209: declare the usable retained order during NEW owned fixture assembly.
+            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER015'), sampleId: sampleId,
+                version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: 'system:fixture',
+                lines: { create: [{ id: id('LINE015'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
             recorded.push({ methodId, sampleId });
         }
         return { batch, recorded };

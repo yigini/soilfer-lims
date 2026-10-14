@@ -43,13 +43,7 @@ async function generate(tx, sample, plan, actor = 'system:intake-work-generation
             details: `Generated ${gates.includes(code) ? 'gate' : 'analysis'}: ${metadata?.name || code}` } });
         generated.push(item);
     }
-    const existingRevision = await tx.sampleOrderRevision.findFirst({ where: { sampleId: String(sample.id) } });
-    if (!existingRevision) {
-        const revision = await tx.sampleOrderRevision.create({ data: { sampleId: String(sample.id), version: 1, status: 'ACTIVE',
-            reason: 'Initial order generated at intake', requestedBy: sample.receivedBy || rules.actorName(actor),
-            authorizedBy: rules.actorName(actor), authorizedAt: new Date() } });
-        for (const code of plan.codes) await tx.orderLine.create({ data: { revisionId: revision.id, analysis: code, methodologyId: plan.methods.get(code) || null, isRequired: true, status: 'ACTIVE' } });
-    }
+    await require('./orderService').createInitialOrder(tx, sample, plan.codes, actor);
     return generated;
 }
 module.exports = { normalizeAnalysisCodes, planForSample, generate };

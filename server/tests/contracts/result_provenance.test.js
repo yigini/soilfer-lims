@@ -60,6 +60,12 @@ describe('WP-31: Result Provenance Tracking', () => {
             id: `entry-${testSampleId}-${analysis}`, sampleId: testSampleId, analysis,
             assignedLab: analyst.labId, assignedTo: analyst.username, status: 'IN_PROGRESS'
         })) });
+        // #209: usable order context is declared only in this NEW owned fixture assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
+            lines: { create: ['EC', 'CLAY_PRED', 'SOC', 'TOTAL_N'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         await require('../../services/qcRuleService').change(repeatReviewer,{labId:analyst.labId,analysisCode:'TOTAL_N',
             methodologyId:null,expectedVersion:0,reason:'Owned replicate provenance selection fixture',
             criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0,repeatabilityLimit:0.1}},{db:prisma});
@@ -70,6 +76,11 @@ describe('WP-31: Result Provenance Tracking', () => {
     test('1. Direct prisma create defaults Result.provenance to MEASURED', async () => {
         await createWorkItemFixture(prisma, { data: { id: `entry-${testSampleId}-PH`, sampleId: testSampleId,
             analysis: 'PH', status: 'IN_PROGRESS', assignedLab: analyst.labId, assignedTo: analyst.username } });
+        // #209: append only the newly assembled owner's line; retain every prior line.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        const declaredOrder = await prisma.sampleOrderRevision.findFirst({ where: { sampleId: testSampleId, status: 'ACTIVE' } });
+        await prisma.orderLine.create({ data: { id: require('node:crypto').randomUUID(), revisionId: declaredOrder.id,
+            analysis: 'PH', workItemId: null, status: 'ACTIVE', isRequired: true } });
         const r = await createExecutionResultFixture(prisma, {
             data: {
                 id: `RES-DEF-${Date.now()}`,
@@ -127,6 +138,11 @@ describe('WP-31: Result Provenance Tracking', () => {
         await reviewFixture(['EC', 'CLAY_PRED', 'PH']);
         const owner=await createWorkItemFixture(prisma,{data:{id:`entry-${testSampleId}-TEXTURE`,sampleId:testSampleId,
             analysis:'TEXTURE',status:'IN_PROGRESS',assignedLab:analyst.labId,assignedTo:analyst.username}});
+        // #209: append only the newly assembled owner's line; retain every prior line.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        const declaredOrder = await prisma.sampleOrderRevision.findFirst({ where: { sampleId: testSampleId, status: 'ACTIVE' } });
+        await prisma.orderLine.create({ data: { id: require('node:crypto').randomUUID(), revisionId: declaredOrder.id,
+            analysis: 'TEXTURE', workItemId: null, status: 'ACTIVE', isRequired: true } });
         // A categorical report outcome retains its actual complete composite execution.
         const derivedRes=await require('../../services/workflowStateRules').inTransaction(prisma,tx=>
             require('../../services/resultWriteService').writeTextureDetermination(tx,{sampleId:testSampleId,workItemId:owner.id,

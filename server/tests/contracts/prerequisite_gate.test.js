@@ -127,6 +127,12 @@ describe('SD-05: Server-Side Prerequisite Gate Contract', () => {
     });
 
     test('5. Saving results now succeeds with preparation completed (HTTP 200)', async () => {
+        // #209: usable order context is declared only in this NEW owned fixture assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
+            lines: { create: ['PH_H2O'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         const res = await request(app)
             .post(`/api/results/${sampleId}`)
             .set('Authorization', `Bearer ${techGtmToken}`)

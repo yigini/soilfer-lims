@@ -153,7 +153,8 @@ test.each(['analyses', 'order'])('%s adding work to SUBMITTED_FULL atomically re
     expect(saved.orders).toHaveLength(1);
     expect(saved.orders[0].lines.map(line => line.analysis).sort()).toEqual(['PH_H2O', 'SOC']);
     expect(saved.audits.filter(row => row.action === 'SAMPLE_STATUS_TRANSITION')).toHaveLength(1);
-    expect(saved.receipts).toHaveLength(mode === 'order' ? 1 : 0);
+    // Claudio6169628053: a supplied key is recorded once on either route.
+    expect(saved.receipts).toHaveLength(1);
 });
 
 test('reconciliation re-reads a stale sample before writing work items', async () => {
@@ -182,7 +183,7 @@ test.each(['analyses', 'order'])('%s a failed order snapshot rolls back already 
     const { sample } = await fixture('PROCESSING', 'PH_H2O', 'IN_PROGRESS');
     await samples.transitionSample(sample.id, sample.status, manager, null, { requiredAnalyses: '["PH_H2O"]' }, client);
     const before = await snapshot(sample.id);
-    await expect(client.$transaction(tx => analysisOrders.reviseAnalyses(sample.id, { analyses: ['PH_H2O', 'SOC'] }, manager, { mode,
+    await expect(client.$transaction(tx => analysisOrders.reviseAnalyses(sample.id, { analyses: ['PH_H2O', 'SOC'], reason: 'Reviewed additional ordered parameter before injected failure' }, manager, { mode,
         tx: { ...tx, sampleOrderRevision: { ...tx.sampleOrderRevision, create: async () => { throw new Error('Injected order failure'); } } } })))
         .rejects.toThrow('Injected order failure');
     expect(await snapshot(sample.id)).toEqual(before);
@@ -194,7 +195,7 @@ test('a failed command receipt rolls back the new order, sample processing trans
     const before = await snapshot(sample.id);
     const spy = jest.spyOn(receipts, 'recordReceipt').mockRejectedValueOnce(new Error('Injected receipt failure'));
     try {
-        await expect(analysisOrders.reviseAnalyses(sample.id, { analyses: ['PH_H2O', 'SOC'] }, manager,
+        await expect(analysisOrders.reviseAnalyses(sample.id, { analyses: ['PH_H2O', 'SOC'], reason: 'Reviewed additional ordered parameter before injected failure' }, manager,
             { mode: 'order', tx: client, idempotencyKey: id() })).rejects.toThrow('Injected receipt failure');
         expect(await snapshot(sample.id)).toEqual(before);
     } finally { spy.mockRestore(); }
@@ -697,4 +698,53 @@ test('an accepted marked gate duplicate prevents revert of the canonical gate wi
     await expect(gates.changeGate({ sampleId: sample.id, gate: 'DRYING', status: 'PENDING', reason: 'Revert request', actor: manager, db: client }))
         .rejects.toMatchObject({ code: 'AMENDMENT_WORKFLOW_REQUIRED' });
     expect(await snapshot(sample.id)).toEqual(before);
+});
+
+// #209/6169628053: these checks exercise response, payload, mode and absent-key contracts separately.
+function keyedOrderTables() {
+    const raw = new (require('better-sqlite3'))(databasePath, { readonly: true, fileMustExist: true });
+    try {
+        return raw.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(({ name }) => ({
+            name, rows: raw.prepare('SELECT * FROM "' + name.replaceAll('"', '""') + '"').all().map(row => JSON.stringify(row)).sort()
+        }));
+    } finally { raw.close(); }
+}
+
+async function keyedOrderCase(mode, keyed = true) {
+    const { sample } = await fixture('PROCESSING', 'PH_H2O', 'NOT_ASSIGNED');
+    await samples.transitionSample(sample.id, sample.status, manager, null, { requiredAnalyses: '["PH_H2O"]' }, client);
+    const input = { analyses: ['PH_H2O', 'SOC'], reason: 'Reviewed complete keyed order target' };
+    const options = { mode, tx: client, ...(keyed && { idempotencyKey: id() }) };
+    const original = await analysisOrders.reviseAnalyses(sample.id, input, manager, options);
+    return { sample, input, options, original };
+}
+
+test.each(['analyses', 'order'])('%s same-key replay returns the original response with all-table zero writes', async mode => {
+    const f = await keyedOrderCase(mode), before = keyedOrderTables();
+    expect(await client.commandReceipt.count({ where: { targetResource: `Sample:${f.sample.id}` } })).toBe(1);
+    const replay = await analysisOrders.reviseAnalyses(f.sample.id, f.input, manager, f.options);
+    expect(JSON.parse(JSON.stringify(replay))).toEqual(JSON.parse(JSON.stringify(f.original)));
+    expect(keyedOrderTables()).toEqual(before);
+});
+
+test.each(['analyses', 'order'])('%s same key with a differing reason refuses with all-table zero writes', async mode => {
+    const f = await keyedOrderCase(mode), before = keyedOrderTables();
+    await expect(analysisOrders.reviseAnalyses(f.sample.id, { ...f.input, reason: 'Different deliberate order reason' }, manager, f.options))
+        .rejects.toMatchObject({ statusCode: 409, code: 'IDEMPOTENCY_KEY_CONFLICT' });
+    expect(keyedOrderTables()).toEqual(before);
+});
+
+test.each(['analyses', 'order'])('%s key cannot replay identical parameters through the other mode and changes no table', async mode => {
+    const f = await keyedOrderCase(mode), before = keyedOrderTables();
+    await expect(analysisOrders.reviseAnalyses(f.sample.id, f.input, manager, { ...f.options, mode: mode === 'order' ? 'analyses' : 'order' }))
+        .rejects.toMatchObject({ statusCode: 409, code: 'IDEMPOTENCY_KEY_CONFLICT' });
+    expect(keyedOrderTables()).toEqual(before);
+});
+
+test.each(['analyses', 'order'])('%s command without a key writes its order and work without any receipt', async mode => {
+    const f = await keyedOrderCase(mode, false);
+    expect(f.original).toMatchObject({ success: true, added: ['SOC'] });
+    expect(await client.sampleOrderRevision.count({ where: { sampleId: f.sample.id, status: 'ACTIVE' } })).toBe(1);
+    expect(await client.workItem.count({ where: { sampleId: f.sample.id, analysis: 'SOC' } })).toBe(1);
+    expect(await client.commandReceipt.count({ where: { targetResource: `Sample:${f.sample.id}` } })).toBe(0);
 });

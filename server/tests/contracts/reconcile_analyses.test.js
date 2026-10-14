@@ -73,6 +73,9 @@ describe('SD-03: Work Item Reconciliation on Analysis List Change Contract', () 
                 result: '18.5 cmol(+)/kg'
             }
         });
+        await prisma.$transaction(async tx => require('../../services/orderService').createInitialOrder(tx,
+            await tx.sample.findUnique({ where: { id: sampleId } }), ['PH_H2O', 'SOC', 'CEC'],
+            require('jsonwebtoken').decode(mgrGtmToken)));
         await createExecutionResultFixture(prisma, {
             data: {
                 id: 'RES-SD03-CEC',
@@ -95,7 +98,8 @@ describe('SD-03: Work Item Reconciliation on Analysis List Change Contract', () 
             .put(`/api/samples/${sampleId}/analyses`)
             .set('Authorization', `Bearer ${mgrGtmToken}`)
             .send({
-                analyses: ['PH_H2O', 'SOC'] // CEC dropped
+                analyses: ['PH_H2O', 'SOC'], // CEC dropped
+                reason: 'Reviewed removal while retaining recorded evidence'
             });
 
         expect(res.status).toBe(409);
@@ -160,7 +164,8 @@ describe('SD-03: Work Item Reconciliation on Analysis List Change Contract', () 
             .put(`/api/samples/${sampleId}/analyses`)
             .set('Authorization', `Bearer ${mgrGtmToken}`)
             .send({
-                analyses: ['CEC'] // PH_H2O dropped
+                analyses: ['CEC'], // PH_H2O dropped
+                reason: 'Reviewed removal of unstarted analysis'
             });
 
         expect(res.status).toBe(200);

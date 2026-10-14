@@ -91,6 +91,8 @@ describe('Texture Work Item & Atomic Linked Results Contracts (Mandatory Correct
                     assignedTo: 'tech_tun_1'
                 }
             });
+            await prisma.$transaction(tx=>require('../../services/orderService').createInitialOrder(tx,
+                {id:sampleId},['TEXTURE'],{username:'system:owned-texture-order',role:'SUPER_ADMIN',labId}));
         });
 
         afterEach(async () => {

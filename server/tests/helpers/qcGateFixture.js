@@ -8,7 +8,7 @@ const { beforeGuards } = require('./legacyWorkflowDatabase');
 const { createSampleFixture, createWorkItemFixture } = require('./workflowFixtures');
 const { installCalculationReleasePrerequisites } = require('./calculationReleasePrerequisites');
 
-async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {
+async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, installOrderRevisions = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {
     const labId = randomUUID(), analysisCode = `QC-GATE-${randomUUID()}`, username = 'system:fixture';
     const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES', relatedRows: {
         Lab: [{ id: labId, code: labId, name: 'QC gate fixture', country: 'TEST', updatedAt: Date.now() }],
@@ -62,6 +62,16 @@ async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS',
             assignedLab: labId, status: 'PROCESSING', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
         items.push(await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: sample.id, labId, analysis: code,
             methodologyId: method.id, status, result: '7', history: '[]' } }));
+    }
+    if (installInstrumentImports && installSampleContainers && installControlCharts && installOrderRevisions) {
+        require('../../scripts/install_order_revisions').installOrderRevisions({ dbPath: file, apply: true });
+        for (const sampleId of new Set(items.map(item => item.sampleId))) {
+            await db.$transaction(async tx => {
+                const current = await tx.sample.findUnique({ where: { id: sampleId } });
+                await require('../../services/orderService').createInitialOrder(tx, current,
+                    items.filter(item => item.sampleId === sampleId).map(item => item.analysis), actor);
+            });
+        }
     }
     const f = { file, db, actor, labId, analysisCode: items[0].analysis, method: methods[0], methods, instrument, items,
         workItemIds: items.map(item => item.id), input: { instrumentId: instrument.id, workItemIds: items.map(item => item.id), seed: 'gate-fixture' } };

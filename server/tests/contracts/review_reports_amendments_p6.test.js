@@ -78,6 +78,8 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
             await createWorkItemFixture(prisma, { data: { ...data, sampleId: sampleForReview.id } });
         }
 
+        await prisma.$transaction(tx => require('../../services/orderService').createInitialOrder(tx,
+            sampleForReview, ['PH_H2O', 'EC'], require('jsonwebtoken').decode(mgrToken)));
         // Add valid results for both items
         // Pin6056586906: each row binds its existing canonical owner.
         for (const data of [

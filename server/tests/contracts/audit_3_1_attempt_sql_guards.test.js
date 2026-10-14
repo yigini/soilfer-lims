@@ -275,6 +275,11 @@ test('the authenticated workspace returns linked and unlinked attempt metadata w
     require('../../scripts/install_instrument_imports').installInstrumentImports({dbPath:file,apply:true});
     await insert('linked',{attemptNo:2,evidenceData:'{"private":"linked"}'});
     result('linked-result',{attemptId:'linked'});result('imported',{param:'NO_WORK',provenance:'IMPORTED'});
+    // Keep this deliberate pre-191 guard suite unchanged. Its current read-only
+    // workspace requires only the new nullable model shape, not successor guards.
+    const {loadOrderRevisionMigrationSource}=require('../../services/orderRevisionMigrationSource');
+    const orderModelColumns=loadOrderRevisionMigrationSource();
+    db.exec(orderModelColumns.schemaSql);
     const {createAuthTokenFixture}=require('../helpers/workflowFixtures');
     const token=await createAuthTokenFixture(client,'LAB_MANAGER',labId),otherToken=await createAuthTokenFixture(client,'LAB_MANAGER',otherLab);
     require('../helpers/legacyWorkflowDatabase').useLegacyRouteDatabase(require('../../prisma'),client,{allModels:true});

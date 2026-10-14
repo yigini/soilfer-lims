@@ -23,6 +23,10 @@ describe('Audit 0.11: queue evidence and instrument readiness', () => {
             qualification: { create: { id: id('QUAL11'), labId, calibrationStatus: 'OK', verificationStatus: 'OK' } } } });
         await prisma.equipmentMethodEligibility.create({ data: { id: id('EL11'), labId, analysisCode: analysis,
             isRequired: true, eligibleEquipmentIds: JSON.stringify([equipmentId]) } });
+        // #209: declare usable retained order lines during NEW owned positive fixture assembly.
+        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-11'), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: jwt.decode(token).username,
+            lines: { create: ([analysis]).map(analysis => ({ id: id('ORDER-11'), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));
         return { analysis, sampleId, workItemId, equipmentId };
     }
     const queue = f => request(app).get('/api/workbench/queue').query({ workItemId: f.workItemId }).set('Authorization', `Bearer ${token}`);

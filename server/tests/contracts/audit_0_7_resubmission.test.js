@@ -30,6 +30,11 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
             status: 'PENDING_REVIEW', type: 'PARTIAL', workItemCount: 1, workItemIds: JSON.stringify([itemId]) } });
         const item = await createWorkItemFixture(prisma, { data: { id: itemId, sampleId, analysis, assignedLab: labId, assignedTo: username,
             status: itemStatus, result: '6.2', submissionId, batchId: batch?.id, history: JSON.stringify([{ action: 'SUBMITTED', submissionId }]) } });
+        // #209: NEW owned retained execution history declares its existing owner's order.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: id('ORDER-07'), sampleId, version: 1,
+            status: 'ACTIVE', reason: 'Owned resubmission execution order context', requestedBy: 'system:fixture',
+            lines: { create: [{ id: id('LINE-07'), analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
         const result = await createExecutionResultFixture(prisma, { ...(['ACCEPTED','SUBMITTED'].includes(itemStatus) && { attemptStatus: itemStatus }),
             data: { id: id('R-07'), sampleId, param: analysis, value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
@@ -94,6 +99,11 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
         const remaining = await createWorkItemFixture(prisma, { data: { id: id('WI-07-REMAINING'), sampleId: f.sampleId,
             analysis: `${f.analysis}-OTHER`, status: 'SUBMITTED', result: '5.4', assignedLab: labId,
             assignedTo: username, submissionId: f.submission.id } });
+        // #209: only the newly assembled remaining S1 owner gets a new matching line.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        const retainedOrder = await prisma.sampleOrderRevision.findFirst({ where: { sampleId: f.sampleId, status: 'ACTIVE' } });
+        await prisma.orderLine.create({ data: { id: id('LINE-07-REMAINING'), revisionId: retainedOrder.id,
+            analysis: remaining.analysis, workItemId: null, status: 'ACTIVE', isRequired: true } });
         // Pin6059085200: only this named S1/S2 fixture opts into cached evidence.
         await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED', data: {
             id: id('R-07-REMAINING'), sampleId: f.sampleId, param: remaining.analysis, value: remaining.result,

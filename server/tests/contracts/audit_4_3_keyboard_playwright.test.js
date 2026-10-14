@@ -33,6 +33,7 @@ test('real Chromium types and records 40 values through the production app with 
             const item = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, labId: f.labId,
                 analysis: f.analysisCode, methodologyId: f.method.id, assignedTo: f.actor.username, equipmentId: f.instrument.id,
                 status: 'IN_PROGRESS', history: '[]' } });
+            await f.db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, [f.analysisCode], f.actor));
             ids.push(item.id);
         }
         process.env.SERVE_CLIENT = 'true'; process.env.JWT_SECRET = 'owned-keyboard-playwright-contract';

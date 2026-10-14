@@ -152,8 +152,12 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
     afterAll(async () => {
         await prisma.result.deleteMany({ where: { sampleId: testSampleId } });
         await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        // #209: retained execution parents remain until this owned database is torn down.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        if (await prisma.workAttempt.count({ where: { workItem: { sampleId: testSampleId } } }) === 0) {
         await prisma.orderLine.deleteMany({ where: { revision: { sampleId: testSampleId } } });
         await prisma.sampleOrderRevision.deleteMany({ where: { sampleId: testSampleId } });
+        } // #209 owned retained order parents
         await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
@@ -442,6 +446,8 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
                 status: (s) => { statusVal = s; return res; }
             };
 
+            // #209: this direct controller mock has the headers object supplied by the actual HTTP route.
+            req.headers = {};
             await sampleController.updateSampleAnalyses(req, res);
             expect(jsonVal.success).toBe(true);
 

@@ -12,6 +12,12 @@ async function assignOrderedWork(sampleId, token) {
         await prisma.analysis.upsert({ where: { code }, create: { code, name: `${code} matrix test parameter`, units }, update: { units, labId: null } });
         await createWorkItemFixture(prisma, { data: { id: `${sampleId}_${code}`, sampleId, analysis: code, assignedTo: username, assignedLab: 'LAB-MX', labId: 'LAB-MX', status: 'IN_PROGRESS' } });
     }
+    // #209: usable order context is declared only in this NEW owned fixture assembly.
+    require('../../services/workflowStateRules').assertFixtureContext();
+    await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
+        version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
+        lines: { create: parameters.map(([code]) => code).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+            workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
 }
 
 describe('Sample Matrix Cross-Parameter Validation Contract', () => {

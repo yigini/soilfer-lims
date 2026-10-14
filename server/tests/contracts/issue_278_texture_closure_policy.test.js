@@ -135,6 +135,12 @@ describe('#278 laboratory policy and the real submission gate', () => {
             create: { code, name: code, units: '%', status: 'active' }, update: {} });
         await createWorkItemsFixture(prisma, { data: ['SAND', 'SILT', 'CLAY'].map(analysis => ({ id: `${sampleId}-${analysis}`, sampleId,
             assignedLab: labId, assignedTo: require('jsonwebtoken').decode(token).username, analysis, status: 'IN_PROGRESS' })) });
+        // #209: declare usable legacy order lines only in this NEW owned positive assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',
+            lines: { create: ['SAND', 'SILT', 'CLAY'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         for (const [param, value] of values) await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId, param,
             value: String(value), numericValue: value, unit: '%', isCurrent: true } });
         return { sampleId, response: await request(app).post(`/api/results/${sampleId}/submit`).set('Authorization', `Bearer ${token}`) };

@@ -1862,6 +1862,7 @@ model OrderLine {
   revisionId           String
   revision             SampleOrderRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
   analysis             String              // Analysis code (e.g. PH_H2O, VIS_NIR, etc.)
+  workItemId           String?             // #209 new-line identity; retained lines remain null.
   methodologyId        String?
   methodRevision       String?
   isRequired           Boolean             @default(true)

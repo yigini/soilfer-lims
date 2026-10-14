@@ -309,6 +309,12 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
         });
 
         test('COMPLETE_WORK on grouped texture with valid closure atomically writes SAND, SILT, CLAY, and TEXTURE results', async () => {
+            // #209: declared legacy order only for this NEW owned positive sync execution assembly.
+            require('../../services/workflowStateRules').assertFixtureContext();
+            await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleA.id,
+                version: 1, status: 'ACTIVE', reason: 'Owned positive canonical sync order context', requestedBy: 'system:fixture',
+                lines: { create: ['PH_H2O', 'SPEC_MIR', 'TEXTURE'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                    workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
             const opId = 'op-text-success-' + Date.now();
             const result = await syncService.applySyncOperations(userTechA, [{
                 operationId: opId,
