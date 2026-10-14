@@ -1,0 +1,136 @@
+{
+  "status": "ACTUAL_NEW_PYTHON39_REQUEST_NATIVE_DELIVERY_RETAINED",
+  "requestId": 6179895406,
+  "toolingCommit": "2afd192872ce38bfabbaf5c69404d0aa7e679123",
+  "retainedUtc": "2026-10-14T22:29:05.261292+00:00",
+  "newExactSourcePassObserved": false,
+  "buildsLaunched": 0,
+  "productionConnections": 0,
+  "files": [
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/actual-request-confirmed.json",
+      "bytes": 7191,
+      "sha256": "6ff0dcb0b3923d75c658361e220b52ece0451e452dd8f08241aee74287b914f1"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/actual-request-fresh-original.json",
+      "bytes": 6953,
+      "sha256": "7433eb71e2b9cd147a7c7a3c6f29571b55426b75a8b194ff5590c724e31e05a4"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/comments-before-original.json",
+      "bytes": 1716254,
+      "sha256": "5db2674943d7b6810178bb8883a6cda64b071938f2421659d6ec452d11fc0778"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/main-ci-original.json",
+      "bytes": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/main-original.json",
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/native-actual-sent.txt",
+      "bytes": 1621,
+      "sha256": "29474e3ef8fbef0e0481446a4f5f3c34807f0dfff615b1e1e478ba31ca856004"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/native-delivery-record.json",
+      "bytes": 775,
+      "sha256": "ecc678494fb9b6ba8c6e324e3027b0a1c534fafbc638fae1ccb78c696d3fed32"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/post-intent.json",
+      "bytes": 213,
+      "sha256": "01115d94f88a3a6f1c41b07b88f064bb630271416e6a9d207bb23080426039c7"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/post-response-original.json",
+      "bytes": 6953,
+      "sha256": "7433eb71e2b9cd147a7c7a3c6f29571b55426b75a8b194ff5590c724e31e05a4"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/post-stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/pr295-actual-pass-original.json",
+      "bytes": 6787,
+      "sha256": "3d504670dbe3035c87ff67d73c50782e005a1893c4665de338de9fb57ce0a25a"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/pr295-comments-original.json",
+      "bytes": 10644,
+      "sha256": "3cd8ecfd08235af23aae6a5ae7c7157690c06e85c7574e503562dd566b4b3201"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/pr295-original.json",
+      "bytes": 23239,
+      "sha256": "cd5b88b46e9a059169c07354119987a0031f8a655964ee7aae454da7e318580f"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/pr296-actual-pass-original.json",
+      "bytes": 8178,
+      "sha256": "83293fdf38e293253ec6ae50ff81dc3a9b61cd87fe863d04eaa465f99a8b9f47"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/pr296-comments-original.json",
+      "bytes": 13709,
+      "sha256": "d6f0751f4ac2bdb75a54211ea8dc43b25edaf9d9440621ac8e6a98e47f4b46c9"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/pr296-original.json",
+      "bytes": 65850,
+      "sha256": "a322b97346355b44c4ecc298e35160e28f15b5e088619b48afd90060bcdaf179"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/pr297-actual-pass-original.json",
+      "bytes": 5571,
+      "sha256": "2272d318b7d824d7341e90cd340b53bfeb81dc5cbec26150f857b4db8251a167"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/pr297-comments-original.json",
+      "bytes": 20259,
+      "sha256": "20f195ef4512a4febe5926cdcbb8baddae3bab99a21fd698ca6b1052d57a0751"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/pr297-original.json",
+      "bytes": 33502,
+      "sha256": "12f72e6fb0f4953b2409c5dd949642f5184e5258d6dce89e65e894c08a10cb77"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/request-body-actual.txt",
+      "bytes": 5320,
+      "sha256": "f8a96cf3f33ea0b09127680dcc235132260f14dcdd05232a500216bfb3d96a5a"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/request-payload-original.json",
+      "bytes": 5376,
+      "sha256": "1d6cf53b0a97c291517d315ce9aadc2247c98f6d4b33122c2d9324e1e75759fa"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-python39-source-review-request-2afd1928/source-index-original.json",
+      "bytes": 1540,
+      "sha256": "16dc1f6705a67b4c347b6e123d88b84cb3fc18b108fde92d97454f6a82de78c5"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/request-batch-build-python39-exact-source-review-once.py",
+      "bytes": 6801,
+      "sha256": "dd8faef91e433f603f381702c0bdcdeb30963b761329ceec38ec8c8ca444496f"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-batch-python39-source-request-native-once.py",
+      "bytes": 3557,
+      "sha256": "4ad03d444cd45d543a67479265ba4059c2c42078369d1f55619ff806c053bed2"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 408435,
+      "sha256": "d30b6be139e00664d8bcefe5424fd807b99ad9b635d0fbfca2f0a396586ffa95"
+    }
+  ]
+}
