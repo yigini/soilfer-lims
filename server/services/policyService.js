@@ -68,7 +68,8 @@ function resolvedFromState(current, key, context = {}) {
                 return { value: null, invalid: true, source, scope: { analysisCode: analysis, methodologyId: method }, version, overrideId: rows[0].id };
             }
             if (!valid(key, value)) throw error(409, key.startsWith('numbers.') ? 'NUMBER_FORMAT_POLICY_INVALID' : 'POLICY_STORED_VALUE_INVALID', 'Invalid stored policy value.');
-            return { value: clone(value), source, scope: { analysisCode: analysis, methodologyId: method }, version, overrideId: rows[0].id };
+            return { value: key === 'qc.westgardRules' ? { ...clone(value), review: clone(value.review || []) } : clone(value),
+                source, scope: { analysisCode: analysis, methodologyId: method }, version, overrideId: rows[0].id };
         }
     }
     const preset = current.policy?.presetCode;

@@ -66,6 +66,10 @@ try {
     console.log(JSON.stringify({event:'INSTRUMENT_IMPORT_STARTUP_READY',...importsReady}));
     const containersReady=require('./scripts/install_sample_containers').assertSampleContainerStartupReady(dbPath);
     console.log(JSON.stringify({event:'SAMPLE_CONTAINER_STARTUP_READY',...containersReady}));
+    const policyReady=require('./scripts/install_lab_policy_schema').assertLabPolicyStartupReady(dbPath);
+    console.log(JSON.stringify({event:'LAB_POLICY_STARTUP_READY',...policyReady}));
+    const chartsReady=require('./scripts/install_control_charts').assertControlChartStartupReady(dbPath);
+    console.log(JSON.stringify({event:'CONTROL_CHART_STARTUP_READY',...chartsReady}));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('QC_GATE_SCOPE_') ? 'Keep the lab stopped and follow docs/audit/2.4-qc-gate.md.'
@@ -73,6 +77,7 @@ try {
             : error.code?.startsWith('AMENDMENT_') || error.code?.startsWith('REPORT_WITHDRAWAL_') ? 'Keep the lab stopped and follow docs/audit/210-amendment-authorisation.md.'
             : error.code?.startsWith('IMPORT_') ? 'Keep the lab stopped and follow docs/audit/200-instrument-import.md.'
             : error.code?.startsWith('SAMPLE_CONTAINER_') ? 'Keep the lab stopped and follow docs/audit/206-containers-and-aliquots.md.'
+            : error.code?.startsWith('QC_CHART_') || error.code?.startsWith('LAB_POLICY_') ? 'Keep the lab stopped and follow docs/audit/214-control-charts.md.'
             : error.code?.startsWith('OVERRIDE_') ? 'Keep the lab stopped and follow docs/audit/197-value-validation.md.'
             : error.code?.startsWith('CALC_') || error.code?.startsWith('CALIBRATION_') || error.code === 'UNIT_CATALOGUE_CONFLICT' ? 'Keep the lab stopped and follow docs/audit/199-calculation-templates.md.'
             : error.code?.startsWith('REAGENT_LOT_') ? 'Keep the lab stopped and follow docs/audit/194-run-first.md.'

@@ -14,6 +14,15 @@ async function preparePositionBindings(db, { batch, position, analyses, actor, r
     if (!KINDS[position.kind]) throw error('REFERENCE_USE_INCOMPATIBLE', 'This position cannot hold a reference material.');
     if (!analyses.length) throw error('REFERENCE_VALUE_MISMATCH', 'The reference position serves no analyte.');
     const current = (position.references || []).filter(row => !row.supersededById);
+    if (batch.startedAt && position.kind === 'LRM') for (const analyte of batch.analytes || []) {
+        const criteria = analyte.criteriaSnapshot && JSON.parse(analyte.criteriaSnapshot);
+        if (!criteria?.controlCharts || criteria.qcRule.resolved.lrmMode.value !== 'CONTROL_CHART') continue;
+        const frozen = criteria.controlCharts.flatMap(row => row.positions).find(row => row.positionId === position.id);
+        if (frozen && (frozen.referenceMaterialId !== referenceMaterialId ||
+            referenceValueIds[analyte.analysisCode] && referenceValueIds[analyte.analysisCode] !== frozen.referenceValueId)) {
+            throw error('QC_CHART_LOT_FROZEN', `QC position ${position.position} (${position.id}) keeps the lot frozen at start.`, { positionId: position.id }, 409);
+        }
+    }
     const correctionReason = typeof reason === 'string' ? reason.trim() : '';
     if (current.some(row => row.referenceMaterialId !== referenceMaterialId) && !correctionReason) {
         throw error('REFERENCE_POSITION_LOT_CONFLICT', 'One physical position must use the same lot for all analytes.');

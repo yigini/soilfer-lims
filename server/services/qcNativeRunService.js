@@ -171,13 +171,16 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
 async function startNativeRun(db, batchId, actor, input = {}) {
     const performedBy = permission(actor);
     return transaction(db, async tx => {
-        const batch = await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
+        let batch = await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
         if (!batch) throw error(404, 'BATCH_NOT_FOUND', 'Batch not found.');
         await scope(tx, actor, batch);
         if (!batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE')) throw error(409, 'QC_NATIVE_RUN_REQUIRED', 'This start flow requires a native run.');
         if (batch.status !== 'OPEN') throw error(409, 'QC_BATCH_LOCKED', 'The run must be OPEN before it starts.');
         if (batch.startedAt) {
             if (input.instrumentId !== undefined && input.instrumentId !== batch.instrumentId) throw error(409, 'QC_INSTRUMENT_FROZEN', 'Started instrument identity is frozen.');
+            if (input.references !== undefined && batch.analytes.some(row => JSON.parse(row.criteriaSnapshot || '{}').controlCharts?.length)) {
+                throw error(409, 'QC_CHART_LOT_FROZEN', 'Resume the started control-chart run with its frozen reference lots.');
+            }
             if (batch.analytes.some(row => !row.criteriaSnapshot || !row.crmOrdinal)) throw error(409, 'QC_SEQUENCE_STALE', 'The started run lacks its frozen criteria.');
             const statuses = [];
             for (const row of batch.analytes) {
@@ -196,6 +199,20 @@ async function startNativeRun(db, batchId, actor, input = {}) {
         const instrument = await instrumentFor(tx, batch, Object.hasOwn(input, 'instrumentId') ? input.instrumentId : batch.instrumentId, actor);
         if (!instrument && analyses.some(row => row.calibrationVerification)) throw error(422, 'QC_INSTRUMENT_REQUIRED', 'Calibration verification requires a registered instrument.');
         const validated = validateRunSequence({ positions: batch.positions, analyses });
+        if (input.references !== undefined) {
+            if (!Array.isArray(input.references) || input.references.some(row => !row || typeof row.positionId !== 'string' || typeof row.referenceMaterialId !== 'string') ||
+                new Set(input.references.map(row => row.positionId)).size !== input.references.length) throw error(400, 'QC_REFERENCE_INVALID', 'Select distinct QC positions and their reference lots.');
+            const plans = [];
+            for (const reference of input.references) {
+                const position = batch.positions.find(row => row.id === reference.positionId), served = validated.positions.find(row => row.id === reference.positionId);
+                if (!position || !served) throw error(400, 'QC_POSITION_NOT_IN_RUN', 'The QC position is not in this run.');
+                plans.push(await require('./qcRunReferenceService').preparePositionBindings(tx, { batch, position,
+                    analyses: validated.forecasts.filter(row => served.servedAnalytes.includes(row.analysisCode)), actor,
+                    referenceMaterialId: reference.referenceMaterialId }));
+            }
+            for (const plan of plans) await applyPositionBindings(tx, plan);
+            batch = await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
+        }
         const methodRevisions = [];
         for (const row of batch.analytes) {
             const method = await tx.methodology.findUnique({ where: { id: row.methodologyId } });
@@ -208,9 +225,11 @@ async function startNativeRun(db, batchId, actor, input = {}) {
         if (changed.count !== 1) throw error(409, 'QC_SEQUENCE_STALE', 'The run changed before first start.');
         for (const row of batch.analytes) {
             const criteria = validated.forecasts.find(forecast => forecast.analysisCode === row.analysisCode);
+            const controlCharts = await require('./controlChartService').freezeRunCharts(tx, batch, row, criteria, validated.positions);
             await tx.batchAnalyte.update({ where: { id: row.id }, data: { status: 'IN_RUN', crmOrdinal: criteria.crmOrdinal,
                 policyVersion: criteria.policyVersion, qcRuleId: criteria.qcRule.id, qcRuleVersion: criteria.qcRule.version,
                 criteriaSnapshot: JSON.stringify({ ...criteria, instrumentId: instrument?.id || null, instrumentText: batch.instrument,
+                    controlCharts,
                     methodRevision: methodRevisions.find(revision => revision.analysisCode === row.analysisCode).methodRevision }) } });
         }
         await tx.batchEvent.create({ data: { id: randomUUID(), batchId: batch.id, type: 'RUN_STARTED', by: performedBy, at: now,

@@ -51,6 +51,17 @@ function mount(batch) {
         tree = module.exports.default(props); effects.splice(0).forEach(effect => effect()); await new Promise(resolve => setImmediate(resolve)); } },
     find: id => nodes(tree).find(node => node.props?.['data-testid'] === id), all: () => nodes(tree) };
 }
+
+test('#214 lot selections are bound by the actual start request; frozen chart lots cannot be changed in the UI', async () => {
+    const unstarted = mount(fixture({ started: false })); await unstarted.render();
+    unstarted.find('native-lot-lrm').props.onChange({ target: { value: 'lot-a' } }); await unstarted.render();
+    await unstarted.find('native-run-start').props.onClick();
+    expect(unstarted.axios.post).toHaveBeenCalledWith('/api/qc/batches/native-run/start', { references: [{ positionId: 'lrm', referenceMaterialId: 'lot-a' }] });
+    const batch = fixture();
+    batch.analytes[0].criteriaSnapshot = JSON.stringify({qcRule:{resolved:{lrmMode:{value:'CONTROL_CHART'}}},controlCharts:[{positions:[{positionId:'lrm',referenceMaterialId:'lot-a'}]}]});
+    const started = mount(batch); await started.render();
+    expect(started.find('native-lot-lrm').props.disabled).toBe(true);
+});
 function fixture({ started = true, mode = 'REQUIRED_BLOCKING', measured = false } = {}) {
     const sample = { id: 'sample', position: 3, kind: 'SAMPLE', sampleId: 's' }, duplicate = { id: 'duplicate', position: 4, kind: 'DUPLICATE', sampleId: 's', duplicateOfPositionId: 'sample' };
     const positions = mode === 'OFF' ? [sample] : [{ id: 'blank', position: 1, kind: 'BLANK' }, { id: 'lrm', position: 2, kind: 'LRM', references: [] }, sample, duplicate];

@@ -242,6 +242,12 @@ function beforeGuards(options) {
             expected.push({table:'UserBenchCredential',missingTable:true});
             // #205 adds exactly one append-only evidence table and one nullable draft column; its installer creates both.
             expected.push({table:'WorkItemDraft',fields:['records']},{table:'PreparationRecord',missingTable:true});
+            // #214 is four additive tables. Preserve the captured historical
+            // schema and continue refusing every other generated-model gap.
+            const chartTables = ['ControlLimitProposal', 'ControlLimitSet', 'QcReviewObligation', 'QcReviewResolution'];
+            const chartModels = chartTables.filter(table => modelNames.includes(table));
+            assert.ok(chartModels.length === 0 || chartModels.length === chartTables.length, 'Generated chart datamodel is partial.');
+            if (chartModels.length) expected.push(...chartTables.map(table => ({ table, missingTable: true })));
             // #200 adds only these two models and one nullable draft pointer.
             // The historical literals and every earlier expected gap stay fixed.
             const importTables = ['ImportTemplate', 'InstrumentImportReceipt'];
@@ -333,7 +339,7 @@ function beforeGuards(options) {
             const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name NOT IN ('ResultEvidenceEvent','ContainerSequence')").all();
             // Copy schema-only indexes, leaving every additive release guard
             // and partial index for its actual installer on this new file.
-            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique','WorkAttempt_workItemId_attemptNo_unique','result_one_current','ReportedValueSelection_one_root','ResultOverrideRequest_one_active_cell','Report_amendmentId_key')").all();
+            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique','WorkAttempt_workItemId_attemptNo_unique','result_one_current','ReportedValueSelection_one_root','ResultOverrideRequest_one_active_cell','Report_amendmentId_key','ControlLimitSet_one_approved_series')").all();
             source.close();
             for (const table of tables) db.exec(['Sample', 'WorkItem'].includes(table.name)
                 ? table.sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '') : table.sql);

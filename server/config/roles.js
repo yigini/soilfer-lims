@@ -104,6 +104,9 @@ const PERMISSIONS = {
     'APPROVE_RESULTS': [
         'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'
     ],
+    'APPROVE_CONTROL_LIMITS': [
+        'SUPER_ADMIN', 'MASTER_USER', 'LAB_MANAGER'
+    ],
     // Repeat/correction entry admits technicians and reviewers; the command
     // services enforce assignment, submission state and laboratory scope.
     'MANAGE_CONTAINERS': [

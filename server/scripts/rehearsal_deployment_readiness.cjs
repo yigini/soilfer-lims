@@ -1337,6 +1337,17 @@ async function runSuite() {
          }finally{db.close();}`
     ],{encoding:'utf8'}).trim();
     const amendmentBefore=JSON.parse(amendmentBeforeOutput);
+    const policyBeforeOutput=cp.execFileSync('docker',['run','--rm',
+        '-v',`${repeatProofVolume}:/owned-policy`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto');
+         const dbPath='/owned-policy/dev.db',hash=()=>Object.fromEntries(['','-wal','-shm'].map(suffix=>[suffix,
+           fs.existsSync(dbPath+suffix)?crypto.createHash('sha256').update(fs.readFileSync(dbPath+suffix)).digest('hex'):null]));
+         const before=hash(),dry=require('./scripts/install_lab_policy_schema').installLabPolicySchema({dbPath});
+         if(dry.classification!=='ABSENT'||dry.mode!=='DRY_RUN'||dry.totalChanges!==0||!dry.plannedSql||JSON.stringify(hash())!==JSON.stringify(before))
+           throw Error('Policy PRE_199 absence/dry-run proof differs');
+         console.log(JSON.stringify({dry,dbWalShmPreserved:true}));`
+    ],{encoding:'utf8'}).trim();
+    const policyBefore=JSON.parse(policyBeforeOutput);
     const calculationContainer = registerContainer(`lims_199_entrypoint_${TS}`), calculationPort = await getFreePort();
     cp.execFileSync('docker', ['run', '-d', '--name', calculationContainer,
         '-p', `127.0.0.1:${calculationPort}:3000`, '-v', `${repeatProofVolume}:/app/server/prisma`,
@@ -1349,6 +1360,29 @@ async function runSuite() {
         !calculationStartupLog.includes('"previousClassification": "PRE_199"') ||
         !calculationStartupLog.includes('CALCULATION_STARTUP_READY')) throw Error('199 default-entrypoint installation proof missing');
     fs.writeFileSync(path.join(tmpDir, '199-default-entrypoint.log'), calculationStartupLog);
+    if(!calculationStartupLog.includes('Installing canonical lab policy schema prerequisite')||
+        !calculationStartupLog.includes('"previousClassification": "ABSENT"')||
+        !calculationStartupLog.includes('LAB_POLICY_STARTUP_READY')||!calculationStartupLog.includes('CONTROL_CHART_STARTUP_READY')||
+        calculationStartupLog.indexOf('LAB_POLICY_STARTUP_READY')>=calculationStartupLog.indexOf('CONTROL_CHART_STARTUP_READY'))
+        throw Error('Policy/214 default-entrypoint prerequisite order proof missing');
+    const policyAfterOutput=cp.execFileSync('docker',['run','--rm',
+        '-v',`${repeatProofVolume}:/owned-policy`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-policy/dev.db',hash=()=>Object.fromEntries(['','-wal','-shm'].map(suffix=>[suffix,
+           fs.existsSync(dbPath+suffix)?crypto.createHash('sha256').update(fs.readFileSync(dbPath+suffix)).digest('hex'):null]));
+         const before=hash(),installer=require('./scripts/install_lab_policy_schema');
+         const ready=installer.assertLabPolicyStartupReady(dbPath),again=installer.installLabPolicySchema({dbPath,apply:true});
+         const inspected=ready.readonlySnapshot.path;
+         const charts=require('./scripts/install_control_charts').assertControlChartStartupReady(inspected);
+         const db=new Database(inspected,{readonly:true,fileMustExist:true});
+         const counts=Object.fromEntries(['LabPolicy','LabPolicyOverride'].map(name=>[name,db.prepare('SELECT count(*) n FROM "'+name+'"').get().n]));db.close();
+         if(ready.classification!=='PRESENT'||again.mode!=='NO_OP'||again.totalChanges!==0||charts.classification!=='COMPLETE_214'||charts.totalChanges!==0||
+           Object.values(counts).some(Boolean)||JSON.stringify(ready.readonlySnapshot.originalDbWalShmSha256)!==JSON.stringify(before)||
+           JSON.stringify(hash())!==JSON.stringify(before))throw Error('Policy/214 startup or repeat preservation differs');
+         console.log(JSON.stringify({ready,again,charts,counts,dbWalShmPreserved:true,secondaryInspectionsOnRetainedSnapshot:true}));`
+    ],{encoding:'utf8'}).trim();
+    const policyAfter=JSON.parse(policyAfterOutput);
+    console.log(JSON.stringify({policyChartEntrypointProof:{scenario:'PRE_199-default-entrypoint-COMPLETE_214',before:policyBefore,after:policyAfter}}));
     const calculationAfterOutput = cp.execFileSync('docker', ['run', '--rm',
         '-v', `${repeatProofVolume}:/owned-199`, IMAGE_TAG, 'node', '-e',
         `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');

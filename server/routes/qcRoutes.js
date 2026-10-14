@@ -3,9 +3,16 @@ const router = express.Router();
 const qcController = require('../controllers/qcController');
 const qcRuleController = require('../controllers/qcRuleController');
 const calculationController = require('../controllers/calculationTemplateController');
+const controlChartController = require('../controllers/controlChartController');
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 
 router.use(verifyToken);
+router.get('/control-charts/series', checkPermission('VIEW_ANALYTICAL_RESULTS'), controlChartController.series);
+router.get('/control-charts', checkPermission('VIEW_ANALYTICAL_RESULTS'), controlChartController.chart);
+router.post('/control-limit-proposals', checkPermission('CHANGE_STATUS'), controlChartController.propose);
+router.post('/control-limit-proposals/:id/approve', checkPermission('APPROVE_CONTROL_LIMITS'), controlChartController.approve);
+router.get('/control-reviews', checkPermission('VIEW_ANALYTICAL_RESULTS'), controlChartController.reviews);
+router.post('/control-reviews/:id/resolve', checkPermission('APPROVE_CONTROL_LIMITS'), controlChartController.resolve);
 router.get('/rules', checkPermission('VIEW_LAB_POLICIES'), qcRuleController.list);
 router.post('/rules', checkPermission('MANAGE_LAB_POLICIES'), qcRuleController.change);
 

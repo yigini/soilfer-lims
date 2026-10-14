@@ -34,7 +34,8 @@ key('qc.calibrationFailAction', 'calibrationFailAction', { ICV: 'FAIL_BATCH', CC
     allowedActions: { ICV: ['FAIL_BATCH', 'WARN'], CCV: ['FAIL_BATCH', 'REPEAT_BRACKET', 'WARN'], CCB: ['FAIL_BATCH', 'REPEAT_BRACKET', 'WARN'] },
     help: 'policies.help.qc_calibrationFailAction' });
 key('qc.lrmLimitMode', 'enum', 'CONTROL_CHART', 'FIXED_WINDOW', 'FIXED_WINDOW', { allowedValues: ['CONTROL_CHART', 'FIXED_WINDOW'] });
-key('qc.westgardRules', 'westgard', { reject: ['1-3s', '2-2s', 'R-4s'], warn: ['1-2s'] }, { reject: ['1-3s'], warn: [] }, { reject: [], warn: [] },
+key('qc.controlChartMinPoints', 'integer', 20, 20, 20, { min: 2, unit: 'observations' });
+key('qc.westgardRules', 'westgard', { reject: ['1-3s', '2-2s', 'R-4s'], warn: ['1-2s'], review: ['4-1s', '10x'] }, { reject: ['1-3s'], warn: [], review: [] }, { reject: [], warn: [], review: [] },
     { allowedValues: ['1-2s', '1-3s', '2-2s', 'R-4s', '4-1s', '10x'] });
 key('qc.runProfiles', 'runProfiles', DEFAULT_RUN_PROFILES, DEFAULT_RUN_PROFILES, DEFAULT_RUN_PROFILES, { scope: 'LAB' });
 key('qc.blankMaxAllowed', 'number', 0.05, 0.05, 0.05, { min: 0, unit: 'method unit' });
@@ -149,9 +150,12 @@ function valid(name, value) {
         Number.isFinite(value.questionable) && Number.isFinite(value.unsatisfactory) &&
         value.questionable > 0 && value.questionable < value.unsatisfactory;
     case 'westgard': {
-        if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !['reject', 'warn'].includes(k))) return false;
+        // #214/6148143929: legacy overrides without review retain their exact
+        // behaviour. Reading them never writes or backfills a policy row.
+        if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !['reject', 'warn', 'review'].includes(k))) return false;
         if (!['reject', 'warn'].every(k => Array.isArray(value[k]) && value[k].every(v => d.allowedValues.includes(v)))) return false;
-        const all = [...value.reject, ...value.warn];
+        if (value.review !== undefined && (!Array.isArray(value.review) || !value.review.every(v => d.allowedValues.includes(v)))) return false;
+        const all = [...value.reject, ...value.warn, ...(value.review || [])];
         return new Set(all).size === all.length;
     }
     case 'runProfiles':
