@@ -1,0 +1,13 @@
+{
+  "status": "ACTUAL_CORRECTED_BUILD_ONLY_SOURCE_PASS_VALIDATED",
+  "reviewId": 6179940139,
+  "reviewUtc": "2026-10-14T22:29:31Z",
+  "toolingCommit": "2afd192872ce38bfabbaf5c69404d0aa7e679123",
+  "sourceHashCount": 5,
+  "localGuardTests": 14,
+  "actualHostGuardTests": 14,
+  "newBuildCount": 0,
+  "productionConnections": 0,
+  "futureProofOrProductionApproved": false,
+  "validatedUtc": "2026-10-14T22:30:45.391629+00:00"
+}
