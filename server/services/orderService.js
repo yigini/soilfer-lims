@@ -21,7 +21,10 @@ async function orderLines(tx, sample, codes, active) {
     const items = await tx.workItem.findMany({ where: { sampleId: sample.id, duplicateOf: null } });
     const lines = [];
     for (const analysis of codes) {
-        const candidates = items.filter(item => normalizeAnalysisCodes([item.analysis]).includes(analysis));
+        const candidates = items.filter(item => {
+            const normalized = normalizeAnalysisCodes([item.analysis]);
+            return normalized.length === 1 && normalized[0] === analysis;
+        });
         if (candidates.length !== 1) throw new rules.TransitionError('Resolve the work-item identity before revising this order.',
             409, 'ORDER_WORKITEM_REQUIRED', { analysis, workItemIds: candidates.map(item => item.id) });
         const item = candidates[0];

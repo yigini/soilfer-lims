@@ -1,0 +1,90 @@
+{
+  "retainedUtc": "2026-10-14T08:16:46.923021+00:00",
+  "status": "CLOSED_TWO_NATIVE_GUARD_MESSAGE_ASSERTION_FAILURES",
+  "summary": {
+    "closedUtc": "2026-10-14T08:12:17.230968+00:00",
+    "exit": 1,
+    "suites": 2,
+    "tests": 28,
+    "passedTests": 26,
+    "failed": 2,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 368,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "cause": "26tests pass including real repeat order-line linking. Two new negative guard-text assertions receive generic Prisma foreign-key wrapper text; verify exact native SQLite predicate without weakening the asserted refusal.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/command.json": {
+      "bytes": 992,
+      "sha256": "0a45c465063daee188c69853867e656635c97baddc0033a5dd1104f485e31e7e"
+    },
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/config-original.json": {
+      "bytes": 6079,
+      "sha256": "25b1d1402c4e2c1c9b932a3d55ef8134a84e51fe8b4e0af579872720f46c8c62"
+    },
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/inventory-original.json": {
+      "bytes": 49296,
+      "sha256": "466a9d82fb49661dcb66517357089fd0d10ac46fad65b5724c3732c926cda950"
+    },
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/report-original.json": {
+      "bytes": 213430,
+      "sha256": "88afbda71c410af8539c17212646a69ec08556557d720cc00e937ea68e939474"
+    },
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/source-after.json": {
+      "bytes": 3001,
+      "sha256": "39cb3c9f0490eae6afcf7b13f1d8a6d8832957f55d6b21c843bba6b52063819f"
+    },
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/source-before.json": {
+      "bytes": 3001,
+      "sha256": "39cb3c9f0490eae6afcf7b13f1d8a6d8832957f55d6b21c843bba6b52063819f"
+    },
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/stderr-original.log": {
+      "bytes": 52604,
+      "sha256": "7cecf0e415c8f54d12e2ff7c3af33803d40e635612bed35570ffe5ed8a33ce74"
+    },
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/stdout-original.log": {
+      "bytes": 721,
+      "sha256": "4fc986524f1a624d1599b79a1c998d771ea7dca1c08af875334b9f8d328c303d"
+    },
+    "WP/backlog-resume-20261013/issue209-order-insert-guards-focused/summary.json": {
+      "bytes": 376,
+      "sha256": "8c43d17578a2e471fb356616ae257b64b54e13ebf17e68233f7827268e66fed3"
+    }
+  }
+}

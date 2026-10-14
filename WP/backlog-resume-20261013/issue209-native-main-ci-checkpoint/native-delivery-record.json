@@ -1,0 +1,21 @@
+{
+  "recordedUtc": "2026-10-14T08:16:46.923021+00:00",
+  "observationNoLaterThanUtc": "2026-10-14T08:15:06Z",
+  "exactCaptureTimeAvailable": false,
+  "returnedWindowId": 5311708,
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "actual209DirectionObserved": 6163271808,
+  "rightComposerInitiallyEmpty": true,
+  "rightFocusObservedBeforeTyping": true,
+  "beginningAndEndingInspected": true,
+  "returnSubmissions": 1,
+  "sentBubbleObserved": true,
+  "rightComposerEmptyAfterSubmission": true,
+  "claudioActivityObserved": "Discombobulating",
+  "centreHumanDraftPreserved": true,
+  "humanCardsAnswered": false,
+  "progressCheckpointSentOnce": true,
+  "final209AuditRequestSent": false,
+  "productionOperations": 0
+}

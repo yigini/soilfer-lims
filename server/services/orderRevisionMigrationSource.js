@@ -1,6 +1,6 @@
 const fs = require('node:fs'), path = require('node:path'), { createHash } = require('node:crypto');
 const DIRECTORY = '20261014000100_order_revision_contract';
-const SHA256 = '0628c5e037bef23bb0486f2b4c7b89c797ed34083e97e3d72405c45d7700402d';
+const SHA256 = '5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c';
 const mismatch = message => Object.assign(new Error(message), { code: 'ORDER_REVISION_SOURCE_MISMATCH', statusCode: 409, totalChanges: 0 });
 function loadOrderRevisionMigrationSource() {
     const directory = path.resolve(__dirname, '..', fs.existsSync('/.dockerenv') ? '.migrations-backup/209' : 'prisma/migrations', DIRECTORY);

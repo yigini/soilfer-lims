@@ -16,17 +16,19 @@ BEGIN
 END;
 
 CREATE TRIGGER "OrderLine_workItem_insert" BEFORE INSERT ON "OrderLine"
-WHEN NEW."workItemId" IS NOT NULL AND NOT EXISTS(
+WHEN NEW."workItemId" IS NOT NULL AND (NOT EXISTS(
  SELECT 1 FROM "WorkItem" w JOIN "SampleOrderRevision" r ON r."id"=NEW."revisionId"
  WHERE w."id"=NEW."workItemId" AND w."sampleId"=r."sampleId"
  AND (trim(w."analysis")=NEW."analysis" OR NEW."analysis"='TEXTURE' AND trim(w."analysis") IN ('TEXTURE','SOIL_PSD_TEXTURE','SOIL_TEXTURE','PSA','pSA','Particle Size Analysis'))
-)
+) OR EXISTS(SELECT 1 FROM "OrderLine" WHERE "revisionId"=NEW."revisionId" AND "workItemId"=NEW."workItemId"))
 BEGIN
  SELECT RAISE(ABORT,'ORDER_LINE_WORKITEM_INVALID');
 END;
 
 CREATE TRIGGER "OrderLine_workItem_update" BEFORE UPDATE ON "OrderLine"
-WHEN NEW."workItemId" IS NOT OLD."workItemId"
+WHEN NEW."workItemId" IS NOT OLD."workItemId" OR (OLD."workItemId" IS NOT NULL AND
+ (NEW."id" IS NOT OLD."id" OR NEW."revisionId" IS NOT OLD."revisionId" OR NEW."analysis" IS NOT OLD."analysis"
+ OR NEW."methodologyId" IS NOT OLD."methodologyId" OR NEW."methodRevision" IS NOT OLD."methodRevision" OR NEW."predecessorLineId" IS NOT OLD."predecessorLineId"))
 BEGIN
  SELECT RAISE(ABORT,'ORDER_LINE_IDENTITY_IMMUTABLE');
 END;
@@ -39,6 +41,10 @@ WHEN NEW."orderLineId" IS NULL OR NOT EXISTS(
  AND (l."workItemId"=w."id" OR l."workItemId" IS NULL)
  AND (trim(l."analysis")=trim(w."analysis") OR trim(l."analysis") IN ('TEXTURE','SOIL_PSD_TEXTURE','SOIL_TEXTURE','PSA','pSA','Particle Size Analysis') AND trim(w."analysis") IN ('TEXTURE','SOIL_PSD_TEXTURE','SOIL_TEXTURE','PSA','pSA','Particle Size Analysis'))
  AND (SELECT count(*) FROM "SampleOrderRevision" WHERE "sampleId"=w."sampleId" AND "status"='ACTIVE')=1
+ AND ((l."workItemId"=w."id" AND (SELECT count(*) FROM "OrderLine" WHERE "revisionId"=r."id" AND "status"='ACTIVE' AND "workItemId"=w."id")=1)
+ OR (l."workItemId" IS NULL AND NOT EXISTS(SELECT 1 FROM "OrderLine" WHERE "revisionId"=r."id" AND "status"='ACTIVE' AND "workItemId"=w."id")
+ AND (SELECT count(*) FROM "OrderLine" x WHERE x."revisionId"=r."id" AND x."status"='ACTIVE' AND x."workItemId" IS NULL
+ AND (trim(x."analysis")=trim(w."analysis") OR trim(x."analysis") IN ('TEXTURE','SOIL_PSD_TEXTURE','SOIL_TEXTURE','PSA','pSA','Particle Size Analysis') AND trim(w."analysis") IN ('TEXTURE','SOIL_PSD_TEXTURE','SOIL_TEXTURE','PSA','pSA','Particle Size Analysis')))=1))
 )
 BEGIN
  SELECT RAISE(ABORT,'ORDER_LINE_REQUIRED');

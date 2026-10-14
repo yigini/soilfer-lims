@@ -115,3 +115,31 @@ test('two concurrent complete revisions leave exactly one ACTIVE revision', asyn
     for (const outcome of outcomes) if (outcome.status === 'rejected') expect(outcome.reason).toMatchObject({ code: 'ORDER_REVISION_CHANGED', statusCode: 409 });
     expect(await f.db.sampleOrderRevision.count({ where: { sampleId: f.items[0].sampleId, status: 'ACTIVE' } })).toBe(1);
 });
+
+test('raw new-attempt insertion cannot select one ambiguous legacy line', async () => {
+    const f = await fixture({ lines: 2 }); installer.installOrderRevisions({ dbPath: f.file, apply: true });
+    const line = await f.db.orderLine.findFirst({ where: { revision: { sampleId: f.items[0].sampleId } } });
+    await expect(f.db.workAttempt.create({ data: { id: randomUUID(), workItemId: f.items[0].id, orderLineId: line.id,
+        attemptNo: 1, status: 'OPEN' } })).rejects.toThrow('ORDER_LINE_REQUIRED');
+    expect(await f.db.workAttempt.count({ where: { workItemId: f.items[0].id } })).toBe(0);
+});
+
+test('a new linked line cannot have its ownership or analysis rewritten', async () => {
+    const f = await fixture({ revisions: 3 }); installer.installOrderRevisions({ dbPath: f.file, apply: true });
+    const revised = await order.reviseAnalyses(f.items[0].sampleId, { analyses: [f.items[0].analysis], reason: 'Reviewed immutable line identity' }, f.actor, { tx: f.db, mode: 'order' });
+    const line = await f.db.orderLine.findFirst({ where: { revisionId: revised.revision.id } }), before = JSON.stringify(line);
+    await expect(f.db.orderLine.update({ where: { id: line.id }, data: { workItemId: null } })).rejects.toThrow('ORDER_LINE_IDENTITY_IMMUTABLE');
+    await expect(f.db.orderLine.update({ where: { id: line.id }, data: { analysis: 'OTHER' } })).rejects.toThrow('ORDER_LINE_IDENTITY_IMMUTABLE');
+    expect(JSON.stringify(await f.db.orderLine.findUnique({ where: { id: line.id } }))).toBe(before);
+});
+
+test('a reasoned repeat receives its resolved legacy line at the new reservation INSERT', async () => {
+    const f = await fixture(); installer.installOrderRevisions({ dbPath: f.file, apply: true });
+    const original = await f.result(f.items[0]);
+    const originalAttempt = await f.db.workAttempt.findUnique({ where: { id: original.attemptId } });
+    const result = await require('../../services/workRepeatService').requestRepeat(f.db, f.items[0].id, f.actor,
+        { reason: 'INSTRUMENT_FAULT', note: 'Reviewed remeasurement request' });
+    expect(result.attempt).toMatchObject({ status: 'OPEN', orderLineId: originalAttempt.orderLineId, parentAttemptId: originalAttempt.id });
+    expect(result.attempt.id).not.toBe(originalAttempt.id);
+    expect(await f.db.workAttempt.findUnique({ where: { id: originalAttempt.id } })).toMatchObject({ orderLineId: originalAttempt.orderLineId });
+});

@@ -8,8 +8,10 @@ function chooseOrderLine(item, revisions) {
     if (codes.length !== 1) return { cause: 'AMBIGUOUS_LINE' };
     const lines = revisions[0].lines.filter(line => line.status === 'ACTIVE');
     const linked = lines.filter(line => line.workItemId === item.id);
-    const matches = linked.length ? linked : lines.filter(line => line.workItemId == null
-        && normalizeAnalysisCodes([line.analysis]).includes(codes[0]));
+    const matches = linked.length ? linked : lines.filter(line => {
+        const normalized = normalizeAnalysisCodes([line.analysis]);
+        return line.workItemId == null && normalized.length === 1 && normalized[0] === codes[0];
+    });
     if (matches.length !== 1) return { cause: matches.length ? 'AMBIGUOUS_LINE' : 'NO_LINE' };
     if (!normalizeAnalysisCodes([matches[0].analysis]).includes(codes[0])) return { cause: 'NO_LINE' };
     return { orderLineId: matches[0].id, revisionId: revisions[0].id,
