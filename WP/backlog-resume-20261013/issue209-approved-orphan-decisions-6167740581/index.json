@@ -1,0 +1,72 @@
+{
+  "record": {
+    "recordedUtc": "2026-10-14T11:57:07.219451+00:00",
+    "status": "ACTUAL_APPROVED_ORPHAN_SCOPE_ACCEPTED_BEFORE_IMPLEMENTATION",
+    "comment": 6167740581,
+    "question": 6167703632,
+    "commentUrl": "https://github.com/yigini/soilfer-lims/issues/209#issuecomment-6167740581",
+    "createdUtc": "2026-10-14T11:54:20Z",
+    "nativeHandoff": {
+      "deliveryObservedNoLaterThanUtc": "2026-10-14T11:54:20Z",
+      "replyObservedNoLaterThanUtc": "2026-10-14T11:54:53Z",
+      "exactCaptureTimeAvailable": false,
+      "window": {
+        "id": 5311708,
+        "app": "Claude_pzs8sxrjxfjjc!Claude",
+        "project": "LIMS Audit",
+        "thread": "Lab workflow audit and plan"
+      },
+      "oneVisibleProjectSelection": true,
+      "freshDelayedAuditStateVerified": true,
+      "rightComposerInitiallyEmpty": true,
+      "focusCaretBeforeTyping": true,
+      "draftHeadAndEndInspected": true,
+      "returnKeyCount": 1,
+      "actualSentBubbleVerified": true,
+      "rightComposerEmptyAfter": true,
+      "claudioStateAtSend": "Hatching",
+      "centreHumanDraft": "can you go and ask Pip",
+      "humanDraftPreserved": true,
+      "cardsAnswered": false,
+      "sentOnce": true,
+      "finalAuditRequest": false
+    },
+    "newAmendmentOrderStepAuthorized": false,
+    "runtimeGuardRelaxation": false,
+    "actualProductionCountsCollected": false,
+    "approvedAmendmentNonzeroListRequiresStop": true,
+    "newIntakeRollbackTestRequired": true,
+    "sourceAndFixtureChangesAtRetention": 0,
+    "productionOperations": 0
+  },
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-approved-orphan-decisions-6167740581/answer-original.json": {
+      "bytes": 6592,
+      "sha256": "d8330b7abe54fad089799a712109861d5c5bf65d534112846617516a69e47030"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-orphan-decisions-6167740581/answer-original.md": {
+      "bytes": 2860,
+      "sha256": "462ca81baa54c8178cc37c00bb8b7ad1047fe78ad11b6a8e6bf540087efcde9b"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-orphan-decisions-6167740581/decision-and-native-record.json": {
+      "bytes": 1456,
+      "sha256": "25bbefd2c7b7d0ff02138c13fdce571fdd747acb3c0011d34a3f4ad710cb4c20"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-orphan-decisions-6167740581/issue209-original.json": {
+      "bytes": 8349,
+      "sha256": "f85b58e1ecf70424447232ebdaf8591da4c83cc1bd5763682cef4062d76079b5"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-orphan-decisions-6167740581/main-original.json": {
+      "bytes": 336,
+      "sha256": "e0c8d4117149b05e499ad0abfd6f0456aed24d869f784317aa0c1072415e39c9"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-orphan-decisions-6167740581/native-handoff-actual-text.txt": {
+      "bytes": 1510,
+      "sha256": "840f673e889fdb02ca9edd6b6b3ed87f80f7429cda2bc7bed4034f5672ac0696"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-orphan-decisions-6167740581/question-original.json": {
+      "bytes": 4776,
+      "sha256": "2b6144179c8b096a956505fa75e848f1036a27989741284cb833fa00878c9737"
+    }
+  }
+}

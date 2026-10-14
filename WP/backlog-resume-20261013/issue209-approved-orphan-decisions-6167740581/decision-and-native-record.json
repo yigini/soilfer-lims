@@ -1,0 +1,40 @@
+{
+  "recordedUtc": "2026-10-14T11:57:07.219451+00:00",
+  "status": "ACTUAL_APPROVED_ORPHAN_SCOPE_ACCEPTED_BEFORE_IMPLEMENTATION",
+  "comment": 6167740581,
+  "question": 6167703632,
+  "commentUrl": "https://github.com/yigini/soilfer-lims/issues/209#issuecomment-6167740581",
+  "createdUtc": "2026-10-14T11:54:20Z",
+  "nativeHandoff": {
+    "deliveryObservedNoLaterThanUtc": "2026-10-14T11:54:20Z",
+    "replyObservedNoLaterThanUtc": "2026-10-14T11:54:53Z",
+    "exactCaptureTimeAvailable": false,
+    "window": {
+      "id": 5311708,
+      "app": "Claude_pzs8sxrjxfjjc!Claude",
+      "project": "LIMS Audit",
+      "thread": "Lab workflow audit and plan"
+    },
+    "oneVisibleProjectSelection": true,
+    "freshDelayedAuditStateVerified": true,
+    "rightComposerInitiallyEmpty": true,
+    "focusCaretBeforeTyping": true,
+    "draftHeadAndEndInspected": true,
+    "returnKeyCount": 1,
+    "actualSentBubbleVerified": true,
+    "rightComposerEmptyAfter": true,
+    "claudioStateAtSend": "Hatching",
+    "centreHumanDraft": "can you go and ask Pip",
+    "humanDraftPreserved": true,
+    "cardsAnswered": false,
+    "sentOnce": true,
+    "finalAuditRequest": false
+  },
+  "newAmendmentOrderStepAuthorized": false,
+  "runtimeGuardRelaxation": false,
+  "actualProductionCountsCollected": false,
+  "approvedAmendmentNonzeroListRequiresStop": true,
+  "newIntakeRollbackTestRequired": true,
+  "sourceAndFixtureChangesAtRetention": 0,
+  "productionOperations": 0
+}
