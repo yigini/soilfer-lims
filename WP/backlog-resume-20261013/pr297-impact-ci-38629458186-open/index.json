@@ -1,0 +1,31 @@
+{
+  "recordedUtc": "2026-10-14T20:10:36.864328+00:00",
+  "number": 297,
+  "head": "6bd516c42a07332d0b0653ed150d1526bf7e424e",
+  "tree": "638580d50f61254609de3abd42d93afc676a5727",
+  "base": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+  "run": 38629458186,
+  "attempt": 1,
+  "status": "OPEN_METADATA_ONLY",
+  "runStatus": "in_progress",
+  "conclusion": null,
+  "expectedSuites": 370,
+  "expectedTests": 5649,
+  "bodyBytes": 16874,
+  "closingReferences": [],
+  "readyLabelAbsent": true,
+  "newReadyNoticeSent": false,
+  "newFinalNativeHandoffSent": false,
+  "actualNewHeadAuditPass": false,
+  "ciDispatches": 0,
+  "productionOperations": 0,
+  "nativeReadonlyObservation": {
+    "windowId": 7867734,
+    "project": "LIMS Audit",
+    "thread": "Lab workflow audit and plan",
+    "latestActualReply": "Old-head audit failed on two report points; each needs a test; nothing needed from YY",
+    "rightComposerEmpty": true,
+    "centreHumanDraft": "can you go and ask Pip",
+    "inputOrMessageSentAtThisBoundary": false
+  }
+}
