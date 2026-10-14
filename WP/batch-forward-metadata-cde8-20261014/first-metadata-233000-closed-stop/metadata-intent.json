@@ -1,0 +1,8 @@
+{
+  "status": "FIRST_METADATA_CAPTURE_ATTEMPTED_ONCE",
+  "startedUtc": "2026-10-14T23:43:20.193763+00:00",
+  "scope": "READONLY_FORWARD_METADATA_EVIDENCE_ONLY_NO_ADOPTION",
+  "sourceReviewId": 6180876636,
+  "neverReplay": true,
+  "imageEligibility": false
+}

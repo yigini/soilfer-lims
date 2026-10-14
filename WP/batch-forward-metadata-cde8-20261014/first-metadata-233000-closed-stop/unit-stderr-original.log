@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z/collect_forward_metadata.py", line 101, in <module>
+    if __name__=='__main__':main()
+  File "/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z/collect_forward_metadata.py", line 100, in main
+    require(record['status']=='READONLY_METADATA_EVIDENCE_CAPTURED_NOT_ADOPTED','Incomplete metadata; keep image excluded and all evidence, never replay')
+  File "/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z/forward_metadata_contract.py", line 27, in require
+    if not v:raise RuntimeError(m)
+RuntimeError: Incomplete metadata; keep image excluded and all evidence, never replay

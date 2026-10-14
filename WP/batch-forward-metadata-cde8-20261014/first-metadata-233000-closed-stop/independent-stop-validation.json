@@ -1,0 +1,23 @@
+{
+  "status": "ACTUAL_METADATA_STOP_RETAINED_IMAGE_EXCLUDED",
+  "sourceReviewId": 6180876636,
+  "toolingCommit": "0b01804f9d409d74a19472c22469824e2df95005",
+  "originalClosedUtc": "2026-10-14T23:43:21.814667+00:00",
+  "unit": "lims-workflow-batch-forward-metadata-cde8c889-20261014t233000z",
+  "invocationId": "89f0de314b2242d7a9036ffa8061bcb5",
+  "readCalls": 8,
+  "allReadCliExitCodes": 0,
+  "snapshotRows": 1526,
+  "uniqueSnapshotKeys": 1526,
+  "reviewedSnapshotBound": 80,
+  "exceedsReviewedBound": true,
+  "freshInspectMatchesFirstForensicBytes": true,
+  "referenceInspectSha256": "c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14",
+  "floorPassAllFilesystems": true,
+  "imageEligibility": false,
+  "imageAdoptionReceipts": 0,
+  "newValidatorOrSourceAuthority": null,
+  "noTruncation": true,
+  "originalFailedBuildUnchanged": true,
+  "neverReplay": true
+}

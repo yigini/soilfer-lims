@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "docker",
+    "image",
+    "inspect",
+    "sha256:1d4882f49f351a08549c79c0409f7848dbb205feef314b33432aae63ed11217b"
+  ],
+  "label": "candidate-image-inspect",
+  "exitCode": 0,
+  "timeoutOrOutputRefused": false,
+  "elapsedSeconds": 0.3061580700450577,
+  "stdout": {
+    "file": "000-candidate-image-inspect.stdout",
+    "bytes": 7229,
+    "sha256": "c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14"
+  },
+  "stderr": {
+    "file": "000-candidate-image-inspect.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

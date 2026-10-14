@@ -1,0 +1,5 @@
+2026-10-15T01:43:20.085657+0200 server systemd[1]: Starting /usr/bin/python3 -B /opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z/collect_forward_metadata.py...
+2026-10-15T01:43:20.086686+0200 server systemd[1]: Started /usr/bin/python3 -B /opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z/collect_forward_metadata.py.
+2026-10-15T01:43:21.832945+0200 server systemd[1]: lims-workflow-batch-forward-metadata-cde8c889-20261014t233000z.service: Main process exited, code=exited, status=1/FAILURE
+2026-10-15T01:43:21.833819+0200 server systemd[1]: lims-workflow-batch-forward-metadata-cde8c889-20261014t233000z.service: Failed with result 'exit-code'.
+2026-10-15T01:43:21.835721+0200 server systemd[1]: lims-workflow-batch-forward-metadata-cde8c889-20261014t233000z.service: Consumed 1.170s CPU time.

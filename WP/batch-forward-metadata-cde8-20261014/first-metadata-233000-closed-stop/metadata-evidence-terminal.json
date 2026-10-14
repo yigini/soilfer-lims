@@ -1,0 +1,254 @@
+{
+  "status": "STOP_METADATA_INCOMPLETE_IMAGE_EXCLUDED",
+  "closedUtc": "2026-10-14T23:43:21.814667+00:00",
+  "scope": "READONLY_FORWARD_METADATA_EVIDENCE_ONLY_NO_ADOPTION",
+  "candidate": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "image": "sha256:1d4882f49f351a08549c79c0409f7848dbb205feef314b33432aae63ed11217b",
+  "toolingCommit": "0b01804f9d409d74a19472c22469824e2df95005",
+  "sourceReviewId": 6180876636,
+  "elapsedSeconds": 1.6200007100123912,
+  "filesystemsBefore": {
+    "/opt/lims": {
+      "device": 64769,
+      "freeBytes": 58723889152
+    },
+    "/var/lib/docker": {
+      "device": 64769,
+      "freeBytes": 58723889152
+    },
+    "/var/lib/containerd": {
+      "device": 64769,
+      "freeBytes": 58723889152
+    }
+  },
+  "filesystemsAfter": {
+    "/opt/lims": {
+      "device": 64769,
+      "freeBytes": 58723008512
+    },
+    "/var/lib/docker": {
+      "device": 64769,
+      "freeBytes": 58723008512
+    },
+    "/var/lib/containerd": {
+      "device": 64769,
+      "freeBytes": 58723008512
+    }
+  },
+  "reserveFloorBytes": 10556150894,
+  "originalResidualBytes": 3609116672,
+  "unexplainedAbortBytes": 500000000,
+  "commands": [
+    {
+      "argv": [
+        "docker",
+        "image",
+        "inspect",
+        "sha256:1d4882f49f351a08549c79c0409f7848dbb205feef314b33432aae63ed11217b"
+      ],
+      "label": "candidate-image-inspect",
+      "exitCode": 0,
+      "timeoutOrOutputRefused": false,
+      "elapsedSeconds": 0.3061580700450577,
+      "stdout": {
+        "file": "000-candidate-image-inspect.stdout",
+        "bytes": 7229,
+        "sha256": "c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14"
+      },
+      "stderr": {
+        "file": "000-candidate-image-inspect.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "docker",
+        "info",
+        "--format",
+        "{{.DockerRootDir}}"
+      ],
+      "label": "docker-root",
+      "exitCode": 0,
+      "timeoutOrOutputRefused": false,
+      "elapsedSeconds": 0.21002778405090794,
+      "stdout": {
+        "file": "001-docker-root.stdout",
+        "bytes": 16,
+        "sha256": "de06adb1b989dfb4bc336424e31d05b78070d845ebf0b62793726992afe13996"
+      },
+      "stderr": {
+        "file": "001-docker-root.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "docker",
+        "info",
+        "--format",
+        "{{.Driver}}"
+      ],
+      "label": "docker-driver",
+      "exitCode": 0,
+      "timeoutOrOutputRefused": false,
+      "elapsedSeconds": 0.3298483450198546,
+      "stdout": {
+        "file": "002-docker-driver.stdout",
+        "bytes": 10,
+        "sha256": "9e80928e56e3b3fbb2783fab6783fbad2845ed7dc7b018629b8f0e31b9e2bbb7"
+      },
+      "stderr": {
+        "file": "002-docker-driver.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "docker",
+        "info",
+        "--format",
+        "{{json .DriverStatus}}"
+      ],
+      "label": "docker-driver-status",
+      "exitCode": 0,
+      "timeoutOrOutputRefused": false,
+      "elapsedSeconds": 0.10400274704443291,
+      "stdout": {
+        "file": "003-docker-driver-status.stdout",
+        "bytes": 49,
+        "sha256": "375efec34cde40c98b06ac3e9706b79cc21a8849fadda54740af1f3834fad8f4"
+      },
+      "stderr": {
+        "file": "003-docker-driver-status.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "ctr",
+        "--address",
+        "/run/containerd/containerd.sock",
+        "namespaces",
+        "list"
+      ],
+      "label": "containerd-namespaces",
+      "exitCode": 0,
+      "timeoutOrOutputRefused": false,
+      "elapsedSeconds": 0.08457390399416909,
+      "stdout": {
+        "file": "004-containerd-namespaces.stdout",
+        "bytes": 63,
+        "sha256": "9a6378885e121acb3aea8a09d02a3c2c08588568cac3282fa2c0fbbc09ec49ce"
+      },
+      "stderr": {
+        "file": "004-containerd-namespaces.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "ctr",
+        "--address",
+        "/run/containerd/containerd.sock",
+        "--namespace",
+        "moby",
+        "images",
+        "list"
+      ],
+      "label": "moby-images",
+      "exitCode": 0,
+      "timeoutOrOutputRefused": false,
+      "elapsedSeconds": 0.231847625982482,
+      "stdout": {
+        "file": "005-moby-images.stdout",
+        "bytes": 10150,
+        "sha256": "5e0aa3e09c8e30f25c9e7ebc270e79039add0ea812410c6c0a2bd5f7c9766c30"
+      },
+      "stderr": {
+        "file": "005-moby-images.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "ctr",
+        "--address",
+        "/run/containerd/containerd.sock",
+        "--namespace",
+        "moby",
+        "content",
+        "list"
+      ],
+      "label": "moby-content",
+      "exitCode": 0,
+      "timeoutOrOutputRefused": false,
+      "elapsedSeconds": 0.12441172503167763,
+      "stdout": {
+        "file": "006-moby-content.stdout",
+        "bytes": 536615,
+        "sha256": "f31d21efa33ab7ca90e9579d95ff8257c61ff6f35a565d74b0c01b82713d4856"
+      },
+      "stderr": {
+        "file": "006-moby-content.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "ctr",
+        "--address",
+        "/run/containerd/containerd.sock",
+        "--namespace",
+        "moby",
+        "snapshots",
+        "--snapshotter",
+        "overlayfs",
+        "list"
+      ],
+      "label": "moby-snapshots",
+      "exitCode": 0,
+      "timeoutOrOutputRefused": false,
+      "elapsedSeconds": 0.20506298000691459,
+      "stdout": {
+        "file": "007-moby-snapshots.stdout",
+        "bytes": 244320,
+        "sha256": "f9ac4687d7fa74206c9a598a42ffd8c05116e3224c8758e17227a01c90464461"
+      },
+      "stderr": {
+        "file": "007-moby-snapshots.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "problems": [
+    {
+      "stage": "metadata-capture",
+      "error": "RuntimeError: Snapshot inventory duplicate or exceeds bound; no truncation",
+      "required": true
+    }
+  ],
+  "originalInspectAbsent": true,
+  "forensicReferenceRole": "DISTINCT_FIRST_POST_CLOSURE_READONLY_API_RESPONSE",
+  "originalRootWrites": 0,
+  "productionDatabaseConnections": 0,
+  "volumeMounts": 0,
+  "newBuilds": 0,
+  "retags": 0,
+  "containerStarts": 0,
+  "filesystemDuCalls": 0,
+  "imageEligibility": false,
+  "imageAdoptionReceipts": 0,
+  "proofLaunches": 0,
+  "productionDeployments": 0,
+  "fullGrowthAttributionCompleted": false,
+  "newSourceReviewRequiredForAnyAdoption": true,
+  "neverReplay": true
+}

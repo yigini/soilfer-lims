@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "ctr",
+    "--address",
+    "/run/containerd/containerd.sock",
+    "namespaces",
+    "list"
+  ],
+  "label": "containerd-namespaces",
+  "exitCode": 0,
+  "timeoutOrOutputRefused": false,
+  "elapsedSeconds": 0.08457390399416909,
+  "stdout": {
+    "file": "004-containerd-namespaces.stdout",
+    "bytes": 63,
+    "sha256": "9a6378885e121acb3aea8a09d02a3c2c08588568cac3282fa2c0fbbc09ec49ce"
+  },
+  "stderr": {
+    "file": "004-containerd-namespaces.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,478 @@
+{
+  "status": "ACTUAL_METADATA_STOP_RETAINED_IMAGE_EXCLUDED",
+  "validation": {
+    "status": "ACTUAL_METADATA_STOP_RETAINED_IMAGE_EXCLUDED",
+    "sourceReviewId": 6180876636,
+    "toolingCommit": "0b01804f9d409d74a19472c22469824e2df95005",
+    "originalClosedUtc": "2026-10-14T23:43:21.814667+00:00",
+    "unit": "lims-workflow-batch-forward-metadata-cde8c889-20261014t233000z",
+    "invocationId": "89f0de314b2242d7a9036ffa8061bcb5",
+    "readCalls": 8,
+    "allReadCliExitCodes": 0,
+    "snapshotRows": 1526,
+    "uniqueSnapshotKeys": 1526,
+    "reviewedSnapshotBound": 80,
+    "exceedsReviewedBound": true,
+    "freshInspectMatchesFirstForensicBytes": true,
+    "referenceInspectSha256": "c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14",
+    "floorPassAllFilesystems": true,
+    "imageEligibility": false,
+    "imageAdoptionReceipts": 0,
+    "newValidatorOrSourceAuthority": null,
+    "noTruncation": true,
+    "originalFailedBuildUnchanged": true,
+    "neverReplay": true
+  },
+  "files": [
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/000-candidate-image-inspect.call.json",
+      "bytes": 605,
+      "sha256": "754c92b0a5245a30e94469c215a8964ddf7607996066c7a90b7e5d3ad09bb220"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/000-candidate-image-inspect.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/000-candidate-image-inspect.stdout",
+      "bytes": 7229,
+      "sha256": "c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/001-docker-root.call.json",
+      "bytes": 515,
+      "sha256": "1f8cff2e10693f545bf234fc410551bc6ea84ad70c7d180b80883ed49ccf0565"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/001-docker-root.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/001-docker-root.stdout",
+      "bytes": 16,
+      "sha256": "de06adb1b989dfb4bc336424e31d05b78070d845ebf0b62793726992afe13996"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/002-docker-driver.call.json",
+      "bytes": 513,
+      "sha256": "47b0f445792e43221a6f54e14e109279c27cef63f832faffe91229586353c67b"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/002-docker-driver.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/002-docker-driver.stdout",
+      "bytes": 10,
+      "sha256": "9e80928e56e3b3fbb2783fab6783fbad2845ed7dc7b018629b8f0e31b9e2bbb7"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/003-docker-driver-status.call.json",
+      "bytes": 546,
+      "sha256": "1fca4865645e86b2823138fb7b78f8a6ba477dde3a9e8a0bbefc84ece096630b"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/003-docker-driver-status.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/003-docker-driver-status.stdout",
+      "bytes": 49,
+      "sha256": "375efec34cde40c98b06ac3e9706b79cc21a8849fadda54740af1f3834fad8f4"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/004-containerd-namespaces.call.json",
+      "bytes": 574,
+      "sha256": "59a383ba14406ad88f0bcd9087b8a82b3287f6006d1d2d293bd0e2afa8a53c94"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/004-containerd-namespaces.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/004-containerd-namespaces.stdout",
+      "bytes": 63,
+      "sha256": "9a6378885e121acb3aea8a09d02a3c2c08588568cac3282fa2c0fbbc09ec49ce"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/005-moby-images.call.json",
+      "bytes": 572,
+      "sha256": "d55e093d47e26a5fea8998f52c9aa50d28f12f21d78d00d4a8e7a42290de14af"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/005-moby-images.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/005-moby-images.stdout",
+      "bytes": 10150,
+      "sha256": "5e0aa3e09c8e30f25c9e7ebc270e79039add0ea812410c6c0a2bd5f7c9766c30"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/006-moby-content.call.json",
+      "bytes": 579,
+      "sha256": "c293e664cc9beeeca14f31fa4ea33d235338c685ff0594127bee0db539dc3dca"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/006-moby-content.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/006-moby-content.stdout",
+      "bytes": 536615,
+      "sha256": "f31d21efa33ab7ca90e9579d95ff8257c61ff6f35a565d74b0c01b82713d4856"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/007-moby-snapshots.call.json",
+      "bytes": 625,
+      "sha256": "0189a50be12c098e975b5bf7265ada15debe1a1146b8a4458360898617932c9f"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/007-moby-snapshots.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/007-moby-snapshots.stdout",
+      "bytes": 244320,
+      "sha256": "f9ac4687d7fa74206c9a598a42ffd8c05116e3224c8758e17227a01c90464461"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/candidate-image-fresh-inspect-original.json",
+      "bytes": 7229,
+      "sha256": "c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/candidate-image.id",
+      "bytes": 71,
+      "sha256": "6bb4227f82debcf97845874330ae261d044b749819d2f2193a0fc0c3935967e3"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/closed-read-stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/collect_forward_metadata.py",
+      "bytes": 10026,
+      "sha256": "8602245e14235f5422cbed7cd42f61ce1c0e72c957f679309a802607fbde1980"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/current-main-original.json",
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/docker-build.log",
+      "bytes": 28713,
+      "sha256": "5a7736d9d36aaccafa9d98d84c3d1a537af4ee29b5255022d2565d78792db0f4"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/forward_metadata_contract.py",
+      "bytes": 10821,
+      "sha256": "6077faa59be1305c88f6c041e093a0d437662422740f29f93eca77eb01efaf7e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/independent-stop-validation.json",
+      "bytes": 877,
+      "sha256": "62e7ece4b5281719551b8438773ec11e17fda90b2cdfb4c3843fbaccc4596a6a"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/journal-original.log",
+      "bytes": 851,
+      "sha256": "49505d9cfe2dd5bf7824ee743b628203944b9b2f4e0d63c30abfb0ab7e52ba76"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/launch_forward_metadata.py",
+      "bytes": 6044,
+      "sha256": "52f83d09f2816a80f9f0ed8f2faea580a37156c5a13b33c4dd4d852561a85f0a"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/main-ci-original.json",
+      "bytes": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/metadata-evidence-terminal.json",
+      "bytes": 7138,
+      "sha256": "5bb598e4d7adaad09daf84b1481c33fa2bbb170b1c5c0c0d77bd2c594a4a311e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/metadata-input.json",
+      "bytes": 1858,
+      "sha256": "9b2f3404d1f9666509c48eafc5ff4f5cd173d7b51c1420b494c3fc0c858b851e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/metadata-intent.json",
+      "bytes": 258,
+      "sha256": "7b74222dec68e22f579583f45c01f45139d4067c955504b304f69c8444c8356f"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/original-build-intent.json",
+      "bytes": 302,
+      "sha256": "984df248ea0bbad53b1561cda8f08ab1fc500717de0e3aaed4b7452845f47b6f"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/original-closed-index.json",
+      "bytes": 445307,
+      "sha256": "7eaa2de365a1c948cd6440dfa18ab9439994c1cbd5c1d2ca6bb3ead62b657aa0"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/original-failure.json",
+      "bytes": 2047,
+      "sha256": "4474dcd30269c0710e17723e2f702114f09d48129ccc070b499aa65a69ab30c2"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/prepare_forward_metadata.py",
+      "bytes": 6104,
+      "sha256": "7ebaa9b53e8cdca1824008cd773b631d1f5c1cf08c6639fe718aa39da2cd2505"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/readonly-closed-retainer-source.py",
+      "bytes": 3720,
+      "sha256": "4be1e930cd1944d052434992f2f4fa9e691bff92ace410be601d1abfad5ac7b4"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/reference-direction-original.json",
+      "bytes": 5195,
+      "sha256": "3e5ff7910985af8de6c8294efd76612e68c2956669e8fca7b1d3ea80d353340a"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/remote-closed-original-index.json",
+      "bytes": 9125,
+      "sha256": "c97b3e3cf175f36e5a8cf97f35db192f5ada0046ffd379b22f57277ac0ed1b38"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/scope-direction-original.json",
+      "bytes": 6613,
+      "sha256": "1a199ef0023c5ba2315d038de4f5797831679f3382933d50e34336b92ffa7ddb"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/source-review-original.json",
+      "bytes": 9162,
+      "sha256": "8d1c3cd77dc96d16b256de8bd210a414531b2a30fe3069d566751d06546c473e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/tooling-source-index.json",
+      "bytes": 1664,
+      "sha256": "38dbb069d4c6fbb7d8aa8500a164a5bf9e7e1a1da675becd24882149f42ae483"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/unit-stderr-original.log",
+      "bytes": 752,
+      "sha256": "062b9eb6f780c0f16d7fe0dc85018edd9a36deb81e0accec77bec449d7765b11"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/unit-stdout-original.log",
+      "bytes": 1445,
+      "sha256": "b1ec863d797118e0dd8c61ea3e1087a656be6c84f1eae4fc4f34b5f52b75c14c"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/verify_forward_metadata_guards.py",
+      "bytes": 10789,
+      "sha256": "4eeb2305e67d5a9cd6455392a249ce78019beb781516d3fd6ec29a6cc9961ef1"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/candidate-image-fresh-inspect-original.json",
+      "bytes": 7229,
+      "sha256": "c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/candidate-image.id",
+      "bytes": 71,
+      "sha256": "6bb4227f82debcf97845874330ae261d044b749819d2f2193a0fc0c3935967e3"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/collect_forward_metadata.py",
+      "bytes": 10026,
+      "sha256": "8602245e14235f5422cbed7cd42f61ce1c0e72c957f679309a802607fbde1980"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/current-main-original.json",
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/docker-build.log",
+      "bytes": 28713,
+      "sha256": "5a7736d9d36aaccafa9d98d84c3d1a537af4ee29b5255022d2565d78792db0f4"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/forward_metadata_contract.py",
+      "bytes": 10821,
+      "sha256": "6077faa59be1305c88f6c041e093a0d437662422740f29f93eca77eb01efaf7e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/launch_forward_metadata.py",
+      "bytes": 6044,
+      "sha256": "52f83d09f2816a80f9f0ed8f2faea580a37156c5a13b33c4dd4d852561a85f0a"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/main-ci-original.json",
+      "bytes": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/metadata-input.json",
+      "bytes": 1858,
+      "sha256": "9b2f3404d1f9666509c48eafc5ff4f5cd173d7b51c1420b494c3fc0c858b851e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/original-build-intent.json",
+      "bytes": 302,
+      "sha256": "984df248ea0bbad53b1561cda8f08ab1fc500717de0e3aaed4b7452845f47b6f"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/original-closed-index.json",
+      "bytes": 445307,
+      "sha256": "7eaa2de365a1c948cd6440dfa18ab9439994c1cbd5c1d2ca6bb3ead62b657aa0"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/original-failure.json",
+      "bytes": 2047,
+      "sha256": "4474dcd30269c0710e17723e2f702114f09d48129ccc070b499aa65a69ab30c2"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/prepare_forward_metadata.py",
+      "bytes": 6104,
+      "sha256": "7ebaa9b53e8cdca1824008cd773b631d1f5c1cf08c6639fe718aa39da2cd2505"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/reference-direction-original.json",
+      "bytes": 5195,
+      "sha256": "3e5ff7910985af8de6c8294efd76612e68c2956669e8fca7b1d3ea80d353340a"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/scope-direction-original.json",
+      "bytes": 6613,
+      "sha256": "1a199ef0023c5ba2315d038de4f5797831679f3382933d50e34336b92ffa7ddb"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/source-review-original.json",
+      "bytes": 9162,
+      "sha256": "8d1c3cd77dc96d16b256de8bd210a414531b2a30fe3069d566751d06546c473e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/tooling-source-index.json",
+      "bytes": 1664,
+      "sha256": "38dbb069d4c6fbb7d8aa8500a164a5bf9e7e1a1da675becd24882149f42ae483"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z/verify_forward_metadata_guards.py",
+      "bytes": 10789,
+      "sha256": "4eeb2305e67d5a9cd6455392a249ce78019beb781516d3fd6ec29a6cc9961ef1"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z-launch/create-new-metadata-root.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z-launch/create-new-metadata-root.stdout",
+      "bytes": 77,
+      "sha256": "e88ff8fb4c49e7a46e2592d10eae4b3a15a2317e5e8de5e08283697d9b95b9f5"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z-launch/launch-intent.json",
+      "bytes": 495,
+      "sha256": "6b67e567471841df2b8f19b63ca950881aaff53f73ed537194b59729a3dc9a13"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z-launch/launch-record.json",
+      "bytes": 2854,
+      "sha256": "0cc38343b432e6c65c679562bf3e721d7ac38c0a725917a463b3ffffb86128b7"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z-launch/upload-metadata-package.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z-launch/upload-metadata-package.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z-launch/verify-and-launch-new-metadata-unit.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/metadata-package-workflow-batch-forward-metadata-cde8c889-20261014T233000Z-launch/verify-and-launch-new-metadata-unit.stdout",
+      "bytes": 354,
+      "sha256": "8feba54164bc9aaddeb38b4caa9d0c63a7888527ea872ba8c4a18ac5763c68e3"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/reviewed-package-preparation-once/command-original.json",
+      "bytes": 543,
+      "sha256": "6465d7ea75c64367cf7343bcb577fb429d0e5ee385e4a687a738654e6978d87e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/reviewed-package-preparation-once/exit-original.json",
+      "bytes": 120,
+      "sha256": "abfe33f3928ec8b50f2ec8496f5d6eebb90bf07117d30120ef68cbe9de535101"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/reviewed-package-preparation-once/package-validation.json",
+      "bytes": 3510,
+      "sha256": "0892fcbe354e5e37fdb3d05abd5099007017423f04d0f11a43853662c1e1401c"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/reviewed-package-preparation-once/stderr-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/reviewed-package-preparation-once/stdout-original.log",
+      "bytes": 419,
+      "sha256": "2d62702d39a2c3370dd422246d09e6e87f6d48ccd6c32621735ab62393adf14c"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/reviewed-launch-execution-once/command-original.json",
+      "bytes": 667,
+      "sha256": "1b3db09fe570c4b188430432e68079cd9554b992737bd550725238832dfbb971"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/reviewed-launch-execution-once/exit-original.json",
+      "bytes": 139,
+      "sha256": "b4e031b2e63603ddff6400114b5ac077fc7ec10048ce7fb49a604f90256e928d"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/reviewed-launch-execution-once/stderr-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/reviewed-launch-execution-once/stdout-original.log",
+      "bytes": 2682,
+      "sha256": "975106d3a23437d9fb9d04eecb04c8af19362ceafbe9199a545d54933d473ecc"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/execute-reviewed-forward-metadata-package-once.py",
+      "bytes": 2875,
+      "sha256": "0eb1cf6cd8d610ad2a4030758f9cf1f7b2de267a8b1e02d2164b5f42e0d183e1"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/execute-reviewed-forward-metadata-launch-once.py",
+      "bytes": 2576,
+      "sha256": "3bd602eac5cfb793291ef82bff14365d25dcb6d6b943665814147340c3dae7a1"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-forward-metadata-233000-closed-stop-once.py",
+      "bytes": 8911,
+      "sha256": "c1d16e5a3962b29427f86dfc4151bd96ee52d65b428ae85d639630b013972404"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 419621,
+      "sha256": "0e4f1e8ab074efbe99d073f8a8107bb586d5c3d742a85e5a4f825bd2fba476c7"
+    }
+  ]
+}

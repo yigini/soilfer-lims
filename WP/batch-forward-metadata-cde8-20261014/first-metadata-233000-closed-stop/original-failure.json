@@ -1,0 +1,73 @@
+{
+  "closedUtc": "2026-10-14T22:38:24.457022+00:00",
+  "head": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "tree": "638580d50f61254609de3abd42d93afc676a5727",
+  "scope": "BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME",
+  "exitCode": 0,
+  "error": "Unexplained disk growth reached the 500MB abort boundary",
+  "elapsedSeconds": 297.4958720700233,
+  "freeBytesBefore": {
+    "/opt/lims": 62403399680,
+    "/var/lib/docker": 62403399680
+  },
+  "freeBytesAfter": {
+    "/opt/lims": 58728148992,
+    "/var/lib/docker": 58728148992
+  },
+  "reserveFloorBytes": 10556150894,
+  "buildAllocationReserveBytes": 4294967296,
+  "diskGrowth": {
+    "policy": "OWNED_BUILD_ROOT_AND_DISJOINT_DOCKER_ALLOCATIONS",
+    "beforeAllocations": {
+      "/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z": {
+        "bytes": 41385984,
+        "device": 64769
+      },
+      "/var/lib/docker/buildkit": {
+        "bytes": 94449664,
+        "device": 64769
+      },
+      "/var/lib/docker/overlay2": {
+        "bytes": 0,
+        "device": 64769
+      },
+      "/var/lib/docker/image": {
+        "bytes": 0,
+        "device": 64769
+      },
+      "/var/lib/docker/containerd": {
+        "bytes": 0,
+        "device": 64769
+      }
+    },
+    "afterAllocations": {
+      "/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z": {
+        "bytes": 107520000,
+        "device": 64769
+      },
+      "/var/lib/docker/buildkit": {
+        "bytes": 94449664,
+        "device": 64769
+      },
+      "/var/lib/docker/overlay2": {
+        "bytes": 0,
+        "device": 64769
+      },
+      "/var/lib/docker/image": {
+        "bytes": 0,
+        "device": 64769
+      },
+      "/var/lib/docker/containerd": {
+        "bytes": 0,
+        "device": 64769
+      }
+    },
+    "refusal": "Unexplained disk growth reached the 500MB abort boundary"
+  },
+  "productionDatabaseMounts": 0,
+  "productionDatabaseConnections": 0,
+  "proofLaunches": 0,
+  "productionDeployments": 0,
+  "neverRetry": true,
+  "status": "FAILED_OR_RESERVE_REFUSED_BUILD_ONLY_RETAIN_ALL"
+}

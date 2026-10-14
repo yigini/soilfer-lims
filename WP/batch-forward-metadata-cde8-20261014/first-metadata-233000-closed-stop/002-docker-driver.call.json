@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "docker",
+    "info",
+    "--format",
+    "{{.Driver}}"
+  ],
+  "label": "docker-driver",
+  "exitCode": 0,
+  "timeoutOrOutputRefused": false,
+  "elapsedSeconds": 0.3298483450198546,
+  "stdout": {
+    "file": "002-docker-driver.stdout",
+    "bytes": 10,
+    "sha256": "9e80928e56e3b3fbb2783fab6783fbad2845ed7dc7b018629b8f0e31b9e2bbb7"
+  },
+  "stderr": {
+    "file": "002-docker-driver.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
