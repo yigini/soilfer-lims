@@ -1,0 +1,15 @@
+{
+  "onlyChangedFrozenPath": "server/data/help/RELEASE_MANIFEST_v1.json",
+  "beforeSha256": "7a64bad21d79ad87425e7797db7e34dc4a7ac5f26c6d5e753b4e15114c510cb5",
+  "afterSha256": "49aed477e8238a619960386fcb419b50cd44cb527070c904908f37ca7f5c3f80",
+  "beforeArtifactBytesRetained": false,
+  "beforeArtifactShaRetained": true,
+  "afterArtifactBytesRetained": true,
+  "stockTest": "help_release_rollout.test.js beforeAll calls publishHelpRelease({dryRun:false})",
+  "stockPublisher": "publish_help_release.cjs writes RELEASE_MANIFEST_v1.json with publication timestamp and test revision UUIDs",
+  "stockHelpSuitePassed": true,
+  "other1309FrozenInputsUnchanged": true,
+  "generatedManifestRestoredOrStagedAsApplication": false,
+  "applicationSummaryStillSourceUnchangedFalse": true,
+  "productionOperations": 0
+}

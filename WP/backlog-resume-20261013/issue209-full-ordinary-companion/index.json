@@ -1,0 +1,188 @@
+{
+  "retainedUtc": "2026-10-14T11:45:00.561352+00:00",
+  "status": "CLOSED_FULL_ORDINARY_FAILURE",
+  "summary": {
+    "closedUtc": "2026-10-14T11:39:13.632135+00:00",
+    "exit": 1,
+    "suites": 370,
+    "tests": 5630,
+    "passedSuites": 305,
+    "passedTests": 4980,
+    "failed": 650,
+    "failedSuites": 65,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": false,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "visibleAssetsUnchanged": true,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "derivedOutput": {
+    "onlyChangedFrozenPath": "server/data/help/RELEASE_MANIFEST_v1.json",
+    "beforeSha256": "7a64bad21d79ad87425e7797db7e34dc4a7ac5f26c6d5e753b4e15114c510cb5",
+    "afterSha256": "49aed477e8238a619960386fcb419b50cd44cb527070c904908f37ca7f5c3f80",
+    "beforeArtifactBytesRetained": false,
+    "beforeArtifactShaRetained": true,
+    "afterArtifactBytesRetained": true,
+    "stockTest": "help_release_rollout.test.js beforeAll calls publishHelpRelease({dryRun:false})",
+    "stockPublisher": "publish_help_release.cjs writes RELEASE_MANIFEST_v1.json with publication timestamp and test revision UUIDs",
+    "stockHelpSuitePassed": true,
+    "other1309FrozenInputsUnchanged": true,
+    "generatedManifestRestoredOrStagedAsApplication": false,
+    "applicationSummaryStillSourceUnchangedFalse": true,
+    "productionOperations": 0
+  },
+  "sourceDraftPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/security/wiring.test.js"
+  ],
+  "actualApplicationDiffCount": 57,
+  "scopeComments": [
+    6163271808,
+    6166518424
+  ],
+  "originalPreparedTerminalHelperUnusedSuperseded": "retain-issue209-full-companion-terminal-once.py",
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/command.json": {
+      "bytes": 1252,
+      "sha256": "04a0a4dff56b0fd3cd83956283cdbd1953a5710e09157d35e173460f795c2ca8"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/config-original.json": {
+      "bytes": 6856,
+      "sha256": "9786045eadd82b4f4461be3944981503b0d27c440e6685d7bc1840f1e58c91bb"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/derived-output-provenance.json": {
+      "bytes": 807,
+      "sha256": "70a13abd8402e5f7ab3fd5569eedc6865ed4bcc58d54e67b72a5c6a2ee4cabad"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/help-manifest-after-original.json": {
+      "bytes": 94717,
+      "sha256": "49aed477e8238a619960386fcb419b50cd44cb527070c904908f37ca7f5c3f80"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/help-publisher-source-original.cjs": {
+      "bytes": 7615,
+      "sha256": "9c5123c7fb0d097859abe719c35a31c08888790f2e592e779a08fa24404e1681"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/help-rollout-source-original.js": {
+      "bytes": 8675,
+      "sha256": "a5c6d775c9ac42a0c9bd56bd119ea6457214d1ef8e0574ddc001281a701a71ff"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "90dd751609ef514b811025afbcfc7cc4b23c4560a3c8698bfab284ed876e9b2b"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/open-metadata.json": {
+      "bytes": 283,
+      "sha256": "1e3caab493d5e1bcb01cae885c5add1851a8c7ca0c42545b9d08ee146891db43"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/physical-retained-terminal-index.json": {
+      "bytes": 389209,
+      "sha256": "4bd48c67f7a300eb05481e630d939bc78e62489140109db9edb39d99892b4493"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/physical-retention-original.jsonl": {
+      "bytes": 320606,
+      "sha256": "e4749393b3ea517d2dcc6c7a33be2698bc233167fc17691296821954618fa857"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/report-original.json": {
+      "bytes": 4870072,
+      "sha256": "08b89f29f1fc882bfee9cb30abb593cef3a988f06aec6173d0323b57d420fc1b"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/source-after.json": {
+      "bytes": 158306,
+      "sha256": "36639f09acf087d121c4b29a8623122194f3d4785541fb6964b88d54c7860ba7"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/source-before.json": {
+      "bytes": 158306,
+      "sha256": "60f11a465cdd7eeef91f0c8b1bb9865a75fe6e85ec7e0c8c9030bc87200d5fad"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/stderr-original.log": {
+      "bytes": 4366761,
+      "sha256": "941d9159217f9fe5b19f0b7d0d97295ca8d8ffef2f9fe31c47c6a05ce017efe4"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/stdout-original.log": {
+      "bytes": 908,
+      "sha256": "2aef43c1e7e748d84605218f5a7bfce52f3c3066fbe6c4270f16658542f5c5b2"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/summary.json": {
+      "bytes": 464,
+      "sha256": "e17a016c1c79fb5f2b5ac9892ebfb354e67c0add2465b83d5044dccf786da5ef"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/visible-local-storage.json": {
+      "bytes": 10276,
+      "sha256": "1165473ba861906bd757950e8ec81ac29201d8c76892f176959cc3476be76d41"
+    }
+  }
+}
