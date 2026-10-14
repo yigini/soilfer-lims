@@ -1,0 +1,149 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 10da40eb-45aa-4b93-8198-036fb72b6437 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dbe1d88e-bb03-4485-aac8-5ddab7dcc3d0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_profilerouteslab (Lab: PROFILE-FOREIGN-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleAmendmentCommandService.js:12:8)
+      at services/sampleAmendmentCommandService.js:28:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.request (controllers/sampleAmendmentController.js:9:22)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 10da40eb-45aa-4b93-8198-036fb72b6437 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_profileforeignlab (Lab: PROFILE-FOREIGN-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleAmendmentCommandService.js:12:8)
+      at services/sampleAmendmentCommandService.js:28:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at exports.request (controllers/sampleAmendmentController.js:9:22)
+
+  console.log
+    [AUTH] Verifying token for ID: b8cc1b58-4811-4464-953f-423b4ad6315c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/profile_identity_routes.test.js
+  Mounted profile correction, scope and immutable export contracts
+    √ foreign manager cannot edit; valid receiving capture records server actor and preserves independent site (40 ms)
+    √ released canonical and equivalent alias edits cannot bypass the amendment (29 ms)
+    √ project movement atomically freezes the exact released legacy key (10 ms)
+    √ reasoned correction updates current export and journal while frozen snapshot and results stay unchanged (42 ms)
+    √ amendment replay is idempotent and a changed payload is a recoverable conflict (12 ms)
+    √ a past receipt does not bypass current laboratory scope (40 ms)
+    √ stale profile revision, missing reason and foreign amendments do not mutate state (13 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total
+Snapshots:   0 total
+Time:        1.938 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\profile_identity_routes.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-profile-scope-workspace-context-singles\01-profile_identity_routes.test\report-original.json

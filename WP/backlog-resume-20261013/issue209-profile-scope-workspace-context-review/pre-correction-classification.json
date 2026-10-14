@@ -1,0 +1,264 @@
+{
+  "createdUtc": "2026-10-14T17:05:38.496436+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 17,
+  "cases": [
+    {
+      "suite": "profile_identity_routes.test.js",
+      "test": "Mounted profile correction, scope and immutable export contracts foreign manager cannot edit; valid receiving capture records server actor and preserves independent site",
+      "originalFailureSha256": "9e39f7f5d86d7fc877e0462613271ed2d7531446b09c962feafee38b8849a7ca",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Only NEW owned released APPROVED/ACCEPTED PH history gets a usable legacy NULL order before its unchanged6.4 witness. Draft and project-move samples remain untouched/orderless. Canonical/alias amendment restrictions, distinct authoriser, identity values, frozen export snapshot/journal, clerical key replay/conflict/current-scope/missing-reason/stale-revision checks remain byte-identical. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "profile_identity_routes.test.js",
+      "test": "Mounted profile correction, scope and immutable export contracts released canonical and equivalent alias edits cannot bypass the amendment",
+      "originalFailureSha256": "9e39f7f5d86d7fc877e0462613271ed2d7531446b09c962feafee38b8849a7ca",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Only NEW owned released APPROVED/ACCEPTED PH history gets a usable legacy NULL order before its unchanged6.4 witness. Draft and project-move samples remain untouched/orderless. Canonical/alias amendment restrictions, distinct authoriser, identity values, frozen export snapshot/journal, clerical key replay/conflict/current-scope/missing-reason/stale-revision checks remain byte-identical. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "profile_identity_routes.test.js",
+      "test": "Mounted profile correction, scope and immutable export contracts project movement atomically freezes the exact released legacy key",
+      "originalFailureSha256": "9e39f7f5d86d7fc877e0462613271ed2d7531446b09c962feafee38b8849a7ca",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Only NEW owned released APPROVED/ACCEPTED PH history gets a usable legacy NULL order before its unchanged6.4 witness. Draft and project-move samples remain untouched/orderless. Canonical/alias amendment restrictions, distinct authoriser, identity values, frozen export snapshot/journal, clerical key replay/conflict/current-scope/missing-reason/stale-revision checks remain byte-identical. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "profile_identity_routes.test.js",
+      "test": "Mounted profile correction, scope and immutable export contracts reasoned correction updates current export and journal while frozen snapshot and results stay unchanged",
+      "originalFailureSha256": "9e39f7f5d86d7fc877e0462613271ed2d7531446b09c962feafee38b8849a7ca",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Only NEW owned released APPROVED/ACCEPTED PH history gets a usable legacy NULL order before its unchanged6.4 witness. Draft and project-move samples remain untouched/orderless. Canonical/alias amendment restrictions, distinct authoriser, identity values, frozen export snapshot/journal, clerical key replay/conflict/current-scope/missing-reason/stale-revision checks remain byte-identical. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "profile_identity_routes.test.js",
+      "test": "Mounted profile correction, scope and immutable export contracts amendment replay is idempotent and a changed payload is a recoverable conflict",
+      "originalFailureSha256": "9e39f7f5d86d7fc877e0462613271ed2d7531446b09c962feafee38b8849a7ca",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Only NEW owned released APPROVED/ACCEPTED PH history gets a usable legacy NULL order before its unchanged6.4 witness. Draft and project-move samples remain untouched/orderless. Canonical/alias amendment restrictions, distinct authoriser, identity values, frozen export snapshot/journal, clerical key replay/conflict/current-scope/missing-reason/stale-revision checks remain byte-identical. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "profile_identity_routes.test.js",
+      "test": "Mounted profile correction, scope and immutable export contracts a past receipt does not bypass current laboratory scope",
+      "originalFailureSha256": "9e39f7f5d86d7fc877e0462613271ed2d7531446b09c962feafee38b8849a7ca",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Only NEW owned released APPROVED/ACCEPTED PH history gets a usable legacy NULL order before its unchanged6.4 witness. Draft and project-move samples remain untouched/orderless. Canonical/alias amendment restrictions, distinct authoriser, identity values, frozen export snapshot/journal, clerical key replay/conflict/current-scope/missing-reason/stale-revision checks remain byte-identical. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "profile_identity_routes.test.js",
+      "test": "Mounted profile correction, scope and immutable export contracts stale profile revision, missing reason and foreign amendments do not mutate state",
+      "originalFailureSha256": "9e39f7f5d86d7fc877e0462613271ed2d7531446b09c962feafee38b8849a7ca",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Only NEW owned released APPROVED/ACCEPTED PH history gets a usable legacy NULL order before its unchanged6.4 witness. Draft and project-move samples remain untouched/orderless. Canonical/alias amendment restrictions, distinct authoriser, identity values, frozen export snapshot/journal, clerical key replay/conflict/current-scope/missing-reason/stale-revision checks remain byte-identical. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "api_key_scoping_isolation.test.js",
+      "test": "API Key Scoping Isolation Contract (SL-22 Security Fix) 1. Unscoped API key (absent labs) is strictly DENIED across all shared endpoints",
+      "originalFailureSha256": "ad78e6f06aff4de4c3e19684257c481b52fbf40673351565327a975f24d934a6",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "125"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Two explicit existing accepted pH owners in NEW owned GTM/MOZ history get separate matching legacy NULL orders before their two witnesses. Raw pH alias,6.5/5.2, units and lab/keys/scopes unchanged; no Lab row manufactured. Absent-scope empty feeds/detail404, cross-lab isolation and exact foreign WorkItem/attempt non-disclosure remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "api_key_scoping_isolation.test.js",
+      "test": "API Key Scoping Isolation Contract (SL-22 Security Fix) 2. Key scoped to LAB-GTM can read GTM data but CANNOT read LAB-MOZ data",
+      "originalFailureSha256": "ad78e6f06aff4de4c3e19684257c481b52fbf40673351565327a975f24d934a6",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "125"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Two explicit existing accepted pH owners in NEW owned GTM/MOZ history get separate matching legacy NULL orders before their two witnesses. Raw pH alias,6.5/5.2, units and lab/keys/scopes unchanged; no Lab row manufactured. Absent-scope empty feeds/detail404, cross-lab isolation and exact foreign WorkItem/attempt non-disclosure remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "api_key_scoping_isolation.test.js",
+      "test": "API Key Scoping Isolation Contract (SL-22 Security Fix) GTM key never exposes the other laboratory WorkItem or attempt on shared endpoints",
+      "originalFailureSha256": "ad78e6f06aff4de4c3e19684257c481b52fbf40673351565327a975f24d934a6",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "125"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Two explicit existing accepted pH owners in NEW owned GTM/MOZ history get separate matching legacy NULL orders before their two witnesses. Raw pH alias,6.5/5.2, units and lab/keys/scopes unchanged; no Lab row manufactured. Absent-scope empty feeds/detail404, cross-lab isolation and exact foreign WorkItem/attempt non-disclosure remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "api_key_scoping_isolation.test.js",
+      "test": "API Key Scoping Isolation Contract (SL-22 Security Fix) MOZ key never exposes the other laboratory WorkItem or attempt on shared endpoints",
+      "originalFailureSha256": "ad78e6f06aff4de4c3e19684257c481b52fbf40673351565327a975f24d934a6",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "125"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Two explicit existing accepted pH owners in NEW owned GTM/MOZ history get separate matching legacy NULL orders before their two witnesses. Raw pH alias,6.5/5.2, units and lab/keys/scopes unchanged; no Lab row manufactured. Absent-scope empty feeds/detail404, cross-lab isolation and exact foreign WorkItem/attempt non-disclosure remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "workspace_projection_p2.test.js",
+      "test": "Package P2: Sample Workspace Projection & Transactional Foundations 1. GET /api/samples/:id/workspace returns unified 5-tab projection",
+      "originalFailureSha256": "16236ac5bd18ea9cc96910a63eb490689acbd1154a00a7c9a00604ae6f7cec08",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "90"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Projection NEW retained SUBMITTED PH witness gets legacy NULL lines for existing PH_H2O/VIS_NIR owners only, no operational lines or spectral evidence. Missing accepted spectral evidence/history gap remains unchanged. First-revision1 order test is separately assembled as an owned runtime-reachable48d missing-order shape: fresh PROCESSING sample with same two logical owners/statuses/aliases and no order/measurement. Same original reasoned request/remediation assertions run on that fresh fixture, then original projection sample restored in finally before custody test. No revision0 invention, no old version assertion change, no runtime/backfill repair. Original EXPECTED/reception/cross-lab/projection counts/history-gap/keyed order replay/custody audits unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "workspace_projection_p2.test.js",
+      "test": "Package P2: Sample Workspace Projection & Transactional Foundations 2. Accurately detects S003-style historical evidence gap on unverified accepted items",
+      "originalFailureSha256": "16236ac5bd18ea9cc96910a63eb490689acbd1154a00a7c9a00604ae6f7cec08",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "90"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Projection NEW retained SUBMITTED PH witness gets legacy NULL lines for existing PH_H2O/VIS_NIR owners only, no operational lines or spectral evidence. Missing accepted spectral evidence/history gap remains unchanged. First-revision1 order test is separately assembled as an owned runtime-reachable48d missing-order shape: fresh PROCESSING sample with same two logical owners/statuses/aliases and no order/measurement. Same original reasoned request/remediation assertions run on that fresh fixture, then original projection sample restored in finally before custody test. No revision0 invention, no old version assertion change, no runtime/backfill repair. Original EXPECTED/reception/cross-lab/projection counts/history-gap/keyed order replay/custody audits unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "workspace_projection_p2.test.js",
+      "test": "Package P2: Sample Workspace Projection & Transactional Foundations 3. Expected sample shows \"Not yet received\" without fabricating received date",
+      "originalFailureSha256": "16236ac5bd18ea9cc96910a63eb490689acbd1154a00a7c9a00604ae6f7cec08",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "90"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Projection NEW retained SUBMITTED PH witness gets legacy NULL lines for existing PH_H2O/VIS_NIR owners only, no operational lines or spectral evidence. Missing accepted spectral evidence/history gap remains unchanged. First-revision1 order test is separately assembled as an owned runtime-reachable48d missing-order shape: fresh PROCESSING sample with same two logical owners/statuses/aliases and no order/measurement. Same original reasoned request/remediation assertions run on that fresh fixture, then original projection sample restored in finally before custody test. No revision0 invention, no old version assertion change, no runtime/backfill repair. Original EXPECTED/reception/cross-lab/projection counts/history-gap/keyed order replay/custody audits unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "workspace_projection_p2.test.js",
+      "test": "Package P2: Sample Workspace Projection & Transactional Foundations 4. Cross-lab access is strictly denied (403)",
+      "originalFailureSha256": "16236ac5bd18ea9cc96910a63eb490689acbd1154a00a7c9a00604ae6f7cec08",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "90"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Projection NEW retained SUBMITTED PH witness gets legacy NULL lines for existing PH_H2O/VIS_NIR owners only, no operational lines or spectral evidence. Missing accepted spectral evidence/history gap remains unchanged. First-revision1 order test is separately assembled as an owned runtime-reachable48d missing-order shape: fresh PROCESSING sample with same two logical owners/statuses/aliases and no order/measurement. Same original reasoned request/remediation assertions run on that fresh fixture, then original projection sample restored in finally before custody test. No revision0 invention, no old version assertion change, no runtime/backfill repair. Original EXPECTED/reception/cross-lab/projection counts/history-gap/keyed order replay/custody audits unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "workspace_projection_p2.test.js",
+      "test": "Package P2: Sample Workspace Projection & Transactional Foundations 5. POST /api/samples/:id/orders applies revision atomically and records receipt",
+      "originalFailureSha256": "16236ac5bd18ea9cc96910a63eb490689acbd1154a00a7c9a00604ae6f7cec08",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "90"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Projection NEW retained SUBMITTED PH witness gets legacy NULL lines for existing PH_H2O/VIS_NIR owners only, no operational lines or spectral evidence. Missing accepted spectral evidence/history gap remains unchanged. First-revision1 order test is separately assembled as an owned runtime-reachable48d missing-order shape: fresh PROCESSING sample with same two logical owners/statuses/aliases and no order/measurement. Same original reasoned request/remediation assertions run on that fresh fixture, then original projection sample restored in finally before custody test. No revision0 invention, no old version assertion change, no runtime/backfill repair. Original EXPECTED/reception/cross-lab/projection counts/history-gap/keyed order replay/custody audits unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    },
+    {
+      "suite": "workspace_projection_p2.test.js",
+      "test": "Package P2: Sample Workspace Projection & Transactional Foundations 6. POST /api/samples/:id/custody/move records physical location change and audit",
+      "originalFailureSha256": "16236ac5bd18ea9cc96910a63eb490689acbd1154a00a7c9a00604ae6f7cec08",
+      "originalObservedHeader": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "originalCaseLineNumbers": [
+        "90"
+      ],
+      "classification": "NEW_OWNED_RETAINED_POSITIVE_ORDER_CONTEXT_AND_EXPLICIT_FIRST_ORDER_ORPHAN_REMEDIATION_SCENARIO",
+      "sourceDecision": "Projection NEW retained SUBMITTED PH witness gets legacy NULL lines for existing PH_H2O/VIS_NIR owners only, no operational lines or spectral evidence. Missing accepted spectral evidence/history gap remains unchanged. First-revision1 order test is separately assembled as an owned runtime-reachable48d missing-order shape: fresh PROCESSING sample with same two logical owners/statuses/aliases and no order/measurement. Same original reasoned request/remediation assertions run on that fresh fixture, then original projection sample restored in finally before custody test. No revision0 invention, no old version assertion change, no runtime/backfill repair. Original EXPECTED/reception/cross-lab/projection counts/history-gap/keyed order replay/custody audits unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain runtime-reachable zero-write refused, reasoned ordinary full-target revision is accepted remedy; readonly distinct impact lists and approvednonzeroSTOP unchanged."
+    }
+  ],
+  "versionDecision": "Preserve original first-revision1 assertion on separately owned runtime-reachable missing-order fixture; projection context has legitimate revision1. Current orderService createRevision max+1 inspected before changes.",
+  "productionOperations": 0
+}

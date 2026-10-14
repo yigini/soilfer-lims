@@ -1,0 +1,55 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 29270e59-f6d7-4b45-b186-2cab07cbc348 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 29270e59-f6d7-4b45-b186-2cab07cbc348 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 29270e59-f6d7-4b45-b186-2cab07cbc348 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: dfe8a727-1b5c-4301-a8cf-fbea6ec2ff20 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 29270e59-f6d7-4b45-b186-2cab07cbc348 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 29270e59-f6d7-4b45-b186-2cab07cbc348 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 29270e59-f6d7-4b45-b186-2cab07cbc348 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/workspace_projection_p2.test.js
+  Package P2: Sample Workspace Projection & Transactional Foundations
+    √ 1. GET /api/samples/:id/workspace returns unified 5-tab projection (76 ms)
+    √ 2. Accurately detects S003-style historical evidence gap on unverified accepted items (28 ms)
+    √ 3. Expected sample shows "Not yet received" without fabricating received date (25 ms)
+    √ 4. Cross-lab access is strictly denied (403) (9 ms)
+    √ 5. POST /api/samples/:id/orders applies revision atomically and records receipt (61 ms)
+    √ 6. POST /api/samples/:id/custody/move records physical location change and audit (7 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        1.844 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\workspace_projection_p2.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-profile-scope-workspace-context-singles\03-workspace_projection_p2.test\report-original.json

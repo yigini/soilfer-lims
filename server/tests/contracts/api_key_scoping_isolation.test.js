@@ -103,6 +103,12 @@ describe('API Key Scoping Isolation Contract (SL-22 Security Fix)', () => {
         // Pin6060286651: explicit accepted owners and one final attempt per original row.
         for (const scope of [{ sampleId: sampleGtmId, assignedLab: 'LAB-GTM' }, { sampleId: sampleMozId, assignedLab: 'LAB-MOZ' }])
             await createWorkItemFixture(prisma, { data: { ...scope, id: `${scope.sampleId}-pH`, analysis: 'pH', status: 'ACCEPTED' } });
+        // #209: each NEW owned accepted scope witness has its own unchanged pH owner/order.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        for (const sampleId of [sampleGtmId, sampleMozId]) await prisma.sampleOrderRevision.create({ data: {
+            id: crypto.randomUUID(), sampleId, version: 1, status: 'ACTIVE', reason: 'Owned API scope execution order context',
+            requestedBy: 'system:fixture', lines: { create: [{ id: crypto.randomUUID(), analysis: 'pH',
+                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
         for (const data of [
                 {
                     id: 'res-iso-gtm-1',

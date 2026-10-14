@@ -1,0 +1,31 @@
+[
+  {
+    "path": "server/tests/contracts/profile_identity_routes.test.js",
+    "beforeSha256": "70b686e4e835d82ad85c588b5f8ed3dfebca5625d0357be4a7699c8c525e67e8",
+    "afterSha256": "66b67ef66f59e8baa67c1421d5a0d64aa96a8021584235acd3447d179bf384f1",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declared only for this NEW owned released numerical history.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: ids.released,\n            version: 1, status: 'ACTIVE', reason: 'Owned released profile execution order context', requestedBy: 'system:fixture',\n            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/api_key_scoping_isolation.test.js",
+    "beforeSha256": "ade7c7567cabd111af981512f089355e388c5fc9ce1b06ca4d42fe6833b2a8e6",
+    "afterSha256": "28ff15fc3f9ffcb81c52bfdf57df7ba20f0b1e0be109323d2e314bdf5f645624",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: each NEW owned accepted scope witness has its own unchanged pH owner/order.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        for (const sampleId of [sampleGtmId, sampleMozId]) await prisma.sampleOrderRevision.create({ data: {\n            id: crypto.randomUUID(), sampleId, version: 1, status: 'ACTIVE', reason: 'Owned API scope execution order context',\n            requestedBy: 'system:fixture', lines: { create: [{ id: crypto.randomUUID(), analysis: 'pH',\n                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/workspace_projection_p2.test.js",
+    "beforeSha256": "904010154621d9ed523f1236510aa94f46da624305494982c200591aedf4a5b0",
+    "afterSha256": "dfec5834dc469c5bcd7b81c99e23e4d5e15248d0d86eac512a3a4d0735ff0c81",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: NEW owned projection history declares both existing analytical owners, preserving the spectral gap.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSample.id,\n            version: 1, status: 'ACTIVE', reason: 'Owned workspace projection execution order context', requestedBy: 'system:fixture',\n            lines: { create: ['PH_H2O', 'VIS_NIR'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n",
+      "        // #209: preserve the original first-revision1 remedy scenario on NEW owned missing-order work.\n        const projectionSample = testSample;\n        const firstOrderSampleId = 'ws-first-order-' + require('node:crypto').randomUUID();\n        testSample = await createSampleFixture(prisma, { data: { id: firstOrderSampleId, originalId: firstOrderSampleId,\n            labId: 'S-P2-FIRST-ORDER', assignedLab: 'LAB-P2', country: 'P2C', status: 'PROCESSING',\n            dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify(['PH_H2O', 'VIS_NIR']) } });\n        for (const [analysis, status] of [['PH_H2O', 'SUBMITTED'], ['VIS_NIR', 'ACCEPTED']])\n            await createWorkItemFixture(prisma, { data: { id: firstOrderSampleId + '-' + analysis, sampleId: firstOrderSampleId,\n                analysis, status, assignedLab: 'LAB-P2', assignedTo: techUser.username, labId: 'LAB-P2' } });\n        try {\n",
+      "        } finally { testSample = projectionSample; }\n"
+    ]
+  }
+]

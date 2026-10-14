@@ -1,0 +1,12 @@
+{
+  "closedUtc": "2026-10-14T17:05:49.176285+00:00",
+  "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\api_key_scoping_isolation.test.js",
+  "exit": 0,
+  "originalReportPresent": true,
+  "tests": 4,
+  "passed": 4,
+  "failed": 0,
+  "expectedTests": 4,
+  "sourceUnchanged": true,
+  "status": "PASS"
+}
