@@ -134,8 +134,8 @@ async function authoriseScientificAmendment(db,sampleId,amendmentId,actor,input)
      details:JSON.stringify({amendmentId:amendment.id,selectedWorkItemIds:selected,priorApprovedBy:sample.approvedBy,priorApprovedAt:sample.approvedAt})});
    const children=[];
    for(const {item,parent,orderLineId,attemptNo,limitOverride}of plans){
-    const child=await tx.workAttempt.create({data:{id:'att-'+item.id+'-'+randomUUID(),workItemId:item.id,orderLineId,attemptNo,status:'OPEN',
-     parentAttemptId:parent.id,reason:payload.reasonCode,note:amendment.reason,requestedBy:performedBy,requestedAt:now,createdAt:now,updatedAt:now}});
+    const child=await require('./orderAttemptWriteService').insertOrderBoundAttempt(tx,{id:'att-'+item.id+'-'+randomUUID(),workItemId:item.id,orderLineId,attemptNo,status:'OPEN',
+     parentAttemptId:parent.id,reason:payload.reasonCode,note:amendment.reason,requestedBy:performedBy,requestedAt:now,createdAt:now,updatedAt:now});
     await tx.sampleAmendmentAttempt.create({data:{id:randomUUID(),amendmentId:amendment.id,workItemId:item.id,
      parentAttemptId:parent.id,childAttemptId:child.id,reason:payload.reasonCode,createdAt:now}});
     let nonconformityId;

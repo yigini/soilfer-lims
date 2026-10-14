@@ -228,3 +228,45 @@ test.each([
     expect(() => installer.installOrderRevisions({dbPath:f.file,apply:true})).toThrow('Order storage differs');
     expect(triples(f.file)).toEqual(before); expect(await rows(f)).toEqual(retained);
 });
+
+test('an actual Prisma-wrapped native order guard returns the service-owned stable code', async () => {
+    const f = await fixture({lines:2}); installer.installOrderRevisions({dbPath:f.file,apply:true});
+    const before = await rows(f), lineId = before.lines[0].id;
+    await expect(f.db.$transaction(tx => require('../../services/orderAttemptWriteService').insertOrderBoundAttempt(tx,
+        {id:randomUUID(),workItemId:f.items[0].id,orderLineId:lineId,attemptNo:1,status:'OPEN',version:1,createdAt:new Date(),updatedAt:new Date()})))
+        .rejects.toMatchObject({code:'ORDER_ATTEMPT_INSERT_REFUSED',statusCode:409});
+    expect(await rows(f)).toEqual(before);
+});
+
+function addOwnedInsertRefusal(f) {
+    const connection = new Database(f.file,{fileMustExist:true});
+    try { connection.exec("CREATE TRIGGER owned_order_attempt_refusal BEFORE INSERT ON WorkAttempt BEGIN SELECT RAISE(ABORT,'OWNED_GUARD_REFUSAL'); END;"); }
+    finally { connection.close(); }
+}
+test('first execution maps an actual wrapped INSERT refusal and rolls back all result and audit writes', async () => {
+    const f = await fixture(); installer.installOrderRevisions({dbPath:f.file,apply:true}); addOwnedInsertRefusal(f);
+    const before = await f.snapshot();
+    await expect(f.result(f.items[0])).rejects.toMatchObject({code:'ORDER_ATTEMPT_INSERT_REFUSED',statusCode:409});
+    expect(await f.snapshot()).toEqual(before);
+});
+test('repeat reservation maps an actual wrapped INSERT refusal and rolls back its parent transition', async () => {
+    const f = await fixture(); installer.installOrderRevisions({dbPath:f.file,apply:true}); await f.result(f.items[0]); addOwnedInsertRefusal(f);
+    const before = await f.snapshot(), attempts = (await rows(f)).attempts;
+    await expect(require('../../services/workRepeatService').requestRepeat(f.db,f.items[0].id,f.actor,
+        {reason:'INSTRUMENT_FAULT',note:'Owned rejected repeat'})).rejects.toMatchObject({code:'ORDER_ATTEMPT_INSERT_REFUSED',statusCode:409});
+    expect(await f.snapshot()).toEqual(before); expect((await rows(f)).attempts).toEqual(attempts);
+});
+test('scientific reservation maps an actual wrapped INSERT refusal and retains its PENDING authorisation', async () => {
+    const f = await qcGateFixture({status:'ACCEPTED',resolvedRules:false,fixedWindowPolicy:false}); held.push(f);
+    const item = f.items[0]; await f.result(item);
+    await require('../../services/sampleStateService').transitionSample(item.sampleId,'APPROVED',f.actor,'Owned completed approval',{},f.db);
+    const service = require('../../services/scientificAmendmentService');
+    const requested = await service.requestScientificAmendment(f.db,item.sampleId,f.actor,
+        {reason:'Owned client retest',reasonCode:'CLIENT_RETEST',selectedWorkItemIds:[item.id]}); addOwnedInsertRefusal(f);
+    const before = await f.snapshot(), attempts = (await rows(f)).attempts;
+    await expect(service.authoriseScientificAmendment(f.db,item.sampleId,requested.amendment.id,
+        {...f.actor,username:'system:other-authoriser'},{expectedVersion:requested.amendment.version}))
+        .rejects.toMatchObject({code:'ORDER_ATTEMPT_INSERT_REFUSED',statusCode:409});
+    expect(await f.snapshot()).toEqual(before); expect((await rows(f)).attempts).toEqual(attempts);
+    expect(await f.db.sampleAmendment.findUnique({where:{id:requested.amendment.id}})).toMatchObject({status:'PENDING',version:requested.amendment.version});
+});

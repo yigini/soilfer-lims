@@ -61,14 +61,14 @@ async function insertExecution(tx,ctx,allocation,evidence,now,metadata={}) {
     }
     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.item.sampleId, requestedAliquot);
     const orderLineId = await require('./orderLineResolutionService').resolveOrderLine(tx, ctx.item);
-    await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,orderLineId,attemptNo:allocation.attemptNo,
+    await require('./orderAttemptWriteService').insertOrderBoundAttempt(tx,{id:allocation.id,workItemId:ctx.item.id,orderLineId,attemptNo:allocation.attemptNo,
         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
         instrumentId:equipmentReadiness?.equipmentId || null,
         executedMethodRevision:ctx.method?.version == null ? null:String(ctx.method.version),
         ...(metadata.materialAliquot != null && {materialAliquot:metadata.materialAliquot}),
         version:metadata.version ?? ((ctx.item.version || 0)+1),evidenceData,
-        evidenceHash:createHash('sha256').update(evidenceData).digest('hex'),createdAt:now,updatedAt:now}});
+        evidenceHash:createHash('sha256').update(evidenceData).digest('hex'),createdAt:now,updatedAt:now});
     ctx.attemptId=allocation.id;
     await require('./workAttemptEventService').appendAttemptEvent(tx,ctx.item,allocation.id,ctx.actor || ctx.performedBy,
         {action:'CREATED',from:null,to:'RECORDED',reason:allocation.reason,newResultIds:evidence.sourceResultIds || []});

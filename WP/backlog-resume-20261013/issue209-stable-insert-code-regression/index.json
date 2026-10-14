@@ -1,0 +1,129 @@
+{
+  "retainedUtc": "2026-10-14T09:33:57.672243+00:00",
+  "status": "CLOSED_STABLE_INSERT_CODE_REGRESSION_PASS",
+  "summary": {
+    "closedUtc": "2026-10-14T09:33:09.782607+00:00",
+    "exit": 0,
+    "suites": 10,
+    "tests": 274,
+    "passedTests": 274,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "PASS"
+  },
+  "cause": "All10suites274testsPASS. Actual native owner guard through Prisma returns409 ORDER_ATTEMPT_INSERT_REFUSED from shared new-attempt writer; real first/repeat/scientific INSERT refusals roll back result/audit/parent/amendment writes. All SQL guards/scanner predicates/history/OPENfirstfill unchanged. Prior270HTTP/readiness/impact/schema cases pass. NativeCl direction retained1c153fda; no Prisma message assertions.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "server/services/orderAttemptWriteService.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/scripts/order_revision_impact.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/command.json": {
+      "bytes": 2513,
+      "sha256": "b299283a0a9de20f4ce741356af6c05be12f83a1f164566999bbc245b4aadf05"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/config-original.json": {
+      "bytes": 6580,
+      "sha256": "0004b8f8b843cd7d797becec5a39b0cfc13779a783785b83db50f0bb57d3e9c0"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "73026ab8f54b5d389db70c367c5635f314298884bdbb66d4831ec3f5f6357add"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/physical-retained-terminal-index.json": {
+      "bytes": 15718,
+      "sha256": "1b08c70ac042a3fd6aaff8fa904098305023ef2899bdbdc9994449cb59f9f675"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/physical-retention-original.jsonl": {
+      "bytes": 12962,
+      "sha256": "0756c9f88dd429a96a515255fdd09f042f050cc285998f5af3222a90f55aef28"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/report-original.json": {
+      "bytes": 122047,
+      "sha256": "27b66a7963d4f3c6cf62bf4bde0b17c26970c45a15efdfd59f6b4114ab37194c"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/source-after.json": {
+      "bytes": 114832,
+      "sha256": "0027c5e1b5821759600dd2cc23232109c62864c8b691e0e2f176f31bfffd58c2"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/source-before.json": {
+      "bytes": 114832,
+      "sha256": "0027c5e1b5821759600dd2cc23232109c62864c8b691e0e2f176f31bfffd58c2"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/stderr-original.log": {
+      "bytes": 77579,
+      "sha256": "193af472c57f9c6007c1763aafb417ddce9483a37ed001ecc1cd4550ced121d7"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/stdout-original.log": {
+      "bytes": 2051,
+      "sha256": "8f71e5fc653ea9730dd0c71cbf045a8aa6129d13954e478559de3e93944fc3bd"
+    },
+    "WP/backlog-resume-20261013/issue209-stable-insert-code-regression/summary.json": {
+      "bytes": 363,
+      "sha256": "03c337bdf7f08f5f2fb0dc414551d38e1e61fcad5dacf1d0ae1bb0987403bfe5"
+    }
+  }
+}
