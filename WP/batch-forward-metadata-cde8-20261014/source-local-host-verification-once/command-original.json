@@ -1,0 +1,16 @@
+{
+  "startedUtc": "2026-10-14T23:26:54.193827+00:00",
+  "sourceSha256Before": {
+    "collect_forward_metadata.py": "8602245e14235f5422cbed7cd42f61ce1c0e72c957f679309a802607fbde1980",
+    "forward_metadata_contract.py": "6077faa59be1305c88f6c041e093a0d437662422740f29f93eca77eb01efaf7e",
+    "launch_forward_metadata.py": "52f83d09f2816a80f9f0ed8f2faea580a37156c5a13b33c4dd4d852561a85f0a",
+    "prepare_forward_metadata.py": "7ebaa9b53e8cdca1824008cd773b631d1f5c1cf08c6639fe718aa39da2cd2505",
+    "verify_forward_metadata_guards.py": "4eeb2305e67d5a9cd6455392a249ce78019beb781516d3fd6ec29a6cc9961ef1"
+  },
+  "scope": "IN_MEMORY_COMPILATION_PURE_GUARD_TESTS_ONLY",
+  "imageInspects": 0,
+  "attributionCollectorsRun": 0,
+  "imageAdoptions": 0,
+  "newReceipts": 0,
+  "productionConnections": 0
+}

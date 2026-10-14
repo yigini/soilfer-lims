@@ -1,0 +1,127 @@
+{
+  "status": "COMPLETE_BOUNDED_METADATA_SOURCE_REVIEW_READY_NOT_APPROVED",
+  "preparedUtc": "2026-10-14T23:30:06.899041+00:00",
+  "sourceSha256": {
+    "collect_forward_metadata.py": "8602245e14235f5422cbed7cd42f61ce1c0e72c957f679309a802607fbde1980",
+    "forward_metadata_contract.py": "6077faa59be1305c88f6c041e093a0d437662422740f29f93eca77eb01efaf7e",
+    "launch_forward_metadata.py": "52f83d09f2816a80f9f0ed8f2faea580a37156c5a13b33c4dd4d852561a85f0a",
+    "prepare_forward_metadata.py": "7ebaa9b53e8cdca1824008cd773b631d1f5c1cf08c6639fe718aa39da2cd2505",
+    "verify_forward_metadata_guards.py": "4eeb2305e67d5a9cd6455392a249ce78019beb781516d3fd6ec29a6cc9961ef1"
+  },
+  "metadataScope": "READONLY_FORWARD_METADATA_EVIDENCE_ONLY_NO_ADOPTION",
+  "imageEligibility": false,
+  "newSourceReview": null,
+  "newExecutionAuthority": null,
+  "files": [
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/collect_forward_metadata.py",
+      "bytes": 10026,
+      "sha256": "8602245e14235f5422cbed7cd42f61ce1c0e72c957f679309a802607fbde1980"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/forward_metadata_contract.py",
+      "bytes": 10821,
+      "sha256": "6077faa59be1305c88f6c041e093a0d437662422740f29f93eca77eb01efaf7e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/launch_forward_metadata.py",
+      "bytes": 6044,
+      "sha256": "52f83d09f2816a80f9f0ed8f2faea580a37156c5a13b33c4dd4d852561a85f0a"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/prepare_forward_metadata.py",
+      "bytes": 6104,
+      "sha256": "7ebaa9b53e8cdca1824008cd773b631d1f5c1cf08c6639fe718aa39da2cd2505"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/verify_forward_metadata_guards.py",
+      "bytes": 10789,
+      "sha256": "4eeb2305e67d5a9cd6455392a249ce78019beb781516d3fd6ec29a6cc9961ef1"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/README.md",
+      "bytes": 5042,
+      "sha256": "9f5ec71a5981f5d92082ff95760c8613d1f97db4193d8b9fc89ab8091e938697"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/preliminary-12-guard-tool-output-transcription.json",
+      "bytes": 413,
+      "sha256": "b8966e2f971ea5d49cff1818d30c517ce91c4f82ea96cbb7ef49048ada73546b"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/source-local-host-verification-once/command-original.json",
+      "bytes": 792,
+      "sha256": "3dab60e85ed3984a1db6d4005b905fd98863ee444f730865262986fa2e998e8e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/source-local-host-verification-once/exit-original.json",
+      "bytes": 2376,
+      "sha256": "aebfda2edcd670679e2535b30153324fc2393d32bbfa70b0b0550d404d7bf51f"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/source-local-host-verification-once/host-inmemory-verification-source.py",
+      "bytes": 60230,
+      "sha256": "8e5886971102833a4c0951c4338554903f91bdbce2d6726a6e40eb4674cb2f61"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/source-local-host-verification-once/host-stderr-original.log",
+      "bytes": 1675,
+      "sha256": "80d2ef5c74185c7553fa74ea1a905f4881a00a6ba74fa53c867dd83b89e1474f"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/source-local-host-verification-once/host-stdout-original.json",
+      "bytes": 841,
+      "sha256": "6f989b54fbd0faaafc38fe40dba66d9dd61c6ae9b682f1c554f5e18244a1a7de"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/source-local-host-verification-once/local-stderr-original.log",
+      "bytes": 2444,
+      "sha256": "e7b9a7f72de56cf1f1c2e2dcfbea1be1faa3067495125cbfe365639bf586ca40"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/source-local-host-verification-once/local-stdout-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-source-containerd-cli-interfaces-once/exit-original.json",
+      "bytes": 92,
+      "sha256": "b96a83b5c4295e492547433aa6c68df436ac8c6d6ae0bef65083457fa769021a"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-source-containerd-cli-interfaces-once/interface-help-probe-source.py",
+      "bytes": 794,
+      "sha256": "507e5535e4afa74ea56afd097e8d99f0818f058a95a1403fef231a3c88079bd5"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-source-containerd-cli-interfaces-once/stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-source-containerd-cli-interfaces-once/stdout-original.json",
+      "bytes": 3464,
+      "sha256": "f82cae86c2acc957984f5ca210358ff01640077a87cca2ee2d267f5603ff9597"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/read-containerd-source-planning-cli-help-once.py",
+      "bytes": 1823,
+      "sha256": "a6f7ff8a2a214d7d21697de13793906a76ee52b3d371cbe2a2e188ff134689d5"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-forward-metadata-source-local-and-host-once.py",
+      "bytes": 3839,
+      "sha256": "1a3371551874330981e3ff3732abff1c81b32c3a37b95945ddf0d68dee89bd53"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/publish-forward-metadata-source-review-ready-once.py",
+      "bytes": 9691,
+      "sha256": "ab0d3f3270a8450027a9000a8aba90f453e4a4a07cd3d4cba41f00bb3eb36024"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 416842,
+      "sha256": "3224653bb77580a35d46543fa1e45563e5b5826b0457feae80cd52a4090c85ea"
+    }
+  ]
+}

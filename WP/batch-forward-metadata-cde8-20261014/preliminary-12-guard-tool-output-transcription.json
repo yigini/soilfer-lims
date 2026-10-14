@@ -1,0 +1,12 @@
+{
+  "status": "PRELIMINARY_EARLIER_SOURCE_GUARDS_PASS",
+  "evidenceKind": "TOOL_OUTPUT_TRANSCRIPTION",
+  "literalSummary": "Ran 12 tests in 0.002s\n\nOK",
+  "toolExitCode": 0,
+  "sourceBeforeAfterHashesAvailable": false,
+  "currentFinalGuardCount": 14,
+  "currentProof": "source-local-host-verification-once/exit-original.json",
+  "metadataCollectorsRun": 0,
+  "imageAdoptions": 0,
+  "newReceipts": 0
+}

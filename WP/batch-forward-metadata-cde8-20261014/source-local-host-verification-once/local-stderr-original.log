@@ -1,0 +1,19 @@
+test_duplicate_json_and_expanded_reference_roles_refuse (__main__.MetadataGuards.test_duplicate_json_and_expanded_reference_roles_refuse) ... ok
+test_exact_first_new_root_is_bound_and_failed_root_or_aliases_refuse (__main__.MetadataGuards.test_exact_first_new_root_is_bound_and_failed_root_or_aliases_refuse) ... ok
+test_exported_manifest_id_and_config_reference_mismatches_stop (__main__.MetadataGuards.test_exported_manifest_id_and_config_reference_mismatches_stop) ... ok
+test_metadata_evidence_cannot_grant_image_or_production_authority (__main__.MetadataGuards.test_metadata_evidence_cannot_grant_image_or_production_authority) ... ok
+test_metadata_spec_passes_only_same_graph_and_explicitly_distinct_reference_roles (__main__.MetadataGuards.test_metadata_spec_passes_only_same_graph_and_explicitly_distinct_reference_roles) ... ok
+test_mutations_filesystem_du_and_wrong_images_are_refused (__main__.MetadataGuards.test_mutations_filesystem_du_and_wrong_images_are_refused) ... ok
+test_oci_configuration_payload_is_not_mistaken_for_descriptor (__main__.MetadataGuards.test_oci_configuration_payload_is_not_mistaken_for_descriptor) ... ok
+test_oci_platform_selection_preserves_only_owned_runtime_metadata (__main__.MetadataGuards.test_oci_platform_selection_preserves_only_owned_runtime_metadata) ... ok
+test_old_or_edited_wrong_actor_or_incomplete_source_review_refuses (__main__.MetadataGuards.test_old_or_edited_wrong_actor_or_incomplete_source_review_refuses) ... ok
+test_option_injection_unknown_namespace_and_digest_shapes_refuse (__main__.MetadataGuards.test_option_injection_unknown_namespace_and_digest_shapes_refuse) ... ok
+test_read_interfaces_allow_only_bounded_metadata_families (__main__.MetadataGuards.test_read_interfaces_allow_only_bounded_metadata_families) ... ok
+test_real_unit_created_empty_outputs_are_accepted_consumed_and_aliases_refuse (__main__.MetadataGuards.test_real_unit_created_empty_outputs_are_accepted_consumed_and_aliases_refuse) ... ok
+test_snapshot_catalog_is_complete_or_refuses_without_truncation (__main__.MetadataGuards.test_snapshot_catalog_is_complete_or_refuses_without_truncation) ... ok
+test_spec_and_evidence_cannot_expand_zero_operations_or_accept_boolean_counts (__main__.MetadataGuards.test_spec_and_evidence_cannot_expand_zero_operations_or_accept_boolean_counts) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.003s
+
+OK
