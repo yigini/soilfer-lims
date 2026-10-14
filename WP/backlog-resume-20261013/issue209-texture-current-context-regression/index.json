@@ -1,0 +1,142 @@
+{
+  "retainedUtc": "2026-10-14T11:07:59.055533+00:00",
+  "status": "CLOSED_TEXTURE_COMPANION_PASS",
+  "summary": {
+    "closedUtc": "2026-10-14T11:07:37.707329+00:00",
+    "exit": 0,
+    "suites": 8,
+    "tests": 248,
+    "passedTests": 248,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "PASS"
+  },
+  "scopeComments": [
+    6163271808,
+    6166518424
+  ],
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/scripts/order_revision_impact.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/services/textureOrderContract.js",
+    "server/services/workItemReconciliationService.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js"
+  ],
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/command.json": {
+      "bytes": 2241,
+      "sha256": "5eed6637bb0e9fc9f989ab9fbe6ea98d6aded6cb2fee67dac702171c352f91f5"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/config-original.json": {
+      "bytes": 6578,
+      "sha256": "5209300389e004d462707a7f9e4d8769382064bdd8e3f02bb787f4d47995df10"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "0dfff08b48b70615454ed13cc9cb8ae519c7f98c4041e66121a403ae37c8a8cf"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/physical-retained-terminal-index.json": {
+      "bytes": 8361,
+      "sha256": "29b32f05dd494fd9bd321475ecba9e0dc3901becd3ebe4d9de762b03cfefd7b4"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/physical-retention-original.jsonl": {
+      "bytes": 6771,
+      "sha256": "d182099bc693ab3962cf966f3959daeaf11a4a9ca706e91788c1dce2008de094"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/report-original.json": {
+      "bytes": 110022,
+      "sha256": "27564eec739780ba78f74ebeed173dc19f61e2af71c753ceb1e798bfcdc866e1"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/source-after.json": {
+      "bytes": 114945,
+      "sha256": "d9538a415f840fb0387adcd454d705e10c449775fd86899085e32b39096f4753"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/source-before.json": {
+      "bytes": 114945,
+      "sha256": "d9538a415f840fb0387adcd454d705e10c449775fd86899085e32b39096f4753"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/stderr-original.log": {
+      "bytes": 79284,
+      "sha256": "330c227dd077fde347d93c9b81bee83129d737cc4173b0180da07e64e54af85f"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/stdout-original.log": {
+      "bytes": 1813,
+      "sha256": "256d8371e39fe558d5a65047d01383b2933486cf6dd2f606308f3f1f24887347"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-current-context-regression/summary.json": {
+      "bytes": 362,
+      "sha256": "5f275389a104b8513979e8924fc851cdece72dd5ea46fff3e0722e0366de72ad"
+    }
+  }
+}

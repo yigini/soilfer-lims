@@ -1,0 +1,1679 @@
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: Choose a current reported value for every texture fraction first.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:4:43)
+        at Object.fail [as fractionSelections] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:61:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at loadSelectionEvidence (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionContext.js:61:62)
+        at loadSelectionContext (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionContext.js:65:22)
+        at Object.preflightReportedSelection (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:38:21)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:68:34
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_SOURCE_SELECTION_REQUIRED',
+      details: {
+        workItemIds: [
+          '7a3a6ba2-815b-4261-8674-71ff788a1799',
+          '93d9969a-e5ff-41aa-b83f-705061a88c8d',
+          '31f59aca-9478-491e-89c3-503ffeed4ab0'
+        ],
+        fraction: 'SAND'
+      }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab db3c9b75-d0f5-4843-9a2b-8c6bae5401ab
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab db3c9b75-d0f5-4843-9a2b-8c6bae5401ab
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab db3c9b75-d0f5-4843-9a2b-8c6bae5401ab
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab db3c9b75-d0f5-4843-9a2b-8c6bae5401ab
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b0dbee1a-90b1-4075-b30c-85e51dd74126
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b0dbee1a-90b1-4075-b30c-85e51dd74126
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b0dbee1a-90b1-4075-b30c-85e51dd74126
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b0dbee1a-90b1-4075-b30c-85e51dd74126
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab e8a3ff99-a4dd-4902-90d9-fc2ad215424b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab e8a3ff99-a4dd-4902-90d9-fc2ad215424b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab e8a3ff99-a4dd-4902-90d9-fc2ad215424b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab e8a3ff99-a4dd-4902-90d9-fc2ad215424b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 971757bc-4308-4c55-b2d6-eb16aeee98d9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 971757bc-4308-4c55-b2d6-eb16aeee98d9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 971757bc-4308-4c55-b2d6-eb16aeee98d9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 971757bc-4308-4c55-b2d6-eb16aeee98d9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 7cabe126-b284-4455-b5fd-19dc4c8c1e98
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 7cabe126-b284-4455-b5fd-19dc4c8c1e98
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 7cabe126-b284-4455-b5fd-19dc4c8c1e98
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 7cabe126-b284-4455-b5fd-19dc4c8c1e98
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 51bb5a81-336f-4f07-ace3-6b4aa09f49d7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 51bb5a81-336f-4f07-ace3-6b4aa09f49d7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 51bb5a81-336f-4f07-ace3-6b4aa09f49d7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 51bb5a81-336f-4f07-ace3-6b4aa09f49d7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 22a04b37-12ea-4b83-96f4-8c8a4118bbee
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 22a04b37-12ea-4b83-96f4-8c8a4118bbee
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 22a04b37-12ea-4b83-96f4-8c8a4118bbee
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 22a04b37-12ea-4b83-96f4-8c8a4118bbee
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 80b8d280-b8bc-4295-a68d-ef7dc350c328
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 80b8d280-b8bc-4295-a68d-ef7dc350c328
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 80b8d280-b8bc-4295-a68d-ef7dc350c328
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: Choose the reported texture value explicitly.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:4:43)
+        at Object.fail [as separateTextureChoice] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:133:15)
+        at separateTextureChoice (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:9:91)
+        at Object.choiceFor [as preflightReportedSelection] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:39:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:68:34
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_SELECTION_REQUIRED',
+      details: {}
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 80b8d280-b8bc-4295-a68d-ef7dc350c328
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a2870633-e6cc-404e-8385-52087dfe24c5
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a2870633-e6cc-404e-8385-52087dfe24c5
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a2870633-e6cc-404e-8385-52087dfe24c5
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: The selected fraction values cannot produce a texture class.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:4:43)
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:93:26)
+        at Object.fractionOutcome [as separateTextureChoice] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:122:19)
+        at separateTextureChoice (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:9:91)
+        at Object.choiceFor [as preflightReportedSelection] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:39:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:68:34
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_TEXTURE_UNRESOLVED',
+      details: { reasonCode: 'INPUT_CENSORED' }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a2870633-e6cc-404e-8385-52087dfe24c5
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a30ace29-e46f-4b52-b8c2-6f47b9f9cdd9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a30ace29-e46f-4b52-b8c2-6f47b9f9cdd9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a30ace29-e46f-4b52-b8c2-6f47b9f9cdd9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: The selected fraction values cannot produce a texture class.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:4:43)
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:93:26)
+        at Object.fractionOutcome [as separateTextureChoice] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:122:19)
+        at separateTextureChoice (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:9:91)
+        at Object.choiceFor [as preflightReportedSelection] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:39:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:68:34
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_TEXTURE_UNRESOLVED',
+      details: { reasonCode: 'INPUT_CENSORED' }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a30ace29-e46f-4b52-b8c2-6f47b9f9cdd9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d61b2581-40fd-4069-93fe-0e044e49192b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d61b2581-40fd-4069-93fe-0e044e49192b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d61b2581-40fd-4069-93fe-0e044e49192b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab d61b2581-40fd-4069-93fe-0e044e49192b
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab cd0bf4c8-0bb5-456a-a39a-8a1170bc4009
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab cd0bf4c8-0bb5-456a-a39a-8a1170bc4009
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab cd0bf4c8-0bb5-456a-a39a-8a1170bc4009
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab cd0bf4c8-0bb5-456a-a39a-8a1170bc4009
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 8e9d2dcc-f701-4357-8a8c-abc9aafa8d0c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 8e9d2dcc-f701-4357-8a8c-abc9aafa8d0c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 8e9d2dcc-f701-4357-8a8c-abc9aafa8d0c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 8e9d2dcc-f701-4357-8a8c-abc9aafa8d0c
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [Report] Sample PDF error: TransitionError: The texture fraction selections changed.
+        at fail (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:4:43)
+        at Object.fail [as assertFractionSnapshot] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueTextureService.js:147:84)
+        at assertFractionSnapshot (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueSelectionService.js:106:46)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportedValueReadService.js:11:31
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at assembleReport (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportAssembly.js:43:70)
+        at getSampleReportPdf (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\reportController.js:913:31) {
+      statusCode: 409,
+      status: 409,
+      code: 'REPORTED_VALUE_STALE',
+      details: { workItemId: 'a2946e6a-d13b-4f4e-8e0d-81ebccd72766' }
+    }
+
+      925 |         return res.send(pdfBuffer);
+      926 |     } catch (err) {
+    > 927 |         console.error('[Report] Sample PDF error:', err);
+          |                 ^
+      928 |         if(err.statusCode) return res.status(err.statusCode).json({error:err.message,code:err.code,...err.details});
+      929 |         return res.status(500).json({ error: err.message || 'Failed to generate PDF' });
+      930 |     }
+
+      at error (controllers/reportController.js:927:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab cbb56905-1fba-4f8f-b6e3-a502edb95da9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab cbb56905-1fba-4f8f-b6e3-a502edb95da9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab cbb56905-1fba-4f8f-b6e3-a502edb95da9
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 06f560b7-3975-4646-8ab4-c5b5812bb569
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 09adde86-787d-4e4c-861c-156039f9b6b7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 09adde86-787d-4e4c-861c-156039f9b6b7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 09adde86-787d-4e4c-861c-156039f9b6b7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 09adde86-787d-4e4c-861c-156039f9b6b7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c009902c-8d49-46fe-b3bf-4015c899ad98
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c009902c-8d49-46fe-b3bf-4015c899ad98
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c009902c-8d49-46fe-b3bf-4015c899ad98
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c009902c-8d49-46fe-b3bf-4015c899ad98
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab fc911e3c-e357-4a92-a8cb-78afe678eb17
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab fc911e3c-e357-4a92-a8cb-78afe678eb17
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab fc911e3c-e357-4a92-a8cb-78afe678eb17
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab fc911e3c-e357-4a92-a8cb-78afe678eb17
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a37e7af7-7a5a-4b9f-96d1-60f03ded4c60
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a37e7af7-7a5a-4b9f-96d1-60f03ded4c60
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a37e7af7-7a5a-4b9f-96d1-60f03ded4c60
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a37e7af7-7a5a-4b9f-96d1-60f03ded4c60
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 42332f07-149a-40f3-a8df-7f82e7658c2a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 42332f07-149a-40f3-a8df-7f82e7658c2a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 42332f07-149a-40f3-a8df-7f82e7658c2a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 42332f07-149a-40f3-a8df-7f82e7658c2a
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2c07434c-f0f2-4bbb-abdc-ec37e5b84ca7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2c07434c-f0f2-4bbb-abdc-ec37e5b84ca7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2c07434c-f0f2-4bbb-abdc-ec37e5b84ca7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 2c07434c-f0f2-4bbb-abdc-ec37e5b84ca7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c7e87392-df92-46fd-903f-d41be13cc93d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c7e87392-df92-46fd-903f-d41be13cc93d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c7e87392-df92-46fd-903f-d41be13cc93d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c7e87392-df92-46fd-903f-d41be13cc93d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b08ae13a-fb65-422f-85c1-c51e59f68ab7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b08ae13a-fb65-422f-85c1-c51e59f68ab7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b08ae13a-fb65-422f-85c1-c51e59f68ab7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b08ae13a-fb65-422f-85c1-c51e59f68ab7
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 15b25900-cd91-4b80-8e28-d87ce0b72cd6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 15b25900-cd91-4b80-8e28-d87ce0b72cd6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 15b25900-cd91-4b80-8e28-d87ce0b72cd6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 15b25900-cd91-4b80-8e28-d87ce0b72cd6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 995a7f73-215e-4fc2-8a3b-9820883d02b3
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 995a7f73-215e-4fc2-8a3b-9820883d02b3
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 995a7f73-215e-4fc2-8a3b-9820883d02b3
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 995a7f73-215e-4fc2-8a3b-9820883d02b3
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/audit_3_3_separate_texture.test.js (52.081 s)
+  √ separate TEXTURE first refuses with zero writes, then chooses the exact matching retained derived Result (2647 ms)
+  √ a fraction MEAN re-derives a single class and retains every one of its four raw source ids (1987 ms)
+  √ a not-reportable fraction propagates its id and localized reason to TEXTURE (en) (1754 ms)
+  √ a not-reportable fraction propagates its id and localized reason to TEXTURE (es) (1881 ms)
+  √ a not-reportable fraction propagates its id and localized reason to TEXTURE (es-419) (1917 ms)
+  √ a not-reportable fraction propagates its id and localized reason to TEXTURE (fr) (1745 ms)
+  √ a not-reportable fraction propagates its id and localized reason to TEXTURE (pt) (1732 ms)
+  √ REVIEWER_PICKS refuses implicit texture, but an explicit DERIVED confirmation is recorded as REVIEWER (1952 ms)
+  √ explicit NOT_REPORTABLE saves three current fraction proofs when CLAY is censored (<15) (3154 ms)
+  √ explicit NOT_REPORTABLE saves three current fraction proofs when CLAY is censored (>15) (1855 ms)
+  √ v2 membership of fraction sources prefers their owning test over a shared TEXTURE derivation (1826 ms)
+  √ a replacement fraction selection makes retained TEXTURE stale without changing it (1782 ms)
+  √ a stale TEXTURE sample cannot hide a good neighboring sample in the grid; its draft PDF still refuses 409 (2022 ms)
+  √ canonical uniqueness prevents a duplicate owner; unresolved retained owners refuse layout with ids and zero writes (1684 ms)
+  √ texture layout validator refuses partial retained facts and makes zero writes (1397 ms)
+  √ texture layout validator refuses mixed retained facts and makes zero writes (1429 ms)
+  √ texture layout validator refuses unresolved retained facts and makes zero writes (1384 ms)
+  √ a complete composite execution still saves one atomic four-output selection group (1590 ms)
+  √ SQL refuses malformed DERIVED attempt shape with zero writes (1815 ms)
+  √ SQL refuses malformed DERIVED tooFew shape with zero writes (1780 ms)
+  √ SQL refuses malformed DERIVED duplicateResult shape with zero writes (1811 ms)
+  √ SQL refuses malformed DERIVED missingProof shape with zero writes (1752 ms)
+  √ SQL refuses malformed DERIVED duplicateProof shape with zero writes (1785 ms)
+  √ SQL refuses malformed DERIVED primitiveProof shape with zero writes (1791 ms)
+  √ SQL refuses malformed DERIVED nullProof shape with zero writes (1792 ms)
+  √ runtime rejects a DERIVED extra source union and makes zero writes (1785 ms)
+  √ runtime rejects a DERIVED missing source union and makes zero writes (1777 ms)
+  √ runtime rejects a DERIVED wrongProof source union and makes zero writes (1761 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 8a62260b-7df4-4288-92fb-e944e7b294dd) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/orderService.js:89:19)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.reviseAnalyses (services/orderService.js:86:16)
+      at Object.<anonymous> (tests/contracts/issue_209_order_revision_integration.test.js:253:5)
+
+PASS tests/contracts/issue_209_order_revision_integration.test.js (37.575 s)
+  √ a TEXTURE target retains all existing fraction owners including completed work and fixes four linked lines in one revision (1585 ms)
+  √ one or two retained fractions refuse a TEXTURE alias with named missing owners and zero row changes (2389 ms)
+  √ TEXTURE without explicit fraction selections still preserves all existing owners; explicit removal waives them with the reason (1245 ms)
+  √ initial generation for a new four-selection sample still creates only the logical TEXTURE measurement owner (1211 ms)
+  √ kit counts separate fraction line refusals and incomplete owner samples without touching the original triple (1312 ms)
+  √ installer dry/apply/repeat retains three ACTIVE histories, every line and a null historical OPEN identity (1393 ms)
+  √ a full reasoned revision supersedes all three ACTIVE ids while every old line and attempt stays byte-equivalent (1206 ms)
+  √ legacy single-match resolution writes only the newly inserted attempt link (1342 ms)
+  √ a legacy 0-revision/0-line context refuses with NO_LINE and no row writes (1302 ms)
+  √ a legacy 1-revision/2-line context refuses with AMBIGUOUS_LINE and no row writes (1277 ms)
+  √ a legacy 2-revision/1-line context refuses with MULTIPLE_ACTIVE_REVISIONS and no row writes (1278 ms)
+  √ a retained OPEN attempt fills with its original null order-line identity (1187 ms)
+  √ two concurrent complete revisions leave exactly one ACTIVE revision (1199 ms)
+  √ raw new-attempt insertion cannot select one ambiguous legacy line (1240 ms)
+  √ a new linked line cannot have its ownership or analysis rewritten (1196 ms)
+  √ a reasoned repeat receives its resolved legacy line at the new reservation INSERT (1400 ms)
+  √ scientific amendment authorisation links only its newly reserved attempt to the current order (1262 ms)
+  √ order revisions enforce permission and laboratory scope before changing retained rows (1253 ms)
+  √ the read-only kit collector preserves an active WAL triple and accounts for every nested retained snapshot (1369 ms)
+  √ the actual shipped post-start order programme preserves an owned WAL-mode original without sidecars (1754 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: wrong type (1183 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: unreviewed foreign key (1154 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: tampered index (1188 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: partial guard (1158 ms)
+  √ an actual Prisma-wrapped native order guard returns the service-owned stable code (1289 ms)
+  √ first execution maps an actual wrapped INSERT refusal and rolls back all result and audit writes (1397 ms)
+  √ repeat reservation maps an actual wrapped INSERT refusal and rolls back its parent transition (1232 ms)
+  √ scientific reservation maps an actual wrapped INSERT refusal and retains its PENDING authorisation (1234 ms)
+
+PASS tests/security/audit_1_2_state_writes.test.js (11.495 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (7 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)"))
+  √ the original rehearsal cannot reintroduce a direct Sample deletion
+  √ nested connect association has one actual authority finding (1 ms)
+  √ nested set association has one actual authority finding
+  √ nested disconnect association has one actual authority finding (1 ms)
+  √ the closed FK runner refuses unknown case (82 ms)
+  √ the closed FK runner refuses configured candidate (83 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (3 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (2 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (2 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (1 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (1 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (2 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (2 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql (1 ms)
+  √ legacy CLI launchers cannot import any fixture or test module (2 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (5 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (1 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (6 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (4 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js
+  √ a direct sample write in a #190 test remains a finding outside the factory (1 ms)
+  √ a direct workItem write in a #190 test remains a finding outside the factory
+  √ a direct result write in a #190 test remains a finding outside the factory (1 ms)
+  √ a changed #190 historical factory digest is a scanner finding (10 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (12 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js (1 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (10874 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"])
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')")
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code]) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)')
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')")
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (24 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (41 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}})
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}})
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED')
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}`
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) }
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`)
+  √ a real temporary non-allowlisted test file fails the source guard (3 ms)
+  √ a shadowed file reader cannot impersonate a known schema load
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (11 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js (1 ms)
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js (1 ms)
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (1 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF')
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0')
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF') (1 ms)
+  √ native pragma reads and enabled constraints remain permitted
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (2 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: 57a8b82e-fbf4-470a-8977-b73491775352 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8a74b201-2480-47ce-ab09-d44419bda0ab (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: adbc511a-7f8b-4851-a9c8-e8ceb5a670ec (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-190-EXECUTION
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: cff2a8f0-e491-4168-b393-f0c21c4b3612 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-190-EXECUTION
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/audit_3_1_attempt_execution.test.js
+  √ saveResults retains fraction-only technician saves when canonical TEXTURE is owned by null (447 ms)
+  √ saveResults retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst (159 ms)
+  √ batchSave retains fraction-only technician saves when canonical TEXTURE is owned by null (167 ms)
+  √ batchSave retains fraction-only technician saves when canonical TEXTURE is owned by another-analyst (141 ms)
+  √ a reasoned repeat allocates max+1 and preserves every old field except its legitimate QUESTIONED transition (59 ms)
+  √ all replicates in one submitted execution share one attempt; later execution preserves that evidence (53 ms)
+  √ one texture execution records all four Results and an explicitly reasoned repeat gets number2 (56 ms)
+  √ invalid texture or noncanonical reason refuses without attempt, result, cache or audit writes (22 ms)
+  √ ordered measurement without work refuses before any write (8 ms)
+  √ ordered spectral-prediction without work refuses before any write (7 ms)
+  √ separate fraction work produces one TEXTURE attempt with source ids and leaves fraction attempts untouched (68 ms)
+  √ direct derivation without TEXTURE work refuses and leaves recorded fractions unchanged (53 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d5f3edeb-4353-4f04-9b8a-bb991fc79d2d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_fcc4726d95654a85943d48c23f5cbcfc (Lab: fcc4726d-9565-4a85-943d-48c23f5cbcfc) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/orderService.js:89:19)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.reviseAnalyses (services/orderService.js:86:16)
+      at exports.updateSampleAnalyses (controllers/sampleController.js:1627:25)
+
+  console.log
+    [AUTH] Verifying token for ID: d5f3edeb-4353-4f04-9b8a-bb991fc79d2d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_fcc4726d95654a85943d48c23f5cbcfc (Lab: fcc4726d-9565-4a85-943d-48c23f5cbcfc) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/orderService.js:89:19)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.reviseAnalyses (services/orderService.js:86:16)
+      at exports.applyOrderRevision (controllers/sampleController.js:1931:25)
+
+  console.log
+    [AUTH] Verifying token for ID: d45685b6-6803-436d-83f1-a57cd03465fc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/issue_209_order_revision_http.test.js
+  √ analyses HTTP route requires a reason for a changed normalized full target, then saves one ACTIVE order (102 ms)
+  √ orders HTTP route requires a reason for a changed normalized full target, then saves one ACTIVE order (47 ms)
+  √ analyses HTTP receipt replays the exact command once and refuses a changed reason (52 ms)
+  √ orders HTTP receipt replays the exact command once and refuses a changed reason (52 ms)
+  √ both HTTP routes preserve the APPROVED amendment boundary (11 ms)
+  √ both HTTP routes preserve the ARCHIVED amendment boundary (11 ms)
+  √ both HTTP routes preserve the DISPOSED amendment boundary (11 ms)
+  √ both HTTP routes enforce laboratory scope (133 ms)
+  √ initial intake work generation writes one linked order through the shared service (19 ms)
+  √ released removal of unstarted work retains its historical line identifier (36 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: user-tech-tun-1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab TUN-LAB1
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/texture_work_item_atomic.test.js
+  Texture Work Item & Atomic Linked Results Contracts (Mandatory Corrections 3 & 4)
+    Unit: normalizeAnalysisCodes & compound expansion
+      √ maps all texture aliases to canonical TEXTURE (1 ms)
+      √ deduplicates individual fractions (SAND, SILT, CLAY) when TEXTURE is present
+      √ preserves individual fractions if TEXTURE is NOT ordered
+    HTTP & Workflow: Atomic Texture Workbench Execution
+      √ Draft saving: persists { sand, silt, clay } object without skipping (79 ms)
+      √ Queue reload contract: GET /api/workbench/queue returns parsed { sand, silt, clay } without positional array dependency (54 ms)
+      √ Preview completion: fails closed if fractions are missing or closure exceeds tolerance (38 ms)
+      √ Batch completion: rejects direct commit without fractions (20 ms)
+      √ Batch completion: atomically writes 4 linked results and WorkAttempt on valid fractions (177 ms)
+
+PASS tests/security/audit_1_2_migration_sources.test.js
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().evidence.sql); (15 ms)
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().guards.sql); (3 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(sources.evidence.sql); (3 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(evidenceCreates(sources.evidence.sql)); (2 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered services/workflowMigrationSources.js bytes never become a SQL exemption
+  √ a third registry entry changes the loader digest and stays unresolved (1 ms)
+
+PASS tests/contracts/issue_209_order_revision_request.test.js
+  #209 reasoned complete order request
+    √ a changed order refuses invalid reason undefined (1 ms)
+    √ a changed order refuses invalid reason null
+    √ a changed order refuses invalid reason "" (1 ms)
+    √ a changed order refuses invalid reason "   "
+    √ a changed order refuses invalid reason 42
+    √ normalises aliases, whitespace and compound codes before comparing the complete set (1 ms)
+    √ equivalent normalised sets are a no-op without an invented reason
+    √ three historical ACTIVE revisions require an explicit complete set
+    √ an unchanged target still needs a deliberate reason when repairing ACTIVE ambiguity (1 ms)
+    √ a complete empty set is a reasoned request, leaving downstream reconciliation to protect recorded work
+    √ a reasoned line repair cannot disappear as an unchanged-analysis no-op
+    √ refuses malformed requested selections "PH_H2O"
+    √ refuses malformed requested selections [""]
+    √ refuses malformed requested selections ["  "] (1 ms)
+    √ refuses malformed requested selections [null]
+    √ refuses malformed requested selections [42]
+    √ corrupt stored selections cannot be silently replaced
+
+Test Suites: 8 passed, 8 total
+Tests:       248 passed, 248 total
+Snapshots:   0 total
+Time:        107.618 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_209_order_revision_integration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_209_order_revision_request.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_209_order_revision_http.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_1_attempt_execution.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\texture_work_item_atomic.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_3_3_separate_texture.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_migration_sources.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-texture-current-context-regression\report-original.json
