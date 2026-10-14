@@ -136,6 +136,12 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
     test('5. Manager disposition override (PROCEED_WITH_WARNING) allows submission acceptance', async () => {
         // Pin6060005962: test 4 retains its evidence-free failed-QC refusal.
         const item = await prisma.workItem.findUnique({ where: { id: workItemId } });
+        // #209: declare usable legacy order lines only in this NEW owned positive assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',
+            lines: { create: [item.analysis].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED', data: {
             id: `RES-QC2-${workItemId}`, sampleId, param: item.analysis, value: item.result,
             // This positive QC-disposition case starts with a valid measurement;

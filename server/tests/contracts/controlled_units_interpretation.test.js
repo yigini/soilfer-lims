@@ -42,6 +42,12 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
             } });
         }
 
+        // #209: declare usable legacy order lines only in this NEW owned positive assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',
+            lines: { create: (await prisma.workItem.findMany({ where: { sampleId, status: 'ACCEPTED' } })).map(item => item.analysis).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         const now = new Date();
         // Pin6056586906: each row binds its existing canonical owner.
         for (const data of [

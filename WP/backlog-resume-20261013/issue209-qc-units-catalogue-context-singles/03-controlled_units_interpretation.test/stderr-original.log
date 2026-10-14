@@ -1,0 +1,22 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+PASS tests/contracts/controlled_units_interpretation.test.js
+  BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine
+    √ 1. Normalizes synonym units and applies scientific conversion factors (3 ms)
+    √ 2. Evaluates individual parameter agronomic classifications (FAO 5-tier) (1 ms)
+    √ 3. Computes multi-parameter soil diagnostics (USDA texture, C:N stoichiometry, Base Saturation, Ca:Mg) (1 ms)
+    √ 4. End-to-end report assembly embeds controlled units and rich diagnostic interpretations (83 ms)
+    √ 5. WP-04: Fail closed on unrecognised unit
+    √ 6. WP-05: Cation mg/kg to cmol(+)/kg conversions
+    √ 7. WP-18: Total N of 30 g/kg rates High in SOIL and Adequate in PLANT (1 ms)
+    √ 8. WP-23: Extended interpretation coverage with calibration methods
+
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        1.919 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\controlled_units_interpretation.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-qc-units-catalogue-context-singles\03-controlled_units_interpretation.test\report-original.json

@@ -97,6 +97,12 @@ describe('Catalogue governance and connected selections', () => {
         // Pin6060286651: exact original parameter and lab; no alias mapping.
         await createWorkItemFixture(prisma, { data: { id: code('WORK'), sampleId: sample.id,
             analysis: a.code, assignedLab: lab, status: 'ACCEPTED' } });
+        // #209: declare usable legacy order lines only in this NEW owned positive assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sample.id,
+            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',
+            lines: { create: [a.code].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: code('RESULT'), sampleId: sample.id, param: a.code, value: '12', unit: 'mg/kg' } });
         const deletion = await invoke(controller.deleteAnalysis, req({}, { code: a.code }));
         expect(deletion.statusCode).toBe(409);

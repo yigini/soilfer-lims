@@ -1,0 +1,352 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.error
+    [saveResults] Error: Error: Record operational evidence through the assigned checklist.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:29:17 {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at tests/contracts/catalogue_result_entry.test.js:29:17
+
+  console.error
+    [saveResults] Error: Error: Record operational evidence through the assigned checklist.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:29:17 {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at tests/contracts/catalogue_result_entry.test.js:29:17
+
+  console.error
+    [saveResults] Error: Error: Upload or link a spectrum through spectral intake; a numerical value is not a spectrum.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:29:17 {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at tests/contracts/catalogue_result_entry.test.js:29:17
+
+  console.error
+    [saveResults] Error: Error: Upload or link a spectrum through spectral intake; a numerical value is not a spectrum.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:29:17 {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at tests/contracts/catalogue_result_entry.test.js:29:17
+
+  console.error
+    [saveResults] Error: Error: A selected parameter is not available to this laboratory.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:33:26) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:33:26)
+
+  console.error
+    [saveResults] Error: Error: Configured result test is not assigned to you.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:38:17) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:38:17)
+
+  console.error
+    [saveResults] Error: Error: Configured result test: use the method assigned to this work item.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:41:17) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:41:17)
+
+  console.error
+    [saveResults] Error: Error: Configured result test: use the configured reporting unit (mg/kg).
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:42:17) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:42:17)
+
+  console.error
+    [saveResults] Error: Error: A parameter and replicate may appear only once in each save.
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:150:49
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:143:25)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:49:17) {
+      statusCode: 400,
+      code: 'RESULT_ENTRY_INVALID'
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:49:17)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:106:23)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:75:52) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:75:52)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at recordedExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:71:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:103:28)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:75:52) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:75:52)
+
+  console.error
+    [saveResults] Error: TransitionError: Use the correction route or request a reasoned repeat.
+        at recordedExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:71:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.assertRecordedResultSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:103:28)
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:31:5)
+        at Object.exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9)
+        at save (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:16:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js:75:52) {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at Object.error [as saveResults] (controllers/resultsController.js:212:17)
+      at save (tests/contracts/catalogue_result_entry.test.js:16:5)
+      at Object.<anonymous> (tests/contracts/catalogue_result_entry.test.js:75:52)
+
+  console.log
+    [AUTH] Verifying token for ID: b718a869-53e6-44b9-905c-e9e4498e64e6 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_lab_technician_catlabee026d65 (LAB_TECHNICIAN) attempted MANAGE_ANALYSES. Allowed roles: ["SUPER_ADMIN","LAB_MANAGER","MASTER_USER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at next (middleware/authMiddleware.js:123:9)
+
+PASS tests/contracts/catalogue_result_entry.test.js
+  Catalogue rules also govern the sample results endpoint
+    √ DRYING cannot accept a scalar through the alternate endpoint (139 ms)
+    √ PREPARATION cannot accept a scalar through the alternate endpoint (4 ms)
+    √ SPEC_MIR cannot accept a scalar through the alternate endpoint (3 ms)
+    √ SPEC_VIS_NIR cannot accept a scalar through the alternate endpoint (3 ms)
+    √ An unknown parameter cannot be smuggled into an otherwise valid batch (33 ms)
+    √ A technician cannot record another technician’s work (5 ms)
+    √ Assigned method and reporting units must match (37 ms)
+    √ Configured lower bounds are honored when the optional LOQ is null (1 ms)
+    √ Duplicate replicate keys cannot create two current results (14 ms)
+    √ Valid assigned measurement is saved and still uses a human parameter name (87 ms)
+    √ Completed or submitted work cannot be edited through the sample results endpoint (78 ms)
+    √ The mounted configuration route rejects technician writes (97 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       12 passed, 12 total
+Snapshots:   0 total
+Time:        1.915 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_result_entry.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-qc-units-catalogue-context-singles\04-catalogue_result_entry.test\report-original.json

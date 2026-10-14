@@ -1,0 +1,342 @@
+{
+  "createdUtc": "2026-10-14T16:59:11.168206+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 14,
+  "cases": [
+    {
+      "suite": "qc_controls.test.js",
+      "test": "BLK-2: Minimum Viable Typed QC Controls Contract 5. Manager disposition override (PROCEED_WITH_WARNING) allows submission acceptance",
+      "originalFailureSha256": "d6572b53a133c44562acf402d9605f55d55f144a2ae9b85376075413af550cf5",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\qc_controls.test.js:139:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "139"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Only positive fifth SUBMITTED PH witness gets its declared legacy NULL order before evidence. Fourth evidence-free QC_FAIL/QC_GATE_FAILED409 stays orderless. Pure blank/RPD/recovery arithmetic, stored PROFILE_ONLY runs, measured6.8, warning reason, locked failure and fresh passing run assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "issue_278_texture_closure_policy.test.js",
+      "test": "#278 laboratory policy and the real submission gate 40 + 40 + 19 is no longer refused at the default tolerance",
+      "originalFailureSha256": "f151bdbe439a9e0751cbc2442cd6cc4fe2ebad3f8d13dc5be738396bf5a97e44",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "138",
+        "144"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "NEW owned explicit three existing fraction owners get three matching legacy NULL lines before submitTriple execution. No TEXTURE/fraction owners manufactured, values40/40/19 and default2 vs strict0.5 unchanged. All pure inclusive boundary, unit/censoring unknown, per-replicate, lab default/policy and strict422/zero-state-change assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "issue_278_texture_closure_policy.test.js",
+      "test": "#278 laboratory policy and the real submission gate a stricter lab still refuses 40 + 40 + 19 with zero writes",
+      "originalFailureSha256": "1f05081a6a7f0b9c5c94fbd3edad6840975f809182d26bd56c37b4faa2ac8203",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "138",
+        "149"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "NEW owned explicit three existing fraction owners get three matching legacy NULL lines before submitTriple execution. No TEXTURE/fraction owners manufactured, values40/40/19 and default2 vs strict0.5 unchanged. All pure inclusive boundary, unit/censoring unknown, per-replicate, lab default/policy and strict422/zero-state-change assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "catalogue_result_entry.test.js",
+      "test": "Catalogue rules also govern the sample results endpoint Valid assigned measurement is saved and still uses a human parameter name",
+      "originalFailureSha256": "49b7ffa7ad8e69c9000c9b1bfc4190e663e21f0ceff2f75c315c863daea6c0de",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 200",
+        "Received: 409",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\catalogue_result_entry.test.js:53:31)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "53"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Only valid assigned measurement positive test gets its usable legacy NULL order, retaining custom parameter/method/unit/lab. Earlier unknown/gate/spectral/foreign analyst/method/unit/duplicate key negatives stay orderless. Original positive HTTP409 and later sealed-edit400 observed, current writer/source-inferred missing recorded execution; no old response code invented. Later correction-required409/full snapshot preservation and stored5 assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "catalogue_result_entry.test.js",
+      "test": "Catalogue rules also govern the sample results endpoint Completed or submitted work cannot be edited through the sample results endpoint",
+      "originalFailureSha256": "e92f60c048bbddb8b8a7bcf40327df6ba6793c2d5f0bdbb2c4c539550f37c7ef",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 409",
+        "Received: 400",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\catalogue_result_entry.test.js:72:35)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "72"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Only valid assigned measurement positive test gets its usable legacy NULL order, retaining custom parameter/method/unit/lab. Earlier unknown/gate/spectral/foreign analyst/method/unit/duplicate key negatives stay orderless. Original positive HTTP409 and later sealed-edit400 observed, current writer/source-inferred missing recorded execution; no old response code invented. Later correction-required409/full snapshot preservation and stored5 assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "controlled_units_interpretation.test.js",
+      "test": "BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine 1. Normalizes synonym units and applies scientific conversion factors",
+      "originalFailureSha256": "86fdad234a2ca39db5ce34852f50a4c2a18f9938211204bbe24302e044f6495f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\controlled_units_interpretation.test.js:59:16)"
+      ],
+      "originalCaseLineNumbers": [
+        "59"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Shared NEW owned APPROVED/ACCEPTED retained history gets11 legacy NULL lines for actual11 existing owners before accepted witnesses. RequiredAnalyses still contains absent EXCH_NA; no Na owner/value invented. All original unit factors, concentration/basis/censoring, FAO tiers/soil-plant/method interpretation, USDA texture/CN/base values and reported selection assertions unchanged. All8 original failures occurred at same first beforeAll ORDER_LINE_REQUIRED witness.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "controlled_units_interpretation.test.js",
+      "test": "BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine 2. Evaluates individual parameter agronomic classifications (FAO 5-tier)",
+      "originalFailureSha256": "86fdad234a2ca39db5ce34852f50a4c2a18f9938211204bbe24302e044f6495f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\controlled_units_interpretation.test.js:59:16)"
+      ],
+      "originalCaseLineNumbers": [
+        "59"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Shared NEW owned APPROVED/ACCEPTED retained history gets11 legacy NULL lines for actual11 existing owners before accepted witnesses. RequiredAnalyses still contains absent EXCH_NA; no Na owner/value invented. All original unit factors, concentration/basis/censoring, FAO tiers/soil-plant/method interpretation, USDA texture/CN/base values and reported selection assertions unchanged. All8 original failures occurred at same first beforeAll ORDER_LINE_REQUIRED witness.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "controlled_units_interpretation.test.js",
+      "test": "BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine 3. Computes multi-parameter soil diagnostics (USDA texture, C:N stoichiometry, Base Saturation, Ca:Mg)",
+      "originalFailureSha256": "86fdad234a2ca39db5ce34852f50a4c2a18f9938211204bbe24302e044f6495f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\controlled_units_interpretation.test.js:59:16)"
+      ],
+      "originalCaseLineNumbers": [
+        "59"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Shared NEW owned APPROVED/ACCEPTED retained history gets11 legacy NULL lines for actual11 existing owners before accepted witnesses. RequiredAnalyses still contains absent EXCH_NA; no Na owner/value invented. All original unit factors, concentration/basis/censoring, FAO tiers/soil-plant/method interpretation, USDA texture/CN/base values and reported selection assertions unchanged. All8 original failures occurred at same first beforeAll ORDER_LINE_REQUIRED witness.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "controlled_units_interpretation.test.js",
+      "test": "BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine 4. End-to-end report assembly embeds controlled units and rich diagnostic interpretations",
+      "originalFailureSha256": "86fdad234a2ca39db5ce34852f50a4c2a18f9938211204bbe24302e044f6495f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\controlled_units_interpretation.test.js:59:16)"
+      ],
+      "originalCaseLineNumbers": [
+        "59"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Shared NEW owned APPROVED/ACCEPTED retained history gets11 legacy NULL lines for actual11 existing owners before accepted witnesses. RequiredAnalyses still contains absent EXCH_NA; no Na owner/value invented. All original unit factors, concentration/basis/censoring, FAO tiers/soil-plant/method interpretation, USDA texture/CN/base values and reported selection assertions unchanged. All8 original failures occurred at same first beforeAll ORDER_LINE_REQUIRED witness.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "controlled_units_interpretation.test.js",
+      "test": "BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine 5. WP-04: Fail closed on unrecognised unit",
+      "originalFailureSha256": "86fdad234a2ca39db5ce34852f50a4c2a18f9938211204bbe24302e044f6495f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\controlled_units_interpretation.test.js:59:16)"
+      ],
+      "originalCaseLineNumbers": [
+        "59"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Shared NEW owned APPROVED/ACCEPTED retained history gets11 legacy NULL lines for actual11 existing owners before accepted witnesses. RequiredAnalyses still contains absent EXCH_NA; no Na owner/value invented. All original unit factors, concentration/basis/censoring, FAO tiers/soil-plant/method interpretation, USDA texture/CN/base values and reported selection assertions unchanged. All8 original failures occurred at same first beforeAll ORDER_LINE_REQUIRED witness.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "controlled_units_interpretation.test.js",
+      "test": "BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine 6. WP-05: Cation mg/kg to cmol(+)/kg conversions",
+      "originalFailureSha256": "86fdad234a2ca39db5ce34852f50a4c2a18f9938211204bbe24302e044f6495f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\controlled_units_interpretation.test.js:59:16)"
+      ],
+      "originalCaseLineNumbers": [
+        "59"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Shared NEW owned APPROVED/ACCEPTED retained history gets11 legacy NULL lines for actual11 existing owners before accepted witnesses. RequiredAnalyses still contains absent EXCH_NA; no Na owner/value invented. All original unit factors, concentration/basis/censoring, FAO tiers/soil-plant/method interpretation, USDA texture/CN/base values and reported selection assertions unchanged. All8 original failures occurred at same first beforeAll ORDER_LINE_REQUIRED witness.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "controlled_units_interpretation.test.js",
+      "test": "BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine 7. WP-18: Total N of 30 g/kg rates High in SOIL and Adequate in PLANT",
+      "originalFailureSha256": "86fdad234a2ca39db5ce34852f50a4c2a18f9938211204bbe24302e044f6495f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\controlled_units_interpretation.test.js:59:16)"
+      ],
+      "originalCaseLineNumbers": [
+        "59"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Shared NEW owned APPROVED/ACCEPTED retained history gets11 legacy NULL lines for actual11 existing owners before accepted witnesses. RequiredAnalyses still contains absent EXCH_NA; no Na owner/value invented. All original unit factors, concentration/basis/censoring, FAO tiers/soil-plant/method interpretation, USDA texture/CN/base values and reported selection assertions unchanged. All8 original failures occurred at same first beforeAll ORDER_LINE_REQUIRED witness.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "controlled_units_interpretation.test.js",
+      "test": "BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine 8. WP-23: Extended interpretation coverage with calibration methods",
+      "originalFailureSha256": "86fdad234a2ca39db5ce34852f50a4c2a18f9938211204bbe24302e044f6495f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\controlled_units_interpretation.test.js:59:16)"
+      ],
+      "originalCaseLineNumbers": [
+        "59"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Shared NEW owned APPROVED/ACCEPTED retained history gets11 legacy NULL lines for actual11 existing owners before accepted witnesses. RequiredAnalyses still contains absent EXCH_NA; no Na owner/value invented. All original unit factors, concentration/basis/censoring, FAO tiers/soil-plant/method interpretation, USDA texture/CN/base values and reported selection assertions unchanged. All8 original failures occurred at same first beforeAll ORDER_LINE_REQUIRED witness.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    },
+    {
+      "suite": "catalogue_governance.test.js",
+      "test": "Catalogue governance and connected selections Historical results prevent deletion and unit reinterpretation",
+      "originalFailureSha256": "2583f8f464b829dad25d2abc994d7b423c7340ca7ffb5f07df89b5deb7153093",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\catalogue_governance.test.js:100:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "100"
+      ],
+      "classification": "NEW_OWNED_POSITIVE_RETAINED_HISTORY_ORDER_CONTEXT",
+      "sourceDecision": "Only NEW owned historical accepted custom parameter witness gets a matching legacy NULL order before execution. Exact original parameter/lab/value12/mg/kg retained; no alias or Lab row invention. Deletion/units409 and usage.results1, allowed retirement/rename and all unsafe definitions/packages/defaults/permissions/audit assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly impact causes and approvednonzeroSTOP; no runtime amendment step/backfill/relink."
+    }
+  ],
+  "productionOperations": 0
+}

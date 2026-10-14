@@ -1,0 +1,36 @@
+PASS tests/contracts/catalogue_governance.test.js
+  Catalogue governance and connected selections
+    √ Rejects unsafe definition {"name":" ","code":"X"} (2 ms)
+    √ Rejects unsafe definition {"name":"Valid name","code":"INVALID CODE"} (1 ms)
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","validation":{"min":20,"max":2}}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","validation":{"min":"2"}}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","validation":"{broken"}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","validation":{"decimalPlaces":1.5}} (1 ms)
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","matrix":"UNKNOWN"}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","executionOrder":"2x"}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","prerequisites":"{}"}
+    √ Rejects unsafe definition {"name":"Valid name","code":"X","status":"whatever"}
+    √ New parameters start inactive, without fabricated numeric limits or units (174 ms)
+    √ Explicit inactive status and matrix survive create and update (8 ms)
+    √ Shared definitions cannot be silently changed by a lab manager (1 ms)
+    √ Manager can create and update their own scoped definition (3 ms)
+    √ Inactive and unknown selections cannot create new orders; existing selections survive retirement (15 ms)
+    √ Placeholders and operational gates are not orderable analyses
+    √ Incorrect mass-concentration defaults and uncurated import labels are flagged for correction (1 ms)
+    √ Duplicate and cross-lab selections are rejected (1 ms)
+    √ Malformed validation in one legacy record does not make the entire catalogue disappear (21 ms)
+    √ A new package cannot contain inactive or unknown parameters (3 ms)
+    √ Historical results prevent deletion and unit reinterpretation (50 ms)
+    √ JSON package references and prerequisites prevent deletion (3 ms)
+    √ Unused definitions can be removed with an audit record (4 ms)
+    √ Method default resolves to this lab, never an unrelated lab (2 ms)
+    √ Mixed valid/invalid defaults request makes no partial changes (3 ms)
+    √ Referenced methods cannot be deleted, including non-FK default references (3 ms)
+    √ Cross-lab default configuration cannot be read by another manager
+
+Test Suites: 1 passed, 1 total
+Tests:       27 passed, 27 total
+Snapshots:   0 total
+Time:        1.03 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\catalogue_governance.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-qc-units-catalogue-context-singles\05-catalogue_governance.test\report-original.json

@@ -1,0 +1,88 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 65bef977-c6da-446d-8c48-cf3740225a4f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 65bef977-c6da-446d-8c48-cf3740225a4f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f1abeb55-395b-465f-a22f-f38eefd368da (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f1abeb55-395b-465f-a22f-f38eefd368da (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Scientific matrix validation failed: Texture closure failed: Sand(40%) + Silt(40%) + Clay(19%) = 99.0% (must sum to 100% ± 0.5%)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:231:53
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 422,
+      status: 422,
+      code: 'BLOCKING_MATRIX_DIAGNOSTICS',
+      details: {
+        blockingErrors: [ [Object] ],
+        matrixDiagnostics: {
+          texture: [Object],
+          textureClosure: [Array],
+          retiredAdvisories: [Array],
+          advisorySuccessor: 'crossChecks',
+          warnings: [Array],
+          blockingErrors: [Array],
+          isBlocking: true
+        }
+      }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+PASS tests/contracts/issue_278_texture_closure_policy.test.js
+  #278 texture closure gate (pure)
+    √ 40 + 40 + 19 passes at the approved ±2 tolerance and classifies the soil (5 ms)
+    √ 40 + 40 + 18 at ±2 blocks: false (boundary is inclusive)
+    √ 40 + 40 + 22 at ±2 blocks: false (boundary is inclusive)
+    √ 40 + 40 + 17.9 at ±2 blocks: true (boundary is inclusive) (1 ms)
+    √ 40 + 40 + 22.1 at ±2 blocks: true (boundary is inclusive)
+    √ the lab tolerance, not a literal, decides
+    √ an invalid tolerance is refused rather than guessed (13 ms)
+    √ stored numericValue is authoritative over the result text
+    √ a non-percent unit is disclosed as not evaluated and does not block (1 ms)
+    √ a row without a stored unit is never given a catalogue unit and closes exactly, never within the lab tolerance
+    √ a row without stored censoring is never treated as uncensored and closes exactly, never within the lab tolerance (1 ms)
+    √ censored fractions are not evaluated and do not block
+    √ non-numeric fractions are not evaluated and do not block
+    √ ambiguous fractions are not evaluated and do not block
+    √ missing fractions skip the check, as before (1 ms)
+    √ each replicate closes on its own
+  #278 laboratory policy and the real submission gate
+    √ each laboratory gets its own tolerance; an unregistered lab gets the registry default (165 ms)
+    √ 40 + 40 + 19 is no longer refused at the default tolerance (342 ms)
+    √ a stricter lab still refuses 40 + 40 + 19 with zero writes (187 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        1.961 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_278_texture_closure_policy.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-qc-units-catalogue-context-singles\02-issue_278_texture_closure_policy.test\report-original.json

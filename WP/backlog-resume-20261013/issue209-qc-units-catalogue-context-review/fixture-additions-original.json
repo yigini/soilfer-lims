@@ -1,0 +1,47 @@
+[
+  {
+    "path": "server/tests/contracts/qc_controls.test.js",
+    "beforeSha256": "5116c1d1a8b9b0d177a654e9edcb278ae75564f693d222c47fd0ccdc2dd343f0",
+    "afterSha256": "a3819f4092e123ea7735c88c67fd9414460343a9ff709ba2c214dbaf5342e839",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declare usable legacy order lines only in this NEW owned positive assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',\n            lines: { create: [item.analysis].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/issue_278_texture_closure_policy.test.js",
+    "beforeSha256": "86943385f66050a535972e557929dc7127a6f21f583936d65bcb414a914fb612",
+    "afterSha256": "a82ad881b45de8777b2b3a71c448c96af84ceaee40196feaa9714f3f167dea92",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declare usable legacy order lines only in this NEW owned positive assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',\n            lines: { create: ['SAND', 'SILT', 'CLAY'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/controlled_units_interpretation.test.js",
+    "beforeSha256": "9c8331920af922d8960a2c413ad9f546254dd9fabc7bdc6f82f690a2dbd84bb0",
+    "afterSha256": "7d69dabebe8fc794841aa2a273a4b40ffd96ee0b0a6c064b999521003e20628d",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declare usable legacy order lines only in this NEW owned positive assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',\n            lines: { create: (await prisma.workItem.findMany({ where: { sampleId, status: 'ACCEPTED' } })).map(item => item.analysis).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/catalogue_result_entry.test.js",
+    "beforeSha256": "a5dc72ca28049d692b6fe4a96822c12e87b24d57d2b8baab81774a43428bb8b5",
+    "afterSha256": "199149cda2863859bb6e77b02446485fc3a9ef985fcfd8c0ef7e77137d279b00",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declare usable legacy order lines only in this NEW owned positive assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',\n            lines: { create: [param].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/catalogue_governance.test.js",
+    "beforeSha256": "760bc3ad0f161f02e84ffd20beb81be669ae25275285ce6d49b1a03ccc356cf2",
+    "afterSha256": "0022f465807acd7321df7a74ea631b76495538e154e00766903f0418c867862d",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declare usable legacy order lines only in this NEW owned positive assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sample.id,\n            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',\n            lines: { create: [a.code].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  }
+]
