@@ -1,0 +1,48 @@
+{
+  "recordedUtc": "2026-10-14T11:49:41.177327+00:00",
+  "sourceAudit": "daca2a12e25c413eb01033087def5a7267c793d2",
+  "supportedBaseline": "48d0e526ded03232ac8516dd867f4b14923bdb58",
+  "currentMain": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+  "closedFullSummary": {
+    "closedUtc": "2026-10-14T11:39:13.632135+00:00",
+    "exit": 1,
+    "suites": 370,
+    "tests": 5630,
+    "passedSuites": 305,
+    "passedTests": 4980,
+    "failed": 650,
+    "failedSuites": 65,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": false,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "visibleAssetsUnchanged": true,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "productionOperations": 0,
+  "databaseConnections": 0,
+  "fixtureCorrections": 0,
+  "facts": [
+    "Current main intake generates initial revision and null-linked matching lines; normal current intake is not inherently orderless.",
+    "Supported baseline writes WorkItems before a separately caught initial-revision/line block; failure is logged and workItems are returned. Orphan or partial order context is therefore reachable from a released production path.",
+    "Current main attempt writer does not require orderLineId at INSERT. Retained executions can have null identity.",
+    "Draft209 exact single legacy match is preserved; missing active revision or matching line refuses ORDER_LINE_REQUIRED before new INSERT.",
+    "Draft209 aggregate NO_LINE currently combines absent ACTIVE revision and absent matching line; current kit impact counts only prospective new-insert open WorkItems, excluding continuing OPEN reservations.",
+    "An APPROVED orphan sample is blocked from ordinary reasoned order edits by AMENDMENT_WORKFLOW_REQUIRED; scientific authorisation resolves its order line before APPROVED-to-PROCESSING. The general reasoned-revision guidance is therefore insufficient for this reachable historical shape.",
+    "This is pinned-source reachability evidence, not actual production inspection, impact counts, a completed owned diagnostic or a complete per-case classification."
+  ],
+  "requiredFollowup": [
+    "Report approved-orphan remediation boundary to Claudio before changing application or fixture semantics.",
+    "Inspect all65 failed suites/cases individually and distinguish current positive setups from supported-baseline runtime shapes.",
+    "Keep zero-write negative legacy refusal proofs and refine read-only absent-revision versus missing-line counts and prospective approved-amendment impact without production collection."
+  ],
+  "failureCategoryCounts": {
+    "ORDER_LINE_REFUSAL": 586,
+    "REQUIRES_CASE_INSPECTION": 63,
+    "STARTUP_OWNER_PREREQUISITE": 1
+  }
+}
