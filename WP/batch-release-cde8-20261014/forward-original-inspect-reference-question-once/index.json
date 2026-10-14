@@ -1,0 +1,80 @@
+{
+  "status": "ACTUAL_REFERENCE_QUESTION_NATIVE_DELIVERY_RETAINED",
+  "questionId": 6180294588,
+  "retainedUtc": "2026-10-14T22:58:35.358223+00:00",
+  "actualReferenceAnswer": null,
+  "newSourceApproval": null,
+  "newExecutionAuthority": null,
+  "files": [
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-original-inspect-reference-question-once/actual-direction-before-original.json",
+      "bytes": 6613,
+      "sha256": "1a199ef0023c5ba2315d038de4f5797831679f3382933d50e34336b92ffa7ddb"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-original-inspect-reference-question-once/actual-question-body.txt",
+      "bytes": 2936,
+      "sha256": "76842fd5914e325c214f97bc9ab584b4aca768b6081655c22970b431c5fd7e89"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-original-inspect-reference-question-once/actual-question-confirmed.json",
+      "bytes": 4778,
+      "sha256": "c9a477b998a4d3d8c33d4301d594414349b975bd2e18f487ce3f2a27175d9262"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-original-inspect-reference-question-once/actual-question-fresh-original.json",
+      "bytes": 4540,
+      "sha256": "0bca0fabcd0e6f124d206a48013dc20002e4159a4589f234d0ebacc478b05fb8"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-original-inspect-reference-question-once/history-before-original.json",
+      "bytes": 1742455,
+      "sha256": "88661a801386c3bdcdfa29aa518aaa7cd1831a1ce5130dd40fd6e162e63b9d99"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-original-inspect-reference-question-once/native-actual-sent.txt",
+      "bytes": 1592,
+      "sha256": "9be602c40d4ce9e5c1be8c89625c89e45662d3b2847f2dda292fa0b6afca01b1"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-original-inspect-reference-question-once/native-delivery-record.json",
+      "bytes": 784,
+      "sha256": "f6a411b6c8aea0988677c79dc860cee544d3e1c086cc3a2e915a0e0bab04de79"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-original-inspect-reference-question-once/post-intent.json",
+      "bytes": 204,
+      "sha256": "26145668f08c98dcdf8ad3a74f50c58267b08eff492c536aba18f21df5a83a71"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-original-inspect-reference-question-once/post-payload-original.json",
+      "bytes": 2963,
+      "sha256": "5d883f6e3de65fd6fcfc16c33ee548556f25dacea1550de859da1f6701350c26"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-original-inspect-reference-question-once/post-response-original.json",
+      "bytes": 4540,
+      "sha256": "0bca0fabcd0e6f124d206a48013dc20002e4159a4589f234d0ebacc478b05fb8"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/forward-original-inspect-reference-question-once/post-stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/raise-forward-receipt-missing-original-inspect-reference-once.py",
+      "bytes": 5575,
+      "sha256": "bd1c09890014c3b7117029b7c14ae73f7020f2f70976d5d62435132262b0aa4f"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-forward-inspect-reference-question-native-once.py",
+      "bytes": 3621,
+      "sha256": "d6bb8993ecde75e26b5056d515350bf15b942daec90bf30ea5dbdcd1c3f0dca9"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 415030,
+      "sha256": "25275b0b85d82abf88df5a3c2758bebe50124ac4a4eafc33fd02e04337affe3b"
+    }
+  ]
+}
