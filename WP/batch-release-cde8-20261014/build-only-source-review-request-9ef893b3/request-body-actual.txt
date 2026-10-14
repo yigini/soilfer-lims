@@ -1,0 +1,45 @@
+Claudio: NEW separate batch build-only source review, #206 + #214 + #209.
+
+Please review the five-file operational graph at exact tooling source 9ef893b38fe381061d4dc8aa90968d1d7a4f6fff before the first new build. All three actual application audits and merges are complete; candidate main is cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367/tree638580d50f61254609de3abd42d93afc676a5727. Main CI38636615469 attempt1 closed SUCCESS21:34:24UTC with exact370/5649/all370inventory and every real Docker build/boundary/readiness step. Its16 original blobs are retained at194b8dfc89940502a480d20b4e18714925c5d5b0.
+
+Actual source approvals: PR295/#206 head1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a/PASS6146939836; PR296/#214 head5e0b32830f961b3236c7cf8f74cf8f676e98fbaa/PASS6163165778; PR297/#209 head6bd516c42a07332d0b0653ed150d1526bf7e424e/PASS6178123314. Their merge chain ends at the exact candidate. The completed #200 receipt identifies predecessor959d/image7aeb only; its historical build/proof/kit/gates/helpers remain consumed.
+
+- [batch_build.py](https://github.com/yigini/soilfer-lims/blob/9ef893b38fe381061d4dc8aa90968d1d7a4f6fff/WP/batch-release-cde8-20261014/batch_build.py)
+- [batch_build_contract.py](https://github.com/yigini/soilfer-lims/blob/9ef893b38fe381061d4dc8aa90968d1d7a4f6fff/WP/batch-release-cde8-20261014/batch_build_contract.py)
+- [launch_batch_build.py](https://github.com/yigini/soilfer-lims/blob/9ef893b38fe381061d4dc8aa90968d1d7a4f6fff/WP/batch-release-cde8-20261014/launch_batch_build.py)
+- [prepare_batch_build.py](https://github.com/yigini/soilfer-lims/blob/9ef893b38fe381061d4dc8aa90968d1d7a4f6fff/WP/batch-release-cde8-20261014/prepare_batch_build.py)
+- [verify_build_guards.py](https://github.com/yigini/soilfer-lims/blob/9ef893b38fe381061d4dc8aa90968d1d7a4f6fff/WP/batch-release-cde8-20261014/verify_build_guards.py)
+
+[Scope and validation](https://github.com/yigini/soilfer-lims/blob/9ef893b38fe381061d4dc8aa90968d1d7a4f6fff/WP/batch-release-cde8-20261014/build-source-review-ready.md), [closed current verification](https://github.com/yigini/soilfer-lims/blob/9ef893b38fe381061d4dc8aa90968d1d7a4f6fff/WP/batch-release-cde8-20261014/actual-cde8-raw-blob-archive-verification-once/exit-original.json), and [raw guard output](https://github.com/yigini/soilfer-lims/blob/9ef893b38fe381061d4dc8aa90968d1d7a4f6fff/WP/batch-release-cde8-20261014/actual-cde8-raw-blob-archive-verification-once/guard-stderr-original.log).
+
+This source authorizes only one immutable new package/root/unit and one stock Docker build. It has zero database connections, volume mounts, impact collection, production-copy proof or deployment. Fresh actual main/CI/three audits/source review and later rejections are checked before upload and again immediately before launch. Intent files precede SSH/build; unknown outcomes forbid replay. Fixed firstroot only; no retry/rebuild/retag/cleanup. The launcher uses python3 -B and an unused unit; package inventory and every raw source byte are verified before execution.
+
+Disk accounting uses metadata for only the owned build root plus disjoint Docker buildkit/overlay2/image/containerd directories, without opening volumes or database paths. Require floor10556150894 +4294967296B allocation before/unpack and preserve the floor after. Per-filesystem signed net allocated change bounds unexplained growth below500000000B, including cache shrink. Build2400/unit2700 seconds; both YY workload pins mandatory. Review these bounds and the failure/uncertain-outcome behavior.
+
+Closed verification22:15:18.083367UTC:14 guard tests PASS/all five source hashes unchanged; actual1561 Gitblobs verify complete bytes/OIDs/modes/inventory,1560 selected after excluding tracked node_modules. No extraction or Docker operation. Earlier actual Git exports refused mode and then filtered-byte changes; original archives/indexes/transcriptions remain honest and immutable. Current raw-object archive preserves committed bytes with the same strict guards. The source publication first refused ignored raw files before commit/push; unique completion retained exactly42 verified owned blobs without source changes. No application/runtime/released assertion changed.
+
+Only after a new PASS would Pip prepare and launch this first build. A separate NEW stopped production-copy proof source and final exact-kit audit/fresh gate remain required. Original DB/WAL/SHM must remain immutable; actual policyPRESENT/NO_OP0orSTOP, measured retained snapshots/allocations,214 chart contexts and created-unstarted-unbound servedLRM runs,209 causes/approved refusal lists/invalidStoredAnalysisSampleCount+sample/ownerIDs remain required before production. Nonzero lists to YY; approved nonzeroSTOP/separately reviewed forward remedy. No amendment-side order/backfill/relink/normalizer change. #103 has no production connection/APPLYGO. No new production connections/counts/build/proof/kit/gate/deploy have occurred.
+
+If this exact build-only graph passes your independent review, please start the verdict with `Source review: PASS` and include the following complete literal bindings. This approves only this first build; it does not approve the future proof or production kit.
+
+```
+9ef893b38fe381061d4dc8aa90968d1d7a4f6fff
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+mainCiRun=38636615469
+batchBuildScope=BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME
+reserveFloorBytes=10556150894
+buildAllocationReserveBytes=4294967296
+buildTimeoutSeconds=2400
+buildUnitTimeoutSeconds=2700
+unexplainedGrowthAbortBytes=500000000
+diskGrowthPolicy=OWNED_BUILD_ROOT_AND_DISJOINT_DOCKER_ALLOCATIONS
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+originalBatchBuildRoot=/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z
+batch_build.py=001fd04c7efaa31423121a53135c7beeba37352db76427c6cd8526ddd80be493
+batch_build_contract.py=43b3e9ca228c07e3ceaa7645b9ae0d87099f3779c327fa336c8fa69184b367a5
+launch_batch_build.py=7cff0a41ad5cd1d4baefbce9323554f9ea8629fd2391f129f89143a552a2a8c3
+prepare_batch_build.py=e8b862b8a5136290ee1175497d37f765a8ae1b6e1000af6df9c5cac732896fa9
+verify_build_guards.py=a0a1b17c8fdb91679ed089e2834e4664c917bd00f7ea305d0058736a83ef3b23
+```

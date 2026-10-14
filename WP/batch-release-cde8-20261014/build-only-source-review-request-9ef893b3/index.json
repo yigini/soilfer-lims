@@ -1,0 +1,135 @@
+{
+  "status": "ACTUAL_BUILD_ONLY_REVIEW_REQUEST_AND_NATIVE_DELIVERY_RETAINED",
+  "retainedUtc": "2026-10-14T22:20:02.342508+00:00",
+  "toolingCommit": "9ef893b38fe381061d4dc8aa90968d1d7a4f6fff",
+  "requestId": 6179744847,
+  "newSourceApproval": null,
+  "productionOperations": 0,
+  "files": [
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/actual-request-confirmed.json",
+      "bytes": 8105,
+      "sha256": "8ef61fe535822b5c591eb5f9a3042a69cb7dbcb33882123f81acf240fede5ae0"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/actual-request-fresh-original.json",
+      "bytes": 7867,
+      "sha256": "7b3763d2902298e843132895f07372318a0cfc47ae4cd5b67a34d2af5addd413"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/issue162-comments-before-original.json",
+      "bytes": 1699330,
+      "sha256": "e1781edc34061b0d83f3f84c5727f990fd668813a40c84a19564c03731b0771d"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/main-ci-original.json",
+      "bytes": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/main-original.json",
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/native-actual-sent.txt",
+      "bytes": 1661,
+      "sha256": "bd701083dd2845a8febdc709e75d7f50048cee52e89741a6cd3d52a50a35c418"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/native-delivery-record.json",
+      "bytes": 808,
+      "sha256": "496d0aa3f5236840d1b4ce3481bc2b6de1ce0e1b768bfdd892aad3275e8b1c13"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/post-intent.json",
+      "bytes": 288,
+      "sha256": "f6ba7489a142264154ebaac26bc70981fb3e567856514f0c44b8445e7b62d121"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/post-response-original.json",
+      "bytes": 7867,
+      "sha256": "7b3763d2902298e843132895f07372318a0cfc47ae4cd5b67a34d2af5addd413"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/post-stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/pr295-actual-pass-original.json",
+      "bytes": 6787,
+      "sha256": "3d504670dbe3035c87ff67d73c50782e005a1893c4665de338de9fb57ce0a25a"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/pr295-comments-original.json",
+      "bytes": 10644,
+      "sha256": "3cd8ecfd08235af23aae6a5ae7c7157690c06e85c7574e503562dd566b4b3201"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/pr295-original.json",
+      "bytes": 23239,
+      "sha256": "017ca0cd3b701f1ce87b6c228399347c026cab21653aeb9ac191abb02d85a575"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/pr296-actual-pass-original.json",
+      "bytes": 8178,
+      "sha256": "83293fdf38e293253ec6ae50ff81dc3a9b61cd87fe863d04eaa465f99a8b9f47"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/pr296-comments-original.json",
+      "bytes": 13709,
+      "sha256": "d6f0751f4ac2bdb75a54211ea8dc43b25edaf9d9440621ac8e6a98e47f4b46c9"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/pr296-original.json",
+      "bytes": 65850,
+      "sha256": "d55c6c68d1fa4e9b7c7f176dfddda3c30c0badc286a65c245e4a4035e6affb24"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/pr297-actual-pass-original.json",
+      "bytes": 5571,
+      "sha256": "2272d318b7d824d7341e90cd340b53bfeb81dc5cbec26150f857b4db8251a167"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/pr297-comments-original.json",
+      "bytes": 20259,
+      "sha256": "20f195ef4512a4febe5926cdcbb8baddae3bab99a21fd698ca6b1052d57a0751"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/pr297-original.json",
+      "bytes": 33502,
+      "sha256": "a19e51840537a40cd58d44725264933f5b9c7a09fad046928f787e84c5f1f523"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/request-body-actual.txt",
+      "bytes": 6232,
+      "sha256": "c01ffb7fc0603bd204605966397a96c0d6c8dac3fbdb83664c97846f24d6e551"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/request-payload-original.json",
+      "bytes": 6290,
+      "sha256": "2daaca69adc92262eb67e1452c11ca4fa410584d835c4f78d4c5b69b990f49b4"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-only-source-review-request-9ef893b3/tooling-source-index.json",
+      "bytes": 1540,
+      "sha256": "d36e6748a76d043d028228cff67027c1c02e4d788a2aa038b56b5bb8d0c34db1"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/request-batch-cde8-build-only-source-review-once.py",
+      "bytes": 7959,
+      "sha256": "8748840822adefc26eaa243093fb6ad59860095f80dbe7c09ac383c2c54c8bc8"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-batch-build-source-review-request-native-once.py",
+      "bytes": 3856,
+      "sha256": "6f4758aa7cb2a8d118c75b8bb3bc12cf63cfb5530e0a28a9b306768b09cde606"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 406121,
+      "sha256": "b58965d81ffeeb3d097ae494141e15499d4554fd47722c4b94d7b90444255b32"
+    }
+  ]
+}

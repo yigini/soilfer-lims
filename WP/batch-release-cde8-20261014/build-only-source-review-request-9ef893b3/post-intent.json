@@ -1,0 +1,1 @@
+{"startedUtc": "2026-10-14T22:18:22.105331+00:00", "toolingCommit": "9ef893b38fe381061d4dc8aa90968d1d7a4f6fff", "candidate": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367", "scope": "BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME", "postCount": 1, "neverRetry": true, "productionOperations": 0}
