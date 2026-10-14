@@ -1,0 +1,160 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f21c72fc-fcb8-46a1-90f9-8a0c3678c66a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f21c72fc-fcb8-46a1-90f9-8a0c3678c66a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 561c6d27-6bf6-40ff-b38c-468bcf572e21 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 561c6d27-6bf6-40ff-b38c-468bcf572e21 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 561c6d27-6bf6-40ff-b38c-468bcf572e21 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 561c6d27-6bf6-40ff-b38c-468bcf572e21 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [saveResults] Error: Error: Sample preparation has not been completed
+        at assertResultSaveReadiness (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:29:92)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.saveResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:142:9) {
+      statusCode: 412
+    }
+
+      210 |
+      211 |     } catch (error) {
+    > 212 |         console.error('[saveResults] Error:', error);
+          |                 ^
+      213 |         if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+      214 |             ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
+      215 |         res.status(500).json({ error: 'Failed to save results' });
+
+      at error (controllers/resultsController.js:212:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 561c6d27-6bf6-40ff-b38c-468bcf572e21 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 561c6d27-6bf6-40ff-b38c-468bcf572e21 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9bb45973-c271-47e8-8030-4d4cf852eb69 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/sample_detail.test.js
+  SD-15: Comprehensive Sample Detail End-to-End Contract Suite
+    1. Cross-Laboratory Assignment Refusal for Every Role (SD-02)
+      √ 1.1. Super Admin is blocked with HTTP 403 from assigning a GTM sample to an HND technician (41 ms)
+      √ 1.2. Lab Manager is blocked with HTTP 403 from assigning to an out-of-lab technician (10 ms)
+      √ 1.3. Valid in-lab assignment succeeds (HTTP 200) (57 ms)
+    2. Prerequisite Gate on Execution & Result Entry (SD-05)
+      √ 2.1. Starting work when preparationStatus !== DONE returns HTTP 412 Precondition Failed (13 ms)
+      √ 2.2. Entering results when preparationStatus !== DONE returns HTTP 412 Precondition Failed (21 ms)
+      √ 2.3. Completing preparation unblocks startWork and execution (HTTP 200) (23 ms)
+    3. Three-Way Analysis Reconciliation Engine (SD-03)
+      √ 3.1. Removing an unstarted (NOT_ASSIGNED) analysis deletes its row (Branch A) (52 ms)
+      √ 3.2. Removing an in-progress analysis without reason is refused (HTTP 400) (Branch B) (8 ms)
+      √ 3.3. Removing an in-progress analysis with reason marks it WAIVED (Branch B) (18 ms)
+      √ 3.4. Removing an analysis with recorded results is refused with HTTP 409 Conflict (Branch C) (29 ms)
+    4. Reason-Required Rejection & Reopening (SD-10)
+      √ 4.1. Rejecting work without reason returns HTTP 400 (6 ms)
+      √ 4.2. Undoing approval requires the amendment workflow even without a reason (5 ms)
+    5. Gate Back-Fill Refusal on Reopen (SD-08)
+      √ 5.1. Refused undo never fabricates preparation evidence on an approved sample (12 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       13 passed, 13 total
+Snapshots:   0 total
+Time:        1.983 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\sample_detail.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-governance-reason-sync-context-singles\02-sample_detail.test\report-original.json

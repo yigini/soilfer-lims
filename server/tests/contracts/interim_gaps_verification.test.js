@@ -546,6 +546,12 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
         });
 
         test('COMPLETE_WORK creates canonical Result and WorkAttempt records in transaction', async () => {
+            // #209: declared legacy order only for this NEW owned positive sync execution assembly.
+            require('../../services/workflowStateRules').assertFixtureContext();
+            await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSample.id,
+                version: 1, status: 'ACTIVE', reason: 'Owned positive canonical sync order context', requestedBy: 'system:fixture',
+                lines: { create: ['PH_H2O', 'SPEC_MIR'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                    workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
             const opId = 'op_complete_canonical_' + testPrefix;
 
             const res = await request(app)

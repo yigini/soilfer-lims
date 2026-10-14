@@ -1,0 +1,125 @@
+{
+  "createdUtc": "2026-10-14T17:43:49.994465+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 5,
+  "cases": [
+    {
+      "suite": "sample_detail.test.js",
+      "test": "SD-15: Comprehensive Sample Detail End-to-End Contract Suite 3. Three-Way Analysis Reconciliation Engine (SD-03) 3.1. Removing an unstarted (NOT_ASSIGNED) analysis deletes its row (Branch A)",
+      "originalFailureSha256": "91ab3d316c02c58968859fe86e63f77d78d2ff7507f8882559c94ad7d266b8be",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 200",
+        "Received: 400",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\sample_detail.test.js:179:32)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "179"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_MANDATORY_REASON_OR_NEW_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Only requests3.1 unstarted OC removal and3.4 recorded EC removal lack mandatory reason. Add explicit reason at these two input sites. Preserve3.2 deliberate missing-reason400; reasoned3.3 creates usable EC order before existing numerical witness so no additional order. Keep recorded-owner409, all scopes/preparation/waiver/approval and zero-write assertions.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught initial-order failures can retain missing/partial-order WorkItems. Current normal intake creates initial order and rolls back initial order failures. Legacy runtime orphans remain zero-write refused, readonly cause/sample lists and approved nonzeroSTOP; no normalization/backfill/relink/amendment-side order step."
+    },
+    {
+      "suite": "sample_detail.test.js",
+      "test": "SD-15: Comprehensive Sample Detail End-to-End Contract Suite 3. Three-Way Analysis Reconciliation Engine (SD-03) 3.4. Removing an analysis with recorded results is refused with HTTP 409 Conflict (Branch C)",
+      "originalFailureSha256": "fe4a2e1bfea70f1b67b3daf4fdb44d3149c39c1db12b2cb2ae23b7bbc2cd7ad5",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 409",
+        "Received: 400",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\sample_detail.test.js:233:32)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "233"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_MANDATORY_REASON_OR_NEW_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Only requests3.1 unstarted OC removal and3.4 recorded EC removal lack mandatory reason. Add explicit reason at these two input sites. Preserve3.2 deliberate missing-reason400; reasoned3.3 creates usable EC order before existing numerical witness so no additional order. Keep recorded-owner409, all scopes/preparation/waiver/approval and zero-write assertions.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught initial-order failures can retain missing/partial-order WorkItems. Current normal intake creates initial order and rolls back initial order failures. Legacy runtime orphans remain zero-write refused, readonly cause/sample lists and approved nonzeroSTOP; no normalization/backfill/relink/amendment-side order step."
+    },
+    {
+      "suite": "interim_gaps_verification.test.js",
+      "test": "Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Sync Parity & Atomicity) Gap 3: SyncService Parity, Atomicity, and Canonical Writes COMPLETE_WORK creates canonical Result and WorkAttempt records in transaction",
+      "originalFailureSha256": "c435c355155dbc69af346ca8db97f1c74d29cc477ed63f5dbfb827bf6c85c2be",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: \"APPLIED\"",
+        "Received: \"REJECTED\"",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\interim_gaps_verification.test.js:567:36)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "567"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_MANDATORY_REASON_OR_NEW_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Only positive COMPLETE_WORK numerical witness receives one declared legacy NULL order with exact two existing analytical owners PH_H2O/SPEC_MIR; exclude operational DRYING. Original observed REJECTED vs APPLIED, no old refusal code captured. Current sync canonical execution/resolveOrderLine source explains missing-order preflight; this is a new manually assembled fixture equivalent to successful current intake. Earlier draft/replay/operational/spectral/unassigned refusal cases remain orderless. Value6.85/basis/author/RECORDED/completed item/canonical receipt unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught initial-order failures can retain missing/partial-order WorkItems. Current normal intake creates initial order and rolls back initial order failures. Legacy runtime orphans remain zero-write refused, readonly cause/sample lists and approved nonzeroSTOP; no normalization/backfill/relink/amendment-side order step."
+    },
+    {
+      "suite": "audit_1_1_reconcile_duplicates.test.js",
+      "test": "Audit 1.1: duplicate references and atomic analysis reconciliation an unrelated unstarted analysis can still be removed while the duplicate group is retained",
+      "originalFailureSha256": "96aed2d7779b28a801a6ddc97caa3aa28130673361b00f48906fdf1728e643e9",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 200",
+        "Received: 400",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_1_reconcile_duplicates.test.js:65:33)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "65"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_MANDATORY_REASON_OR_NEW_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Only positive unrelated unstarted CEC removal request lacks mandatory reason. Add reason input to original full PH_H2O/SOC target; ordinary orderService reconciles and creates revision in one TX. No initial order fixture needed. Preserve duplicate SOC rows, four duplicate removal zero-write refusals, injected FK/audit rollback and cold catalogue transaction guards.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught initial-order failures can retain missing/partial-order WorkItems. Current normal intake creates initial order and rolls back initial order failures. Legacy runtime orphans remain zero-write refused, readonly cause/sample lists and approved nonzeroSTOP; no normalization/backfill/relink/amendment-side order step."
+    },
+    {
+      "suite": "reopened_governance_scenarios.test.js",
+      "test": "Reopened Governance & Offline Parity Contract Tests 2. Offline Sync Spectral & Texture Determinations COMPLETE_WORK on grouped texture with valid closure atomically writes SAND, SILT, CLAY, and TEXTURE results",
+      "originalFailureSha256": "374b32c323c4d7f43fea92e21b145ade6c27ee53d1cb814e39c09f24161fec05",
+      "originalObservedHeader": [
+        "Error: expect(received).toContain(expected) // indexOf",
+        "",
+        "Expected value: \"REJECTED\"",
+        "Received array: [\"APPLIED\", \"SUCCESS\"]",
+        "    at Object.toContain (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\reopened_governance_scenarios.test.js:325:44)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "325"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_MANDATORY_REASON_OR_NEW_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Only positive grouped TEXTURE closure receives legacy NULL order with three existing analytical owners PH_H2O/SPEC_MIR/TEXTURE; no new fraction owners. Original REJECTED vs APPLIED/SUCCESS, no old refusal code captured. Existing matching TEXTURE line supports canonical one-attempt four-results writer. Earlier invalid90percent closure and custom-spectral scalar refusals remain orderless. Original40/40/20, exact four IDs/one attempt/author and all outbox/lease/scope/assignment/broadcast guards unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d caught initial-order failures can retain missing/partial-order WorkItems. Current normal intake creates initial order and rolls back initial order failures. Legacy runtime orphans remain zero-write refused, readonly cause/sample lists and approved nonzeroSTOP; no normalization/backfill/relink/amendment-side order step."
+    }
+  ],
+  "runtimeSourceSha256": {
+    "server/services/orderRevisionContract.js": "c8a241303e903068a2f131a07ffcf41fc27c1a8a58a055972f49f48e7093349f",
+    "server/services/orderService.js": "92c9285f7d0ac1604091a0a501f826827004c0e29fef6b12e1a9e8be25b1535a",
+    "server/services/orderLineResolutionService.js": "fb16963e58f0e60acb0ef6b9a55e8aae5cc8db8b2246b8c8091182bcbee62d09",
+    "server/services/syncService.js": "394df765458d38b5e7f3ae5fa1d6c38adbb21721ee36f843450d6928cc7f4e3b"
+  },
+  "changedLegacyExpectations": 0,
+  "productionOperations": 0
+}

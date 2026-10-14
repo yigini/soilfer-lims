@@ -1,0 +1,66 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791999864183 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791999864183 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791999864183 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791999864183 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791999864183 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-mgrA-REOPEN-1791999864183 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/reopened_governance_scenarios.test.js
+  Reopened Governance & Offline Parity Contract Tests
+    1. Offline Sync Draft Parity & Gating
+      √ SAVE_WORK_DRAFT rejects prerequisite-blocked sample with PREREQUISITE_INCOMPLETE (10 ms)
+      √ SAVE_WORK_DRAFT rejects unassigned technician with NOT_ASSIGNED_TECHNICIAN (2 ms)
+      √ Valid SAVE_WORK_DRAFT persists atomically and advances status from ASSIGNED to IN_PROGRESS (61 ms)
+    2. Offline Sync Spectral & Texture Determinations
+      √ COMPLETE_WORK on custom spectral method rejects scalar entry with SPECTRAL_SCALAR_REJECTED (2 ms)
+      √ COMPLETE_WORK on grouped texture rejects non-closing sum with TEXTURE_CLOSURE_FAILED (7 ms)
+      √ COMPLETE_WORK on grouped texture with valid closure atomically writes SAND, SILT, CLAY, and TEXTURE results (94 ms)
+    3. Offline Shared-Device Outbox User Partitioning & Identity Fail-Closed (IR-08)
+      √ getPendingOutboxOperations strictly fails closed with [] when identity is null, undefined, empty, or non-string
+      √ triggerSync fails closed with AUTH_REQUIRED / MISSING_USER_IDENTITY when user identity is absent
+      √ triggerSync fails closed when authToken is passed without valid user context
+      √ Simulated shared device: User A logout -> User B login dispatches only User B ops and preserves User A & ownerless ops intact (4 ms)
+      √ Mid-sync account switch is detected and safely aborted without cross-account attribution
+    4. Offline Pack Lease & Scope Enforcement
+      √ getPack returns 410 PACK_EXPIRED when pack lease is expired (5 ms)
+      √ getPack returns 403 PACK_ACCESS_DENIED when requested across laboratories (1 ms)
+      √ getPack returns 401 SESSION_INVALIDATED when user tokenVersion changed (1 ms)
+    5. Work Item Assignment Scoping & Receiving Lab Broadcast
+      √ assignWork via assignmentEligibilityService blocks cross-lab assignment (30 ms)
+      √ assignWork broadcasts WORKITEM_UPDATE to target receiving laboratory (20 ms)
+      √ reassignWork broadcasts WORKITEM_UPDATE to receiving laboratory (11 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       17 passed, 17 total
+Snapshots:   0 total
+Time:        1.89 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\reopened_governance_scenarios.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-governance-reason-sync-context-singles\04-reopened_governance_scenarios.test\report-original.json

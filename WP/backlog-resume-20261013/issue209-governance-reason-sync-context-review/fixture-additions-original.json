@@ -1,0 +1,39 @@
+[
+  {
+    "path": "server/tests/contracts/audit_1_1_reconcile_duplicates.test.js",
+    "beforeSha256": "eb977dbffd3f0b10360c16e71ab3d6072368acac4da98c1b84a05072f2efa681",
+    "afterSha256": "9cb71fc2ede069a78cde0831a1f43696f1c1d845d99ac76b205d491f94c111ff",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      ", reason: 'Reviewed removal of unrelated unstarted CEC'"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/sample_detail.test.js",
+    "beforeSha256": "7acf27e33ec67871d95add7236f3532c6be687a4c751093b53325e81c906be94",
+    "afterSha256": "838015356af812d221eaf03fa5b8128516ee14b30847bbfa5f1c9dc634893052",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      ", reason: 'Reviewed removal of unstarted OC'",
+      ", reason: 'Reviewed recorded EC removal refusal'"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/interim_gaps_verification.test.js",
+    "beforeSha256": "8df929edd09a529d6c6b8ee55d48f2776b3fbdb3ebfdba3f6f5b56f8558fe847",
+    "afterSha256": "9daa52bcde69c86fc2d069c1c06d95e080e92072ad422d7f9a7fdccaae431df2",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "            // #209: declared legacy order only for this NEW owned positive sync execution assembly.\n            require('../../services/workflowStateRules').assertFixtureContext();\n            await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSample.id,\n                version: 1, status: 'ACTIVE', reason: 'Owned positive canonical sync order context', requestedBy: 'system:fixture',\n                lines: { create: ['PH_H2O', 'SPEC_MIR'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                    workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/reopened_governance_scenarios.test.js",
+    "beforeSha256": "e532b588e1ec04a8db01d9600e8947290625cf888b36370c1bcec3c5ecebe237",
+    "afterSha256": "5a3bf187337d1b0b8ec22f85741678e17cfe47d805def873c3b22686137155e8",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "            // #209: declared legacy order only for this NEW owned positive sync execution assembly.\n            require('../../services/workflowStateRules').assertFixtureContext();\n            await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleA.id,\n                version: 1, status: 'ACTIVE', reason: 'Owned positive canonical sync order context', requestedBy: 'system:fixture',\n                lines: { create: ['PH_H2O', 'SPEC_MIR', 'TEXTURE'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                    workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  }
+]

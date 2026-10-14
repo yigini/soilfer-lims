@@ -173,7 +173,7 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
                 .put(`/api/samples/${sampleLabGtmId}/analyses`)
                 .set('Authorization', `Bearer ${mgrGtmToken}`)
                 .send({
-                    analyses: ['PH_H2O', 'EC_1_5']
+                    analyses: ['PH_H2O', 'EC_1_5'], reason: 'Reviewed removal of unstarted OC'
                 });
 
             expect(res.status).toBe(200);
@@ -227,7 +227,7 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
                 .put(`/api/samples/${sampleLabGtmId}/analyses`)
                 .set('Authorization', `Bearer ${mgrGtmToken}`)
                 .send({
-                    analyses: [] // Attempt to remove EC_1_5
+                    analyses: [], reason: 'Reviewed recorded EC removal refusal' // Attempt to remove EC_1_5
                 });
 
             expect(res.status).toBe(409);

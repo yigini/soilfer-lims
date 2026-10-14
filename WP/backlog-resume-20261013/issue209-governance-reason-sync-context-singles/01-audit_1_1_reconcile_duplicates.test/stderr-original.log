@@ -1,0 +1,47 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 663890a2-66fb-4c29-a061-e3a8a493978c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 663890a2-66fb-4c29-a061-e3a8a493978c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 663890a2-66fb-4c29-a061-e3a8a493978c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 663890a2-66fb-4c29-a061-e3a8a493978c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 663890a2-66fb-4c29-a061-e3a8a493978c (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_1_1_reconcile_duplicates.test.js
+  Audit 1.1: duplicate references and atomic analysis reconciliation
+    √ analyses refuses removal with a put duplicate before any writes (NOT_ASSIGNED) (242 ms)
+    √ orders refuses removal with a post duplicate before any writes (NOT_ASSIGNED) (21 ms)
+    √ analyses refuses removal with a put duplicate before any writes (WAIVED) (25 ms)
+    √ orders refuses removal with a post duplicate before any writes (WAIVED) (21 ms)
+    √ an unrelated unstarted analysis can still be removed while the duplicate group is retained (48 ms)
+    √ a remaining FK failure after an earlier deletion returns 409 and rolls back rows and audits (23 ms)
+    √ an audit failure rolls back the preceding deletion instead of partially reconciling (122 ms)
+    √ cold catalogue lookups during additions stay inside the reconciliation transaction (41 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        2.128 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_1_reconcile_duplicates.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-governance-reason-sync-context-singles\01-audit_1_1_reconcile_duplicates.test\report-original.json

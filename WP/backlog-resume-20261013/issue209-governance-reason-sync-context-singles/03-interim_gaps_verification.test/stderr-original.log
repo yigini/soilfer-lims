@@ -1,0 +1,78 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: admin-GAP-1791999859820 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: admin-GAP-1791999859820 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: admin-GAP-1791999859820 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: admin-GAP-1791999859820 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA-GAP-1791999859820 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA-GAP-1791999859820 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA-GAP-1791999859820 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA-GAP-1791999859820 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA2-GAP-1791999859820 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: techA-GAP-1791999859820 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/interim_gaps_verification.test.js
+  Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Sync Parity & Atomicity)
+    Gap 1: Explicit Laboratory Scoping for SIS Integration Keys (IR-14)
+      √ POST /api/v1/data-exchange/keys rejects omitted or empty labs array even if countries provided (39 ms)
+      √ POST /api/v1/data-exchange/keys rejects non-existent laboratory identifier (11 ms)
+      √ POST /api/v1/data-exchange/keys succeeds with real form payload (explicit labs & countries: null) (123 ms)
+    Gap 2: Review Token Binding to Normalized Changes and Current Revision
+      √ Staff review token rejects altered changes payload (112 ms)
+      √ Staff review token rejects stale tokenVersion (concurrent modification) (4 ms)
+      √ Lab review token rejects altered targetState (12 ms)
+    Gap 3: SyncService Parity, Atomicity, and Canonical Writes
+      √ SAVE_WORK_DRAFT: stores draft and receipt atomically, duplicate returns DUPLICATE_APPLIED (36 ms)
+      √ COMPLETE_WORK rejects operational gate tasks (DRYING) with scalar value (5 ms)
+      √ COMPLETE_WORK rejects spectral tasks (SPEC_MIR) with scalar value (5 ms)
+      √ COMPLETE_WORK rejects technician not assigned to work item (6 ms)
+      √ COMPLETE_WORK creates canonical Result and WorkAttempt records in transaction (77 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       11 passed, 11 total
+Snapshots:   0 total
+Time:        1.883 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\interim_gaps_verification.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-governance-reason-sync-context-singles\03-interim_gaps_verification.test\report-original.json
