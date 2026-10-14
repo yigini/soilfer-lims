@@ -215,3 +215,16 @@ test('the actual shipped post-start order programme preserves an owned WAL-mode 
         impact:{originalFilesPreserved:true,totalChanges:0},dbWalShmPreserved:true,secondaryInspectionsOnRetainedSnapshot:true});
     expect(triples(target)).toEqual(before);
 });
+
+test.each([
+    'ALTER TABLE OrderLine ADD COLUMN workItemId INTEGER',
+    'ALTER TABLE OrderLine ADD COLUMN workItemId TEXT REFERENCES WorkItem(id)',
+    'ALTER TABLE OrderLine ADD COLUMN workItemId TEXT; CREATE INDEX OrderLine_workItemId_idx ON OrderLine(analysis)',
+    "CREATE TRIGGER SampleOrderRevision_active_insert BEFORE INSERT ON SampleOrderRevision BEGIN SELECT RAISE(ABORT,'OWNED_PARTIAL_209'); END;"
+])('the read-only owner refuses partial or mismatched schema without touching the original triple: %s', async sql => {
+    const f = await fixture(), connection = new Database(f.file,{fileMustExist:true});
+    try { connection.exec(sql); } finally { connection.close(); }
+    const before = triples(f.file), retained = await rows(f);
+    expect(() => installer.installOrderRevisions({dbPath:f.file,apply:true})).toThrow('Order storage differs');
+    expect(triples(f.file)).toEqual(before); expect(await rows(f)).toEqual(retained);
+});

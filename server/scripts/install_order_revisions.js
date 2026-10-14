@@ -43,6 +43,9 @@ function classify(db, source) {
     if (column && (column.type !== 'TEXT' || column.notnull !== 0 || column.pk !== 0 || column.hidden !== 0 || column.dflt_value !== null)) {
         differences.push('OrderLine.workItemId must be nullable TEXT without a default');
     }
+    if (db.prepare('PRAGMA foreign_key_list("OrderLine")').all().some(row => row.from === 'workItemId')) {
+        differences.push('OrderLine.workItemId must retain its reviewed scalar historical-identifier semantics');
+    }
     const objects = releaseObjects(source), present = objects.map(wanted => {
         const row = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(wanted.name);
         if (row && (row.type !== wanted.type || normalize(row.sql) !== normalize(wanted.sql))) differences.push(wanted.name + ' differs');

@@ -1,0 +1,128 @@
+{
+  "retainedUtc": "2026-10-14T09:07:51.970079+00:00",
+  "status": "CLOSED_HTTP_NORMALIZATION_SCHEMA_REGRESSION_FAILURE",
+  "summary": {
+    "closedUtc": "2026-10-14T09:06:42.161925+00:00",
+    "exit": 1,
+    "suites": 10,
+    "tests": 270,
+    "passedTests": 269,
+    "failed": 1,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "cause": "Closed10suites270tests269PASS1FAIL: all HTTP cases and4 new native schema-tamper refusals pass, strict scanner correctly refuses unresolved parameterized SQL in the new tamper test. Use explicit literal test-case SQL, keep all scanner predicates and negative assertions unchanged. Retain honestly before correction.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/scripts/order_revision_impact.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/command.json": {
+      "bytes": 2520,
+      "sha256": "aec6bc5a26a9e99ab2af78f5ff4accaba3e1efc1dc3e9faf1df6b205282848d8"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/config-original.json": {
+      "bytes": 6580,
+      "sha256": "6b2834bb7d3a75b317d2b20be4f34add6c2fb6742f361f653da9f178fcff4d25"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "7027352e23789bdf3cbdaa79ce60736a7781cae5263de7efb08d213c761c5dba"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/physical-retained-terminal-index.json": {
+      "bytes": 15718,
+      "sha256": "6660b75aeb8f8be06e7083de95e86c74ffdb69a97486ac5685881e33bb70ba8c"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/physical-retention-original.jsonl": {
+      "bytes": 12962,
+      "sha256": "1b24434b457aa63b1dc0097e914084fb7e6be5ec9929a6a0a0faf3c6f76ab398"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/report-original.json": {
+      "bytes": 125083,
+      "sha256": "fda60cb3473d796a941edea54fc8aeeec56a09060e2792e6eb6a4c65ae2882e5"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/source-after.json": {
+      "bytes": 114715,
+      "sha256": "bc7878caee4fd4cff36c721345fd0227fe6186907745737619842912cd62db97"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/source-before.json": {
+      "bytes": 114715,
+      "sha256": "bc7878caee4fd4cff36c721345fd0227fe6186907745737619842912cd62db97"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/stderr-original.log": {
+      "bytes": 78385,
+      "sha256": "d8617ec621b646e824c33b2e806e7986ec25e0631377e56819dc5b48df92b935"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/stdout-original.log": {
+      "bytes": 2058,
+      "sha256": "46fa5939b4068a3c4fea73b70754e6e54089e56a13e95bb84c226ec18b0bd549"
+    },
+    "WP/backlog-resume-20261013/issue209-http-normalization-schema-regression/summary.json": {
+      "bytes": 379,
+      "sha256": "587c68dc4a702fa177a8b085adc5f8d148f8696ce70486282aafbfd023fdf92e"
+    }
+  }
+}

@@ -30,7 +30,7 @@ test.each(['analyses','orders'])('%s HTTP route requires a reason for a changed 
     const refused = await send(route, sample.id, { analyses: codes });
     expect(refused.status).toBe(400); expect(refused.body.code).toBe('TRANSITION_REASON_REQUIRED');
     expect(await db.sampleOrderRevision.findMany({ where: { sampleId: sample.id } })).toEqual(before);
-    const accepted = await send(route, sample.id, { analyses: codes.map(code => code.toLowerCase()), reason: 'Reviewed complete target order' });
+    const accepted = await send(route, sample.id, { analyses: codes.map(code => ' ' + code + ' '), reason: 'Reviewed complete target order' });
     expect(accepted.status).toBe(200);
     expect(await db.sampleOrderRevision.count({ where: { sampleId: sample.id, status: 'ACTIVE' } })).toBe(1);
     const current = await db.sampleOrderRevision.findFirst({ where: { sampleId: sample.id, status: 'ACTIVE' }, include: { lines: true } });
