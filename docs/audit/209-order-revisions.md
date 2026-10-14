@@ -57,8 +57,13 @@ The released 48d intake could retain WorkItems after an initial-order failure.
 Those runtime-reachable missing-order contexts remain zero-write refusals in
 #209. The kit distinguishes no ACTIVE revision from an ACTIVE revision with no
 matching line, using the execution resolver's actual decision. It also lists
-prospective refusals for measurement owners on APPROVED, REPORTED, archived or
-disposed samples. Operational tasks do not create measurement attempts.
+prospective refusals for ACCEPTED, non-duplicate measurement owners on APPROVED,
+REPORTED, archived or disposed samples, matching scientific amendment selection.
+WAIVED work and marked duplicates are excluded. Operational tasks do not create
+measurement attempts. Malformed stored analysis lists on fraction-owner samples
+are listed separately as `INVALID_STORED_ANALYSES` with sample and owner IDs;
+reporting this legacy data does not throw or refuse schema-ready startup, and
+does not repair or normalize the stored value.
 The approved-amendment list must be measured as zero before proceeding. A
 nonzero list requires STOP, YY's sample list and a separate Claudio-reviewed
 forward remedy. #209 adds no amendment-side order step and keeps the approved

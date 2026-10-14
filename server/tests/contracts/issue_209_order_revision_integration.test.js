@@ -385,6 +385,59 @@ test('first execution maps an actual wrapped INSERT refusal and rolls back all r
     await expect(f.result(f.items[0])).rejects.toMatchObject({code:'ORDER_ATTEMPT_INSERT_REFUSED',statusCode:409});
     expect(await f.snapshot()).toEqual(before);
 });
+
+test('approved impact excludes unmatched WAIVED and marked duplicate work while an ACCEPTED current orphan still requires STOP', async () => {
+    const f = await qcGateFixture({ resolvedRules: false, fixedWindowPolicy: false }); held.push(f);
+    const helpers = require('../helpers/workflowFixtures');
+    const sample = await helpers.createSampleFixture(f.db, { data: { id: randomUUID(), originalId: randomUUID(), assignedLab: f.labId,
+        status: 'APPROVED', requiredAnalyses: JSON.stringify([f.analysisCode]) } });
+    const waived = await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: f.labId,
+        analysis: f.analysisCode, status: 'WAIVED' } });
+    // Retained spellings normalize to the same analysis while respecting this owned fixture's raw unique key.
+    const duplicate = await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: f.labId,
+        analysis: ' ' + f.analysisCode + ' ', status: 'ACCEPTED', duplicateOf: waived.id } });
+    let before = await f.snapshot(), physical = triples(f.file);
+    const excluded = installer.installOrderRevisions({ dbPath: f.file }).impact;
+    expect(triples(f.file)).toEqual(physical);
+    expect(excluded).toMatchObject({ prospectiveApprovedAmendmentRefusalCount: 0, approvedAmendmentSampleIds: [],
+        prospectiveApprovedAmendmentRefusals: [], approvedAmendmentKitGate: 'NO_APPROVED_AMENDMENT_REFUSALS' });
+    expect(await f.snapshot()).toEqual(before);
+    const accepted = await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: f.labId,
+        analysis: f.analysisCode + ' ', status: 'ACCEPTED' } });
+    expect(require('../../services/analysisCodesService').normalizeAnalysisCodes([waived.analysis, duplicate.analysis, accepted.analysis]))
+        .toEqual([f.analysisCode]);
+    before = await f.snapshot(); physical = triples(f.file);
+    const required = installer.installOrderRevisions({ dbPath: f.file }).impact;
+    expect(triples(f.file)).toEqual(physical);
+    expect(required).toMatchObject({ prospectiveApprovedAmendmentRefusalCount: 1, approvedAmendmentSampleIds: [sample.id],
+        approvedAmendmentKitGate: 'STOP_APPROVED_AMENDMENT_REMEDIATION_REQUIRED' });
+    expect(required.prospectiveApprovedAmendmentRefusals).toEqual([expect.objectContaining({ workItemId: accepted.id,
+        sampleId: sample.id, cause: 'NO_LINE', contextCause: 'NO_ACTIVE_REVISION' })]);
+    expect(await f.snapshot()).toEqual(before);
+});
+
+test.each(['{', '{"TEXTURE":true}', '[42]', '[null]', '[""]', '["   "]'])(
+    'malformed stored fraction analyses %s are listed read-only and cannot refuse schema-ready startup', async raw => {
+        const f = await qcGateFixture({ resolvedRules: false, fixedWindowPolicy: false }); held.push(f);
+        const helpers = require('../helpers/workflowFixtures');
+        await f.db.analysis.upsert({ where: { code: 'SAND' }, update: {}, create: { code: 'SAND', name: 'Owned fraction impact', units: '%' } });
+        f.textureSample = await helpers.createSampleFixture(f.db, { data: { id: randomUUID(), originalId: randomUUID(), assignedLab: f.labId,
+            status: 'PROCESSING', requiredAnalyses: raw } });
+        f.textureOwners = [await helpers.createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: f.textureSample.id,
+            assignedLab: f.labId, analysis: 'SAND', status: 'IN_PROGRESS' } })];
+        const before = await f.snapshot(), physical = triples(f.file);
+        const dry = installer.installOrderRevisions({ dbPath: f.file });
+        const ready = installer.assertOrderRevisionStartupReady(f.file);
+        expect(triples(f.file)).toEqual(physical);
+        for (const result of [dry, ready]) {
+            expect(result).toMatchObject({ classification: 'COMPLETE_209', mode: 'DRY_RUN', totalChanges: 0, backfilledCount: 0,
+                impact: { invalidStoredAnalysisSampleCount: 1 } });
+            expect(result.impact.invalidStoredAnalyses).toEqual([{ sampleId: f.textureSample.id, cause: 'INVALID_STORED_ANALYSES',
+                workItemIds: f.textureOwners.filter(item => item.analysis === 'SAND').map(item => item.id) }]);
+        }
+        expect(await f.snapshot()).toEqual(before);
+        expect((await f.db.sample.findUnique({ where: { id: f.textureSample.id } })).requiredAnalyses).toBe(raw);
+    });
 test('repeat reservation maps an actual wrapped INSERT refusal and rolls back its parent transition', async () => {
     const f = await fixture(); installer.installOrderRevisions({dbPath:f.file,apply:true}); await f.result(f.items[0]); addOwnedInsertRefusal(f);
     const before = await f.snapshot(), attempts = (await rows(f)).attempts;

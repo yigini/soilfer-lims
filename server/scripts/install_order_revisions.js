@@ -121,7 +121,7 @@ function impact(db) {
     const noActiveRevisionWorkItems=refused.filter(item=>item.contextCause==='NO_ACTIVE_REVISION');
     const noMatchingLineWorkItems=refused.filter(item=>item.contextCause==='NO_MATCHING_LINE');
     const prospectiveApprovedAmendmentRefusals=[];
-    for(const item of db.prepare('SELECT w.id,w.sampleId,w.analysis,s.status AS sampleStatus FROM WorkItem w JOIN Sample s ON s.id=w.sampleId ORDER BY w.id').iterate()) {
+    for(const item of db.prepare("SELECT w.id,w.sampleId,w.analysis,s.status AS sampleStatus FROM WorkItem w JOIN Sample s ON s.id=w.sampleId WHERE w.status='ACCEPTED' AND w.duplicateOf IS NULL ORDER BY w.id").iterate()) {
         if(isNonMeasurement(item) || !(item.sampleStatus==='REPORTED' ||
             ['APPROVED','ARCHIVED','DISPOSED'].includes(workflow.normalizeSampleState(item.sampleStatus)))) continue;
         const result=chooseOrderLine(item,groups.get(item.sampleId)||[]);
@@ -135,11 +135,17 @@ function impact(db) {
         if (!ownersBySample.has(item.sampleId)) ownersBySample.set(item.sampleId, []);
         ownersBySample.get(item.sampleId).push(item);
     }
-    const incompleteTextureOwners = [];
+    const incompleteTextureOwners = [], invalidStoredAnalyses = [];
     const sampleTarget = db.prepare('SELECT requiredAnalyses FROM Sample WHERE id=?');
     for (const [sampleId, owners] of ownersBySample) {
         const raw = sampleTarget.get(sampleId).requiredAnalyses;
-        const target = normalizedSelection(typeof raw === 'string' ? JSON.parse(raw) : raw || [], true);
+        let target;
+        try { target = normalizedSelection(typeof raw === 'string' ? JSON.parse(raw) : raw || [], true); }
+        catch (error) {
+            if (!(error instanceof SyntaxError) && error.code !== 'INVALID_STORED_ANALYSES') throw error;
+            invalidStoredAnalyses.push({ sampleId, cause: 'INVALID_STORED_ANALYSES', workItemIds: owners.map(item => item.id) });
+            continue;
+        }
         const result = inspectTextureOwners(owners, target);
         if (result.missingFractions.length) incompleteTextureOwners.push({ sampleId,
             workItemIds: result.owners.map(item => item.id), missingFractions: result.missingFractions });
@@ -152,6 +158,7 @@ function impact(db) {
         approvedAmendmentKitGate:approvedAmendmentSampleIds.length?'STOP_APPROVED_AMENDMENT_REMEDIATION_REQUIRED':'NO_APPROVED_AMENDMENT_REFUSALS',
         fractionOwnerRefusalCount: refusalCounts.FRACTION_OWNER_LINE_REQUIRED,
         incompleteTextureOwnerSampleCount: incompleteTextureOwners.length, incompleteTextureOwners,
+        invalidStoredAnalysisSampleCount: invalidStoredAnalyses.length, invalidStoredAnalyses,
         continuingReservedOpenCount: continuingReservedOpenWorkItems.length, continuingReservedOpenWorkItems,
         ambiguousOpenReservationCount: ambiguousOpenReservations.length, ambiguousOpenReservations,
         refusalScope: 'Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately' };
