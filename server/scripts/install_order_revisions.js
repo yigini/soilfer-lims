@@ -4,6 +4,8 @@ const { loadOrderRevisionMigrationSource } = require('../services/orderRevisionM
 const { chooseOrderLine } = require('../services/orderLineResolutionService');
 const { isNonMeasurement } = require('../services/workItemKinds');
 const { inspectOpenExecutionReservations } = require('../services/workAttemptReservationService');
+const { inspectTextureOwners, isFractionOwner } = require('../services/textureOrderContract');
+const { normalizedSelection } = require('../services/orderRevisionContract');
 const MARKER = '209_order_revision_contract';
 const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, statusCode: 409, totalChanges: 0, differences });
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -93,7 +95,7 @@ function impact(db) {
     }
     const multipleActive = [...groups].filter(([, rows]) => rows.length > 1)
         .map(([sampleId, rows]) => ({ sampleId, revisionIds: rows.map(row => row.id), priorActiveCount: rows.length }));
-    const refusalCounts = { NO_LINE: 0, AMBIGUOUS_LINE: 0, MULTIPLE_ACTIVE_REVISIONS: 0 }, refused = [];
+    const refusalCounts = { NO_LINE: 0, AMBIGUOUS_LINE: 0, MULTIPLE_ACTIVE_REVISIONS: 0, FRACTION_OWNER_LINE_REQUIRED: 0 }, refused = [];
     const continuingReservedOpenWorkItems = [], ambiguousOpenReservations = [];
     const items = db.prepare("SELECT id,sampleId,analysis FROM WorkItem WHERE status IN ('NOT_ASSIGNED','ASSIGNED','IN_PROGRESS','REPEAT_REQUIRED') ORDER BY id").iterate();
     for (const item of items) {
@@ -109,9 +111,29 @@ function impact(db) {
             continue;
         }
         const result = chooseOrderLine(item, groups.get(item.sampleId) || []);
-        if (result.cause) { refusalCounts[result.cause]++; refused.push({ workItemId: item.id, sampleId: item.sampleId, analysis: item.analysis, cause: result.cause }); }
+        if (result.cause) {
+            const cause = result.cause === 'NO_LINE' && isFractionOwner(item) ? 'FRACTION_OWNER_LINE_REQUIRED' : result.cause;
+            refusalCounts[cause]++; refused.push({ workItemId: item.id, sampleId: item.sampleId, analysis: item.analysis,
+                cause, orderLineCause: result.cause });
+        }
+    }
+    const ownersBySample = new Map();
+    for (const item of db.prepare("SELECT id,sampleId,analysis,status FROM WorkItem WHERE analysis IN ('SAND','SILT','CLAY') AND status<>'WAIVED' ORDER BY id").iterate()) {
+        if (!ownersBySample.has(item.sampleId)) ownersBySample.set(item.sampleId, []);
+        ownersBySample.get(item.sampleId).push(item);
+    }
+    const incompleteTextureOwners = [];
+    const sampleTarget = db.prepare('SELECT requiredAnalyses FROM Sample WHERE id=?');
+    for (const [sampleId, owners] of ownersBySample) {
+        const raw = sampleTarget.get(sampleId).requiredAnalyses;
+        const target = normalizedSelection(typeof raw === 'string' ? JSON.parse(raw) : raw || [], true);
+        const result = inspectTextureOwners(owners, target);
+        if (result.missingFractions.length) incompleteTextureOwners.push({ sampleId,
+            workItemIds: result.owners.map(item => item.id), missingFractions: result.missingFractions });
     }
     return { multipleActiveSampleCount: multipleActive.length, multipleActive, refusalCounts, refusedOpenWorkItems: refused,
+        fractionOwnerRefusalCount: refusalCounts.FRACTION_OWNER_LINE_REQUIRED,
+        incompleteTextureOwnerSampleCount: incompleteTextureOwners.length, incompleteTextureOwners,
         continuingReservedOpenCount: continuingReservedOpenWorkItems.length, continuingReservedOpenWorkItems,
         ambiguousOpenReservationCount: ambiguousOpenReservations.length, ambiguousOpenReservations,
         refusalScope: 'Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately' };

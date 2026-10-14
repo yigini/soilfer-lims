@@ -1,0 +1,142 @@
+{
+  "retainedUtc": "2026-10-14T11:05:03.828832+00:00",
+  "status": "CLOSED_TEXTURE_COMPANION_FAILED_OR_INCOMPLETE",
+  "summary": {
+    "closedUtc": "2026-10-14T11:04:52.205648+00:00",
+    "exit": 1,
+    "suites": 8,
+    "tests": 248,
+    "passedTests": 246,
+    "failed": 2,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "scopeComments": [
+    6163271808,
+    6166518424
+  ],
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/scripts/order_revision_impact.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/services/textureOrderContract.js",
+    "server/services/workItemReconciliationService.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js"
+  ],
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/command.json": {
+      "bytes": 2235,
+      "sha256": "e5b727c1c0ec6d580bbffdb347136c67dce291abff6599751f09d4568fd4bdd1"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/config-original.json": {
+      "bytes": 6580,
+      "sha256": "cd17e2a8467370b8be398214f87f04ac806b9862a9aec8703ac5439e484da6e5"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "a001da2e1e85350823658e6c3734b898f7f4c07191b512104a11629af8536eff"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/physical-retained-terminal-index.json": {
+      "bytes": 8361,
+      "sha256": "a06b97960ffde6ae3646ac1347404403b625ab547ed963309a48aa8dd0279360"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/physical-retention-original.jsonl": {
+      "bytes": 6771,
+      "sha256": "3fc7ebdb1ecd15cf5b079939bea3871a8237a8efccee18698a31865d5ccbc507"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/report-original.json": {
+      "bytes": 114889,
+      "sha256": "8bec7a36ef3ccbace9f53f584cb7d8ab21d8ffc00a094db7e832e4c247fcf02d"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/source-after.json": {
+      "bytes": 114945,
+      "sha256": "f09220716e245d2bc3b285babc9857bea74e30419c2e953716a7b8cd5dd9afe4"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/source-before.json": {
+      "bytes": 114945,
+      "sha256": "f09220716e245d2bc3b285babc9857bea74e30419c2e953716a7b8cd5dd9afe4"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/stderr-original.log": {
+      "bytes": 79161,
+      "sha256": "5e41da68709f061538eb3c865fb88ede916e3edce5080d22b4bcde848a9ae9a0"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/stdout-original.log": {
+      "bytes": 1807,
+      "sha256": "9ca82799f35be2e90ba91fc9c3ee9892ce9ccec3370e72dc8d18dd630361ace7"
+    },
+    "WP/backlog-resume-20261013/issue209-texture-companion-regression/summary.json": {
+      "bytes": 378,
+      "sha256": "87b0cffe3fab83d42bbbd7a213caea3c7ef80286d951d43dcb840f3b3512a46d"
+    }
+  }
+}

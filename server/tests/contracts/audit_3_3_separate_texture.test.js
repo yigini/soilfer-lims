@@ -25,6 +25,8 @@ async function fixture({mean=false,clayValue=15}={}) {
         f.textureItems[analysis]=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:sample.id,assignedLab:f.labId,
             analysis,methodologyId:method.id,status:'IN_PROGRESS'}});
     }
+    await require('../../services/orderService').reviseAnalyses(sample.id,
+        {analyses:['SAND','SILT','CLAY','TEXTURE'],reason:'Declared current companion order for retained fraction review'},f.actor,{tx:f.db});
     // #198: the existing two-sand-reading selection fixture declares its
     // required count through policyService; every original source assertion
     // and the texture derivation authority remain unchanged.

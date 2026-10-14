@@ -46,6 +46,81 @@ async function rows(f) {
 
 afterAll(async () => { for (const f of held) await f.db.$disconnect(); }); // Retain every owned fixture/triple.
 
+async function textureFixture({ fractions = ['SAND','SILT','CLAY'], completed = false, initial = true } = {}) {
+    const f = await qcGateFixture({resolvedRules:false,fixedWindowPolicy:false}); held.push(f);
+    const {createSampleFixture,createWorkItemFixture}=require('../helpers/workflowFixtures');
+    for(const analysis of ['SAND','SILT','CLAY','TEXTURE']) await f.db.analysis.upsert({where:{code:analysis},update:{},
+        create:{code:analysis,name:'Owned order '+analysis,units:'%'}});
+    f.textureSample=await createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,
+        status:'PROCESSING',dryingStatus:'DONE',preparationStatus:'DONE',requiredAnalyses:'["TEXTURE"]'}});
+    f.textureOwners=[];
+    for(const analysis of [...fractions,'TEXTURE']) f.textureOwners.push(await createWorkItemFixture(f.db,{data:{id:randomUUID(),
+        sampleId:f.textureSample.id,assignedLab:f.labId,analysis,status:completed&&analysis==='SAND'?'COMPLETED':'IN_PROGRESS',history:'[]'}}));
+    if(initial) await f.db.$transaction(tx=>order.createInitialOrder(tx,f.textureSample,['TEXTURE'],f.actor));
+    return f;
+}
+
+test('a TEXTURE target retains all existing fraction owners including completed work and fixes four linked lines in one revision',async()=>{
+    const f=await textureFixture({completed:true}),before=await rows(f);
+    const originalItems=await f.db.workItem.findMany({where:{sampleId:f.textureSample.id},orderBy:{id:'asc'}});
+    const revised=await order.reviseAnalyses(f.textureSample.id,{analyses:['SAND','SILT','CLAY','TEXTURE'],
+        reason:'Reviewed retained fraction companions'},f.actor,{tx:f.db,mode:'order'});
+    expect(await f.db.workItem.findMany({where:{sampleId:f.textureSample.id},orderBy:{id:'asc'}})).toEqual(originalItems);
+    const lines=await f.db.orderLine.findMany({where:{revisionId:revised.revision.id}});
+    expect(lines).toHaveLength(4);expect(lines.map(line=>line.analysis).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
+    for(const item of f.textureOwners) expect(await f.db.$transaction(tx=>resolveOrderLine(tx,item)))
+        .toBe(lines.find(line=>line.workItemId===item.id).id);
+    const after=await rows(f);expect(after.lines.filter(line=>before.lines.some(old=>old.id===line.id))).toEqual(before.lines);
+    expect(after.attempts).toEqual(before.attempts);
+    expect((await f.db.sample.findUnique({where:{id:f.textureSample.id}})).requiredAnalyses).toBe('["TEXTURE"]');
+    const audit=await f.db.auditLog.findFirst({where:{sampleId:f.textureSample.id,action:'ORDER_REVISION_APPLIED'}});
+    expect(JSON.parse(audit.details).companionWorkItemIds.sort()).toEqual(f.textureOwners.filter(item=>item.analysis!=='TEXTURE').map(item=>item.id).sort());
+});
+
+test('one or two retained fractions refuse a TEXTURE alias with named missing owners and zero row changes',async()=>{
+    for(const fractions of [['SAND'],['SAND','SILT']]){
+        const f=await textureFixture({fractions}),before=JSON.stringify(await f.snapshot());
+        await expect(order.reviseAnalyses(f.textureSample.id,{analyses:['SOIL_TEXTURE'],reason:'Reviewed partial owners'},f.actor,{tx:f.db}))
+            .rejects.toMatchObject({code:'TEXTURE_FRACTION_OWNERS_INCOMPLETE',statusCode:409,
+                details:{missingFractions:['SAND','SILT','CLAY'].filter(code=>!fractions.includes(code))}});
+        expect(JSON.stringify(await f.snapshot())).toBe(before);
+    }
+});
+
+test('TEXTURE without explicit fraction selections still preserves all existing owners; explicit removal waives them with the reason',async()=>{
+    const f=await textureFixture();
+    await order.reviseAnalyses(f.textureSample.id,{analyses:['TEXTURE'],reason:'Reviewed existing companions'},f.actor,{tx:f.db});
+    expect(await f.db.orderLine.count({where:{revision:{sampleId:f.textureSample.id,status:'ACTIVE'}}})).toBe(4);
+    await order.reviseAnalyses(f.textureSample.id,{analyses:[],reason:'Explicit removal of fraction work'},f.actor,{tx:f.db});
+    const items=await f.db.workItem.findMany({where:{sampleId:f.textureSample.id}});
+    expect(items.every(item=>item.status==='WAIVED'&&item.reanalysisReason==='Explicit removal of fraction work')).toBe(true);
+});
+
+test('initial generation for a new four-selection sample still creates only the logical TEXTURE measurement owner',async()=>{
+    const f=await textureFixture({fractions:[],initial:false});
+    const sample=await require('../helpers/workflowFixtures').createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),
+        assignedLab:f.labId,status:'PROCESSING',requiredAnalyses:'["SAND","SILT","CLAY","TEXTURE"]'}});
+    await f.db.$transaction(async tx=>{const intake=require('../../services/intakeWorkItemService');
+        await intake.generate(tx,sample,await intake.planForSample(tx,sample),f.actor);});
+    const items=await f.db.workItem.findMany({where:{sampleId:sample.id,analysis:{notIn:['DRYING','PREPARATION']}}});
+    expect(items.map(item=>item.analysis)).toEqual(['TEXTURE']);
+    const lines=await f.db.orderLine.findMany({where:{revision:{sampleId:sample.id,status:'ACTIVE'}}});
+    expect(lines).toHaveLength(1);expect(lines[0]).toMatchObject({analysis:'TEXTURE',workItemId:items[0].id});
+});
+
+test('kit counts separate fraction line refusals and incomplete owner samples without touching the original triple',async()=>{
+    const f=await textureFixture({fractions:['SAND','SILT']}),physical=triples(f.file);
+    const result=installer.installOrderRevisions({dbPath:f.file});
+    expect(triples(f.file)).toEqual(physical);
+    expect(result.impact).toMatchObject({fractionOwnerRefusalCount:2,incompleteTextureOwnerSampleCount:1,
+        refusalCounts:{FRACTION_OWNER_LINE_REQUIRED:2}});
+    expect(result.impact.incompleteTextureOwners).toEqual([{sampleId:f.textureSample.id,
+        workItemIds:expect.arrayContaining(f.textureOwners.filter(item=>item.analysis!=='TEXTURE').map(item=>item.id)),missingFractions:['CLAY']}]);
+    expect(result.impact.refusedOpenWorkItems.filter(item=>item.sampleId===f.textureSample.id)).toEqual(expect.arrayContaining([
+        expect.objectContaining({analysis:'SAND',cause:'FRACTION_OWNER_LINE_REQUIRED',orderLineCause:'NO_LINE'}),
+        expect.objectContaining({analysis:'SILT',cause:'FRACTION_OWNER_LINE_REQUIRED',orderLineCause:'NO_LINE'})]));
+});
+
 test('installer dry/apply/repeat retains three ACTIVE histories, every line and a null historical OPEN identity', async () => {
     const f = await fixture({ revisions: 3, historicalOpen: true }), before = await rows(f), physical = triples(f.file);
     const dry = installer.installOrderRevisions({ dbPath: f.file });

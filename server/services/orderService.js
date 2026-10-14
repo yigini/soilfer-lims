@@ -9,6 +9,7 @@ const receipts = require('./commandReceiptService');
 const { normalizedSelection, orderRevisionRequest } = require('./orderRevisionContract');
 const { normalizeAnalysisCodes } = require('./analysisCodesService');
 const { reconcileWorkItemsForSample } = require('./workItemReconciliationService');
+const { inspectTextureOwners } = require('./textureOrderContract');
 
 function currentAnalyses(sample) {
     let value;
@@ -17,9 +18,9 @@ function currentAnalyses(sample) {
     return normalizedSelection(value, true);
 }
 
-async function orderLines(tx, sample, codes, active) {
+async function orderLines(tx, sample, codes, active, companions = []) {
     const items = await tx.workItem.findMany({ where: { sampleId: sample.id, duplicateOf: null } });
-    const lines = [];
+    const owners = [];
     for (const analysis of codes) {
         const candidates = items.filter(item => {
             const normalized = normalizeAnalysisCodes([item.analysis]);
@@ -28,9 +29,15 @@ async function orderLines(tx, sample, codes, active) {
         if (candidates.length !== 1) throw new rules.TransitionError('Resolve the work-item identity before revising this order.',
             409, 'ORDER_WORKITEM_REQUIRED', { analysis, workItemIds: candidates.map(item => item.id) });
         const item = candidates[0];
+        owners.push({ analysis, item });
+    }
+    owners.push(...companions.map(item => ({ analysis: normalizeAnalysisCodes([item.analysis])[0], item })));
+    const lines = [];
+    for (const { analysis, item } of owners) {
         const method = item.methodologyId ? await tx.methodology.findUnique({ where: { id: item.methodologyId } }) : null;
         if (item.methodologyId && !method) throw new rules.TransitionError('The assigned methodology is unavailable.', 409, 'ORDER_METHOD_REQUIRED');
-        const predecessors = active.length === 1 ? active[0].lines.filter(line => normalizeAnalysisCodes([line.analysis]).includes(analysis)) : [];
+        const predecessors = active.length === 1 ? active[0].lines.filter(line =>
+            line.workItemId === item.id || (line.workItemId == null && normalizeAnalysisCodes([line.analysis]).includes(analysis))) : [];
         lines.push({ id: randomUUID(), analysis, workItemId: item.id, methodologyId: item.methodologyId,
             methodRevision: method?.version == null ? null : String(method.version), isRequired: true, status: 'ACTIVE',
             predecessorLineId: predecessors.length === 1 ? predecessors[0].id : null });
@@ -38,9 +45,9 @@ async function orderLines(tx, sample, codes, active) {
     return lines;
 }
 
-async function createRevision(tx, sample, codes, actor, reason, active) {
+async function createRevision(tx, sample, codes, actor, reason, active, companions = []) {
     rules.requireTransaction(tx);
-    const lines = await orderLines(tx, sample, codes, active);
+    const lines = await orderLines(tx, sample, codes, active, companions);
     const maximum = await tx.sampleOrderRevision.aggregate({ where: { sampleId: sample.id }, _max: { version: true } });
     const supersededRevisionIds = active.map(row => row.id);
     if (supersededRevisionIds.length) {
@@ -83,9 +90,18 @@ async function reviseAnalyses(sampleId, changes, actor, options = {}) {
             evidence.assertAmendable(sample);
             const active = await tx.sampleOrderRevision.findMany({ where: { sampleId: sample.id, status: 'ACTIVE' }, include: { lines: true }, orderBy: { id: 'asc' } });
             const current = currentAnalyses(sample);
+            const target = changes.analyses === undefined ? current : normalizedSelection(changes.analyses);
+            const actualItems = await tx.workItem.findMany({ where: { sampleId: sample.id } });
+            const texture = inspectTextureOwners(actualItems, target);
+            if (texture.missingFractions.length) throw new rules.TransitionError(
+                'The retained texture fraction owners are incomplete. Resolve the missing fractions before revising this order.',
+                409, 'TEXTURE_FRACTION_OWNERS_INCOMPLETE', { missingFractions: texture.missingFractions,
+                    workItemIds: texture.owners.map(item => item.id) });
             const request = orderRevisionRequest(changes, { currentAnalyses: current, priorActiveCount: active.length,
-                requiresLineRevision: active.length === 1 && current.some(code => active[0].lines.filter(line => line.status === 'ACTIVE'
-                    && normalizeAnalysisCodes([line.analysis]).includes(code)).length !== 1) });
+                requiresLineRevision: active.length === 1 && (current.some(code => active[0].lines.filter(line => line.status === 'ACTIVE'
+                    && normalizeAnalysisCodes([line.analysis]).includes(code)).length !== 1)
+                    || texture.owners.some(item => active[0].lines.filter(line => line.status === 'ACTIVE'
+                        && line.workItemId === item.id).length !== 1)) });
             const payloadHash = receipts.computePayloadHash({ analyses: [...request.analyses].sort(), reason: request.reason,
                 ...(!isOrder && changes.analysisGroupIds && { analysisGroupIds: changes.analysisGroupIds }) });
             if (key) {
@@ -106,10 +122,11 @@ async function reviseAnalyses(sampleId, changes, actor, options = {}) {
                     actor: performedBy, outcome, payloadHash });
                 return outcome;
             }
-            const reconcile = await reconcileWorkItemsForSample(sample, request.analyses, actor, request.reason, tx);
+            const reconcile = await reconcileWorkItemsForSample(sample, request.analyses, actor, request.reason, tx,
+                { retainedWorkItemIds: texture.owners.map(item => item.id) });
             if (reconcile.conflict) throw new rules.TransitionError(reconcile.error, reconcile.status || 409,
                 reconcile.code || 'ANALYSIS_RECONCILIATION_REFUSED', { conflicts: reconcile.conflicts, refused: reconcile.refused });
-            const order = await createRevision(tx, sample, request.analyses, actor, request.reason, active);
+            const order = await createRevision(tx, sample, request.analyses, actor, request.reason, active, texture.owners);
             const updates = { requiredAnalyses: JSON.stringify(request.analyses),
                 ...(!isOrder && changes.analysisGroupIds && { analysisGroupIds: JSON.stringify(changes.analysisGroupIds) }) };
             const nextStatus = workflow.normalizeSampleState(sample.status) === 'SUBMITTED_FULL' && reconcile.added.length ? 'PROCESSING' : sample.status;
@@ -117,7 +134,8 @@ async function reviseAnalyses(sampleId, changes, actor, options = {}) {
             await tx.auditLog.create({ data: { id: randomUUID(), entity: 'SAMPLE', entityId: sample.id, sampleId: sample.id, performedBy,
                 action: isOrder ? 'ORDER_REVISION_APPLIED' : 'ANALYSES_UPDATE', timestamp: new Date(),
                 details: JSON.stringify({ revisionId: order.revision.id, supersededRevisionIds: order.supersededRevisionIds,
-                    priorActiveCount: order.priorActiveCount, reconcileSummary: reconcile.summary, reason: request.reason }),
+                    priorActiveCount: order.priorActiveCount, companionWorkItemIds: texture.owners.map(item => item.id),
+                    reconcileSummary: reconcile.summary, reason: request.reason }),
                 before: JSON.stringify({ analyses: sample.requiredAnalyses, groups: sample.analysisGroupIds, status: sample.status }),
                 after: JSON.stringify({ ...updates, status: updated.status, reconcile }) } });
             const outcome = { success: true, sample: updated, added: reconcile.added, waived: reconcile.waived, removed: reconcile.removed,

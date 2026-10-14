@@ -23,7 +23,7 @@ async function preflightDefaults(codes, sample, existingCodes = [], db) {
  * 2. Assigned or in progress, no result -> Require reason; set WAIVED with reason and actor; audit
  * 3. Any result recorded (current or superseded) -> Refuse with 409 naming analysis and result
  */
-async function reconcileWorkItems(tx, sample, targetAnalyses, user, reason) {
+async function reconcileWorkItems(tx, sample, targetAnalyses, user, reason, { retainedWorkItemIds = [] } = {}) {
     sample = await tx.sample.findUnique({ where: { id: String(sample.id) } });
     if (!sample) throw new rules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
     rules.assertScope(user, sample);
@@ -44,7 +44,8 @@ async function reconcileWorkItems(tx, sample, targetAnalyses, user, reason) {
         }
     });
 
-    const itemsToRemove = existingItems.filter(item => !targetSet.has(item.analysis) && item.status !== 'WAIVED');
+    const retained = new Set(retainedWorkItemIds);
+    const itemsToRemove = existingItems.filter(item => !targetSet.has(item.analysis) && item.status !== 'WAIVED' && !retained.has(item.id));
 
     // Refuse before any mutation: a canonical item may still be referenced by
     // a marked duplicate, including a waived duplicate outside the removal set.
@@ -204,11 +205,11 @@ async function reconcileWorkItems(tx, sample, targetAnalyses, user, reason) {
     };
 }
 
-async function reconcileWorkItemsForSample(sample, targetAnalyses, user, reason, tx = null) {
+async function reconcileWorkItemsForSample(sample, targetAnalyses, user, reason, tx = null, options = {}) {
     // A parent transaction must see failures and roll back its entire order edit.
-    if (tx) return reconcileWorkItems(tx, sample, targetAnalyses, user, reason);
+    if (tx) return reconcileWorkItems(tx, sample, targetAnalyses, user, reason, options);
     try {
-        return await rules.inTransaction(null, client => reconcileWorkItems(client, sample, targetAnalyses, user, reason));
+        return await rules.inTransaction(null, client => reconcileWorkItems(client, sample, targetAnalyses, user, reason, options));
     } catch (error) {
         if (error.code === 'P2003' || error.code === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
             return { conflict: true, status: 409, code: 'WORKITEM_REFERENCE_CONFLICT',

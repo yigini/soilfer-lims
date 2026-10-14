@@ -1,0 +1,17 @@
+{
+  "closedUtc": "2026-10-14T11:04:52.205648+00:00",
+  "exit": 1,
+  "suites": 8,
+  "tests": 248,
+  "passedTests": 246,
+  "failed": 2,
+  "pending": 0,
+  "todo": 0,
+  "sourceUnchanged": true,
+  "selectedInventoryEqual": true,
+  "fullDiscovery": 370,
+  "ordinarySetups": true,
+  "workerIdleMemoryLimit": 512000000,
+  "productionOperations": 0,
+  "status": "FAILED_OR_INCOMPLETE"
+}
