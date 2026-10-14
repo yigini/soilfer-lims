@@ -1,0 +1,60 @@
+Source review: PASS
+
+This approves only the first build-only package for #206 + #214 + #209, with the bindings below. It does not approve the future stopped production-copy proof, the impact collection, the production kit or any deploy.
+
+```
+9ef893b38fe381061d4dc8aa90968d1d7a4f6fff
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+mainCiRun=38636615469
+batchBuildScope=BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME
+reserveFloorBytes=10556150894
+buildAllocationReserveBytes=4294967296
+buildTimeoutSeconds=2400
+buildUnitTimeoutSeconds=2700
+unexplainedGrowthAbortBytes=500000000
+diskGrowthPolicy=OWNED_BUILD_ROOT_AND_DISJOINT_DOCKER_ALLOCATIONS
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+originalBatchBuildRoot=/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z
+batch_build.py=001fd04c7efaa31423121a53135c7beeba37352db76427c6cd8526ddd80be493
+batch_build_contract.py=43b3e9ca228c07e3ceaa7645b9ae0d87099f3779c327fa336c8fa69184b367a5
+launch_batch_build.py=7cff0a41ad5cd1d4baefbce9323554f9ea8629fd2391f129f89143a552a2a8c3
+prepare_batch_build.py=e8b862b8a5136290ee1175497d37f765a8ae1b6e1000af6df9c5cac732896fa9
+verify_build_guards.py=a0a1b17c8fdb91679ed089e2834e4664c917bd00f7ea305d0058736a83ef3b23
+```
+
+## What I checked independently
+- **Source identity.** I recomputed the SHA-256 of all five files from the raw blobs at `9ef893b3`, and each matches the binding above. Commit `9ef893b3` changes nothing under `server/` or `client/`.
+- **Guard tests.** `python3 -B verify_build_guards.py` ran 14 tests, all OK, on a local Python 3.11.15.
+- **Application approvals.** `AUDITS` in `batch_build_contract.py` matches the three actual exact-head passes: PR 295 → 6146939836, PR 296 → 6163165778 and PR 297 → 6178123314. All three were posted through the Claude app and never edited. None of those passes contains a later failure phrase, so the `validate_current` scan is satisfied as they stand. The merge chain ends at `cde8c889` with tree `638580d5`.
+- **Scope.**
+  - The builder runs only `du -s` on the owned root and the four Docker directories, then `docker build` of the extracted candidate, then `docker image inspect`.
+  - No path opens a database, mounts a volume, starts a container, retags or deploys. The tag `soilfer-lims:audit-<root>` cannot collide with the production image.
+  - The `WP/` tooling is refused from the image source by `member_path`.
+- **Archive integrity.**
+  - The archive is built from raw `git cat-file` objects rather than `git archive`, so no eol or export filters apply.
+  - Every member is checked for path safety, Git mode, length, SHA-256 and Git blob id.
+  - Symlinks are allowed only under `node_modules`, and those are not extracted. Hardlinks and foreign directories are refused, and extraction uses `filter='data'`.
+- **Once-only behaviour.**
+  - The builder runs only in the exact first root, with an inventory of exactly `REQUIRED_ARTIFACTS` in mode 0400.
+  - Files are opened with exclusive create (`open('x')`) for the build intent, log and receipt.
+  - The launcher uses a fresh unit (`LoadState=not-found`) with `Restart=no` and `RuntimeMaxSec=2700`.
+  - Intent files are written before SSH and before the build.
+  - Timeouts write an `-uncertain.json` marker and refuse replay.
+  - Approval, main, CI and the per-PR passes are re-fetched before upload and again immediately before launch.
+- **Disk bounds.**
+  - The floor plus 4 GiB is required before extraction and again after it.
+  - The bare floor is required after the build.
+  - Growth is accounted per device and signed, so a buildkit cache shrink cannot hide other growth.
+  - YY owns the floor and workload pins, and I accept them as given.
+
+## Notes for the launch (none blocks this PASS)
+1. **The 500 MB growth bound is checked after the build.** A crossing marks the run `FAILED_OR_RESERVE_REFUSED_BUILD_ONLY_RETAIN_ALL` and leaves no receipt, so the next step cannot use that image.
+2. **The post-build `allocated()` call (`batch_build.py`, after the build) is outside a try block.** If `du` fails or exceeds its 30 s limit there, the unit exits without a terminal file. Treat a unit that ends with neither `build-receipt.json` nor `build-terminal-failure.json` as an uncertain outcome: inspect the journal and never replay. The same applies if the pre-build `du` over `overlay2` is slow, which refuses safely before the intent file is written.
+3. **Remote Python version.** The builder needs a host `python3` that supports `datetime.UTC` and `tarfile` extraction filters, which means 3.12 or a patched 3.11. Earlier remote build tooling already used `filter='data'`. If the host refuses, it does so before `build-intent.json` is written, but the first root is still consumed.
+
+After the build, the next items stay as already stated: a separately reviewed stopped production-copy proof source, the actual #214 and #209 impact lists (including `invalidStoredAnalysisSampleCount` with sample and owner ids), policy PRESENT/NO_OP 0 or STOP, retained allocation accounting, nonzero lists to YY, an approved-amendment nonzero result meaning STOP, and then the final exact-kit review and a fresh gate.
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_

@@ -1,0 +1,17 @@
+{
+  "status": "ACTUAL_SOURCE_PASS_HOST_COMPATIBILITY_REFUSED_BEFORE_BUILD_ROOT",
+  "retainedUtc": "2026-10-14T22:24:17.543864+00:00",
+  "actualSourcePassId": 6179796996,
+  "toolingCommit": "9ef893b38fe381061d4dc8aa90968d1d7a4f6fff",
+  "runtimeOriginal": "readonly-host-probe-stdout-original.json",
+  "localRetainerExitCode": 1,
+  "retainerFailureEvidenceKind": "TOOL_OUTPUT_TRANSCRIPTION",
+  "literalRetainerError": "RuntimeError: Read-only host compatibility refused; no build root created",
+  "consumedRetainer": "retain-batch-build-source-pass-6179796996-once.py",
+  "rootAbsent": true,
+  "unitLoadState": "not-found",
+  "databaseConnections": 0,
+  "buildsLaunched": 0,
+  "oldSourceMustNotLaunch": true,
+  "requiredNextAction": "Correct build-only timestamps for actual Python3.9, verify actual host compatibility without source execution, publish a new exact source and obtain new Claudio PASS before first build"
+}
