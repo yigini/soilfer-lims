@@ -1,0 +1,115 @@
+{
+  "retainedUtc": "2026-10-14T07:28:42.560057+00:00",
+  "status": "ACTUAL_EXACT_HEAD_AUDIT_PASS",
+  "commentId": 6163165778,
+  "commentUrl": "https://github.com/yigini/soilfer-lims/pull/296#issuecomment-6163165778",
+  "head": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+  "tree": "f2152e240b355cd141612b783c6ccf04f5c8383a",
+  "base": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "run": 38524553288,
+  "closedEvidenceAudit": "a6b78aea0d9af2611aa8d9686b3ab185c4fe1806",
+  "sourcePaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/admin/ReferenceMaterials.jsx",
+    "client/src/components/lab/LabPolicies.jsx",
+    "client/src/components/qc/BatchInspectionModal.jsx",
+    "client/src/components/qc/ControlCharts.jsx",
+    "client/src/components/workbench/NativeRunPanel.jsx",
+    "client/src/components/workbench/StartRunForm.jsx",
+    "client/src/context/AuthContext.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/214-control-charts.md",
+    "server/config/policyRegistry.js",
+    "server/config/roles.js",
+    "server/controllers/controlChartController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261013000200_control_charts/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/routes/qcRoutes.js",
+    "server/scripts/control_chart_prebinding_impact.js",
+    "server/scripts/install_control_charts.js",
+    "server/scripts/install_lab_policy_schema.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/controlChartMigrationSource.js",
+    "server/services/controlChartRules.js",
+    "server/services/controlChartService.js",
+    "server/services/labPolicyMigrationSource.js",
+    "server/services/policyService.js",
+    "server/services/qcNativeEvaluationService.js",
+    "server/services/qcNativeMeasurementService.js",
+    "server/services/qcNativeRunService.js",
+    "server/services/qcRunReferenceService.js",
+    "server/services/workbenchRunService.js",
+    "server/tests/contracts/audit_1_0_policy_components.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_2_1_reference_ui.test.js",
+    "server/tests/contracts/audit_2_3_compatibility_runs.test.js",
+    "server/tests/contracts/audit_2_3_native_runs.test.js",
+    "server/tests/contracts/audit_2_3_native_ui.test.js",
+    "server/tests/contracts/audit_4_1_run_first_ui.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/issue_214_control_chart_integration.test.js",
+    "server/tests/contracts/issue_214_control_chart_rules.test.js",
+    "server/tests/contracts/issue_214_control_chart_ui.test.js",
+    "server/tests/contracts/issue_214_lab_policy_schema.test.js",
+    "server/tests/fixtures/pre214-native-run-source.cjs",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workflowWriteScanner.js"
+  ],
+  "productionOperations": 0,
+  "mergePerformed": false,
+  "nonBlockingFollowUp": "Refuse approving a proposal created before current APPROVED set fromDate; explicitly deferred by Claudio.",
+  "kitRequirements": [
+    "readonly policy PRESENT/NO_OP0 or STOP",
+    "retained snapshot disk allocation",
+    "CONTROL_CHART context count",
+    "created-unstarted-unbound LRM run count"
+  ],
+  "files": {
+    "checks-original.json": {
+      "bytes": 3564,
+      "sha256": "6e128c3a0742ed7b0e33b20691f1d051decc97bb6940730bc0d21826c11cd213"
+    },
+    "closing-refs-original.json": {
+      "bytes": 158,
+      "sha256": "6d7ffde95c7a63be642a25159f6a7a0b2069715520cb5e216729fea71796c5cb"
+    },
+    "comments-original.json": {
+      "bytes": 13442,
+      "sha256": "93e75db0b6641d43a907562e5b8a00cb69fc52629e5dfcd35e1f451309aeb84d"
+    },
+    "jobs-original.json": {
+      "bytes": 4335,
+      "sha256": "71a9734f6df78ef1b131acafda74ca1ff94ccfd3cb47ea0721ad7cfb6e1f466e"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    },
+    "pr-original.json": {
+      "bytes": 64906,
+      "sha256": "83861171d97fe022d27241ef35712eeca2b67cea91494e7a0efb18ad3a099ff7"
+    },
+    "run-original.json": {
+      "bytes": 12666,
+      "sha256": "3bd6076449d0820e09ef2e1459f82a2f7edfae2dbef4853b257d6ddb5a2a6244"
+    },
+    "verdict-original.json": {
+      "bytes": 8178,
+      "sha256": "83293fdf38e293253ec6ae50ff81dc3a9b61cd87fe863d04eaa465f99a8b9f47"
+    }
+  }
+}
