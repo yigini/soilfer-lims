@@ -1,0 +1,89 @@
+{
+  "retainedUtc": "2026-10-14T07:38:04.024502+00:00",
+  "status": "CLOSED_FIRST_REQUEST_DRAFT_FOCUSED_PASS",
+  "summary": {
+    "closedUtc": "2026-10-14T07:36:48.920830+00:00",
+    "exit": 0,
+    "suites": 1,
+    "tests": 17,
+    "passedTests": 17,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 367,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "PASS"
+  },
+  "acceptedScopeComment": 6163271808,
+  "precedingScopeAudit": "f08b489a84a621655cc48f934afd09503bf5e3af",
+  "applicationDraftPaths": [
+    "server/services/orderRevisionContract.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js"
+  ],
+  "liveServiceWiringComplete": false,
+  "migrationComplete": false,
+  "full209ProofComplete": false,
+  "issue209PrCreated": false,
+  "nextWork": [
+    "orderService transaction shared by both routes and intake",
+    "additive guarded migration with no historical cleanup",
+    "insert-only new-attempt order-line resolution with legacy single-match fallback",
+    "readonly refusal/ACTIVE ambiguity impact counts for kit",
+    "real concurrency/history-preservation/attempt reservation/installer tests and full ordinary verification"
+  ],
+  "productionOperations": 0,
+  "rawFiles": {
+    "command.json": {
+      "bytes": 835,
+      "sha256": "124a7fc733119325b166e10479fb041e307fcbb5cf4ed4d248f0f1288e393360"
+    },
+    "config-original.json": {
+      "bytes": 6077,
+      "sha256": "60f6e94918bd6c97f2e6501466594519027a35ceb2511b2d4c0dd262935e3bbd"
+    },
+    "config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "inventory-original.json": {
+      "bytes": 49150,
+      "sha256": "15bce81a1fbbe8da9c5abd0fb12b0b560193b4c04171d0fd200c57e6860fc88c"
+    },
+    "inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "report-original.json": {
+      "bytes": 7966,
+      "sha256": "37f8ca9fd547e0f32c65ad3c9aa0d3ea40f2367fc11e0e6b1a4a84165f92c897"
+    },
+    "source-after.json": {
+      "bytes": 1222,
+      "sha256": "11689b5613d233e8821d46f7e97765c6a2063b4cbc5ead9cc849f778fbe3af2e"
+    },
+    "source-before.json": {
+      "bytes": 1222,
+      "sha256": "11689b5613d233e8821d46f7e97765c6a2063b4cbc5ead9cc849f778fbe3af2e"
+    },
+    "stderr-original.log": {
+      "bytes": 1610,
+      "sha256": "fef3a949411e57384412071bd0f645add1b3f312507a88c96c25c622109c979e"
+    },
+    "stdout-original.log": {
+      "bytes": 581,
+      "sha256": "6d4fbf1f8f91fae2dc2502779120b31fbd4f24c6ca5fe9c461fb22c16a566772"
+    },
+    "summary.json": {
+      "bytes": 360,
+      "sha256": "db70aa24d199db9e0a1f52dc2c4cd75415cf08cc415a0eff86e3e29afb059640"
+    }
+  }
+}
