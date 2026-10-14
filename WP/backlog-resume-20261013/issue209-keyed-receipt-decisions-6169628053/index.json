@@ -1,0 +1,37 @@
+{
+  "retainedUtc": "2026-10-14T13:41:11.507123+00:00",
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-keyed-receipt-decisions-6169628053/answer-original.json": {
+      "bytes": 4907,
+      "sha256": "7457bbb1709ad81777ec4d22751afb07bd976fc254d59e027a704e70d14d7a01"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-receipt-decisions-6169628053/answer-original.md": {
+      "bytes": 1184,
+      "sha256": "01163b3ad0424c853c80d289d51bfa3afc7e207edc69412948e2a0fa45ffee5c"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-receipt-decisions-6169628053/current-comments-original.json": {
+      "bytes": 45709,
+      "sha256": "38eaf2c77224c8702f66a0328d3053b7b8256388402d2015c39fcb70c5e7eaad"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-receipt-decisions-6169628053/current-issue-original.json": {
+      "bytes": 8349,
+      "sha256": "2f1adbd929297ceea9adbd3346dbe7fdaed8fefb0ad62cdf9940993d8286a3a0"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-receipt-decisions-6169628053/decision-record.json": {
+      "bytes": 851,
+      "sha256": "dfbcc56a6ddd64350c69dd02fdfa831074e31d0d51e3b685b80743a3c3ebecc6"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-receipt-decisions-6169628053/main-original.json": {
+      "bytes": 336,
+      "sha256": "e0c8d4117149b05e499ad0abfd6f0456aed24d869f784317aa0c1072415e39c9"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-receipt-decisions-6169628053/native-reply-visual-transcription.txt": {
+      "bytes": 447,
+      "sha256": "288feb97defe7cedf5452002176e0ef20e78868af11e63236d2a73199a42d52c"
+    }
+  },
+  "comment": 6169628053,
+  "fullAnswerRead": true,
+  "implementationPending": true,
+  "productionOperations": 0
+}

@@ -1,0 +1,13 @@
+{
+  "recordedUtc": "2026-10-14T13:41:11.456653+00:00",
+  "comment": 6169628053,
+  "url": "https://github.com/yigini/soilfer-lims/issues/209#issuecomment-6169628053",
+  "answers": 6169593044,
+  "fullAnswerRead": true,
+  "scope": "Exactlyone sameTX scoped receipt for either keyed mode; samepayload originalresponse/0write; differentpayload409/0write; crossmode409 evenidenticalparameters; nokey0receipts; changeonlyonelegacyexpectation0to1; addreplay/conflict/crossmode/nokey tests; listchangedlegacyexpectationinfinalaudit",
+  "currentRuntimeGap": "Mode not yet explicitly included in current payload hash, so exact identical normalized request across modes can replay. Correct under actual answer before claiming proof.",
+  "sourceChangesAtRetention": 0,
+  "nativeAcknowledgementSent": false,
+  "finalAuditPass": false,
+  "productionOperations": 0
+}
