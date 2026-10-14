@@ -23,6 +23,10 @@ async function fixture(reasonCode='CLIENT_RETEST',originalReplicates=2,analysisC
   status:unlinked?'PROCESSING':'APPROVED',dryingStatus:'DONE',preparationStatus:'DONE',approvedBy:'retained-approver',approvedAt:new Date('2026-09-25T10:00:00Z')}});
  f.item=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:f.sample.id,assignedLab:f.labId,labId:f.labId,
   analysis:f.analysisCode,methodologyId:f.method.id,status:unlinked?'REPEAT_REQUIRED':'ACCEPTED',assignedTo:f.actor.username,equipmentId:f.instrument.id}});
+ // Declare the retained usable order during owned fixture assembly; approval facts stay unchanged.
+ const retainedOrder=await f.db.sampleOrderRevision.create({data:{id:randomUUID(),sampleId:f.sample.id,version:1,status:'ACTIVE',
+  reason:'Retained accepted-parent order context',lines:{create:{id:randomUUID(),analysis:f.analysisCode,workItemId:null,isRequired:true,status:'ACTIVE'}}},include:{lines:true}});
+ f.retainedOrderLine=retainedOrder.lines[0];
  f.originals=await createExecutionResultsFixture(f.db,{attemptStatus:unlinked?'RECORDED':'ACCEPTED',data:Array.from({length:originalReplicates},(_,index)=>index+1).map(replicateNo=>({id:randomUUID(),sampleId:f.sample.id,
   param:f.analysisCode,replicateNo,value:String(7+replicateNo/10),numericValue:7+replicateNo/10,unit:'fixture-unit',
   methodologyId:f.method.id,equipmentId:f.instrument.id,isCurrent:true}))});
@@ -98,6 +102,7 @@ async function unlinkedFixture(analysisCode){
  // Historical/invalid OPEN rows are possible without a new amendment link.
  // Retain every guard and the accepted parent; the runtime must refuse reuse.
  f.child=await f.db.workAttempt.create({data:{id:randomUUID(),workItemId:f.item.id,attemptNo:2,status:'OPEN',parentAttemptId:f.parent.id,
+   orderLineId:f.retainedOrderLine.id,
   reason:'CONFIRMATION',requestedBy:f.other.username,requestedAt:new Date()}});
  expect(await f.db.sampleAmendmentAttempt.count()).toBe(0);return f;
 }

@@ -1,0 +1,1007 @@
+{
+  "recordedUtc": "2026-10-14T12:23:26.767154+00:00",
+  "reviewedBeforeFixtureChanges": true,
+  "cases": [
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "current stored-numeric preview keeps legacy diagnostics separate for basis null and writes no evidence",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "current stored-numeric preview keeps legacy diagnostics separate for basis AIR_DRY and writes no evidence",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "the actual submission response retains legacy diagnostics and separate immutable crossChecks for basis null",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "the actual submission response retains legacy diagnostics and separate immutable crossChecks for basis AIR_DRY",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "an unregistered historical lab saves and submits through the real HTTP workflow with disclosed unavailable checks and zero evidence",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toBe(expected) // Object.is equality",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "missing sample lab metadata discloses unavailable preview/review without a policy substitute or database writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "a registered inactive lab still records immutable checks using its own configured policy",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "the separate submission endpoint exposes cross-check evidence or its unavailable reason, registered=true",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "the separate submission endpoint exposes cross-check evidence or its unavailable reason, registered=false",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "real submission retains all seven numeric-evidence checks and review reads the frozen 1.3 \u00d7 CEC flag without parsing text",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "a late evidence insert refusal rolls back the complete submission, attempts, events, Sample and audits",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "cross-check writes require a caller transaction and permission; foreign review reads and writes refuse without changes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "after selection the live panel uses the real saved selections, supersedes without mixing observations, and preserves submission evidence",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "a later laboratory policy affects only live selected checks; stored submission thresholds and another lab remain fixed",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "a partial selection never fills missing selected inputs from the still-current observations",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "invalid retained JSON {invalid is refused with a stable4xx without adopting or changing evidence",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "invalid retained JSON null is refused with a stable4xx without adopting or changing evidence",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "invalid retained JSON {\"values\":null} is refused with a stable4xx without adopting or changing evidence",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_4_8_cross_check_evidence.test.js",
+      "test": "invalid retained JSON {\"values\":[],\"missing\":[],\"lowerBound\":false} is refused with a stable4xx without adopting or changing evidence",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_ADDED_DETERMINATIONS",
+      "caseInspection": {
+        "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+        "sourceRanges": [
+          [
+            29,
+            48
+          ],
+          [
+            70,
+            103
+          ],
+          [
+            140,
+            170
+          ]
+        ],
+        "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "linked CLIENT_RETEST child first-fills, completes its replica set and submits with the accepted parent sealed",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "linked CONFIRMATION child first-fills, completes its replica set and submits with the accepted parent sealed",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "ordinary accepted-parent repeat requests retain their exact refusal and zero writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "an absent original replicate refuses and rolls back first fill, result and audit together",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "a persisted version field fault refuses the actual result write and rolls back every row",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "a persisted lab field fault refuses the actual result write and rolls back every row",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "the SQL guard prevents a persisted sample link fault with zero writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "the SQL guard prevents a persisted line link fault with zero writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "the SQL guard prevents a persisted parent link fault with zero writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "the SQL guard prevents a persisted reason link fault with zero writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "recordedExecution refuses a real unlinked OPEN child of an accepted parent without writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "the texture writer reaches appendResult and rolls back first fill for a real unlinked accepted-parent child",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "submitRecordedAttempt refuses a real unlinked accepted-parent child without writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_1_first_fill.test.js",
+      "test": "mounted request/authorise routes keep requests pending, enforce a second person and preserve command replay",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+        "sourceRanges": [
+          [
+            14,
+            47
+          ],
+          [
+            86,
+            120
+          ]
+        ],
+        "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_3_report_content.test.js",
+      "test": "missing approval evidence refuses new issue with stable conflict: {}",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Six report approval-evidence negatives assemble approved sample with deliberately absent/incomplete approval evidence then valid accepted analytical result",
+        "sourceRanges": [
+          [
+            16,
+            30
+          ],
+          [
+            134,
+            154
+          ]
+        ],
+        "change": "Declare usable retained ACTIVE legacyNULL line before accepted evidence, preserving missing approvedBy/approvedAt fields and all report approval refusals/zero writes."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_3_report_content.test.js",
+      "test": "missing approval evidence refuses new issue with stable conflict: {\"approvedBy\":\"system:fixture\"}",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Six report approval-evidence negatives assemble approved sample with deliberately absent/incomplete approval evidence then valid accepted analytical result",
+        "sourceRanges": [
+          [
+            16,
+            30
+          ],
+          [
+            134,
+            154
+          ]
+        ],
+        "change": "Declare usable retained ACTIVE legacyNULL line before accepted evidence, preserving missing approvedBy/approvedAt fields and all report approval refusals/zero writes."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_3_report_content.test.js",
+      "test": "missing approval evidence refuses new issue with stable conflict: {\"approvedAt\":\"2026-10-09T10:00:00.000Z\"}",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Six report approval-evidence negatives assemble approved sample with deliberately absent/incomplete approval evidence then valid accepted analytical result",
+        "sourceRanges": [
+          [
+            16,
+            30
+          ],
+          [
+            134,
+            154
+          ]
+        ],
+        "change": "Declare usable retained ACTIVE legacyNULL line before accepted evidence, preserving missing approvedBy/approvedAt fields and all report approval refusals/zero writes."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_3_report_content.test.js",
+      "test": "missing approval evidence refuses new revision with stable conflict: {}",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Six report approval-evidence negatives assemble approved sample with deliberately absent/incomplete approval evidence then valid accepted analytical result",
+        "sourceRanges": [
+          [
+            16,
+            30
+          ],
+          [
+            134,
+            154
+          ]
+        ],
+        "change": "Declare usable retained ACTIVE legacyNULL line before accepted evidence, preserving missing approvedBy/approvedAt fields and all report approval refusals/zero writes."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_3_report_content.test.js",
+      "test": "missing approval evidence refuses new revision with stable conflict: {\"approvedBy\":\"system:fixture\"}",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Six report approval-evidence negatives assemble approved sample with deliberately absent/incomplete approval evidence then valid accepted analytical result",
+        "sourceRanges": [
+          [
+            16,
+            30
+          ],
+          [
+            134,
+            154
+          ]
+        ],
+        "change": "Declare usable retained ACTIVE legacyNULL line before accepted evidence, preserving missing approvedBy/approvedAt fields and all report approval refusals/zero writes."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    },
+    {
+      "suite": "audit_6_3_report_content.test.js",
+      "test": "missing approval evidence refuses new revision with stable conflict: {\"approvedAt\":\"2026-10-09T10:00:00.000Z\"}",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "VALID_RETAINED_ORDER_POSITIVE_OR_INDEPENDENT_NEGATIVE_CONTEXT",
+      "caseInspection": {
+        "context": "Six report approval-evidence negatives assemble approved sample with deliberately absent/incomplete approval evidence then valid accepted analytical result",
+        "sourceRanges": [
+          [
+            16,
+            30
+          ],
+          [
+            134,
+            154
+          ]
+        ],
+        "change": "Declare usable retained ACTIVE legacyNULL line before accepted evidence, preserving missing approvedBy/approvedAt fields and all report approval refusals/zero writes."
+      },
+      "runtimeMissingOrderBoundary": "The orphan variant is reachable from48d caught intake failures; remains refused with zero writes and separate readonly lists. Approved/noneditable nonzero list STOP per6167740581; fixture context does not repair any retained/live sample."
+    }
+  ],
+  "sourceBefore": {
+    "server/tests/contracts/audit_4_8_cross_check_evidence.test.js": {
+      "bytes": 24048,
+      "sha256": "996fe110e72c767dafabfceff973cbc163f431b8c96f73cdef3b5f3630931128",
+      "context": "fixture() adds EXCH_CA/MG/K/NA/CEC to the same ordered sample before valid measurements; cnFixture adds SOC/TN; unregistered lab fixture declares SOC/TN owner facts",
+      "sourceRanges": [
+        [
+          29,
+          48
+        ],
+        [
+          70,
+          103
+        ],
+        [
+          140,
+          170
+        ]
+      ],
+      "change": "For fresh registered positive determinations use explicit reasoned full targets before each new measurement. For historical unregistered-lab positive case declare one retained ACTIVE order with legacyNULL lines before HTTP; keep unavailable-policy/lab/history assertions and lack of Lab row unchanged."
+    },
+    "server/tests/contracts/audit_6_1_first_fill.test.js": {
+      "bytes": 20712,
+      "sha256": "c55182673ea146ffd7f2da2d8444c8bbbcd72bc5935135c549d25cbd05925fa7",
+      "context": "Fresh owned approved-parent fixture has no order; tests aim at amendment links, second-person policy, accepted-parent sealing and unlinked child refusals",
+      "sourceRanges": [
+        [
+          14,
+          47
+        ],
+        [
+          86,
+          120
+        ]
+      ],
+      "change": "Declare one usable retained ACTIVE legacyNULL order line during fixture assembly before parent evidence; preserve all approval metadata/parent/scientific values. The negative child INSERT supplies valid orderLineId only, leaving its absent amendment link as the tested fault. No amendment-side order command, approved edit, or retained identity rewrite."
+    },
+    "server/tests/contracts/audit_6_3_report_content.test.js": {
+      "bytes": 20510,
+      "sha256": "e02df6a6f369014cb1283b307ef66858a0d376cbf1ac82d46d0b5f009a6ba886",
+      "context": "Six report approval-evidence negatives assemble approved sample with deliberately absent/incomplete approval evidence then valid accepted analytical result",
+      "sourceRanges": [
+        [
+          16,
+          30
+        ],
+        [
+          134,
+          154
+        ]
+      ],
+      "change": "Declare usable retained ACTIVE legacyNULL line before accepted evidence, preserving missing approvedBy/approvedAt fields and all report approval refusals/zero writes."
+    }
+  },
+  "scopeComments": [
+    6163271808,
+    6166518424,
+    6167740581
+  ],
+  "previousReviewedCases": 46,
+  "totalReviewedCases": 85,
+  "remainingUnreviewed": 565,
+  "ordinaryApprovedEditOrAmendmentOrderStep": false,
+  "productionConnections": 0,
+  "productionOperations": 0,
+  "assertionsToChange": 0,
+  "negativeProof": "issue209-orphan-impact-intake-rollback-focused/index.json"
+}

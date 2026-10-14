@@ -1,0 +1,726 @@
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User foreign (Lab: 662446ea-9c57-4824-be1a-5ec7e6dd4dad) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/crossCheckEvaluationService.js:13:11)
+      at services/crossCheckEvaluationService.js:109:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_8_cross_check_evidence.test.js:234:5)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User foreign (Lab: 662446ea-9c57-4824-be1a-5ec7e6dd4dad) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/crossCheckEvaluationService.js:13:11)
+      at recordSubmissionCrossChecks (services/crossCheckEvaluationService.js:77:20)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_8_cross_check_evidence.test.js:235:5)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a82dcf19-1a74-483f-88fa-8c0b249539fb
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a82dcf19-1a74-483f-88fa-8c0b249539fb
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a82dcf19-1a74-483f-88fa-8c0b249539fb
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a82dcf19-1a74-483f-88fa-8c0b249539fb
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a82dcf19-1a74-483f-88fa-8c0b249539fb
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab a82dcf19-1a74-483f-88fa-8c0b249539fb
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bcecd140-ad82-4beb-ab9e-2e6aa9d46a1e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bcecd140-ad82-4beb-ab9e-2e6aa9d46a1e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bcecd140-ad82-4beb-ab9e-2e6aa9d46a1e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bcecd140-ad82-4beb-ab9e-2e6aa9d46a1e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bcecd140-ad82-4beb-ab9e-2e6aa9d46a1e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab bcecd140-ad82-4beb-ab9e-2e6aa9d46a1e
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 8b56a358-2d56-4927-8a9e-8d0fc2f8c83d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 8b56a358-2d56-4927-8a9e-8d0fc2f8c83d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 8b56a358-2d56-4927-8a9e-8d0fc2f8c83d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 8b56a358-2d56-4927-8a9e-8d0fc2f8c83d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 8b56a358-2d56-4927-8a9e-8d0fc2f8c83d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 8b56a358-2d56-4927-8a9e-8d0fc2f8c83d
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab b048aa78-5528-4a5f-9004-d51d01d5a7e0
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/audit_4_8_cross_check_evidence.test.js (32.929 s)
+  √ current stored-numeric preview keeps legacy diagnostics separate for basis null and writes no evidence (1939 ms)
+  √ current stored-numeric preview keeps legacy diagnostics separate for basis AIR_DRY and writes no evidence (1546 ms)
+  √ the actual submission response retains legacy diagnostics and separate immutable crossChecks for basis null (1948 ms)
+  √ the actual submission response retains legacy diagnostics and separate immutable crossChecks for basis AIR_DRY (1769 ms)
+  √ an unregistered historical lab saves and submits through the real HTTP workflow with disclosed unavailable checks and zero evidence (1405 ms)
+  √ missing sample lab metadata discloses unavailable preview/review without a policy substitute or database writes (1469 ms)
+  √ a registered inactive lab still records immutable checks using its own configured policy (1509 ms)
+  √ the separate submission endpoint exposes cross-check evidence or its unavailable reason, registered=true (1596 ms)
+  √ the separate submission endpoint exposes cross-check evidence or its unavailable reason, registered=false (1556 ms)
+  √ real submission retains all seven numeric-evidence checks and review reads the frozen 1.3 × CEC flag without parsing text (1590 ms)
+  √ a late evidence insert refusal rolls back the complete submission, attempts, events, Sample and audits (1571 ms)
+  √ cross-check writes require a caller transaction and permission; foreign review reads and writes refuse without changes (1467 ms)
+  √ after selection the live panel uses the real saved selections, supersedes without mixing observations, and preserves submission evidence (1861 ms)
+  √ a later laboratory policy affects only live selected checks; stored submission thresholds and another lab remain fixed (3641 ms)
+  √ a partial selection never fills missing selected inputs from the still-current observations (1557 ms)
+  √ invalid retained JSON {invalid is refused with a stable4xx without adopting or changing evidence (1477 ms)
+  √ invalid retained JSON null is refused with a stable4xx without adopting or changing evidence (1460 ms)
+  √ invalid retained JSON {"values":null} is refused with a stable4xx without adopting or changing evidence (1485 ms)
+  √ invalid retained JSON {"values":[],"missing":[],"lowerBound":false} is refused with a stable4xx without adopting or changing evidence (1575 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 32de7c60-bd6f-4b13-8894-eb0fc59e1fbc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 32de7c60-bd6f-4b13-8894-eb0fc59e1fbc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 32de7c60-bd6f-4b13-8894-eb0fc59e1fbc (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c7b2719a-5636-44e0-a9af-a5dc3f0568ec
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ad1d8d6a-d5fa-4cfe-95d8-b991c3245c31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab c7b2719a-5636-44e0-a9af-a5dc3f0568ec
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: ad1d8d6a-d5fa-4cfe-95d8-b991c3245c31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ad1d8d6a-d5fa-4cfe-95d8-b991c3245c31 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_6_1_first_fill.test.js (20.402 s)
+  √ linked CLIENT_RETEST child first-fills, completes its replica set and submits with the accepted parent sealed (1537 ms)
+  √ linked CONFIRMATION child first-fills, completes its replica set and submits with the accepted parent sealed (1395 ms)
+  √ ordinary accepted-parent repeat requests retain their exact refusal and zero writes (1247 ms)
+  √ an absent original replicate refuses and rolls back first fill, result and audit together (1292 ms)
+  √ a persisted version field fault refuses the actual result write and rolls back every row (1286 ms)
+  √ a persisted lab field fault refuses the actual result write and rolls back every row (1258 ms)
+  √ the SQL guard prevents a persisted sample link fault with zero writes (1275 ms)
+  √ the SQL guard prevents a persisted line link fault with zero writes (1290 ms)
+  √ the SQL guard prevents a persisted parent link fault with zero writes (1273 ms)
+  √ the SQL guard prevents a persisted reason link fault with zero writes (1292 ms)
+  √ recordedExecution refuses a real unlinked OPEN child of an accepted parent without writes (1270 ms)
+  √ the texture writer reaches appendResult and rolls back first fill for a real unlinked accepted-parent child (1271 ms)
+  √ submitRecordedAttempt refuses a real unlinked accepted-parent child without writes (1268 ms)
+  √ mounted request/authorise routes keep requests pending, enforce a second person and preserve command replay (1400 ms)
+  √ normal scientific retest review, reapproval and report generation preserve the withdrawn original and issue the next revision (1828 ms)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 6660eeb5-7cea-4276-bd57-359c65f31ae5
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab 7c91e6dd-eef5-4506-9193-6995e97364e6
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_6_3_report_content.test.js (13.67 s)
+  √ uncertainty requires explicit lab policy in ISO17025_STRICT
+  √ uncertainty requires explicit lab policy in BASIC
+  √ uncertainty requires explicit lab policy in ADVISORY
+  √ declared uncertainty NOT_REPORTED/0.25/2/7/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_ABSOLUTE/0.25/2/7/censored=false follows its exact meaning (1 ms)
+  √ declared uncertainty EXPANDED_RELATIVE_PCT/5/3/-7/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_ABSOLUTE/0.25/null/7/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_ABSOLUTE/null/2/7/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_ABSOLUTE/0/2/7/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_RELATIVE_PCT/5/2/null/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_RELATIVE_PCT/5/2/0/censored=false follows its exact meaning
+  √ declared uncertainty EXPANDED_ABSOLUTE/0.25/2/7/censored=true follows its exact meaning
+  √ uncertainty scopes resolve per laboratory and method without changing scientific rows (1354 ms)
+  √ assembly discloses missing frozen method and approval instead of selecting current directory defaults (1240 ms)
+  √ methods and revisions follow selected source attempts and list distinct frozen methods (1 ms)
+  √ approval role is matched to retained actor and approval timestamp, never a current role
+  √ actual execution, acceptance and publication freeze EXPANDED_ABSOLUTE uncertainty and approval (1402 ms)
+  √ actual execution, acceptance and publication freeze EXPANDED_RELATIVE_PCT uncertainty and approval (1376 ms)
+  √ receipt and analysis dates use recorded intake and selected attempts only (1 ms)
+  √ missing approval evidence refuses new issue with stable conflict: {} (1262 ms)
+  √ missing approval evidence refuses new issue with stable conflict: {"approvedBy":"system:fixture"} (1272 ms)
+  √ missing approval evidence refuses new issue with stable conflict: {"approvedAt":"2026-10-09T10:00:00.000Z"} (1276 ms)
+  √ missing approval evidence refuses new revision with stable conflict: {} (1370 ms)
+  √ missing approval evidence refuses new revision with stable conflict: {"approvedBy":"system:fixture"} (1403 ms)
+  √ missing approval evidence refuses new revision with stable conflict: {"approvedAt":"2026-10-09T10:00:00.000Z"} (1394 ms)
+  √ unreadable approval time cannot authorize new issue (1 ms)
+  √ golden PDF {
+  name: 'normal',
+  value: '7.123456789',
+  censoring: 'NONE',
+  interpretation: 'Saved normal interpretation',
+  uncertainty: [Object],
+  expectedText: [Array]
+} preserves censoring, uncertainty, QC and publication evidence (11 ms)
+  √ golden PDF {
+  name: 'censored',
+  value: '<0.5',
+  censoring: 'BELOW_LOQ',
+  interpretation: 'Saved censored interpretation',
+  uncertainty: [Object],
+  expectedText: [Array]
+} preserves censoring, uncertainty, QC and publication evidence (9 ms)
+  √ golden PDF {
+  name: 'proceed-with-warning',
+  value: '7.123456789',
+  censoring: 'NONE',
+  interpretation: 'Saved warning interpretation',
+  warning: true,
+  uncertainty: [Object],
+  expectedText: [Array]
+} preserves censoring, uncertainty, QC and publication evidence (7 ms)
+  √ golden PDF {
+  name: 'amended',
+  value: '7.123456789',
+  censoring: 'NONE',
+  interpretation: 'Saved amended interpretation',
+  amended: true,
+  uncertainty: [Object],
+  expectedText: [Array]
+} preserves censoring, uncertainty, QC and publication evidence (7 ms)
+  √ saved interpretations retain their translated label and uncertainty in en (10 ms)
+  √ saved interpretations retain their translated label and uncertainty in es (8 ms)
+  √ saved interpretations retain their translated label and uncertainty in es-419 (8 ms)
+  √ saved interpretations retain their translated label and uncertainty in fr (8 ms)
+  √ saved interpretations retain their translated label and uncertainty in pt (7 ms)
+  √ wrapped approval and issuer evidence stays readable in en (12 ms)
+  √ wrapped approval and issuer evidence stays readable in es (5 ms)
+  √ wrapped approval and issuer evidence stays readable in es-419 (6 ms)
+  √ wrapped approval and issuer evidence stays readable in fr (7 ms)
+  √ wrapped approval and issuer evidence stays readable in pt (6 ms)
+  √ all report and uncertainty policy labels exist in en (7 ms)
+  √ all report and uncertainty policy labels exist in es (6 ms)
+  √ all report and uncertainty policy labels exist in es-419 (4 ms)
+  √ all report and uncertainty policy labels exist in fr (6 ms)
+  √ all report and uncertainty policy labels exist in pt (5 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 42d50d5a-addd-4976-8727-3472d89b7117) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/orderService.js:89:19)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.reviseAnalyses (services/orderService.js:86:16)
+      at Object.<anonymous> (tests/contracts/issue_209_order_revision_integration.test.js:253:5)
+
+PASS tests/contracts/issue_209_order_revision_integration.test.js (45.191 s)
+  √ a TEXTURE target retains all existing fraction owners including completed work and fixes four linked lines in one revision (1594 ms)
+  √ one or two retained fractions refuse a TEXTURE alias with named missing owners and zero row changes (2507 ms)
+  √ TEXTURE without explicit fraction selections still preserves all existing owners; explicit removal waives them with the reason (2217 ms)
+  √ initial generation for a new four-selection sample still creates only the logical TEXTURE measurement owner (1294 ms)
+  √ kit counts separate fraction line refusals and incomplete owner samples without touching the original triple (1343 ms)
+  √ installer dry/apply/repeat retains three ACTIVE histories, every line and a null historical OPEN identity (1376 ms)
+  √ a full reasoned revision supersedes all three ACTIVE ids while every old line and attempt stays byte-equivalent (1223 ms)
+  √ legacy single-match resolution writes only the newly inserted attempt link (1243 ms)
+  √ a legacy 0-revision/0-line context refuses with NO_LINE and no row writes (1285 ms)
+  √ a legacy 1-revision/2-line context refuses with AMBIGUOUS_LINE and no row writes (1333 ms)
+  √ a legacy 2-revision/1-line context refuses with MULTIPLE_ACTIVE_REVISIONS and no row writes (1331 ms)
+  √ a retained OPEN attempt fills with its original null order-line identity (1498 ms)
+  √ two concurrent complete revisions leave exactly one ACTIVE revision (1206 ms)
+  √ raw new-attempt insertion cannot select one ambiguous legacy line (1179 ms)
+  √ a new linked line cannot have its ownership or analysis rewritten (1205 ms)
+  √ a reasoned repeat receives its resolved legacy line at the new reservation INSERT (1210 ms)
+  √ scientific amendment authorisation links only its newly reserved attempt to the current order (1244 ms)
+  √ order revisions enforce permission and laboratory scope before changing retained rows (1361 ms)
+  √ the read-only kit collector preserves an active WAL triple and accounts for every nested retained snapshot (1364 ms)
+  √ the actual shipped post-start order programme preserves an owned WAL-mode original without sidecars (1741 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: wrong type (1180 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: unreviewed foreign key (1174 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: tampered index (1180 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: partial guard (1165 ms)
+  √ an actual Prisma-wrapped native order guard returns the service-owned stable code (1290 ms)
+  √ an actual initial revision INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction (1219 ms)
+  √ an actual initial line INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction (1187 ms)
+  √ runtime-reachable missing revision and missing matching line remain zero-write refusals and have distinct read-only impact lists (2619 ms)
+  √ an approved orphan remains non-editable and its prospective amendment impact requires STOP with sample ids, without writes (1329 ms)
+  √ first execution maps an actual wrapped INSERT refusal and rolls back all result and audit writes (1262 ms)
+  √ repeat reservation maps an actual wrapped INSERT refusal and rolls back its parent transition (1247 ms)
+  √ scientific reservation maps an actual wrapped INSERT refusal and retains its PENDING authorisation (1231 ms)
+
+PASS tests/security/audit_1_2_state_writes.test.js (10.701 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (7 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)"))
+  √ the original rehearsal cannot reintroduce a direct Sample deletion
+  √ nested connect association has one actual authority finding (1 ms)
+  √ nested set association has one actual authority finding
+  √ nested disconnect association has one actual authority finding (1 ms)
+  √ the closed FK runner refuses unknown case (86 ms)
+  √ the closed FK runner refuses configured candidate (89 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (3 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (3 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (2 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (1 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (1 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (2 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js (1 ms)
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql
+  √ legacy CLI launchers cannot import any fixture or test module (1 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (6 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (2 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (6 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (5 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js
+  √ a direct sample write in a #190 test remains a finding outside the factory (1 ms)
+  √ a direct workItem write in a #190 test remains a finding outside the factory
+  √ a direct result write in a #190 test remains a finding outside the factory
+  √ a changed #190 historical factory digest is a scanner finding (9 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (10 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js (1 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql (1 ms)
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (10046 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"])
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`")
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"]) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)')
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')")
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (34 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (38 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}})
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) }
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED')
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}`
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`)
+  √ a real temporary non-allowlisted test file fails the source guard (2 ms)
+  √ a shadowed file reader cannot impersonate a known schema load (1 ms)
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (1 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js (1 ms)
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (1 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF')
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0')
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF')
+  √ native pragma reads and enabled constraints remain permitted
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (2 ms)
+
+PASS tests/security/audit_1_2_migration_sources.test.js
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().evidence.sql); (13 ms)
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().guards.sql); (3 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(sources.evidence.sql); (2 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(evidenceCreates(sources.evidence.sql)); (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered services/workflowMigrationSources.js bytes never become a SQL exemption
+  √ a third registry entry changes the loader digest and stays unresolved (1 ms)
+
+Test Suites: 6 passed, 6 total
+Tests:       256 passed, 256 total
+Snapshots:   0 total
+Time:        124.076 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_8_cross_check_evidence.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_1_first_fill.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_3_report_content.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_209_order_revision_integration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_migration_sources.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-crosscheck-approved-context-focused\report-original.json

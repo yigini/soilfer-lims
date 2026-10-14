@@ -1,0 +1,178 @@
+{
+  "retainedUtc": "2026-10-14T12:31:51.503949+00:00",
+  "status": "CLOSED_CLASSIFIED_CROSSCHECK_APPROVED_CONTEXT_PASS",
+  "summary": {
+    "closedUtc": "2026-10-14T12:30:11.006033+00:00",
+    "exit": 0,
+    "suites": 6,
+    "tests": 256,
+    "passedTests": 256,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "PASS"
+  },
+  "scopeComments": [
+    6163271808,
+    6166518424,
+    6167740581
+  ],
+  "sourceDraftPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_4_6_calibration.test.js",
+    "server/tests/contracts/audit_4_6_calculation_install.test.js",
+    "server/tests/contracts/audit_4_1_run_start_header.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_4_3_keyboard_playwright.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_evidence.test.js",
+    "server/tests/contracts/audit_6_1_first_fill.test.js",
+    "server/tests/contracts/audit_6_3_report_content.test.js"
+  ],
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/command.json": {
+      "bytes": 1948,
+      "sha256": "abcb6b2bf240361e9cb607e06f506a50040444208cb7a9da59476dcc986307c7"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/config-original.json": {
+      "bytes": 6579,
+      "sha256": "d741305f5b8bcd58cc9c063144fb122e0274b4b2f7bf57f6785ff28523ea3f83"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "3945533bf9fd8271349b92735a2403f2fbed3e3ecf4d8a2aa12acd9a69b5e2bc"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/physical-retained-terminal-index.json": {
+      "bytes": 12891,
+      "sha256": "73a7d65b9a2256ee7a17e687cd3932eb4aae3a7bcee232b93ff3b21b2f3cf0d5"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/physical-retention-original.jsonl": {
+      "bytes": 10485,
+      "sha256": "c9254d3ac822c727c5c684b75380e9193c126aefd7d77d197727e773b8711a46"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/report-original.json": {
+      "bytes": 112903,
+      "sha256": "4ae97c2cea0f47681aa6cc5ca9ea84ea79c3cef17ea2456c0d57bfe9530964d4"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/source-after.json": {
+      "bytes": 114945,
+      "sha256": "e28bf31a669eeabb768b53986815f60abecff849e599f7298253927f6c61b23a"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/source-before.json": {
+      "bytes": 114945,
+      "sha256": "e28bf31a669eeabb768b53986815f60abecff849e599f7298253927f6c61b23a"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/stderr-original.log": {
+      "bytes": 44450,
+      "sha256": "8a996ec37ba933af2e14a809a61f14b6ec2d9ec831dba58472d33719345eb2f3"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/stdout-original.log": {
+      "bytes": 1554,
+      "sha256": "c239d3d90a32ad78028a853b8bec94041098d3b3ef4276c76ab1b1b25daabbd3"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-focused/summary.json": {
+      "bytes": 362,
+      "sha256": "df068ef57e40f7339c76d8347033a13511a0f3fc39ba674d2809adfee4b6d4de"
+    }
+  },
+  "classifiedBeforeCorrections": 39,
+  "totalOriginalFailedCasesResolved": 85,
+  "remainingFailedCases": 565,
+  "reviewFiles": {
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-review/audit_4_8_cross_check_evidence.test.js.before-original": {
+      "bytes": 24048,
+      "sha256": "996fe110e72c767dafabfceff973cbc163f431b8c96f73cdef3b5f3630931128"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-review/audit_6_1_first_fill.test.js.before-original": {
+      "bytes": 20712,
+      "sha256": "c55182673ea146ffd7f2da2d8444c8bbbcd72bc5935135c549d25cbd05925fa7"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-review/audit_6_3_report_content.test.js.before-original": {
+      "bytes": 20510,
+      "sha256": "e02df6a6f369014cb1283b307ef66858a0d376cbf1ac82d46d0b5f009a6ba886"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-review/fixture-additions-original.json": {
+      "bytes": 3109,
+      "sha256": "5b749374865d5b3e689ac00d57bce93d3829b6e5268e539d095cd1dc7d722326"
+    },
+    "WP/backlog-resume-20261013/issue209-crosscheck-approved-context-review/pre-correction-classification.json": {
+      "bytes": 59760,
+      "sha256": "474760d6e2271c70f1ca9f594bd38c99aabb6edf8692b988e8a23146752f4975"
+    }
+  }
+}

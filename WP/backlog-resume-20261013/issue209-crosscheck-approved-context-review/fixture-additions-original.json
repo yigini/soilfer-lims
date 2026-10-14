@@ -1,0 +1,47 @@
+{
+  "server/tests/contracts/audit_4_8_cross_check_evidence.test.js": {
+    "beforeSha256": "996fe110e72c767dafabfceff973cbc163f431b8c96f73cdef3b5f3630931128",
+    "afterSha256": "2b8e04ab8fb54b7f3b3c84ce00d5fba0ab5f6f3eed503c007d418c6980b0c143",
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "additions": [
+      {
+        "afterStart": 41,
+        "bytes": "        await require('../../services/orderService').reviseAnalyses(f.sampleId, {\n            analyses: f.items.map(owner => owner.analysis), reason: 'Owned additional C:N determination'\n        }, f.actor, { tx: f.db });\n"
+      },
+      {
+        "afterStart": 86,
+        "bytes": "    // This historical lab case has a usable retained order, without inventing a Lab or policy.\n    await f.db.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId, version: 1, status: 'ACTIVE',\n        reason: 'Retained historical SOC/TN order context', lines: { create: ['SOC', 'TN'].map(analysis => ({\n            id: randomUUID(), analysis, workItemId: null, isRequired: true, status: 'ACTIVE'\n        })) } } });\n"
+      },
+      {
+        "afterStart": 163,
+        "bytes": "        await require('../../services/orderService').reviseAnalyses(f.sampleId, {\n            analyses: f.items.map(owner => owner.analysis), reason: 'Owned additional cross-check determination'\n        }, f.actor, { tx: f.db });\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_6_1_first_fill.test.js": {
+    "beforeSha256": "c55182673ea146ffd7f2da2d8444c8bbbcd72bc5935135c549d25cbd05925fa7",
+    "afterSha256": "f11e3bc7685f626ca0b651d36317e927b200e86e8f2ddaaa03ddb8dc5fae6232",
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "additions": [
+      {
+        "afterStart": 26,
+        "bytes": " // Declare the retained usable order during owned fixture assembly; approval facts stay unchanged.\n const retainedOrder=await f.db.sampleOrderRevision.create({data:{id:randomUUID(),sampleId:f.sample.id,version:1,status:'ACTIVE',\n  reason:'Retained accepted-parent order context',lines:{create:{id:randomUUID(),analysis:f.analysisCode,workItemId:null,isRequired:true,status:'ACTIVE'}}},include:{lines:true}});\n f.retainedOrderLine=retainedOrder.lines[0];\n"
+      },
+      {
+        "afterStart": 105,
+        "bytes": "   orderLineId:f.retainedOrderLine.id,\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_6_3_report_content.test.js": {
+    "beforeSha256": "e02df6a6f369014cb1283b307ef66858a0d376cbf1ac82d46d0b5f009a6ba886",
+    "afterSha256": "b93a0abb7303694410828e67cf3c2261d271c1b3cf59668f752468cd78db3f16",
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "additions": [
+      {
+        "afterStart": 25,
+        "bytes": "  // A valid retained order does not fill the deliberately missing approval evidence.\n  await f.db.sampleOrderRevision.create({data:{id:randomUUID(),sampleId:sample.id,version:1,status:'ACTIVE',\n   reason:'Retained report-evidence order context',lines:{create:{id:randomUUID(),analysis:f.analysisCode,workItemId:null,isRequired:true,status:'ACTIVE'}}}});\n"
+      }
+    ]
+  }
+}

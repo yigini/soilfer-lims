@@ -22,6 +22,9 @@ async function fixture({approved=false,approval={}}={}){
    status:'APPROVED',dryingStatus:'DONE',preparationStatus:'DONE',receptionDate:new Date(),...approval}});
   const item=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:sample.id,labId:f.labId,analysis:f.analysisCode,
    methodologyId:f.method.id,status:'ACCEPTED',result:'7',history:'[]'}});f.items=[item];
+  // A valid retained order does not fill the deliberately missing approval evidence.
+  await f.db.sampleOrderRevision.create({data:{id:randomUUID(),sampleId:sample.id,version:1,status:'ACTIVE',
+   reason:'Retained report-evidence order context',lines:{create:{id:randomUUID(),analysis:f.analysisCode,workItemId:null,isRequired:true,status:'ACTIVE'}}}});
  }
  f.row=await f.result(f.items[0]);
  await rules.inTransaction(f.db,tx=>appendReportedSelection(tx,f.items[0],f.actor));
