@@ -1,0 +1,30 @@
+{
+  "recordedUtc": "2026-10-14T11:36:08.482088+00:00",
+  "deliveryObservedNoLaterThanUtc": "2026-10-14T11:32:39Z",
+  "replyObservedNoLaterThanUtc": "2026-10-14T11:34:02Z",
+  "exactCaptureTimeAvailable": false,
+  "window": {
+    "id": 5311708,
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "project": "LIMS Audit",
+    "thread": "Lab workflow audit and plan"
+  },
+  "oneMinimizedWindowRecovery": true,
+  "freshActualWindowTarget": true,
+  "rightComposerInitiallyEmpty": true,
+  "focusCaretObservedBeforeTyping": true,
+  "draftHeadAndEndInspected": true,
+  "returnKeyCount": 1,
+  "actualSentBubbleVerified": true,
+  "rightComposerEmptyAfter": true,
+  "claudioStateAtSend": "Cogitating",
+  "centreHumanDraft": "can you go and ask Pip",
+  "humanDraftPreserved": true,
+  "cardsAnswered": false,
+  "progressCheckpoint": true,
+  "finalAuditRequest": false,
+  "fullServerPassClaimed": false,
+  "productionOperations": 0,
+  "replyAuthority": "Visual transcription of the actual current auditor reply; not a native API export or final audit PASS",
+  "newReviewRequirement": "Before fixture corrections classify each failing context against released production creation paths; report reachable runtime gaps and distinct readonly impact causes; list runtime gaps and fixture-only contexts in the audit request"
+}

@@ -1,0 +1,8 @@
+Thanks, Pip. That’s on track. The fraction fix passes 248 of 248, and it’s right to leave the full run untouched until it finishes.
+
+One caution before you add order context to the failing calibration and calculation fixtures. For each one, check whether a real production sample can be in that state, meaning a work item with no order revision or no matching line.
+
+- If it can, that is a runtime gap, not a fixture gap. Don’t paper over it in the fixture. Report it here, and make sure the read-only impact count includes it as its own cause, so YY sees how many live samples it would stop.
+- If it can’t, adding the order context is fine.
+
+Please list both groups in the audit request.

@@ -1,0 +1,7 @@
+Pip here. YY asked me to check in, so here is the current #209 boundary.
+
+I read and retained your full fraction direction6166518424. The companion correction is implemented: the corrected eight-suite run closed at11:07:37UTC with248/248 tests passing, including the original fraction-only HTTP saves, atomic texture and separate-texture assertions, completed-owner preservation, partial-owner409/zero writes, intake collapse and read-only impact counts. Evidence/source checkpoint27477ea8.
+
+The one full ordinary run64340 started11:08:15UTC and remains active on370 suites/expected5630 tests/1310 frozen inputs. Active logs show older fixture failures, including ORDER_LINE_REQUIRED in positive calibration/calculation contexts. There are no final totals or full PASS yet. I am leaving this frozen run untouched until it closes, then retaining its actual result before adding only the required owned fixture contexts and running new successors; assertions and runtime/scanner/history guards stay intact. Open metadata/current audit74376ec4.
+
+No #209 PR or final audit request yet. After full verification I will open the source-only PR, get actual stock CI green and request your exact-head audit. #206/#214 remain merged and green but undeployed; the reviewed batch kit follows #209. #103 remains no-apply, with its read-only list still outstanding. This is a progress update, not an audit-ready notice.
