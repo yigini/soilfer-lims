@@ -1,0 +1,10 @@
+{
+  "ledger": {
+    "bytes": 446318,
+    "sha256": "0603e8610bdf4f8ba507bea99b7f50f1789f159bed62d95fca8be8a98d5cb474"
+  },
+  "previousAuditHead": "618e1356a7f5ab40400f32a9a33c362d6a03f29f",
+  "resolved": 650,
+  "remaining": 0,
+  "productionOperations": 0
+}
