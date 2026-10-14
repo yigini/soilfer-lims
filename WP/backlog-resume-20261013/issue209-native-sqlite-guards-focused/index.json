@@ -1,0 +1,90 @@
+{
+  "retainedUtc": "2026-10-14T08:22:00.767925+00:00",
+  "status": "CLOSED_REAL_SERVICE_INSTALLER_FOCUSED_PASS",
+  "summary": {
+    "closedUtc": "2026-10-14T08:17:48.531165+00:00",
+    "exit": 0,
+    "suites": 2,
+    "tests": 28,
+    "passedTests": 28,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 368,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "PASS"
+  },
+  "cause": "All28 tests pass, including native SQLite guard-code refusals and unchanged-row proofs plus real repeat insertion. Previous26pass/2Prisma-wrapper assertions preserved; exact runtime/source guards unchanged for this diagnostic successor.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/command.json": {
+      "bytes": 993,
+      "sha256": "334e9aa70a20be5b3e922d73839cad706007090806ff49ff9e01fd3e6576fa90"
+    },
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/config-original.json": {
+      "bytes": 6078,
+      "sha256": "03423ca94907aef732341de1764ef1babb0676393545db5c29cba4eabdf0c5ef"
+    },
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/inventory-original.json": {
+      "bytes": 49296,
+      "sha256": "97ad8d2ce05c3bb6935995b35d8cb5cfe68b3e415fc43ddbb061d2b53a69cf6d"
+    },
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/report-original.json": {
+      "bytes": 12579,
+      "sha256": "d64b6560571850f19e217ef0f2232093755b7baa853af834e3660b5488aee175"
+    },
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/source-after.json": {
+      "bytes": 3001,
+      "sha256": "85431c40679a4a81176428687e5ad47a30a34b74c57eeaafb26e425afc287b9a"
+    },
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/source-before.json": {
+      "bytes": 3001,
+      "sha256": "85431c40679a4a81176428687e5ad47a30a34b74c57eeaafb26e425afc287b9a"
+    },
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/stderr-original.log": {
+      "bytes": 2919,
+      "sha256": "1b5b1e94d8039e357cff112b3cfbf5442a5650ac6e953b1b25d9c552b5ee8b4e"
+    },
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/stdout-original.log": {
+      "bytes": 722,
+      "sha256": "8b83455853d43f3f26c0c358175b1eb8cc11973d2a80eaead4503177989416f6"
+    },
+    "WP/backlog-resume-20261013/issue209-native-sqlite-guards-focused/summary.json": {
+      "bytes": 360,
+      "sha256": "981866370dfd3491d41636640152a85127de37791dcc0bd3b8c133f1fbfad8ab"
+    }
+  }
+}

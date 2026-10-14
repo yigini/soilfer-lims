@@ -119,8 +119,11 @@ test('two concurrent complete revisions leave exactly one ACTIVE revision', asyn
 test('raw new-attempt insertion cannot select one ambiguous legacy line', async () => {
     const f = await fixture({ lines: 2 }); installer.installOrderRevisions({ dbPath: f.file, apply: true });
     const line = await f.db.orderLine.findFirst({ where: { revision: { sampleId: f.items[0].sampleId } } });
-    await expect(f.db.workAttempt.create({ data: { id: randomUUID(), workItemId: f.items[0].id, orderLineId: line.id,
-        attemptNo: 1, status: 'OPEN' } })).rejects.toThrow('ORDER_LINE_REQUIRED');
+    const connection = new Database(f.file, { fileMustExist: true });
+    try {
+        expect(() => connection.prepare('INSERT INTO WorkAttempt(id,workItemId,orderLineId,attemptNo,status,version,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?,?)')
+            .run(randomUUID(), f.items[0].id, line.id, 1, 'OPEN', 1, 1, 1)).toThrow('ORDER_LINE_REQUIRED');
+    } finally { connection.close(); }
     expect(await f.db.workAttempt.count({ where: { workItemId: f.items[0].id } })).toBe(0);
 });
 
@@ -128,8 +131,11 @@ test('a new linked line cannot have its ownership or analysis rewritten', async 
     const f = await fixture({ revisions: 3 }); installer.installOrderRevisions({ dbPath: f.file, apply: true });
     const revised = await order.reviseAnalyses(f.items[0].sampleId, { analyses: [f.items[0].analysis], reason: 'Reviewed immutable line identity' }, f.actor, { tx: f.db, mode: 'order' });
     const line = await f.db.orderLine.findFirst({ where: { revisionId: revised.revision.id } }), before = JSON.stringify(line);
-    await expect(f.db.orderLine.update({ where: { id: line.id }, data: { workItemId: null } })).rejects.toThrow('ORDER_LINE_IDENTITY_IMMUTABLE');
-    await expect(f.db.orderLine.update({ where: { id: line.id }, data: { analysis: 'OTHER' } })).rejects.toThrow('ORDER_LINE_IDENTITY_IMMUTABLE');
+    const connection = new Database(f.file, { fileMustExist: true });
+    try {
+        expect(() => connection.prepare('UPDATE OrderLine SET workItemId=NULL WHERE id=?').run(line.id)).toThrow('ORDER_LINE_IDENTITY_IMMUTABLE');
+        expect(() => connection.prepare('UPDATE OrderLine SET analysis=? WHERE id=?').run('OTHER', line.id)).toThrow('ORDER_LINE_IDENTITY_IMMUTABLE');
+    } finally { connection.close(); }
     expect(JSON.stringify(await f.db.orderLine.findUnique({ where: { id: line.id } }))).toBe(before);
 });
 
