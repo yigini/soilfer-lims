@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe",
+    "-B",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-release-cde8-20261014\\prepare_batch_build.py",
+    "--tooling-commit",
+    "2afd192872ce38bfabbaf5c69404d0aa7e679123",
+    "--source-review-id",
+    "6179940139",
+    "--root-name",
+    "workflow-batch-build-cde8c889-20261014T221500Z"
+  ],
+  "startedUtc": "2026-10-14T22:31:41.469725+00:00",
+  "reviewId": 6179940139,
+  "toolingCommit": "2afd192872ce38bfabbaf5c69404d0aa7e679123",
+  "preparationCount": 1,
+  "buildsLaunched": 0,
+  "productionConnections": 0,
+  "neverReplay": true
+}

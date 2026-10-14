@@ -1,0 +1,63 @@
+{
+  "status": "PREPARED_BATCH_BUILD_ONLY_NOT_LAUNCHED",
+  "head": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "tree": "638580d50f61254609de3abd42d93afc676a5727",
+  "scope": "BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME",
+  "rootName": "workflow-batch-build-cde8c889-20261014T221500Z",
+  "audits": [
+    {
+      "issue": 206,
+      "pr": 295,
+      "source": "1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a",
+      "merge": "6d750914d8565acdd496767a7dd935811b5a89b2",
+      "comment": 6146939836
+    },
+    {
+      "issue": 214,
+      "pr": 296,
+      "source": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+      "merge": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+      "comment": 6163165778
+    },
+    {
+      "issue": 209,
+      "pr": 297,
+      "source": "6bd516c42a07332d0b0653ed150d1526bf7e424e",
+      "merge": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+      "comment": 6178123314
+    }
+  ],
+  "mainCiRun": 38636615469,
+  "labAndHubBuildsOwnedByYY": true,
+  "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED",
+  "productionDatabaseMounts": 0,
+  "productionDatabaseConnections": 0,
+  "proofLaunches": 0,
+  "productionDeployments": 0,
+  "toolingCommit": "2afd192872ce38bfabbaf5c69404d0aa7e679123",
+  "toolingSourceIndexSha256": "85d92a2d736eff1ef6fffca4c2b381492fb069bcf263d9faa00c0abc879f18cb",
+  "sourceReviewId": 6179940139,
+  "sourceReviewRawSha256": "0d365bd6b10693f283d92115f67185e2ab236d2a636e6167367191472207f033",
+  "archiveSha256": "6c54dbed48f4aab4d36286dd5e2a921587c1adae51fc4856f53cd321cf86144a",
+  "applicationIndexSha256": "c7520b9feab4c331818d40fc80de62609d8fba7f3d8d6fa79fc68c38cb485c0f",
+  "reserveFloorBytes": 10556150894,
+  "buildAllocationReserveBytes": 4294967296,
+  "buildTimeoutSeconds": 2400,
+  "buildUnitTimeoutSeconds": 2700,
+  "unexplainedGrowthAbortBytes": 500000000,
+  "diskGrowthPolicy": "OWNED_BUILD_ROOT_AND_DISJOINT_DOCKER_ALLOCATIONS",
+  "preparedUtc": "2026-10-14T22:31:53.404838+00:00",
+  "evidenceSha256": {
+    "main-original.json": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89",
+    "main-ci-original.json": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2",
+    "pr295-original.json": "5eb26d9a72f609e0abd007d34e9680d672f62b30d38ee9c18d66a9e38d040e64",
+    "pr295-actual-pass-original.json": "3d504670dbe3035c87ff67d73c50782e005a1893c4665de338de9fb57ce0a25a",
+    "pr295-comments-original.json": "3cd8ecfd08235af23aae6a5ae7c7157690c06e85c7574e503562dd566b4b3201",
+    "pr296-original.json": "a61e1d86de8facf7faba4b513fbbb7d0c9affc2325f95770e0b38abf5f22342f",
+    "pr296-actual-pass-original.json": "83293fdf38e293253ec6ae50ff81dc3a9b61cd87fe863d04eaa465f99a8b9f47",
+    "pr296-comments-original.json": "d6f0751f4ac2bdb75a54211ea8dc43b25edaf9d9440621ac8e6a98e47f4b46c9",
+    "pr297-original.json": "05a14316816cc8dcad6d770a765e8e2abbb3ddb71a33e939be6882a4dabfb4df",
+    "pr297-actual-pass-original.json": "2272d318b7d824d7341e90cd340b53bfeb81dc5cbec26150f857b4db8251a167",
+    "pr297-comments-original.json": "20f195ef4512a4febe5926cdcbb8baddae3bab99a21fd698ca6b1052d57a0751"
+  }
+}
