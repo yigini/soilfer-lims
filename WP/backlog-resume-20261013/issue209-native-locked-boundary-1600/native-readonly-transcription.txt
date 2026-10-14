@@ -1,0 +1,1 @@
+Fresh returned Claude7867734 was requested for read-only state; actual screenshot displayed Windows lock screen. No input, activation, message, authentication interaction or further snapshot attempt. User asked to unlock; repository/GitHub work continues. No actual current Claude thread/draft contents read.

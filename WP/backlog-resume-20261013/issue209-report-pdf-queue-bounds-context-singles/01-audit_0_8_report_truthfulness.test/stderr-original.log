@@ -1,0 +1,142 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-08
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2265cebf-f9ed-4c74-a0c6-344fa3011a45 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_0_8_report_truthfulness.test.js
+  Audit 0.8: issued identity and truthful report evidence
+    √ two simultaneous real publications have different bases and committed counter values (342 ms)
+    √ revisions reuse the base without incrementing the counter; policy changes affect new lineages only (237 ms)
+    √ latest issued legacy number anchors rev 1; older content and v1 PDF remain exact (142 ms)
+    √ a historical base shared by another sample fails closed without a substitute or new report (119 ms)
+    √ modern base ownership also rejects another sample (148 ms)
+    √ failure after counter increment rolls it back; the next successful publication issues that value (186 ms)
+    √ year boundary is determined by lab timezone, with UTC fallback
+    √ additive migration preserves legacy snapshots, nullable identities and enforces revision uniqueness (2 ms)
+    √ QC_FAIL with PROCEED prints analyte, batch and reason; all reported linked batches must pass for a pass claim (158 ms)
+    √ warn-mode unevaluated QC and unlinked historical results never claim QC passed (140 ms)
+    √ en PDF uses actual publication date/status, replacement, frozen deviations and preparation (8 ms)
+    √ es PDF uses actual publication date/status, replacement, frozen deviations and preparation (7 ms)
+    √ es-419 PDF uses actual publication date/status, replacement, frozen deviations and preparation (7 ms)
+    √ fr PDF uses actual publication date/status, replacement, frozen deviations and preparation (6 ms)
+    √ pt PDF uses actual publication date/status, replacement, frozen deviations and preparation (6 ms)
+    √ internal PDF marks the issued replacement; public PDF refuses the superseded version (155 ms)
+    √ preparation claims come from complete recorded confirmations rather than sample DONE flags (1 ms)
+    √ short certificates keep footer on one page and all issue-date fields use publishedAt (6 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       18 passed, 18 total
+Snapshots:   0 total
+Time:        3.188 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_8_report_truthfulness.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-report-pdf-queue-bounds-context-singles\01-audit_0_8_report_truthfulness.test\report-original.json

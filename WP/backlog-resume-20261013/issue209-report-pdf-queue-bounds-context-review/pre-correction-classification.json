@@ -1,0 +1,312 @@
+{
+  "createdUtc": "2026-10-14T15:58:20.149408+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 19,
+  "cases": [
+    {
+      "suite": "audit_0_8_report_truthfulness.test.js",
+      "test": "Audit 0.8: issued identity and truthful report evidence two simultaneous real publications have different bases and committed counter values",
+      "originalFailureSha256": "44ea16d3d9f52bb2b6182cb869a62c083c0be4be91f306510f0748788d2621b5",
+      "originalCaseLineNumbers": [
+        "39",
+        "67"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved or review-needed PH history gets its declared retained legacy NULL order before accepted/submitted evidence. Approval/review/QC/disposition/report-lineage/number/PDF/publication-date/policy snapshot inputs and assertions unchanged.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_8_report_truthfulness.test.js",
+      "test": "Audit 0.8: issued identity and truthful report evidence revisions reuse the base without incrementing the counter; policy changes affect new lineages only",
+      "originalFailureSha256": "15b5d97dc2d714278ad31a77d102f5515dcdb1597e9683c733b8c9374da9f576",
+      "originalCaseLineNumbers": [
+        "37",
+        "75"
+      ],
+      "classification": "ORIGINAL_FOREIGN_KEY_SETUP_FAILURE_NOT_ATTRIBUTED_TO_MISSING_ORDER",
+      "sourceDecision": "Fresh owned approved or review-needed PH history gets its declared retained legacy NULL order before accepted/submitted evidence. Approval/review/QC/disposition/report-lineage/number/PDF/publication-date/policy snapshot inputs and assertions unchanged.",
+      "foreignKeyBoundary": "Referenced Sample and Batch are created before WorkItem. The new context is inserted after WorkItem, so it does not change or conceal the original failing FK site. Original cause remains unconfirmed; verify this same unchanged site in the successor, retaining any repeat failure honestly.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_8_report_truthfulness.test.js",
+      "test": "Audit 0.8: issued identity and truthful report evidence latest issued legacy number anchors rev 1; older content and v1 PDF remain exact",
+      "originalFailureSha256": "e22ce27733b13e2322126f622d6f8df07f5a9170da3801e2b2372f22c9b4437d",
+      "originalCaseLineNumbers": [
+        "39",
+        "88"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved or review-needed PH history gets its declared retained legacy NULL order before accepted/submitted evidence. Approval/review/QC/disposition/report-lineage/number/PDF/publication-date/policy snapshot inputs and assertions unchanged.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_8_report_truthfulness.test.js",
+      "test": "Audit 0.8: issued identity and truthful report evidence a historical base shared by another sample fails closed without a substitute or new report",
+      "originalFailureSha256": "e80a5b4e5801f9e009826c392dab01740393d82303ca76f714ee80b1232b840f",
+      "originalCaseLineNumbers": [
+        "39",
+        "107"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved or review-needed PH history gets its declared retained legacy NULL order before accepted/submitted evidence. Approval/review/QC/disposition/report-lineage/number/PDF/publication-date/policy snapshot inputs and assertions unchanged.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_8_report_truthfulness.test.js",
+      "test": "Audit 0.8: issued identity and truthful report evidence modern base ownership also rejects another sample",
+      "originalFailureSha256": "7f9410d0d13831221b9b579e3eb5e375e27e3d2d5af3342b2b974ba8fe780c69",
+      "originalCaseLineNumbers": [
+        "39",
+        "114"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved or review-needed PH history gets its declared retained legacy NULL order before accepted/submitted evidence. Approval/review/QC/disposition/report-lineage/number/PDF/publication-date/policy snapshot inputs and assertions unchanged.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_8_report_truthfulness.test.js",
+      "test": "Audit 0.8: issued identity and truthful report evidence failure after counter increment rolls it back; the next successful publication issues that value",
+      "originalFailureSha256": "868e8069997feee61893d682a3b2668335386f5c4d8dc25eaf6c06779a85cd3e",
+      "originalCaseLineNumbers": [
+        "39",
+        "121"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved or review-needed PH history gets its declared retained legacy NULL order before accepted/submitted evidence. Approval/review/QC/disposition/report-lineage/number/PDF/publication-date/policy snapshot inputs and assertions unchanged.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_8_report_truthfulness.test.js",
+      "test": "Audit 0.8: issued identity and truthful report evidence QC_FAIL with PROCEED prints analyte, batch and reason; all reported linked batches must pass for a pass claim",
+      "originalFailureSha256": "05f8e3f14df4e20863125be2973664afc19c31c5ae6e217fa8b1bd4b6c7b2b0b",
+      "originalCaseLineNumbers": [
+        "39",
+        "154"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved or review-needed PH history gets its declared retained legacy NULL order before accepted/submitted evidence. Approval/review/QC/disposition/report-lineage/number/PDF/publication-date/policy snapshot inputs and assertions unchanged.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_8_report_truthfulness.test.js",
+      "test": "Audit 0.8: issued identity and truthful report evidence warn-mode unevaluated QC and unlinked historical results never claim QC passed",
+      "originalFailureSha256": "8c5e1772c45863d044d4f5f54859c3428fa06ccd0bed158fe9c47186e64fd922",
+      "originalCaseLineNumbers": [
+        "39",
+        "169"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved or review-needed PH history gets its declared retained legacy NULL order before accepted/submitted evidence. Approval/review/QC/disposition/report-lineage/number/PDF/publication-date/policy snapshot inputs and assertions unchanged.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_8_report_truthfulness.test.js",
+      "test": "Audit 0.8: issued identity and truthful report evidence internal PDF marks the issued replacement; public PDF refuses the superseded version",
+      "originalFailureSha256": "c607254222e30c390259741d3dd6d0385f9964e6fb8a88dc1be9682a2d3e1789",
+      "originalCaseLineNumbers": [
+        "39",
+        "198"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved or review-needed PH history gets its declared retained legacy NULL order before accepted/submitted evidence. Approval/review/QC/disposition/report-lineage/number/PDF/publication-date/policy snapshot inputs and assertions unchanged.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "report_pdf.test.js",
+      "test": "BLK-3: Report & Certificate PDF Generation Contract 1. Public PDF download returns valid binary application/pdf buffer",
+      "originalFailureSha256": "afe5c4156b5ce9f7998fc9e866cfaf91a0e75989458c18be4f5e3f36a3ca0635",
+      "originalCaseLineNumbers": [
+        "51"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved history already has five accepted PH/SOC/fraction owners and a five-code requiredAnalyses set without TEXTURE. Declare exactly their five legacy NULL matching lines before accepted results; preserve all values/units/selections, binary PDF/share/revocation assertions. No approved edit/normalizer change.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "report_pdf.test.js",
+      "test": "BLK-3: Report & Certificate PDF Generation Contract 2. Authenticated report PDF endpoint returns valid PDF",
+      "originalFailureSha256": "afe5c4156b5ce9f7998fc9e866cfaf91a0e75989458c18be4f5e3f36a3ca0635",
+      "originalCaseLineNumbers": [
+        "51"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved history already has five accepted PH/SOC/fraction owners and a five-code requiredAnalyses set without TEXTURE. Declare exactly their five legacy NULL matching lines before accepted results; preserve all values/units/selections, binary PDF/share/revocation assertions. No approved edit/normalizer change.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "report_pdf.test.js",
+      "test": "BLK-3: Report & Certificate PDF Generation Contract 3. Authenticated sample PDF endpoint generates certificate on-the-fly",
+      "originalFailureSha256": "afe5c4156b5ce9f7998fc9e866cfaf91a0e75989458c18be4f5e3f36a3ca0635",
+      "originalCaseLineNumbers": [
+        "51"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved history already has five accepted PH/SOC/fraction owners and a five-code requiredAnalyses set without TEXTURE. Declare exactly their five legacy NULL matching lines before accepted results; preserve all values/units/selections, binary PDF/share/revocation assertions. No approved edit/normalizer change.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "report_pdf.test.js",
+      "test": "BLK-3: Report & Certificate PDF Generation Contract 4. Non-existent public token returns 404 JSON (not silent 200 or crash)",
+      "originalFailureSha256": "afe5c4156b5ce9f7998fc9e866cfaf91a0e75989458c18be4f5e3f36a3ca0635",
+      "originalCaseLineNumbers": [
+        "51"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved history already has five accepted PH/SOC/fraction owners and a five-code requiredAnalyses set without TEXTURE. Declare exactly their five legacy NULL matching lines before accepted results; preserve all values/units/selections, binary PDF/share/revocation assertions. No approved edit/normalizer change.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "report_pdf.test.js",
+      "test": "BLK-3: Report & Certificate PDF Generation Contract 5. Revoked share link returns 410 Gone",
+      "originalFailureSha256": "afe5c4156b5ce9f7998fc9e866cfaf91a0e75989458c18be4f5e3f36a3ca0635",
+      "originalCaseLineNumbers": [
+        "51"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh owned approved history already has five accepted PH/SOC/fraction owners and a five-code requiredAnalyses set without TEXTURE. Declare exactly their five legacy NULL matching lines before accepted results; preserve all values/units/selections, binary PDF/share/revocation assertions. No approved edit/normalizer change.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_11_workbench_queue.test.js",
+      "test": "Audit 0.11: queue evidence and instrument readiness missing-instrument blocker clears after selection, and the required-instrument method can complete",
+      "originalFailureSha256": "9bf1a76fba2168f9b9fa798092eb9bea4a90791c91fc1d3e4dfe395df6e67e08",
+      "originalCaseLineNumbers": [
+        "42"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh PROCESSING controlled owner receives its declared usable legacy NULL order during assembly. Required instrument eligibility/draft selection/readiness/current-invalid/superseded/cache inputs and assertions unchanged.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "audit_0_11_workbench_queue.test.js",
+      "test": "Audit 0.11: queue evidence and instrument readiness current invalid measurement is a hint; superseded rows and WorkItem.result cannot supply the input",
+      "originalFailureSha256": "cb3a006cc1ce8a468ab1a09e10472c330e75531fb38b8efe4d23a55937035c12",
+      "originalCaseLineNumbers": [
+        "47"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "Fresh PROCESSING controlled owner receives its declared usable legacy NULL order during assembly. Required instrument eligibility/draft selection/readiness/current-invalid/superseded/cache inputs and assertions unchanged.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "issue_281_cross_check_bounds.test.js",
+      "test": "#281 a stored out-of-range value is never rewritten, keeps every other policy readable and disables only the cross-checks",
+      "originalFailureSha256": "4ad3283fad59c99fb4984d7e5d89c431691ca7b761e835593d2f09d83bb1da44",
+      "originalCaseLineNumbers": [
+        "79",
+        "95"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "All existing explicit fraction/carbon/nitrogen owners receive one declared legacy NULL line each during NEW owned assembly, before recorded/saved values. No TEXTURE owner, normalization, policy value, invalid-bounds disclosure, strict blocking threshold, or scientific value change.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "issue_281_cross_check_bounds.test.js",
+      "test": "#281 a stored out-of-range value a stored invalid texture tolerance is disclosed and the blocking gate closes exactly, never wider",
+      "originalFailureSha256": "983cfc94818051c4e4d2bd0e1f01ed453a6487d195acd1b6b7502bea0193e484",
+      "originalCaseLineNumbers": [
+        "79",
+        "106"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "All existing explicit fraction/carbon/nitrogen owners receive one declared legacy NULL line each during NEW owned assembly, before recorded/saved values. No TEXTURE owner, normalization, policy value, invalid-bounds disclosure, strict blocking threshold, or scientific value change.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    },
+    {
+      "suite": "issue_281_cross_check_bounds.test.js",
+      "test": "#281 a stored out-of-range value another laboratory with valid policy still records evidence",
+      "originalFailureSha256": "fc5c18cc70d476a94cb91af51d5c53379870fa17ed356bfd09aed16744d9351c",
+      "originalCaseLineNumbers": [
+        "79",
+        "127"
+      ],
+      "classification": "DECLARED_CURRENT_OR_RETAINED_USABLE_ORDER_FOR_OWNED_EXECUTION_WITNESS",
+      "sourceDecision": "All existing explicit fraction/carbon/nitrogen owners receive one declared legacy NULL line each during NEW owned assembly, before recorded/saved values. No TEXTURE owner, normalization, policy value, invalid-bounds disclosure, strict blocking threshold, or scientific value change.",
+      "foreignKeyBoundary": null,
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "releasedVariant": "48d missing orders remain runtime-reachable/0write refusal/readonly noACTIVE or noMatching/fraction lists, approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink/widerfallback."
+    }
+  ],
+  "sourceAuthorities": [
+    6163271808,
+    6166518424,
+    6167740581,
+    6169628053
+  ],
+  "originalForeignKeyCauseNotInferred": true,
+  "productionOperations": 0
+}

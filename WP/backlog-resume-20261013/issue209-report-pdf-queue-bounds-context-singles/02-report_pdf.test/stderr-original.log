@@ -1,0 +1,49 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 15f4dbf2-896d-4381-8201-f59e0c9219f0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 15f4dbf2-896d-4381-8201-f59e0c9219f0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 15f4dbf2-896d-4381-8201-f59e0c9219f0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 15f4dbf2-896d-4381-8201-f59e0c9219f0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 15f4dbf2-896d-4381-8201-f59e0c9219f0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 15f4dbf2-896d-4381-8201-f59e0c9219f0 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/report_pdf.test.js
+  BLK-3: Report & Certificate PDF Generation Contract
+    √ 1. Public PDF download returns valid binary application/pdf buffer (25 ms)
+    √ 2. Authenticated report PDF endpoint returns valid PDF (21 ms)
+    √ 3. Authenticated sample PDF endpoint generates certificate on-the-fly (14 ms)
+    √ 4. Non-existent public token returns 404 JSON (not silent 200 or crash) (2 ms)
+    √ 5. Revoked share link returns 410 Gone (16 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        1.953 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\report_pdf.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-report-pdf-queue-bounds-context-singles\02-report_pdf.test\report-original.json

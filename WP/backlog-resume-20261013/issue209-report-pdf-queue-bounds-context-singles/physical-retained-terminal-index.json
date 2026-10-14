@@ -1,0 +1,11 @@
+{
+  "closedUtc": "2026-10-14T15:59:53.031407+00:00",
+  "allRecordedTeardownTargetsRetained": true,
+  "files": [
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_1_2_9db872cc-4c69-494d-9cc3-1fbe50d1e667.db",
+      "bytes": 2433024,
+      "sha256": "74375f9fe2cdd93d41a2bbd9b9691e614e5f2be70ef77745f6122aa7e6666b27"
+    }
+  ]
+}

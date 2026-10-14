@@ -1,0 +1,38 @@
+[
+  {
+    "path": "server/tests/contracts/audit_0_8_report_truthfulness.test.js",
+    "beforeSha256": "b1cf03904ce7e5cce742fe4edaccf60681ac44b294a99c32c96e9b0b3fcf4b32",
+    "afterSha256": "c3cf2db4f4921023bf14bf080f71dfb6092e761231f02d6ca95688b2964f8377",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declare usable retained order lines during NEW owned positive fixture assembly.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-08'), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: require('jsonwebtoken').decode(token).username,\n            lines: { create: (['PH_H2O']).map(analysis => ({ id: id('ORDER-08'), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/report_pdf.test.js",
+    "beforeSha256": "3dac7a376fd82c85519263cc0e16baab4f52bd715a76ae9df45c8ee6add9c9f9",
+    "afterSha256": "1d210169d93704d94e9be6e72b2e7ebeda8e18f5e3c3e0bd42bdd84ec1ced2e7",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declare usable retained order lines during NEW owned positive fixture assembly.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: s.id,\n            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: require('jsonwebtoken').decode(mgrToken).username,\n            lines: { create: (['PH_H2O','SOC','SAND','SILT','CLAY']).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_0_11_workbench_queue.test.js",
+    "beforeSha256": "ad0ba361fb19a478b49039d479d8996dfd5de3a7a53b50c6a84c005f3fae9a47",
+    "afterSha256": "396f8df6750dd12fb7986be9084268e7f86238464dbef898e23fcd0010ac4b90",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declare usable retained order lines during NEW owned positive fixture assembly.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-11'), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: jwt.decode(token).username,\n            lines: { create: ([analysis]).map(analysis => ({ id: id('ORDER-11'), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/issue_281_cross_check_bounds.test.js",
+    "beforeSha256": "947239c0c32f2098c628525f5e4ec1314adfe80d38d1cfbdf2aa5b0b54c0c74a",
+    "afterSha256": "bcba7b6ff81fff6a3311a441519508a5f17299600fa8b96d98b8facf1a5333a2",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: declare usable retained order lines during NEW owned positive fixture assembly.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: jwt.decode(token).username,\n            lines: { create: (codes).map(analysis => ({ id: randomUUID(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));\n"
+    ]
+  }
+]

@@ -1,0 +1,81 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-11
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 821d28df-5a92-42e0-93fd-963a789a4d00 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_0_11_workbench_queue.test.js
+  Audit 0.11: queue evidence and instrument readiness
+    √ missing-instrument blocker clears after selection, and the required-instrument method can complete (287 ms)
+    √ current invalid measurement is a hint; superseded rows and WorkItem.result cannot supply the input (56 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        1.793 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_11_workbench_queue.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-report-pdf-queue-bounds-context-singles\03-audit_0_11_workbench_queue.test\report-original.json

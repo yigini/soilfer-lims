@@ -1,0 +1,15 @@
+{
+  "observedUpperBoundUtc": "2026-10-14T16:00:59.987918+00:00",
+  "returnedClaudeWindow": 7867734,
+  "returnedApp": "Claude_pzs8sxrjxfjjc!Claude",
+  "requestedAction": "Read-only native audit checkpoint check after independently retained121case PASS",
+  "actualSnapshot": "Windows lock screen, time5:59 WednesdayOct14, sign-in PIN prompt visible",
+  "nativeThreadOrDraftContentNotObservable": true,
+  "inputsSent": 0,
+  "messagesSent": 0,
+  "authenticationInteraction": false,
+  "stoppedNativeUiAccess": true,
+  "userUnlockRequested": true,
+  "repositoryAndGithubWorkMayContinue": true,
+  "productionOperations": 0
+}

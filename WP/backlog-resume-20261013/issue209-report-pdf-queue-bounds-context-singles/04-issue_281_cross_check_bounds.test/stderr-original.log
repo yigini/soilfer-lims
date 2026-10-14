@@ -1,0 +1,117 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 404c0bb4-3e11-4889-a563-447b9cc2464e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 404c0bb4-3e11-4889-a563-447b9cc2464e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 404c0bb4-3e11-4889-a563-447b9cc2464e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 404c0bb4-3e11-4889-a563-447b9cc2464e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9b889b6a-2d55-443d-9f72-29ba7c632971 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9b889b6a-2d55-443d-9f72-29ba7c632971 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9b889b6a-2d55-443d-9f72-29ba7c632971 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9b889b6a-2d55-443d-9f72-29ba7c632971 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [submitForApproval] Error: TransitionError: Scientific matrix validation failed: Texture closure failed: Sand(40%) + Silt(40%) + Clay(19%) = 99.0% (must sum to 100% exactly)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:231:53
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.submitForApproval (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\resultsController.js:224:25) {
+      statusCode: 422,
+      status: 422,
+      code: 'BLOCKING_MATRIX_DIAGNOSTICS',
+      details: {
+        blockingErrors: [ [Object] ],
+        matrixDiagnostics: {
+          texture: [Object],
+          textureClosure: [Array],
+          retiredAdvisories: [Array],
+          advisorySuccessor: 'crossChecks',
+          warnings: [Array],
+          blockingErrors: [Array],
+          isBlocking: true,
+          texturePolicyInvalid: true
+        }
+      }
+    }
+
+      278 |             ...(outcome.crossCheckUnavailableReason && { crossCheckUnavailableReason: outcome.crossCheckUnavailableReason }) });
+      279 |     } catch (error) {
+    > 280 |         console.error('[submitForApproval] Error:', error);
+          |                 ^
+      281 |         if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+      282 |             message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+      283 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+
+      at error (controllers/resultsController.js:280:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 064d1b24-4fa6-4a0f-9654-a00961d5e01e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 064d1b24-4fa6-4a0f-9654-a00961d5e01e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/issue_281_cross_check_bounds.test.js
+  √ the en server and client locales disclose CROSS_CHECK_POLICY_INVALID (9 ms)
+  √ the es server and client locales disclose CROSS_CHECK_POLICY_INVALID (5 ms)
+  √ the es-419 server and client locales disclose CROSS_CHECK_POLICY_INVALID (4 ms)
+  √ the fr server and client locales disclose CROSS_CHECK_POLICY_INVALID (5 ms)
+  √ the pt server and client locales disclose CROSS_CHECK_POLICY_INVALID (4 ms)
+  #281 registry bounds
+    √ crossCheck.textureClosureTolerancePct accepts its bounds and refuses one step outside them (3 ms)
+    √ crossCheck.baseSaturationMaxPct accepts its bounds and refuses one step outside them
+    √ crossCheck.cnMin accepts its bounds and refuses one step outside them
+    √ crossCheck.cnMax accepts its bounds and refuses one step outside them (1 ms)
+    √ crossCheck.carbonatePhMin accepts its bounds and refuses one step outside them
+    √ crossCheck.basesCecFactor accepts its bounds and refuses one step outside them
+    √ defaults are unchanged (165 ms)
+    √ the policy owner refuses an out-of-range save with POLICY_VALUE_INVALID and writes nothing (89 ms)
+  #281 a stored out-of-range value
+    √ is never rewritten, keeps every other policy readable and disables only the cross-checks (481 ms)
+    √ a stored invalid texture tolerance is disclosed and the blocking gate closes exactly, never wider (425 ms)
+    √ a manager fixes it by saving a valid value as a new policy version (60 ms)
+    √ another laboratory with valid policy still records evidence (292 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       17 passed, 17 total
+Snapshots:   0 total
+Time:        2.8 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_281_cross_check_bounds.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-report-pdf-queue-bounds-context-singles\04-issue_281_cross_check_bounds.test\report-original.json

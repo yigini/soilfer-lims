@@ -36,6 +36,10 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
             ...(!reviewNeeded ? { approvedBy: require('jsonwebtoken').decode(token).username, approvedAt: new Date() } : {}) } });
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-08'), sampleId, analysis: 'PH_H2O',
             status: reviewNeeded ? 'SUBMITTED' : 'ACCEPTED', result: '6.2', batchId: batch.id } });
+        // #209: declare usable retained order lines during NEW owned positive fixture assembly.
+        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-08'), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: require('jsonwebtoken').decode(token).username,
+            lines: { create: (['PH_H2O']).map(analysis => ({ id: id('ORDER-08'), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));
         await createExecutionResultFixture(prisma, { attemptStatus: item.status,
             data: { id: id('R-08'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, batchId: batch.id } });
