@@ -1,0 +1,1668 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_labspectralstate179 (Lab: LAB-SPECTRAL-STATE-179) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/spectralWorkItemStateService.js:16:11)
+      at freshScan (services/spectralWorkItemStateService.js:32:5)
+      at Object.trashScan (services/spectralWorkItemStateService.js:117:18)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.deleteScan (controllers/spectralController.js:1777:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=f41e4c84-b484-4bab-801c-b76e330b7a00.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    Upload Error: TransitionError: A reason is required to reopen completed spectral work in this batch.
+        at Object.preflightBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\spectralWorkItemStateService.js:186:32)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at processScans (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1676:24)
+        at exports.uploadBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1681:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_REOPEN_REQUIRED',
+      details: { affected: [ [Object] ] }
+    }
+
+      1696 |
+      1697 |     } catch (e) {
+    > 1698 |         console.error("Upload Error:", e);
+           |                 ^
+      1699 |         const error = stateRules.mapStateError(e);
+      1700 |         res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+      1701 |             ...(error.details && { details: error.details }) });
+
+      at error (controllers/spectralController.js:1698:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [SPECTRAL COMMIT] Error: TransitionError: A reason is required to reopen completed spectral work in this batch.
+        at Object.preflightBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\spectralWorkItemStateService.js:186:32)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.commitBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:751:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_REOPEN_REQUIRED',
+      details: { affected: [ [Object] ] }
+    }
+
+       998 |         res.json(responsePayload);
+       999 |     } catch (e) {
+    > 1000 |         console.error('[SPECTRAL COMMIT] Error:', e);
+           |                 ^
+      1001 |         const error = stateRules.mapStateError(e);
+      1002 |         res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+      1003 |             ...(error.details && { details: error.details }) });
+
+      at error (controllers/spectralController.js:1000:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=9f860dca-9ab7-4e51-b177-4112f0ef169e.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=9f860dca-9ab7-4e51-b177-4112f0ef169e.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=61809822-8ece-48ca-b870-b5bcb7d78d30.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=d656a040-ee8a-4ae7-b521-987763dbce4a.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=b9c8ae2b-2d9c-4a64-8053-2308ff820505.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    Upload Error: TransitionError: A reason is required to reopen completed spectral work in this batch.
+        at Object.preflightBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\spectralWorkItemStateService.js:186:32)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at processScans (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1676:24)
+        at exports.uploadBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1681:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_REOPEN_REQUIRED',
+      details: { affected: [ [Object], [Object] ] }
+    }
+
+      1696 |
+      1697 |     } catch (e) {
+    > 1698 |         console.error("Upload Error:", e);
+           |                 ^
+      1699 |         const error = stateRules.mapStateError(e);
+      1700 |         res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+      1701 |             ...(error.details && { details: error.details }) });
+
+      at error (controllers/spectralController.js:1698:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=61809822-8ece-48ca-b870-b5bcb7d78d30.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=d656a040-ee8a-4ae7-b521-987763dbce4a.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=b9c8ae2b-2d9c-4a64-8053-2308ff820505.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=61809822-8ece-48ca-b870-b5bcb7d78d30.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [DEBUG] Processing Scan: Name=d656a040-ee8a-4ae7-b521-987763dbce4a.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [DEBUG] Processing Scan: Name=b9c8ae2b-2d9c-4a64-8053-2308ff820505.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [SPECTRAL COMMIT] Error: TransitionError: A reason is required to reopen completed spectral work in this batch.
+        at Object.preflightBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\spectralWorkItemStateService.js:186:32)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.commitBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:751:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_REOPEN_REQUIRED',
+      details: { affected: [ [Object], [Object] ] }
+    }
+
+       998 |         res.json(responsePayload);
+       999 |     } catch (e) {
+    > 1000 |         console.error('[SPECTRAL COMMIT] Error:', e);
+           |                 ^
+      1001 |         const error = stateRules.mapStateError(e);
+      1002 |         res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+      1003 |             ...(error.details && { details: error.details }) });
+
+      at error (controllers/spectralController.js:1000:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item e25d2644-3943-4c17-aef6-98f8ccc4f99f.csv: A supplied reason is required to reopen completed spectral work.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [COMMIT] Receipt save interrupted: Injected interrupted receipt save
+
+      726 |             } catch (receiptError) {
+      727 |                 // Committed scan identities can recover an interrupted receipt.
+    > 728 |                 console.warn('[COMMIT] Receipt save interrupted:', receiptError.message);
+          |                         ^
+      729 |             }
+      730 |         };
+      731 |         const receiptFor = (scan, item, sample) => ({ id: scan.id, filename: item.filename, sampleId: scan.sampleId,
+
+      at warn (controllers/spectralController.js:728:25)
+      at saveReceipt (controllers/spectralController.js:967:17)
+
+  console.error
+    [COMMIT] Error on item bac7efff-d583-453f-bf65-b94322fab964.csv: A supplied reason is required to reopen completed spectral work.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 1c7eff87-dd6b-46d0-889f-32fd4aee359e.csv: A supplied reason is required to reopen completed spectral work.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=c1cf2cf4-ff4e-4017-96f2-dd2d1aa6d1e1.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=c1cf2cf4-ff4e-4017-96f2-dd2d1aa6d1e1.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=bc4af786-516e-46df-8585-7a7cfa59c315.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=bc4af786-516e-46df-8585-7a7cfa59c315.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in SUBMITTED cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item ad78c683-85f3-4fc7-b89d-6a5a7f4e17c9.csv: Work in SUBMITTED cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=ac3914dc-5625-4820-93ba-29ab2f007319.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=ac3914dc-5625-4820-93ba-29ab2f007319.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in ACCEPTED cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 97b568d4-1b71-47df-925e-1b836e259682.csv: Work in ACCEPTED cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=9de248c0-0e18-4fd3-8307-89c409569ec9.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=9de248c0-0e18-4fd3-8307-89c409569ec9.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in WAIVED cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 9bd0924d-5d5b-4d00-a8c8-368f07245bea.csv: Work in WAIVED cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=2dd3602c-0c18-478b-a71a-8fb004531600.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=2dd3602c-0c18-478b-a71a-8fb004531600.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in CANCELLED cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item bb686708-e90a-4bdb-91dc-502fc1ec4d7a.csv: Work in CANCELLED cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=726ad591-0e52-407f-8e93-121d82d10374.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=726ad591-0e52-407f-8e93-121d82d10374.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in ON_HOLD cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item d89877ee-1aca-47d4-8e27-20cd68572d56.csv: Work in ON_HOLD cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=f3b7419b-e24f-4fca-ad6b-a532c96301f3.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=f3b7419b-e24f-4fca-ad6b-a532c96301f3.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in AWAITING_VERIFICATION cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 5b928e91-2c50-4347-ac7c-3a1f91a18bc1.csv: Work in AWAITING_VERIFICATION cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=0f83a4e3-31a5-4736-8f45-a9246a0178e2.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=0f83a4e3-31a5-4736-8f45-a9246a0178e2.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in NOT_ASSIGNED cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 440cfaa1-9e79-42b6-961b-a112f197c285.csv: Work in NOT_ASSIGNED cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=d8e1e24d-6195-49ff-aefa-efc2b4f99ead.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=d8e1e24d-6195-49ff-aefa-efc2b4f99ead.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: An amendment is required for approved spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 5cfdb92d-931f-43e6-8ed6-34e63f86d8fa.csv: An amendment is required for approved spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=0a7281af-b41b-4ab1-aca2-0af563771977.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=0a7281af-b41b-4ab1-aca2-0af563771977.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Sample material is closed.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item fae9d3cc-8dde-45dc-85dd-7a24d7693631.csv: Sample material is closed.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=2cb9ce67-1841-4961-9f1c-df140e0b739d.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=2cb9ce67-1841-4961-9f1c-df140e0b739d.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Sample material is closed.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 3a29dbaa-c7b3-4041-8464-1814e011f521.csv: Sample material is closed.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=0b6896ae-a7e2-455d-8f1d-b0aad69139f6.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=0b6896ae-a7e2-455d-8f1d-b0aad69139f6.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Sample material is closed.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item b0fc8cef-161e-41fd-a6f2-3bcaf79f5bfb.csv: Sample material is closed.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=5bcbda5f-59d3-44cc-bd44-50512a285dfc.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=5bcbda5f-59d3-44cc-bd44-50512a285dfc.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Sample intake was rejected.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 6a846563-e41c-4809-9e9e-d25bb1799ca9.csv: Sample intake was rejected.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=14545640-0926-4004-b129-15e0eb5f6beb.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=174ae816-0428-49c2-a491-beae00f035d9.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=14545640-0926-4004-b129-15e0eb5f6beb.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [DEBUG] Processing Scan: Name=174ae816-0428-49c2-a491-beae00f035d9.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in SUBMITTED cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item a6f3d74a-124a-4e9c-bad2-5fed2642843b.csv: Work in SUBMITTED cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=8148ce53-a5c1-4ed6-b5f9-7ece1df1cff9.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=8148ce53-a5c1-4ed6-b5f9-7ece1df1cff9.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Injected acquisition audit failure
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 20f31dfe-8e2d-4988-a2ef-605e1e21810e.csv: Injected acquisition audit failure
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=458f2dff-53ee-4fb0-b07a-2c5841ea6916.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    Upload Error: TransitionError: A reason is required to reopen completed spectral work in this batch.
+        at Object.preflightBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\spectralWorkItemStateService.js:186:32)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at processScans (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1676:24)
+        at exports.uploadBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1681:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_REOPEN_REQUIRED',
+      details: { affected: [ [Object] ] }
+    }
+
+      1696 |
+      1697 |     } catch (e) {
+    > 1698 |         console.error("Upload Error:", e);
+           |                 ^
+      1699 |         const error = stateRules.mapStateError(e);
+      1700 |         res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+      1701 |             ...(error.details && { details: error.details }) });
+
+      at error (controllers/spectralController.js:1698:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 94880b5d-011e-4a1f-9e2b-3a46a6c1f8bd (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=005ede6d-fe51-4583-a277-a8644bf79fc2.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=005ede6d-fe51-4583-a277-a8644bf79fc2.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/audit_1_2_spectral_state.test.js (9.219 s)
+  √ a literal pre-190 measured orphan refuses the installer and COMPLETE startup without writes (416 ms)
+  √ link on COMPLETED without a supplied reopen reason refuses with zero changes (120 ms)
+  √ reasoned link atomically reopens and completes work, snapshots prior evidence and preserves Results (67 ms)
+  √ trash on COMPLETED preserves the summary, clears only completion time and audits its prior identity (54 ms)
+  √ trash on IN_PROGRESS changes no work item state, version, history or summary (32 ms)
+  √ single trash requires a supplied reason and writes no records (20 ms)
+  √ batch trash requires a supplied reason and writes no records (19 ms)
+  √ SUBMITTED work refuses spectral link with zero changes (25 ms)
+  √ SUBMITTED work refuses spectral trash with zero changes (22 ms)
+  √ ACCEPTED work refuses spectral link with zero changes (21 ms)
+  √ ACCEPTED work refuses spectral trash with zero changes (22 ms)
+  √ WAIVED work refuses spectral link with zero changes (22 ms)
+  √ WAIVED work refuses spectral trash with zero changes (20 ms)
+  √ CANCELLED work refuses spectral link with zero changes (500 ms)
+  √ CANCELLED work refuses spectral trash with zero changes (503 ms)
+  √ ON_HOLD work refuses spectral link with zero changes (26 ms)
+  √ ON_HOLD work refuses spectral trash with zero changes (21 ms)
+  √ AWAITING_VERIFICATION work refuses spectral link with zero changes (21 ms)
+  √ AWAITING_VERIFICATION work refuses spectral trash with zero changes (22 ms)
+  √ APPROVED parent refuses spectral link with zero changes (21 ms)
+  √ APPROVED parent refuses spectral trash with zero changes (25 ms)
+  √ ARCHIVED parent refuses spectral link with zero changes (20 ms)
+  √ ARCHIVED parent refuses spectral trash with zero changes (19 ms)
+  √ DISPOSED parent refuses spectral link with zero changes (25 ms)
+  √ DISPOSED parent refuses spectral trash with zero changes (21 ms)
+  √ CANCELLED parent refuses spectral link with zero changes (18 ms)
+  √ CANCELLED parent refuses spectral trash with zero changes (19 ms)
+  √ RECEIVED_REJECTED parent refuses spectral link with zero changes (18 ms)
+  √ RECEIVED_REJECTED parent refuses spectral trash with zero changes (24 ms)
+  √ mixed batch trash commits the good scan and changes no rows for the refused scan (56 ms)
+  √ late spectral audit failure rolls back scan trash, reopening, history and all audits (45 ms)
+  √ a concurrent work item version change loses the reopening CAS and rolls back every write (49 ms)
+  √ fresh parent scope is checked inside the trash transaction and a refusal changes no rows (60 ms)
+  √ a present incomplete preparation item overrides legacy DONE flags and refuses spectral changes (24 ms)
+  √ upload on COMPLETED without a reason refuses the scan and changes no rows (63 ms)
+  √ commit on COMPLETED without a reason refuses the scan and changes no rows (35 ms)
+  √ upload with a reason reopens, adds and completes atomically without changing Results (67 ms)
+  √ commit with a reason reopens, adds and completes atomically without changing Results (60 ms)
+  √ upload preflight preserves every table and staged bytes; the same request resends without duplicates (241 ms)
+  √ commit preflight preserves every table and staged bytes; the same request resends without duplicates (230 ms)
+  √ partial staged commit preserves the manifest and skips committed entries when its receipt is saved (190 ms)
+  √ partial staged commit preserves the manifest and skips committed entries when its receipt is interrupted (184 ms)
+  √ SKIP and terminal parse failures settle a staged commit with retained per-entry receipts (139 ms)
+  √ settled SKIP and parse receipts survive a partial manifest and merge without replay on retry (137 ms)
+  √ upload uses the trimmed entry reason when the request reason is only whitespace (65 ms)
+  √ commit uses the trimmed entry reason when the request reason is only whitespace (56 ms)
+  √ SUBMITTED work refuses upload acquisition with zero changes (24 ms)
+  √ SUBMITTED work refuses commit acquisition with zero changes (30 ms)
+  √ ACCEPTED work refuses upload acquisition with zero changes (24 ms)
+  √ ACCEPTED work refuses commit acquisition with zero changes (28 ms)
+  √ WAIVED work refuses upload acquisition with zero changes (23 ms)
+  √ WAIVED work refuses commit acquisition with zero changes (24 ms)
+  √ CANCELLED work refuses upload acquisition with zero changes (506 ms)
+  √ CANCELLED work refuses commit acquisition with zero changes (496 ms)
+  √ ON_HOLD work refuses upload acquisition with zero changes (25 ms)
+  √ ON_HOLD work refuses commit acquisition with zero changes (32 ms)
+  √ AWAITING_VERIFICATION work refuses upload acquisition with zero changes (25 ms)
+  √ AWAITING_VERIFICATION work refuses commit acquisition with zero changes (24 ms)
+  √ NOT_ASSIGNED work refuses upload acquisition with zero changes (25 ms)
+  √ NOT_ASSIGNED work refuses commit acquisition with zero changes (26 ms)
+  √ APPROVED parent refuses upload acquisition without changing scans, work, Results or audits (25 ms)
+  √ APPROVED parent refuses commit acquisition without changing scans, work, Results or audits (23 ms)
+  √ ARCHIVED parent refuses upload acquisition without changing scans, work, Results or audits (23 ms)
+  √ ARCHIVED parent refuses commit acquisition without changing scans, work, Results or audits (21 ms)
+  √ DISPOSED parent refuses upload acquisition without changing scans, work, Results or audits (23 ms)
+  √ DISPOSED parent refuses commit acquisition without changing scans, work, Results or audits (22 ms)
+  √ CANCELLED parent refuses upload acquisition without changing scans, work, Results or audits (22 ms)
+  √ CANCELLED parent refuses commit acquisition without changing scans, work, Results or audits (29 ms)
+  √ RECEIVED_REJECTED parent refuses upload acquisition without changing scans, work, Results or audits (24 ms)
+  √ RECEIVED_REJECTED parent refuses commit acquisition without changing scans, work, Results or audits (27 ms)
+  √ upload mixed acquisition commits ready work and writes nothing for a blocked item (64 ms)
+  √ commit mixed acquisition commits ready work and writes nothing for a blocked item (70 ms)
+  √ upload late audit failure rolls back new scans, supersession and both item transitions (52 ms)
+  √ commit late audit failure rolls back new scans, supersession and both item transitions (62 ms)
+  √ count-stable APPROVE review preserves completed work and commits only the scan audit (35 ms)
+  √ count-stable REJECT review preserves completed work and commits only the scan audit (33 ms)
+  √ count-stable UNDO review preserves completed work and commits only the scan audit (30 ms)
+  √ count-changing REJECT review on COMPLETED requires a reason and changes no rows (29 ms)
+  √ count-changing UNDO review on COMPLETED requires a reason and changes no rows (38 ms)
+  √ reasoned rejection of the sole counted scan leaves work in progress and preserves the earlier summary (40 ms)
+  √ reasoned REJECT review recompletes only when current linked non-failed evidence remains (52 ms)
+  √ reasoned UNDO review recompletes only when current linked non-failed evidence remains (58 ms)
+  √ approval of an unlinked scan creates no inferred association and completes no matching work (21 ms)
+  √ QC-FAIL scan approval does not satisfy completion or create Result values (29 ms)
+  √ SUBMITTED bound work refuses scan review with zero changes (35 ms)
+  √ ACCEPTED bound work refuses scan review with zero changes (20 ms)
+  √ WAIVED bound work refuses scan review with zero changes (19 ms)
+  √ CANCELLED bound work refuses scan review with zero changes (480 ms)
+  √ ON_HOLD bound work refuses scan review with zero changes (20 ms)
+  √ AWAITING_VERIFICATION bound work refuses scan review with zero changes (23 ms)
+  √ APPROVED parent refuses scan review with zero changes (19 ms)
+  √ ARCHIVED parent refuses scan review with zero changes (21 ms)
+  √ DISPOSED parent refuses scan review with zero changes (22 ms)
+  √ CANCELLED parent refuses scan review with zero changes (19 ms)
+  √ RECEIVED_REJECTED parent refuses scan review with zero changes (20 ms)
+  √ mixed batch review preflight refuses before any writes and a reasoned resend commits each scan once (159 ms)
+  √ late scan review audit failure rolls back review, reopening and recompletion together (53 ms)
+  √ relinking cannot remove evidence from a SUBMITTED source item even if its new target is ready (32 ms)
+  √ relinking cannot remove evidence from a ACCEPTED source item even if its new target is ready (34 ms)
+  √ relinking cannot remove evidence from a WAIVED source item even if its new target is ready (35 ms)
+  √ relinking cannot remove evidence from a CANCELLED source item even if its new target is ready (471 ms)
+  √ relinking cannot remove evidence from a ON_HOLD source item even if its new target is ready (36 ms)
+  √ relinking cannot remove evidence from a AWAITING_VERIFICATION source item even if its new target is ready (37 ms)
+  √ link of another COMPLETED item evidence requires a reason and writes no rows (42 ms)
+  √ supersede of another COMPLETED item evidence requires a reason and writes no rows (34 ms)
+  √ reasoned link preserves the previous item summary and completes only its new evidence owner (69 ms)
+  √ reasoned supersede preserves the previous item summary and completes only its new evidence owner (72 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       107 passed, 107 total
+Snapshots:   0 total
+Time:        9.537 s, estimated 12 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_spectral_state.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-historical-corrected-serial-singles\02-audit_1_2_spectral_state.test\report-original.json

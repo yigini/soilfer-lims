@@ -1,0 +1,25 @@
+PASS tests/contracts/audit_4_8_cross_check_install.test.js (9.028 s)
+  √ PRE_201 upgrades additively with every original analytical/QC/audit field, object, FK and receipt retained (1151 ms)
+  √ real direct startup refuses missing cross-check installation before app startup and preserves the owned file (815 ms)
+  √ the exact fresh Prisma table is classified separately and receives only guards/receipt with0 backfill (551 ms)
+  √ foreign/partial/unmarked state foreign-table refuses dry-run and apply with exactly0 writes (590 ms)
+  √ foreign/partial/unmarked state extra-index refuses dry-run and apply with exactly0 writes (569 ms)
+  √ foreign/partial/unmarked state wrong-guard refuses dry-run and apply with exactly0 writes (578 ms)
+  √ foreign/partial/unmarked state partial-guard refuses dry-run and apply with exactly0 writes (565 ms)
+  √ foreign/partial/unmarked state populated-fresh refuses dry-run and apply with exactly0 writes (558 ms)
+  √ foreign/partial/unmarked state unmarked-complete refuses dry-run and apply with exactly0 writes (573 ms)
+  √ foreign/partial/unmarked state forged-complete-receipt refuses dry-run and apply with exactly0 writes (609 ms)
+  √ a late receipt refusal rolls back table, indexes and guards and retains all original evidence (491 ms)
+  √ every evidence column and deletion is immutable; sample/lab FKs retain the parent rows (1224 ms)
+  √ tampered prisma/migrations/20261010000100_cross_check_evaluation/migration.sql is refused by both loader and scanner rather than trusted as SQL (14 ms)
+  √ tampered prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json is refused by both loader and scanner rather than trusted as SQL (2 ms)
+  √ closed historical factory stays byte-bound, takes no arguments, and refuses unlisted/runtime callers (15 ms)
+  √ a changed loader body or mutable/aliased/parameterized import never grants a SQL authority (3 ms)
+  √ CLI requires an explicit database and one unambiguous execution mode (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       17 passed, 17 total
+Snapshots:   0 total
+Time:        9.517 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_8_cross_check_install.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-historical-corrected-serial-singles\01-audit_4_8_cross_check_install.test\report-original.json

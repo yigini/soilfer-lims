@@ -1,0 +1,51 @@
+{
+  "closedUtc": "2026-10-14T12:55:50.338281+00:00",
+  "allRecordedTeardownTargetsRetained": true,
+  "files": [
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_190_spectral-orphan-07906167-eccb-466d-8cb4-9473bcc16b9d.db",
+      "bytes": 1187840,
+      "sha256": "8798344f0bc1f3f3e8f444dd24425e354b93a9c2d2e23d8aba50b009c664eb45"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_617f3ef1-838b-45e6-8d78-d51fa3a4a55b.db",
+      "bytes": 1576960,
+      "sha256": "bb4a490e97d026900758554c117e47e7202cbbc263f7f1d1a9ce5512f74273e1"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_3cbe8761-de78-449b-bd7d-607221b64e68.db",
+      "bytes": 1576960,
+      "sha256": "1ddfc3a9637ca1ba1610e8888efa4b53eb810bd12d691abce03eab8ed9105c22"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_9e24534c-de37-4a88-8564-40c91a795333.db",
+      "bytes": 1576960,
+      "sha256": "70adca862bd1fe0165350abbe86f581376f1de166486ff72146eb6a4fad80452"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_a096b331-8c0e-471d-9a90-9a52ea18531a.db",
+      "bytes": 1576960,
+      "sha256": "3a563d00cb45b015cafc4d2bcd6b609a19b6b85ba08e738b23712ef5febe013d"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_3932fc82-7b7f-41ab-ab1a-459159dc9668.db",
+      "bytes": 1576960,
+      "sha256": "d9aa45846e83200fe7c3516de700dbdc62e933058199412f2d0c82c4e2d9b647"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_25fc9703-014b-46b6-aa69-777b69ad1681.db",
+      "bytes": 1576960,
+      "sha256": "44b78fbee3ad65f00cea4166c47b7aae58b072d0d68835771766406065b8ee65"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_33a68599-03ef-4ead-8c6c-d09c8454f523.db",
+      "bytes": 1605632,
+      "sha256": "e5f1b116585eceab57cabbd618c097892f2fe2c783abecb4fe92633ebe2799a2"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_086c105a-c607-4380-9090-c69b569c2d50.db",
+      "bytes": 1605632,
+      "sha256": "335d21c4a2332f9a11fd1289023d8c47009a34d842b486091a51daee7be61a19"
+    }
+  ]
+}
