@@ -1,0 +1,14 @@
+{
+  "clarifiedUtc": "2026-10-14T05:14:10.594752+00:00",
+  "originalRecord": "WP/backlog-resume-20261013/issue214-corrected-push-native-readonly/native-readonly-record.json",
+  "originalSha256": "aca6dc31af0aafdf8deae4be7083b5d8373b65e0427a78f2bcda2ff16d860409",
+  "originalObservedBoundaryUtcWasApproximateUnverified": "2026-10-14T05:13:00Z",
+  "actualRecordedUtc": "2026-10-14T05:12:50.422128+00:00",
+  "observationOccurredNoLaterThanUtc": "2026-10-14T05:12:50.422128+00:00",
+  "exactNativeCaptureTimeKnown": false,
+  "useOriginalRecordingTimeAsUpperBound": true,
+  "windowDraftAndNoMessageFactsUnchanged": true,
+  "originalPreserved": true,
+  "nativeInputs": 0,
+  "productionOperations": 0
+}
