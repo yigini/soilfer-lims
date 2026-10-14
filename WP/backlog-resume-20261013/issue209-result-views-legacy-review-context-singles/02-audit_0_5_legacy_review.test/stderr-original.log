@@ -1,0 +1,411 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: Work item WI-05-2dce991a-a610-4b9e-9ecb-046ddff56e1d is no longer eligible for this review. Only submitted work items can be reviewed.
+        at itemStateError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:25:26)
+        at itemStateError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:41:25)
+        at assertReviewable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:818:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 409,
+      code: 'ITEM_NOT_SUBMITTED',
+      workItemId: 'WI-05-2dce991a-a610-4b9e-9ecb-046ddff56e1d'
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: Work item WI-05-6ffaffb2-1ee3-472f-bc31-ab53817ecbac is no longer eligible for this review. Only submitted work items can be reviewed.
+        at itemStateError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:25:26)
+        at itemStateError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:41:25)
+        at assertReviewable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:818:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 409,
+      code: 'ITEM_NOT_SUBMITTED',
+      workItemId: 'WI-05-6ffaffb2-1ee3-472f-bc31-ab53817ecbac'
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: Work item WI-05-b22c13a3-10c1-4ea5-8d27-12492aef0fa3 is no longer eligible for this review. Only submitted work items can be reviewed.
+        at itemStateError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:25:26)
+        at itemStateError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:41:25)
+        at assertReviewable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:818:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 409,
+      code: 'ITEM_NOT_SUBMITTED',
+      workItemId: 'WI-05-b22c13a3-10c1-4ea5-8d27-12492aef0fa3'
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: Work item WI-05-edf218e6-4359-4bae-84f6-c35dd9598b1a is no longer eligible for this review. Only submitted work items can be reviewed.
+        at itemStateError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:25:26)
+        at itemStateError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:41:25)
+        at assertReviewable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:818:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 409,
+      code: 'ITEM_NOT_SUBMITTED',
+      workItemId: 'WI-05-edf218e6-4359-4bae-84f6-c35dd9598b1a'
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: QC_GATE_FAILED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:848:17) {
+      statusCode: 409,
+      code: 'QC_GATE_FAILED',
+      details: { items: [ [Object] ] }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: QC_GATE_NOT_EVALUATED
+        at failure (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:9:48)
+        at Object.failure [as requireAcceptance] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\qcGateService.js:139:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:848:17) {
+      statusCode: 409,
+      code: 'QC_GATE_NOT_EVALUATED',
+      details: { items: [ [Object] ] }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-05
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-05
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-05
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-05
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 9de98a45-efde-4824-963d-c5067cf02b62 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b330392-aa9f-404c-97c0-d441b193902e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2b330392-aa9f-404c-97c0-d441b193902e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_lab_technician_labaudit05 (LAB_TECHNICIAN) attempted APPROVE_RESULTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.warn
+    [AUTH] Missing token at 2026-10-14T16:12:05.246Z from ::ffff:127.0.0.1
+
+      16 |
+      17 |     if (!token) {
+    > 18 |         console.warn(`[AUTH] Missing token at ${new Date().toISOString()} from ${req.ip}`);
+         |                 ^
+      19 |         return res.status(401).json({ error: 'No token provided', code: 'NO_TOKEN' });
+      20 |     }
+      21 |
+
+      at warn (middleware/authMiddleware.js:18:17)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (app.js:99:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/localeMiddleware.js:36:9)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:42:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:51:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+PASS tests/contracts/audit_0_5_legacy_review.test.js
+  Audit 0.5: legacy review delegates to the guarded authority
+    √ legacy ACCEPT cannot bypass the ASSIGNED state guard or mutate evidence (125 ms)
+    √ legacy ACCEPT cannot bypass the IN_PROGRESS state guard or mutate evidence (25 ms)
+    √ legacy ACCEPT cannot bypass the COMPLETED state guard or mutate evidence (21 ms)
+    √ legacy ACCEPT cannot bypass the ACCEPTED state guard or mutate evidence (20 ms)
+    √ legacy ACCEPT enforces laboratory scope using the linked sample (15 ms)
+    √ legacy ACCEPT enforces the QC_FAIL batch verdict (95 ms)
+    √ legacy ACCEPT enforces the RUNNING batch verdict (67 ms)
+    √ legacy ACCEPT requires actual evidence (17 ms)
+    √ legacy ACCEPT uses the canonical response and writes its decision/audit once (112 ms)
+    √ legacy REJECT preserves scalar values and invokes canonical RETURN invalidation (42 ms)
+    √ legacy WAIVE maps to the canonical WAIVED state with a durable reason (22 ms)
+    √ malformed legacy request {"decision":"UNKNOWN"} fails with a stable code before writes (17 ms)
+    √ malformed legacy request {"decision":"WAIVE","reason":" "} fails with a stable code before writes (16 ms)
+    √ malformed legacy request {"decision":"REJECT"} fails with a stable code before writes (18 ms)
+    √ malformed legacy request {"decision":"ACCEPT","reason":{}} fails with a stable code before writes (17 ms)
+    √ legacy review keeps the permission middleware (21 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       16 passed, 16 total
+Snapshots:   0 total
+Time:        2.228 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_5_legacy_review.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-result-views-legacy-review-context-singles\02-audit_0_5_legacy_review.test\report-original.json

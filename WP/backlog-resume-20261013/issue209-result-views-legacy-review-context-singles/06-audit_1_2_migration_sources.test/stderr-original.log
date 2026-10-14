@@ -1,0 +1,41 @@
+PASS tests/security/audit_1_2_migration_sources.test.js
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().evidence.sql); (17 ms)
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().guards.sql); (2 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(sources.evidence.sql); (2 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(evidenceCreates(sources.evidence.sql)); (2 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered services/workflowMigrationSources.js bytes never become a SQL exemption (1 ms)
+  √ a third registry entry changes the loader digest and stays unresolved
+
+Test Suites: 1 passed, 1 total
+Tests:       33 passed, 33 total
+Snapshots:   0 total
+Time:        0.604 s, estimated 1 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_migration_sources.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-result-views-legacy-review-context-singles\06-audit_1_2_migration_sources.test\report-original.json

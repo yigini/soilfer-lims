@@ -1,0 +1,428 @@
+{
+  "createdUtc": "2026-10-14T16:11:09.573985+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 28,
+  "cases": [
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid incomplete invalid evidence refuses; a complete selected mean excludes cached values and retains both sources",
+      "originalFailureSha256": "7ae394a94df328b49416ea66aa843007d39015d4f432e00ec50209b36a7cb2c1",
+      "originalCaseLineNumbers": [
+        "52",
+        "61"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid different controlled units refuse averaging and no normalized mean is invented",
+      "originalFailureSha256": "9afdefcfd25026c52185ff46768a819ec17411386c632ee8f8e9aa405f7dd317",
+      "originalCaseLineNumbers": [
+        "52",
+        "85"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid ambiguous methodology evidence refuses until an explicit not-reportable choice; other selected samples remain intact",
+      "originalFailureSha256": "0b27c6986c9b7f1b79752b87b605ae5a6149b61c74da3995fccd61c280f58f9b",
+      "originalCaseLineNumbers": [
+        "44",
+        "94"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid ambiguous unit evidence refuses until an explicit not-reportable choice; other selected samples remain intact",
+      "originalFailureSha256": "0b27c6986c9b7f1b79752b87b605ae5a6149b61c74da3995fccd61c280f58f9b",
+      "originalCaseLineNumbers": [
+        "44",
+        "94"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid ambiguous qualified evidence refuses until an explicit not-reportable choice; other selected samples remain intact",
+      "originalFailureSha256": "0b27c6986c9b7f1b79752b87b605ae5a6149b61c74da3995fccd61c280f58f9b",
+      "originalCaseLineNumbers": [
+        "44",
+        "94"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid single qualified and legacy null-validity results keep their exact value",
+      "originalFailureSha256": "0cdacb6dce2af8107cfeafabc5629cb38726130920d51485da356ec2b0373b37",
+      "originalCaseLineNumbers": [
+        "44",
+        "119"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid archived approved samples remain exportable without enabling unapproved exports",
+      "originalFailureSha256": "22ad90e6c282add022a119915f87e60b2134d9def18918d2c12454d8c16e034b",
+      "originalCaseLineNumbers": [
+        "44",
+        "125"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid exports retain the saved lab/method policy after a later LATEST_VALID edit",
+      "originalFailureSha256": "64c4215ae34ca7421304278e16788f959dec77e1510dcf6f48c41d1dfceb15d7",
+      "originalCaseLineNumbers": [
+        "44",
+        "133"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid an unknown policy refuses a new choice; bulk export discloses the missing choice without an analytical value",
+      "originalFailureSha256": "edc83ad199cef1a3c0cd2099dbccdf258ef7bece1b7971d6f24a462ccc5fa05f",
+      "originalCaseLineNumbers": [
+        "52",
+        "150"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid date bounds are merged and each bound works alone ({ startDate: '2026-01-02T00:00:00Z', endDate: '2026-01-02T23:59:59Z' })",
+      "originalFailureSha256": "ba9faeab9e1996987783ad4d763d72a00cb7ba7487eb84e38902b02796fa0551",
+      "originalCaseLineNumbers": [
+        "44",
+        "168"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid date bounds are merged and each bound works alone ({ startDate: '2026-01-02T00:00:00Z' })",
+      "originalFailureSha256": "ba9faeab9e1996987783ad4d763d72a00cb7ba7487eb84e38902b02796fa0551",
+      "originalCaseLineNumbers": [
+        "44",
+        "168"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid date bounds are merged and each bound works alone ({ endDate: '2026-01-02T23:59:59Z' })",
+      "originalFailureSha256": "ba9faeab9e1996987783ad4d763d72a00cb7ba7487eb84e38902b02796fa0551",
+      "originalCaseLineNumbers": [
+        "44",
+        "168"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_10_current_result_views.test.js",
+      "test": "Audit 0.10: current results in exports and working grid scope filters cannot expose another lab in either working view or WET_CHEM export",
+      "originalFailureSha256": "fe507d26702a084b3c4a6e2f6f7c0e75be2f461d6510df7c0bbfb23ab566cab6",
+      "originalCaseLineNumbers": [
+        "44",
+        "173"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "SOC view fixtures get one legacy NULL SOC order before evidence, including approved/archived/other-lab contexts; sentinel-safe existing id() generator retained. Method/unit/censoring ambiguity, no-selection errors, invalid/superseded data, saved policy/date/scope filters and all assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority legacy ACCEPT cannot bypass the ASSIGNED state guard or mutate evidence",
+      "originalFailureSha256": "68e9047fd2c09800e8f70d14c552156a6a470d31d4de0f6246211566f9c9ea67",
+      "originalCaseLineNumbers": [
+        "29",
+        "46"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority legacy ACCEPT cannot bypass the IN_PROGRESS state guard or mutate evidence",
+      "originalFailureSha256": "68e9047fd2c09800e8f70d14c552156a6a470d31d4de0f6246211566f9c9ea67",
+      "originalCaseLineNumbers": [
+        "29",
+        "46"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority legacy ACCEPT cannot bypass the COMPLETED state guard or mutate evidence",
+      "originalFailureSha256": "68e9047fd2c09800e8f70d14c552156a6a470d31d4de0f6246211566f9c9ea67",
+      "originalCaseLineNumbers": [
+        "29",
+        "46"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority legacy ACCEPT cannot bypass the ACCEPTED state guard or mutate evidence",
+      "originalFailureSha256": "526be8e9c2e5dc5eebd7b229fc2d02e0196a2ae89ca45b680099b89de02abd0d",
+      "originalCaseLineNumbers": [
+        "29",
+        "46"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority legacy ACCEPT enforces laboratory scope using the linked sample",
+      "originalFailureSha256": "06ff5e332defb6fdb8aa9073d242e33d0baaab62e69dac8d956e14a4926c1b29",
+      "originalCaseLineNumbers": [
+        "29",
+        "52"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority legacy ACCEPT enforces the QC_FAIL batch verdict",
+      "originalFailureSha256": "f597bd648ea83e45e142e74de17d4f7143acbb36503b48bb4812c292b7bd0f5e",
+      "originalCaseLineNumbers": [
+        "29",
+        "58"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority legacy ACCEPT enforces the RUNNING batch verdict",
+      "originalFailureSha256": "f597bd648ea83e45e142e74de17d4f7143acbb36503b48bb4812c292b7bd0f5e",
+      "originalCaseLineNumbers": [
+        "29",
+        "58"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority legacy ACCEPT uses the canonical response and writes its decision/audit once",
+      "originalFailureSha256": "d4faa7e52b5993727ad8b841eb3be197c59ac7b17e6745eed8534f99d0c3194b",
+      "originalCaseLineNumbers": [
+        "29",
+        "70"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority legacy REJECT preserves scalar values and invokes canonical RETURN invalidation",
+      "originalFailureSha256": "e8a725b25d92c3656871cbb0a519544adb5c8faee275bd4e13dadb7e31e3cc01",
+      "originalCaseLineNumbers": [
+        "29",
+        "82"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority legacy WAIVE maps to the canonical WAIVED state with a durable reason",
+      "originalFailureSha256": "d72258932f659c57ea6c04763dea31fdddeed56ff34e491c4ccd74c42129f847",
+      "originalCaseLineNumbers": [
+        "29",
+        "93"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority malformed legacy request {\"decision\":\"UNKNOWN\"} fails with a stable code before writes",
+      "originalFailureSha256": "b19d68afc1a21841f2e5a207f772e86178935e3d0eacff1cb1b99209ce37a3e6",
+      "originalCaseLineNumbers": [
+        "29",
+        "106"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority malformed legacy request {\"decision\":\"WAIVE\",\"reason\":\" \"} fails with a stable code before writes",
+      "originalFailureSha256": "b19d68afc1a21841f2e5a207f772e86178935e3d0eacff1cb1b99209ce37a3e6",
+      "originalCaseLineNumbers": [
+        "29",
+        "106"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority malformed legacy request {\"decision\":\"REJECT\"} fails with a stable code before writes",
+      "originalFailureSha256": "b19d68afc1a21841f2e5a207f772e86178935e3d0eacff1cb1b99209ce37a3e6",
+      "originalCaseLineNumbers": [
+        "29",
+        "106"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority malformed legacy request {\"decision\":\"ACCEPT\",\"reason\":{}} fails with a stable code before writes",
+      "originalFailureSha256": "b19d68afc1a21841f2e5a207f772e86178935e3d0eacff1cb1b99209ce37a3e6",
+      "originalCaseLineNumbers": [
+        "29",
+        "106"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    },
+    {
+      "suite": "audit_0_5_legacy_review.test.js",
+      "test": "Audit 0.5: legacy review delegates to the guarded authority legacy review keeps the permission middleware",
+      "originalFailureSha256": "994928c54cef0620c6d69e6037c9c3ecf186112426d235a19406a9ee43261b1b",
+      "originalCaseLineNumbers": [
+        "29",
+        "112"
+      ],
+      "classification": "DECLARED_USABLE_LEGACY_ORDER_FOR_FRESH_RETAINED_EXECUTION_WITNESS",
+      "sourceDecision": "Only evidence:true legacy PH review fixtures get one legacy NULL PH order before their witness; evidence:false remains exactly missing. Legacy ACCEPT/RETURN/WAIVE, scope/state/permissions/QC refusals and scalar flags/values remain unchanged. No Lab/policy/approval metadata is invented for other-lab fixture.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing orders remain zero-write refused/readonly lists/approvednonzeroSTOP under6167740581; declaration applies only to NEW owned positive witness assembly, not runtime repair."
+    }
+  ],
+  "productionOperations": 0
+}

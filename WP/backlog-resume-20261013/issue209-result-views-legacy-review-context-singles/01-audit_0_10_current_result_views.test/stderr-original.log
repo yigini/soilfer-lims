@@ -1,0 +1,274 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-010
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f94d1cce-3559-4481-837f-6eb8c2899a4a (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 964b323b-6b8f-4edf-a698-b2d4ea4f7a54 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 964b323b-6b8f-4edf-a698-b2d4ea4f7a54 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_0_10_current_result_views.test.js
+  Audit 0.10: current results in exports and working grid
+    √ fixture metadata cannot contain excluded analytical-value sentinels (3 ms)
+    √ incomplete invalid evidence refuses; a complete selected mean excludes cached values and retains both sources (201 ms)
+    √ different controlled units refuse averaging and no normalized mean is invented (30 ms)
+    √ ambiguous methodology evidence refuses until an explicit not-reportable choice; other selected samples remain intact (84 ms)
+    √ ambiguous unit evidence refuses until an explicit not-reportable choice; other selected samples remain intact (73 ms)
+    √ ambiguous qualified evidence refuses until an explicit not-reportable choice; other selected samples remain intact (74 ms)
+    √ single qualified and legacy null-validity results keep their exact value (40 ms)
+    √ archived approved samples remain exportable without enabling unapproved exports (29 ms)
+    √ exports retain the saved lab/method policy after a later LATEST_VALID edit (290 ms)
+    √ an unknown policy refuses a new choice; bulk export discloses the missing choice without an analytical value (25 ms)
+    √ date bounds are merged and each bound works alone ({ startDate: '2026-01-02T00:00:00Z', endDate: '2026-01-02T23:59:59Z' }) (59 ms)
+    √ date bounds are merged and each bound works alone ({ startDate: '2026-01-02T00:00:00Z' }) (67 ms)
+    √ date bounds are merged and each bound works alone ({ endDate: '2026-01-02T23:59:59Z' }) (65 ms)
+    √ scope filters cannot expose another lab in either working view or WET_CHEM export (87 ms)
+    √ the actual mean authority enforces recorded r and refuses an unavailable limit (13 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       15 passed, 15 total
+Snapshots:   0 total
+Time:        3.011 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_10_current_result_views.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-result-views-legacy-review-context-singles\01-audit_0_10_current_result_views.test\report-original.json

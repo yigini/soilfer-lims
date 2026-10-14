@@ -1,0 +1,20 @@
+[
+  {
+    "path": "server/tests/contracts/audit_0_10_current_result_views.test.js",
+    "beforeSha256": "94b5ffb47ca62340d751b9462d3a872618350f6455e5240ad571d48fd905f56b",
+    "afterSha256": "c208c6abeab2806eb29e9dbc8956fb99b9966d2f7f5ec88722c5f1783a19f63f",
+    "oldSourceAndEveryAssertionRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: the NEW owned retained SOC history declares its usable legacy order.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-010'), sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned retained selected-value execution context', requestedBy: jwt.decode(token).username,\n            lines: { create: [{ id: id('LINE-010'), analysis: 'SOC', workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_0_5_legacy_review.test.js",
+    "beforeSha256": "82bf2feaae6ad947b67fad9c3221568461f2af5012ea2be135f3cb411745c1c5",
+    "afterSha256": "cf6f3eccad5dee3830f105685c8096a0a2bdebc721b6ddfded49746dbc3c6314",
+    "oldSourceAndEveryAssertionRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: only the positive evidence witness gets a declared retained usable order.\n        if (evidence) await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-05'), sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned retained legacy review execution context', requestedBy: require('jsonwebtoken').decode(manager).username,\n            lines: { create: [{ id: id('LINE-05'), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n"
+    ]
+  }
+]
