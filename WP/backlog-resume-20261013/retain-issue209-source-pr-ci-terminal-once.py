@@ -48,7 +48,8 @@ assert len(raw['logs-original.zip'])<64*1024*1024
 archive=zipfile.ZipFile(io.BytesIO(raw['logs-original.zip']));entries=archive.infolist()
 assert all(not e.is_dir() and e.file_size<64*1024*1024 for e in entries)
 def stepLog(fragment,required=False):
-    found=[entry for entry in entries if fragment in entry.filename]
+    # Match the numbered step title, excluding the distinct Post Build cleanup log.
+    found=[entry for entry in entries if entry.filename.rsplit('/',1)[-1].split('_',1)[-1].startswith(fragment)]
     assert len(found)<=1,[entry.filename for entry in found]
     if required:assert len(found)==1,fragment
     return archive.read(found[0]) if found else None
