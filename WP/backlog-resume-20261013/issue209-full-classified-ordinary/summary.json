@@ -1,0 +1,23 @@
+{
+  "closedUtc": "2026-10-14T18:25:08.403282+00:00",
+  "exit": 0,
+  "suites": 370,
+  "tests": 5642,
+  "passedSuites": 370,
+  "passedTests": 5642,
+  "failed": 0,
+  "failedSuites": 0,
+  "pending": 0,
+  "todo": 0,
+  "sourceUnchanged": true,
+  "selectedInventoryEqual": true,
+  "fullDiscovery": 370,
+  "ordinarySetups": true,
+  "workerIdleMemoryLimit": 512000000,
+  "nodeOptions": "",
+  "visibleAssetsUnchanged": true,
+  "declaredMutableOutputCapturedBeforeAndAfter": true,
+  "onlyMutableOutput": "server/data/help/RELEASE_MANIFEST_v1.json",
+  "productionOperations": 0,
+  "status": "PASS"
+}

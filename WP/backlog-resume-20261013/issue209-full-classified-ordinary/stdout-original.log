@@ -1,0 +1,4 @@
+
+> server@1.9.0 test
+> jest --maxWorkers=1 --workerIdleMemoryLimit=512MB --testMatch **/tests/**/*.test.js --setupFilesAfterEnv C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\ownedSuiteSetup.js C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\setup.js C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\backlog-resume-20261013\issue209-local-owned-physical-retention-spectral-finalizer.cjs C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\backlog-resume-20261013\visible-test-storage-206.setup.cjs --globalTeardown C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\backlog-resume-20261013\issue214-policy-owner-local-retention-teardown.cjs --json --outputFile C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\backlog-resume-20261013\issue209-full-classified-ordinary\report-original.json
+
