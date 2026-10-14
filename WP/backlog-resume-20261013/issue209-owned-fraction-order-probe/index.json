@@ -1,0 +1,32 @@
+{
+  "record": {
+    "retainedUtc": "2026-10-14T10:17:50.478337+00:00",
+    "status": "CLOSED_OWNED_FRACTION_ORDER_BOUNDARY",
+    "closedUtc": "2026-10-14T10:16:06.732Z",
+    "originalDbWalShmPreserved": true,
+    "sourceUnchanged": true,
+    "productionOperations": 0,
+    "limitation": "Reproduces an actual retained owned fixture on a NEW clone; probes order contract/reconciliation without adding or disabling guards. Not production inspection, full209owner/Docker acceptance or overall application PASS.",
+    "sourceScopeComment": 6163271808,
+    "sourceAuditHead": "b5f5566f243e2e7efdce39bc5c4fe3afca5b0f3b",
+    "finding": "Actual current orderService on a NEW retained owned clone normalizes explicit4-code target toTEXTURE, waives3 separate fraction WorkItems and creates only1TEXTUREline; those fraction owners then resolveNO_LINE."
+  },
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-owned-fraction-order-probe/probe-original.json": {
+      "bytes": 27523,
+      "sha256": "b3a3657bf103e125332b9c88ded25a5b34724f7fc9bb67f05c4921054ae07a1d"
+    },
+    "WP/backlog-resume-20261013/issue209-owned-fraction-order-probe-stdout-original.log": {
+      "bytes": 1022,
+      "sha256": "d605b3e6bab5e283f0072a56b4c8fe836c4c9a9443fd828c344ad104e341dffb"
+    },
+    "WP/backlog-resume-20261013/issue209-owned-fraction-order-probe-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-owned-fraction-order-probe-exit-original.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    }
+  }
+}
