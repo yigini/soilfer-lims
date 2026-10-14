@@ -1,0 +1,53 @@
+{
+  "record": {
+    "recordedUtc": "2026-10-14T11:52:05.383171+00:00",
+    "comment": 6167703632,
+    "url": "https://github.com/yigini/soilfer-lims/issues/209#issuecomment-6167703632",
+    "createdUtc": "2026-10-14T11:52:04Z",
+    "sourceEvidenceAudit": "b5e2e4c8f9f52f1b8c07820e57959de267743631",
+    "bodySha256": "57b099d794669d9f61bce72b5dc5696538942365b599109b20fba6e5ed0344cf",
+    "postedOnce": true,
+    "actualAnswerPending": true,
+    "nativeHandoffSent": false,
+    "productionOperations": 0,
+    "applicationAndFixtureCorrections": 0
+  },
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-closed-runtime-boundary-analysis/claudio-remediation-question-draft.md": {
+      "bytes": 3169,
+      "sha256": "57b099d794669d9f61bce72b5dc5696538942365b599109b20fba6e5ed0344cf"
+    },
+    "WP/backlog-resume-20261013/issue209-closed-runtime-boundary-analysis/comments-before-question-original.json": {
+      "bytes": 24535,
+      "sha256": "2bfe08126ba5cb6f98392d8bfd5938781efe4307edd6b905ebf985640392b8cc"
+    },
+    "WP/backlog-resume-20261013/issue209-closed-runtime-boundary-analysis/main-before-question-original.json": {
+      "bytes": 336,
+      "sha256": "e0c8d4117149b05e499ad0abfd6f0456aed24d869f784317aa0c1072415e39c9"
+    },
+    "WP/backlog-resume-20261013/issue209-closed-runtime-boundary-analysis/question-post-exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-closed-runtime-boundary-analysis/question-post-original.json": {
+      "bytes": 4776,
+      "sha256": "2b6144179c8b096a956505fa75e848f1036a27989741284cb833fa00878c9737"
+    },
+    "WP/backlog-resume-20261013/issue209-closed-runtime-boundary-analysis/question-post-record.json": {
+      "bytes": 513,
+      "sha256": "bda4f468fbb97a9c59b87af76d12a820503468b75db5b084ea29c4e2bf8ae9ef"
+    },
+    "WP/backlog-resume-20261013/issue209-closed-runtime-boundary-analysis/question-post-request.json": {
+      "bytes": 3199,
+      "sha256": "a42b06d8eda3876b303a418d4e7c7ab04402250ef409afe99e2a5924764c6b78"
+    },
+    "WP/backlog-resume-20261013/issue209-closed-runtime-boundary-analysis/question-post-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/raise-issue209-approved-orphan-remediation-boundary-once.py": {
+      "bytes": 5855,
+      "sha256": "f990e35b36ae423983e0e5eb0562a8bbb7b47d1e0d31572e0e1e58a8f894a0c4"
+    }
+  }
+}
