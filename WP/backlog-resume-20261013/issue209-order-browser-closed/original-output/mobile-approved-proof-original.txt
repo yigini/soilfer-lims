@@ -1,0 +1,10 @@
+### Result
+{
+  "reason": "Reviewed amendment request",
+  "saveDisabled": true,
+  "putCount": 0
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({reason:document.querySelector("#order-revision-reason").value,saveDisabled:[...document.querySelectorAll("button")].find(e=>e.textContent.includes("Save Changes")).disabled,putCount:window.__orderRequests.filter(r=>r.method==="PUT").length})');
+```

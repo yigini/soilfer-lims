@@ -1,0 +1,31 @@
+{
+  "observedUtc": "2026-10-14T09:12:36.846425+00:00",
+  "commands": [
+    {
+      "name": "build",
+      "argv": [
+        "cmd.exe",
+        "/d",
+        "/c",
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "lint",
+      "argv": [
+        "cmd.exe",
+        "/d",
+        "/c",
+        "npm.cmd",
+        "run",
+        "lint"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "sourceUnchanged": true,
+  "productionOperations": 0
+}

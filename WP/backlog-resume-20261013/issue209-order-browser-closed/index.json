@@ -1,0 +1,318 @@
+{
+  "retainedUtc": "2026-10-14T09:21:55.541934+00:00",
+  "status": "CLOSED_ACTUAL_CHROMIUM_DETACHED_UI_PASS",
+  "synthetic": true,
+  "productionOperations": 0,
+  "client": {
+    "observedUtc": "2026-10-14T09:12:36.846425+00:00",
+    "commands": [
+      {
+        "name": "build",
+        "argv": [
+          "cmd.exe",
+          "/d",
+          "/c",
+          "npm.cmd",
+          "run",
+          "build"
+        ],
+        "exitCode": 0
+      },
+      {
+        "name": "lint",
+        "argv": [
+          "cmd.exe",
+          "/d",
+          "/c",
+          "npm.cmd",
+          "run",
+          "lint"
+        ],
+        "exitCode": 0
+      }
+    ],
+    "sourceUnchanged": true,
+    "productionOperations": 0
+  },
+  "lintErrors": 0,
+  "baselineLintWarnings": 14,
+  "desktop": {
+    "width": 1440,
+    "documentWidth": 1440,
+    "saveDisabled": true
+  },
+  "keyboardReady": {
+    "focused": "Save Changes",
+    "reason": "Reviewed complete soil panel",
+    "saveDisabled": false
+  },
+  "actualSavedRequests": [
+    {
+      "method": "PUT",
+      "url": "/api/samples/UI-ORDER-SAMPLE/analyses",
+      "input": {
+        "analyses": [
+          "PH_H2O",
+          "SOC"
+        ],
+        "analysisGroupIds": [
+          "UI-BUNDLE"
+        ],
+        "reason": "Reviewed complete soil panel"
+      }
+    }
+  ],
+  "mobile": {
+    "width": 390,
+    "documentWidth": 390,
+    "modalBounds": {
+      "x": 16,
+      "y": 42.203125,
+      "width": 358,
+      "height": 759.59375,
+      "top": 42.203125,
+      "right": 374,
+      "bottom": 801.796875,
+      "left": 16
+    },
+    "saveDisabled": true,
+    "notice": true
+  },
+  "approved": {
+    "reason": "Reviewed amendment request",
+    "saveDisabled": true,
+    "putCount": 0
+  },
+  "browserClosed": true,
+  "fixtureServerAbsent": true,
+  "fixtureServerSessionExit": 1,
+  "fixtureServerFinallyRecordAbsent": true,
+  "stopPrecision": "Ctrl-C session returned exit1; independently verified actual PID44388 and listener50625 absent; no restart/replay.",
+  "initialNavigationRefusal": "CLI blocked file protocol after opening browser; existing isolated session navigated once to owned localhost fixture. Original refusal retained, not an application failure.",
+  "console": "Initial processing navigation logged favicon404 and React development info; approved navigation has zero errors. No JS application exception observed.",
+  "copiedOriginalFiles": {
+    "output/playwright/issue-209-order-ui/browser-closed-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/browser-closed-original.txt",
+    "output/playwright/issue-209-order-ui/console-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/console-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-add-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-add-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-before.png": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-before.png",
+    "output/playwright/issue-209-order-ui/desktop-focus-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-focus-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-goto-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-goto-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-keyboard-ready-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-keyboard-ready-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-layout-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-layout-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-reason-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-reason-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-resize-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-resize-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-save-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-save-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-saved-payload-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-saved-payload-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-select-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-select-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-tab-discard-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-tab-discard-original.txt",
+    "output/playwright/issue-209-order-ui/desktop-tab-save-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-tab-save-original.txt",
+    "output/playwright/issue-209-order-ui/fixture-inputs.json": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/fixture-inputs.json",
+    "output/playwright/issue-209-order-ui/http-open-original.json": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/http-open-original.json",
+    "output/playwright/issue-209-order-ui/http-stdout-original.log": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/http-stdout-original.log",
+    "output/playwright/issue-209-order-ui/mobile-approved-goto-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-approved-goto-original.txt",
+    "output/playwright/issue-209-order-ui/mobile-approved-proof-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-approved-proof-original.txt",
+    "output/playwright/issue-209-order-ui/mobile-approved-reason-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-approved-reason-original.txt",
+    "output/playwright/issue-209-order-ui/mobile-approved.png": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-approved.png",
+    "output/playwright/issue-209-order-ui/mobile-layout-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-layout-original.txt",
+    "output/playwright/issue-209-order-ui/mobile-notice-scroll-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-notice-scroll-original.txt",
+    "output/playwright/issue-209-order-ui/mobile-notice.png": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-notice.png",
+    "output/playwright/issue-209-order-ui/mobile-resize-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-resize-original.txt",
+    "output/playwright/issue-209-order-ui/open-original.txt": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/open-original.txt",
+    "output/playwright/issue-209-order-ui/orders.html": "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/orders.html",
+    ".playwright-cli/console-2026-10-14T09-15-49-495Z.log": "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/console-2026-10-14T09-15-49-495Z.log",
+    ".playwright-cli/page-2026-10-14T09-18-05-951Z.yml": "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-18-05-951Z.yml",
+    ".playwright-cli/console-2026-10-14T09-18-05-842Z.log": "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/console-2026-10-14T09-18-05-842Z.log",
+    ".playwright-cli/page-2026-10-14T09-16-47-999Z.yml": "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-16-47-999Z.yml",
+    ".playwright-cli/page-2026-10-14T09-16-22-302Z.yml": "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-16-22-302Z.yml",
+    ".playwright-cli/page-2026-10-14T09-18-01-081Z.yml": "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-18-01-081Z.yml",
+    ".playwright-cli/page-2026-10-14T09-15-49-815Z.yml": "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-15-49-815Z.yml",
+    ".playwright-cli/page-2026-10-14T09-17-18-486Z.yml": "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-17-18-486Z.yml"
+  },
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/server-after-stop-original.json": {
+      "bytes": 45,
+      "sha256": "b3e4e0899a9979691f0d01b64c072dc54a5bcc0186f0ec6b2bfc04305c8041f2"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/console-2026-10-14T09-15-49-495Z.log": {
+      "bytes": 331,
+      "sha256": "99134c17fb05b5af032613b7a0e3d440ab615b379db1461b02bcf19a9f3a197c"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/console-2026-10-14T09-18-05-842Z.log": {
+      "bytes": 203,
+      "sha256": "499ed35650c0b2aecb27efccbac30ae88af6095e18bfe10dcde366e284dc96f4"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-15-49-815Z.yml": {
+      "bytes": 1618,
+      "sha256": "8d99f20abfc2c30601d7fb0681a3b091df75e3f0bc5daeca4a62d56cffdc62e2"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-16-22-302Z.yml": {
+      "bytes": 1807,
+      "sha256": "59a06065755acbeac3feac80cbadf9d73e32915efe21bcfc0aff62de429e95cd"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-16-47-999Z.yml": {
+      "bytes": 2124,
+      "sha256": "4e8f17471f5c0dea66b4850f28a4eaf534d5f6512877581c591391ed8183f045"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-17-18-486Z.yml": {
+      "bytes": 2124,
+      "sha256": "c6cade3cf9e6a4f3382da2a122ad2a33a4604d29b903f8f724334d90f58ea607"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-18-01-081Z.yml": {
+      "bytes": 413,
+      "sha256": "6456a9a2866c991c1f1691d855a024bdd4575bb36612adee0ca1a0b3ab45ebc9"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/actual-cli-snapshots/page-2026-10-14T09-18-05-951Z.yml": {
+      "bytes": 1813,
+      "sha256": "29a38463d9916bc3999bf18d21d3ab8f7230c679a0c5e26f520ba90a52218d1f"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/browser-closed-original.txt": {
+      "bytes": 38,
+      "sha256": "39d878211ddd588cf7b2ab495fb56ca46cfb775e96c750d04d29591511a67579"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/console-original.txt": {
+      "bytes": 98,
+      "sha256": "8dba3caff4e23b507958104ffae041f5ace41b89fc5cadc6e0c0391e8293cd3b"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-add-original.txt": {
+      "bytes": 314,
+      "sha256": "6de6ea972a9d7d8bf2ada728b18fa4cb882ddd61e0ba19c84fd78c38bc56e8b1"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-before.png": {
+      "bytes": 53918,
+      "sha256": "3baa73a4a06fb2c172137b6b2dd7794ba9bf487318a8b84252f2b50a27d310e0"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-focus-original.txt": {
+      "bytes": 330,
+      "sha256": "c41edf077e14660f195c1687531a0dca3137fe6e73e2444668a6e86a3851f270"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-goto-original.txt": {
+      "bytes": 400,
+      "sha256": "1a40ce6dde817567070faae6eb906042377955d94d3d464a0eba4e638b715198"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-keyboard-ready-original.txt": {
+      "bytes": 340,
+      "sha256": "db85e33daf91f5250822c645707054416e36d10e709c6ccf29fbaddcc310deb1"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-layout-original.txt": {
+      "bytes": 337,
+      "sha256": "c77c36ae90cbe370475bf0d8448f1017a8d7953e632fcc39eb95dd168562e44c"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-reason-original.txt": {
+      "bytes": 135,
+      "sha256": "355659a90b822c22f15a62f2b3713e5a75dac0844b2df1c414b84ef60803f2b0"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-resize-original.txt": {
+      "bytes": 97,
+      "sha256": "8812f41ee0ce29b3a66303b78e340b2f43f47d2e253ec4936ddcf584ef6f13a7"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-save-original.txt": {
+      "bytes": 302,
+      "sha256": "7af337875eaf2bc9f2ef61c915bb0db9f0538d7f0673ddb270dc0a707c6080ae"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-saved-payload-original.txt": {
+      "bytes": 754,
+      "sha256": "c1110260b3ac6f35e61b8cccf75cda9e7706914264bc64fa8c9e6bf2cc15b35e"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-select-original.txt": {
+      "bytes": 310,
+      "sha256": "2cdda2957381ccf93fd26274a817009f2ba30e8a624ae8a0d11feb798e373ece"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-tab-discard-original.txt": {
+      "bytes": 86,
+      "sha256": "84ee9202baf8ce8f1c5e7ced011e69e0a4cd0d54bfc68022713b5c44d13cfb45"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/desktop-tab-save-original.txt": {
+      "bytes": 86,
+      "sha256": "84ee9202baf8ce8f1c5e7ced011e69e0a4cd0d54bfc68022713b5c44d13cfb45"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/fixture-inputs.json": {
+      "bytes": 222,
+      "sha256": "a189288a907ee899501d4a06937158b99bd92085e5ad00dbdb0029d02234028f"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/http-open-original.json": {
+      "bytes": 174,
+      "sha256": "fcfafc5c17b85542f2b2f2934e45456e693dcbe225091c77eb33212f77978e10"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/http-stdout-original.log": {
+      "bytes": 155,
+      "sha256": "8d5230f33f8f414ccac6ee3b2775565ccfef483c654388445fa841f90fe22d02"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-approved-goto-original.txt": {
+      "bytes": 396,
+      "sha256": "e5b8c183648d85a780b0ccce1b3b27ba47337eb63a4b2088e1be560b2a6b7ecb"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-approved-proof-original.txt": {
+      "bytes": 415,
+      "sha256": "8161d25d3aae4dc832907ab0628dd555b00f965ef6b11a76d4d575b582fa3779"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-approved-reason-original.txt": {
+      "bytes": 145,
+      "sha256": "4b8bc88f2191ee93845c07c83ba710cc8237e58a3321717f7d2a13fecdc7ab10"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-approved.png": {
+      "bytes": 39453,
+      "sha256": "8c7a7602780b896014b8e80ea031c0d1e1d04d6e67c7bb616c84926cf238f79c"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-layout-original.txt": {
+      "bytes": 747,
+      "sha256": "b53af8f86a05e8392ce74b6549c34ee7e6f939093682fa8aecae340e167b1935"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-notice-scroll-original.txt": {
+      "bytes": 93,
+      "sha256": "2c8e2e4020d5bb743111e5620bd3937b52e8d8280a60d730b79a680943a7f9c9"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-notice.png": {
+      "bytes": 39279,
+      "sha256": "799bc6f14e0ff3e5eed7072d4242fcd282a546ef6ea918a9009be865f83ebd5c"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/mobile-resize-original.txt": {
+      "bytes": 95,
+      "sha256": "c61589d0b69462244c05c73f556597354af3f577dcf69215474f45c45bfd304b"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/open-original.txt": {
+      "bytes": 254,
+      "sha256": "2fad53af334610ee6e74e705d468f6105a32377d99de0fbac3a6e382e23d88bb"
+    },
+    "WP/backlog-resume-20261013/issue209-order-browser-closed/original-output/orders.html": {
+      "bytes": 1543365,
+      "sha256": "7a3a8fefa2af69ce916f24379578bc7ff4642594632ea8823e2357423308ee80"
+    },
+    "WP/backlog-resume-20261013/issue209-order-client-build-lint/build-exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-order-client-build-lint/build-stderr-original.log": {
+      "bytes": 525,
+      "sha256": "78926189c9199ed1cd86683028febfac433d0b854f8e721067cf999a87504e77"
+    },
+    "WP/backlog-resume-20261013/issue209-order-client-build-lint/build-stdout-original.log": {
+      "bytes": 5483,
+      "sha256": "2b63f12aac90b8a838ceb0972eec0be6f257ee95c9959452223b4990c568cc3d"
+    },
+    "WP/backlog-resume-20261013/issue209-order-client-build-lint/lint-exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-order-client-build-lint/lint-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-order-client-build-lint/lint-stdout-original.log": {
+      "bytes": 2844,
+      "sha256": "17818db05c088664a1524421131d88f0911d0600c11bd587504dd0533d472d70"
+    },
+    "WP/backlog-resume-20261013/issue209-order-client-build-lint/source-after.json": {
+      "bytes": 27351,
+      "sha256": "4e5d1804d9d0884d111c960ea11009a0dc203570fb5dc564a9eeacd16433508f"
+    },
+    "WP/backlog-resume-20261013/issue209-order-client-build-lint/source-before.json": {
+      "bytes": 27351,
+      "sha256": "4e5d1804d9d0884d111c960ea11009a0dc203570fb5dc564a9eeacd16433508f"
+    },
+    "WP/backlog-resume-20261013/issue209-order-client-build-lint/summary.json": {
+      "bytes": 486,
+      "sha256": "b5aebd0880c1fd3fb6817a167151fe371d1ea8c0054991ce4749eb36fd376352"
+    }
+  },
+  "fullServerVerified": false
+}

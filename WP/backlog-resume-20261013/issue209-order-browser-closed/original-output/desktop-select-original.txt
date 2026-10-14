@@ -1,0 +1,10 @@
+### Ran Playwright code
+```js
+await page.getByRole('combobox').selectOption('UI-BUNDLE');
+```
+### Page
+- Page URL: http://127.0.0.1:50625/orders.html
+- Page Title: Issue209 detached order UI
+- Console: 1 errors, 0 warnings
+### Snapshot
+- [Snapshot](.playwright-cli\page-2026-10-14T09-16-22-302Z.yml)

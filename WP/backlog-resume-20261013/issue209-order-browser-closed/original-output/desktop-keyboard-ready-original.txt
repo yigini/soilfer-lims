@@ -1,0 +1,10 @@
+### Result
+{
+  "focused": "Save Changes",
+  "reason": "Reviewed complete soil panel",
+  "saveDisabled": false
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({focused:document.activeElement.textContent,reason:document.querySelector("#order-revision-reason").value,saveDisabled:document.activeElement.disabled})');
+```

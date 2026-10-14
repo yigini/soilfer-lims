@@ -1,0 +1,24 @@
+### Result
+{
+  "saved": "[{\"method\":\"PUT\",\"url\":\"/api/samples/UI-ORDER-SAMPLE/analyses\",\"input\":{\"analyses\":[\"PH_H2O\",\"SOC\"],\"analysisGroupIds\":[\"UI-BUNDLE\"],\"reason\":\"Reviewed complete soil panel\"}}]",
+  "requests": [
+    {
+      "method": "PUT",
+      "url": "/api/samples/UI-ORDER-SAMPLE/analyses",
+      "input": {
+        "analyses": [
+          "PH_H2O",
+          "SOC"
+        ],
+        "analysisGroupIds": [
+          "UI-BUNDLE"
+        ],
+        "reason": "Reviewed complete soil panel"
+      }
+    }
+  ]
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({saved:document.querySelector("#saved-order")?.textContent,requests:window.__orderRequests.filter(r=>r.method==="PUT")})');
+```

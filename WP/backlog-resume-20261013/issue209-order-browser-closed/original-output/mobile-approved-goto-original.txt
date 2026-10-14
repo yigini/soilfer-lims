@@ -1,0 +1,11 @@
+### Ran Playwright code
+```js
+await page.goto('http://127.0.0.1:50625/orders.html?status=APPROVED');
+```
+### Page
+- Page URL: http://127.0.0.1:50625/orders.html?status=APPROVED
+- Page Title: Issue209 detached order UI
+### Snapshot
+- [Snapshot](.playwright-cli\page-2026-10-14T09-18-05-951Z.yml)
+### Events
+- New console entries: .playwright-cli\console-2026-10-14T09-18-05-842Z.log#L1

@@ -1,0 +1,44 @@
+- main [ref=e3]:
+  - heading "Order revision UI verification fixture" [level=1] [ref=e4]
+  - paragraph [ref=e5]: Detached synthetic presentation data. No database or production connection.
+  - generic [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e13]:
+        - heading [level=2] [ref=e14]:
+          - text: Adjust Analysis Selection
+          - button "Help guidance" [ref=e16]
+        - paragraph [ref=e20]: UI-LAB
+      - button [ref=e21] [cursor=pointer]
+    - generic [ref=e25]:
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - text: Analysis Bundle
+          - button "Help guidance" [ref=e29]
+        - generic [ref=e33]:
+          - combobox [ref=e34]:
+            - option "-- Choose Bundle --"
+            - option "Synthetic soil panel (2 tests)" [selected]
+          - generic [ref=e72]:
+            - button "Add Bundle" [ref=e73] [cursor=pointer]
+            - button "Replace All" [ref=e74] [cursor=pointer]
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - text: Add Individual Tests
+          - button "Help guidance" [ref=e38]
+        - textbox "Search by name or code..." [ref=e43]
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - text: Current Selections (1)
+          - button "Help guidance" [ref=e47]
+        - generic [ref=e52]:
+          - generic [ref=e53]: pH in water
+          - button [ref=e54] [cursor=pointer]
+      - generic [ref=e58]:
+        - generic [ref=e59]:
+          - text: Reason for order revision
+          - button "Help guidance" [ref=e61]
+        - textbox "Reason for order revision" [ref=e65]:
+          - /placeholder: Explain the complete analysis selection…
+    - generic [ref=e66]:
+      - button "Discard" [ref=e67] [cursor=pointer]
+      - button "Save Changes" [disabled] [ref=e68]

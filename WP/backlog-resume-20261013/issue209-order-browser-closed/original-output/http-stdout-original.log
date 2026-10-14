@@ -1,0 +1,4 @@
+"GET /orders.html HTTP/1.1" 200 -
+code 404, message File not found
+"GET /favicon.ico HTTP/1.1" 404 -
+"GET /orders.html?status=APPROVED HTTP/1.1" 200 -

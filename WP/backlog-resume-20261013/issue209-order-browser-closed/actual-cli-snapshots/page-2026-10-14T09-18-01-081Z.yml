@@ -1,0 +1,4 @@
+- main [ref=e3]:
+  - heading "Order revision UI verification fixture" [level=1] [ref=e4]
+  - paragraph [ref=e5]: Detached synthetic presentation data. No database or production connection.
+  - generic [ref=e88]: "[{\"method\":\"PUT\",\"url\":\"/api/samples/UI-ORDER-SAMPLE/analyses\",\"input\":{\"analyses\":[\"PH_H2O\",\"SOC\"],\"analysisGroupIds\":[\"UI-BUNDLE\"],\"reason\":\"Reviewed complete soil panel\"}}]"

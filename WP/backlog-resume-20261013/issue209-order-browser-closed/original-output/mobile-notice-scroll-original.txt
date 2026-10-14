@@ -1,0 +1,5 @@
+### Ran Playwright code
+```js
+// Scroll mouse wheel
+await page.mouse.wheel(0, 400);
+```

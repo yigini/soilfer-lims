@@ -1,0 +1,21 @@
+### Result
+{
+  "width": 390,
+  "documentWidth": 390,
+  "modalBounds": {
+    "x": 16,
+    "y": 42.203125,
+    "width": 358,
+    "height": 759.59375,
+    "top": 42.203125,
+    "right": 374,
+    "bottom": 801.796875,
+    "left": 16
+  },
+  "saveDisabled": true,
+  "notice": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({width:innerWidth,documentWidth:document.documentElement.scrollWidth,modalBounds:[...document.querySelectorAll("div")].find(e=>e.classList.contains("max-w-2xl")).getBoundingClientRect().toJSON(),saveDisabled:[...document.querySelectorAll("button")].find(e=>e.textContent.includes("Save Changes")).disabled,notice:document.body.textContent.includes("require the amendment workflow")})');
+```
