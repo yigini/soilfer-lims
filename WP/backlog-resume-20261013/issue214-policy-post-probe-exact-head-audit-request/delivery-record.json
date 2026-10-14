@@ -1,0 +1,18 @@
+{
+  "postedUtc": "2026-10-14T07:19:23.991971+00:00",
+  "number": 296,
+  "head": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+  "tree": "f2152e240b355cd141612b783c6ccf04f5c8383a",
+  "base": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "run": 38524553288,
+  "closedEvidenceAudit": "6c24507499ad917eb5a3cfcc3016d2a2381bb514",
+  "comment": 6163082548,
+  "commentUrl": "https://github.com/yigini/soilfer-lims/pull/296#issuecomment-6163082548",
+  "readyNoticeSentOnce": true,
+  "labelAddedOnce": true,
+  "finalNativeHandoffSent": false,
+  "actualAuditPass": false,
+  "productionOperations": 0,
+  "ciDispatches": 0,
+  "nextAuthorizedWork": "Start #209 in same audit writer after this actual request"
+}
