@@ -11,6 +11,8 @@ const prisma = require('../../prisma');
 const { getAuthToken, ensureTestLab } = require('../setup');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
+const { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');
+const orderSource = loadOrderRevisionMigrationSource();
 
 const labId = 'LAB-SPECTRAL-STATE-179';
 let token, equipmentId;
@@ -51,6 +53,9 @@ async function fixture({ status = 'COMPLETED', parentStatus = 'PROCESSING' } = {
             workItems: [{ ...itemData, createdAt: now, updatedAt: now }] });
         databases.push(database); db = database.client; useLegacyRouteDatabase(prisma, db);
         expect(installWorkAttemptContract({dbPath:database.file,apply:true}).classification).toBe('COMPLETE');
+        // Add only the current nullable model shape to this NEW owned legacy closure clone.
+        const orderShape = new Database(database.file);
+        try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
         sample = await db.sample.findUnique({ where: { id: sampleData.id } });
         item = await db.workItem.findUnique({ where: { id: itemData.id } });
     } else {
@@ -59,6 +64,11 @@ async function fixture({ status = 'COMPLETED', parentStatus = 'PROCESSING' } = {
     }
     const bystander = await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: sample.id,
         analysis: 'PH_H2O', assignedLab: labId, status: 'ACCEPTED' } });
+    // The valid accepted pH bystander has a retained order; spectral refusal states stay intact.
+    await db.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,
+        version: 1, status: 'ACTIVE', reason: 'Retained spectral-bystander pH order context',
+        lines: { create: { id: randomUUID(), analysis: 'PH_H2O', workItemId: null, isRequired: true, status: 'ACTIVE' } }
+    } }));
     const result = await createExecutionResultFixture(db, { attemptStatus: 'ACCEPTED', data: { id: randomUUID(), sampleId: sample.id, param: 'PH_H2O',
         value: '6.27', numericValue: 6.27, unit: 'pH', provenance: 'MEASURED', flags: '["RETAINED_SCIENTIFIC_FLAG"]' } });
     const attempt = await db.workAttempt.findUnique({ where: { id: result.attemptId } });

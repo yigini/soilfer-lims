@@ -15,6 +15,9 @@ const { isInvalidOnlyByQcFailure } = require('../../services/qcService');
 const policyService = require('../../services/policyService');
 const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 const { SPECTRAL_ACQUISITION_CODES } = require('../../config/spectralAcquisition');
+const Database = require('better-sqlite3');
+const { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');
+const orderSource = loadOrderRevisionMigrationSource();
 const labId = 'LAB-AUDIT-03';
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 const modes = ['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'];
@@ -48,6 +51,9 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
                 batches: batch ? [{ ...batch, createdAt: batch.createdAt.getTime() }] : [] });
             ownedDatabases.push(database); useLegacyRouteDatabase(prisma, database.client);
             expect(installWorkAttemptContract({ dbPath: database.file, apply: true }).classification).toBe('COMPLETE');
+            // Current nullable model shape only, on this NEW owned closure context before capture.
+            const orderShape = new Database(database.file);
+            try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
             item = await database.client.workItem.findUnique({ where: { id: workItemId } });
         } else {
             await createSampleFixture(prisma, { data: sampleData });
@@ -55,6 +61,12 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         }
         const resultData = { id: resultId, sampleId, param, value: '7.2', numericValue: 7.2, isCurrent: true,
             isValid: valid, flags: JSON.stringify(flags), batchId: batch?.id };
+        // Declare usable retained order facts without altering approval, work or QC metadata.
+        // The caller transaction also follows the existing owned legacy connection injection.
+        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-03'), sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Retained publication measurement order context',
+            lines: { create: { id: id('LINE-03'), analysis: param, workItemId: null, isRequired: true, status: 'ACTIVE' } }
+        } }));
         const result = recordResult ? await createExecutionResultFixture(prisma, {
             ...(['ACCEPTED','SUBMITTED'].includes(itemStatus) && { attemptStatus: itemStatus }), data: resultData }) : null;
         await setFixtureQcRequirement(prisma, token, labId, batch ? 'REQUIRED' : 'NOT_REQUIRED');

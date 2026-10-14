@@ -1,0 +1,2865 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_labspectralstate179 (Lab: LAB-SPECTRAL-STATE-179) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/spectralWorkItemStateService.js:16:11)
+      at freshScan (services/spectralWorkItemStateService.js:32:5)
+      at Object.trashScan (services/spectralWorkItemStateService.js:117:18)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.deleteScan (controllers/spectralController.js:1777:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=7f2ad534-f27f-4cab-a484-ff848e69dc2f.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    Upload Error: TransitionError: A reason is required to reopen completed spectral work in this batch.
+        at Object.preflightBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\spectralWorkItemStateService.js:186:32)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at processScans (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1676:24)
+        at exports.uploadBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1681:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_REOPEN_REQUIRED',
+      details: { affected: [ [Object] ] }
+    }
+
+      1696 |
+      1697 |     } catch (e) {
+    > 1698 |         console.error("Upload Error:", e);
+           |                 ^
+      1699 |         const error = stateRules.mapStateError(e);
+      1700 |         res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+      1701 |             ...(error.details && { details: error.details }) });
+
+      at error (controllers/spectralController.js:1698:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [SPECTRAL COMMIT] Error: TransitionError: A reason is required to reopen completed spectral work in this batch.
+        at Object.preflightBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\spectralWorkItemStateService.js:186:32)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.commitBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:751:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_REOPEN_REQUIRED',
+      details: { affected: [ [Object] ] }
+    }
+
+       998 |         res.json(responsePayload);
+       999 |     } catch (e) {
+    > 1000 |         console.error('[SPECTRAL COMMIT] Error:', e);
+           |                 ^
+      1001 |         const error = stateRules.mapStateError(e);
+      1002 |         res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+      1003 |             ...(error.details && { details: error.details }) });
+
+      at error (controllers/spectralController.js:1000:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=8e4736eb-2f5e-4951-8545-3237b8756af4.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=8e4736eb-2f5e-4951-8545-3237b8756af4.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=a37f1707-757a-4c5c-bb4c-de00aa67b2ca.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=a7652ecb-5cf2-4c67-a5e0-16d3024811b8.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=30bc4519-a17c-40fe-95ff-d6d7bd8a0e21.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    Upload Error: TransitionError: A reason is required to reopen completed spectral work in this batch.
+        at Object.preflightBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\spectralWorkItemStateService.js:186:32)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at processScans (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1676:24)
+        at exports.uploadBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1681:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_REOPEN_REQUIRED',
+      details: { affected: [ [Object], [Object] ] }
+    }
+
+      1696 |
+      1697 |     } catch (e) {
+    > 1698 |         console.error("Upload Error:", e);
+           |                 ^
+      1699 |         const error = stateRules.mapStateError(e);
+      1700 |         res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+      1701 |             ...(error.details && { details: error.details }) });
+
+      at error (controllers/spectralController.js:1698:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=a37f1707-757a-4c5c-bb4c-de00aa67b2ca.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=a7652ecb-5cf2-4c67-a5e0-16d3024811b8.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=30bc4519-a17c-40fe-95ff-d6d7bd8a0e21.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=a37f1707-757a-4c5c-bb4c-de00aa67b2ca.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [DEBUG] Processing Scan: Name=a7652ecb-5cf2-4c67-a5e0-16d3024811b8.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [DEBUG] Processing Scan: Name=30bc4519-a17c-40fe-95ff-d6d7bd8a0e21.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [SPECTRAL COMMIT] Error: TransitionError: A reason is required to reopen completed spectral work in this batch.
+        at Object.preflightBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\spectralWorkItemStateService.js:186:32)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.commitBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:751:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_REOPEN_REQUIRED',
+      details: { affected: [ [Object], [Object] ] }
+    }
+
+       998 |         res.json(responsePayload);
+       999 |     } catch (e) {
+    > 1000 |         console.error('[SPECTRAL COMMIT] Error:', e);
+           |                 ^
+      1001 |         const error = stateRules.mapStateError(e);
+      1002 |         res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+      1003 |             ...(error.details && { details: error.details }) });
+
+      at error (controllers/spectralController.js:1000:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item ffa0b329-ffc1-4b6c-aacd-bec91fcecede.csv: A supplied reason is required to reopen completed spectral work.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [COMMIT] Receipt save interrupted: Injected interrupted receipt save
+
+      726 |             } catch (receiptError) {
+      727 |                 // Committed scan identities can recover an interrupted receipt.
+    > 728 |                 console.warn('[COMMIT] Receipt save interrupted:', receiptError.message);
+          |                         ^
+      729 |             }
+      730 |         };
+      731 |         const receiptFor = (scan, item, sample) => ({ id: scan.id, filename: item.filename, sampleId: scan.sampleId,
+
+      at warn (controllers/spectralController.js:728:25)
+      at saveReceipt (controllers/spectralController.js:967:17)
+
+  console.error
+    [COMMIT] Error on item 41166dcb-50ce-4d32-ae84-903a09a4fed2.csv: A supplied reason is required to reopen completed spectral work.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item bcc0a5b9-31c5-4e43-966f-7593b4f2f14c.csv: A supplied reason is required to reopen completed spectral work.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=1555c0d5-c34d-4ca6-92d5-1321eefc11ab.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=1555c0d5-c34d-4ca6-92d5-1321eefc11ab.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=a47ed982-b5ab-4e92-aff8-4c1a762d723b.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=a47ed982-b5ab-4e92-aff8-4c1a762d723b.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in SUBMITTED cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item ec791b47-4750-4104-955d-a17705817466.csv: Work in SUBMITTED cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=f86a9256-9abf-4b8a-88fe-0c543ae2d958.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=f86a9256-9abf-4b8a-88fe-0c543ae2d958.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in ACCEPTED cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 499f7731-db7b-4f77-bf0f-2a5353518866.csv: Work in ACCEPTED cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=741de8e1-dfee-44f1-bc0d-20b8961bc33f.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=741de8e1-dfee-44f1-bc0d-20b8961bc33f.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in WAIVED cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item f63d44b5-18eb-42e9-abde-bda0d62fad4c.csv: Work in WAIVED cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=af99005e-6456-4e74-bcd9-242c19e3d5a1.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=af99005e-6456-4e74-bcd9-242c19e3d5a1.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in ON_HOLD cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 4da5cae2-ab77-4001-b72a-ff5db0b716b0.csv: Work in ON_HOLD cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=e11ccc7c-5086-4195-b020-5bd2acfe8a9a.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=e11ccc7c-5086-4195-b020-5bd2acfe8a9a.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in AWAITING_VERIFICATION cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 9043e557-27b3-4ba5-b876-c1e54ee71f58.csv: Work in AWAITING_VERIFICATION cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=cbe25afa-0203-48be-8d43-f558802dea9f.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=cbe25afa-0203-48be-8d43-f558802dea9f.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in NOT_ASSIGNED cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item a7bbcc75-402f-4cd3-9a20-983fb9006538.csv: Work in NOT_ASSIGNED cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=000c943f-e078-4a2c-a780-a1da4115d358.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=000c943f-e078-4a2c-a780-a1da4115d358.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: An amendment is required for approved spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item f34d2e61-04c0-41bf-9027-5b30ad8f1ad3.csv: An amendment is required for approved spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=779ca646-aadb-4fe3-823b-cf2eff0b9879.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=779ca646-aadb-4fe3-823b-cf2eff0b9879.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Sample material is closed.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item fd0c40bd-1569-47b4-aea5-ed5e5968302b.csv: Sample material is closed.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=64c61dfa-a5ea-46b0-8074-15eb69e1e754.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=64c61dfa-a5ea-46b0-8074-15eb69e1e754.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Sample material is closed.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 68752848-dea1-4aad-b2b7-5b2b2b072219.csv: Sample material is closed.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=cf3d821d-6050-4615-a311-b5738f208a88.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=cf3d821d-6050-4615-a311-b5738f208a88.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Sample material is closed.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 818bac54-c593-4a64-bdcd-1602f34eb31d.csv: Sample material is closed.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=c2cf5359-cb55-4402-b7e4-44e091ee38e0.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=c2cf5359-cb55-4402-b7e4-44e091ee38e0.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Sample intake was rejected.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item 39b55d18-9f64-45b2-bb55-75d19eba099e.csv: Sample intake was rejected.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=a98365d7-7959-469d-ade0-76e3fefb9e43.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=5ba3050b-4581-4a1e-b749-88502d4e8ed7.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=a98365d7-7959-469d-ade0-76e3fefb9e43.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [DEBUG] Processing Scan: Name=5ba3050b-4581-4a1e-b749-88502d4e8ed7.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Work in SUBMITTED cannot change spectral evidence.
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item b6b86e04-69c3-4c44-8d40-5c41fd2aca50.csv: Work in SUBMITTED cannot change spectral evidence.
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=50b4171a-b02b-4d9e-b878-7f795aaa0b9b.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=50b4171a-b02b-4d9e-b878-7f795aaa0b9b.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    [SPECTRAL] Transaction error: Injected acquisition audit failure
+
+      1636 |             } catch (caughtError) {
+      1637 |                 const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 1638 |                 console.error('[SPECTRAL] Transaction error:', txErr.message);
+           |                         ^
+      1639 |                 results.failed++;
+      1640 |                 results.errors.push({
+      1641 |                     filename: scanItem.filename,
+
+      at error (controllers/spectralController.js:1638:25)
+      at exports.uploadBatch (controllers/spectralController.js:1682:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [COMMIT] Error on item cb882ca9-d47d-4008-8e0c-e6b659b4ee38.csv: Injected acquisition audit failure
+
+      968 |             } catch (caughtError) {
+      969 |                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
+    > 970 |                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
+          |                         ^
+      971 |                 results.failed++;
+      972 |                 results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
+      973 |             }
+
+      at error (controllers/spectralController.js:970:25)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=233e8bb5-61a7-49ce-9875-0e47fc746557.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.error
+    Upload Error: TransitionError: A reason is required to reopen completed spectral work in this batch.
+        at Object.preflightBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\spectralWorkItemStateService.js:186:32)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at processScans (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1676:24)
+        at exports.uploadBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\spectralController.js:1681:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_REOPEN_REQUIRED',
+      details: { affected: [ [Object] ] }
+    }
+
+      1696 |
+      1697 |     } catch (e) {
+    > 1698 |         console.error("Upload Error:", e);
+           |                 ^
+      1699 |         const error = stateRules.mapStateError(e);
+      1700 |         res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+      1701 |             ...(error.details && { details: error.details }) });
+
+      at error (controllers/spectralController.js:1698:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f5d74585-0762-4939-bd23-242375dd8fe4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] Processing Scan: Name=c09025d2-ca4c-4aec-883d-8391d0b0e443.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [DEBUG] Processing Scan: Name=c09025d2-ca4c-4aec-883d-8391d0b0e443.csv, LabID=undefined, Modality=MIR
+
+      at log (controllers/spectralController.js:1195:21)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast SPECTRAL_UPDATE to 0 socket(s) in lab LAB-SPECTRAL-STATE-179
+
+      at log (wsServer.js:305:24)
+
+FAIL tests/contracts/audit_1_2_spectral_state.test.js (11.789 s)
+  √ a literal pre-190 measured orphan refuses the installer and COMPLETE startup without writes (403 ms)
+  √ link on COMPLETED without a supplied reopen reason refuses with zero changes (164 ms)
+  √ reasoned link atomically reopens and completes work, snapshots prior evidence and preserves Results (76 ms)
+  √ trash on COMPLETED preserves the summary, clears only completion time and audits its prior identity (55 ms)
+  √ trash on IN_PROGRESS changes no work item state, version, history or summary (33 ms)
+  √ single trash requires a supplied reason and writes no records (21 ms)
+  √ batch trash requires a supplied reason and writes no records (27 ms)
+  √ SUBMITTED work refuses spectral link with zero changes (25 ms)
+  √ SUBMITTED work refuses spectral trash with zero changes (24 ms)
+  √ ACCEPTED work refuses spectral link with zero changes (30 ms)
+  √ ACCEPTED work refuses spectral trash with zero changes (30 ms)
+  √ WAIVED work refuses spectral link with zero changes (29 ms)
+  √ WAIVED work refuses spectral trash with zero changes (32 ms)
+  × CANCELLED work refuses spectral link with zero changes (451 ms)
+  × CANCELLED work refuses spectral trash with zero changes (436 ms)
+  √ ON_HOLD work refuses spectral link with zero changes (28 ms)
+  √ ON_HOLD work refuses spectral trash with zero changes (24 ms)
+  √ AWAITING_VERIFICATION work refuses spectral link with zero changes (20 ms)
+  √ AWAITING_VERIFICATION work refuses spectral trash with zero changes (21 ms)
+  √ APPROVED parent refuses spectral link with zero changes (20 ms)
+  √ APPROVED parent refuses spectral trash with zero changes (27 ms)
+  √ ARCHIVED parent refuses spectral link with zero changes (22 ms)
+  √ ARCHIVED parent refuses spectral trash with zero changes (19 ms)
+  √ DISPOSED parent refuses spectral link with zero changes (27 ms)
+  √ DISPOSED parent refuses spectral trash with zero changes (19 ms)
+  √ CANCELLED parent refuses spectral link with zero changes (22 ms)
+  √ CANCELLED parent refuses spectral trash with zero changes (20 ms)
+  √ RECEIVED_REJECTED parent refuses spectral link with zero changes (20 ms)
+  √ RECEIVED_REJECTED parent refuses spectral trash with zero changes (23 ms)
+  √ mixed batch trash commits the good scan and changes no rows for the refused scan (55 ms)
+  √ late spectral audit failure rolls back scan trash, reopening, history and all audits (42 ms)
+  √ a concurrent work item version change loses the reopening CAS and rolls back every write (46 ms)
+  √ fresh parent scope is checked inside the trash transaction and a refusal changes no rows (65 ms)
+  √ a present incomplete preparation item overrides legacy DONE flags and refuses spectral changes (22 ms)
+  √ upload on COMPLETED without a reason refuses the scan and changes no rows (67 ms)
+  √ commit on COMPLETED without a reason refuses the scan and changes no rows (42 ms)
+  √ upload with a reason reopens, adds and completes atomically without changing Results (63 ms)
+  √ commit with a reason reopens, adds and completes atomically without changing Results (60 ms)
+  √ upload preflight preserves every table and staged bytes; the same request resends without duplicates (246 ms)
+  √ commit preflight preserves every table and staged bytes; the same request resends without duplicates (234 ms)
+  √ partial staged commit preserves the manifest and skips committed entries when its receipt is saved (178 ms)
+  √ partial staged commit preserves the manifest and skips committed entries when its receipt is interrupted (179 ms)
+  √ SKIP and terminal parse failures settle a staged commit with retained per-entry receipts (150 ms)
+  √ settled SKIP and parse receipts survive a partial manifest and merge without replay on retry (132 ms)
+  √ upload uses the trimmed entry reason when the request reason is only whitespace (54 ms)
+  √ commit uses the trimmed entry reason when the request reason is only whitespace (56 ms)
+  √ SUBMITTED work refuses upload acquisition with zero changes (29 ms)
+  √ SUBMITTED work refuses commit acquisition with zero changes (27 ms)
+  √ ACCEPTED work refuses upload acquisition with zero changes (24 ms)
+  √ ACCEPTED work refuses commit acquisition with zero changes (24 ms)
+  √ WAIVED work refuses upload acquisition with zero changes (25 ms)
+  √ WAIVED work refuses commit acquisition with zero changes (29 ms)
+  × CANCELLED work refuses upload acquisition with zero changes (439 ms)
+  × CANCELLED work refuses commit acquisition with zero changes (432 ms)
+  √ ON_HOLD work refuses upload acquisition with zero changes (36 ms)
+  √ ON_HOLD work refuses commit acquisition with zero changes (61 ms)
+  √ AWAITING_VERIFICATION work refuses upload acquisition with zero changes (30 ms)
+  √ AWAITING_VERIFICATION work refuses commit acquisition with zero changes (30 ms)
+  √ NOT_ASSIGNED work refuses upload acquisition with zero changes (33 ms)
+  √ NOT_ASSIGNED work refuses commit acquisition with zero changes (31 ms)
+  √ APPROVED parent refuses upload acquisition without changing scans, work, Results or audits (32 ms)
+  √ APPROVED parent refuses commit acquisition without changing scans, work, Results or audits (30 ms)
+  √ ARCHIVED parent refuses upload acquisition without changing scans, work, Results or audits (27 ms)
+  √ ARCHIVED parent refuses commit acquisition without changing scans, work, Results or audits (26 ms)
+  √ DISPOSED parent refuses upload acquisition without changing scans, work, Results or audits (25 ms)
+  √ DISPOSED parent refuses commit acquisition without changing scans, work, Results or audits (26 ms)
+  √ CANCELLED parent refuses upload acquisition without changing scans, work, Results or audits (24 ms)
+  √ CANCELLED parent refuses commit acquisition without changing scans, work, Results or audits (23 ms)
+  √ RECEIVED_REJECTED parent refuses upload acquisition without changing scans, work, Results or audits (29 ms)
+  √ RECEIVED_REJECTED parent refuses commit acquisition without changing scans, work, Results or audits (28 ms)
+  √ upload mixed acquisition commits ready work and writes nothing for a blocked item (66 ms)
+  √ commit mixed acquisition commits ready work and writes nothing for a blocked item (72 ms)
+  √ upload late audit failure rolls back new scans, supersession and both item transitions (53 ms)
+  √ commit late audit failure rolls back new scans, supersession and both item transitions (60 ms)
+  √ count-stable APPROVE review preserves completed work and commits only the scan audit (39 ms)
+  √ count-stable REJECT review preserves completed work and commits only the scan audit (35 ms)
+  √ count-stable UNDO review preserves completed work and commits only the scan audit (31 ms)
+  √ count-changing REJECT review on COMPLETED requires a reason and changes no rows (31 ms)
+  √ count-changing UNDO review on COMPLETED requires a reason and changes no rows (28 ms)
+  √ reasoned rejection of the sole counted scan leaves work in progress and preserves the earlier summary (45 ms)
+  √ reasoned REJECT review recompletes only when current linked non-failed evidence remains (50 ms)
+  √ reasoned UNDO review recompletes only when current linked non-failed evidence remains (57 ms)
+  √ approval of an unlinked scan creates no inferred association and completes no matching work (28 ms)
+  √ QC-FAIL scan approval does not satisfy completion or create Result values (33 ms)
+  √ SUBMITTED bound work refuses scan review with zero changes (21 ms)
+  √ ACCEPTED bound work refuses scan review with zero changes (33 ms)
+  √ WAIVED bound work refuses scan review with zero changes (20 ms)
+  × CANCELLED bound work refuses scan review with zero changes (428 ms)
+  √ ON_HOLD bound work refuses scan review with zero changes (26 ms)
+  √ AWAITING_VERIFICATION bound work refuses scan review with zero changes (20 ms)
+  √ APPROVED parent refuses scan review with zero changes (19 ms)
+  √ ARCHIVED parent refuses scan review with zero changes (20 ms)
+  √ DISPOSED parent refuses scan review with zero changes (19 ms)
+  √ CANCELLED parent refuses scan review with zero changes (18 ms)
+  √ RECEIVED_REJECTED parent refuses scan review with zero changes (27 ms)
+  √ mixed batch review preflight refuses before any writes and a reasoned resend commits each scan once (160 ms)
+  √ late scan review audit failure rolls back review, reopening and recompletion together (56 ms)
+  √ relinking cannot remove evidence from a SUBMITTED source item even if its new target is ready (31 ms)
+  √ relinking cannot remove evidence from a ACCEPTED source item even if its new target is ready (33 ms)
+  √ relinking cannot remove evidence from a WAIVED source item even if its new target is ready (38 ms)
+  × relinking cannot remove evidence from a CANCELLED source item even if its new target is ready (448 ms)
+  √ relinking cannot remove evidence from a ON_HOLD source item even if its new target is ready (33 ms)
+  √ relinking cannot remove evidence from a AWAITING_VERIFICATION source item even if its new target is ready (37 ms)
+  √ link of another COMPLETED item evidence requires a reason and writes no rows (42 ms)
+  √ supersede of another COMPLETED item evidence requires a reason and writes no rows (31 ms)
+  √ reasoned link preserves the previous item summary and completes only its new evidence owner (66 ms)
+  √ reasoned supersede preserves the previous item summary and completes only its new evidence owner (69 ms)
+
+  ● CANCELLED work refuses spectral link with zero changes
+
+    SqliteError: duplicate column name: workItemId
+
+      56 |         // Add only the current nullable model shape to this NEW owned legacy closure clone.
+      57 |         const orderShape = new Database(database.file);
+    > 58 |         try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
+         |                          ^
+      59 |         sample = await db.sample.findUnique({ where: { id: sampleData.id } });
+      60 |         item = await db.workItem.findUnique({ where: { id: itemData.id } });
+      61 |     } else {
+
+      at Database.exec (node_modules/better-sqlite3/lib/methods/wrappers.js:9:14)
+      at exec (tests/contracts/audit_1_2_spectral_state.test.js:58:26)
+      at tests/contracts/audit_1_2_spectral_state.test.js:207:19
+
+  ● CANCELLED work refuses spectral trash with zero changes
+
+    SqliteError: duplicate column name: workItemId
+
+      56 |         // Add only the current nullable model shape to this NEW owned legacy closure clone.
+      57 |         const orderShape = new Database(database.file);
+    > 58 |         try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
+         |                          ^
+      59 |         sample = await db.sample.findUnique({ where: { id: sampleData.id } });
+      60 |         item = await db.workItem.findUnique({ where: { id: itemData.id } });
+      61 |     } else {
+
+      at Database.exec (node_modules/better-sqlite3/lib/methods/wrappers.js:9:14)
+      at exec (tests/contracts/audit_1_2_spectral_state.test.js:58:26)
+      at tests/contracts/audit_1_2_spectral_state.test.js:207:19
+
+  ● CANCELLED work refuses upload acquisition with zero changes
+
+    SqliteError: duplicate column name: workItemId
+
+      56 |         // Add only the current nullable model shape to this NEW owned legacy closure clone.
+      57 |         const orderShape = new Database(database.file);
+    > 58 |         try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
+         |                          ^
+      59 |         sample = await db.sample.findUnique({ where: { id: sampleData.id } });
+      60 |         item = await db.workItem.findUnique({ where: { id: itemData.id } });
+      61 |     } else {
+
+      at Database.exec (node_modules/better-sqlite3/lib/methods/wrappers.js:9:14)
+      at exec (tests/contracts/audit_1_2_spectral_state.test.js:58:26)
+      at tests/contracts/audit_1_2_spectral_state.test.js:406:19
+
+  ● CANCELLED work refuses commit acquisition with zero changes
+
+    SqliteError: duplicate column name: workItemId
+
+      56 |         // Add only the current nullable model shape to this NEW owned legacy closure clone.
+      57 |         const orderShape = new Database(database.file);
+    > 58 |         try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
+         |                          ^
+      59 |         sample = await db.sample.findUnique({ where: { id: sampleData.id } });
+      60 |         item = await db.workItem.findUnique({ where: { id: itemData.id } });
+      61 |     } else {
+
+      at Database.exec (node_modules/better-sqlite3/lib/methods/wrappers.js:9:14)
+      at exec (tests/contracts/audit_1_2_spectral_state.test.js:58:26)
+      at tests/contracts/audit_1_2_spectral_state.test.js:406:19
+
+  ● CANCELLED bound work refuses scan review with zero changes
+
+    SqliteError: duplicate column name: workItemId
+
+      56 |         // Add only the current nullable model shape to this NEW owned legacy closure clone.
+      57 |         const orderShape = new Database(database.file);
+    > 58 |         try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
+         |                          ^
+      59 |         sample = await db.sample.findUnique({ where: { id: sampleData.id } });
+      60 |         item = await db.workItem.findUnique({ where: { id: itemData.id } });
+      61 |     } else {
+
+      at Database.exec (node_modules/better-sqlite3/lib/methods/wrappers.js:9:14)
+      at exec (tests/contracts/audit_1_2_spectral_state.test.js:58:26)
+      at tests/contracts/audit_1_2_spectral_state.test.js:514:19
+
+  ● relinking cannot remove evidence from a CANCELLED source item even if its new target is ready
+
+    SqliteError: duplicate column name: workItemId
+
+      56 |         // Add only the current nullable model shape to this NEW owned legacy closure clone.
+      57 |         const orderShape = new Database(database.file);
+    > 58 |         try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
+         |                          ^
+      59 |         sample = await db.sample.findUnique({ where: { id: sampleData.id } });
+      60 |         item = await db.workItem.findUnique({ where: { id: itemData.id } });
+      61 |     } else {
+
+      at Database.exec (node_modules/better-sqlite3/lib/methods/wrappers.js:9:14)
+      at exec (tests/contracts/audit_1_2_spectral_state.test.js:58:26)
+      at tests/contracts/audit_1_2_spectral_state.test.js:560:19
+
+PASS tests/contracts/audit_4_8_cross_check_install.test.js (8.369 s)
+  √ PRE_201 upgrades additively with every original analytical/QC/audit field, object, FK and receipt retained (993 ms)
+  √ real direct startup refuses missing cross-check installation before app startup and preserves the owned file (856 ms)
+  √ the exact fresh Prisma table is classified separately and receives only guards/receipt with0 backfill (539 ms)
+  √ foreign/partial/unmarked state foreign-table refuses dry-run and apply with exactly0 writes (565 ms)
+  √ foreign/partial/unmarked state extra-index refuses dry-run and apply with exactly0 writes (554 ms)
+  √ foreign/partial/unmarked state wrong-guard refuses dry-run and apply with exactly0 writes (597 ms)
+  √ foreign/partial/unmarked state partial-guard refuses dry-run and apply with exactly0 writes (583 ms)
+  √ foreign/partial/unmarked state populated-fresh refuses dry-run and apply with exactly0 writes (593 ms)
+  √ foreign/partial/unmarked state unmarked-complete refuses dry-run and apply with exactly0 writes (576 ms)
+  √ foreign/partial/unmarked state forged-complete-receipt refuses dry-run and apply with exactly0 writes (566 ms)
+  √ a late receipt refusal rolls back table, indexes and guards and retains all original evidence (474 ms)
+  √ every evidence column and deletion is immutable; sample/lab FKs retain the parent rows (1180 ms)
+  √ tampered prisma/migrations/20261010000100_cross_check_evaluation/migration.sql is refused by both loader and scanner rather than trusted as SQL (24 ms)
+  √ tampered prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json is refused by both loader and scanner rather than trusted as SQL (3 ms)
+  √ closed historical factory stays byte-bound, takes no arguments, and refuses unlisted/runtime callers (14 ms)
+  √ a changed loader body or mutable/aliased/parameterized import never grants a SQL authority (3 ms)
+  √ CLI requires an explicit database and one unambiguous execution mode (2 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9934fb3-4fdc-4268-9d52-9e2bc92dad71 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9934fb3-4fdc-4268-9d52-9e2bc92dad71 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-03
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9934fb3-4fdc-4268-9d52-9e2bc92dad71 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: d9934fb3-4fdc-4268-9d52-9e2bc92dad71 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-03
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-03
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-03
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-03
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-03
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-03
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-03
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-03
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-03
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-03
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: Error: Stored result flags must be repaired before review.
+        at invalidateReturnedResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportResultGovernance.js:143:33)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at commitReview.qcAcknowledgement (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1020:17)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:92:31
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      code: 'RESULT_FLAGS_INVALID'
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-AUDIT-03
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: PrismaClientKnownRequestError: 
+    Invalid `tx.auditLog.create()` invocation in
+    C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportResultGovernance.js:148:27
+    
+      145 await tx.result.update({ where: { id: result.id }, data: {
+      146     isValid: false, flags: JSON.stringify([...new Set([...flags, 'REVIEW_RETURNED'])])
+      147 } });
+    → 148 await tx.auditLog.create(
+    Foreign key constraint violated on the foreign key
+        at zr.handleRequestError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:8172)
+        at zr.handleRequestError [as handleAndLogRequestError] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7467)
+        at zr.handleAndLogRequestError [as request] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7174)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at a (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:5816)
+        at invalidateReturnedResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportResultGovernance.js:148:9)
+        at commitReview.qcAcknowledgement (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1020:17)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:92:31
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      code: 'P2003',
+      meta: {
+        modelName: 'AuditLog',
+        driverAdapterError: DriverAdapterError: ForeignKeyConstraintViolation
+            at BetterSQLite3Transaction.onError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:568:11)
+            at BetterSQLite3Transaction.performIO (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:563:12)
+            at BetterSQLite3Transaction.queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:504:63)
+            at queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43566)
+            at o (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:25753)
+            at e.xr (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:46795)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43535)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43973)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:42723)
+            at processTicksAndRejections (node:internal/process/task_queues:103:5)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:45151)
+            at e.run (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:42242)
+            at execute (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:61:815)
+            at qt.request (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:62:2327)
+            at Object.singleLoader (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:6569) {
+          cause: [Object]
+        }
+      },
+      clientVersion: '7.10.0'
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItemsBulk] Error: PrismaClientKnownRequestError: 
+    Invalid `tx.auditLog.create()` invocation in
+    C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportResultGovernance.js:148:27
+    
+      145 await tx.result.update({ where: { id: result.id }, data: {
+      146     isValid: false, flags: JSON.stringify([...new Set([...flags, 'REVIEW_RETURNED'])])
+      147 } });
+    → 148 await tx.auditLog.create(
+    Foreign key constraint violated on the foreign key
+        at zr.handleRequestError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:8172)
+        at zr.handleRequestError [as handleAndLogRequestError] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7467)
+        at zr.handleAndLogRequestError [as request] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7174)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at a (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:5816)
+        at invalidateReturnedResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportResultGovernance.js:148:9)
+        at commitReview.qcAcknowledgement (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1308:25)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:92:31
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1301:17
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.reviewWorkItemsBulk (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1170:9) {
+      code: 'P2003',
+      meta: {
+        modelName: 'AuditLog',
+        driverAdapterError: DriverAdapterError: ForeignKeyConstraintViolation
+            at BetterSQLite3Transaction.onError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:568:11)
+            at BetterSQLite3Transaction.performIO (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:563:12)
+            at BetterSQLite3Transaction.queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:504:63)
+            at queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43566)
+            at o (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:25753)
+            at e.xr (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:46795)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43535)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43973)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:42723)
+            at processTicksAndRejections (node:internal/process/task_queues:103:5)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:45151)
+            at e.run (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:42242)
+            at execute (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:61:815)
+            at qt.request (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:62:2327)
+            at Object.singleLoader (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:6569) {
+          cause: [Object]
+        }
+      },
+      clientVersion: '7.10.0'
+    }
+
+      1346 |         res.json({ success: true, count: results.length, results, errors });
+      1347 |     } catch (error) {
+    > 1348 |         console.error('[reviewWorkItemsBulk] Error:', error);
+           |                 ^
+      1349 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1350 |     }
+      1351 | };
+
+      at error (controllers/workItemController.js:1348:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewSubmission] Error: PrismaClientKnownRequestError: 
+    Invalid `tx.auditLog.create()` invocation in
+    C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportResultGovernance.js:148:27
+    
+      145 await tx.result.update({ where: { id: result.id }, data: {
+      146     isValid: false, flags: JSON.stringify([...new Set([...flags, 'REVIEW_RETURNED'])])
+      147 } });
+    → 148 await tx.auditLog.create(
+    Foreign key constraint violated on the foreign key
+        at zr.handleRequestError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:8172)
+        at zr.handleRequestError [as handleAndLogRequestError] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7467)
+        at zr.handleAndLogRequestError [as request] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:7174)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at a (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:5816)
+        at invalidateReturnedResults (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reportResultGovernance.js:148:9)
+        at commitReview.reason.reason (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:359:25)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:92:31
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:347:17
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:265:9) {
+      code: 'P2003',
+      meta: {
+        modelName: 'AuditLog',
+        driverAdapterError: DriverAdapterError: ForeignKeyConstraintViolation
+            at BetterSQLite3Transaction.onError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:568:11)
+            at BetterSQLite3Transaction.performIO (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:563:12)
+            at BetterSQLite3Transaction.queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:504:63)
+            at queryRaw (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43566)
+            at o (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:25753)
+            at e.xr (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:46795)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43535)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:43973)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:42723)
+            at processTicksAndRejections (node:internal/process/task_queues:103:5)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:45151)
+            at e.run (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:15:42242)
+            at execute (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:61:815)
+            at qt.request (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:62:2327)
+            at Object.singleLoader (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:69:6569) {
+          cause: [Object]
+        }
+      },
+      clientVersion: '7.10.0'
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:33:44)
+        at assertReviewable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:818:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItemsBulk] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:33:44)
+        at assertReviewable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1175:19)
+        at execute (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewAttemptService.js:81:16)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.reviewWorkItemsBulk (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1170:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      1346 |         res.json({ success: true, count: results.length, results, errors });
+      1347 |     } catch (error) {
+    > 1348 |         console.error('[reviewWorkItemsBulk] Error:', error);
+           |                 ^
+      1349 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1350 |     }
+      1351 | };
+
+      at error (controllers/workItemController.js:1348:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 49d55d38-12b3-4079-a506-5a6a407039b9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewSubmission] Error: TransitionError: A manager amendment is required for an approved sample.
+        at Object.assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultEvidenceService.js:14:15)
+        at assertAmendable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:33:44)
+        at assertReviewable (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:292:19)
+        at execute (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewAttemptService.js:81:16)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at exports.reviewSubmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\submissionController.js:265:9) {
+      statusCode: 409,
+      status: 409,
+      code: 'AMENDMENT_WORKFLOW_REQUIRED',
+      details: {}
+    }
+
+      376 |
+      377 |     } catch (error) {
+    > 378 |         console.error('[reviewSubmission] Error:', error);
+          |                 ^
+      379 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      380 |     }
+      381 | };
+
+      at error (controllers/submissionController.js:378:17)
+
+FAIL tests/contracts/audit_0_3_publication.test.js (7.839 s)
+  Audit 0.3: reviewed results and policy-aware publication
+    √ accepted SPEC_MIR publishes with exact approved scan and accepted pH result (282 ms)
+    √ accepted SPEC_VIS_NIR publishes with exact approved scan and accepted pH result (57 ms)
+    √ accepted SPEC_NIR publishes with exact approved scan and accepted pH result (52 ms)
+    √ accepted SPEC_FTIR publishes with exact approved scan and accepted pH result (48 ms)
+    √ unlinked spectral scan cannot evidence an accepted acquisition (37 ms)
+    √ superseded spectral scan cannot evidence an accepted acquisition (29 ms)
+    √ pending spectral scan cannot evidence an accepted acquisition (29 ms)
+    √ rejected spectral scan cannot evidence an accepted acquisition (27 ms)
+    √ wrong sample spectral scan cannot evidence an accepted acquisition (30 ms)
+    √ no scan or a scan linked to another item fails closed (41 ms)
+    √ SPEC_GRS continues to require and record scalar Results (254 ms)
+    √ SPEC_XRF continues to require and record scalar Results (110 ms)
+    × COMPLETED sample cannot publish (452 ms)
+    √ SUBMITTED_FULL sample cannot publish (28 ms)
+    √ PROCESSING sample cannot publish (24 ms)
+    √ REPEAT_REQUIRED analytical work blocks even an approved sample (22 ms)
+    √ SUBMITTED analytical work blocks even an approved sample (18 ms)
+    √ COMPLETED analytical work blocks even an approved sample (23 ms)
+    √ REQUIRED_BLOCKING never bypasses manager review (18 ms)
+    √ REQUIRED_WARN never bypasses manager review (20 ms)
+    √ ADVISORY never bypasses manager review (17 ms)
+    √ OFF never bypasses manager review (18 ms)
+    √ RUNNING QC blocks with a stable 409 (118 ms)
+    √ QC attached only to a result still blocks (59 ms)
+    √ a missing linked batch fails closed (1 ms)
+    √ unresolved policy mode fails closed (17 ms)
+    √ legacy accepted no-batch work with an explicit lab waiver can publish (43 ms)
+    √ unfinished drying and preparation gates do not count as analytical publication work (59 ms)
+    √ ungoverned current result blocks and lists params (35 ms)
+    √ an accepted item without a current valid result blocks (34 ms)
+    √ WAIVED work neither blocks nor prints a value (84 ms)
+    × CANCELLED work neither blocks nor prints a value (425 ms)
+    √ a mix of waived and accepted matches prints once and preserves the stored row (70 ms)
+    √ composite texture governs sand, silt, clay and texture without duplicating values (61 ms)
+    √ methodology conflicts prevent governance while a null method matches
+    √ two governing items print one current result only when both are accepted (62 ms)
+    √ QC_FAIL in REQUIRED_BLOCKING retains storage and applies the policy at read time (84 ms)
+    √ QC_FAIL in REQUIRED_WARN retains storage and applies the policy at read time (131 ms)
+    √ QC_FAIL in ADVISORY retains storage and applies the policy at read time (83 ms)
+    √ QC_FAIL in OFF retains storage and applies the policy at read time (83 ms)
+    √ REQUIRED_BLOCKING never prints an independently invalid ORIGINALLY_INVALID result (66 ms)
+    √ REQUIRED_BLOCKING never prints an independently invalid REVIEW_RETURNED result (69 ms)
+    √ REQUIRED_BLOCKING never prints an independently invalid QC_BATCH_REJECTED result (81 ms)
+    √ REQUIRED_BLOCKING never prints an independently invalid QC_BATCH_REANALYZE_REQUESTED result (67 ms)
+    √ REQUIRED_BLOCKING never prints an independently invalid METHOD_INVALID result (66 ms)
+    √ REQUIRED_WARN never prints an independently invalid ORIGINALLY_INVALID result (67 ms)
+    √ REQUIRED_WARN never prints an independently invalid REVIEW_RETURNED result (61 ms)
+    √ REQUIRED_WARN never prints an independently invalid QC_BATCH_REJECTED result (64 ms)
+    √ REQUIRED_WARN never prints an independently invalid QC_BATCH_REANALYZE_REQUESTED result (64 ms)
+    √ REQUIRED_WARN never prints an independently invalid METHOD_INVALID result (69 ms)
+    √ ADVISORY never prints an independently invalid ORIGINALLY_INVALID result (62 ms)
+    √ ADVISORY never prints an independently invalid REVIEW_RETURNED result (62 ms)
+    √ ADVISORY never prints an independently invalid QC_BATCH_REJECTED result (67 ms)
+    √ ADVISORY never prints an independently invalid QC_BATCH_REANALYZE_REQUESTED result (70 ms)
+    √ ADVISORY never prints an independently invalid METHOD_INVALID result (65 ms)
+    √ OFF never prints an independently invalid ORIGINALLY_INVALID result (71 ms)
+    √ OFF never prints an independently invalid REVIEW_RETURNED result (64 ms)
+    √ OFF never prints an independently invalid QC_BATCH_REJECTED result (73 ms)
+    √ OFF never prints an independently invalid QC_BATCH_REANALYZE_REQUESTED result (77 ms)
+    √ OFF never prints an independently invalid METHOD_INVALID result (74 ms)
+    √ malformed or unknown flags {bad cannot qualify for the QC-only exception (1 ms)
+    √ malformed or unknown flags {} cannot qualify for the QC-only exception
+    √ malformed or unknown flags ["QC_BATCH_FAILED",{}] cannot qualify for the QC-only exception
+    √ QC caveat is frozen in en (102 ms)
+    √ QC caveat is frozen in es (97 ms)
+    √ QC caveat is frozen in es-419 (111 ms)
+    √ QC caveat is frozen in fr (101 ms)
+    √ QC caveat is frozen in pt (103 ms)
+    √ individual RETURN preserves values, merges flags and prevents assembly (40 ms)
+    √ bulk RETURN preserves values, merges flags and prevents assembly (41 ms)
+    √ submission RETURN preserves values, merges flags and prevents assembly (49 ms)
+    √ RETURN of composite texture invalidates all four current parameters (33 ms)
+    √ RETURN with malformed flags fails closed and preserves all records (149 ms)
+    √ RETURN invalidates a shared current result even if another governing item is accepted (27 ms)
+    √ individual audit failure rolls back RETURN and result invalidation together (39 ms)
+    √ bulk audit failure rolls back RETURN and result invalidation together (32 ms)
+    √ submission audit failure rolls back RETURN and result invalidation together (39 ms)
+    √ individual RETURN of accepted work refuses amendments and preserves the published snapshot and all review records (52 ms)
+    √ bulk RETURN of accepted work refuses amendments and preserves the published snapshot and all review records (66 ms)
+    √ submission RETURN of accepted work refuses amendments and preserves the published snapshot and all review records (51 ms)
+
+  ● Audit 0.3: reviewed results and policy-aware publication › COMPLETED sample cannot publish
+
+    SqliteError: duplicate column name: workItemId
+
+      54 |             // Current nullable model shape only, on this NEW owned closure context before capture.
+      55 |             const orderShape = new Database(database.file);
+    > 56 |             try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
+         |                              ^
+      57 |             item = await database.client.workItem.findUnique({ where: { id: workItemId } });
+      58 |         } else {
+      59 |             await createSampleFixture(prisma, { data: sampleData });
+
+      at Database.exec (node_modules/better-sqlite3/lib/methods/wrappers.js:9:14)
+      at exec (tests/contracts/audit_0_3_publication.test.js:56:30)
+      at tests/contracts/audit_0_3_publication.test.js:160:36
+
+  ● Audit 0.3: reviewed results and policy-aware publication › CANCELLED work neither blocks nor prints a value
+
+    SqliteError: duplicate column name: workItemId
+
+      54 |             // Current nullable model shape only, on this NEW owned closure context before capture.
+      55 |             const orderShape = new Database(database.file);
+    > 56 |             try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
+         |                              ^
+      57 |             item = await database.client.workItem.findUnique({ where: { id: workItemId } });
+      58 |         } else {
+      59 |             await createSampleFixture(prisma, { data: sampleData });
+
+      at Database.exec (node_modules/better-sqlite3/lib/methods/wrappers.js:9:14)
+      at exec (tests/contracts/audit_0_3_publication.test.js:56:30)
+      at tests/contracts/audit_0_3_publication.test.js:214:19
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 5ba7092d-af29-4cdb-a206-acd1e7dcba0a) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/orderService.js:89:19)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.reviseAnalyses (services/orderService.js:86:16)
+      at Object.<anonymous> (tests/contracts/issue_209_order_revision_integration.test.js:253:5)
+
+PASS tests/contracts/issue_209_order_revision_integration.test.js (44.233 s)
+  √ a TEXTURE target retains all existing fraction owners including completed work and fixes four linked lines in one revision (1911 ms)
+  √ one or two retained fractions refuse a TEXTURE alias with named missing owners and zero row changes (2486 ms)
+  √ TEXTURE without explicit fraction selections still preserves all existing owners; explicit removal waives them with the reason (1260 ms)
+  √ initial generation for a new four-selection sample still creates only the logical TEXTURE measurement owner (1241 ms)
+  √ kit counts separate fraction line refusals and incomplete owner samples without touching the original triple (1347 ms)
+  √ installer dry/apply/repeat retains three ACTIVE histories, every line and a null historical OPEN identity (1401 ms)
+  √ a full reasoned revision supersedes all three ACTIVE ids while every old line and attempt stays byte-equivalent (1222 ms)
+  √ legacy single-match resolution writes only the newly inserted attempt link (1228 ms)
+  √ a legacy 0-revision/0-line context refuses with NO_LINE and no row writes (1277 ms)
+  √ a legacy 1-revision/2-line context refuses with AMBIGUOUS_LINE and no row writes (1283 ms)
+  √ a legacy 2-revision/1-line context refuses with MULTIPLE_ACTIVE_REVISIONS and no row writes (1296 ms)
+  √ a retained OPEN attempt fills with its original null order-line identity (1198 ms)
+  √ two concurrent complete revisions leave exactly one ACTIVE revision (1215 ms)
+  √ raw new-attempt insertion cannot select one ambiguous legacy line (1246 ms)
+  √ a new linked line cannot have its ownership or analysis rewritten (1289 ms)
+  √ a reasoned repeat receives its resolved legacy line at the new reservation INSERT (1194 ms)
+  √ scientific amendment authorisation links only its newly reserved attempt to the current order (1236 ms)
+  √ order revisions enforce permission and laboratory scope before changing retained rows (1237 ms)
+  √ the read-only kit collector preserves an active WAL triple and accounts for every nested retained snapshot (1373 ms)
+  √ the actual shipped post-start order programme preserves an owned WAL-mode original without sidecars (1742 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: wrong type (1223 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: unreviewed foreign key (1184 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: tampered index (1179 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: partial guard (1186 ms)
+  √ an actual Prisma-wrapped native order guard returns the service-owned stable code (1321 ms)
+  √ an actual initial revision INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction (1227 ms)
+  √ an actual initial line INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction (1226 ms)
+  √ runtime-reachable missing revision and missing matching line remain zero-write refusals and have distinct read-only impact lists (2627 ms)
+  √ an approved orphan remains non-editable and its prospective amendment impact requires STOP with sample ids, without writes (1318 ms)
+  √ first execution maps an actual wrapped INSERT refusal and rolls back all result and audit writes (1314 ms)
+  √ repeat reservation maps an actual wrapped INSERT refusal and rolls back its parent transition (1231 ms)
+  √ scientific reservation maps an actual wrapped INSERT refusal and retains its PENDING authorisation (1272 ms)
+
+PASS tests/security/audit_1_2_state_writes.test.js (11.599 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (8 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)"))
+  √ the original rehearsal cannot reintroduce a direct Sample deletion
+  √ nested connect association has one actual authority finding (1 ms)
+  √ nested set association has one actual authority finding (1 ms)
+  √ nested disconnect association has one actual authority finding
+  √ the closed FK runner refuses unknown case (84 ms)
+  √ the closed FK runner refuses configured candidate (80 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (3 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (2 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (2 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (1 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (1 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js (1 ms)
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql (1 ms)
+  √ legacy CLI launchers cannot import any fixture or test module (1 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (6 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js (1 ms)
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (1 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (6 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (8 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js
+  √ a direct sample write in a #190 test remains a finding outside the factory
+  √ a direct workItem write in a #190 test remains a finding outside the factory
+  √ a direct result write in a #190 test remains a finding outside the factory
+  √ a changed #190 historical factory digest is a scanner finding (9 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (7 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js (1 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (10857 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"])
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')")
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code]) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)')
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')")
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (43 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (42 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}})
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}})
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) }
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED') (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}`
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) }
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`) (1 ms)
+  √ a real temporary non-allowlisted test file fails the source guard (2 ms)
+  √ a shadowed file reader cannot impersonate a known schema load (1 ms)
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (1 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js (2 ms)
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (1 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF')
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0') (1 ms)
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF')
+  √ native pragma reads and enabled constraints remain permitted
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (1 ms)
+
+PASS tests/security/audit_1_2_migration_sources.test.js
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().evidence.sql); (14 ms)
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().guards.sql); (3 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(sources.evidence.sql); (2 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(evidenceCreates(sources.evidence.sql)); (1 ms)
+  √ unknown imports, members or aliases remain unresolved (2 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered services/workflowMigrationSources.js bytes never become a SQL exemption
+  √ a third registry entry changes the loader digest and stays unresolved (1 ms)
+
+Test Suites: 2 failed, 4 passed, 6 total
+Tests:       8 failed, 373 passed, 381 total
+Snapshots:   0 total
+Time:        84.918 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_4_8_cross_check_install.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_spectral_state.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_3_publication.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_209_order_revision_integration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_migration_sources.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-historical-column-spectral-publication-context-focused\report-original.json

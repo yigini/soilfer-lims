@@ -1,0 +1,187 @@
+{
+  "retainedUtc": "2026-10-14T12:41:16.214324+00:00",
+  "status": "CLOSED_CLASSIFIED_HISTORICAL_SPECTRAL_PUBLICATION_CONTEXT_FAILED_OR_INCOMPLETE",
+  "summary": {
+    "closedUtc": "2026-10-14T12:39:09.003198+00:00",
+    "exit": 1,
+    "suites": 6,
+    "tests": 381,
+    "passedTests": 373,
+    "failed": 8,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "scopeComments": [
+    6163271808,
+    6166518424,
+    6167740581
+  ],
+  "sourceDraftPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_4_6_calibration.test.js",
+    "server/tests/contracts/audit_4_6_calculation_install.test.js",
+    "server/tests/contracts/audit_4_1_run_start_header.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_4_3_keyboard_playwright.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_evidence.test.js",
+    "server/tests/contracts/audit_6_1_first_fill.test.js",
+    "server/tests/contracts/audit_6_3_report_content.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_install.test.js",
+    "server/tests/contracts/audit_1_2_spectral_state.test.js",
+    "server/tests/contracts/audit_0_3_publication.test.js"
+  ],
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/command.json": {
+      "bytes": 1986,
+      "sha256": "094ee9d21fe3620215a4e2b8fb19fdb079d6d45c10516fd38e5bd5dff0b9aae6"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/config-original.json": {
+      "bytes": 6617,
+      "sha256": "459ff09a3ae72d35ea66893a8b50a06d4efb36009a168f4b24bad32b68e70e74"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "e835231896a9c71d765d2c572fbdf802f3d145c8bf15f5faa2698955931e6601"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/physical-retained-terminal-index.json": {
+      "bytes": 2687,
+      "sha256": "4b6fdd8553a53bdfaebddac55047947a2729ca1c71718c3d5cfdc300ee38aac2"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/physical-retention-original.jsonl": {
+      "bytes": 2117,
+      "sha256": "2582ed2370134e02c55f21388322614207deb4445ea41abf57ab312a40dd823d"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/report-original.json": {
+      "bytes": 177441,
+      "sha256": "5380b9f6cd5792bfc95ef9428a43a5d0baebb9dbb475da6854e4ff946a525a8f"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/source-after.json": {
+      "bytes": 114964,
+      "sha256": "5de0ca465fa31c1f0279fb833fbda681b89370f053fca24f20ca89be2737a77d"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/source-before.json": {
+      "bytes": 114964,
+      "sha256": "5de0ca465fa31c1f0279fb833fbda681b89370f053fca24f20ca89be2737a77d"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/stderr-original.log": {
+      "bytes": 145443,
+      "sha256": "e3326fd693e5fad6a9731bb27889faa49522a844b4a83102b8003047dc16321e"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/stdout-original.log": {
+      "bytes": 1592,
+      "sha256": "6f0ee3d2f3398635dedf06ef922bb1f52976f6d91dd25037db54a1fbb658a1db"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-focused/summary.json": {
+      "bytes": 378,
+      "sha256": "bd8b1793de8b41a36025a4a0ee075790f338d44693e239cc17d6fa2d60776876"
+    }
+  },
+  "classifiedBeforeCorrections": 193,
+  "totalOriginalFailedCasesFullyResolvedBeforeThisRun": 85,
+  "remainingOriginalUnreviewed": 372,
+  "newFixtureSetupFailures": 8,
+  "cause": "Unnecessary schemaSql addition in current generated closure fixture: workItemId already exists; remove only new redundant shape blocks/imports in spectral/publication. PRE201 pinned shape is genuinely absent and its12 previouslyfailed cases nowpass. No runtime/schema owner/guard weakening.",
+  "reviewFiles": {
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-review/audit_0_3_publication.test.js.before-original": {
+      "bytes": 28823,
+      "sha256": "897da40fa44345bba41de6ee9858d521c7cddbf8d033e97c69cd7ca8d27e6fd0"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-review/audit_1_2_spectral_state.test.js.before-original": {
+      "bytes": 42597,
+      "sha256": "7be7e9441cb7f54654f1148edc6ced9805b266c0aa320fc05ec66d953912708c"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-review/audit_4_8_cross_check_install.test.js.before-original": {
+      "bytes": 16570,
+      "sha256": "13ee094d6b0fc6d9153ba013cca4cd77f66469c2a122818750afb196eaaf0608"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-review/fixture-additions-original.json": {
+      "bytes": 4067,
+      "sha256": "3cee0754bbe099c22acecf4513aaabf7662a8047d31f082607cc0183af4ebdb2"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-review/local-finalizer-retention-boundary.json": {
+      "bytes": 590,
+      "sha256": "9a10b4be4e06fd0691e070cc4d56875c4bad7f5cdf9a1db26b74cbfb55c8a3c2"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-column-spectral-publication-context-review/pre-correction-classification.json": {
+      "bytes": 310990,
+      "sha256": "4a8ca8b536e1a5e14e964836e902f60d400070cccc011052a0e8e142cc1a23b4"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "server/tests/contracts/audit_4_8_cross_check_install.test.js": {
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "13ee094d6b0fc6d9153ba013cca4cd77f66469c2a122818750afb196eaaf0608",
+    "afterSha256": "43ae68475fd59cb9650cb1c43cf18d856d4df4f1885019a15d27eb471e1682bc",
+    "additions": [
+      {
+        "afterStart": 12,
+        "bytes": "const { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');\nconst orderSource = loadOrderRevisionMigrationSource();\n"
+      },
+      {
+        "afterStart": 19,
+        "bytes": "    // Current Prisma needs its declared nullable shape on this NEW owned pre-201 context.\n    // The captured historical source, original guards and prior owner receipts are unchanged.\n    const orderShape = new Database(file);\n    try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }\n"
+      },
+      {
+        "afterStart": 32,
+        "bytes": "        await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, ['SOC'], {\n            username: 'system:fixture', role: 'SUPER_ADMIN', labId\n        }));\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_1_2_spectral_state.test.js": {
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "7be7e9441cb7f54654f1148edc6ced9805b266c0aa320fc05ec66d953912708c",
+    "afterSha256": "6b343fc841c44ad0060732c49b1b765bbaf2d4f976958bef97624783a7133bb1",
+    "additions": [
+      {
+        "afterStart": 14,
+        "bytes": "const { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');\nconst orderSource = loadOrderRevisionMigrationSource();\n"
+      },
+      {
+        "afterStart": 56,
+        "bytes": "        // Add only the current nullable model shape to this NEW owned legacy closure clone.\n        const orderShape = new Database(database.file);\n        try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }\n"
+      },
+      {
+        "afterStart": 67,
+        "bytes": "    // The valid accepted pH bystander has a retained order; spectral refusal states stay intact.\n    await db.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,\n        version: 1, status: 'ACTIVE', reason: 'Retained spectral-bystander pH order context',\n        lines: { create: { id: randomUUID(), analysis: 'PH_H2O', workItemId: null, isRequired: true, status: 'ACTIVE' } }\n    } }));\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_0_3_publication.test.js": {
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "897da40fa44345bba41de6ee9858d521c7cddbf8d033e97c69cd7ca8d27e6fd0",
+    "afterSha256": "543b96fc3bdfea11cab3ef2435aac4362135c717345b432d02a94d6d57ce44f2",
+    "additions": [
+      {
+        "afterStart": 18,
+        "bytes": "const Database = require('better-sqlite3');\nconst { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');\nconst orderSource = loadOrderRevisionMigrationSource();\n"
+      },
+      {
+        "afterStart": 54,
+        "bytes": "            // Current nullable model shape only, on this NEW owned closure context before capture.\n            const orderShape = new Database(database.file);\n            try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }\n"
+      },
+      {
+        "afterStart": 64,
+        "bytes": "        // Declare usable retained order facts without altering approval, work or QC metadata.\n        // The caller transaction also follows the existing owned legacy connection injection.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-03'), sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Retained publication measurement order context',\n            lines: { create: { id: id('LINE-03'), analysis: param, workItemId: null, isRequired: true, status: 'ACTIVE' } }\n        } }));\n"
+      }
+    ]
+  }
+}

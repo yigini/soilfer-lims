@@ -1,0 +1,9 @@
+{
+  "stockHooksChanged": false,
+  "stockTestSourceAssertionsChanged": false,
+  "originalHookSha256": "46b03847c7fba3c0949bdccabc9d72c58a5e10db31c70d5f638b54eac8de404c",
+  "newLocalHook": "WP/backlog-resume-20261013/issue209-local-owned-physical-retention-spectral-finalizer.cjs",
+  "newHookSha256": "90fd7048cb2efdb7485e5e18df0b6dd6f6216a919c6424f76463ad4b43b127df",
+  "extraTeardownOnly": "Exact literal-pre190 spectral orphan test finally path check + ownedDB/WAL/SHM cleanup, after all assertions; all other test body negative file-removal probes execute",
+  "productionOperations": 0
+}
