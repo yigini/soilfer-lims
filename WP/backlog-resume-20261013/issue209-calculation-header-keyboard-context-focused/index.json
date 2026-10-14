@@ -1,0 +1,182 @@
+{
+  "retainedUtc": "2026-10-14T12:25:41.411628+00:00",
+  "status": "CLOSED_CLASSIFIED_CALCULATION_HEADER_KEYBOARD_CONTEXT_PASS",
+  "summary": {
+    "closedUtc": "2026-10-14T12:24:34.654043+00:00",
+    "exit": 0,
+    "suites": 11,
+    "tests": 357,
+    "passedTests": 357,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "PASS"
+  },
+  "scopeComments": [
+    6163271808,
+    6166518424,
+    6167740581
+  ],
+  "sourceDraftPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_4_6_calibration.test.js",
+    "server/tests/contracts/audit_4_6_calculation_install.test.js",
+    "server/tests/contracts/audit_4_1_run_start_header.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_4_3_keyboard_playwright.test.js"
+  ],
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/command.json": {
+      "bytes": 2678,
+      "sha256": "fb4cabbfaf1abae495e7fdd2438ed573c8c5fea9ae9a0e6a17ab6d04a9d2ffef"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/config-original.json": {
+      "bytes": 6579,
+      "sha256": "5ec3d09d6396807d3e617427fdd1f3accf65e3292c963c59bc999fe21bbd3c44"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "d9ebfb7291bf8fb38a2fcd40f3c8c98c0f0492ffa98a8f74519f00c38d0f0d30"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/physical-retained-terminal-index.json": {
+      "bytes": 43633,
+      "sha256": "bafdaa98da147f66d6c9b03cf6d4776910f54050d753733a5b82e0b824a5c125"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/physical-retention-original.jsonl": {
+      "bytes": 36281,
+      "sha256": "59c2fd614813a8912e8579c1ebc14391561577e313f17200910d5e66b8c44387"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/report-original.json": {
+      "bytes": 157160,
+      "sha256": "79fb2a6884f3c178b3dd9866be6dbaf8f3641794d4583850b87651218c2a4180"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/source-after.json": {
+      "bytes": 114945,
+      "sha256": "bfd2f37de9eead15ae9d27f9de9f666df46f14b66441e3afbfba7e9f7713fdc8"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/source-before.json": {
+      "bytes": 114945,
+      "sha256": "bfd2f37de9eead15ae9d27f9de9f666df46f14b66441e3afbfba7e9f7713fdc8"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/stderr-original.log": {
+      "bytes": 95070,
+      "sha256": "1b2a2c8901dc2d08cd1778f7228db4b00f9d1c2e3636cd2ff9f328b23bd41cc1"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/stdout-original.log": {
+      "bytes": 2199,
+      "sha256": "3014e9f8de582aab45df69812f6441c32f37cbd19e709624cadc71a1e65f7a3b"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-focused/summary.json": {
+      "bytes": 363,
+      "sha256": "b3a2b84988f88d838475f5bca1adbe14ad503d807ee02a291755ce852625f4a0"
+    }
+  },
+  "classifiedBeforeCorrections": 46,
+  "remainingFailedCases": 604,
+  "reviewFiles": {
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-review/audit_1_2_guard_installer.test.js.before-original": {
+      "bytes": 42982,
+      "sha256": "2e08b96182da09a4fd81e0fd7e691801b214c3c2d750409f37a66b1f3dd4ccc9"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-review/audit_4_1_run_start_header.test.js.before-original": {
+      "bytes": 21951,
+      "sha256": "cbe16fe75c90472358707e4e2d8e6fb0c4a50614c14f097318f1338104fe6b30"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-review/audit_4_3_keyboard_playwright.test.js.before-original": {
+      "bytes": 10810,
+      "sha256": "c40c8a56d4675fb4befe32ad8c68c0ab2be72675d314bbaed70a07fcd506358e"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-review/audit_4_6_calculation_install.test.js.before-original": {
+      "bytes": 39618,
+      "sha256": "59f98184371ce2e627206fa34a239d323b8cce3769a006b28d926ffeff90af7b"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-review/audit_4_6_calibration.test.js.before-original": {
+      "bytes": 50469,
+      "sha256": "1e94e06629d843fdda5fd5aadcdac06b8a4625ea2b8692e55863de315928fe79"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-review/fixture-additions-original.json": {
+      "bytes": 3737,
+      "sha256": "3c2154012ae800b295f9bb2d7c444c76ebcf0a9f4b19557828e6bf386e004562"
+    },
+    "WP/backlog-resume-20261013/issue209-calculation-header-keyboard-context-review/pre-correction-classification.json": {
+      "bytes": 58174,
+      "sha256": "3bd4b5484e846a4b41932a1a54c87a67df0b3bee08b838f663a2d782f8a97634"
+    }
+  }
+}

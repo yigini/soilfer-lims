@@ -1,0 +1,1093 @@
+{
+  "recordedUtc": "2026-10-14T12:17:36.706294+00:00",
+  "reviewedBeforeFixtureChanges": true,
+  "sourceAudit": "2b05acff89b473e6477e35bb14628c0a6c449092",
+  "main": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+  "supportedBaseline": "48d0e526ded03232ac8516dd867f4b14923bdb58",
+  "scopeComments": [
+    6163271808,
+    6166518424,
+    6167740581
+  ],
+  "cases": [
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "the actual Result writer recomputes every reading, refuses tampering and atomically freezes its curve and raw inputs",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "response 5.002 compares extract mg/L with the highest standard and retains an amber flag=true after mg/kg conversion",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "response 4.998 compares extract mg/L with the highest standard and retains an amber flag=false after mg/kg conversion",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a future failed curve blocks stored completion without changing an earlier Result or its frozen calculation",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a passing recalibration binds later readings to revision2 while the original Result/calculation remain on revision1",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "no-template completion retains the historical path for lab null without writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "no-template completion retains the historical path for lab unresolvable-owned-lab without writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "UPDATE and DELETE are refused on every calculation table, preserving all original rows",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "an actual calculation SQL context abort becomes a stable409 through the mapped repeat controller",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "the actual curve governs extract 1 despite generic maximum 0.1, with HTTP preview and immutable flags",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "the actual curve governs extract 4 despite generic maximum 1000, with HTTP preview and immutable flags",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a method with no active calculation keeps the generic #197 calibration maximum",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a calculated transcription correction keeps the original basis after newer-active, preserving every original scientific field",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a calculated transcription correction keeps the original basis after deactivated, preserving every original scientific field",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a correction of a correction keeps the first calculation basis and binds its own original evidence",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "calculated final-only, mismatched output and partial raw-input corrections refuse with exact zero-write snapshots",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a correction cannot request a different activationId basis",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a correction cannot request a different templateId basis",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a correction cannot request a different templateVersion basis",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a correction cannot request a different curveId basis",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a revised original curve refuses a transcription correction without writes to either Result or calculation",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "the actual correction HTTP route recomputes the extract-range flag and binds only stored ids",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calibration.test.js",
+      "test": "a calculation field on a non-calculated Result is refused, while its old final-only correction remains available",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+        "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+        "sourceRanges": [
+          [
+            59,
+            70
+          ],
+          [
+            322,
+            334
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL permits a deactivated original basis only through the complete existing correction witness",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with no witness, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with Result.sampleId, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with Result.param, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with Result.attemptId, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with Result.replicateNo, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with Result.methodologyId, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with Result.batchId, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with Result.equipmentId, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with Result.equipmentReadiness, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with Result.basis, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with Result.provenance, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with ResultCalculation.templateId, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with ResultCalculation.templateVersion, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with ResultCalculation.activationId, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with ResultCalculation.curveId, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with ResultCalculation.parameters, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with ResultCalculation.conversionFactor, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with ResultCalculation.unitConversion, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_6_calculation_install.test.js",
+      "test": "SQL refuses a historical activation with revised curve, preserving all owned rows and objects byte for byte",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+        "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+        "sourceRanges": [
+          [
+            107,
+            120
+          ],
+          [
+            132,
+            149
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_1_run_start_header.test.js",
+      "test": "real HTTP keeps the existing WorkItem/live-revision rule for legacy-null",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: expect(received).toMatchObject(expected)",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "legacy-null case manually creates fresh sample and WI, then retained unknown first-start batch context",
+        "change": "Initial sample order before legacy batch normalization. Keep instrument/source/method UNKNOWN evidence and live-method assertions unchanged.",
+        "sourceRanges": [
+          [
+            96,
+            126
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_1_2_guard_installer.test.js",
+      "test": "a complete guarded database passes the read-only gate, listens and answers a real health request",
+      "observedCategory": "STARTUP_OWNER_PREREQUISITE",
+      "firstMessage": "Error: The real app refused startup: {\"error\":\"ORDER_REVISION_STARTUP_REQUIRED\",\"message\":\"Run the reviewed order-revision installer before starting the lab.\",\"nextStep\":\"Keep the lab stopped and follow docs/audit/209-order-revisions.md.\",\"differences\":[]}",
+      "productionReachabilityClassification": "COMPLETE_CURRENT_STARTUP_OWNER_CONTEXT",
+      "caseInspection": {
+        "context": "complete generated database startup installs all released owners through214 but omits new209owner",
+        "change": "Install209 only at the complete-positive boundary after214. Keep all preceding missing-owner refusals/fingerprints and startup assertions unchanged.",
+        "sourceRanges": [
+          [
+            443,
+            477
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    },
+    {
+      "suite": "audit_4_3_keyboard_playwright.test.js",
+      "test": "real Chromium types and records 40 values through the production app with keyboard input only",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: expect(received).toMatchObject(expected)",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT",
+      "caseInspection": {
+        "context": "40 newly assembled PROCESSING samples and fresh analytical WIs bypass current intake",
+        "change": "Initial order for each of the40 samples before the actual HTTP/browser workflow; no keyboard/40-row/commit assertion changes.",
+        "sourceRanges": [
+          [
+            28,
+            37
+          ]
+        ]
+      },
+      "legacyMissingOrderShape": "REACHABLE_FROM_SUPPORTED_48D_CAUGHT_ORDER_FAILURE; retained zero-write refusal and separate readonly kit lists; this positive fixture is not an orphan repair"
+    }
+  ],
+  "sourceBefore": {
+    "server/tests/contracts/audit_4_6_calibration.test.js": {
+      "sha256": "1e94e06629d843fdda5fd5aadcdac06b8a4625ea2b8692e55863de315928fe79",
+      "bytes": 50469,
+      "context": "fixture()/additionalItem; no-template completion creates P_BRAY1 on the owned real-lab sample before passing an in-memory historical lab projection",
+      "change": "Initial order for fresh P_OLSEN owners; explicit reasoned full-target revision when the test adds P_BRAY1. Preserve the later null/unresolvable lab projection and all scientific assertions.",
+      "sourceRanges": [
+        [
+          59,
+          70
+        ],
+        [
+          322,
+          334
+        ]
+      ]
+    },
+    "server/tests/contracts/audit_4_6_calculation_install.test.js": {
+      "sha256": "59f98184371ce2e627206fa34a239d323b8cce3769a006b28d926ffeff90af7b",
+      "bytes": 39618,
+      "context": "correction SQL fixture creates fresh PROCESSING P_OLSEN item and a second valid attempt witness before literal tamper probes",
+      "change": "Initial order before each valid measurement witness; leave every malformed Result/ResultCalculation mutation and zero-write assertion unchanged.",
+      "sourceRanges": [
+        [
+          107,
+          120
+        ],
+        [
+          132,
+          149
+        ]
+      ]
+    },
+    "server/tests/contracts/audit_4_1_run_start_header.test.js": {
+      "sha256": "cbe16fe75c90472358707e4e2d8e6fb0c4a50614c14f097318f1338104fe6b30",
+      "bytes": 21951,
+      "context": "legacy-null case manually creates fresh sample and WI, then retained unknown first-start batch context",
+      "change": "Initial sample order before legacy batch normalization. Keep instrument/source/method UNKNOWN evidence and live-method assertions unchanged.",
+      "sourceRanges": [
+        [
+          96,
+          126
+        ]
+      ]
+    },
+    "server/tests/contracts/audit_1_2_guard_installer.test.js": {
+      "sha256": "2e08b96182da09a4fd81e0fd7e691801b214c3c2d750409f37a66b1f3dd4ccc9",
+      "bytes": 42982,
+      "context": "complete generated database startup installs all released owners through214 but omits new209owner",
+      "change": "Install209 only at the complete-positive boundary after214. Keep all preceding missing-owner refusals/fingerprints and startup assertions unchanged.",
+      "sourceRanges": [
+        [
+          443,
+          477
+        ]
+      ]
+    },
+    "server/tests/contracts/audit_4_3_keyboard_playwright.test.js": {
+      "sha256": "c40c8a56d4675fb4befe32ad8c68c0ab2be72675d314bbaed70a07fcd506358e",
+      "bytes": 10810,
+      "context": "40 newly assembled PROCESSING samples and fresh analytical WIs bypass current intake",
+      "change": "Initial order for each of the40 samples before the actual HTTP/browser workflow; no keyboard/40-row/commit assertion changes.",
+      "sourceRanges": [
+        [
+          28,
+          37
+        ]
+      ]
+    }
+  },
+  "remainingFailedCasesUnreviewed": 604,
+  "runtimeReachableGaps": [
+    "Supported48d caught initial order failure leaves WIs without ACTIVE revision or matching line; new INSERT refuses and kit lists separately.",
+    "APPROVED/REPORTED/noneditable orphan amendment refuses before sample transition; kit nonzero approved list STOP, separate forward-fix scope."
+  ],
+  "negativeProof": "issue209-orphan-impact-intake-rollback-focused/index.json; 6/214 closedPASS, current intake initial-revision and initial-line failures roll back all WIs/orders/lines/audits",
+  "productionConnections": 0,
+  "productionOperations": 0,
+  "assertionsToChange": 0
+}

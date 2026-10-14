@@ -108,6 +108,8 @@ async function correctionSqlFixture({ resultField, calculationField, noWitness =
             dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date() } });
         const item = await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: sample.id, labId: curve.labId, analysis: 'P_OLSEN',
             methodologyId: curve.methodologyId, assignedTo: manager.username, status: 'IN_PROGRESS', history: '[]' } });
+        // Give the valid witness current intake's order before the unchanged SQL tamper probes.
+        await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, ['P_OLSEN'], manager));
         const reporting = await db.unit.findUnique({ where: { code: 'mg/kg' } });
         const inputs = { absorbance: 1, blankConcentration: 0, extractVolume: 20, dilutionFactor: 1, sampleMass: 1, moistureCorrectionFactor: 1 };
         const computed = calculate(template, inputs, { numberFormat: { decimal: '.', thousands: ',' },
@@ -136,6 +138,7 @@ async function correctionSqlFixture({ resultField, calculationField, noWitness =
                 assignedLab: curve.labId, receptionDate: new Date() } });
             await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: otherSample.id, labId: curve.labId, analysis: 'P_OLSEN',
                 assignedTo: manager.username, status: 'IN_PROGRESS', history: '[]' } });
+            await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, otherSample, ['P_OLSEN'], manager));
             target.attemptId = (await createExecutionResultFixture(db, { data: { id: randomUUID(), sampleId: otherSample.id,
                 param: 'P_OLSEN', value: original.value, numericValue: original.numericValue, unit: original.unit } })).attemptId;
         } else if (resultField === 'methodologyId') target.methodologyId = (await db.methodology.create({ data: { id: randomUUID(),

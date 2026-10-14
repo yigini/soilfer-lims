@@ -1,0 +1,751 @@
+{
+  "terminalUtc": "2026-10-14T12:24:34.654043+00:00",
+  "allTeardownTargetsRetained": true,
+  "files": [
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_09527150-83e3-4c97-90c0-8a62de9d35e1.db",
+      "bytes": 1921024,
+      "sha256": "50feca34913bcc9c825cf6a83882f3088b1b2b7ba86d5cc41d1b12c568ae2edf"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_5932bf26-10a6-47e1-977f-8616ab3ad7e7.db",
+      "bytes": 1925120,
+      "sha256": "372adfc2028d0ede3a46f21dff37e29e241ef6c1145d37796bf312c643c40bbf"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_f65e19d8-2f08-447b-8c2b-a9314248771d.db",
+      "bytes": 1925120,
+      "sha256": "26a8d3cc954416398c9bfdd68d6712594f1fc62ee6730679a3d529fb1718b8fd"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_775c3990-4202-427b-a3f1-24f5d53a1c4c.db",
+      "bytes": 1925120,
+      "sha256": "c548ca55f23fe5f7c5e17e524ce67611351ca095c485ba946c9aa1e39fbb8b22"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_6eca078e-ddef-4818-bd12-bbacf3d92a36.db",
+      "bytes": 1933312,
+      "sha256": "1722025d988985fc23d5cc85ed798d61514f6ba5d32ea11584f4d16922dd6b3c"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_ca933df0-ebcd-452b-9781-6c1c844ba34a.db",
+      "bytes": 1921024,
+      "sha256": "c94da052226540c782b1546b919bbaffcc09ee147ba30df44a785bf11accfdc6"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_14cc7940-26e8-4cf0-824d-8b8bf0dfb33c.db",
+      "bytes": 1929216,
+      "sha256": "99d9830800f9b3902007e0922e7a9bc28e122f4c101f4f972573c89e0c8b2a26"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_62a9f2d8-c9cd-4ce0-87e4-408740f8237c.db",
+      "bytes": 1933312,
+      "sha256": "1857b59086533928bfeb150b532bfd72f874591ec7b943006cf48375ff357139"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_7e0d6163-4881-4712-a372-0d3e8878e0ca.db",
+      "bytes": 1921024,
+      "sha256": "c04a69d1d1255fa5d5b2a7656b10f7147f6fed0127466da1b7e761358bbc7082"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_7951fd76-c0e9-4b41-9c51-bc1a8d04246b.db",
+      "bytes": 1916928,
+      "sha256": "bacd87f759af1463229bd1f7bee6597984e3d7fb296a88cb854e7ca19b4a9bb0"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_d8ee1900-c54c-4213-bd4d-05cd50c91513.db",
+      "bytes": 1916928,
+      "sha256": "64060e0c3457c62e6e5e2d90d6a8852cc37aeadc817ab645e90be6126e84d4cb"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_2c3c9da7-5639-42b4-8100-b8767da06c02.db",
+      "bytes": 1843200,
+      "sha256": "1d58bbd8eb832a96dfd41bebca9356c6ec58a0b620d8cf8fb2537638c8ef5b12"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_278d7eb3-cd81-4c73-875a-8999d78360d0.db",
+      "bytes": 1921024,
+      "sha256": "4dc6746bd42803b73dea92a955d12de4df2494d3f50b43268f23a6ceac9ea5cd"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_5c330ae4-dd9d-4e80-a8b0-4ddb31e3ce0c.db",
+      "bytes": 1843200,
+      "sha256": "a0f3eee6dfe1eb4d1a963c9999af23ed1623c899f5022e725c7334f39c0a527e"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_7615517e-e704-4521-80ff-b0bd02d69a76.db",
+      "bytes": 1961984,
+      "sha256": "e4fbe4ce251e0dadfc89ec16df7667d87d6597cd5794fa6da57af7a0cb382948"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_8baa48e2-1870-4b6a-88cf-5eb329c48fc2.db",
+      "bytes": 1961984,
+      "sha256": "90497ed9227ffc2e31ad650716228c5c7594f0b92a9af9377ec3fbec762decf9"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_477fd422-f083-4a5c-902a-274fb509ea2f.db",
+      "bytes": 1961984,
+      "sha256": "2364b326970b0bd090169fa5f4ccaa7b0bfcb76eaaef539cfa40457bb9d2cf75"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_97361dd7-9c77-459b-bbae-b3519f98ed05.db",
+      "bytes": 1961984,
+      "sha256": "39fa31dadb28783539480edcfba0ce874dafac721de634e24acc0487bc0839a8"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_9cfb513c-39c8-43ba-97aa-87379f3f96d2.db",
+      "bytes": 1961984,
+      "sha256": "f7df4b7a12d5952cb16e40f1c2ef39caa777860db29f77a9f3d8b70b4c1552d4"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_fda9588b-517b-4ad5-bbad-13aac88d396a.db",
+      "bytes": 1961984,
+      "sha256": "674b24a6518ca1e3e16ba959ed7b4af983cf929825fe628cfbaf524f7626531d"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_4d1920d6-6f42-4e65-8b88-01635ae0441c.db",
+      "bytes": 1961984,
+      "sha256": "d568b5e0a93cbf261827f75b70d625846f07dc667bca664c73ed7a064ea19994"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_562ed2a9-8c42-412a-9446-dbe27bf62d84.db",
+      "bytes": 1961984,
+      "sha256": "2144e2b35ff7d3036664a3606798255c2c6873b8736b87aa85bff192fc4441fe"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_6021fb53-63c7-489b-9448-1447eb62b981.db",
+      "bytes": 1843200,
+      "sha256": "d2a3e74a2f11c1b1a57197a753ecf85fe563faff9f7fffec1cf88e11f8b41303"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_81b6a30a-001e-4a43-9879-646318fe8acc.db",
+      "bytes": 1949696,
+      "sha256": "c6ceabc3646bbda14f6e754fa69465e58b9c31cf8d1980d45b7f5259e4010a25"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_ec0a41d8-fa4b-41c8-b75f-17b4c6c758b7.db",
+      "bytes": 1851392,
+      "sha256": "6cc20876db0a873e14ceb13d70b1f4addb68671324abd5a82a5d3a7804601dfc"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_800387a0-099d-41fd-9a54-39e45100c881.db",
+      "bytes": 1851392,
+      "sha256": "97776ec41dfa365c0208f2436aab7fa7a93eba71876acd2c6ef2cf393230ed5d"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_473fec0e-9345-437b-84ed-35c4a2acd98d.db",
+      "bytes": 1925120,
+      "sha256": "6bdb78994dad26111ba530428d88290cd0ee23ebf6cc88a75c33503aa2b8c45a"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_23d4b5ec-68f9-4da4-82e1-2ef8dea99f2d.db",
+      "bytes": 1925120,
+      "sha256": "89729bd80edbd77f6d747e9c252126f257720f2b48d5502017a7cb18a82a95e2"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_08ab65f8-ceaa-452b-bb12-33b9185fdd03.db",
+      "bytes": 1961984,
+      "sha256": "436e2ff8cb85760b9a81c274bae2fa37fc7f288de92d5681f7f40677496455d5"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_115f0a40-ada4-4219-b2a2-37f8a6dad0fc.db",
+      "bytes": 1961984,
+      "sha256": "7d18c3af8592015dcbc6fab08b87213a82df3572f6625e66909b865ecc45bf91"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_72871de7-bd16-4ca5-bb3d-1997410e3787.db",
+      "bytes": 1953792,
+      "sha256": "98a880b8a981357fd94aafdb42fcad3298d77017b8bba086b24596a4ae4051da"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_640b5048-988b-45c9-990d-aae390150ba0.db",
+      "bytes": 1941504,
+      "sha256": "30c967c20f3d19ac2301633c9bbf3f66bd08c7180b2a5d69f0bbb3e3700a965b"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_017ad5aa-a938-491e-9e5b-b00acab3130c.db",
+      "bytes": 1937408,
+      "sha256": "7256dc350b2da8e469cfd151c63f138c1394880c8e7ec6f28766aafb60e8f21e"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_6e677027-0c13-4531-9548-bb368ad9d3a4.db",
+      "bytes": 1945600,
+      "sha256": "3191ac12ed5ba44cd4f35b4d640ff8751122a8d1e84a82a505c9de89d6b4f528"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_ff4cdb52-0c7f-4408-bebf-28dc0fa58788.db",
+      "bytes": 1925120,
+      "sha256": "14e77004e5d2c2e4787b8e2fbe03c99ff0d967665cae16f5106af0e97d94a91b"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_67e2b828-6e84-48a1-a820-8ec4aa3ebadf.db",
+      "bytes": 1925120,
+      "sha256": "db7c0a9e4400606137823fe712c4410da412cd393e2712c8576e0b9cdba266b9"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_9f2401ad-4b15-45ce-a633-c2fdbf5df45d.db",
+      "bytes": 1925120,
+      "sha256": "8dcc1a6487240052184f9afb66e2e391fc66f62f6126cafb817d3936776532f6"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_ff77be1e-1fa0-4e6d-962d-130f73b5751c.db",
+      "bytes": 1925120,
+      "sha256": "fd8ec7e719c9b4040c61efe077f4a342043cff90ca73b3fd2d544ea9b635f4f1"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_49d548d4-e9e4-4ae8-bcbe-5770236b8c40.db",
+      "bytes": 1925120,
+      "sha256": "1285350300779cb878b5adc56c63703dbb5ed1affb7e7d5404a271b69be5e890"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_79a9eb14-6248-476e-a12f-b3530a8c3e5e.db",
+      "bytes": 1933312,
+      "sha256": "65c8c50df7d0261e2c53f90e844a912d16ec1bea0f477798170ddc2bdd4e92b8"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_e69e5bcc-0924-4f35-89cd-db11ca7d2438.db",
+      "bytes": 1929216,
+      "sha256": "de952d3c82bd03ff59da9b444536a4ed2407163c4c9d29c00ac4cd5995758d29"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_fbf2b362-d0e7-468b-a419-c8a975f08a0c.db",
+      "bytes": 1925120,
+      "sha256": "95176c763ff007778bb1e775b13270d4dda93e03ed4b70202f8c8e3a7a5f4a76"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calibration_d433ea63-91c9-444b-9b58-2ea16f0ea99a.db",
+      "bytes": 1921024,
+      "sha256": "02e68608c0b3e054101f6dfd3ca650335bd203901aaca398146d399333843696"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_fdfa536a-3b42-446b-99ff-ff18c0572ffc.db",
+      "bytes": 1630208,
+      "sha256": "b7ae7c99634cc75a4d2f6a8b6fb26d9ae5b907437d20cc637de72423cae0fdc1"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_64ae7f8b-bcc5-4819-a4d9-572d29dde549.db",
+      "bytes": 1630208,
+      "sha256": "730b18301c0d216fde0533d5d017097a6e2134dd69e0e92099271c80c118161b"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_da48534d-d7d8-434e-b3a5-8ad4e1dc0042.db",
+      "bytes": 1630208,
+      "sha256": "88a942532fe5f582b3b7e5b5be795bd326c95e98f3f68b6834cb915b32d979b8"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_63feeafa-9bca-4401-a6db-ae7a78ddd05b.db",
+      "bytes": 1630208,
+      "sha256": "5854a50e762430298ea73f611d40ea013d4975531ce3a268a280a00eda575256"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_4f677360-3caf-44ce-9499-5adb24b8639f.db",
+      "bytes": 1630208,
+      "sha256": "94d2312279029fe2153377afd6917238e263fb69393f958f28dcdf2c7d5ea3a0"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_53b47412-273b-4661-95cb-19cdaada703e.db",
+      "bytes": 1630208,
+      "sha256": "b12e78a1940d294509d55671953139f2d96fd013e1fd109008c4381978314fb0"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_cad44ff6-8690-427d-91b7-024c70629981.db",
+      "bytes": 1630208,
+      "sha256": "11c2fa1b49af0b018a3f58fc652eafcefe41f1fb95592afd743a3c1345e3c764"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_51a8ff28-de76-4d3d-aedf-df9237860376.db",
+      "bytes": 1630208,
+      "sha256": "b8f2d4e7025257025bb172ddad82d8213fbfb4b907847bff7f46b99ba17bbb41"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_0931ffea-9b31-4a52-ad23-139f7949db12.db",
+      "bytes": 1630208,
+      "sha256": "61fed7da3e5d2fd93f07a79a242947bcaf3aa9e75b052e9ff68f3febeb41e948"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_db419e50-e47b-4c9b-8d04-f17d7bde1e99.db",
+      "bytes": 1630208,
+      "sha256": "d0845731ad8cd452cdbe5ab2fdf47c40fc57040279fc6b5a887a1058f7923939"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_ff5703d8-8c91-4032-b039-9d8ba525c596.db",
+      "bytes": 1630208,
+      "sha256": "82bb8ca1d21b658abcfac3fc1832b3038d473f9cc8c81954e8150042ee494b48"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_e6df8bd4-8a31-4df3-8dc1-f401e11e044e.db",
+      "bytes": 1630208,
+      "sha256": "cd87bef8bb43bc2c3d63b9093d6cd2665d4357419740d7515dc982e08d387a41"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_a7a0ea43-faee-4a84-8118-45885e85b305.db",
+      "bytes": 1630208,
+      "sha256": "55762e281b38aa6231007e9eefd4c483550577745d13cf9b92579560d5096c9a"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_0660ca10-5d85-43a4-8812-63929397ce3d.db",
+      "bytes": 1630208,
+      "sha256": "801e50e6d9b251f707454e2752b3743686c8c9e9bd41914f9714929b464f2fd1"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_08fea83d-6832-42e7-b98a-19bf69754cf2.db",
+      "bytes": 1630208,
+      "sha256": "5b64852b56502c86b4f6689a0d9783e4bcae22ca4c1fdeb79ecbce9769d5b520"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_49ed7841-88d2-430b-a7da-a80a1e730af8.db",
+      "bytes": 1630208,
+      "sha256": "a6d922c4e66d10e661c485de9129fe13177f6ff06e1942262db2a68d72d42941"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_a7e73ff0-d2bb-4426-9d59-14440119c10d.db",
+      "bytes": 1630208,
+      "sha256": "c3c9b2945d3f890a7e6028708d0969c2a9428834122988b388c8ce64550f5abe"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_eaca5063-d454-4498-a0f6-18941ef46c2b.db",
+      "bytes": 1630208,
+      "sha256": "78cbcb436c58ca9864d042b2f7b5af8dd01c2e6138d64fc18ed4410f3a84b892"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_08e2749f-5ef2-4ba6-be5c-8e411efb19b6.db",
+      "bytes": 1630208,
+      "sha256": "1900db4f1f879d4dddb250a3a6af0d373402c41028887bcad85bbac61af42e85"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_73573ce6-e5e9-41d3-996d-ad5295fbcb49.db",
+      "bytes": 1630208,
+      "sha256": "530cd3984ec6dd33911cdaa17009d8a89d9a406730f7736ec35aa31208d4201d"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_baseline_f9c2e3d3-a9fa-4991-a623-93e8d05e8f96.db",
+      "bytes": 1409024,
+      "sha256": "85c4eb47c35259bb56f7b61282de0d011311f464d35aab4d45ebdcce679c3123"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_baseline_00437473-f357-499f-ae22-0067a6fab377.db",
+      "bytes": 1409024,
+      "sha256": "835d11b5cd02942af88350881ec1116b5156593522675f581e927a876d2426d1"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_baseline_bff2d2f9-4389-49fc-9696-fc5c54d7a3b1.db",
+      "bytes": 1265664,
+      "sha256": "ebdfc030936a3b845f11eaffa8024f375025fad5943acf03dc69cbbea06cde79"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_4811e6e1-2fcd-474d-9471-003597b99ff3.db",
+      "bytes": 1613824,
+      "sha256": "110b9eee5c0ed0842eca4a25745bd29566209b96d7ef8f982630ec9cb011b028"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_68cad927-70eb-4fce-adc5-bb361cd663ac.db",
+      "bytes": 1556480,
+      "sha256": "bcf7055da03640ee2a67da219e36232a0976a8b092abe12d778b743f44d64a73"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_2e385775-0564-4fef-a09f-aef62c203add.db",
+      "bytes": 1568768,
+      "sha256": "8ee20a03cae6753d1b16b682ea0bcabff821fe56fd406c942b0e108f8714a919"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_9f558cf4-7a7f-4dfa-b0a1-77f8c15616d3.db",
+      "bytes": 1613824,
+      "sha256": "75fad15b39d253bcc282d0472f3dffc2698d754e0639f633f4b4228401ce5c20"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_189871da-8ad1-4bbb-8320-1b8e8967eab3.db",
+      "bytes": 1556480,
+      "sha256": "73ba13a10d6d7bdc3fcb709f9019d283fa4a3c44222461f0ac46df50a2492cdf"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_0ffcf8c9-a891-4be5-896d-aa8a65c807e8.db",
+      "bytes": 1556480,
+      "sha256": "8c9dd7a508b2dc75501e3af40125932cd5161b83852fd56360a74da851d633b4"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_7367bac8-1cfe-4f5e-899c-9dd6839e1fed.db",
+      "bytes": 1556480,
+      "sha256": "aa1f7db2ab9c4a35750258d2664fe579dc3a7dbf3351de45f1a67f3174a94371"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_4fc7be4e-b121-4355-a46d-3300ca3ebe68.db",
+      "bytes": 1556480,
+      "sha256": "2b3381111414bb08b3f9cda3bb73514faf0e5e8d8b51f98691b74487bc33a4c5"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_8edd60d6-e1a0-4658-9a28-291b69f42fdf.db",
+      "bytes": 1556480,
+      "sha256": "ccac52449add40a30cca46f31dc22866656b48ade5d9fd099a502e12443c6916"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_4b8a9998-9287-4c66-b5ff-19099001bd1e.db",
+      "bytes": 1556480,
+      "sha256": "428f131c91791465d532301c926efb34ad9c0d35a5428a8022c93e9bce9a7345"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_20309617-f72c-450e-8fd7-be0ff7c9b9e5.db",
+      "bytes": 1556480,
+      "sha256": "c2d90f6505a66d4b9fac9d6920b9969a5cdb30fb4bc4d692c163c6790b4c6d0f"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_f2ee5819-5da7-4fc7-a417-f0d2d556dd5f.db",
+      "bytes": 1556480,
+      "sha256": "eb74e73ba46ad2a2278c2cd90ed66bb39f0f8eb41b2f9b189cfeead1a902926d"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_90ec2ffc-fa52-4506-81ac-a3cf42780f22.db",
+      "bytes": 1593344,
+      "sha256": "c4628a53538e1edbd011089c85e222e03861998dce0375403f10d4fa12b8191f"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_4d80e26e-975e-4508-9e6b-fe71c2c2d03d.db",
+      "bytes": 1593344,
+      "sha256": "f1c15b9c208bec22f4215f50aaa785ab31d88ef9ce90368aeef7aadffc35521a"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_4504a7d5-440a-48d4-a95b-15654cc3683d.db",
+      "bytes": 1593344,
+      "sha256": "fb87a58227f5deef84fbf1839d717d229e068b9d95afb6c64014a2616e44d812"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_ff61b06a-0251-4a1c-a8bf-07d0f713e85c.db",
+      "bytes": 1593344,
+      "sha256": "a73b06ddf7d9f81e31358ce0fbd85221beeb63c0e493ca288d263ea5e944c8dc"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_4cff500f-eb3b-418b-a486-8d92abce101c.db",
+      "bytes": 1593344,
+      "sha256": "77498a3b0ec973eb7a17a026c6710a15340b12cb4526d267f04ac6c028e10dbe"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_91bded0d-630c-4539-9084-017b4bb4ccc5.db",
+      "bytes": 1593344,
+      "sha256": "52c8a00d21374284e30e7349a82772c183174846c5e45fb9b9a0eabe6066f73a"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_dff0ff4a-c117-429e-b81a-ad1d8070695f.db",
+      "bytes": 1593344,
+      "sha256": "8a57d717a6391d7a101ac851e64f33892191d73df545c463dd6bd3074a3f1da8"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_ddf0811a-59f6-4dbd-bb0a-a112053edea3.db",
+      "bytes": 1593344,
+      "sha256": "68ff80153e9933fb7aeb45d7f54123d4cb11772fe44395cd63121d13fb754855"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_1328656f-1007-473d-b021-9dc9f77748a6.db",
+      "bytes": 1593344,
+      "sha256": "eb744b0f23fe48221101dbc9280316f113e2928a23d574b8142326a3be68f7cb"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_b6b93752-75bf-4b82-9fd4-8d3bef96269e.db",
+      "bytes": 1613824,
+      "sha256": "43e810fc5be86214fb6f76e217257dfb46e8348e258d800c6990d498cfc7667c"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_calc_install_f5f62ffd-dabb-4854-b9b7-b7645f5ac2b3.db",
+      "bytes": 1613824,
+      "sha256": "fbcb6425e76782371c66912ab4b5083d97985d506f334ac873836c7337ae76b6"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_f2db8f45-47f7-4592-9341-1d5ebcbac867.db",
+      "bytes": 2834432,
+      "sha256": "1174ce87cff03793ae87a0ac2cc7ca1f3d02c8d44b307a7dcb82609a0afc466f"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_55ef34a6-a014-4fc0-8bcf-9dc6fac39bf9.db",
+      "bytes": 2199552,
+      "sha256": "498aee3c637c97b72d473fae8bc765871f1707bd45712e43be408ec0dadd1199"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_b677c24a-421f-43aa-a9be-ebd187e6f0be.db",
+      "bytes": 2199552,
+      "sha256": "120cda454e0b77d6046aeb321f14901630f0bf97d57dcf334e8b415f7237558c"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_3f183e36-c6e6-4f0a-815d-8a7530c1a195.db",
+      "bytes": 2199552,
+      "sha256": "55de2640b2ce3851eb796357b23bc311321fd1294aa877f9b5e0b25decdfb653"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_8fcc0a12-35b5-426b-96c5-5315a1379eff.db",
+      "bytes": 2199552,
+      "sha256": "7080921c37f617fd4995c7d85c6f01232a1b5581e17373502e13667d7bfd2526"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_320bbd74-1bc2-43b3-8054-81718e7d0bca.db",
+      "bytes": 2199552,
+      "sha256": "b75210c88c530a86cfa6bf4b467ea368c930f7e1c02bf17e1485684745d24e00"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_304f0feb-a3f5-40e4-806c-a4b0aa39d077.db",
+      "bytes": 1871872,
+      "sha256": "22d02863fecee6aba2592a8c3544e5dd72b000a07440f38654796bbf22b3697a"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_dd0c5e4d-1103-4da5-8d5c-0ea03b71489f.db",
+      "bytes": 1953792,
+      "sha256": "49f9e1d8b98e608369cba7f785f27853161aa332cbac74b4f228297b72fafa92"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_1ed4ab37-eac6-4120-9313-7c647ace243f.db",
+      "bytes": 1880064,
+      "sha256": "071533e381d5abeb1402c432f26600afdc16c7a1792cebb6d54cb74241d9442e"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_c5459477-31e1-42c4-bb60-66729bc0423d.db",
+      "bytes": 2199552,
+      "sha256": "91b3ebfb8bdeb66c223418992d2d599a4ce4c5a98b9990205fc2a7b00b874940"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_f776ab71-c59a-4d04-be2d-6f859e363ba8.db",
+      "bytes": 1871872,
+      "sha256": "18fbe828504234246c41841b9b65bf1763148317c79f0d746de350bcc4144656"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_333886e9-6bae-4234-87e8-e843669c0179.db",
+      "bytes": 1871872,
+      "sha256": "4389deb1551f12a0ca3c1cceb02d3aec87942a14d7dd9855fa59830917edc98a"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_1f0a060a-952e-44ee-a1a1-03b0d0d9382b.db",
+      "bytes": 1871872,
+      "sha256": "5518da7705a4656fb579d60e1b302ddc3de880a691588419b766ca5ce139c0e9"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_f37dc006-8c44-40a3-9184-20a2c7cd3737.db",
+      "bytes": 1900544,
+      "sha256": "3e3c6fd088e36f7141873f43211bafea07b7b7c771fb9ec2daff999b64605b9f"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_2901f251-3c30-4f2f-b6e8-04134cfd3d5b.db",
+      "bytes": 1900544,
+      "sha256": "24833725afcf5b176a081576a71c07f865c626924ca140541b0f754899d9df63"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_3ef443ac-632f-4eb1-b88c-3f98fcd14af7.db",
+      "bytes": 1900544,
+      "sha256": "ada896fed0415e05a16ff26a6168fdc78d6327bb566353a7f7edccde22a922cd"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_1620a3f9-7690-435c-b826-ea6fd1d4c96b.db",
+      "bytes": 2011136,
+      "sha256": "8e0b0ab248b035c40d53bc6b68e88a98146c5c057fc12d0b30a7e801776f6e05"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_f27d2656-5b09-4076-a28d-4c508d924ec3.db",
+      "bytes": 2039808,
+      "sha256": "b4e638c8206abd4510c1b0ec902db3061ee8c2c2b0e145b3084ea97641c81bd5"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_1b6806d3-e8bc-4944-8238-bbb3771cb16a.db",
+      "bytes": 1871872,
+      "sha256": "172cd5b258d15e56524e4f77c51b387af53bd457ed42d29c0874c89174127323"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_c19464e5-fae6-4293-b023-41245bc457f1.db",
+      "bytes": 1871872,
+      "sha256": "90e24f6630349a337680629d4b3fd251158df7e23475ff59662b92d852a8c1ae"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_e05d3ede-6dd6-4511-a879-33d00ce05025.db",
+      "bytes": 1871872,
+      "sha256": "d2ee6d4457b189c71d27b4df1ac62d844b0d141480a084c294ed586a6c0b9879"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_c8376aec-4507-4a66-8f42-7889ca7901fc.db",
+      "bytes": 1871872,
+      "sha256": "3f22eb281a8b2ee5d0e27cbf0db0079a79f8401b5a2e7e80bdd305df8cf2d870"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_e1c1d3df-7a0c-4cad-8a32-62fc7e75c5d7.db",
+      "bytes": 1884160,
+      "sha256": "df420319b5107a1c295242d28a66672f0d56649de8edfeaeaad94f3369056a33"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_3d982f79-6bfb-4a27-96b7-5fa38a318387.db",
+      "bytes": 1871872,
+      "sha256": "f41e093067c3002c24482f29cdd625000186c0c75458e45d464287475c2bdaa6"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_0827b120-842a-4dda-a803-905b3def732a.db",
+      "bytes": 2314240,
+      "sha256": "fc4303410242da8c298354ef8eca3d6f8f32e7d9a0cc17e5781bdaaf9d337e0d"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_129280c1-9b36-496a-8d4e-f16c9afea396.db",
+      "bytes": 2408448,
+      "sha256": "14a12550b9fbe72e68cf0771ff21466fb9aacde8c7dc7b6da19656ef7519a0b2"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_a6a4e87f-5261-4c3b-a89f-cf5147a530ee.db",
+      "bytes": 1560576,
+      "sha256": "9910978e2566a898779fd142e9b2798a94b77532b26419d913c63d362d89d730"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_a6a4e87f-5261-4c3b-a89f-cf5147a530ee.db.pre-migration.db",
+      "bytes": 1540096,
+      "sha256": "fd8ebf40d92d977ed30a281f2e9fbc5c36e18cc8835361318ca954663c431fcd"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_53f38188-e2d4-46fd-9eb1-2ee1b2846fe2.db",
+      "bytes": 1560576,
+      "sha256": "4c78aa42ca440bd50e46ce7a7c35a6ae334bc3d721e2160fc02cd10b561ee165"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_53f38188-e2d4-46fd-9eb1-2ee1b2846fe2.db.pre-migration.db",
+      "bytes": 1540096,
+      "sha256": "447e1f0209b9ba6f9ee689074677661818e1ae40d23715f3b2bf7c06cbea9c51"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_3b0f5651-216d-4843-bcf7-e8bafeb05844.db",
+      "bytes": 1560576,
+      "sha256": "c7b45304a3c116ad823793af8ea1d0a3e8f5693f34af801dadb65f96694774bf"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_a6237015-b199-4234-b08d-da6674ced0a3.db",
+      "bytes": 1560576,
+      "sha256": "123b9b903af04c009512480e15e9a440b02102f796d0133cc6baa834411f33db"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_a6237015-b199-4234-b08d-da6674ced0a3.db.pre-migration.db",
+      "bytes": 1540096,
+      "sha256": "e958fcabba88854a6c2696d449cce2c99d420305557648bd579e67c7372a542b"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_9308d112-1f6d-4909-804e-65f981fbad9c.db",
+      "bytes": 1560576,
+      "sha256": "c7923ba782b078d8c232c6532c1b8ccf42eebe11d5849660139e204d196219bb"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_9308d112-1f6d-4909-804e-65f981fbad9c.db.pre-migration.db",
+      "bytes": 1540096,
+      "sha256": "51de23a148a9a4c05c5d49136114d676ec76673eb960b288b633233ec1870994"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_256e053c-30e6-4662-8b3a-aa14f8cacee7.db",
+      "bytes": 1560576,
+      "sha256": "08cf684b56de39429e34c18d71889f7417bf34b63600a84ee3fa29fa80807b19"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_256e053c-30e6-4662-8b3a-aa14f8cacee7.db.pre-migration.db",
+      "bytes": 1540096,
+      "sha256": "1cfb803293ea3d6730b3aff865f21cf3e2d556b7418d47c60bac5a1245d940f0"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_34c46519-3669-440a-9a3c-290510ebe0c0.db",
+      "bytes": 1560576,
+      "sha256": "f7b8b10c4676521eee96640f2d9ed98a2ea8b05442bb9dcbbfd1166c7aa2eebe"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_b92e537e-8881-4c15-af62-a54678dfdadd.db",
+      "bytes": 1560576,
+      "sha256": "4116190a7ba7f3a881718517f066354a4b7bd4195bebb9f65f7a8052b01bafc4"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_b92e537e-8881-4c15-af62-a54678dfdadd.db.pre-migration.db",
+      "bytes": 1540096,
+      "sha256": "8407893f32083a3c4412dfe36e8cf9913c6258db19012ea4c85bf0b264890326"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_e61368cc-cd3c-4c18-8f83-aff0e7430eb8.db",
+      "bytes": 1560576,
+      "sha256": "f0a06a4a1e6ad1fa26d67ca38292286a60ffa31ffcfa3512b37990749ca85b0c"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_e61368cc-cd3c-4c18-8f83-aff0e7430eb8.db.pre-migration.db",
+      "bytes": 1540096,
+      "sha256": "284cace66e8bb6687725032fbc0acebcaee8b71a950f20e113cf5ec8469cdda8"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_56d5ff19-8088-45f8-a3ba-a7592ec12d45.db",
+      "bytes": 1560576,
+      "sha256": "258b418d65ed266b904a2748b223e81c74ba53c4e9d81e77dd290ce7a058e81a"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_56d5ff19-8088-45f8-a3ba-a7592ec12d45.db.pre-migration.db",
+      "bytes": 1540096,
+      "sha256": "79e94d71ee1f0180ecd2a0fd54328baacedd49d23edb5696c83af346d87a45d6"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_abb210ac-9078-4039-bbba-c178abc3da41.db",
+      "bytes": 1560576,
+      "sha256": "228f76842cb3b12652ccf77812ea18610c92812261f05ed4ef272efcbfa70a16"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_b1940faa-ee8f-4d76-a45a-d6f0b3a9e198.db",
+      "bytes": 1593344,
+      "sha256": "b510b92f456eae46506db9c8881691266f016f9abd8545eb750d65be275f22c9"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_01448881-b8ad-44e5-91a2-17c7a8733829.db",
+      "bytes": 1818624,
+      "sha256": "272b71cb56e53046e294a7ca068e018958f84e47ad9b0d630883304d5190e942"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_a1987abc-8c4f-4502-b308-8beaac4389cd.db",
+      "bytes": 1548288,
+      "sha256": "9e28ef38456330f4e6f18eb10f9abdf0cad575fed97d4302a8863e23eea65ead"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_e20166ff-538d-44cb-947b-855ee3f2053c.db",
+      "bytes": 1536000,
+      "sha256": "435ba8f5596bef0d8a77bace1bb560ec27832296c4d8ac777356e5a1ee9dc30f"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_0e16c52a-8f97-427e-af19-ca0bc0e22389.db",
+      "bytes": 1536000,
+      "sha256": "a4afeb834858cbfaec61989fbdafa205f8aab6e606b04539ecaf1918d3d70085"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_bf7d8207-ee3d-48ad-be76-fe5050c528ac.db",
+      "bytes": 987136,
+      "sha256": "72db60b3bab64bb0a5fd215300555f59b8bfb3c1dcb97c1831133979180c242f"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_ca02acf8-7e2c-4d72-b6cb-dcb556262261.db",
+      "bytes": 1536000,
+      "sha256": "a4afeb834858cbfaec61989fbdafa205f8aab6e606b04539ecaf1918d3d70085"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_f31fdfe4-d6c6-4d10-9a57-715de953b995.db",
+      "bytes": 1544192,
+      "sha256": "b6084cdc09f69749404e7be23e00d1d83532a2358cae81003f38cff3811b6065"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_82614978-aba6-4caf-89ee-f0a24228445e.db",
+      "bytes": 1540096,
+      "sha256": "bf24828c665ad58958116c25dd40b1d1131906f8bb4d26f72d96fdebbc9b9dbd"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_1323b6b2-f8fa-4faa-a4de-53d7e45e8903.db",
+      "bytes": 1548288,
+      "sha256": "8a551620b98d91c340340d29c07362000f1a408f595fafc2433e16e606aa2639"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_b1792864-6edc-4d2f-9f3d-cd3db84df5f4.db",
+      "bytes": 1548288,
+      "sha256": "d29dbe56cae834498b5c5a90f9d02ddde2338bd32db3f94e8cc56a124c64eaf9"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_4689aadd-026a-44e5-8b69-368c62c5f085.db",
+      "bytes": 1548288,
+      "sha256": "b0cc6411033d1b386fc937d1c68464ca682d8e0c18ab399ffacc80aeef0884c2"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\installer_73d45d25-dd64-4d2d-b86c-34eb9e93fd9f.db",
+      "bytes": 1548288,
+      "sha256": "8b90b59aba88579410c3240c7ae318cbc3011c827cd0929ef7bdd2a6c51838a5"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_bootstrap_1791980643824.db",
+      "bytes": 1605632,
+      "sha256": "bc304f5e544e975fab35afee171aee986ffd335d5a03bdf2fe00eb4ed001bb07"
+    },
+    {
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\audit_legacy_b1ad4d6d-94f2-440e-82e8-5bd371fc5b90.db",
+      "bytes": 1560576,
+      "sha256": "3bd30445ec93f2f39cdf7348c557baceb8ffef2349281755065d9f9076a3b595"
+    }
+  ]
+}

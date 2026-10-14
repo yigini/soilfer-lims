@@ -1,0 +1,74 @@
+{
+  "server/tests/contracts/audit_4_6_calibration.test.js": {
+    "onlyAddedContext": true,
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "1e94e06629d843fdda5fd5aadcdac06b8a4625ea2b8692e55863de315928fe79",
+    "afterSha256": "7a9ddc6a41175c0040a05fe85703e74151c7d63d15746bc2da0fbfbe8bbd414a",
+    "additions": [
+      {
+        "afterStart": 63,
+        "bytes": "    // This positive native execution has the order current intake creates.\n    await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, [method.analysisCode], manager));\n"
+      },
+      {
+        "afterStart": 71,
+        "bytes": "        await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, laterSample, [method.analysisCode], manager));\n"
+      },
+      {
+        "afterStart": 329,
+        "bytes": "    await require('../../services/orderService').reviseAnalyses(f.sample.id, {\n        analyses: ['P_OLSEN', 'P_BRAY1'], reason: 'Owned additional non-calculated determination'\n    }, f.manager, { tx: f.db });\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_4_6_calculation_install.test.js": {
+    "onlyAddedContext": true,
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "59f98184371ce2e627206fa34a239d323b8cce3769a006b28d926ffeff90af7b",
+    "afterSha256": "29f01000d7a6e68d56fca720693ae8b221851cb89d344036a15153d4ff27ae0a",
+    "additions": [
+      {
+        "afterStart": 111,
+        "bytes": "        // Give the valid witness current intake's order before the unchanged SQL tamper probes.\n        await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, ['P_OLSEN'], manager));\n"
+      },
+      {
+        "afterStart": 141,
+        "bytes": "            await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, otherSample, ['P_OLSEN'], manager));\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_4_1_run_start_header.test.js": {
+    "onlyAddedContext": true,
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "cbe16fe75c90472358707e4e2d8e6fb0c4a50614c14f097318f1338104fe6b30",
+    "afterSha256": "2faa506921b08031831d491bad2ff5e4fd66b7310315b7785043d3244707784e",
+    "additions": [
+      {
+        "afterStart": 112,
+        "bytes": "        // A usable sample order does not invent the legacy run's unknown first-start metadata.\n        await f.db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, { id: sampleId }, [f.analysisCode], f.actor));\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_1_2_guard_installer.test.js": {
+    "onlyAddedContext": true,
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "2e08b96182da09a4fd81e0fd7e691801b214c3c2d750409f37a66b1f3dd4ccc9",
+    "afterSha256": "8ee5fcc5e8690c9b374a16a0955b00edc2d07cadc175b3d417a6a7f530cee8f1",
+    "additions": [
+      {
+        "afterStart": 449,
+        "bytes": "    require('../../scripts/install_order_revisions').installOrderRevisions({dbPath:fixture.file,apply:true});\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_4_3_keyboard_playwright.test.js": {
+    "onlyAddedContext": true,
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "beforeSha256": "c40c8a56d4675fb4befe32ad8c68c0ab2be72675d314bbaed70a07fcd506358e",
+    "afterSha256": "cb10211e5d5fd1a10d66b160e337213c018fcc9dd6b74026b2019ae09f7c3398",
+    "additions": [
+      {
+        "afterStart": 36,
+        "bytes": "            await f.db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, [f.analysisCode], f.actor));\n"
+      }
+    ]
+  }
+}

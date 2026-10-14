@@ -60,12 +60,15 @@ async function fixture({ additionalItem = false } = {}) {
         dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date() } });
     const item = await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: sample.id, labId: lab.id, analysis: method.analysisCode,
         methodologyId: method.id, assignedTo: analyst.username, status: 'IN_PROGRESS', history: '[]' } });
+    // This positive native execution has the order current intake creates.
+    await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, [method.analysisCode], manager));
     let laterItem = null;
     if (additionalItem) {
         const laterSample = await createSampleFixture(db, { data: { id: randomUUID(), originalId: randomUUID(), status: 'PROCESSING', assignedLab: lab.id,
             dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date() } });
         laterItem = await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: laterSample.id, labId: lab.id, analysis: method.analysisCode,
             methodologyId: method.id, assignedTo: analyst.username, status: 'IN_PROGRESS', history: '[]' } });
+        await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, laterSample, [method.analysisCode], manager));
     }
     const run = await native.buildNativeRun(db, analyst, { labId: lab.id, workItemIds: [item.id, ...(laterItem ? [laterItem.id] : [])], analyses: [{ analysisCode: method.analysisCode, methodologyId: method.id }], seed: 'owned-calibration' });
     const input = { analysisCode: method.analysisCode, templateId: template.id, templateVersion: template.version, activationId: activation.id,
@@ -323,6 +326,9 @@ test.each([null, 'unresolvable-owned-lab'])('no-template completion retains the 
     const f = context;
     const item = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: f.sample.id, labId: f.lab.id,
         analysis: 'P_BRAY1', assignedTo: f.analyst.username, status: 'IN_PROGRESS', history: '[]' } });
+    await require('../../services/orderService').reviseAnalyses(f.sample.id, {
+        analyses: ['P_OLSEN', 'P_BRAY1'], reason: 'Owned additional non-calculated determination'
+    }, f.manager, { tx: f.db });
     const result = await require('../helpers/workAttemptFixtures').createExecutionResultFixture(f.db, { data: {
         id: randomUUID(), sampleId: f.sample.id, param: 'P_BRAY1', value: '7', numericValue: 7, unit: 'mg/kg', isCurrent: true, isValid: true
     } });
