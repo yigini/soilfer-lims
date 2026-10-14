@@ -15,10 +15,12 @@ async function fixture() {
     const f = { labId, analysis, actor, auth: `Bearer ${jwt.sign({ id: actor.id, tokenVersion: 0 }, JWT_SECRET, { expiresIn: '10m' })}` };
     f.item = async (code = analysis, sampleOverrides = {}) => {
         const sampleId = randomUUID(), workItemId = randomUUID();
-        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
+        const sample = await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
             status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify([code]), ...sampleOverrides } });
         await createWorkItemFixture(prisma, { data: { id: workItemId, sampleId, analysis: code, assignedLab: labId,
             assignedTo: actor.username, status: 'ASSIGNED', version: 0 } });
+        if (!['APPROVED','ARCHIVED','DISPOSED'].includes(sample.status)) await prisma.$transaction(tx =>
+            require('../../services/orderService').createInitialOrder(tx,sample,[code],actor));
         return { sampleId, workItemId, version: 0, value: '6.2' };
     };
     f.asset = (criticality = 'CRITICAL', configured = true) => prisma.equipmentAsset.create({ data: {

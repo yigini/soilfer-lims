@@ -29,6 +29,12 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
         await createWorkItemFixture(prisma, { data: { id: `WI-${testSampleId}-PH`, sampleId: testSampleId,
             analysis: 'PH', assignedLab: 'LAB-TEST', status: 'COMPLETED' } });
 
+        // #209: usable legacy order context only for this NEW owned positive execution assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned workbench/QC execution order context', requestedBy: 'system:fixture',
+            lines: { create: ['PH'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         // Create result attached to batchId
         await createExecutionResultFixture(prisma, {
             data: {

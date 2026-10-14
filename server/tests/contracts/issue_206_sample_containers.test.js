@@ -120,15 +120,16 @@ test('the additive attempt insert guard refuses foreign/non-aliquot links; futur
     const f = await fixture({ count: 2 }), { aliquot, bulk } = await hierarchy(f);
     const [result] = await record(f, aliquot.id);
     const before = await f.db.workAttempt.findUnique({ where: { id: result.attemptId } });
+    const otherOrderLine = await f.db.orderLine.findFirst({where:{workItemId:f.items[1].id,revision:{status:'ACTIVE'}}});
     raw(f, db => {
-        const insert = db.prepare("INSERT INTO WorkAttempt(id,workItemId,attemptNo,aliquotId,status,updatedAt) VALUES(?,?,?,?, 'RECORDED',?)");
-        expect(() => insert.run(randomUUID(), f.items[1].id, 1, aliquot.id, Date.now())).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
-        expect(() => insert.run(randomUUID(), f.items[1].id, 1, bulk.id, Date.now())).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
+        const insert = db.prepare("INSERT INTO WorkAttempt(id,workItemId,attemptNo,aliquotId,status,updatedAt,orderLineId) VALUES(?,?,?,?, 'RECORDED',?,?)");
+        expect(() => insert.run(randomUUID(), f.items[1].id, 1, aliquot.id, Date.now(),otherOrderLine.id)).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
+        expect(() => insert.run(randomUUID(), f.items[1].id, 1, bulk.id, Date.now(),otherOrderLine.id)).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
         // Detached test-owned fixture simulates a later audited lifecycle
         // successor. #206 itself exposes no disposal mutation or guard bypass.
         db.exec('DROP TRIGGER SampleContainer_no_update');
         db.prepare("UPDATE SampleContainer SET status='DISPOSED' WHERE id=?").run(aliquot.id);
-        expect(() => insert.run(randomUUID(), f.items[0].id, 2, aliquot.id, Date.now())).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
+        expect(() => insert.run(randomUUID(), f.items[0].id, 2, aliquot.id, Date.now(),before.orderLineId)).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
     });
     expect(await f.db.workAttempt.findUnique({ where: { id: result.attemptId } })).toEqual(before);
 });

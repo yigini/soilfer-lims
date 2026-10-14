@@ -76,6 +76,10 @@ describe('#281 a stored out-of-range value', () => {
         const codes = [...values, ...saved].map(([param]) => param);
         await createWorkItemsFixture(prisma, { data: codes.map(analysis => ({ id: `${sampleId}-${analysis}`, sampleId,
             assignedLab: labId, assignedTo: jwt.decode(token).username, analysis, status: 'IN_PROGRESS' })) });
+        // #209: declare usable retained order lines during NEW owned positive fixture assembly.
+        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: jwt.decode(token).username,
+            lines: { create: (codes).map(analysis => ({ id: randomUUID(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));
         for (const [param, value, unit] of values) await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId, param,
             value: String(value), numericValue: value, unit, isCurrent: true } });
         const save = saved.length ? await request(app).post(`/api/results/${sampleId}`).set('Authorization', `Bearer ${token}`)

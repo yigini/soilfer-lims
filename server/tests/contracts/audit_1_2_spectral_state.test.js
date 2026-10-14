@@ -59,6 +59,11 @@ async function fixture({ status = 'COMPLETED', parentStatus = 'PROCESSING' } = {
     }
     const bystander = await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: sample.id,
         analysis: 'PH_H2O', assignedLab: labId, status: 'ACCEPTED' } });
+    // The valid accepted pH bystander has a retained order; spectral refusal states stay intact.
+    await db.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,
+        version: 1, status: 'ACTIVE', reason: 'Retained spectral-bystander pH order context',
+        lines: { create: { id: randomUUID(), analysis: 'PH_H2O', workItemId: null, isRequired: true, status: 'ACTIVE' } }
+    } }));
     const result = await createExecutionResultFixture(db, { attemptStatus: 'ACCEPTED', data: { id: randomUUID(), sampleId: sample.id, param: 'PH_H2O',
         value: '6.27', numericValue: 6.27, unit: 'pH', provenance: 'MEASURED', flags: '["RETAINED_SCIENTIFIC_FLAG"]' } });
     const attempt = await db.workAttempt.findUnique({ where: { id: result.attemptId } });

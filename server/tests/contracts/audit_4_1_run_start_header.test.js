@@ -109,6 +109,8 @@ test.each(['no-batch', 'unstarted', 'legacy-null'])('real HTTP keeps the existin
             analysis: f.analysisCode, methodologyId: f.method.id, status: 'IN_PROGRESS', batchId } });
         for (const analysis of ['DRYING', 'PREPARATION']) await createWorkItemFixture(f.db, { data: {
             id: randomUUID(), sampleId, labId: f.labId, analysis, status: 'COMPLETED', history: '[]' } });
+        // A usable sample order does not invent the legacy run's unknown first-start metadata.
+        await f.db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, { id: sampleId }, [f.analysisCode], f.actor));
         await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(f.db, batchId);
         expect((await apiRunView(f.db, await readQcRun(f.db, batchId, f.actor))).analytes[0])
             .toMatchObject({ methodRevision: null, methodRevisionSource: 'UNKNOWN' });

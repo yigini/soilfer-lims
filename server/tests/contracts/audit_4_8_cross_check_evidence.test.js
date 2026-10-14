@@ -38,6 +38,9 @@ async function cnFixture(basis) {
         const item = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: f.sampleId,
             assignedLab: f.labId, analysis: param, methodologyId: method.id, status: 'IN_PROGRESS' } });
         f.items.push(item);
+        await require('../../services/orderService').reviseAnalyses(f.sampleId, {
+            analyses: f.items.map(owner => owner.analysis), reason: 'Owned additional C:N determination'
+        }, f.actor, { tx: f.db });
         f.rows.push(await createExecutionResultFixture(f.db, { data: { id: randomUUID(), sampleId: f.sampleId,
             param, methodologyId: method.id, numericValue, value: String(numericValue), unit: unit.code, basis, censoring: 'NONE', isCurrent: true } }));
         await transitionWorkItem(item.id, 'COMPLETED', f.actor, 'Owned C:N determination complete', {}, f.db);
@@ -80,6 +83,11 @@ test('an unregistered historical lab saves and submits through the real HTTP wor
         await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId, assignedLab: labRef,
             labId: labRef, analysis: param, assignedTo: f.actor.username, status: 'IN_PROGRESS' } });
     }
+    // This historical lab case has a usable retained order, without inventing a Lab or policy.
+    await f.db.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId, version: 1, status: 'ACTIVE',
+        reason: 'Retained historical SOC/TN order context', lines: { create: ['SOC', 'TN'].map(analysis => ({
+            id: randomUUID(), analysis, workItemId: null, isRequired: true, status: 'ACTIVE'
+        })) } } });
     const oldResults = await f.db.result.findMany(), oldEvidence = await f.db.crossCheckEvaluation.findMany(), labs = await f.db.lab.findMany();
     await require('../helpers/qcRunHttpHarness').withQcRunHttp(f.db, f.actor, async (app, token) => {
         const save = await require('supertest')(app).post(`/api/results/${sampleId}`).set('Authorization', 'Bearer ' + token)
@@ -152,6 +160,9 @@ async function fixture({ differentText = false, curated = false } = {}) {
         const item = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: f.sampleId,
             assignedLab: f.labId, analysis: param, methodologyId: method.id, status: 'IN_PROGRESS' } });
         f.items.push(item);
+        await require('../../services/orderService').reviseAnalyses(f.sampleId, {
+            analyses: f.items.map(owner => owner.analysis), reason: 'Owned additional cross-check determination'
+        }, f.actor, { tx: f.db });
         f.rows.push(await createExecutionResultFixture(f.db, { data: { id: randomUUID(), sampleId: f.sampleId,
             param, methodologyId: method.id, value: differentText ? 'original text ' + value : String(value), numericValue: value, unit: unit.code,
             basis: 'AIR_DRY', censoring: 'NONE', flags: '["RETAINED_QC_FLAG"]', isCurrent: true } }));

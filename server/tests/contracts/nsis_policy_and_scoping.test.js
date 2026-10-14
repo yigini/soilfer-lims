@@ -34,6 +34,12 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
         // Pin6060286651: explicit accepted owners and one final attempt per original row.
         await createWorkItemFixture(prisma, { data: { id: `${sampleApprovedGtm.id}-PH_H2O`, sampleId: sampleApprovedGtm.id,
             analysis: 'PH_H2O', assignedLab: sampleApprovedGtm.assignedLab, status: 'ACCEPTED' } });
+        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleApprovedGtm.id,
+            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',
+            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'PH_H2O',
+                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
         for (const data of [
                         {
                             id: `res-app-gtm-${timestamp}`,

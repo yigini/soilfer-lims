@@ -49,6 +49,12 @@ describe('Catalogue rules also govern the sample results endpoint', () => {
         expect((await save([m, m])).code).toBe(400);
     });
     test('Valid assigned measurement is saved and still uses a human parameter name', async () => {
+        // #209: declare usable legacy order lines only in this NEW owned positive assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',
+            lines: { create: [param].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         const response = await save([{ param, value: '5', methodologyId: method.id, unit: 'mg/kg' }]);
         expect(response.code).toBe(200);
         expect(await prisma.result.count({ where: { sampleId, isCurrent: true } })).toBe(1);

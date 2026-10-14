@@ -130,9 +130,9 @@ describe('WP-03: Dead-Code & System Wiring Regression Tests', () => {
         // Route must gate EDIT_ANALYSES
         expect(sampleRoutesCode).toMatch(/router\.put\(['"]\/:id\/analyses['"],\s*checkPermission\(['"]EDIT_ANALYSES['"]\)/);
 
-        // The controller delegates to the state authority, which must retain
+        // The retained entry point delegates to the shared order authority, which retains
         // the same domain permission check in addition to the route guard.
-        const analysisAuthority = fs.readFileSync(path.join(serverDir, 'services/sampleAnalysisStateService.js'), 'utf8');
+        const analysisAuthority = fs.readFileSync(path.join(serverDir, 'services/orderService.js'), 'utf8');
         expect(analysisAuthority).toContain("hasPermission(actor, 'EDIT_ANALYSES')");
         const updateAnalysesFn = sampleControllerCode.match(/exports\.updateSampleAnalyses = async ([\s\S]*?)\n};/);
         expect(updateAnalysesFn).not.toBeNull();

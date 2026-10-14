@@ -86,6 +86,12 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
             await createWorkItemFixture(prisma, { data: { ...data, sampleId: testSample.id } });
         }
 
+        // #209: NEW owned projection history declares both existing analytical owners, preserving the spectral gap.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSample.id,
+            version: 1, status: 'ACTIVE', reason: 'Owned workspace projection execution order context', requestedBy: 'system:fixture',
+            lines: { create: ['PH_H2O', 'VIS_NIR'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         // Add result for pH so it has evidence
         await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED',
             data: {
@@ -172,6 +178,16 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
     });
 
     test('5. POST /api/samples/:id/orders applies revision atomically and records receipt', async () => {
+        // #209: preserve the original first-revision1 remedy scenario on NEW owned missing-order work.
+        const projectionSample = testSample;
+        const firstOrderSampleId = 'ws-first-order-' + require('node:crypto').randomUUID();
+        testSample = await createSampleFixture(prisma, { data: { id: firstOrderSampleId, originalId: firstOrderSampleId,
+            labId: 'S-P2-FIRST-ORDER', assignedLab: 'LAB-P2', country: 'P2C', status: 'PROCESSING',
+            dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify(['PH_H2O', 'VIS_NIR']) } });
+        for (const [analysis, status] of [['PH_H2O', 'SUBMITTED'], ['VIS_NIR', 'ACCEPTED']])
+            await createWorkItemFixture(prisma, { data: { id: firstOrderSampleId + '-' + analysis, sampleId: firstOrderSampleId,
+                analysis, status, assignedLab: 'LAB-P2', assignedTo: techUser.username, labId: 'LAB-P2' } });
+        try {
         const idempotencyKey = 'order-rev-key-' + Date.now();
         const res = await request(app)
             .post(`/api/samples/${testSample.id}/orders`)
@@ -202,6 +218,7 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
 
         // Clean up created work item for EC
         await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSample.id, analysis: 'EC' } }), select: { id: true } })).map(row => row.id), { single: false });
+        } finally { testSample = projectionSample; }
     });
 
     test('6. POST /api/samples/:id/custody/move records physical location change and audit', async () => {

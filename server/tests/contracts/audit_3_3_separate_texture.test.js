@@ -25,6 +25,8 @@ async function fixture({mean=false,clayValue=15}={}) {
         f.textureItems[analysis]=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:sample.id,assignedLab:f.labId,
             analysis,methodologyId:method.id,status:'IN_PROGRESS'}});
     }
+    await require('../../services/orderService').reviseAnalyses(sample.id,
+        {analyses:['SAND','SILT','CLAY','TEXTURE'],reason:'Declared current companion order for retained fraction review'},f.actor,{tx:f.db});
     // #198: the existing two-sand-reading selection fixture declares its
     // required count through policyService; every original source assertion
     // and the texture derivation authority remain unchanged.
@@ -161,6 +163,7 @@ test('a stale TEXTURE sample cannot hide a good neighboring sample in the grid; 
     const goodSample=await createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,status:'PROCESSING',dryingStatus:'DONE',preparationStatus:'DONE'}});
     const goodItem=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:goodSample.id,analysis:f.analysisCode,
         methodologyId:f.method.id,assignedLab:f.labId,status:'ACCEPTED'}});
+    await f.db.$transaction(tx=>require('../../services/orderService').createInitialOrder(tx,goodSample,[f.analysisCode],f.actor));
     const goodResult=await f.result(goodItem);
     await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(f.db,f.actor,f.labId);
     const [goodSelection]=await rules.inTransaction(f.db,tx=>selections.appendReportedSelection(tx,goodItem,f.actor));
@@ -218,6 +221,7 @@ test('a complete composite execution still saves one atomic four-output selectio
         status:'PROCESSING',dryingStatus:'DONE',preparationStatus:'DONE',requiredAnalyses:'["TEXTURE"]'}});
     const item=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:sample.id,assignedLab:f.labId,analysis:'TEXTURE',
         methodologyId:f.textureItems.TEXTURE.methodologyId,status:'IN_PROGRESS'}});
+    await f.db.$transaction(tx=>require('../../services/orderService').createInitialOrder(tx,sample,['TEXTURE'],f.actor));
     await rules.inTransaction(f.db,tx=>require('../../services/resultWriteService').writeTextureDetermination(tx,{sampleId:sample.id,
         workItemId:item.id,actor:f.actor,measurement:{param:'TEXTURE',equipmentId:f.instrument.id},fractions:{sand:60,silt:25,clay:15}}));
     await require('../../services/workItemStateService').transitionWorkItem(item.id,'COMPLETED',f.actor,'Composite comparison',{},f.db);

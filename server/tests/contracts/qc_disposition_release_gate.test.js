@@ -27,6 +27,35 @@ const { normalizeLegacyQcFixture } = require('../helpers/normalizedQcFixture');
 const { QC_RUN_INCLUDE, batchApiView } = require('../../services/qcRunViewService');
 const evidenceBatch = async id => batchApiView(await prisma.batch.findUnique({ where: { id }, include: QC_RUN_INCLUDE }), { serialized: true });
 
+// #209: order context belongs only to this NEW owned QC fixture assembly.
+async function declareOwnedQcOrderContext(sampleId) {
+    require('../../services/workflowStateRules').assertFixtureContext();
+    await prisma.$transaction(async tx => {
+        const main = (await tx.$queryRawUnsafe('PRAGMA database_list')).find(row => row.name === 'main');
+        const path = require('node:path'), fs = require('node:fs');
+        if (!main?.file || !fs.existsSync(main.file) || path.dirname(fs.realpathSync(main.file)) !== path.resolve(__dirname, '../.tmp'))
+            throw Error('QC order context requires this owned test database.');
+        if (process.env.PRODUCTION_DATABASE_PATH && path.resolve(main.file).toLowerCase() === path.resolve(process.env.PRODUCTION_DATABASE_PATH).toLowerCase())
+            throw Error('QC order context refuses production.');
+        const owners = await tx.workItem.findMany({ where: { sampleId, duplicateOf: null } });
+        const codes = [...new Set(owners.map(item => item.analysis.trim()))];
+        if (!codes.length) throw Error('QC order context requires existing canonical owners.');
+        const active = await tx.sampleOrderRevision.findMany({ where: { sampleId, status: 'ACTIVE' }, include: { lines: true } });
+        if (active.length > 1) throw Error('QC owned assembly requires a single declared active order.');
+        const uuid = () => require('node:crypto').randomUUID();
+        if (!active.length) {
+            await tx.sampleOrderRevision.create({ data: { id: uuid(), sampleId, version: 1, status: 'ACTIVE',
+                reason: 'Owned retained QC execution order context', requestedBy: 'system:fixture',
+                lines: { create: codes.map(analysis => ({ id: uuid(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+        } else for (const analysis of codes) {
+            const matching = active[0].lines.filter(line => line.analysis === analysis && line.status === 'ACTIVE');
+            if (matching.length > 1) throw Error('QC owned assembly refuses ambiguous declared lines.');
+            if (!matching.length) await tx.orderLine.create({ data: { id: uuid(), revisionId: active[0].id,
+                analysis, workItemId: null, status: 'ACTIVE', isRequired: true } });
+        }
+    });
+}
+
 describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)', () => {
     let testLab1, testLab2;
     let lab1Manager, lab2Manager, lab1Tech;
@@ -141,6 +170,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Link work item to batch
+        await declareOwnedQcOrderContext(sample1.id);
         await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: `RES-118-${Date.now()}`, sampleId: sample1.id,
             param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: batch1.id } });
         await prisma.workItem.update({
@@ -209,6 +239,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         await prisma.batch.create({ data: { ...batch1, id: reportBatchId, workItemIds: JSON.stringify([`WI-${reportId}`]) } });
         await createSampleFixture(prisma, { data: { ...sample1, id: reportId, originalId: reportId, status: 'APPROVED' } });
         await createWorkItemFixture(prisma, { data: { ...workItem1, id: `WI-${reportId}`, sampleId: reportId, batchId: reportBatchId } });
+        await declareOwnedQcOrderContext(reportId);
         await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: `RES-${reportId}`, sampleId: reportId,
             param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: reportBatchId } });
         await normalizeLegacyQcFixture(prisma, reportBatchId);
@@ -422,6 +453,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${releasedSample.id}-PH`, sampleId: releasedSample.id,
             analysis: 'PH', assignedLab: testLab1.id, status: 'ACCEPTED' } });
+        await declareOwnedQcOrderContext(releasedSample.id);
         const resReleased = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `res-released-${Date.now()}`,
@@ -437,6 +469,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result 3: Superseded historical result (must be immutable)
+        await declareOwnedQcOrderContext(manualInvalidData.sampleId);
         const [resWithManualInvalid,resSuperseded]=await createExecutionResultsFixture(prisma,{data:[manualInvalidData,{
                 id: `res-super-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -516,6 +549,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
+        await declareOwnedQcOrderContext(activeSample.id);
         await normalizeLegacyQcFixture(prisma, reanalyzeBatchId);
         const dispRes = await request(app)
             .post(`/api/qc/batches/${reanalyzeBatchId}/disposition`)
@@ -574,6 +608,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${activeSample.id}-PH`, sampleId: activeSample.id,
             analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        await declareOwnedQcOrderContext(activeSample.id);
         const resUnflagged = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-unflagged-${Date.now()}`,
@@ -592,6 +627,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical EC owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${activeSample.id}-EC`, sampleId: activeSample.id,
             analysis: 'EC', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        await declareOwnedQcOrderContext(activeSample.id);
         const resSensorFailure = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-sensor-${Date.now()}`,
@@ -610,6 +646,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical OC owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${activeSample.id}-OC`, sampleId: activeSample.id,
             analysis: 'OC', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        await declareOwnedQcOrderContext(activeSample.id);
         const resPriorReject = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-reject-${Date.now()}`,
@@ -628,6 +665,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical TN owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${activeSample.id}-TN`, sampleId: activeSample.id,
             analysis: 'TN', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        await declareOwnedQcOrderContext(activeSample.id);
         const resQcOnly = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-qconly-${Date.now()}`,
@@ -685,6 +723,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${archivedSample.id}-PH`, sampleId: archivedSample.id,
             analysis: 'PH', assignedLab: testLab1.id, status: 'ACCEPTED' } });
+        await declareOwnedQcOrderContext(archivedSample.id);
         const resArchived = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `res-arch-${Date.now()}`,
@@ -712,6 +751,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${disposedSample.id}-PH`, sampleId: disposedSample.id,
             analysis: 'PH', assignedLab: testLab1.id, status: 'ACCEPTED' } });
+        await declareOwnedQcOrderContext(disposedSample.id);
         const resDisposed = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `res-disp-${Date.now()}`,
@@ -747,6 +787,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${pubSample.id}-PH`, sampleId: pubSample.id,
             analysis: 'PH', assignedLab: testLab1.id, status: 'ACCEPTED' } });
+        await declareOwnedQcOrderContext(pubSample.id);
         const resPublished = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `res-pub-${Date.now()}`,
@@ -920,6 +961,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Trigger REANALYZE_BATCH
+        await declareOwnedQcOrderContext(activeSample.id);
         await normalizeLegacyQcFixture(prisma, batchWiTestId);
         const membershipBefore = await prisma.batchPosition.findMany({ where: { batchId: batchWiTestId, kind: 'SAMPLE' },
             orderBy: { position: 'asc' }, include: { workItems: true } });
@@ -980,6 +1022,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${sample.id}-PH`, sampleId: sample.id,
             analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        await declareOwnedQcOrderContext(sample.id);
         const res = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-probe-${Date.now()}`,
@@ -1031,6 +1074,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${sample.id}-PH`, sampleId: sample.id,
             analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        await declareOwnedQcOrderContext(sample.id);
         const res = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-warn-${Date.now()}`,
@@ -1077,6 +1121,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${sample.id}-PH`, sampleId: sample.id,
             analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        await declareOwnedQcOrderContext(sample.id);
         const res = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-valid-${Date.now()}`,
@@ -1131,6 +1176,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${sample.id}-PH`, sampleId: sample.id,
             analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        await declareOwnedQcOrderContext(sample.id);
         const resUnknown = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-unknown-${Date.now()}`,
@@ -1149,6 +1195,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical EC owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${sample.id}-EC`, sampleId: sample.id,
             analysis: 'EC', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        await declareOwnedQcOrderContext(sample.id);
         const resMalformed = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-malformed-${Date.now()}`,
@@ -1203,6 +1250,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
         await createWorkItemFixture(prisma, { data: { id: `${histSample.id}-PH`, sampleId: histSample.id,
             analysis: 'PH', assignedLab: testLab1.id, status: 'ACCEPTED' } });
+        await declareOwnedQcOrderContext(histSample.id);
         const resSupersededReport = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `res-hist-${Date.now()}`,

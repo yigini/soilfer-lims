@@ -22,6 +22,10 @@ async function fixture(status = 'PROCESSING', flags = {}, itemStatus = 'IN_PROGR
         status, receptionDate: new Date(), requiredAnalyses: JSON.stringify([analysis]), dryingStatus: 'DONE', preparationStatus: 'DONE', ...flags } });
     const item = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: labId,
         assignedTo: actor.username, analysis, status: itemStatus } });
+    // #209: declare retained usable order context while assembling this NEW owned fixture.
+    await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,
+        version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: repeatReviewer.username,
+        lines: { create: [{ id: randomUUID(), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
     const result = await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, param: analysis, value: '6.2',
         numericValue: 6.2, unit: 'pH', isCurrent: true, isValid: true, flags: '["ORIGINAL_NOTE"]', ...resultData } });
     return { sample, item, result };
@@ -133,6 +137,13 @@ test('blocking matrix diagnostics retain 422 before any lifecycle or submission 
     for (const [param, value] of [['SAND', '40'], ['SILT', '30'], ['CLAY', '17']]) {
         await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: row.sample.id, analysis: param,
             status: row.item.status, assignedLab: labId, assignedTo: actor.username } });
+        // #209: only this separately seeded canonical witness needs its matching retained order line.
+        await prisma.$transaction(async tx => {
+            const revision = await tx.sampleOrderRevision.findFirstOrThrow({ where: { sampleId: row.sample.id, status: 'ACTIVE' } });
+            if (!await tx.orderLine.count({ where: { revisionId: revision.id, analysis: param, status: 'ACTIVE' } }))
+                await tx.orderLine.create({ data: { id: randomUUID(), revisionId: revision.id, analysis: param,
+                    workItemId: null, status: 'ACTIVE', isRequired: true } });
+        });
         await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: row.sample.id, param,
             value, numericValue: Number(value), isCurrent: true } });
     }

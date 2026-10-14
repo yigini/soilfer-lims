@@ -33,6 +33,12 @@ describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
             id: `${testSampleId}-${analysis}`, sampleId: testSampleId, assignedLab: 'GTM-LAB1',
             assignedTo: require('jsonwebtoken').decode(token).username, analysis, status: 'IN_PROGRESS'
         })) });
+        // #209: usable order context is declared only in this NEW owned fixture assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
+            lines: { create: analysisDefinitions.map(([code]) => code).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
     });
 
     afterEach(async () => {

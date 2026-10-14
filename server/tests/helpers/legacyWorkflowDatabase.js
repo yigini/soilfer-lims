@@ -262,6 +262,9 @@ function beforeGuards(options) {
             // #206 adds exactly one identity model. The independent raw counter
             // is installer-owned; captured historical DDL remains unchanged.
             expected.push({table:'SampleContainer',missingTable:true});
+            // #209 adds only this nullable new-line identity. The captured
+            // historical DDL and every other expected gap remain unchanged.
+            expected.push({table:'OrderLine',fields:['workItemId']});
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }

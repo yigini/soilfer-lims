@@ -1,4 +1,11 @@
 {
+  "orderRevision": {
+    "reason": "Reason for order revision",
+    "reasonPlaceholder": "Explain the complete analysis selection…",
+    "reasonRequired": "A reason is required for the order revision.",
+    "completeTarget": "The selection is the complete target order, including every analysis to retain. A changed order requires a reason.",
+    "amendmentRequired": "Approved, archived and disposed samples require the amendment workflow before changing their order."
+  },
   "replicateGrid": {
     "rep1": "Rep 1",
     "rep2": "Rep 2",

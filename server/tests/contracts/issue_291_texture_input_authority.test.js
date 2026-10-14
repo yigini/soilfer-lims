@@ -60,6 +60,9 @@ async function fixture(unit,values=[40,40,19],censoring={}) {
         f.textureItems[analysis]=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:sample.id,assignedLab:f.labId,
             analysis,methodologyId:method.id,status:'IN_PROGRESS'}});
     }
+    await require('../../services/orderService').reviseAnalyses(sample.id, {
+        analyses: ['TEXTURE'], reason: 'Owned complete existing fraction and texture order context'
+    }, f.actor, { tx: f.db, mode: 'order' });
     for(const [index,param] of ['SAND','SILT','CLAY'].entries()) {
         // The normal writer stores fraction units as '%'; g/kg rows exist only as
         // legacy or imported rows, so they are created through the execution fixture.

@@ -446,6 +446,7 @@ test('a complete guarded database passes the read-only gate, listens and answers
     expect(fingerprint(fixture.file)).toBe(beforeCharts);
     expect(require('../../scripts/install_control_charts').installControlCharts({dbPath:fixture.file,apply:true}))
         .toMatchObject({classification:'COMPLETE_214',previousClassification:'FRESH_PRISMA_214',backfilledCount:0,totalChanges:1});
+    require('../../scripts/install_order_revisions').installOrderRevisions({dbPath:fixture.file,apply:true});
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const benchReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"BENCH_CREDENTIAL_STARTUP_READY"')));

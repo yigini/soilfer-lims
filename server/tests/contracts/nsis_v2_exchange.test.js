@@ -43,6 +43,12 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
         // Pin6069938801: the two original replicas form one explicit accepted execution.
         await createWorkItemFixture(prisma, { data: { id: `${sample1.id}-PH_H2O`, sampleId: sample1.id,
             analysis: 'PH_H2O', assignedLab: sample1.assignedLab, status: 'ACCEPTED' } });
+        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sample1.id,
+            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',
+            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'PH_H2O',
+                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
         await createExecutionResultsFixture(prisma, { attemptStatus: 'ACCEPTED', data: [
                         {
                             id: `res-v2-1-${timestamp}`,

@@ -38,6 +38,10 @@ describe('Audit 0.10: current results in exports and working grid', () => {
             receptionDate: receptionDate ? new Date(receptionDate) : new Date(), requiredAnalyses: '["SOC"]' } });
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-010'), sampleId, analysis: 'SOC',
             status: itemStatus, assignedLab, assignedTo: jwt.decode(token).username,methodologyId, result: '9999' } });
+        // #209: the NEW owned retained SOC history declares its usable legacy order.
+        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-010'), sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned retained selected-value execution context', requestedBy: jwt.decode(token).username,
+            lines: { create: [{ id: id('LINE-010'), analysis: 'SOC', workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
         return { sample, item, projectCode };
     }
     async function result(f, value, data = {}) {

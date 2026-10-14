@@ -39,6 +39,10 @@ describe('BLK-3: Report & Certificate PDF Generation Contract', () => {
             } });
         }
 
+        // #209: declare usable retained order lines during NEW owned positive fixture assembly.
+        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: s.id,
+            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: require('jsonwebtoken').decode(mgrToken).username,
+            lines: { create: (['PH_H2O','SOC','SAND','SILT','CLAY']).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));
         // Add verified results to the sample in DB
         const now = new Date();
         // Pin6056586906: each row binds its existing canonical owner.

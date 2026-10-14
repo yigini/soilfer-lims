@@ -9,11 +9,17 @@ const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures
 const { loadCrossCheckMigrationSource } = require('../../services/crossCheckMigrationSource');
 const { installCrossCheckEvaluations: install, assertCrossCheckStartupReady: ready, parseArguments } = require('../../scripts/install_cross_check_evaluations');
 const { scanSource } = require('../helpers/workflowWriteScanner');
+const { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');
+const orderSource = loadOrderRevisionMigrationSource();
 const root = path.resolve(__dirname, '../..'), marker = '201_cross_check_evaluations';
 const hash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const retainedFiles = [];
 async function fixture() {
     const { file } = createPre201CrossCheckFixture(); retainedFiles.push(file);
+    // Current Prisma needs its declared nullable shape on this NEW owned pre-201 context.
+    // The captured historical source, original guards and prior owner receipts are unchanged.
+    const orderShape = new Database(file);
+    try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + file }) });
     const labId = 'cross-lab-' + randomUUID();
     let sample;
@@ -23,6 +29,9 @@ async function fixture() {
             assignedLab: labId, country: 'GTM', projectCode: 'OWNED-CROSS', status: 'PROCESSING',
             metadata: '{"preserve":"é精确"}', history: '[{"old":"retained"}]' } });
         await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: labId, analysis: 'SOC', status: 'IN_PROGRESS' } });
+        await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, ['SOC'], {
+            username: 'system:fixture', role: 'SUPER_ADMIN', labId
+        }));
         await createExecutionResultFixture(db, { data: { id: randomUUID(), sampleId: sample.id, param: 'SOC',
             value: '6.7500', rawInput: '6.7500', numericValue: 6.75, unit: 'g/kg', basis: 'AIR_DRY',
             flags: '["RETAINED_QC_FLAG"]', censoring: 'NONE', isCurrent: true, provenance: 'MEASURED' } });

@@ -94,6 +94,12 @@ async function fixture(sampleStatus = 'PROCESSING', itemStatus = 'COMPLETED', an
     const item = await work.createWorkItem({ id: randomUUID(), sampleId: sample.id, assignedLab: labId, labId,
         analysis, status: itemStatus, assignedTo: technician.username, result: '6.25', version: 1, history: '[{"note":"retained"}]' },
     'system:fixture', { context: 'fixture' });
+    if (!['PREPARATION', 'DRYING', ...workflow.CLOSURE_TASK_ANALYSES].includes(analysis)) {
+        // #209: declare retained usable order context while assembling this NEW owned fixture.
+        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,
+            version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: manager.username,
+            lines: { create: [{ id: randomUUID(), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+    }
     return { sample, item };
 }
 async function snapshot(sampleIds) {
@@ -113,6 +119,15 @@ async function snapshot(sampleIds) {
 async function seedSubmissionAttempt(row,item=row.item) {
     // Apply6061487810's final-execution fixture precedent to the named
     // submission tests: cached display values cannot identify an attempt.
+    if (item.id !== row.item.id) {
+        // #209: only this separately seeded canonical witness needs its matching retained order line.
+        await prisma.$transaction(async tx => {
+            const revision = await tx.sampleOrderRevision.findFirstOrThrow({ where: { sampleId: row.sample.id, status: 'ACTIVE' } });
+            if (!await tx.orderLine.count({ where: { revisionId: revision.id, analysis: item.analysis, status: 'ACTIVE' } }))
+                await tx.orderLine.create({ data: { id: randomUUID(), revisionId: revision.id, analysis: item.analysis,
+                    workItemId: null, status: 'ACTIVE', isRequired: true } });
+        });
+    }
     await createExecutionResultFixture(prisma,{attemptStatus:'RECORDED',data:{id:randomUUID(),sampleId:row.sample.id,
         param:item.analysis,value:item.result,isCurrent:true,provenance:'MEASURED'}});
 }

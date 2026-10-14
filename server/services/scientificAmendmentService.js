@@ -116,7 +116,8 @@ async function authoriseScientificAmendment(db,sampleId,amendmentId,actor,input)
    await require('./workRepeatBatchService').assertRepeatSourceReleased(tx,item);
    const override=limitOverrides.get(item.id),limitOverride=override?{description:override.description,impactAssessment:override.impactAssessment}:null;
    await require('./workRepeatService').assertRepeatCapacity(tx,item,sample,Boolean(limitOverride));
-   plans.push({item,parent,attemptNo:Math.max(0,...attempts.map(row=>row.attemptNo))+1,limitOverride});
+   const orderLineId=await require('./orderLineResolutionService').resolveOrderLine(tx,item);
+   plans.push({item,parent,orderLineId,attemptNo:Math.max(0,...attempts.map(row=>row.attemptNo))+1,limitOverride});
   }
   const reports=await tx.report.findMany({where:{sampleId:sample.id,status:'PUBLISHED'}});
   if(reports.length>1||reports.some(row=>!row.publishedAt))throw fail('REPORT_WITHDRAWAL_SCOPE_INVALID','The current issued report is unavailable.');
@@ -132,9 +133,9 @@ async function authoriseScientificAmendment(db,sampleId,amendmentId,actor,input)
     {expectedStatus:'APPROVED',action:'SCIENTIFIC_AMENDMENT_AUTHORISED',amendmentCapability:capability,
      details:JSON.stringify({amendmentId:amendment.id,selectedWorkItemIds:selected,priorApprovedBy:sample.approvedBy,priorApprovedAt:sample.approvedAt})});
    const children=[];
-   for(const {item,parent,attemptNo,limitOverride}of plans){
-    const child=await tx.workAttempt.create({data:{id:'att-'+item.id+'-'+randomUUID(),workItemId:item.id,attemptNo,status:'OPEN',
-     parentAttemptId:parent.id,reason:payload.reasonCode,note:amendment.reason,requestedBy:performedBy,requestedAt:now,createdAt:now,updatedAt:now}});
+   for(const {item,parent,orderLineId,attemptNo,limitOverride}of plans){
+    const child=await require('./orderAttemptWriteService').insertOrderBoundAttempt(tx,{id:'att-'+item.id+'-'+randomUUID(),workItemId:item.id,orderLineId,attemptNo,status:'OPEN',
+     parentAttemptId:parent.id,reason:payload.reasonCode,note:amendment.reason,requestedBy:performedBy,requestedAt:now,createdAt:now,updatedAt:now});
     await tx.sampleAmendmentAttempt.create({data:{id:randomUUID(),amendmentId:amendment.id,workItemId:item.id,
      parentAttemptId:parent.id,childAttemptId:child.id,reason:payload.reasonCode,createdAt:now}});
     let nonconformityId;
