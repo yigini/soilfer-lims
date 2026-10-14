@@ -1,0 +1,15 @@
+{
+  "recordedUtc": "2026-10-14T15:38:54.449500+00:00",
+  "closedProofCommit": "5b3eacc700c98716177e15a841ccc4d345a1396d",
+  "priorPushProcessClosedExit": 128,
+  "priorPushStderrNotRetainedByOriginalHelper": true,
+  "freshActualRemoteHead": "91ddfca4a794679fc73781b5c7d7eeeac9cc72d5",
+  "confirmedPriorProofNotPushed": true,
+  "originalRetainerConsumedNeverReplay": true,
+  "exactRawAndReviewBlobsVerified": 38,
+  "sourcePathsVerified": 79,
+  "allFrozenInputsStillUnchanged": true,
+  "testOrQuestionOrNativeReplays": 0,
+  "productionOperations": 0,
+  "action": "New evidence completion, one exact audit branch push after independent closure and remote verification"
+}
