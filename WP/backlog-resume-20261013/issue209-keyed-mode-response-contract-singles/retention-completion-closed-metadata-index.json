@@ -1,0 +1,25 @@
+{
+  "retainedUtc": "2026-10-14T15:39:44.544468+00:00",
+  "proofCommit": "5b3eacc700c98716177e15a841ccc4d345a1396d",
+  "closedForwardPush": true,
+  "observedRemoteAudit": "214b96164c3ea79473b397283c81e1c8a2a71bfb",
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-keyed-mode-response-contract-singles/retention-completion-push-stdout-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-mode-response-contract-singles/retention-completion-push-stderr-original.log": {
+      "bytes": 136,
+      "sha256": "ccb77efdc39f963d2c449409199019e7ba5ec91785f055644ef5e19d6b2a1b5e"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-mode-response-contract-singles/retention-completion-push-exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-mode-response-contract-singles/remote-after-retention-completion-original.json": {
+      "bytes": 399,
+      "sha256": "21067c8096138b93dac76446bac6014737bb623921324e07edda86e28a3229d0"
+    }
+  },
+  "productionOperations": 0
+}
