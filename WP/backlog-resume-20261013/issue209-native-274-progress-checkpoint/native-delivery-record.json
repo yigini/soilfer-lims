@@ -1,0 +1,27 @@
+{
+  "recordedUtc": "2026-10-14T09:37:46.643510+00:00",
+  "deliveryObservedNoLaterThanUtc": "2026-10-14T09:36:39Z",
+  "exactCaptureTimeAvailable": false,
+  "sourceAuditHead": "fbfc604dcd06aaaf2401d56bf8ac0fde600fbd48",
+  "window": {
+    "id": 5311708,
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "project": "LIMS Audit",
+    "thread": "Lab workflow audit and plan"
+  },
+  "freshActualWindowTarget": true,
+  "rightComposerInitiallyEmpty": true,
+  "focusCaretObservedBeforeTyping": true,
+  "draftHeadAndEndInspected": true,
+  "returnKeyCount": 1,
+  "actualSentBubbleVerified": true,
+  "rightComposerEmptyAfter": true,
+  "claudioState": "Churning",
+  "centreHumanDraft": "can you go and ask Pip",
+  "humanDraftPreserved": true,
+  "cardsAnswered": false,
+  "progressCheckpoint": true,
+  "finalAuditRequest": false,
+  "fullServerPassClaimed": false,
+  "productionOperations": 0
+}

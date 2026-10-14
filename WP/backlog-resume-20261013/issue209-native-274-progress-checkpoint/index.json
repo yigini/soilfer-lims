@@ -1,0 +1,39 @@
+{
+  "record": {
+    "recordedUtc": "2026-10-14T09:37:46.643510+00:00",
+    "deliveryObservedNoLaterThanUtc": "2026-10-14T09:36:39Z",
+    "exactCaptureTimeAvailable": false,
+    "sourceAuditHead": "fbfc604dcd06aaaf2401d56bf8ac0fde600fbd48",
+    "window": {
+      "id": 5311708,
+      "app": "Claude_pzs8sxrjxfjjc!Claude",
+      "project": "LIMS Audit",
+      "thread": "Lab workflow audit and plan"
+    },
+    "freshActualWindowTarget": true,
+    "rightComposerInitiallyEmpty": true,
+    "focusCaretObservedBeforeTyping": true,
+    "draftHeadAndEndInspected": true,
+    "returnKeyCount": 1,
+    "actualSentBubbleVerified": true,
+    "rightComposerEmptyAfter": true,
+    "claudioState": "Churning",
+    "centreHumanDraft": "can you go and ask Pip",
+    "humanDraftPreserved": true,
+    "cardsAnswered": false,
+    "progressCheckpoint": true,
+    "finalAuditRequest": false,
+    "fullServerPassClaimed": false,
+    "productionOperations": 0
+  },
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-native-274-progress-checkpoint/native-checkpoint-actual-text.txt": {
+      "bytes": 2305,
+      "sha256": "b349b75dd507a3a4f467f83ca02fa537b9012722ea527f8d208bfe46fc777c11"
+    },
+    "WP/backlog-resume-20261013/issue209-native-274-progress-checkpoint/native-delivery-record.json": {
+      "bytes": 876,
+      "sha256": "f021484131ef8acf9981ba4849945497d2d956dbe79ab8a4cdde85375d8b87fb"
+    }
+  }
+}

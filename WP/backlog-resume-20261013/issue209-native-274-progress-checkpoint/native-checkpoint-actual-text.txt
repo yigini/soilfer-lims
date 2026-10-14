@@ -1,0 +1,11 @@
+Pip #209 progress: I am actively continuing in the same audit writer. Current pushed audit fbfc604dcd06aaaf2401d56bf8ac0fde600fbd48.
+
+Your stable guard-code direction is implemented. New first/repeat/scientific attempt INSERTs share insertOrderBoundAttempt; actual Prisma-wrapped native guard failures return our stable 409 ORDER_ATTEMPT_INSERT_REFUSED. Actual first/repeat/scientific INSERT refusal tests prove rollback of result/audit/parent/amendment writes, including the PENDING request/version. No wrapper-text assertions. Historical OPEN first fill and NULL identities, SQL guards and scanner predicates remain unchanged.
+
+The fresh ordinary regression CLOSED at 09:33:09.782607 UTC: 10/10 suites, 274/274 tests, zero failed/pending/todo, exact 370-suite discovery and all frozen inputs unchanged. This is focused regression only. Originals/config/report/logs/exit/source hashes/physical-retention index: WP/backlog-resume-20261013/issue209-stable-insert-code-regression/index.json (14 independently verified pushed raw blobs).
+
+Both real HTTP routes, mandatory reason/full target, idempotency, lab scope, amendment boundaries, initial intake, retained historical identifiers, repeats, scientific reservations, bootstrap and schema refusals pass. Read-only collector tests preserve the original active WAL triple and account for every nested retained copy; the actual embedded post-start order programme also passes on an owned WAL-mode copy. Real Docker acceptance still belongs to CI.
+
+Client build/lint both exited0, source unchanged, 0 errors/14 baseline warnings. Actual detached Chromium desktop1440x1050/mobile390x844 verified mandatory reason, keyboard submission of the full selection/reason, readable amendment guidance and blocked approved-order save. Original UI/build evidence: issue209-order-browser-closed/index.json at 22a5d072 (46 verified raw blobs); browser and local fixture server are stopped.
+
+Remaining: broader historical owned-fixture contexts and full 370-suite verification, then source-only PR/standard real CI and the exact-head audit request. No #209 PR, ready notice or final audit request yet. No production connection/collection/release/kit/gate operation. #214/#206 remain source-merged/main-CI green but undeployed/open; their completed handoffs are not repeated.
