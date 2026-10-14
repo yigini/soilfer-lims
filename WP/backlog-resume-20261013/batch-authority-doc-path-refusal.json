@@ -1,0 +1,16 @@
+{
+  "recordedUtc": "2026-10-14T21:44:16.258327+00:00",
+  "evidenceKind": "TOOL_OUTPUT_TRANSCRIPTION",
+  "toolSession": 62930,
+  "exitCode": 1,
+  "helper": "prepare-batch-cde8-authority-draft-once.py",
+  "helperSha256": "89ba336be5e22b27c77ce473b7ce7004358a259d9393cc1003cb54c5fb30dff1",
+  "errorType": "AssertionError",
+  "literalRefusal": "docs/audit/206-containers-aliquots.md",
+  "boundary": "Before destination creation, staging, commit, push or production operation",
+  "destinationCreated": false,
+  "productionConnections": 0,
+  "productionOperations": 0,
+  "originalHelperMustNeverReplay": true,
+  "actualObservedPath": "docs/audit/206-containers-and-aliquots.md"
+}

@@ -1,0 +1,100 @@
+{
+  "preparedUtc": "2026-10-14T21:44:30.131755+00:00",
+  "status": "DRAFT_BATCH_SOURCE_AUTHORITY_NOT_A_KIT",
+  "candidateHead": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "tree": "638580d50f61254609de3abd42d93afc676a5727",
+  "files": {
+    "actual-batching-direction-6141144901.json": {
+      "bytes": 5042,
+      "sha256": "4d386161b2b2fa098bbc25f930d6e8e475d602fc21f05e0ee96fa20120a8ebc4"
+    },
+    "earlier-consumed-preparer-source.py": {
+      "bytes": 13331,
+      "sha256": "89ba336be5e22b27c77ce473b7ce7004358a259d9393cc1003cb54c5fb30dff1"
+    },
+    "earlier-doc-path-refusal-transcription.json": {
+      "bytes": 674,
+      "sha256": "ef0867f1939d132315e3efbd53cdeb779f8a70f27de7d381e6d1369047d1110c"
+    },
+    "immutable-predecessor-receipt.json": {
+      "bytes": 195543,
+      "sha256": "03e3309714cadd956e13e9b34576ed774f1e56c482fdc2b07a828a52c1fcb953"
+    },
+    "issue206-original.json": {
+      "bytes": 8443,
+      "sha256": "3dc98dd02cf3627d100397ef67351456fd6a49c1a3b62eda9355d1ba33ef1bea"
+    },
+    "issue209-original.json": {
+      "bytes": 8349,
+      "sha256": "2f1adbd929297ceea9adbd3346dbe7fdaed8fefb0ad62cdf9940993d8286a3a0"
+    },
+    "issue214-original.json": {
+      "bytes": 8805,
+      "sha256": "09a09d239ef798edb131eb5aeafa0085258d04c3192d5bad6c9388445438f481"
+    },
+    "main-ci-original.json": {
+      "bytes": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    "pr295-actual-pass-original.json": {
+      "bytes": 6787,
+      "sha256": "3d504670dbe3035c87ff67d73c50782e005a1893c4665de338de9fb57ce0a25a"
+    },
+    "pr295-closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    },
+    "pr295-merge-commit-original.json": {
+      "bytes": 2702,
+      "sha256": "15b477c34ea504a6b67559cd179978944c77a6136e910dde45659248b30d0d4e"
+    },
+    "pr295-original.json": {
+      "bytes": 23239,
+      "sha256": "4e28a6893dda262a24899b64ec439d8ccb9841461b725ae733ee10cad6a6cf31"
+    },
+    "pr296-actual-pass-original.json": {
+      "bytes": 8178,
+      "sha256": "83293fdf38e293253ec6ae50ff81dc3a9b61cd87fe863d04eaa465f99a8b9f47"
+    },
+    "pr296-closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    },
+    "pr296-merge-commit-original.json": {
+      "bytes": 2722,
+      "sha256": "72b993805e1ea4456f61b41c6856d0ac047638f5b5bda4d683e0c8297b4e1bff"
+    },
+    "pr296-original.json": {
+      "bytes": 65850,
+      "sha256": "824b014b2a135e5b0bef77d0f7cbcc4e89a3c189c47367cd16247bf19484c2b0"
+    },
+    "pr297-actual-pass-original.json": {
+      "bytes": 5571,
+      "sha256": "2272d318b7d824d7341e90cd340b53bfeb81dc5cbec26150f857b4db8251a167"
+    },
+    "pr297-closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    },
+    "pr297-merge-commit-original.json": {
+      "bytes": 2722,
+      "sha256": "b79c408fb44af08312f0c64afd3a4cbedf9b6d1066f76b23567f92f28078b514"
+    },
+    "pr297-original.json": {
+      "bytes": 33502,
+      "sha256": "05e53398bb0d758203567ddf1287413e6ce672b17b66c6c40877a53c9cc54c8f"
+    },
+    "README.md": {
+      "bytes": 1971,
+      "sha256": "106f3cfc74f90d19ce8fa064abdb4d408caa82fc64af4f5fa231a5a4e1bc3d03"
+    },
+    "release-authority-draft.json": {
+      "bytes": 8764,
+      "sha256": "6a3c13175f6052ce4c01d24f3cd40d5131bd4df2aecf543f38d423883e82dfdc"
+    }
+  }
+}

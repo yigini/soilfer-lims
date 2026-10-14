@@ -1,0 +1,218 @@
+{
+  "preparedUtc": "2026-10-14T21:44:30.131755+00:00",
+  "status": "DRAFT_BATCH_SOURCE_AUTHORITY_NOT_A_KIT",
+  "candidateHead": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "candidateTree": "638580d50f61254609de3abd42d93afc676a5727",
+  "issues": [
+    206,
+    214,
+    209
+  ],
+  "sourceAudits": [
+    {
+      "issue": 206,
+      "pr": 295,
+      "sourceHead": "1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a",
+      "merge": "6d750914d8565acdd496767a7dd935811b5a89b2",
+      "mergeBase": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+      "tree": "85350d14bdff5a607a3d2edc9615785842c9c94b",
+      "actualAuditCommentId": 6146939836,
+      "actualAuditUrl": "https://github.com/yigini/soilfer-lims/pull/295#issuecomment-6146939836"
+    },
+    {
+      "issue": 214,
+      "pr": 296,
+      "sourceHead": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+      "merge": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+      "mergeBase": "6d750914d8565acdd496767a7dd935811b5a89b2",
+      "tree": "f2152e240b355cd141612b783c6ccf04f5c8383a",
+      "actualAuditCommentId": 6163165778,
+      "actualAuditUrl": "https://github.com/yigini/soilfer-lims/pull/296#issuecomment-6163165778"
+    },
+    {
+      "issue": 209,
+      "pr": 297,
+      "sourceHead": "6bd516c42a07332d0b0653ed150d1526bf7e424e",
+      "merge": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+      "mergeBase": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+      "tree": "638580d50f61254609de3abd42d93afc676a5727",
+      "actualAuditCommentId": 6178123314,
+      "actualAuditUrl": "https://github.com/yigini/soilfer-lims/pull/297#issuecomment-6178123314"
+    }
+  ],
+  "mainCi": 38636615469,
+  "closedMainCiEvidenceAudit": "194b8dfc89940502a480d20b4e18714925c5d5b0",
+  "exactJestSummary": [
+    "Test Suites: 370 passed, 370 total",
+    "Tests:       5649 passed, 5649 total"
+  ],
+  "predecessor": {
+    "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+    "completedReceiptSha256": "03e3309714cadd956e13e9b34576ed774f1e56c482fdc2b07a828a52c1fcb953",
+    "historicalReceiptIsBaselineEvidenceOnly": true,
+    "freshLiveBaselineVerified": false,
+    "expectedPriorTableCountFromReceipt": 106,
+    "expectedPriorReceiptCountFromReceipt": 39
+  },
+  "candidateOwnedSourceIndex": {
+    "docker-entrypoint.sh": {
+      "bytes": 9463,
+      "sha256": "e7f1cf8241776e5aa9f357d5435a5e11632e6b9e5c6502ee1b1ecdd31146e19c"
+    },
+    "Dockerfile": {
+      "bytes": 9374,
+      "sha256": "dfa78a5e19b77778ac4301406fd70b5fde99e929d1b3da75bc033c2668ea48d4"
+    },
+    "server/package.json": {
+      "bytes": 1458,
+      "sha256": "8a8b34be2cf5365d20309b639589db567d277e54acca2cd91b3d42765cd61f21"
+    },
+    "server/package-lock.json": {
+      "bytes": 310261,
+      "sha256": "54ebcdf6ae7313ff2f77ea01afca9ba2629ffb59d588c2e57c64007054bc99ef"
+    },
+    "server/prisma/schema.prisma": {
+      "bytes": 89556,
+      "sha256": "89ca33a77a02d99c840d094ead7ade4ae254895ab7af7de114d81ec58b7fc626"
+    },
+    "server/scripts/install_sample_containers.js": {
+      "bytes": 8926,
+      "sha256": "3ec6e200141c74b98db8b017de7f733d707a688500422a89fc2d5e35577cc2dd"
+    },
+    "server/scripts/install_lab_policy_schema.js": {
+      "bytes": 11387,
+      "sha256": "2fb7aec33e45dcd26cf7e34e4d0cb8102420fa06b311db3472c39c33aca92023"
+    },
+    "server/scripts/install_control_charts.js": {
+      "bytes": 8475,
+      "sha256": "0557ab276ec24795cabdf6f58b4a8946c193d19853f259cf8ab52d6df4ce3370"
+    },
+    "server/scripts/install_order_revisions.js": {
+      "bytes": 18100,
+      "sha256": "756a720c3351b87e9b6dd2a57fb109874952e2d3a4c5496472120d08c7b6552e"
+    },
+    "server/scripts/order_revision_impact.js": {
+      "bytes": 4773,
+      "sha256": "6cf3712c20cead275f8ea41e258ca321b03932f23a559d550670b40e03f4cb76"
+    },
+    "server/scripts/control_chart_prebinding_impact.js": {
+      "bytes": 8709,
+      "sha256": "abf37ed7905e6f5c0482a90a66ed01b6aaede17f73e0701216d5eed6e4ac37c0"
+    },
+    "server/services/sampleContainerMigrationSource.js": {
+      "bytes": 1344,
+      "sha256": "ab223052522a5d74e899c4c372204a4a68574819a3f6b3c7bd8837f8ad7bb8d4"
+    },
+    "server/services/labPolicyMigrationSource.js": {
+      "bytes": 1326,
+      "sha256": "ff0e4a69226b442e97f91b5e569ec4e5c129b6aaef65a0490722e1ba82037bc1"
+    },
+    "server/services/controlChartMigrationSource.js": {
+      "bytes": 1145,
+      "sha256": "2e79cdf57bb09eed9f5e2e8721aa5c0ab540c16a7312d4ff02d138a20e604df6"
+    },
+    "server/services/orderRevisionMigrationSource.js": {
+      "bytes": 1209,
+      "sha256": "ba6baba68eceb2355cbc68a7a6bba83a1e3c7f168a30bdf8a35df80c8dde1093"
+    },
+    "server/prisma/migrations/20261013000100_sample_containers/migration.sql": {
+      "bytes": 3351,
+      "sha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4"
+    },
+    "server/prisma/migrations/20261013000200_control_charts/migration.sql": {
+      "bytes": 8438,
+      "sha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6"
+    },
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql": {
+      "bytes": 3439,
+      "sha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c"
+    },
+    "docs/audit/206-containers-and-aliquots.md": {
+      "bytes": 3933,
+      "sha256": "f85f28a3f7df1db9a30ef2f5c37e8db912a536ea4454b398ac22f8bb8294f319"
+    },
+    "docs/audit/214-control-charts.md": {
+      "bytes": 6690,
+      "sha256": "6c8f57c3f43641541db724787f9b872108861f0b5132fb17401af4c7610fb2ee"
+    },
+    "docs/audit/209-order-revisions.md": {
+      "bytes": 4715,
+      "sha256": "03089c723ccb14ff5a77efde930e79814578963d08431f1a6918ab134fa9e02a"
+    }
+  },
+  "intendedNativeDelta": {
+    "newEmptyTables": [
+      "SampleContainer",
+      "ContainerSequence",
+      "ControlLimitProposal",
+      "ControlLimitSet",
+      "QcReviewObligation",
+      "QcReviewResolution"
+    ],
+    "newNullableScalar": "OrderLine.workItemId",
+    "schemaReceipts": [
+      "206_sample_containers",
+      "214_control_charts",
+      "209_order_revision_contract"
+    ],
+    "expectedInstalledTableCountIfFreshBaselineMatchesReceipt": 112,
+    "expectedInstalledReceiptCountIfFreshBaselineMatchesReceipt": 42,
+    "allOriginalColumnsRowsSchemasObjectsScientificRecordsPoliciesOverridesReportsAndReceiptsPreserved": true,
+    "analyticalBackfill": 0,
+    "historicalOrderRelinking": 0
+  },
+  "policyPrerequisite": "Actual production PRESENT/NO_OP0 on a retained snapshot; anything else STOP before apply, no normalization/preset rows.",
+  "impactPlan": {
+    "access": "RETAINED_RAW_PRODUCTION_DB_WAL_SHM_COPY_ONLY",
+    "originalSQLiteConnections": 0,
+    "originalTripleBeforeAfterEqual": true,
+    "orderImpactRequires214Complete": "If the production snapshot is PRE_214, use only a NEW owned candidate copy under the reviewed dry/apply/repeat proof; retain the original copy and all unchanged historical rows. Never install onto production for impact collection.",
+    "chartContextCount": "Use actual policyService/qcRuleService via injected readonly reader on the retained snapshot.",
+    "required209Lists": [
+      "noActiveRevisionWorkItems",
+      "noMatchingLineWorkItems",
+      "multipleActive",
+      "incompleteTextureOwners",
+      "refusedOpenWorkItems",
+      "continuingReservedOpenWorkItems",
+      "ambiguousOpenReservations",
+      "prospectiveApprovedAmendmentRefusals",
+      "invalidStoredAnalyses"
+    ],
+    "invalidStoredAnalysisSampleCountRequired": true,
+    "nonzeroListsShownToYY": true,
+    "approvedNonzero": "STOP_APPROVED_AMENDMENT_REMEDIATION_REQUIRED; separate Claudio-reviewed forward remedy"
+  },
+  "guards": {
+    "labAndHubBuildsOwnedByYY": true,
+    "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED",
+    "memoryBytes": 805306368,
+    "nodeOptions": "",
+    "reserveFloorBytes": 10556150894,
+    "retainedSnapshotAllocationAccountingRequired": true,
+    "unexplainedGrowthAbortBytes": 500000000,
+    "readinessTimeoutSeconds": 600,
+    "productionUnitTimeoutSeconds": 5400,
+    "minimumMeasuredStageHeadroomSeconds": 60,
+    "minimumMeasuredUnitHeadroomSeconds": 600,
+    "freshGateMaximumAgeSeconds": 600,
+    "recovery": "SEPARATELY_AUDITED_FORWARD_FIX_ONLY",
+    "historicalRootsGatesProofsBackupsImagesNeverReplayed": true
+  },
+  "pending": {
+    "newBuildProofCoordinatorSourceReview": null,
+    "newOneTimeBuild": null,
+    "newStoppedProductionCopyProof": null,
+    "actualProductionImpactLists": null,
+    "frozenExactKit": null,
+    "actualExactKitAudit": null,
+    "freshSingleUseGate": null
+  },
+  "executionAuthority": null,
+  "productionConnections": 0,
+  "productionCountsCollected": false,
+  "productionOperations": 0,
+  "newBuilds": 0,
+  "newProofs": 0
+}
