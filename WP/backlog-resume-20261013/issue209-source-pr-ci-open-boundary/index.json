@@ -1,0 +1,58 @@
+{
+  "retainedUtc": "2026-10-14T18:38:13.380480+00:00",
+  "status": "OPEN_METADATA_ONLY",
+  "number": 297,
+  "url": "https://github.com/yigini/soilfer-lims/pull/297",
+  "head": "562cab2d24b25a500041a44abf384ffc4dbfad7c",
+  "tree": "f35ba4c974ac4ac1102d6e53146417caaa14b6da",
+  "base": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+  "auditSource": "5cd059d025b0de770d1b910b4a934ccf6e4532a5",
+  "run": 38615738432,
+  "runUrl": "https://github.com/yigini/soilfer-lims/actions/runs/38615738432",
+  "attempt": 1,
+  "runStatus": "in_progress",
+  "conclusion": null,
+  "localSuites": 370,
+  "localTests": 5642,
+  "activeLogsCaptured": false,
+  "readyNoticeSent": false,
+  "finalNativeAuditRequestSent": false,
+  "actualFinalAuditPass": false,
+  "ciDispatches": 0,
+  "productionOperations": 0,
+  "files": {
+    "pr-original.json": {
+      "bytes": 32675,
+      "sha256": "cce5fae1406a4532f3f8620e0e18bc9c615d15812a28395c313270e734f138c9"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "e0c8d4117149b05e499ad0abfd6f0456aed24d869f784317aa0c1072415e39c9"
+    },
+    "issue209-original.json": {
+      "bytes": 8349,
+      "sha256": "2f1adbd929297ceea9adbd3346dbe7fdaed8fefb0ad62cdf9940993d8286a3a0"
+    },
+    "pr-comments-original.json": {
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "runs-original.json": {
+      "bytes": 12576,
+      "sha256": "41a8c2b2e1e4c4ced2e83bacf9b8872aa2432600ea66247fc1f156eba990ccbc"
+    },
+    "run-original.json": {
+      "bytes": 12540,
+      "sha256": "a960a32dcba0063669534dac4a5091c102ca9e082da815b8ae69c4f071d86553"
+    },
+    "jobs-original.json": {
+      "bytes": 3507,
+      "sha256": "484827407882c933d97fa91a2ca50bae2606fa22cf8d35fe64bfc7007ed73405"
+    },
+    "closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    }
+  },
+  "preparedUnusedTerminalHelper": "retain-issue209-source-pr-ci-terminal-once.py"
+}
